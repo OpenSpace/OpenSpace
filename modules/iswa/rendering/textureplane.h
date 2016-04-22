@@ -36,19 +36,17 @@
      TexturePlane(const ghoul::Dictionary& dictionary);
      ~TexturePlane();
 
-     virtual bool initialize() override;
+    virtual bool initialize() override;
     virtual bool deinitialize() override;
 
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
+    // virtual void render(const RenderData& data) override; //moved to cygnetPlane
+    // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
  
  private:
-     virtual bool loadTexture() override;
+    virtual bool loadTexture() override;
     virtual bool updateTexture() override;
     
     static int id();
- 
-    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
  };
  
  } // namespace openspace

@@ -33,7 +33,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
 
 namespace {
     const std::string _loggerCat = "DataPlane";
@@ -44,7 +43,6 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_futureData(nullptr)
     ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
     ,_useLog("useLog","Use Logarithm Norm", false)
     // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
@@ -89,8 +87,9 @@ DataPlane::~DataPlane(){}
 
 
 bool DataPlane::initialize(){
+    initializeTime();
+
     createPlane();
-    
     if (_shader == nullptr) {
     // DatePlane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -128,108 +127,51 @@ bool DataPlane::deinitialize(){
     return true;
 }
 
+// void DataPlane::render(const RenderData& data){} //moved to CygnetPlane
+// void DataPLane::update(const UpdateData& data){} //moved to CygnetPlane
 
+bool DataPlane::loadTexture() {
+    float* values = readData();
+    if(!values){
+        return false;
+    }
 
-void DataPlane::render(const RenderData& data){
-    
-    if(!_texture) return;
-    
-    psc position = data.position;
-    glm::mat4 transform = glm::mat4(1.0);
+    if (!_texture) {
+        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                values, 
+                                                                _dimensions,
+                                                                ghoul::opengl::Texture::Format::Red,
+                                                                GL_RED, 
+                                                                GL_FLOAT,
+                                                                ghoul::opengl::Texture::FilterMode::Linear,
+                                                                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                            );
 
-    glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-    glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
-
-    glm::mat4 rot = glm::mat4(1.0);
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        if(texture){
+            texture->uploadTexture();
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _texture = std::move(texture);
         }
+    }else{
+        _texture->setPixelData(values);
+        _texture->uploadTexture();
     }
-
-    transform = transform * rotz * roty; //BATSRUS
-
-    if(_data->frame == "GSM"){
-        glm::vec4 v(1,0,0,1);
-        glm::vec3 xVec = glm::vec3(transform*v);
-        xVec = glm::normalize(xVec);
-
-        double  lt;
-        glm::vec3 sunVec =
-        SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _time, lt);
-        sunVec = glm::normalize(sunVec);
-
-        float angle = acos(glm::dot(xVec, sunVec));
-        glm::vec3 ref =  glm::cross(xVec, sunVec);
-
-        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-        transform = rotation * transform;
-    }
-
-    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
-    
-
-    // Activate shader
-    _shader->activate();
-    glEnable(GL_ALPHA_TEST);
-    glDisable(GL_CULL_FACE);
-
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
-
-    // _shader->setUniform("top", _topColor.value());
-    // _shader->setUniform("mid", _midColor.value());
-    // _shader->setUniform("bot", _botColor.value());
-    // _shader->setUniform("tfValues", _tfValues.value());
-
-    setPscUniforms(*_shader.get(), data.camera, position);
-
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
-    _shader->setUniform("texture1", unit);
-
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glEnable(GL_CULL_FACE);
-    _shader->deactivate();
-
-    // position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
-    // // RenderData data = { *_camera, psc(), doPerformanceMeasurements };
-    // ColorBarData cbdata = { data.camera, 
-    //                         position,
-    //                         transform,
-    //                         _topColor.value(),
-    //                         _midColor.value(),
-    //                         _botColor.value(),
-    //                         _tfValues.value()
-    //                         // transform
-    //                       };    
-    // _colorbar->render(cbdata);
+    return true;
 }
 
-void DataPlane::update(const UpdateData& data){
-    if(_planeIsDirty)
-        createPlane();
+bool DataPlane::updateTexture(){
+    if(_futureObject)
+        return false;
 
-    _time = Time::ref().currentTime();
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _time);
+    _memorybuffer = "";
+    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(_data->id, _memorybuffer);
 
-    //add real world limit!!!
-    if(fabs(_time-_lastUpdateTime) >= _data->updateTime){
-            updateTexture();
-            _lastUpdateTime = _time;
+    if(future){
+        _futureObject = future;
+        return true;
     }
 
-    if(_futureData && _futureData->isFinished && _memorybuffer != ""){
-        if(!_dataOptions.options().size()){
-            readHeader();
-        }
-
-        if(loadTexture())
-            _futureData = nullptr;
-    }
+    return false;
 }
 
 void DataPlane::readHeader(){
@@ -279,6 +221,9 @@ void DataPlane::readHeader(){
 }
 
 float* DataPlane::readData(){
+    if(!_dataOptions.options().size()) // load options for value selection
+            readHeader();
+
     if(!_memorybuffer.empty()){
         std::stringstream memorystream(_memorybuffer);
         std::string line;
@@ -392,50 +337,6 @@ float DataPlane::normalizeWithLogarithm(float value, int logMean){
 
     float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
     return glm::clamp(logNormalized,0.0f, 1.0f);
-}
-
-bool DataPlane::loadTexture() {
-    float* values = readData();
-    if(!values){
-        return false;
-    }
-
-    if (!_texture) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                values, 
-                                                                _dimensions,
-                                                                ghoul::opengl::Texture::Format::Red,
-                                                                GL_RED, 
-                                                                GL_FLOAT,
-                                                                ghoul::opengl::Texture::FilterMode::Linear,
-                                                                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                            );
-
-        if(texture){
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _texture = std::move(texture);
-        }
-    }else{
-        _texture->setPixelData(values);
-        _texture->uploadTexture();
-    }
-    return true;
-}
-
-bool DataPlane::updateTexture(){
-    if(_futureData)
-        return false;
-
-    _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(_data->id, _memorybuffer);
-
-    if(future){
-        _futureData = future;
-        return (_memorybuffer != "");
-    }
-
-    return false;
 }
 
 int DataPlane::id(){
