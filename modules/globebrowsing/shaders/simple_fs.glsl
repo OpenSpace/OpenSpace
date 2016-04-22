@@ -38,6 +38,8 @@ uniform sampler2D nightTex;
 uniform sampler2D textureSampler;
 uniform mat3 uvTransformPatchToTile;
 
+uniform int segmentsPerPatch;
+
 in vec4 vs_position;
 in vec2 vs_uv;
 
@@ -49,7 +51,7 @@ Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = texture(textureSampler, vec2(uvTransformPatchToTile * vec3(vs_uv.s, vs_uv.t, 1)));
-	frag.color = frag.color * 1.0  + vec4(fract(vs_uv * 32), 0.4,1) * 0.0;
+	frag.color = frag.color * 1.0  + vec4(fract(vs_uv * segmentsPerPatch), 0.4,1) * 0.4;
 	frag.depth =  pscDepth(vs_position);
 
 	return frag;

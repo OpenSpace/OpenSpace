@@ -133,6 +133,7 @@ namespace openspace {
 		_programObject->setUniform("uvTransformPatchToTile", uvTransform);
 
 		LatLon swCorner = patch.southWestCorner();
+		_programObject->setUniform("segmentsPerPatch", _grid->xSegments());
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
@@ -224,6 +225,7 @@ namespace openspace {
 		_programObject->setUniform(
 			"modelViewProjectionTransform",
 			data.camera.projectionMatrix() * viewTransform *  modelTransform);
+		_programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
 		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
