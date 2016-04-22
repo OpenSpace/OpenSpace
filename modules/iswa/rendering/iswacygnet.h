@@ -28,8 +28,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <openspace/properties/propertyowner.h>
 #include <memory>
+#include <chrono>
+#include <openspace/properties/propertyowner.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -83,6 +84,8 @@ protected:
     // void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
     void registerProperties();
     void unregisterProperties();
+    void initializeTime();
+    void updateCygnet();
     // void setParent();
 
     // properties::BoolProperty _enabled;
@@ -97,8 +100,12 @@ protected:
 
     glm::dmat3 _stateMatrix;
 
-    double _time;
-    double _lastUpdateTime = 0;
+    double _openSpaceTime;
+    double _lastUpdateOpenSpaceTime;
+
+    std::chrono::milliseconds _realTime;
+    std::chrono::milliseconds _lastUpdateRealTime;
+    int _minRealTimeUpdateInterval;
 
     int _id;
 };

@@ -40,8 +40,8 @@ class DataPlane : public CygnetPlane {
 
     virtual bool initialize() override;
     virtual bool deinitialize() override;
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
+    // virtual void render(const RenderData& data) override; //moved to cygnetPlane
+    // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
  
  private:
     virtual bool loadTexture() override;
@@ -57,25 +57,16 @@ class DataPlane : public CygnetPlane {
     properties::Vec2Property _normValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
+    properties::BoolProperty _useRGB;
+
 
     // properties::Vec4Property _topColor;
     // properties::Vec4Property _midColor;
     // properties::Vec4Property _botColor;
     // properties::Vec2Property _tfValues;
-
-
-    // std::shared_ptr<KameleonWrapper> _kw;
-    // std::string _kwPath;
     
     glm::size3_t _dimensions;
-    int numDataValues;
-    int numDataOptions = 0;
-
-    // float* _dataSlice;
-    // std::string _var;
-
-    std::shared_ptr<ColorBar> _colorbar;
-    std::shared_ptr<DownloadManager::FileFuture> _futureData;
+    // std::shared_ptr<ColorBar> _colorbar;
  };
  
  } // namespace openspace

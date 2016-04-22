@@ -104,4 +104,14 @@ void ISWACygnet::unregisterProperties(){
     OsEng.gui()._iSWAproperty.unregisterProperties(name());
 }
 
+void ISWACygnet::initializeTime(){
+	_openSpaceTime = Time::ref().currentTime();
+	_lastUpdateOpenSpaceTime = _openSpaceTime;
+
+	_realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	_lastUpdateRealTime = _realTime;
+
+	_minRealTimeUpdateInterval = 100;
+}
+
 }//namespace openspac

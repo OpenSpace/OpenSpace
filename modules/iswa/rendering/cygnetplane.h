@@ -36,6 +36,9 @@ public:
     ~CygnetPlane();
 
     virtual bool isReady() const override;
+    virtual void render(const RenderData& data) override;
+    virtual void update(const UpdateData& data) override;
+
 
 protected:
     virtual bool loadTexture() = 0;
@@ -48,7 +51,9 @@ protected:
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-    bool _planeIsDirty;
+
+    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+
 };
 } //namespace openspace
 
