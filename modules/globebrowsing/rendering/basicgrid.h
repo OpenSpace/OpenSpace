@@ -38,8 +38,8 @@ class BasicGrid : public Grid
 {
 public:
 	/**
-	\param xRes is the number of grid cells in the x direction.
-	\param yRes is the number of grid cells in the y direction.
+	\param xSegments is the number of grid cells in the x direction.
+	\param ySegments is the number of grid cells in the y direction.
 	\param usePositions determines whether or not to upload any vertex position data
 	to the GPU.
 	\param useTextureCoordinates determines whether or not to upload any vertex texture
@@ -48,24 +48,16 @@ public:
 	to the GPU.
 	*/
 	BasicGrid(
-		unsigned int xRes,
-		unsigned int yRes,
+		unsigned int xSegments,
+		unsigned int ySegments,
 		Geometry::Positions usePositions,
 		Geometry::TextureCoordinates useTextureCoordinates,
 		Geometry::Normals useNormals);
 	~BasicGrid();
 
-	/**
-	Returns the number of grid cells in the x direction. Hence the number of vertices
-	in the x direction is xResolution + 1.
-	*/
-	virtual int xResolution() const;
-	
-	/**
-	Returns the number of grid cells in the y direction. Hence the number of vertices
-	in the y direction is xResolution + 1.
-	*/
-	virtual int yResolution() const;
+
+	virtual int xSegments() const;
+	virtual int ySegments() const;
 
 private:
 	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
@@ -73,10 +65,10 @@ private:
 	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);
 	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes);
 
-	void validate(int xRes, int yRes);
+	void validate(int xSegments, int ySegments);
 
-	inline size_t numElements(int xRes, int yRes);
-	inline size_t numVertices(int xRes, int yRes);
+	inline size_t numElements(int xSegments, int ySegments);
+	inline size_t numVertices(int xSegments, int ySegments);
 };
 } // namespace openspace
 #endif // __BASICGRIDGEOMETRY_H__

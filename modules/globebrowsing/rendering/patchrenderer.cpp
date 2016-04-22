@@ -183,7 +183,7 @@ namespace openspace {
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
 		// Snap patch position
-		int segmentsPerPatch = _grid->resolution();
+		int segmentsPerPatch = _grid->segments();
 		LatLon stepSize = LatLon(
 			patchSize.lat / segmentsPerPatch,
 			patchSize.lon / segmentsPerPatch);

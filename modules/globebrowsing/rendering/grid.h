@@ -38,8 +38,8 @@ class Grid
 {
 public:
 	Grid(
-		int xRes,
-		int yRes,
+		int xSegments,
+		int ySegments,
 		Geometry::Positions usePositions = Geometry::Positions::No,
 		Geometry::TextureCoordinates useTextures = Geometry::TextureCoordinates::No,
 		Geometry::Normals useNormals = Geometry::Normals::No);
@@ -47,19 +47,28 @@ public:
 
 	Geometry& geometry();
 
-	virtual int xResolution() const = 0;
-	virtual int yResolution() const = 0;
+	/**
+	Returns the number of grid cells in the x direction. Hence the number of vertices
+	in the x direction is xResolution + 1.
+	*/
+	virtual int xSegments() const = 0;
+	
+	/**
+	Returns the number of grid cells in the y direction. Hence the number of vertices
+	in the y direction is xResolution + 1.
+	*/
+	virtual int ySegments() const = 0;
 
 protected:
-	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes) = 0;
-	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes) = 0;
-	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes) = 0;
-	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes) = 0;
+	virtual std::vector<GLuint>		CreateElements(				int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec4>	CreatePositions(			int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec3>	CreateNormals(				int xSegments, int ySegments) = 0;
 
 	std::unique_ptr<Geometry> _geometry;
 
-	const int _xRes;
-	const int _yRes;
+	const int _xSegments;
+	const int _ySegments;
 };
 } // namespace openspace
 #endif // __GRIDGEOMETRY_H__

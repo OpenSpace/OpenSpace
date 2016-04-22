@@ -31,13 +31,13 @@ namespace {
 namespace openspace {
 
 	Grid::Grid(
-		int xRes,
-		int yRes,
+		int xSegments,
+		int ySegments,
 		Geometry::Positions usePositions,
 		Geometry::TextureCoordinates useTextures,
 		Geometry::Normals useNormals)
-	: _xRes(xRes)
-	, _yRes(yRes)
+	: _xSegments(xSegments)
+	, _ySegments(ySegments)
 {
 
 }

@@ -31,32 +31,32 @@ namespace {
 namespace openspace {
 
 BasicGrid::BasicGrid(
-	unsigned int xRes,
-	unsigned int yRes,
+	unsigned int xSegments,
+	unsigned int ySegments,
 	Geometry::Positions usePositions,
 	Geometry::TextureCoordinates useTextureCoordinates,
 	Geometry::Normals useNormals)
 	: Grid(
-		xRes, 
-		yRes,
+		xSegments, 
+		ySegments,
 		usePositions,
 		useTextureCoordinates,
 		useNormals)
 {
 	_geometry = std::unique_ptr<Geometry>(new Geometry(
-		CreateElements(xRes, yRes),
+		CreateElements(xSegments, ySegments),
 		usePositions,
 		useTextureCoordinates,
 		useNormals));
 
 	if (usePositions == Geometry::Positions::Yes) {
-		_geometry->setVertexPositions(CreatePositions(_xRes, _yRes));
+		_geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));
 	}
 	if (useTextureCoordinates == Geometry::TextureCoordinates::Yes) {
-		_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(_xRes, _yRes));
+		_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(_xSegments, _ySegments));
 	}
 	if (useNormals == Geometry::Normals::Yes) {
-		_geometry->setVertexNormals(CreateNormals(_xRes, _yRes));
+		_geometry->setVertexNormals(CreateNormals(_xSegments, _ySegments));
 	}
 }
 
@@ -65,34 +65,34 @@ BasicGrid::~BasicGrid()
 
 }
 
-int BasicGrid::xResolution() const {
-	return _xRes;
+int BasicGrid::xSegments() const {
+	return _xSegments;
 }
 
-int BasicGrid::yResolution() const {
-	return _yRes;
+int BasicGrid::ySegments() const {
+	return _ySegments;
 }
 
-void BasicGrid::validate(int xRes, int yRes) {
-	ghoul_assert(xRes > 0 && yRes > 0,
-		"Resolution must be at least 1x1. (" << xRes << ", " << yRes << ")");
+void BasicGrid::validate(int xSegments, int ySegments) {
+	ghoul_assert(xSegments > 0 && ySegments > 0,
+		"Resolution must be at least 1x1. (" << xSegments << ", " << ySegments << ")");
 }
 
-inline size_t BasicGrid::numElements(int xRes, int yRes){
-	return 3 * 2 * xRes * yRes;
+inline size_t BasicGrid::numElements(int xSegments, int ySegments){
+	return 3 * 2 * xSegments * ySegments;
 }
 
-inline size_t BasicGrid::numVertices(int xRes, int yRes) {
-	return (xRes + 1) * (yRes + 1);
+inline size_t BasicGrid::numVertices(int xSegments, int ySegments) {
+	return (xSegments + 1) * (ySegments + 1);
 }
 
-std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
-	validate(xRes, yRes);
+std::vector<GLuint> BasicGrid::CreateElements(int xSegments, int ySegments) {
+	validate(xSegments, ySegments);
 
 	std::vector<GLuint> elements;
-	elements.reserve(numElements(xRes, yRes));
-	for (unsigned int y = 0; y < yRes; y++) {
-		for (unsigned int x = 0; x < xRes; x++) {
+	elements.reserve(numElements(xSegments, ySegments));
+	for (unsigned int y = 0; y < ySegments; y++) {
+		for (unsigned int x = 0; x < xSegments; x++) {
 
 			// x    v01---v11   x ..
 			//       |  /  |
@@ -101,10 +101,10 @@ std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
 			// x	x     x     x ..
 			// :    :     :     :
 
-			GLuint v00 = (y + 0) * (xRes + 1) + x + 0;
-			GLuint v10 = (y + 0) * (xRes + 1) + x + 1;
-			GLuint v01 = (y + 1) * (xRes + 1) + x + 0;
-			GLuint v11 = (y + 1) * (xRes + 1) + x + 1;
+			GLuint v00 = (y + 0) * (xSegments + 1) + x + 0;
+			GLuint v10 = (y + 0) * (xSegments + 1) + x + 1;
+			GLuint v01 = (y + 1) * (xSegments + 1) + x + 0;
+			GLuint v11 = (y + 1) * (xSegments + 1) + x + 1;
 
 			// add upper triangle
 			elements.push_back(v00);
@@ -122,15 +122,15 @@ std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
 }
 
 std::vector<glm::vec4> BasicGrid::CreatePositions(
-	int xRes,
-	int yRes) 
+	int xSegments,
+	int ySegments) 
 {
-	validate(xRes, yRes);
+	validate(xSegments, ySegments);
 	std::vector<glm::vec4> positions;
-	positions.reserve(numVertices(xRes, yRes));
+	positions.reserve(numVertices(xSegments, ySegments));
 
 	// Copy from 2d texture coordinates and use as template to create positions
-	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(xRes, yRes);
+	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(xSegments, ySegments);
 	for (unsigned int i = 0; i < templateTextureCoords.size(); i++)
 	{
 		positions.push_back(glm::vec4(
@@ -142,29 +142,29 @@ std::vector<glm::vec4> BasicGrid::CreatePositions(
 	return positions;
 }
 
-std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xRes, int yRes){
-	validate(xRes, yRes);
+std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xSegments, int ySegments){
+	validate(xSegments, ySegments);
 	std::vector<glm::vec2> textureCoordinates;
-	textureCoordinates.reserve(numVertices(xRes, yRes));
+	textureCoordinates.reserve(numVertices(xSegments, ySegments));
 
-	for (unsigned int y = 0; y < yRes + 1; y++) {
-		for (unsigned int x = 0; x < xRes + 1; x++) {
+	for (unsigned int y = 0; y < ySegments + 1; y++) {
+		for (unsigned int x = 0; x < xSegments + 1; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / static_cast<float>(xRes),
-				static_cast<float>(y) / static_cast<float>(yRes)
+				static_cast<float>(x) / static_cast<float>(xSegments),
+				static_cast<float>(y) / static_cast<float>(ySegments)
 			));
 		}
 	}
 	return textureCoordinates;
 }
 
-std::vector<glm::vec3> BasicGrid::CreateNormals(int xRes, int yRes) {
-	validate(xRes, yRes);
+std::vector<glm::vec3> BasicGrid::CreateNormals(int xSegments, int ySegments) {
+	validate(xSegments, ySegments);
 	std::vector<glm::vec3> normals;
-	normals.reserve(numVertices(xRes, yRes));
+	normals.reserve(numVertices(xSegments, ySegments));
 
-	for (unsigned int y = 0; y < yRes + 1; y++) {
-		for (unsigned int x = 0; x < xRes + 1; x++) {
+	for (unsigned int y = 0; y < ySegments + 1; y++) {
+		for (unsigned int x = 0; x < xSegments + 1; x++) {
 			normals.push_back(glm::vec3(0, 0, 1));
 		}
 	}
