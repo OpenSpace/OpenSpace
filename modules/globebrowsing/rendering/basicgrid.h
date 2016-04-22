@@ -37,6 +37,16 @@ namespace openspace {
 class BasicGrid : public Grid
 {
 public:
+	/**
+	\param xRes is the number of grid cells in the x direction.
+	\param yRes is the number of grid cells in the y direction.
+	\param usePositions determines whether or not to upload any vertex position data
+	to the GPU.
+	\param useTextureCoordinates determines whether or not to upload any vertex texture
+	coordinate data to the GPU.
+	\param useNormals determines whether or not to upload any vertex normal data
+	to the GPU.
+	*/
 	BasicGrid(
 		unsigned int xRes,
 		unsigned int yRes,
@@ -45,10 +55,19 @@ public:
 		Geometry::Normals useNormals);
 	~BasicGrid();
 
+	/**
+	Returns the number of grid cells in the x direction. Hence the number of vertices
+	in the x direction is xResolution + 1.
+	*/
 	virtual int xResolution() const;
+	
+	/**
+	Returns the number of grid cells in the y direction. Hence the number of vertices
+	in the y direction is xResolution + 1.
+	*/
 	virtual int yResolution() const;
 
-protected:
+private:
 	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
 	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes);
 	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);

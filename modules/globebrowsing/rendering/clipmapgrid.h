@@ -36,6 +36,15 @@ namespace openspace {
 //							CLIPMAP GRID	(Abstract class)							//
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+This class defines a grid used for the layers of a geometry clipmap. A geometry
+clipmap is built up from a pyramid of clipmaps so the majority of the grids used
+are of the class OuterClipMapGrid. The vertex positions and texture coordinated are
+defined differently than for a normal BasicGrid. Other than having the basic grid
+vertices it also creates padding of one grid cell on the perimeter. This padding can be
+used when rendering a ClipMapGrid so that an inner layer of the pyramid can move and
+snap to the outer layers grid cells.
+*/
 class ClipMapGrid : public Grid
 {
 public:
@@ -45,6 +54,12 @@ public:
 
 	virtual int xResolution() const;
 	virtual int yResolution() const;
+
+	/**
+	Returns the resolution of the grid. A ClipMapGrid must have the resolution in x and
+	y direction equal so this function works as a wrapper for xResolution() and
+	yResolution().
+	*/
 	int resolution() const;
 };
 
@@ -52,6 +67,11 @@ public:
 //									OUTER CLIPMAP GRID									//
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+The outer layers of a geometry clipmap pyramid can be built up by grids with sizes
+increasing with the power of 2. The OuterClipMapGrid has a whole in the middle where
+a smaller ClipMapGrid of half the size can fit.
+*/
 class OuterClipMapGrid : public ClipMapGrid
 {
 public:
@@ -81,6 +101,11 @@ private:
 //									INNER CLIPMAP GRID									//
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+The InnerClipMapGrid can be used for the inner most (smallest) grid of a geometry clipmap
+pyramid. The only difference from a OuterClipMapGrid is that this grid does not have
+a whole where a smaller ClipMapGrid can be positioned.
+*/
 class InnerClipMapGrid : public ClipMapGrid
 {
 public:
@@ -88,13 +113,12 @@ public:
 
 	~InnerClipMapGrid();
 
-protected:
+private:
 	virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
 	virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
 	virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
 	virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
 
-private:
 	void validate(int xRes, int yRes);
 
 	static size_t numElements(int resolution);

@@ -79,11 +79,11 @@ void BasicGrid::validate(int xRes, int yRes) {
 }
 
 inline size_t BasicGrid::numElements(int xRes, int yRes){
-	return 3 * 2 * (xRes - 1)*(yRes - 1);
+	return 3 * 2 * xRes * yRes;
 }
 
 inline size_t BasicGrid::numVertices(int xRes, int yRes) {
-	return xRes * yRes;
+	return (xRes + 1) * (yRes + 1);
 }
 
 std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
@@ -91,8 +91,8 @@ std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
 
 	std::vector<GLuint> elements;
 	elements.reserve(numElements(xRes, yRes));
-	for (unsigned int y = 0; y < yRes-1; y++) {
-		for (unsigned int x = 0; x < xRes-1; x++) {
+	for (unsigned int y = 0; y < yRes; y++) {
+		for (unsigned int x = 0; x < xRes; x++) {
 
 			// x    v01---v11   x ..
 			//       |  /  |
@@ -101,10 +101,10 @@ std::vector<GLuint> BasicGrid::CreateElements(int xRes, int yRes) {
 			// x	x     x     x ..
 			// :    :     :     :
 
-			GLuint v00 = (y + 0) * xRes + x + 0;
-			GLuint v10 = (y + 0) * xRes + x + 1;
-			GLuint v01 = (y + 1) * xRes + x + 0;
-			GLuint v11 = (y + 1) * xRes + x + 1;
+			GLuint v00 = (y + 0) * (xRes + 1) + x + 0;
+			GLuint v10 = (y + 0) * (xRes + 1) + x + 1;
+			GLuint v01 = (y + 1) * (xRes + 1) + x + 0;
+			GLuint v11 = (y + 1) * (xRes + 1) + x + 1;
 
 			// add upper triangle
 			elements.push_back(v00);
@@ -147,11 +147,11 @@ std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xRes, int yRes){
 	std::vector<glm::vec2> textureCoordinates;
 	textureCoordinates.reserve(numVertices(xRes, yRes));
 
-	for (unsigned int y = 0; y < yRes; y++) {
-		for (unsigned int x = 0; x < xRes; x++) {
+	for (unsigned int y = 0; y < yRes + 1; y++) {
+		for (unsigned int x = 0; x < xRes + 1; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / static_cast<float>(xRes - 1),
-				static_cast<float>(y) / static_cast<float>(yRes - 1)
+				static_cast<float>(x) / static_cast<float>(xRes),
+				static_cast<float>(y) / static_cast<float>(yRes)
 			));
 		}
 	}
@@ -163,8 +163,8 @@ std::vector<glm::vec3> BasicGrid::CreateNormals(int xRes, int yRes) {
 	std::vector<glm::vec3> normals;
 	normals.reserve(numVertices(xRes, yRes));
 
-	for (unsigned int y = 0; y < yRes; y++) {
-		for (unsigned int x = 0; x < xRes; x++) {
+	for (unsigned int y = 0; y < yRes + 1; y++) {
+		for (unsigned int x = 0; x < xRes + 1; x++) {
 			normals.push_back(glm::vec3(0, 0, 1));
 		}
 	}
