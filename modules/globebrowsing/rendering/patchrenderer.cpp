@@ -55,9 +55,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//							PATCH RENDERER											//
 	//////////////////////////////////////////////////////////////////////////////////////
-	PatchRenderer::PatchRenderer(shared_ptr<Grid> geometry)
-		: _grid(geometry)
-		, _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0)
+	PatchRenderer::PatchRenderer()
+		: _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, -M_PI), 0)
 	{
 
 	}
@@ -76,7 +75,8 @@ namespace openspace {
 	//								LATLON PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
 	LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
-		: PatchRenderer(grid)
+		: PatchRenderer()
+		, _grid(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -154,8 +154,9 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<Grid> grid)
-		: PatchRenderer(grid)
+	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid)
+		: PatchRenderer()
+		, _grid(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -182,7 +183,7 @@ namespace openspace {
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
 		// Snap patch position
-		int segmentsPerPatch = 32;
+		int segmentsPerPatch = _grid->resolution();
 		LatLon stepSize = LatLon(
 			patchSize.lat / segmentsPerPatch,
 			patchSize.lon / segmentsPerPatch);

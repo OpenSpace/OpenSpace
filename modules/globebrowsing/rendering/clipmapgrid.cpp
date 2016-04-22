@@ -32,8 +32,39 @@ namespace {
 
 namespace openspace {
 
-ClipMapGeometry::ClipMapGeometry(unsigned int resolution)
+//////////////////////////////////////////////////////////////////////////////////////////
+//							CLIPMAP GRID	(Abstract class)							//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+ClipMapGrid::ClipMapGrid(unsigned int resolution)
 	: Grid(resolution, resolution, Geometry::Positions::No, Geometry::TextureCoordinates::Yes, Geometry::Normals::No)
+{
+
+}
+
+ClipMapGrid::~ClipMapGrid()
+{
+
+}
+
+int ClipMapGrid::xResolution() const {
+	return resolution();
+}
+
+int ClipMapGrid::yResolution() const {
+	return resolution();
+}
+
+int ClipMapGrid::resolution() const {
+	return _xRes;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									OUTER CLIPMAP GRID									//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+OuterClipMapGrid::OuterClipMapGrid(unsigned int resolution)
+: ClipMapGrid(resolution)
 {
 	_geometry = std::unique_ptr<Geometry>(new Geometry(
 		CreateElements(resolution, resolution),
@@ -44,51 +75,39 @@ ClipMapGeometry::ClipMapGeometry(unsigned int resolution)
 	_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(resolution, resolution));
 }
 
-ClipMapGeometry::~ClipMapGeometry()
+OuterClipMapGrid::~OuterClipMapGrid()
 {
 
 }
 
-int ClipMapGeometry::xResolution() const {
-	return resolution();
-}
-
-int ClipMapGeometry::yResolution() const {
-	return resolution();
-}
-
-int ClipMapGeometry::resolution() const {
-	return _xRes;
-}
-
-size_t ClipMapGeometry::numElements(int resolution)
+size_t OuterClipMapGrid::numElements(int resolution)
 {
 	int numElementsInTotalSquare = 6 * (resolution + 1) * (resolution + 1);
 	int numElementsInHole = 6 * (resolution / 4 * resolution / 4);
 	return numElementsInTotalSquare - numElementsInHole;
 }
 
-size_t ClipMapGeometry::numVerticesBottom(int resolution)
+size_t OuterClipMapGrid::numVerticesBottom(int resolution)
 {
 	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesLeft(int resolution)
+size_t OuterClipMapGrid::numVerticesLeft(int resolution)
 {
 	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesRight(int resolution)
+size_t OuterClipMapGrid::numVerticesRight(int resolution)
 {
 	return (resolution / 4 + 1 + 1) * (resolution / 2 + 1);
 }
 
-size_t ClipMapGeometry::numVerticesTop(int resolution)
+size_t OuterClipMapGrid::numVerticesTop(int resolution)
 {
 	return (resolution + 1 + 2) * (resolution / 4 + 1 + 1);
 }
 
-size_t ClipMapGeometry::numVertices(int resolution)
+size_t OuterClipMapGrid::numVertices(int resolution)
 {
 	return	numVerticesBottom(resolution) +
 			numVerticesLeft(resolution) +
@@ -96,7 +115,7 @@ size_t ClipMapGeometry::numVertices(int resolution)
 			numVerticesTop(resolution);
 }
 
-void ClipMapGeometry::validate(int xRes, int yRes) {
+void OuterClipMapGrid::validate(int xRes, int yRes) {
 	
 	ghoul_assert(xRes == yRes,
 		"Resolution must be equal in x and in y. ");
@@ -107,8 +126,7 @@ void ClipMapGeometry::validate(int xRes, int yRes) {
 		"Resolution must be a power of 2. (" << resolution << ")");
 }
 
-std::vector<GLuint> ClipMapGeometry::CreateElements(int xRes, int yRes) {
-	int hej = 0;
+std::vector<GLuint> OuterClipMapGrid::CreateElements(int xRes, int yRes) {
 	validate(xRes, yRes);
 	int resolution = xRes;
 	std::vector<GLuint> elements;
@@ -215,7 +233,7 @@ std::vector<GLuint> ClipMapGeometry::CreateElements(int xRes, int yRes) {
 	return elements;
 }
 
-std::vector<glm::vec4> ClipMapGeometry::CreatePositions(int xRes, int yRes)
+std::vector<glm::vec4> OuterClipMapGrid::CreatePositions(int xRes, int yRes)
 {
 	validate(xRes, yRes);
 	int resolution = xRes;
@@ -237,65 +255,194 @@ std::vector<glm::vec4> ClipMapGeometry::CreatePositions(int xRes, int yRes)
 }
 
 
-std::vector<glm::vec2> ClipMapGeometry::CreateTextureCoordinates(int xRes, int yRes){
+std::vector<glm::vec2> OuterClipMapGrid::CreateTextureCoordinates(int xRes, int yRes){
 	validate(xRes, yRes);
 	int resolution = xRes;
 	std::vector<glm::vec2> textureCoordinates;
 	textureCoordinates.reserve(numVertices(resolution));
 
-	// Resolution needs to be an int to compare with negative numbers
-	int intResolution = resolution;
 	// Build the bottom part of the clipmap geometry
-	for (int y = -1; y < intResolution / 4 + 1; y++) {
-		for (int x = -1; x < intResolution + 2; x++) {
+	for (int y = -1; y < resolution / 4 + 1; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / intResolution,
-				static_cast<float>(y) / intResolution));
+				static_cast<float>(x) / resolution,
+				static_cast<float>(y) / resolution));
 		}
 	}
 	
 	// Build the left part of the clipmap geometry
-	for (int y = intResolution / 4; y < 3 * intResolution / 4 + 1; y++) {
-		for (int x = -1; x < intResolution / 4 + 1; x++) {
+	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
+		for (int x = -1; x < resolution / 4 + 1; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / intResolution,
-				static_cast<float>(y) / intResolution));
+				static_cast<float>(x) / resolution,
+				static_cast<float>(y) / resolution));
 		}
 	}
 	
 	// Build the right part of the clipmap geometry
-	for (int y = intResolution / 4; y < 3 * intResolution / 4 + 1; y++) {
-		for (int x = 3 * intResolution / 4; x < intResolution + 2; x++) {
-			float u = static_cast<float>(x) / intResolution;
-			float v = static_cast<float>(y) / intResolution;
+	for (int y = resolution / 4; y < 3 * resolution / 4 + 1; y++) {
+		for (int x = 3 * resolution / 4; x < resolution + 2; x++) {
+			float u = static_cast<float>(x) / resolution;
+			float v = static_cast<float>(y) / resolution;
 			textureCoordinates.push_back(glm::vec2(u, v));
 		}
 	}
 	
 	// Build the top part of the clipmap geometry
-	for (int y = 3 * intResolution / 4; y < intResolution + 2; y++) {
-		for (int x = -1; x < intResolution + 2; x++) {
+	for (int y = 3 * resolution / 4; y < resolution + 2; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
 			textureCoordinates.push_back(glm::vec2(
-				static_cast<float>(x) / intResolution,
-				static_cast<float>(y) / intResolution));
+				static_cast<float>(x) / resolution,
+				static_cast<float>(y) / resolution));
 		}
 	}
 	
 	return textureCoordinates;
 }
 
-std::vector<glm::vec3> ClipMapGeometry::CreateNormals(int xRes, int yRes) {
+std::vector<glm::vec3> OuterClipMapGrid::CreateNormals(int xRes, int yRes) {
 	validate(xRes, yRes);
 	int resolution = xRes;
 	std::vector<glm::vec3> normals;
 	normals.reserve(numVertices(resolution));
 
-	for (unsigned int y = 0; y < resolution + 1; y++) {
-		for (unsigned int x = 0; x < resolution + 1; x++) {
+	for (int y = -1; y < resolution + 2; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
 			normals.push_back(glm::vec3(0, 0, 1));
 		}
 	}
 
 	return normals;
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									INNER CLIPMAP GRID									//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+InnerClipMapGrid::InnerClipMapGrid(unsigned int resolution)
+	: ClipMapGrid(resolution)
+{
+	_geometry = std::unique_ptr<Geometry>(new Geometry(
+		CreateElements(resolution, resolution),
+		Geometry::Positions::No,
+		Geometry::TextureCoordinates::Yes,
+		Geometry::Normals::No));
+
+	_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(resolution, resolution));
+}
+
+InnerClipMapGrid::~InnerClipMapGrid()
+{
+
+}
+
+size_t InnerClipMapGrid::numElements(int resolution)
+{
+	return resolution * resolution * 6;
+}
+
+size_t InnerClipMapGrid::numVertices(int resolution)
+{
+	return (resolution + 1) * (resolution + 1);
+}
+
+void InnerClipMapGrid::validate(int xRes, int yRes) {
+
+	ghoul_assert(xRes == yRes,
+		"Resolution must be equal in x and in y. ");
+	int resolution = xRes;
+	ghoul_assert(resolution >= 1,
+		"Resolution must be at least 1. (" << resolution << ")");
+}
+
+std::vector<GLuint> InnerClipMapGrid::CreateElements(int xRes, int yRes) {
+	validate(xRes, yRes);
+	int resolution = xRes;
+	std::vector<GLuint> elements;
+	elements.reserve(numElements(resolution));
+
+	// x    v01---v11   x ..
+	//       |  /  |
+	// x    v00---v10   x ..
+	//
+	// x	x     x     x ..
+	// :    :     :     :
+
+	for (unsigned int y = 0; y < resolution + 2; y++) {
+		for (unsigned int x = 0; x < resolution + 2; x++) {
+			GLuint v00 = (y + 0) * (resolution + 3) + x + 0;
+			GLuint v10 = (y + 0) * (resolution + 3) + x + 1;
+			GLuint v01 = (y + 1) * (resolution + 3) + x + 0;
+			GLuint v11 = (y + 1) * (resolution + 3) + x + 1;
+
+			elements.push_back(v00);
+			elements.push_back(v10);
+			elements.push_back(v11);
+
+			elements.push_back(v00);
+			elements.push_back(v11);
+			elements.push_back(v01);
+		}
+	}
+
+	return elements;
+}
+
+std::vector<glm::vec4> InnerClipMapGrid::CreatePositions(int xRes, int yRes)
+{
+	validate(xRes, yRes);
+	int resolution = xRes;
+	std::vector<glm::vec4> positions;
+	positions.reserve(numVertices(resolution));
+	std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(xRes, yRes);
+
+	// Copy from 2d texture coordinates and use as template to create positions
+	for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
+		positions.push_back(
+			glm::vec4(
+				templateTextureCoords[i].x,
+				templateTextureCoords[i].y,
+				0,
+				1));
+	}
+
+	return positions;
+}
+
+
+std::vector<glm::vec2> InnerClipMapGrid::CreateTextureCoordinates(int xRes, int yRes) {
+	validate(xRes, yRes);
+	int resolution = xRes;
+	std::vector<glm::vec2> textureCoordinates;
+	textureCoordinates.reserve(numVertices(resolution));
+
+	// Build the bottom part of the clipmap geometry
+	for (int y = -1; y < resolution + 2; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
+			textureCoordinates.push_back(glm::vec2(
+				static_cast<float>(x) / resolution,
+				static_cast<float>(y) / resolution));
+		}
+	}
+
+	return textureCoordinates;
+}
+
+std::vector<glm::vec3> InnerClipMapGrid::CreateNormals(int xRes, int yRes) {
+	validate(xRes, yRes);
+	int resolution = xRes;
+	std::vector<glm::vec3> normals;
+	normals.reserve(numVertices(resolution));
+
+	for (int y = -1; y < resolution + 2; y++) {
+		for (int x = -1; x < resolution + 2; x++) {
+			normals.push_back(glm::vec3(0, 0, 1));
+		}
+	}
+
+	return normals;
+}
+
+
 }// namespace openspace

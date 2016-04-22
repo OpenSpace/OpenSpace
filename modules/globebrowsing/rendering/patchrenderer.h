@@ -33,6 +33,7 @@
 
 #include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/grid.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 #include <modules/globebrowsing/rendering/frustrumculler.h>
 #include <modules/globebrowsing/rendering/texturetileset.h>
 
@@ -55,14 +56,12 @@ namespace openspace {
 	class PatchRenderer {
 	public:
 		
-		PatchRenderer(shared_ptr<Grid>);
+		PatchRenderer();
 		~PatchRenderer();
 
 	protected:
 
 		unique_ptr<ProgramObject> _programObject;
-		shared_ptr<Grid> _grid;
-		
 		TextureTileSet _tileSet;
 	};
 
@@ -85,18 +84,22 @@ namespace openspace {
 			const RenderData& data, 
 			double radius, 
 			const TileIndex& ti);
+	private:
+		shared_ptr<Grid> _grid;
 	};
 
 
 
 	class ClipMapPatchRenderer : public PatchRenderer {
 	public:
-		ClipMapPatchRenderer(shared_ptr<Grid> grid);
+ 		ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
 
 		void renderPatch(
 			const LatLon& patchSize,
 			const RenderData& data,
 			double radius);
+	private:
+		shared_ptr<ClipMapGrid> _grid;
 	};
 }  // namespace openspace
 

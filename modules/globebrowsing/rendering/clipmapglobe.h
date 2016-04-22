@@ -57,8 +57,8 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
-		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
 		
 		ClipMapPyramid _clipMapPyramid;
 

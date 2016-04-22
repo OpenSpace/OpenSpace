@@ -32,22 +32,38 @@
 
 namespace openspace {
 
-class ClipMapGeometry : public Grid
+//////////////////////////////////////////////////////////////////////////////////////////
+//							CLIPMAP GRID	(Abstract class)							//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+class ClipMapGrid : public Grid
 {
 public:
-	ClipMapGeometry(unsigned int resolution);
+	ClipMapGrid(unsigned int resolution);
 
-	~ClipMapGeometry();
+	~ClipMapGrid();
 
 	virtual int xResolution() const;
 	virtual int yResolution() const;
 	int resolution() const;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									OUTER CLIPMAP GRID									//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+class OuterClipMapGrid : public ClipMapGrid
+{
+public:
+	OuterClipMapGrid(unsigned int resolution);
+
+	~OuterClipMapGrid();
 
 protected:
-	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
-	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes);
-	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);
-	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes);
+	virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
+	virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
+	virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
 
 private:
 	void validate(int xRes, int yRes);
@@ -60,5 +76,30 @@ private:
 	static size_t numElements(int resolution);
 	static size_t numVertices(int resolution);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									INNER CLIPMAP GRID									//
+//////////////////////////////////////////////////////////////////////////////////////////
+
+class InnerClipMapGrid : public ClipMapGrid
+{
+public:
+	InnerClipMapGrid(unsigned int resolution);
+
+	~InnerClipMapGrid();
+
+protected:
+	virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
+	virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
+	virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
+
+private:
+	void validate(int xRes, int yRes);
+
+	static size_t numElements(int resolution);
+	static size_t numVertices(int resolution);
+};
+
 } // namespace openspace
 #endif // __CLIPMAPGEOMETRY_H__
