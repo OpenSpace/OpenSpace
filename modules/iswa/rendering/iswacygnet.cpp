@@ -31,54 +31,87 @@
 namespace openspace{
 
 ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary)
-	, _updateInterval("updateInterval", "Update Interval", 3, 1, 10)
-	, _delete("delete", "Delete")
-	, _shader(nullptr)
-	, _texture(nullptr)
-	, _memorybuffer("")
+    : Renderable(dictionary)
+    , _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
+    , _delete("delete", "Delete")
+    , _shader(nullptr)
+    , _texture(nullptr)
+    , _memorybuffer("")
 {
-	_data = std::make_shared<Metadata>();
+    _data = std::make_shared<Metadata>();
 
 	// dict.getValue can only set strings in _data directly
 	float renderableId;
-	glm::vec4 renderableScale;
-	glm::vec4 renderableOffset;
+	float updateTime;
+	glm::vec3 min, max;
+	glm::vec2 spatialScale;
+
 	dictionary.getValue("Id", renderableId);
-	dictionary.getValue("Scale", renderableScale);
-	dictionary.getValue("Offset", renderableOffset);
+	dictionary.getValue("UpdateTime", updateTime);
+	dictionary.getValue("SpatialScale", spatialScale);
+	dictionary.getValue("Min", min);
+	dictionary.getValue("Max", max);
+	dictionary.getValue("Frame",_data->frame);
+
+	
 	_data->id = (int) renderableId;
-	_data->offset = renderableOffset;
-	_data->scale = renderableScale;
+	_data->updateTime = (int) updateTime;
+	_data->spatialScale = spatialScale;
+	_data->min = min;
+	_data->max = max;
+
+    _data->scale = glm::vec3(
+    		(max.x - min.x),
+    		(max.y - min.y),
+    		(max.z - min.z)
+    );
+
+	_data->offset = glm::vec3(
+			(min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
+        	(min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
+        	(min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
+	);
+
 
 	// dictionary.getValue("Path",_data->path);
 	// dictionary.getValue("Parent",_data->parent);
-	dictionary.getValue("Frame",_data->frame);
 
-	// addProperty(_enabled);
-	addProperty(_updateInterval);
-	addProperty(_delete);
+    // addProperty(_enabled);
+    addProperty(_updateInterval);
+    addProperty(_delete);
 
-	std::cout << _data->id << std::endl;
-	std::cout << std::to_string(_data->offset) << std::endl;
-	std::cout << std::to_string(_data->scale) << std::endl;
-	std::cout << _data->path << std::endl;
-	std::cout << _data->parent << std::endl;
-	std::cout << _data->frame << std::endl;
+	// std::cout << _data->id << std::endl;
+	// std::cout << std::to_string(_data->offset) << std::endl;
+	// std::cout << std::to_string(_data->scale) << std::endl;
+	// std::cout << std::to_string(_data->max) << std::endl;
+    // std::cout << std::to_string(_data->min) << std::endl;
+	// std::cout << _data->path << std::endl;
+	// std::cout << _data->parent << std::endl;
+	// std::cout << _data->frame << std::endl;
 
-	_delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
+    _delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 }
 
 ISWACygnet::~ISWACygnet(){}
 
 void ISWACygnet::registerProperties(){
-	OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-	OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-	OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+    OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
+    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
 void ISWACygnet::unregisterProperties(){
-	OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._iSWAproperty.unregisterProperties(name());
+}
+
+void ISWACygnet::initializeTime(){
+	_openSpaceTime = Time::ref().currentTime();
+	_lastUpdateOpenSpaceTime = _openSpaceTime;
+
+	_realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+	_lastUpdateRealTime = _realTime;
+
+	_minRealTimeUpdateInterval = 100;
 }
 
 }//namespace openspac

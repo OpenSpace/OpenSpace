@@ -90,7 +90,7 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
         if (viewport->hasSubViewports() && viewport->getNonLinearProjectionPtr()) {
             int res = viewport->getNonLinearProjectionPtr()->getCubemapResolution();
             return glm::ivec2(res, res);
-		} else {
+        } else {
             return currentWindowResolution();
         }
     }

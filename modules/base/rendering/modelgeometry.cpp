@@ -31,29 +31,29 @@
 
 namespace {
     const std::string _loggerCat = "ModelGeometry";
-	const std::string keyGeomModelFile = "GeometryFile";
-	const int8_t CurrentCacheVersion = 3;
+    const std::string keyGeomModelFile = "GeometryFile";
+    const int8_t CurrentCacheVersion = 3;
     const std::string keyType = "Type";
-	const std::string keyName = "Name";
-	const std::string keySize = "Magnification";
+    const std::string keyName = "Name";
+    const std::string keySize = "Magnification";
 }
 
 namespace openspace {
 namespace modelgeometry {
 
 ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
-	std::string geometryType;
-	const bool success = dictionary.getValue(
-		keyType, geometryType);
-	if (!success) {
+    std::string geometryType;
+    const bool success = dictionary.getValue(
+        keyType, geometryType);
+    if (!success) {
         LERROR("ModelGeometry did not contain a correct value of the key '"
-			<< keyType << "'");
+            << keyType << "'");
         return nullptr;
-	}
-	ghoul::TemplateFactory<ModelGeometry>* factory
-		= FactoryManager::ref().factory<ModelGeometry>();
+    }
+    ghoul::TemplateFactory<ModelGeometry>* factory
+        = FactoryManager::ref().factory<ModelGeometry>();
 
-	ModelGeometry* result = factory->create(geometryType, dictionary);
+    ModelGeometry* result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a ModelGeometry object of type '" << geometryType
                                                                     << "'");
@@ -65,27 +65,27 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
     , _magnification("magnification", "Magnification", 0.f, 0.f, 10.f)
-	, _mode(GL_TRIANGLES)
+    , _mode(GL_TRIANGLES)
 {
-	setName("ModelGeometry");
+    setName("ModelGeometry");
 
-	std::string name;
-	bool success = dictionary.getValue(keyName, name);
-	ghoul_assert(success, "Name tag was not present");
+    std::string name;
+    bool success = dictionary.getValue(keyName, name);
+    ghoul_assert(success, "Name tag was not present");
 
     if (dictionary.hasKeyAndValue<double>(keySize))
         _magnification = static_cast<float>(dictionary.value<double>(keySize));
 
-	success = dictionary.getValue(keyGeomModelFile, _file);
-	if (!success) {
-		LERROR("Geometric Model file of '" << name << "' did not provide a key '"
-			<< keyGeomModelFile << "'");
-	}
-	_file = FileSys.absolutePath(_file);
+    success = dictionary.getValue(keyGeomModelFile, _file);
+    if (!success) {
+        LERROR("Geometric Model file of '" << name << "' did not provide a key '"
+            << keyGeomModelFile << "'");
+    }
+    _file = FileSys.absolutePath(_file);
 
     if (!FileSys.fileExists(_file, ghoul::filesystem::FileSystem::RawPath::Yes))
-		LERROR("Could not load the geometric model file '" << _file << "': File not found");
-	
+        LERROR("Could not load the geometric model file '" << _file << "': File not found");
+    
 
     addProperty(_magnification);
 }
@@ -94,53 +94,53 @@ ModelGeometry::~ModelGeometry() {
 }
 
 void ModelGeometry::render() {
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+    glBindVertexArray(_vaoID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+    glDrawElements(_mode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 
 void ModelGeometry::changeRenderMode(const GLenum mode) {
-	_mode = mode;
+    _mode = mode;
 }
 
 bool ModelGeometry::initialize(Renderable* parent) {
     _parent = parent;
-	PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
-	_parent->setBoundingSphere(ps);
+    PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
+    _parent->setBoundingSphere(ps);
 
-	if (_vertices.empty())
-		return false;
-	glGenVertexArrays(1, &_vaoID);
-	glGenBuffers(1, &_vbo);
-	glGenBuffers(1, &_ibo);
+    if (_vertices.empty())
+        return false;
+    glGenVertexArrays(1, &_vaoID);
+    glGenBuffers(1, &_vbo);
+    glGenBuffers(1, &_ibo);
 
-	glBindVertexArray(_vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-	glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), _vertices.data(), GL_STATIC_DRAW);
+    glBindVertexArray(_vaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), _vertices.data(), GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-		reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(int), _indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(int), _indices.data(), GL_STATIC_DRAW);
 
-	glBindVertexArray(0);
+    glBindVertexArray(0);
 
     return true;
 }
 
 void ModelGeometry::deinitialize() {
-	glDeleteBuffers(1, &_vbo);
-	glDeleteVertexArrays(1, &_vaoID);
-	glDeleteBuffers(1, &_ibo);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_ibo);
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
@@ -235,19 +235,19 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
 }
 
 bool ModelGeometry::getVertices(std::vector<Vertex>* vertexList) {
-	vertexList->clear();
-	for (auto v : _vertices)
-		vertexList->push_back(v);
+    vertexList->clear();
+    for (auto v : _vertices)
+        vertexList->push_back(v);
 
-	return !(vertexList->empty());
+    return !(vertexList->empty());
 }
 
 bool ModelGeometry::getIndices(std::vector<int>* indexList) {
-	indexList->clear();
-	for (auto i : _indices)
-		indexList->push_back(i);
+    indexList->clear();
+    for (auto i : _indices)
+        indexList->push_back(i);
 
-	return !(indexList->empty());
+    return !(indexList->empty());
 }
 
 void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {

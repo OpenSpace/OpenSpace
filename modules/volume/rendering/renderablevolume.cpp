@@ -82,16 +82,16 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
     const std::string& filepath, 
     const ghoul::Dictionary& hintsDictionary) {
 
-	if( ! FileSys.fileExists(filepath)) {
-		LWARNING("Could not load volume, could not find '" << filepath << "'");
-		return nullptr;
-	}
+    if( ! FileSys.fileExists(filepath)) {
+        LWARNING("Could not load volume, could not find '" << filepath << "'");
+        return nullptr;
+    }
 
-	if(hasExtension(filepath, "raw")) {
-		ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
-		ghoul::RawVolumeReader rawReader(hints);
-		return rawReader.read(filepath);
-	} else if(hasExtension(filepath, "cdf")) {
+    if(hasExtension(filepath, "raw")) {
+        ghoul::RawVolumeReader::ReadHints hints = readHints(hintsDictionary);
+        ghoul::RawVolumeReader rawReader(hints);
+        return rawReader.read(filepath);
+    } else if(hasExtension(filepath, "cdf")) {
 
         ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
         ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
@@ -139,28 +139,28 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
         std::stringstream ss;
         ss << "." << dimensions[0] << "x" << dimensions[1] << "x" << dimensions[2] << "." << "." << variableCacheString << ".cache";
 
-		 // = filepath + ss.str();
+         // = filepath + ss.str();
         ghoul::filesystem::File ghlFile(filepath);
         std::string cachepath = FileSys.cacheManager()->cachedFilename(ghlFile.baseName(),
                                                                        ss.str(),  true);
-		if (cache && FileSys.fileExists(cachepath)) {
+        if (cache && FileSys.fileExists(cachepath)) {
            
 #define VOLUME_LOAD_PROGRESSBAR
             std::ifstream file(cachepath, std::ios::binary | std::ios::in);
-			if (file.is_open()) {
-				size_t length = dimensions[0] * dimensions[1] * dimensions[2];
-				float* data = new float[length];
+            if (file.is_open()) {
+                size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+                float* data = new float[length];
 #ifdef VOLUME_LOAD_PROGRESSBAR
-				LINFO("Loading cache: " << cachepath);
-				ProgressBar pb(static_cast<int>(dimensions[2]));
-				for (size_t i = 0; i < dimensions[2]; ++i) {
-					size_t offset = length / dimensions[2];
-					std::streamsize offsetsize = sizeof(float)*offset;
-					file.read(reinterpret_cast<char*>(data + offset * i), offsetsize);
-					pb.print(static_cast<int>(i));
-				}
+                LINFO("Loading cache: " << cachepath);
+                ProgressBar pb(static_cast<int>(dimensions[2]));
+                for (size_t i = 0; i < dimensions[2]; ++i) {
+                    size_t offset = length / dimensions[2];
+                    std::streamsize offsetsize = sizeof(float)*offset;
+                    file.read(reinterpret_cast<char*>(data + offset * i), offsetsize);
+                    pb.print(static_cast<int>(i));
+                }
 #else
-				file.read(reinterpret_cast<char*>(data), sizeof(float)*length);
+                file.read(reinterpret_cast<char*>(data), sizeof(float)*length);
 #endif
                 file.close();
                 return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
@@ -169,10 +169,10 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
             }
         }
 
-		KameleonWrapper kw(filepath);
-		std::string variableString;
-		if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
-			float* data = kw.getUniformSampledValues(variableString, dimensions);
+        KameleonWrapper kw(filepath);
+        std::string variableString;
+        if (hintsDictionary.hasKey("Variable") && hintsDictionary.getValue("Variable", variableString)) {
+            float* data = kw.getUniformSampledValues(variableString, dimensions);
             if(cache) {
                 std::ofstream file(cachepath, std::ios::binary | std::ios::out);
                 if (file.is_open()) {
@@ -181,45 +181,45 @@ ghoul::opengl::Texture* RenderableVolume::loadVolume(
                     file.close();
                 }
             }
-        	return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
-		} else if (hintsDictionary.hasKey("Variables")) {
-			std::string xVariable, yVariable, zVariable;
-			bool xVar, yVar, zVar;
-			xVar = hintsDictionary.getValue("Variables.1", xVariable);
-			yVar = hintsDictionary.getValue("Variables.2", yVariable);
-			zVar = hintsDictionary.getValue("Variables.3", zVariable);
+            return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+        } else if (hintsDictionary.hasKey("Variables")) {
+            std::string xVariable, yVariable, zVariable;
+            bool xVar, yVar, zVar;
+            xVar = hintsDictionary.getValue("Variables.1", xVariable);
+            yVar = hintsDictionary.getValue("Variables.2", yVariable);
+            zVar = hintsDictionary.getValue("Variables.3", zVariable);
 
-			if (!xVar || !yVar || !zVar) {
-				LERROR("Error reading variables! Must be 3 and must exist in CDF data");
-			} else {
+            if (!xVar || !yVar || !zVar) {
+                LERROR("Error reading variables! Must be 3 and must exist in CDF data");
+            } else {
 
-				float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
+                float* data = kw.getUniformSampledVectorValues(xVariable, yVariable, zVariable, dimensions);
                 if(cache) {
                     //FILE* file = fopen (cachepath.c_str(), "wb");
-					std::ofstream file(cachepath, std::ios::in | std::ios::binary);
-					size_t length = dimensions[0] * dimensions[1] * dimensions[2];
-					file.write(reinterpret_cast<char*>(data), sizeof(float)*length);
+                    std::ofstream file(cachepath, std::ios::in | std::ios::binary);
+                    size_t length = dimensions[0] * dimensions[1] * dimensions[2];
+                    file.write(reinterpret_cast<char*>(data), sizeof(float)*length);
                     file.close();
                 }
 
-				return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
-			}
+                return new ghoul::opengl::Texture(data, dimensions, ghoul::opengl::Texture::Format::RGBA, GL_RGBA, GL_FLOAT, filtermode, wrappingmode);
+            }
 
-		} else {
-			LWARNING("Hints does not specify a 'Variable' or 'Variables'");
-		}
-	} else {
-		LWARNING("No valid file extension.");
-	}
-	return nullptr;
+        } else {
+            LWARNING("Hints does not specify a 'Variable' or 'Variables'");
+        }
+    } else {
+        LWARNING("No valid file extension.");
+    }
+    return nullptr;
 }
 
 glm::vec3 RenderableVolume::getVolumeOffset(
-		const std::string& filepath,
-		const ghoul::Dictionary& hintsDictionary) {
+        const std::string& filepath,
+        const ghoul::Dictionary& hintsDictionary) {
 
-	KameleonWrapper kw(filepath);
-	return kw.getModelBarycenterOffset();
+    KameleonWrapper kw(filepath);
+    return kw.getModelBarycenterOffset();
 }
 
 ghoul::RawVolumeReader::ReadHints RenderableVolume::readHints(const ghoul::Dictionary& dictionary) {
@@ -454,8 +454,8 @@ ghoul::opengl::Texture* RenderableVolume::loadTransferFunction(const std::string
     // }
 
     return new ghoul::opengl::Texture(transferFunction,
-    		glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
-    		GL_RGBA, GL_FLOAT,filtermode, wrappingmode);
+            glm::size3_t(width,1,1),ghoul::opengl::Texture::Format::RGBA,
+            GL_RGBA, GL_FLOAT,filtermode, wrappingmode);
 }
 
 } // namespace openspace

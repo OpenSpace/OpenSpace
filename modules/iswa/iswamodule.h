@@ -31,10 +31,10 @@
 
 class ISWAModule : public OpenSpaceModule {
 public:
-	ISWAModule();
+    ISWAModule();
 
 protected:
-	void internalInitialize() override;
+    void internalInitialize() override;
 };
 
 } // namespace openspace

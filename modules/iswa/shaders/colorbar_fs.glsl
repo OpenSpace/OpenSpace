@@ -37,55 +37,44 @@ in vec4 vs_position;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	// vec4 diffuse;
-	// diffuse = top;
-	// diffuse = texture(texture1, vs_st);
-	// float v = texture(texture1, vs_st).r;
-	float v = 1-vs_st.t;
-	float t = tfValues.x;
-	float x = tfValues.y;
-	float y = tfValues.z;
-	float b = tfValues.w;
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    vec4 diffuse;
+    // diffuse = top;
+    // diffuse = texture(texture1, vs_st);
+    // float v = texture(texture1, vs_st).r;
+    float v = 1-vs_st.t;
+    float x = tfValues.x;
+    float y = tfValues.y;
 
-	if(x>t)
-		x=t;
-	if(y>x)
-		y=x;
-	if(b>y)
-		b=y;
+    // if(y == 0){
+        // v = v-x;
+        // diffuse = mix(bot, top, v);
+    // }else{
+    if(v > (x+y)){
+        v = v - (x+y);
+        v = v / (x-y);
+        diffuse = mix(mid, top, v);
+    }else if( v < (x-y)){
+        v = v / (x-y);
+        diffuse = mix(bot, mid, v);
+    }else{
+        diffuse = mid;
+    }
+    // }
 
-	vec4 diffuse = vec4(0.f,0.f,0.f,0.f);
-	if(y == x){
-		diffuse = mix(bot, top, v);
-	}else{
-		if(v > x && v <= t){
-			v = v - x;
-			v = v / (t-x);
-			diffuse = mix(mid, top, v);
-		}else if( v < y && v > b){
-			v = v - b;
-			v = v / (y-b);
-			diffuse = mix(bot, mid, v);
-		}else if(v < x && v > y){
-			diffuse = mid;
-		}
-	}
-	// }
+    // diffuse = vec4(vs_st.s, vs_st.t, 0, 1);
+    // vec4 diffuse = vec4(1,vs_st,1);
+    //vec4 diffuse = vec4(1,0,0,1);
+    // if(position.w > 9.0) {
+    //     diffuse = vec4(1,0,0,1);
+    // }
 
-	// diffuse = vec4(vs_st.s, vs_st.t, 0, 1);
-	// vec4 diffuse = vec4(1,vs_st,1);
-	//vec4 diffuse = vec4(1,0,0,1);
-	// if(position.w > 9.0) {
-	// 	diffuse = vec4(1,0,0,1);
-	// }
-
-	//diffuse.a = diffuse.r;
-	// float tot = diffuse.r + diffuse.g + diffuse.b;
-	// tot /= 3.0;
-	// if (diffuse.a <= 0.05)
-		// discard;
+    //diffuse.a = diffuse.r;
+    // float tot = diffuse.r + diffuse.g + diffuse.b;
+    // tot /= 3.0;
+    // if (diffuse.a <= 0.05)
+        // discard;
 
     Fragment frag;
     frag.color = diffuse;

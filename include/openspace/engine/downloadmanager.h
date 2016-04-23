@@ -69,7 +69,6 @@ public:
     DownloadManager(std::string requestURL, int applicationVersion,
         bool useMultithreadedDownload = true);
 
-    // callers responsibility to delete
     // callbacks happen on a different thread
     std::shared_ptr<FileFuture> downloadFile(const std::string& url, const ghoul::filesystem::File& file,
         bool overrideFile = true,

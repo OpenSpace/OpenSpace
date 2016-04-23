@@ -30,52 +30,52 @@
 
 // Forward declare to minimize dependencies
 namespace ghoul {
-	namespace filesystem {
-		class File;
-	}
-	namespace opengl {
-		class ProgramObject;
-		class Texture;
-	}
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
 }
 
 namespace openspace {
 
 class RenderableVolumeGL: public RenderableVolume {
 public:
-	RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-	~RenderableVolumeGL();
+    RenderableVolumeGL(const ghoul::Dictionary& dictionary);
+    ~RenderableVolumeGL();
     
-	bool initialize() override;
+    bool initialize() override;
     bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
+    virtual void render(const RenderData& data) override;
+    virtual void update(const UpdateData& data) override;
 
 private:
-	ghoul::Dictionary _hintsDictionary;
+    ghoul::Dictionary _hintsDictionary;
 
     std::string _filename;
 
     std::string _transferFunctionName;
-	std::string _volumeName;
+    std::string _volumeName;
 
     std::string _transferFunctionPath;
-	std::string _samplerFilename;
+    std::string _samplerFilename;
     
     ghoul::filesystem::File* _transferFunctionFile;
 
-	ghoul::opengl::Texture* _volume;
-	ghoul::opengl::Texture* _transferFunction;
+    ghoul::opengl::Texture* _volume;
+    ghoul::opengl::Texture* _transferFunction;
 
-	GLuint _boxArray; 
-	GLuint _vertexPositionBuffer;
-	ghoul::opengl::ProgramObject* _boxProgram;
-	glm::vec3 _boxScaling;
-	psc _pscOffset;
-	float _w;
+    GLuint _boxArray; 
+    GLuint _vertexPositionBuffer;
+    ghoul::opengl::ProgramObject* _boxProgram;
+    glm::vec3 _boxScaling;
+    psc _pscOffset;
+    float _w;
     
     bool _updateTransferfunction;
     int _id;

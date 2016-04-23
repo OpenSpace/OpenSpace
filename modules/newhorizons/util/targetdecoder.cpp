@@ -32,20 +32,20 @@ namespace openspace {
 
 TargetDecoder::TargetDecoder(const ghoul::Dictionary& dictionary) :_type("TARGET")
 {
-	_names.resize(dictionary.size());
-	for (int i = 0; i < _names.size(); ++i) {
-		std::string readMe;
-		dictionary.getValue(std::to_string(i + 1), readMe);
-		_names[i] = readMe;
-	}
+    _names.resize(dictionary.size());
+    for (int i = 0; i < _names.size(); ++i) {
+        std::string readMe;
+        dictionary.getValue(std::to_string(i + 1), readMe);
+        _names[i] = readMe;
+    }
 }
 
 std::string TargetDecoder::getDecoderType(){
-	return _type;
+    return _type;
 }
 
 std::vector<std::string> TargetDecoder::getTranslation(){
-	return _names;
+    return _names;
 }
 
 } // namespace openspace

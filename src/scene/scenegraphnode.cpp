@@ -156,8 +156,8 @@ bool SceneGraphNode::deinitialize() {
     _ephemeris = nullptr;
 
  //   for (SceneGraphNode* child : _children) {
-    //	child->deinitialize();
-    //	delete child;
+    //    child->deinitialize();
+    //    delete child;
     //}
     _children.clear();
 
@@ -289,14 +289,14 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 
 //not used anymore @AA
 //bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
-//	std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
+//    std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
 //
-//	if (it != _children.end()){
-//		_children.erase(it);
-//		return true;
-//	}
+//    if (it != _children.end()){
+//        _children.erase(it);
+//        return true;
+//    }
 //
-//	return false;
+//    return false;
 //}
 
 const psc& SceneGraphNode::position() const

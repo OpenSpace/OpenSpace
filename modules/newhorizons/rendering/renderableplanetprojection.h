@@ -53,106 +53,106 @@
 
 namespace openspace {
 
-namespace planetgeometryprojection {
-class PlanetGeometryProjection;
+namespace planetgeometry{
+class PlanetGeometry;
 }
 
 
 class RenderablePlanetProjection : public Renderable {
 public:
-	RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
-	~RenderablePlanetProjection();
+    RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanetProjection();
 
     bool initialize() override;
     bool deinitialize() override;
-	bool isReady() const override;
+    bool isReady() const override;
 
 
-	void render(const RenderData& data) override;
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-	ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
+    ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
 
 protected:
 
     void loadTexture();
-	void loadProjectionTexture();
-	bool auxiliaryRendertarget();
-	glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
-	void attitudeParameters(double time);
+    void loadProjectionTexture();
+    bool auxiliaryRendertarget();
+    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
+    void attitudeParameters(double time);
 
-	void textureBind();
-	void project();
-	void clearAllProjections();
+    void textureBind();
+    void project();
+    void clearAllProjections();
 private:
-	void imageProjectGPU();
+    void imageProjectGPU();
 
-	std::map<std::string, Decoder*> _fileTranslation;
+    std::map<std::string, Decoder*> _fileTranslation;
 
     properties::StringProperty  _colorTexturePath;
-	properties::StringProperty  _projectionTexturePath;
-	properties::IntProperty _rotation;
-	properties::FloatProperty _fadeProjection;
-	properties::BoolProperty _performProjection;
-	properties::BoolProperty _clearAllProjections;
+    properties::StringProperty  _projectionTexturePath;
+    properties::IntProperty _rotation;
+    properties::FloatProperty _fadeProjection;
+    properties::BoolProperty _performProjection;
+    properties::BoolProperty _clearAllProjections;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-	std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
-	std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+    std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
+    std::unique_ptr<ghoul::opengl::Texture> _textureProj;
     std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
-	planetgeometryprojection::PlanetGeometryProjection* _geometry;
-	
-	glm::vec2  _camScaling;
-	glm::vec3  _up;
-	glm::mat4  _transform;
-	glm::mat4  _projectorMatrix;
+    planetgeometry::PlanetGeometry* _geometry;
+    
+    glm::vec2  _camScaling;
+    glm::vec3  _up;
+    glm::mat4  _transform;
+    glm::mat4  _projectorMatrix;
 
-	//sequenceloading
-	std::string _sequenceSource;
-	std::string _sequenceType;
-	bool _foundSequence;
+    //sequenceloading
+    std::string _sequenceSource;
+    std::string _sequenceType;
+    bool _foundSequence;
 
-	// spice
-	std::string _instrumentID;
-	std::string _projectorID;
-	std::string _projecteeID;
+    // spice
+    std::string _instrumentID;
+    std::string _projectorID;
+    std::string _projecteeID;
     SpiceManager::AberrationCorrection _aberration;
     std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
 
 
-	float _fovy;
-	float _aspectRatio;
-	float _nearPlane;
-	float _farPlane;
+    float _fovy;
+    float _aspectRatio;
+    float _nearPlane;
+    float _farPlane;
 
-	glm::dmat3 _stateMatrix;
-	glm::dmat3 _instrumentMatrix;
-	glm::vec3  _boresight;
+    glm::dmat3 _stateMatrix;
+    glm::dmat3 _instrumentMatrix;
+    glm::vec3  _boresight;
 
-	double _time;
-	double _previousTime;
-	double _previousCapture;
-	double lightTime;
+    double _time;
+    double _previousTime;
+    double _previousCapture;
+    double lightTime;
 
-	std::vector<Image> _imageTimes;
-	int _sequenceID;
+    std::vector<Image> _imageTimes;
+    int _sequenceID;
 
-	std::string _target;
-	std::string _frame;
-	std::string _defaultProjImage;
-	std::string _clearingImage;
-	std::string _next;
+    std::string _target;
+    std::string _frame;
+    std::string _defaultProjImage;
+    std::string _clearingImage;
+    std::string _next;
 
-	bool _capture;
+    bool _capture;
 
-	// FBO stuff
-	GLuint _fboID;
-	GLuint _quad;
-	GLuint _vertexPositionBuffer;
+    // FBO stuff
+    GLuint _fboID;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
 
-	std::queue<Image> imageQueue;
+    std::queue<Image> imageQueue;
 };
 }  // namespace openspace
 

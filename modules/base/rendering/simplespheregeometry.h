@@ -31,7 +31,7 @@
 
 namespace openspace {
 
-class RenderablePlanet;
+class Renderable;
 class PowerScaledSphere;
 
 namespace planetgeometry {
@@ -42,18 +42,18 @@ public:
     ~SimpleSphereGeometry();
 
 
-    bool initialize(RenderablePlanet* parent) override;
+    bool initialize(Renderable* parent) override;
     void deinitialize() override;
     void render() override;
-	PowerScaledSphere* _planet;
+    PowerScaledSphere* _planet;
 
 private:
     void createSphere();
 
-	glm::vec2 _modRadius;
-	properties::Vec4Property _realRadius;
+    glm::vec2 _modRadius;
+    properties::Vec4Property _realRadius;
     properties::IntProperty _segments;
-	std::string _name;
+    std::string _name;
 
     PowerScaledSphere* _sphere;
 };

@@ -90,7 +90,7 @@ namespace openspace {
 //    mutable bool _viewMatrixIsDirty;
 //};
 
-	class SyncBuffer;
+    class SyncBuffer;
 
 class Camera {
 public:
@@ -99,38 +99,38 @@ public:
 
     void setPosition(psc pos);
     const psc& position() const;
-	
-	const psc& unsynchedPosition() const;
+    
+    const psc& unsynchedPosition() const;
 
-	void setModelMatrix(glm::mat4 modelMatrix);
-	const glm::mat4& modelMatrix() const;
+    void setModelMatrix(glm::mat4 modelMatrix);
+    const glm::mat4& modelMatrix() const;
 
-	void setViewMatrix(glm::mat4 viewMatrix);
-	const glm::mat4& viewMatrix() const;
+    void setViewMatrix(glm::mat4 viewMatrix);
+    const glm::mat4& viewMatrix() const;
 
-	void setProjectionMatrix(glm::mat4 projectionMatrix);
-	const glm::mat4& projectionMatrix() const;
+    void setProjectionMatrix(glm::mat4 projectionMatrix);
+    const glm::mat4& projectionMatrix() const;
 
     const glm::mat4& viewProjectionMatrix() const;
 
     void setCameraDirection(glm::vec3 cameraDirection);
     glm::vec3 cameraDirection() const;
 
-	void setFocusPosition(psc pos);
-	const psc& focusPosition() const;
+    void setFocusPosition(psc pos);
+    const psc& focusPosition() const;
 
-	void setViewRotationMatrix(glm::mat4 m);
-	const glm::mat4& viewRotationMatrix() const;
+    void setViewRotationMatrix(glm::mat4 m);
+    const glm::mat4& viewRotationMatrix() const;
     void compileViewRotationMatrix();
 
     void rotate(const glm::quat& rotation);
     void setRotation(glm::quat rotation);
    // const glm::quat& rotation() const;
-	void setRotation(glm::mat4 rotation);
+    void setRotation(glm::mat4 rotation);
 
-	const glm::vec3& viewDirection() const;
+    const glm::vec3& viewDirection() const;
 
-	const float& maxFov() const;
+    const float& maxFov() const;
     const float& sinMaxFov() const;
     void setMaxFov(float fov);
     void setScaling(glm::vec2 scaling);
@@ -139,43 +139,43 @@ public:
     void setLookUpVector(glm::vec3 lookUp);
     const glm::vec3& lookUpVector() const;
 
-	void postSynchronizationPreDraw();
-	void preSynchronization();
-	void serialize(SyncBuffer* syncBuffer);
-	void deserialize(SyncBuffer* syncBuffer);
+    void postSynchronizationPreDraw();
+    void preSynchronization();
+    void serialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
 private:
     float _maxFov;
     float _sinMaxFov;
     mutable glm::mat4 _viewProjectionMatrix;
-	glm::mat4 _modelMatrix;
-	glm::mat4 _viewMatrix;
-	glm::mat4 _projectionMatrix;
+    glm::mat4 _modelMatrix;
+    glm::mat4 _viewMatrix;
+    glm::mat4 _projectionMatrix;
     mutable bool _dirtyViewProjectionMatrix;
     glm::vec3 _viewDirection;
     glm::vec3 _cameraDirection;
-	psc _focusPosition;
+    psc _focusPosition;
     // glm::quat _viewRotation;
     
     glm::vec3 _lookUp;
 
-	mutable std::mutex _mutex;
-	
-	//local variables
-	glm::mat4 _localViewRotationMatrix;
-	glm::vec2 _localScaling;
-	psc _localPosition;
+    mutable std::mutex _mutex;
+    
+    //local variables
+    glm::mat4 _localViewRotationMatrix;
+    glm::vec2 _localScaling;
+    psc _localPosition;
 
-	//shared copies of local variables
-	glm::vec2 _sharedScaling;
-	psc _sharedPosition;
-	glm::mat4 _sharedViewRotationMatrix;
+    //shared copies of local variables
+    glm::vec2 _sharedScaling;
+    psc _sharedPosition;
+    glm::mat4 _sharedViewRotationMatrix;
 
-	//synced copies of local variables
-	glm::vec2 _syncedScaling;
-	psc _syncedPosition;
-	glm::mat4 _syncedViewRotationMatrix;
-	
+    //synced copies of local variables
+    glm::vec2 _syncedScaling;
+    psc _syncedPosition;
+    glm::mat4 _syncedViewRotationMatrix;
+    
 };
 
 } // namespace openspace

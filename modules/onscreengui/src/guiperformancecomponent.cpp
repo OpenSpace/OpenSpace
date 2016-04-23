@@ -31,86 +31,86 @@
 #include <algorithm>
 
 namespace {
-	const std::string _loggerCat = "GuiPerformanceComponent";
+    const std::string _loggerCat = "GuiPerformanceComponent";
 }
 
 namespace openspace {
 namespace gui {
 
 void GuiPerformanceComponent::initialize() {
-	_minMaxValues[0] = 100.f;
-	_minMaxValues[1] = 250.f;
+    _minMaxValues[0] = 100.f;
+    _minMaxValues[1] = 250.f;
 }
 
 void GuiPerformanceComponent::deinitialize() {
-	delete _performanceMemory;
-	_performanceMemory = nullptr;
+    delete _performanceMemory;
+    _performanceMemory = nullptr;
 }
 
 void GuiPerformanceComponent::render() {
-	// Copy and paste from renderengine.cpp::storePerformanceMeasurements method
-//	const int8_t Version = 0;
-	const int nValues = 250;
-	const int lengthName = 256;
-	const int maxValues = 256;
+    // Copy and paste from renderengine.cpp::storePerformanceMeasurements method
+//    const int8_t Version = 0;
+    const int nValues = 250;
+    const int lengthName = 256;
+    const int maxValues = 256;
 
-	struct PerformanceLayout {
-		int8_t version;
-		int32_t nValuesPerEntry;
-		int32_t nEntries;
-		int32_t maxNameLength;
-		int32_t maxEntries;
+    struct PerformanceLayout {
+        int8_t version;
+        int32_t nValuesPerEntry;
+        int32_t nEntries;
+        int32_t maxNameLength;
+        int32_t maxEntries;
 
-		struct PerformanceLayoutEntry {
-			char name[lengthName];
-			float renderTime[nValues];
-			float updateRenderable[nValues];
-			float updateEphemeris[nValues];
+        struct PerformanceLayoutEntry {
+            char name[lengthName];
+            float renderTime[nValues];
+            float updateRenderable[nValues];
+            float updateEphemeris[nValues];
 
-			int32_t currentRenderTime;
-			int32_t currentUpdateRenderable;
-			int32_t currentUpdateEphemeris;
-		};
+            int32_t currentRenderTime;
+            int32_t currentUpdateRenderable;
+            int32_t currentUpdateEphemeris;
+        };
 
-		PerformanceLayoutEntry entries[maxValues];
-	};
+        PerformanceLayoutEntry entries[maxValues];
+    };
 
-	ImGui::Begin("Performance", &_isEnabled);
-	if (OsEng.renderEngine().doesPerformanceMeasurements() &&
-			ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
-	{
-		ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
-		_minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
-		
+    ImGui::Begin("Performance", &_isEnabled);
+    if (OsEng.renderEngine().doesPerformanceMeasurements() &&
+            ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
+    {
+        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
+        _minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
+        
 
-		if (!_performanceMemory)
-			_performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
+        if (!_performanceMemory)
+            _performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
 
 
         void* ptr = _performanceMemory->memory();
-		PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
+        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 
-		for (int i = 0; i < layout->nEntries; ++i) {
-			const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
+        for (int i = 0; i < layout->nEntries; ++i) {
+            const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
 
-			if (ImGui::CollapsingHeader(entry.name)) {
-				std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
-				ImGui::PlotLines("UpdateEphemeris", &entry.updateEphemeris[0], layout->nValuesPerEntry, 0, updateEphemerisTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+            if (ImGui::CollapsingHeader(entry.name)) {
+                std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
+                ImGui::PlotLines("UpdateEphemeris", &entry.updateEphemeris[0], layout->nValuesPerEntry, 0, updateEphemerisTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
 
-				std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
-				ImGui::PlotLines("UpdateRender", &entry.updateRenderable[0], layout->nValuesPerEntry, 0, updateRenderableTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+                std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
+                ImGui::PlotLines("UpdateRender", &entry.updateRenderable[0], layout->nValuesPerEntry, 0, updateRenderableTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
 
-				std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
-				ImGui::PlotLines("RenderTime", &entry.renderTime[0], layout->nValuesPerEntry, 0, renderTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-			}
-		}
-	}
-	else {
-		ImGui::TextWrapped("Performance monitoring is disabled. Enable with "
-						   "'openspace.setPerformanceMeasurement(true)'");
-	}
+                std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
+                ImGui::PlotLines("RenderTime", &entry.renderTime[0], layout->nValuesPerEntry, 0, renderTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
+            }
+        }
+    }
+    else {
+        ImGui::TextWrapped("Performance monitoring is disabled. Enable with "
+                           "'openspace.setPerformanceMeasurement(true)'");
+    }
 
-	ImGui::End();
+    ImGui::End();
 }
 
 

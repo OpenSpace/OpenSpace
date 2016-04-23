@@ -20,6 +20,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 namespace openspace{
 
@@ -27,7 +28,7 @@ CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
     :ISWACygnet(dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
-    ,_planeIsDirty(true)
+    ,_futureObject(nullptr)
 {}
 
 CygnetPlane::~CygnetPlane(){}
@@ -41,39 +42,136 @@ bool CygnetPlane::isReady() const{
     return ready;
 }
 
+void CygnetPlane::render(const RenderData& data){
+    
+    if(!_texture) return;
+    
+    psc position = data.position;
+    glm::mat4 transform = glm::mat4(1.0);
+
+    glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+    glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+
+    glm::mat4 rot = glm::mat4(1.0);
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        }
+    }
+
+    transform = transform * rotz * roty; //BATSRUS
+
+    // Correct for the small error of x-axis not pointing directly at the sun
+    if(_data->frame == "GSM"){
+        glm::vec4 v(1,0,0,1);
+        glm::vec3 xVec = glm::vec3(transform*v);
+        xVec = glm::normalize(xVec);
+
+        double  lt;
+        glm::vec3 sunVec =
+        SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _openSpaceTime, lt);
+        sunVec = glm::normalize(sunVec);
+
+        float angle = acos(glm::dot(xVec, sunVec));
+        glm::vec3 ref =  glm::cross(xVec, sunVec);
+
+        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+        transform = rotation * transform;
+    }
+
+    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
+    
+
+    // Activate shader
+    _shader->activate();
+    glEnable(GL_ALPHA_TEST);
+    glDisable(GL_CULL_FACE);
+
+    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("ModelTransform", transform);
+
+    // _shader->setUniform("top", _topColor.value());
+    // _shader->setUniform("mid", _midColor.value());
+    // _shader->setUniform("bot", _botColor.value());
+    // _shader->setUniform("tfValues", _tfValues.value());
+
+    setPscUniforms(*_shader.get(), data.camera, position);
+
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _texture->bind();
+    _shader->setUniform("texture1", unit);
+
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_CULL_FACE);
+    _shader->deactivate();
+
+    // position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
+    // // RenderData data = { *_camera, psc(), doPerformanceMeasurements };
+    // ColorBarData cbdata = { data.camera, 
+    //                         position,
+    //                         transform,
+    //                         _topColor.value(),
+    //                         _midColor.value(),
+    //                         _botColor.value(),
+    //                         _tfValues.value()
+    //                         // transform
+    //                       };    
+    // _colorbar->render(cbdata);
+}
+
+void CygnetPlane::update(const UpdateData& data){
+    _openSpaceTime = Time::ref().currentTime();
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());;
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _openSpaceTime);
+
+    if(Time::ref().timeJumped()){
+        updateTexture();
+
+        _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime = _openSpaceTime;
+    }
+
+
+    if(fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
+            (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval)
+    {
+        updateTexture();
+
+        _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime = _openSpaceTime;
+    }
+
+    if(_futureObject && _futureObject->isFinished){
+        if(loadTexture())
+            _futureObject = nullptr;
+    }
+}
+
 void CygnetPlane::createPlane(){
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     
-	// ============================
-    // 		GEOMETRY (quad)
     // ============================
-    GLfloat x,y;
-    if(!_data->scale.x){
-        x = _data->scale.y/2.0;
-        y = _data->scale.z/2.0;
-
-    }else if(!_data->scale.y){
-        x = _data->scale.x/2.0;
-        y = _data->scale.z/2.0;
-
-    }else{
-        x = _data->scale.x/2.0;
-        y = _data->scale.y/2.0;
-    }
-
-    // const GLfloat x = _data->scale.x/2.0;
-    // const GLfloat y = _data->scale.y/2.0;
-    const GLfloat w = _data->scale.w;
+    //         GEOMETRY (quad)
+    // ============================
+    // GLfloat x,y, z;
+    float s = _data->spatialScale.x;
+    const GLfloat x = s*_data->scale.x/2.0;
+    const GLfloat y = s*_data->scale.y/2.0;
+    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat w = _data->spatialScale.y;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
-        -x, -y, 0, w, 0, 1,
-         x,  y, 0, w, 1, 0,
-        -x,  y, 0, w, 0, 0,
-        -x, -y, 0, w, 0, 1,
-         x, -y, 0, w, 1, 1,
-         x,  y, 0, w, 1, 0,
+        //      x      y     z     w     s     t
+        -x, -z,             -y,  w, 0, 1,
+         x,  z,              y,  w, 1, 0,
+        -x,  ((x>0)?z:-z),   y,  w, 0, 0,
+        -x, -z,             -y,  w, 0, 1,
+         x,  ((x>0)?-z:z),  -y,  w, 1, 1,
+         x,  z,              y,  w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array
@@ -83,8 +181,6 @@ void CygnetPlane::createPlane(){
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-
-    _planeIsDirty = false;
 }
 
 void CygnetPlane::destroyPlane(){

@@ -24,7 +24,11 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+//#include <modules/newhorizons/rendering/planetgeometryprojection.h>
+
+#include <modules/base/rendering/planetgeometry.h>
+
+//#include <openspace/renderingo 
 
 #include <openspace/engine/configurationmanager.h>
 
@@ -111,7 +115,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         keyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometryprojection::PlanetGeometryProjection::createFromDictionary(geometryDictionary);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -194,20 +198,20 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
                                             _projectorID,
                                             translationDictionary,
                                             _potentialTargets);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
             }
             else if (_sequenceType == sequenceTypeImage) {
                 parser = new LabelParser(name,
                                          _sequenceSource,
                                          translationDictionary);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
             }
             else if (_sequenceType == sequenceTypeHybrid) {
                 //first read labels
                 parser = new LabelParser(name,
                                          _sequenceSource,
                                          translationDictionary);
-                openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
 
                 std::string _eventFile;
                 bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
@@ -219,7 +223,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
                                                 _projectorID,
                                                 translationDictionary,
                                                 _potentialTargets);
-                    openspace::ImageSequencer2::ref().runSequenceParser(parser);
+                    openspace::ImageSequencer::ref().runSequenceParser(parser);
                 }
                 else{
                     LWARNING("No eventfile has been provided, please check modfiles");
@@ -288,27 +292,28 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     // SCREEN-QUAD 
-    const GLfloat size = 1.0f;
-    const GLfloat w = 1.0f;
+    const GLfloat size = 1.f;
+    const GLfloat w = 1.f;
     const GLfloat vertex_data[] = {
-        -size, -size, 0.0f, w, 0, 1,
-         size,  size, 0.0f, w, 1, 0,
-        -size,  size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-         size, -size, 0.0f, w, 1, 1,
-         size,  size, 0.0f, w, 1, 0,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
-    glGenVertexArrays(1, &_quad);                         // generate array
-    glBindVertexArray(_quad);                             // bind array
-    glGenBuffers(1, &_vertexPositionBuffer);              // generate buffer
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glGenVertexArrays(1, &_quad);
+    glBindVertexArray(_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    
+    glBindVertexArray(0);
 
     return completeSuccess;
 }
@@ -372,7 +377,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("radius")){ 
         ghoul::any r = _geometry->property("radius")->get();
         if (glm::vec4* radius = ghoul::any_cast<glm::vec4>(&r)){
-            _fboProgramObject->setUniform("radius", radius);
+            _fboProgramObject->setUniform("_radius", radius);
         }
     }else{
         LERROR("Geometry object needs to provide radius");
@@ -380,7 +385,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     if (_geometry->hasProperty("segments")){
         ghoul::any s = _geometry->property("segments")->get();
         if (int* segments = ghoul::any_cast<int>(&s)){
-            _fboProgramObject->setAttribute("segments", segments[0]);
+            _fboProgramObject->setUniform("_segments", segments[0]);
         }
     }else{
         LERROR("Geometry object needs to provide segment count");
@@ -481,15 +486,15 @@ void RenderablePlanetProjection::project(){
     // Comment out if not using queue and prefer old method -------------
     // + in update() function
     //if (!imageQueue.empty()){
-    //	Image& img = imageQueue.front();
-    //	RenderablePlanetProjection::attitudeParameters(img.startTime);
-    //	// if image has new path - ie actual image, NOT placeholder
-    //	if (_projectionTexturePath.value() != img.path){
-    //		// rebind and upload 
-    //		_projectionTexturePath = img.path; 
-    //	}
-    //	imageProjectGPU(); // fbopass
-    //	imageQueue.pop();
+    //    Image& img = imageQueue.front();
+    //    RenderablePlanetProjection::attitudeParameters(img.startTime);
+    //    // if image has new path - ie actual image, NOT placeholder
+    //    if (_projectionTexturePath.value() != img.path){
+    //        // rebind and upload 
+    //        _projectionTexturePath = img.path; 
+    //    }
+    //    imageProjectGPU(); // fbopass
+    //    imageQueue.pop();
     //}
     // ------------------------------------------------------------------
 
@@ -561,9 +566,9 @@ void RenderablePlanetProjection::update(const UpdateData& data){
     _time = Time::ref().currentTime();
     _capture = false;
 
-    if (openspace::ImageSequencer2::ref().isReady() && _performProjection){
-        openspace::ImageSequencer2::ref().updateSequencer(_time);
-        _capture = openspace::ImageSequencer2::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
+    if (openspace::ImageSequencer::ref().isReady() && _performProjection){
+        openspace::ImageSequencer::ref().updateSequencer(_time);
+        _capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
     }
 
     if (_fboProgramObject && _fboProgramObject->isDirty()) {
@@ -574,7 +579,7 @@ void RenderablePlanetProjection::update(const UpdateData& data){
     // @mm
     //_capture = true;
     //for (auto img : _imageTimes){
-    //	imageQueue.push(img);
+    //    imageQueue.push(img);
     //}
     //_imageTimes.clear();
     // --------------------------------------------------------------

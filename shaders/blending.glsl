@@ -25,6 +25,52 @@
 #ifndef _BLENDING_GLSL_
 #define _BLENDING_GLSL_
 
+
+/**
+ * Blend in src behind dst using normal blending
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ */
+void normalBlend(inout vec4 dst, vec4 src) {
+    dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
+    dst.a = dst.a + (1.0 - dst.a) * src.a;
+}
+
+/**
+ * Blend in src behind dst using additive blending
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ */
+void additiveBlend(inout vec4 dst, vec4 src) {
+    dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;//    dst.rgb = dst.rgb + src.a * src.rgb;
+    //dst.a = dst.a + src.a;
+}
+
+
+/**
+ * Blend in src behind dst using normal blending
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ * stepSize = 0: alpha becomes 0
+ * stepSize = 1: alpha becomes src.a
+ */
+void normalBlendStep(inout vec4 dst, vec4 src, float stepSize) {
+    src.a = 1.0 - pow(1.0 - src.a, stepSize);
+    normalBlend(dst, src);
+}
+
+/**
+ * Blend in src behind dst using addivtive blending
+ * dst is premultiplied
+ * src is expressed in straight RGBA
+ * stepSize = 0: alpha becomes 0
+ * stepSize = 1: alpha becomes src.a
+ */
+void additiveBlendStep(inout vec4 dst, vec4 src, float stepSize) {
+    src.a = 1.0 - pow(1.0 - src.a, stepSize);
+    additiveBlend(dst, src);
+}
+
 /**
  * Blend in src behind dst
  * dst is premultiplied

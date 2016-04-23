@@ -35,16 +35,16 @@
 
 namespace openspace {
 
-	ISWAModule::ISWAModule()
-		: OpenSpaceModule("ISWA")
-	{}
+    ISWAModule::ISWAModule()
+        : OpenSpaceModule("ISWA")
+    {}
 
-	void ISWAModule::internalInitialize(){
-		auto fRenderable = FactoryManager::ref().factory<Renderable>();
-		ghoul_assert(fRenderable, "No renderable factory existed");
+    void ISWAModule::internalInitialize(){
+        auto fRenderable = FactoryManager::ref().factory<Renderable>();
+        ghoul_assert(fRenderable, "No renderable factory existed");
 
-		fRenderable->registerClass<ISWAContainer>("ISWAContainer");
-		fRenderable->registerClass<TexturePlane>("TexturePlane");
-		fRenderable->registerClass<DataPlane>("DataPlane");
-	}
+        fRenderable->registerClass<ISWAContainer>("ISWAContainer");
+        fRenderable->registerClass<TexturePlane>("TexturePlane");
+        fRenderable->registerClass<DataPlane>("DataPlane");
+    }
 }

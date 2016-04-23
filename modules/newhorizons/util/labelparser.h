@@ -35,46 +35,46 @@
 namespace openspace {
 class LabelParser : public SequenceParser{
 public:
-	LabelParser();
-	LabelParser(std::string name,
+    LabelParser();
+    LabelParser(std::string name,
                 const std::string& fileName,
-				ghoul::Dictionary translationDictionary);
+                ghoul::Dictionary translationDictionary);
 
-	bool create() override;
+    bool create() override;
 
-	// temporary need to figure this out
-	std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+    // temporary need to figure this out
+    std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
 private:
-	void createImage(Image& image,
-			            double startTime,
-			            double stopTime,
-			            std::vector<std::string> instr,
-			            std::string targ,
-			            std::string path);
+    void createImage(Image& image,
+                        double startTime,
+                        double stopTime,
+                        std::vector<std::string> instr,
+                        std::string targ,
+                        std::string path);
 
-	std::string decode(std::string line);
-	std::string encode(std::string line);
+    std::string decode(std::string line);
+    std::string encode(std::string line);
 
-	bool augmentWithSpice(Image& image, 
-			                std::string spacecraft, 
-							std::vector<std::string> payload, 
-							std::vector<std::string> potentialTargets);
-		
+    bool augmentWithSpice(Image& image, 
+                            std::string spacecraft, 
+                            std::vector<std::string> payload, 
+                            std::vector<std::string> potentialTargets);
+        
     std::string _name;
-	std::string _fileName;
-	std::string _spacecraft;
-	std::map<std::string, Decoder*> _fileTranslation;
-	std::vector<std::string> _specsOfInterest;
+    std::string _fileName;
+    std::string _spacecraft;
+    std::map<std::string, Decoder*> _fileTranslation;
+    std::vector<std::string> _specsOfInterest;
 
-	std::string _target;
-	std::string _instrumentID;
-	std::string _instrumentHostID;
-	std::string _detectorType;
-	std::string _sequenceID;
-	double _startTime;
-	double _stopTime;
-	bool _badDecoding;
+    std::string _target;
+    std::string _instrumentID;
+    std::string _instrumentHostID;
+    std::string _detectorType;
+    std::string _sequenceID;
+    double _startTime;
+    double _stopTime;
+    bool _badDecoding;
 };
 }
 #endif //__LABELPARSER_H__

@@ -142,7 +142,7 @@ public:
      * <code>UMBRAL</code> and <code>PENUMBRAL</code>. All other values will result in an
      * exception.
      * \param type The terminator type
-     * \param The terminator type enum
+     * \return The terminator type enum
      * \throws std::out_of_range if \p type is not a valid string
      * \pre \p type must not be empty
      */
@@ -519,10 +519,8 @@ public:
      * compute the intercept
      * \param ephemerisTime Intercept time in ephemeris seconds past J2000 TDB
      * \param directionVector Probing ray's direction
-     * \param surfaceIntercept Surface intercept point on the target body
-     * \param surfaceVector Vector from observer to intercept point
-     * \param isVisible Flag indicating whether intercept was found
-     * \return <code>true</code> if not error occurred, <code>false</code> otherwise
+     * \return A SurfaceInterceptResult structure that contains all information about the
+     * intercept, including whether an intercept was found
      * \throws SpiceException If the \p target or \p observer do not name the same
      * NAIF object, the \p target or \p observer name the same NAIF object or are in the
      * same location, the \p referenceFrame or \p fovFrame are not recognized,
@@ -618,11 +616,12 @@ public:
      * \param referenceFrame The reference frame of the output position vector
      * \param aberrationCorrection The aberration correction method
      * \param ephemerisTime The time at which the position is to be queried
-     * \return A TargetStateResult object that contains the <code>position>, containing
-     * the position of the target; the <code>velocity</code>, containing the velocity of
-     * the target; and the <code>lightTime</code>, containing the one-way light time
-     * between the \p target and the \p observer. This method is only set if the
-     * \p aberrationCorrection is set to a valid different from AberrationCorrection::None
+     * \return A TargetStateResult object that contains the <code>position</code>,
+     * containing the position of the target; the <code>velocity</code>, containing the
+     * velocity of the target; and the <code>lightTime</code>, containing the one-way
+     * light time between the \p target and the \p observer. This method is only set if
+     * the \p aberrationCorrection is set to a valid different from
+     * AberrationCorrection::None
      * \throws SpiceException If the \p target or \p observer do not name a valid
      * NAIF object, the \p referenceFrame is not a valid frame, or if there is
      * insufficient kernel information.
@@ -770,8 +769,9 @@ public:
      * surface that is completely illuminated. Note that in astronomy references, the
      * unqualified word "terminator" refers to the umbral terminator.
      * \param aberrationCorrection The aberration correction method that is used
-     * \param numberOfPoints The number of points along terminator that should be computed
-     * by this method
+     * \param ephemerisTime The time at which the terminator ellipse shall be computed
+     * \param numberOfTerminatorPoints The number of points along terminator that should
+     * be computed by this method
      * \return A TerminatorEllipseResult structure that contains all outputs of this
      * function
      * \throws SpiceException If the \p target, \p observer, or \p lightSource are
@@ -807,7 +807,7 @@ public:
      * \return  the frame of the body
      * \todo I think this function should die ---abock
      */
-    std::string frameFromBody(const std::string body) const;
+    std::string frameFromBody(const std::string& body) const;
     
 private:
     /// Struct storing the information about all loaded kernels

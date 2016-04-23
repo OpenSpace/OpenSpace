@@ -35,11 +35,11 @@ out vec4 vs_position;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vec4 tmp = vec4(in_position, exponent);
-	vs_position = tmp;
+    vec4 tmp = vec4(in_position, exponent);
+    vs_position = tmp;
 
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

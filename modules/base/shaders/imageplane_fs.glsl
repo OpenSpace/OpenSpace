@@ -33,14 +33,14 @@ in vec4 vs_position;
 
 Fragment getFragment()
 {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	vec4 diffuse;
-	if (gl_FrontFacing)
-		diffuse = texture(texture1, vs_st);
-	else {
-		diffuse = vec4(0.8);
-	}
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    vec4 diffuse;
+    if (gl_FrontFacing)
+        diffuse = texture(texture1, vs_st);
+    else {
+        diffuse = vec4(0.8);
+    }
 
     Fragment frag;
     frag.color = diffuse;

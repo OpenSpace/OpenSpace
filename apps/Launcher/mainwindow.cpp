@@ -104,58 +104,58 @@ MainWindow::MainWindow()
 
     QWidget* container = new QWidget;
     {
-        QGridLayout* layout = new QGridLayout;
+        QGridLayout* innerLayout = new QGridLayout;
         
         QLabel* shortcutLabel = new QLabel("Keyboard Shortcuts:");
-        layout->addWidget(shortcutLabel, 0, 0);
+        innerLayout->addWidget(shortcutLabel, 0, 0);
         QPushButton* shortcutButton = new QPushButton("Open...");
         QObject::connect(shortcutButton, SIGNAL(clicked(bool)),
                          this, SLOT(shortcutButtonPressed())
                          );
-        layout->addWidget(shortcutButton, 0, 1);
+        innerLayout->addWidget(shortcutButton, 0, 1);
 
-        layout->setRowStretch(1, 10);
+        innerLayout->setRowStretch(1, 10);
 
         QLabel* configurationSelectionLabel = new QLabel("Configuration:");
-        layout->addWidget(configurationSelectionLabel, 2, 0);
+        innerLayout->addWidget(configurationSelectionLabel, 2, 0);
         _configurations = new QComboBox;
-        layout->addWidget(_configurations, 2, 1);
+        innerLayout->addWidget(_configurations, 2, 1);
         
         QLabel* sceneSelectionLabel = new QLabel("Scenes:");
-        layout->addWidget(sceneSelectionLabel, 3, 0);
+        innerLayout->addWidget(sceneSelectionLabel, 3, 0);
         _scenes = new QComboBox;
-        layout->addWidget(_scenes, 3, 1);
+        innerLayout->addWidget(_scenes, 3, 1);
         
-        container->setLayout(layout);
+        container->setLayout(innerLayout);
     }
     layout->addWidget(container, 1, 1);
     
     container = new QWidget;
     {
-        QBoxLayout* layout = new QHBoxLayout;
+        QBoxLayout* innerLayout = new QHBoxLayout;
         
         QPushButton* cancelButton = new QPushButton("Cancel");
         QObject::connect(
             cancelButton, SIGNAL(clicked(bool)),
             QApplication::instance(), SLOT(quit())
         );
-        layout->addWidget(cancelButton);
+        innerLayout->addWidget(cancelButton);
         
         QPushButton* syncButton = new QPushButton("Sync");
         QObject::connect(
             syncButton, SIGNAL(clicked(bool)),
             this, SLOT(syncButtonPressed())
         );
-        layout->addWidget(syncButton);
+        innerLayout->addWidget(syncButton);
         
         QPushButton* startButton = new QPushButton("Start");
         QObject::connect(
             startButton, SIGNAL(clicked(bool)),
             this, SLOT(startButtonPressed())
         );
-        layout->addWidget(startButton);
+        innerLayout->addWidget(startButton);
         
-        container->setLayout(layout);
+        container->setLayout(innerLayout);
     }
     layout->addWidget(container, 2, 1);
     
@@ -257,8 +257,8 @@ void MainWindow::newsNetworkError() {
 }
 
 void MainWindow::newsReadyRead() {
-    QByteArray data = _newsReply->readAll();
-    QString news = QString::fromLatin1(data);
+    QByteArray arrayData = _newsReply->readAll();
+    QString news = QString::fromLatin1(arrayData);
     _informationWidget->setText(news);
     _newsReply->deleteLater();
 }

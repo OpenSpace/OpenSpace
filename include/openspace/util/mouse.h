@@ -61,8 +61,8 @@ namespace openspace {
 
 enum class MouseAction {
     Release = 0,
-	Press = 1,
-	Repeat = 2
+    Press = 1,
+    Repeat = 2
 };
 
 // The X11 library header files define Button1-Button5 as defines, so they have to be
@@ -85,7 +85,7 @@ enum class MouseButton {
     Button7 = 6,
     Button8 = 8,
     Last = Button8,
-	Left = Button1,
+    Left = Button1,
     Right = Button2,
     Middle = Button3
 };

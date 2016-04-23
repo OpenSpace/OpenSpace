@@ -31,16 +31,16 @@ namespace properties {
 
 REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
 [](lua_State* state, bool& success) -> std::string {
-		success = lua_isstring(state, -1) == 1;
-		if (success)
-			return lua_tostring(state, -1);
-		else
-			return "";
-	},
+        success = lua_isstring(state, -1) == 1;
+        if (success)
+            return lua_tostring(state, -1);
+        else
+            return "";
+    },
 [](lua_State* state, std::string value) -> bool {
-		lua_pushstring(state, value.c_str());
-		return true;
-	},
+        lua_pushstring(state, value.c_str());
+        return true;
+    },
 [](std::string value, bool& success) -> std::string {
     // An incoming string is of the form
     // "value"

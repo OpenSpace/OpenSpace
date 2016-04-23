@@ -38,80 +38,80 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-	const std::string _loggerCat = "RenderablePlane";
+    const std::string _loggerCat = "RenderablePlane";
 
-	const std::string keyFieldlines = "Fieldlines";
-	const std::string keyFilename = "File";
-	const std::string keyHints = "Hints";
-	const std::string keyShaders = "Shaders";
-	const std::string keyVertexShader = "VertexShader";
-	const std::string keyFragmentShader = "FragmentShader";
+    const std::string keyFieldlines = "Fieldlines";
+    const std::string keyFilename = "File";
+    const std::string keyHints = "Hints";
+    const std::string keyShaders = "Shaders";
+    const std::string keyVertexShader = "VertexShader";
+    const std::string keyFragmentShader = "FragmentShader";
 }
 
 namespace openspace {
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary)
-	, _texturePath("texture", "Texture")
-	, _billboard("billboard", "Billboard", false)
-	, _projectionListener("projectionListener", "DisplayProjections", false)
-	, _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
-	, _origin(Origin::Center)
-	, _shader(nullptr)
+    : Renderable(dictionary)
+    , _texturePath("texture", "Texture")
+    , _billboard("billboard", "Billboard", false)
+    , _projectionListener("projectionListener", "DisplayProjections", false)
+    , _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
+    , _origin(Origin::Center)
+    , _shader(nullptr)
     , _textureIsDirty(false)
     , _texture(nullptr)
-	, _quad(0)
-	, _vertexPositionBuffer(0)
+    , _quad(0)
+    , _vertexPositionBuffer(0)
 {
     glm::vec2 size;
-	dictionary.getValue("Size", size);
+    dictionary.getValue("Size", size);
     _size = size;
 
-	if (dictionary.hasKey("Name")){
-		dictionary.getValue("Name", _nodeName);
-	}
+    if (dictionary.hasKey("Name")){
+        dictionary.getValue("Name", _nodeName);
+    }
 
-	std::string origin;
-	if (dictionary.getValue("Origin", origin)) {
-		if (origin == "LowerLeft") {
-			_origin = Origin::LowerLeft;
-		}
-		else if (origin == "LowerRight") {
-			_origin = Origin::LowerRight;
-		}
-		else if (origin == "UpperLeft") {
-			_origin = Origin::UpperLeft;
-		}
-		else if (origin == "UpperRight") {
-			_origin = Origin::UpperRight;
-		}
-		else if (origin == "Center") {
-			_origin = Origin::Center;
-		}
-	}
+    std::string origin;
+    if (dictionary.getValue("Origin", origin)) {
+        if (origin == "LowerLeft") {
+            _origin = Origin::LowerLeft;
+        }
+        else if (origin == "LowerRight") {
+            _origin = Origin::LowerRight;
+        }
+        else if (origin == "UpperLeft") {
+            _origin = Origin::UpperLeft;
+        }
+        else if (origin == "UpperRight") {
+            _origin = Origin::UpperRight;
+        }
+        else if (origin == "Center") {
+            _origin = Origin::Center;
+        }
+    }
 
-	// Attempt to get the billboard value
-	bool billboard = false;
-	if (dictionary.getValue("Billboard", billboard)) {
-		_billboard = billboard;
-	}
-	if (dictionary.hasKey("ProjectionListener")){
-		bool projectionListener = false;
-		if (dictionary.getValue("ProjectionListener", projectionListener)) {
-			_projectionListener = projectionListener;
-		}
-	}
+    // Attempt to get the billboard value
+    bool billboard = false;
+    if (dictionary.getValue("Billboard", billboard)) {
+        _billboard = billboard;
+    }
+    if (dictionary.hasKey("ProjectionListener")){
+        bool projectionListener = false;
+        if (dictionary.getValue("ProjectionListener", projectionListener)) {
+            _projectionListener = projectionListener;
+        }
+    }
 
 
-	std::string texturePath = "";
-	bool success = dictionary.getValue("Texture", texturePath);
-	if (success) {
-		_texturePath = absPath(texturePath);
+    std::string texturePath = "";
+    bool success = dictionary.getValue("Texture", texturePath);
+    if (success) {
+        _texturePath = absPath(texturePath);
         _textureFile = new ghoul::filesystem::File(_texturePath);
     }
 
     addProperty(_billboard);
-	addProperty(_texturePath);
+    addProperty(_texturePath);
     _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
     _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 
@@ -119,7 +119,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
     _size.onChange([this](){ _planeIsDirty = true; });
 
-	setBoundingSphere(_size.value());
+    setBoundingSphere(_size.value());
 }
 
 RenderablePlane::~RenderablePlane() {
@@ -128,12 +128,12 @@ RenderablePlane::~RenderablePlane() {
 }
 
 bool RenderablePlane::isReady() const {
-	bool ready = true;
-	if (!_shader)
-		ready &= false;
-	if(!_texture)
-		ready &= false;
-	return ready;
+    bool ready = true;
+    if (!_shader)
+        ready &= false;
+    if(!_texture)
+        ready &= false;
+    return ready;
 }
 
 bool RenderablePlane::initialize() {
@@ -141,7 +141,7 @@ bool RenderablePlane::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-	if (_shader == nullptr) {
+    if (_shader == nullptr) {
         // Plane Program
 
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -155,21 +155,21 @@ bool RenderablePlane::initialize() {
 
     loadTexture();
 
-	return isReady();
+    return isReady();
 }
 
 bool RenderablePlane::deinitialize() {
-	glDeleteVertexArrays(1, &_quad);
-	_quad = 0;
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-	glDeleteBuffers(1, &_vertexPositionBuffer);
-	_vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
 
-	if (!_projectionListener){
-		// its parents job to kill texture
-		// iff projectionlistener 
-		_texture = nullptr;
-	}
+    if (!_projectionListener){
+        // its parents job to kill texture
+        // iff projectionlistener 
+        _texture = nullptr;
+    }
 
     delete _textureFile;
     _textureFile = nullptr;
@@ -181,42 +181,42 @@ bool RenderablePlane::deinitialize() {
         _shader = nullptr;
     }
 
-	return true;
+    return true;
 }
 
 void RenderablePlane::render(const RenderData& data) {
-	glm::mat4 transform = glm::mat4(1.0);
-	if (_billboard)
-		transform = glm::inverse(data.camera.viewRotationMatrix());
+    glm::mat4 transform = glm::mat4(1.0);
+    if (_billboard)
+        transform = glm::inverse(data.camera.viewRotationMatrix());
 
-	// Activate shader
-	_shader->activate();
-	if (_projectionListener){
-		//get parent node-texture and set with correct dimensions  
-		SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
-		if (textureNode != nullptr){
-			RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+    // Activate shader
+    _shader->activate();
+    if (_projectionListener){
+        //get parent node-texture and set with correct dimensions  
+        SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+        if (textureNode != nullptr){
+            RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
             _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());
-			float h = _texture->height();
-			float w = _texture->width();
-			float scale = h / w;
-			transform = glm::scale(transform, glm::vec3(1.f, scale, 1.f));
-		}
-	}
+            float h = _texture->height();
+            float w = _texture->width();
+            float scale = h / w;
+            transform = glm::scale(transform, glm::vec3(1.f, scale, 1.f));
+        }
+    }
 
-	_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-	_shader->setUniform("ModelTransform", transform);
-	setPscUniforms(*_shader.get(), data.camera, data.position);
+    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("ModelTransform", transform);
+    setPscUniforms(*_shader.get(), data.camera, data.position);
 
-	ghoul::opengl::TextureUnit unit;
-	unit.activate();
-	_texture->bind();
-	_shader->setUniform("texture1", unit);
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _texture->bind();
+    _shader->setUniform("texture1", unit);
 
-	glBindVertexArray(_quad);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	_shader->deactivate();
+    _shader->deactivate();
 }
 
 void RenderablePlane::update(const UpdateData& data) {
@@ -233,38 +233,38 @@ void RenderablePlane::update(const UpdateData& data) {
 }
 
 void RenderablePlane::loadTexture() {
-	if (_texturePath.value() != "") {
+    if (_texturePath.value() != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-		if (texture) {
-			LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-			texture->uploadTexture();
+        if (texture) {
+            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+            texture->uploadTexture();
 
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
             _texture = std::move(texture);
 
             delete _textureFile;
             _textureFile = new ghoul::filesystem::File(_texturePath);
             _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
-		}
-	}
+        }
+    }
 }
 
 void RenderablePlane::createPlane() {
     // ============================
-    // 		GEOMETRY (quad)
+    //         GEOMETRY (quad)
     // ============================
     const GLfloat size = _size.value()[0];
     const GLfloat w = _size.value()[1];
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //	  x      y     z     w     s     t
-        -size, -size, 0.0f, w, 0, 1,
-        size, size, 0.0f, w, 1, 0,
-        -size, size, 0.0f, w, 0, 0,
-        -size, -size, 0.0f, w, 0, 1,
-        size, -size, 0.0f, w, 1, 1,
-        size, size, 0.0f, w, 1, 0,
+        //      x      y     z     w     s     t
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array

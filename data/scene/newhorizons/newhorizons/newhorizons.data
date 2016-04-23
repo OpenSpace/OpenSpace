@@ -1,0 +1,10 @@
+return {
+    FileRequest = {
+        { Identifier = "newhorizons_model", Destination = "models", Version = 1 },
+        { Identifier = "newhorizons_textures", Destination = "textures", Version = 2 }
+    },
+    TorrentFiles = {
+        { File = "NewHorizonsKernels.torrent", Destination = "${SPICE}" },
+        { File = "jup260.bsp.torrent", Destination = "${SPICE}" }
+    }
+}

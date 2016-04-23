@@ -42,43 +42,43 @@ namespace gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-	//void registerProperty(const std::string& propertyDescription);
+    //void registerProperty(const std::string& propertyDescription);
     void registerProperty(properties::Property* prop);
     void unregisterProperties(std::string owner);
-	void render();
+    void render();
 
 protected:
-	enum class PropertyType {
-		BoolProperty = 0,
-		IntProperty,
-		FloatProperty,
-		Vec2Property,
-		Vec3Property,
-		StringProperty,
-		OptionProperty,
-		SelectionProperty,
-		TriggerProperty,
-		InvalidPropertyType
-	};
+    enum class PropertyType {
+        BoolProperty = 0,
+        IntProperty,
+        FloatProperty,
+        Vec2Property,
+        Vec3Property,
+        StringProperty,
+        OptionProperty,
+        SelectionProperty,
+        TriggerProperty,
+        InvalidPropertyType
+    };
 
-	struct PropertyInfo {
-		PropertyType type;
-		std::string identifier;
-		std::string name;
-		std::string group;
-	};
-	typedef std::string PropertyOwner;
+    struct PropertyInfo {
+        PropertyType type;
+        std::string identifier;
+        std::string name;
+        std::string group;
+    };
+    typedef std::string PropertyOwner;
 
-	struct Property {
-		PropertyOwner owner;
-		std::vector<PropertyInfo> properties;
-	};
+    struct Property {
+        PropertyOwner owner;
+        std::vector<PropertyInfo> properties;
+    };
 
-	void handleProperty(const ghoul::Dictionary& value);
+    void handleProperty(const ghoul::Dictionary& value);
 
-	PropertyType toPropertyType(const std::string& name) const;
+    PropertyType toPropertyType(const std::string& name) const;
 
-	void renderProperty(const PropertyInfo& info) const;
+    void renderProperty(const PropertyInfo& info) const;
 
     std::set<properties::Property*> _boolProperties;
     std::set<properties::Property*> _intProperties;
@@ -92,7 +92,7 @@ protected:
     std::set<properties::Property*> _triggerProperties;
     std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
 
-	//std::vector<Property> _properties;
+    //std::vector<Property> _properties;
 };
 
 } // namespace gui

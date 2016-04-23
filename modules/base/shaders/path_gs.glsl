@@ -58,11 +58,11 @@ uniform mat4 projection;
 
 void main() {
   
-	gs_point_color = vs_point_color[0];
-	gs_point_position = vs_point_position[0];
-	//gs_point_position = gl_in[0].gl_Position;
-	if (isHour[0] == 1) {
-	/*vec4 projPos[4];
+    gs_point_color = vs_point_color[0];
+    gs_point_position = vs_point_position[0];
+    //gs_point_position = gl_in[0].gl_Position;
+    if (isHour[0] == 1) {
+    /*vec4 projPos[4];
     for (int i = 0; i < 4; ++i) {
         vec4 p1     = gl_in[0].gl_Position;
         p1.xy      += vec2(99999999*(corners[i] - vec2(0.5))); 
@@ -82,26 +82,26 @@ void main() {
     //    return;
 
     for(int i = 0; i < 4; i++) {
-		gs_point_position = gl_in[0].gl_Position;
+        gs_point_position = gl_in[0].gl_Position;
         gl_Position = projPos[i];
        // billboardSize = sizeInPixels;
-		EmitVertex();
+        EmitVertex();
     }
 
-		
-	    for(int i = 0; i < 4; i++) {
+        
+        for(int i = 0; i < 4; i++) {
         gl_Position = gl_in[0].gl_Position;;
        // billboardSize = sizeInPixels;
       
-		}*/
-		gl_Position =  gl_in[0].gl_Position;
-		EmitVertex();
-		EndPrimitive();
-	}
-	else {
-		gl_Position =  gl_in[0].gl_Position;
-		EmitVertex();
-		EndPrimitive();
-	return;
-	}
+        }*/
+        gl_Position =  gl_in[0].gl_Position;
+        EmitVertex();
+        EndPrimitive();
+    }
+    else {
+        gl_Position =  gl_in[0].gl_Position;
+        EmitVertex();
+        EndPrimitive();
+    return;
+    }
 }

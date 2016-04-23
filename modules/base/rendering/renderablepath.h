@@ -32,61 +32,61 @@
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-		class Texture;
-	}
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
 }
 
 namespace openspace {
 
 class RenderablePath : public Renderable {
 public:
-	RenderablePath(const ghoul::Dictionary& dictionary);
+    RenderablePath(const ghoul::Dictionary& dictionary);
 
-	bool initialize() override;
-	bool deinitialize() override;
+    bool initialize() override;
+    bool deinitialize() override;
 
-	bool isReady() const override;
+    bool isReady() const override;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
-	void calculatePath(std::string observer);
+    void calculatePath(std::string observer);
 private:
-	struct VertexInfo {
-		float x, y, z, e;
-		//float r, g, b, a;
-	};
-	void sendToGPU();
-	void addPosition(psc pos);
-	void addColor(glm::vec4 col);
+    struct VertexInfo {
+        float x, y, z, e;
+        //float r, g, b, a;
+    };
+    void sendToGPU();
+    void addPosition(psc pos);
+    void addColor(glm::vec4 col);
 
-	glm::vec3 _lineColor;
-	glm::vec4 _lastPosition;
-	properties::FloatProperty _lineFade;
-	properties::FloatProperty _lineWidth;
-	properties::BoolProperty _drawLine;
+    glm::vec3 _lineColor;
+    glm::vec4 _lastPosition;
+    properties::FloatProperty _lineFade;
+    properties::FloatProperty _lineWidth;
+    properties::BoolProperty _drawLine;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-	bool _successfullDictionaryFetch;
+    bool _successfullDictionaryFetch;
 
-	std::string _target;
-	std::string _observer;
-	std::string _frame;
+    std::string _target;
+    std::string _observer;
+    std::string _frame;
 
-	GLuint _vaoID;
-	GLuint _vBufferID;
-		
-	bool _needsSweep;
+    GLuint _vaoID;
+    GLuint _vBufferID;
+        
+    bool _needsSweep;
 
-	std::vector<VertexInfo> _vertexArray;
-		
-	float _increment;
-	double _start;
-	double _stop;
-	float _distanceFade;
+    std::vector<VertexInfo> _vertexArray;
+        
+    float _increment;
+    double _start;
+    double _stop;
+    float _distanceFade;
 };
 
 } // namespace openspace

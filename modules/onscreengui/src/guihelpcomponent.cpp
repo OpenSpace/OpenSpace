@@ -27,16 +27,16 @@
 #include "imgui.h"
 
 namespace {
-	const ImVec2 size = ImVec2(350, 500);
+    const ImVec2 size = ImVec2(350, 500);
 }
 
 namespace openspace {
 namespace gui {
 
 void GuiHelpComponent::render() {
-	ImGui::Begin("Help", &_isEnabled, size, 0.5f);
-	ImGui::ShowUserGuide();
-	ImGui::End();
+    ImGui::Begin("Help", &_isEnabled, size, 0.5f);
+    ImGui::ShowUserGuide();
+    ImGui::End();
 }
 
 } // gui

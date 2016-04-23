@@ -38,19 +38,19 @@ const int targetId = 1;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-	vs_position = in_position;
-	vec4 tmp = in_position;
-	int id = gl_VertexID;
-	
-	vec3 black = vec3(0.0);
+    vs_position = in_position;
+    vec4 tmp = in_position;
+    int id = gl_VertexID;
+    
+    vec3 black = vec3(0.0);
 
-	if(id == targetId)
-		vs_color.xyz = black;
-	else
-		vs_color.xyz = color;
-		
-	vec4 position = pscTransform(tmp, ModelTransform);
-	vs_position = tmp;
-	position = ViewProjection * position;
-	gl_Position =  z_normalization(position);
+    if(id == targetId)
+        vs_color.xyz = black;
+    else
+        vs_color.xyz = color;
+        
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

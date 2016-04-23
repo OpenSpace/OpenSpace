@@ -29,37 +29,43 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/vectorproperty.h>
 #include <modules/iswa/rendering/colorbar.h>
+#include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
  
 class DataPlane : public CygnetPlane {
  public:
- 	DataPlane(const ghoul::Dictionary& dictionary);
- 	~DataPlane();
+     DataPlane(const ghoul::Dictionary& dictionary);
+     ~DataPlane();
 
- 	virtual bool initialize() override;
+    virtual bool initialize() override;
     virtual bool deinitialize() override;
-	virtual void render(const RenderData& data) override;
-	virtual void update(const UpdateData& data) override;
+    // virtual void render(const RenderData& data) override; //moved to cygnetPlane
+    // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
  
  private:
- 	virtual void loadTexture() override;
- 	virtual void updateTexture() override;
+    virtual bool loadTexture() override;
+    virtual bool updateTexture() override;
+    void readHeader();
+    float* readData();
+    float normalizeWithStandardScore(float value, float mean, float sd);
+    float normalizeWithLogarithm(float value, int logMean);
 
-	static int id();
+    static int id();
 
-	properties::Vec4Property _topColor;
-	properties::Vec4Property _midColor;
-	properties::Vec4Property _botColor;
-	properties::Vec4Property _tfValues;
+    properties::SelectionProperty _dataOptions;
+    properties::Vec2Property _normValues;
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::BoolProperty _useRGB;
 
-	std::shared_ptr<KameleonWrapper> _kw;
-	std::string _kwPath;
-	glm::size3_t _dimensions;
-	float* _dataSlice;
-	std::string _var;
-
-	std::shared_ptr<ColorBar> _colorbar;
+    // properties::Vec4Property _topColor;
+    // properties::Vec4Property _midColor;
+    // properties::Vec4Property _botColor;
+    // properties::Vec2Property _tfValues;
+    
+    glm::size3_t _dimensions;
+    // std::shared_ptr<ColorBar> _colorbar;
  };
  
  } // namespace openspace

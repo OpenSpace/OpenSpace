@@ -25,7 +25,7 @@
 #include <openspace/properties/selectionproperty.h>
 
 namespace {
-	const std::string _loggerCat = "SelectionProperty";
+    const std::string _loggerCat = "SelectionProperty";
 
     const std::string Delimiter = ",";
 }
@@ -36,79 +36,79 @@ namespace properties {
 const std::string SelectionProperty::OptionsKey = "Options";
 
 SelectionProperty::SelectionProperty(std::string identifier, std::string guiName)
-	: TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>())
+    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>())
 {}
 
 void SelectionProperty::addOption(Option option) {
-	// @REFACTOR from optionproperty.cpp, possible refactoring? ---abock
-	for (const Option& o : _options) {
-		if (o.value == option.value) {
-			LWARNING("The value of option {" << o.value << " -> " << o.description <<
-				"} was already registered when trying to add option {" << option.value <<
-				" -> " << option.description << "}");
-			return;
-		}
-	}
-	_options.push_back(std::move(option));
+    // @REFACTOR from optionproperty.cpp, possible refactoring? ---abock
+    for (const Option& o : _options) {
+        if (o.value == option.value) {
+            LWARNING("The value of option {" << o.value << " -> " << o.description <<
+                "} was already registered when trying to add option {" << option.value <<
+                " -> " << option.description << "}");
+            return;
+        }
+    }
+    _options.push_back(std::move(option));
 }
 
 const std::vector<SelectionProperty::Option>& SelectionProperty::options() const {
-	return _options;
+    return _options;
 }
 
 template <>
 std::string PropertyDelegate<TemplateProperty<std::vector<int>>>::className() {
-	return "SelectionProperty";
+    return "SelectionProperty";
 }
 
 template <>
 template <>
 std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromLuaValue(lua_State* state, bool& success) {
-	static const int KEY = -2;
-	static const int VAL = -1;
+    static const int KEY = -2;
+    static const int VAL = -1;
 
-	std::vector<int> result;
+    std::vector<int> result;
 
-	if (!lua_istable(state, VAL)) {
-		LERROR("Parameter passed to the property is not a table");
-		success = false;
-		return result;
-	}
+    if (!lua_istable(state, VAL)) {
+        LERROR("Parameter passed to the property is not a table");
+        success = false;
+        return result;
+    }
 
-	lua_pushnil(state);
-	while (lua_next(state, KEY) != 0) {
-		if (lua_isnumber(state, VAL)) {
-			int number = static_cast<int>(lua_tonumber(state, VAL));
-			result.push_back(number);
-		}
-		else {
-			success = false;
-			return std::vector<int>();
-		}
+    lua_pushnil(state);
+    while (lua_next(state, KEY) != 0) {
+        if (lua_isnumber(state, VAL)) {
+            int number = static_cast<int>(lua_tonumber(state, VAL));
+            result.push_back(number);
+        }
+        else {
+            success = false;
+            return std::vector<int>();
+        }
 
-		lua_pop(state, 1);
-	}
+        lua_pop(state, 1);
+    }
 
-	success = true;
-	return result;
+    success = true;
+    return result;
 }
 
 template <>
 template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value) {
-	//@NOTE Untested ---abock
-	lua_newtable(state);
-	for (int i = 0; i < value.size(); ++i) {
-		int v = value[i];
-		lua_pushinteger(state, v);
-		lua_setfield(state, -2, std::to_string(i).c_str());
-	}
-	return true;
+    //@NOTE Untested ---abock
+    lua_newtable(state);
+    for (int i = 0; i < value.size(); ++i) {
+        int v = value[i];
+        lua_pushinteger(state, v);
+        lua_setfield(state, -2, std::to_string(i).c_str());
+    }
+    return true;
 }
 
 template <>
 int PropertyDelegate<TemplateProperty<std::vector<int>>>::typeLua() {
-	return LUA_TTABLE;
+    return LUA_TTABLE;
 }
 
 template <>
@@ -135,17 +135,17 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string&
 }
 
 std::string SelectionProperty::generateAdditionalDescription() const {
-	std::string result;
-	result += OptionsKey + " = {";
-	for (size_t i = 0; i < _options.size(); ++i) {
-		const Option& o = _options[i];
-		result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
-		if (i != _options.size() - 1)
-			result += ",";
-	}
+    std::string result;
+    result += OptionsKey + " = {";
+    for (size_t i = 0; i < _options.size(); ++i) {
+        const Option& o = _options[i];
+        result += "[\"" + std::to_string(o.value) + "\"] = \"" + o.description + "\"";
+        if (i != _options.size() - 1)
+            result += ",";
+    }
 
-	result += "}";
-	return result;
+    result += "}";
+    return result;
 }
 
 } // namespace properties

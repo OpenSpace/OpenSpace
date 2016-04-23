@@ -42,7 +42,7 @@
 #include <iterator>
 
 namespace {
-	const std::string _loggerCat = "ABufferRenderer";
+    const std::string _loggerCat = "ABufferRenderer";
     const std::string BoundsFragmentShaderPath = "${SHADERS}/abuffer/boundsabuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/abuffer/renderabuffer.frag";
     const int MaxRaycasters = 32;
@@ -70,13 +70,13 @@ void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
     const GLfloat size = 1.0f;
     const GLfloat vertex_data[] = {
-        //	  x      y     s     t
+        //      x      y     s     t
         -size, -size, 0.0f, 1.0f,
-        size,	size, 0.0f, 1.0f, 
+        size,    size, 0.0f, 1.0f, 
         -size,  size, 0.0f, 1.0f, 
         -size, -size, 0.0f, 1.0f, 
         size, -size, 0.0f, 1.0f, 
-        size,	size, 0.0f, 1.0f,
+        size,    size, 0.0f, 1.0f,
     };
 
 
@@ -90,12 +90,12 @@ void ABufferRenderer::initialize() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
 
-	glGenTextures(1, &_anchorPointerTexture);
-	glGenBuffers(1, &_anchorPointerTextureInitializer);
-	glGenBuffers(1, &_atomicCounterBuffer);
-	glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
-	glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
-	glGenBuffers(1, &_fragmentBuffer);
+    glGenTextures(1, &_anchorPointerTexture);
+    glGenBuffers(1, &_anchorPointerTextureInitializer);
+    glGenBuffers(1, &_atomicCounterBuffer);
+    glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, _atomicCounterBuffer);
+    glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
+    glGenBuffers(1, &_fragmentBuffer);
     glGenTextures(1, &_fragmentTexture);
     
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
@@ -126,12 +126,12 @@ void ABufferRenderer::initialize() {
     
 void ABufferRenderer::deinitialize() {
     LINFO("Deinitializing ABufferRenderer");
-	glDeleteBuffers(1, &_fragmentBuffer);
+    glDeleteBuffers(1, &_fragmentBuffer);
     glDeleteTextures(1, &_fragmentTexture);
 
-	glDeleteTextures(1, &_anchorPointerTexture);
-	glDeleteBuffers(1, &_anchorPointerTextureInitializer);
-	glDeleteBuffers(1, &_atomicCounterBuffer);
+    glDeleteTextures(1, &_anchorPointerTexture);
+    glDeleteBuffers(1, &_anchorPointerTextureInitializer);
+    glDeleteBuffers(1, &_atomicCounterBuffer);
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
@@ -283,42 +283,42 @@ void ABufferRenderer::setResolution(glm::ivec2 res) {
 }
 
 void ABufferRenderer::clear() {
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
-	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
+    glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	static const GLuint zero = 1;
-	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
-	glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
-	glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
+    static const GLuint zero = 1;
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
+    glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
+    glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
 }
 
 void ABufferRenderer::updateResolution() {
     int totalPixels = _resolution.x * _resolution.y;
-	glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+    glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, totalPixels * sizeof(GLuint), NULL, GL_STATIC_DRAW);
 
-	GLuint* data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-	memset(data, 0x00, totalPixels * sizeof(GLuint));
-	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    GLuint* data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    memset(data, 0x00, totalPixels * sizeof(GLuint));
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-	glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
-	glBufferData(GL_TEXTURE_BUFFER, MaxAverageLayers*totalPixels*sizeof(GLuint) * 4, NULL, GL_DYNAMIC_COPY);
+    glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
+    glBufferData(GL_TEXTURE_BUFFER, MaxAverageLayers*totalPixels*sizeof(GLuint) * 4, NULL, GL_DYNAMIC_COPY);
 
-	glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
-	glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
-	glBindTexture(GL_TEXTURE_BUFFER, 0);
+    glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
+    glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-	glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+    glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 
     
     _dirtyResolution = false;

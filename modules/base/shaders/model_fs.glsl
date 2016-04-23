@@ -45,40 +45,40 @@ in vec4 vs_position;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	vec4 position = vs_position;
-	float depth = pscDepth(position);
-	//depth = length(campos - position);
-	vec4 diffuse = texture(texture1, vs_st);
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
+    //depth = length(campos - position);
+    vec4 diffuse = texture(texture1, vs_st);
 
-	diffuse[3] = fading;
+    diffuse[3] = fading;
 
-	if (_performShading) {
-		vec4 spec = vec4(0.0);
-		
-		vec3 n = normalize(vs_normal.xyz);
-		vec3 l_pos = vec3(sun_pos); // sun.
-		vec3 l_dir = normalize(l_pos-objpos.xyz);
-		float intensity = min(max(1*dot(n,l_dir), 0.0), 1);
-	
-		float shine = 100;
-	
-		vec4 specular = vec4(1.0);
-		vec4 ambient =diffuse*0.4;
-		ambient[3] = transparency;
- 		if(intensity > 0.0f){
-			// halfway vector
-			vec3 h = normalize(l_dir + normalize(cam_dir));
-			// specular factor
-			float intSpec = max(dot(n,h),0.0);
-			spec = specular * pow(intSpec, shine);
-		}
-		diffuse = vec4(max(intensity * diffuse , ambient).xyz,1) +spec*1.5*diffuse ;
-	}
+    if (_performShading) {
+        vec4 spec = vec4(0.0);
+        
+        vec3 n = normalize(vs_normal.xyz);
+        vec3 l_pos = vec3(sun_pos); // sun.
+        vec3 l_dir = normalize(l_pos-objpos.xyz);
+        float intensity = min(max(1*dot(n,l_dir), 0.0), 1);
+    
+        float shine = 100;
+    
+        vec4 specular = vec4(1.0);
+        vec4 ambient =diffuse*0.4;
+        ambient[3] = transparency;
+         if(intensity > 0.0f){
+            // halfway vector
+            vec3 h = normalize(l_dir + normalize(cam_dir));
+            // specular factor
+            float intSpec = max(dot(n,h),0.0);
+            spec = specular * pow(intSpec, shine);
+        }
+        diffuse = vec4(max(intensity * diffuse , ambient).xyz,1) +spec*1.5*diffuse ;
+    }
 
-	diffuse[3] = fading*transparency;
+    diffuse[3] = fading*transparency;
 
-	Fragment frag;
-	frag.color = diffuse;
-	frag.depth = depth;
-	return frag;
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 }

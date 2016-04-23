@@ -35,8 +35,8 @@ public:
                                 = ghoul::Dictionary());
     virtual ~DynamicEphemeris();
     virtual const psc& position() const;
-	virtual void update(const UpdateData& data) override;
-	void setPosition(psc pos);
+    virtual void update(const UpdateData& data) override;
+    void setPosition(psc pos);
 private:
     psc _position;
 };

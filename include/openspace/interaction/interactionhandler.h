@@ -22,55 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//<<<<<<< HEAD
-//#ifndef INTERACTIONHANDLER_H
-//#define INTERACTIONHANDLER_H
-//
-//#include <openspace/scripting/scriptengine.h>
-//#include <openspace/util/powerscaledcoordinate.h>
-//#include <openspace/util/powerscaledscalar.h>
-//
-//// std includes
-//#include <vector>
-//#include <mutex>
-//#include <map>
-//#include <functional>
-//
-//namespace openspace {
-//
-//// Forward declare to minimize dependencies
-//class Camera;
-//class SceneGraphNode;
-//class ExternalControl;
-//
-//class InteractionHandler {
-//public:
-//    InteractionHandler(void);
-//    InteractionHandler(const InteractionHandler& src);
-//    InteractionHandler& operator=(const InteractionHandler& rhs);
-//	virtual ~InteractionHandler();
-//
-//	void enable();
-//	void disable();
-//	const bool isEnabled() const;
-//
-//	void connectDevices();
-//	void addExternalControl(ExternalControl* controller);
-//
-//	void setCamera(Camera *camera = nullptr);
-//	void setOrigin(SceneGraphNode* node);
-//
-//	Camera* getCamera() const;
-//	const psc getOrigin() const;
-//	void lockControls();
-//	void unlockControls();
-//
-//	void setFocusNode(SceneGraphNode *node);
-//	
-//	void orbit(const glm::quat &rotation);
-//	void rotate(const glm::quat &rotation);
-//	void distance(const PowerScaledScalar &distance, size_t iterations = 0);
-//=======
 #ifndef __INTERACTIONHANDLER_H__
 #define __INTERACTIONHANDLER_H__
 
@@ -94,45 +45,45 @@ class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
 
-	~InteractionHandler();
+    ~InteractionHandler();
 
-	void setKeyboardController(KeyboardController* controller);
-	void setMouseController(MouseController* controller);
-	void addController(Controller* controller);
+    void setKeyboardController(KeyboardController* controller);
+    void setMouseController(MouseController* controller);
+    void addController(Controller* controller);
 
-	void lockControls();
-	void unlockControls();
+    void lockControls();
+    void unlockControls();
 
-	void update(double deltaTime);
+    void update(double deltaTime);
 
-	void setFocusNode(SceneGraphNode* node);
-	const SceneGraphNode* const focusNode() const;
-	void setCamera(Camera* camera);
-	const Camera* const camera() const;
+    void setFocusNode(SceneGraphNode* node);
+    const SceneGraphNode* const focusNode() const;
+    void setCamera(Camera* camera);
+    const Camera* const camera() const;
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-	void mouseButtonCallback(MouseButton button, MouseAction action);
-	void mousePositionCallback(double x, double y);
-	void mouseScrollWheelCallback(double pos);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
 
-	double deltaTime() const;
+    double deltaTime() const;
 
-	void orbitDelta(const glm::quat& rotation);
+    void orbitDelta(const glm::quat& rotation);
 
-	void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
+    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
 
-	//void distance(const float &d);
+    //void distance(const float &d);
 
-	void rotateDelta(const glm::quat& rotation);
+    void rotateDelta(const glm::quat& rotation);
 
-	void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
+    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
 
-	void lookAt(const glm::quat& rotation);
+    void lookAt(const glm::quat& rotation);
 
-	void setRotation(const glm::quat& rotation);
+    void setRotation(const glm::quat& rotation);
 
-	void resetKeyBindings();
-    void bindKey(Key key, std::string lua);
+    void resetKeyBindings();
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
 
     void setInteractionSensitivity(float sensitivity);
     float interactionSensitivity() const;
@@ -143,51 +94,51 @@ public:
     void setInvertRotation(bool invert);
     bool invertRotation() const;
 
-	void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
     void clearKeyframes();
 
-	/**
-	* Returns the Lua library that contains all Lua functions available to affect the
-	* interaction. The functions contained are
-	* - openspace::luascriptfunctions::setOrigin
-	* \return The Lua library that contains all Lua functions available to affect the
-	* interaction
-	*/
-	static scripting::ScriptEngine::LuaLibrary luaLibrary();
-	
-private:
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * interaction. The functions contained are
+    * - openspace::luascriptfunctions::setOrigin
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-	friend class Controller;
+private:
+    friend class Controller;
 
     InteractionHandler(const InteractionHandler&) = delete;
     InteractionHandler& operator=(const InteractionHandler&) = delete;
-	InteractionHandler(InteractionHandler&&) = delete;
-	InteractionHandler& operator=(InteractionHandler&&) = delete;
+    InteractionHandler(InteractionHandler&&) = delete;
+    InteractionHandler& operator=(InteractionHandler&&) = delete;
 
-	Camera* _camera;
-	SceneGraphNode* _focusNode;
+    Camera* _camera;
+    SceneGraphNode* _focusNode;
 
-	double _deltaTime;
-	std::mutex _mutex;
+    double _deltaTime;
+    std::mutex _mutex;
 
-	bool _validKeyLua;
-	std::multimap<Key, std::string > _keyLua;
+    bool _validKeyLua;
+
+    std::multimap<KeyWithModifier, std::string > _keyLua;
 
     float _controllerSensitivity;
     bool _invertRoll;
     bool _invertRotation;
 
-	KeyboardController* _keyboardController;
-	MouseController* _mouseController;
-	std::vector<Controller*> _controllers;
+    KeyboardController* _keyboardController;
+    MouseController* _mouseController;
+    std::vector<Controller*> _controllers;
 
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
     
-	//remote controller
-	std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
-	double _currentKeyframeTime;
-	std::mutex _keyframeMutex;
+    //remote controller
+    std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
+    double _currentKeyframeTime;
+    std::mutex _keyframeMutex;
 };
 
 } // namespace interaction

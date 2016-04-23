@@ -28,8 +28,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <openspace/properties/propertyowner.h>
 #include <memory>
+#include <chrono>
+#include <openspace/properties/propertyowner.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -46,43 +47,67 @@
 
 
 namespace openspace{
+
+struct Metadata {
+	int id;
+	int updateTime;
+	std::string path;
+	std::string parent;
+	std::string frame;
+	glm::vec3 min;
+	glm::vec3 max;
+	glm::vec3 offset;
+	glm::vec3 scale;
+	glm::vec2 spatialScale;
+	std::string scaleVariable;
+	std::shared_ptr<KameleonWrapper> kw;
+};
+
+
+
 class ISWACygnet : public Renderable{
 public:
-	// ISWACygnet(std::shared_ptr<Metadata> data);
-	ISWACygnet(const ghoul::Dictionary& dictionary);
-	~ISWACygnet();
+    // ISWACygnet(std::shared_ptr<Metadata> data);
+    ISWACygnet(const ghoul::Dictionary& dictionary);
+    ~ISWACygnet();
 
-	virtual bool initialize() = 0;
-	virtual bool deinitialize() = 0;
+    virtual bool initialize() = 0;
+    virtual bool deinitialize() = 0;
 
-	// virtual void render(const RenderData& data) = 0;
-	// virtual void update(const UpdateData& data) = 0;
-	// virtual bool isReady() = 0;
+    // virtual void render(const RenderData& data) = 0;
+    // virtual void update(const UpdateData& data) = 0;
+    // virtual bool isReady() = 0;
 
-	// bool enabled(){return _enabled.value();}
+    // bool enabled(){return _enabled.value();}
 
 protected:
-	// void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
-	void registerProperties();
-	void unregisterProperties();
-	// void setParent();
+    // void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
+    void registerProperties();
+    void unregisterProperties();
+    void initializeTime();
+    void updateCygnet();
+    // void setParent();
 
-	// properties::BoolProperty _enabled;
-	properties::FloatProperty _updateInterval;
-	properties::TriggerProperty _delete;
+    // properties::BoolProperty _enabled;
+    properties::FloatProperty _updateInterval;
+    properties::TriggerProperty _delete;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-	std::shared_ptr<Metadata> _data;
-	std::string _memorybuffer;
+    std::shared_ptr<Metadata> _data;
+    std::string _memorybuffer;
 
-	glm::dmat3 _stateMatrix;
+    glm::dmat3 _stateMatrix;
 
-	double _time;
-	double _lastUpdateTime = 0;
+    double _openSpaceTime;
+    double _lastUpdateOpenSpaceTime;
 
-	int _id;
+    std::chrono::milliseconds _realTime;
+    std::chrono::milliseconds _lastUpdateRealTime;
+    int _minRealTimeUpdateInterval;
+
+    int _id;
 };
 
 }//namespace openspace

@@ -15,7 +15,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
 			Frame = "IAU_MARS",
-			Body = "MARS",
+			Body = "MARS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.390, 6 },
@@ -33,11 +33,11 @@ return {
         },
         Ephemeris = {
             Type = "Spice",
-            Body = "MARS",
+            Body = "MARS BARYCENTER",
             Reference = "ECLIPJ2000",
             Observer = "SUN",
             Kernels = {
-                "${OPENSPACE_DATA}/spice/MAR063.BSP"
+                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
         },
         Rotation = {
@@ -53,7 +53,7 @@ return {
         Parent = "MarsBarycenter",
         Renderable = {
             Type = "RenderableTrail",
-            Body = "MARS",
+            Body = "MARS BARYCENTER",
             Frame = "GALACTIC",
             Observer = "SUN",
             RGB = { 1, 0.8, 0.5 },

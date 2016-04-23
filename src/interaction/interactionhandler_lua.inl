@@ -32,28 +32,28 @@ namespace luascriptfunctions {
  * Set the origin of the camera
  */
 int setOrigin(lua_State* L) {
-	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "lua.setOrigin";
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.setOrigin";
 
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	const int type = lua_type(L, -1);
-	if (type != LUA_TSTRING)
-		return luaL_error(L, "Expected string, got %i", type);
+    const int type = lua_type(L, -1);
+    if (type != LUA_TSTRING)
+        return luaL_error(L, "Expected string, got %i", type);
 
-	std::string s = luaL_checkstring(L, -1);
+    std::string s = luaL_checkstring(L, -1);
 
-	SceneGraphNode* node = sceneGraphNode(s);
-	if (!node) {
-		LWARNING("Could not find a node in scenegraph called '" << s <<"'");
-		return 0;
-	}
+    SceneGraphNode* node = sceneGraphNode(s);
+    if (!node) {
+        LWARNING("Could not find a node in scenegraph called '" << s <<"'");
+        return 0;
+    }
 
-	OsEng.interactionHandler().setFocusNode(node);
+    OsEng.interactionHandler().setFocusNode(node);
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -62,31 +62,35 @@ int setOrigin(lua_State* L) {
 * Binds a key to Lua command
 */
 int bindKey(lua_State* L) {
-	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "lua.bindKey";
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.bindKey";
 
-	int nArguments = lua_gettop(L);
-	if (nArguments != 2)
-		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-
-
-	std::string key = luaL_checkstring(L, -2);
-	std::string command = luaL_checkstring(L, -1);
-
-	if (command.empty())
-		return luaL_error(L, "Command string is empty");
-
-    openspace::Key iKey = stringToKey(key);
-
-    if (iKey == openspace::Key::Unknown) {
-		LERROR("Could not find key '"<< key <<"'");
-		return 0;
-	}
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
 
 
-	OsEng.interactionHandler().bindKey(iKey, command);
+    std::string key = luaL_checkstring(L, -2);
+    std::string command = luaL_checkstring(L, -1);
 
-	return 0;
+    if (command.empty())
+        return luaL_error(L, "Command string is empty");
+
+    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
+
+    if (iKey.key == openspace::Key::Unknown) {
+        LERROR("Could not find key '"<< key <<"'");
+        return 0;
+    }
+
+
+    OsEng.interactionHandler().bindKey(
+        iKey.key,
+        iKey.modifier,
+        command
+    );
+        
+    return 0;
 }
 
 /**
@@ -95,16 +99,16 @@ int bindKey(lua_State* L) {
 * Clears all key bindings
 */
 int clearKeys(lua_State* L) {
-	using ghoul::lua::luaTypeToString;
-	const std::string _loggerCat = "lua.clearKeys";
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.clearKeys";
 
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.interactionHandler().resetKeyBindings();
+    OsEng.interactionHandler().resetKeyBindings();
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -113,12 +117,12 @@ int clearKeys(lua_State* L) {
 * Get current frame time
 */
 int dt(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
-	return 1;
+    lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
+    return 1;
 }
 
 /**
@@ -127,15 +131,15 @@ int dt(lua_State* L) {
 * Change distance to origin
 */
 int distance(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 2)
-		return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
 
-	double d1 = luaL_checknumber(L, -2);
-	double d2 = luaL_checknumber(L, -1);
-	PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
-	OsEng.interactionHandler().distanceDelta(dist);
-	return 0;
+    double d1 = luaL_checknumber(L, -2);
+    double d2 = luaL_checknumber(L, -1);
+    PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
+    OsEng.interactionHandler().distanceDelta(dist);
+    return 0;
 }
 
 /**

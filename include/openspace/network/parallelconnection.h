@@ -82,7 +82,7 @@ namespace openspace{
             
             void requestHostship(const std::string &password);
 
-			void setPassword(const std::string &password);
+            void setPassword(const std::string &password);
             
             void signalDisconnect();
             
@@ -113,23 +113,23 @@ namespace openspace{
         protected:
             
         private:
-			//@TODO change this into the ghoul hasher for client AND server
-			uint32_t hash(const std::string &val){
-				uint32_t hashVal = 0, i;
-				size_t len = val.length();
+            //@TODO change this into the ghoul hasher for client AND server
+            uint32_t hash(const std::string &val){
+                uint32_t hashVal = 0, i;
+                size_t len = val.length();
 
-				for (hashVal = i = 0; i < len; ++i){
-					hashVal += val.c_str()[i];
-					hashVal += (hashVal << 10);
-					hashVal ^= (hashVal >> 6);
-				}
+                for (hashVal = i = 0; i < len; ++i){
+                    hashVal += val.c_str()[i];
+                    hashVal += (hashVal << 10);
+                    hashVal ^= (hashVal >> 6);
+                }
 
-				hashVal += (hashVal << 3);
-				hashVal ^= (hashVal >> 11);
-				hashVal += (hashVal << 15);
+                hashVal += (hashVal << 3);
+                hashVal ^= (hashVal >> 11);
+                hashVal += (hashVal << 15);
 
-				return hashVal;
-			};
+                return hashVal;
+            };
             
             void queueMessage(std::vector<char> message);
             
@@ -137,27 +137,27 @@ namespace openspace{
             
             void writeHeader(std::vector<char> &buffer, uint32_t messageType);
 
-			void closeSocket();
+            void closeSocket();
 
-			bool initNetworkAPI();
+            bool initNetworkAPI();
 
-			void establishConnection(addrinfo *info);
+            void establishConnection(addrinfo *info);
 
-			void sendAuthentication();
+            void sendAuthentication();
 
-			void listenCommunication();
+            void listenCommunication();
 
-			void delegateDecoding(uint32_t type);
+            void delegateDecoding(uint32_t type);
 
-			void initializationMessageReceived();
+            void initializationMessageReceived();
 
-			void dataMessageReceived();
+            void dataMessageReceived();
 
-			void hostInfoMessageReceived();
-			
-			void initializationRequestMessageReceived();
+            void hostInfoMessageReceived();
+            
+            void initializationRequestMessageReceived();
 
-			void broadcast();
+            void broadcast();
             
             int headerSize();
 
@@ -171,15 +171,15 @@ namespace openspace{
             
             std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
             
-			uint32_t _passCode;
+            uint32_t _passCode;
             std::string _port;
             std::string _address;
             std::string _name;
             _SOCKET _clientSocket;
             std::thread *_connectionThread;
-			std::thread *_broadcastThread;
+            std::thread *_broadcastThread;
             std::thread *_sendThread;
-			std::thread *_listenThread;
+            std::thread *_listenThread;
             std::thread *_handlerThread;
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
