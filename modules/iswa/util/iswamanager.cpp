@@ -298,7 +298,10 @@ namespace openspace{
                         "Frame = '" + frame + "' , "
                         "Min = " + std::to_string(min) + ", "
                         "Max = " + std::to_string(max) + ", "
-                        "kwPath = '" + kwPath + "'" 
+                        "SpatialScale = " + std::to_string(spatialScale) + ", "
+                        "UpdateTime = 0, "
+                        "kwPath = '" + kwPath + "' ," 
+                        "axisCut = 'y'"
                         "}"
                     "}"
                     ;

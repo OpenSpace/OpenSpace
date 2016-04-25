@@ -52,7 +52,20 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
 	registerProperties();
 
+
 	dictionary.getValue("kwPath", _kwPath);
+
+	std::string axis;
+	dictionary.getValue("axisCut", axis);
+
+	if(axis == "x"){
+		_data->scale.x = 0;
+	}else if(axis == "y"){
+		_data->scale.y = 0;
+	}else{
+		_data->scale.z = 0;
+	}
+
 	std::cout << "Creating kameleonplane" << std::endl;
 }
 

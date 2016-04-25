@@ -130,7 +130,7 @@ void CygnetPlane::update(const UpdateData& data){
 
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
-    if( Time::ref().timeJumped() || timeToUpdate ){
+    if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
         updateTexture();
 
         _lastUpdateRealTime = _realTime;
