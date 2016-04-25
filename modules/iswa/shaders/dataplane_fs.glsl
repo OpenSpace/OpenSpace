@@ -28,7 +28,7 @@ uniform sampler2D texture1;
 uniform vec4 top;
 uniform vec4 mid;
 uniform vec4 bot;
-uniform vec2 tfValues;
+uniform vec4 tfValues;
 
 in vec2 vs_st;
 in vec4 vs_position;

@@ -127,9 +127,9 @@ namespace openspace{
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
         metaFuture->id = id;
-        
         DlManager.downloadToMemory(
-                    "http://128.183.168.116:3000/" + std::to_string(-id),
+                    // "http://128.183.168.116:3000/" + std::to_string(-id),
+                    "http://10.0.0.76:3000/" + std::to_string(-id),
                     metaFuture->json,
                     [metaFuture](const DownloadManager::FileFuture& f){
                         LDEBUG("Download to memory finished");
@@ -175,7 +175,8 @@ namespace openspace{
     std::string ISWAManager::iSWAurl(int id, std::string type){
         std::string url;
         if(id < 0){
-            url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
+            // url = "http://128.183.168.116:3000/ "+type+"/" + std::to_string(-id) + "/";
+            url = "http://10.0.0.76:3000/"+type+"/" + std::to_string(-id) + "/";
         } else{
             url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
         }        

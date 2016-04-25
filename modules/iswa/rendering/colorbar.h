@@ -36,7 +36,7 @@ struct ColorBarData {
     glm::vec4 top;
     glm::vec4 mid;
     glm::vec4 bot;
-    glm::vec2 tfValues;
+    glm::vec4 tfValues;
 };
 
 

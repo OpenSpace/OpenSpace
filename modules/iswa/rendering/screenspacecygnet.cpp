@@ -124,7 +124,6 @@ void ScreenSpaceCygnet::update(){
         loadTexture();
         _futureTexture = nullptr;
     }
-
 }
 
 bool ScreenSpaceCygnet::isReady() const{
