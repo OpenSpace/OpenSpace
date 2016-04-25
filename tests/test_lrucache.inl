@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/datastructures/lrucache.h>
+#include <modules/globebrowsing/other/lrucache.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>

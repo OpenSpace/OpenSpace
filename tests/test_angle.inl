@@ -25,7 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/../modules/globebrowsing/datastructures/angle.h>
+#include <openspace/../modules/globebrowsing/geodetics/angle.h>
 
 #include <fstream>
 #include <glm/glm.hpp>

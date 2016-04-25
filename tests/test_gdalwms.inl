@@ -43,13 +43,13 @@ TEST_F(GdalWmsTest, Simple) {
 	//GDALRegister_WMS();
 
 
-
+	/*
 	GDALWMSDataset* wms_dataset = GDALOpen("../test.xml", GA_ReadOnly);
 	if (wms_dataset)
 	{
 		;
 	}
-
+	*/
 
 	/*
 	GDALDataset  *poDataset;
