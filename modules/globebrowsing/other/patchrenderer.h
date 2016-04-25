@@ -46,62 +46,62 @@ namespace opengl {
 
 namespace openspace {
 
-	class LonLatPatch;
-	class TriangleSoup;
-	
-	using std::shared_ptr;
-	using std::unique_ptr;
-	using ghoul::opengl::ProgramObject;
+    class LonLatPatch;
+    class TriangleSoup;
+    
+    using std::shared_ptr;
+    using std::unique_ptr;
+    using ghoul::opengl::ProgramObject;
 
-	class PatchRenderer {
-	public:
-		
-		PatchRenderer();
-		~PatchRenderer();
+    class PatchRenderer {
+    public:
+        
+        PatchRenderer();
+        ~PatchRenderer();
 
-	protected:
+    protected:
 
-		unique_ptr<ProgramObject> _programObject;
-		TextureTileSet _tileSet;
-	};
-
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//							PATCH RENDERER SUBCLASSES								//
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	class LatLonPatchRenderer : public PatchRenderer {
-	public:
-		LatLonPatchRenderer(shared_ptr<Grid> grid);
-
-		void renderPatch(
-			const GeodeticPatch& patch,
-			const RenderData& data, 
-			double radius);
-
-		void renderPatch(
-			const GeodeticPatch& patch, 
-			const RenderData& data, 
-			double radius, 
-			const TileIndex& ti);
-	private:
-		shared_ptr<Grid> _grid;
-		TwmsTileProvider tileProvider;
-	};
+        unique_ptr<ProgramObject> _programObject;
+        TextureTileSet _tileSet;
+    };
 
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    //							PATCH RENDERER SUBCLASSES								//
+    //////////////////////////////////////////////////////////////////////////////////////
 
-	class ClipMapPatchRenderer : public PatchRenderer {
-	public:
- 		ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
+    class LatLonPatchRenderer : public PatchRenderer {
+    public:
+        LatLonPatchRenderer(shared_ptr<Grid> grid);
 
-		void renderPatch(
-			const Geodetic2& patchSize,
-			const RenderData& data,
-			double radius);
-	private:
-		shared_ptr<ClipMapGrid> _grid;
-	};
+        void renderPatch(
+            const GeodeticPatch& patch,
+            const RenderData& data, 
+            double radius);
+
+        void renderPatch(
+            const GeodeticPatch& patch, 
+            const RenderData& data, 
+            double radius, 
+            const TileIndex& ti);
+    private:
+        shared_ptr<Grid> _grid;
+        TwmsTileProvider tileProvider;
+    };
+
+
+
+    class ClipMapPatchRenderer : public PatchRenderer {
+    public:
+        ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
+
+        void renderPatch(
+            const Geodetic2& patchSize,
+            const RenderData& data,
+            double radius);
+    private:
+        shared_ptr<ClipMapGrid> _grid;
+    };
 
 }  // namespace openspace
 

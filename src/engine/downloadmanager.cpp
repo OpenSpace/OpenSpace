@@ -145,7 +145,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
 	ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
 
-    LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
+    //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
     auto downloadFunction = [url, finishedCallback, progressCallback, future, fp]() {
         CURL* curl = curl_easy_init();
