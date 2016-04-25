@@ -22,49 +22,89 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#ifndef __QUADTREE_H__
+#define __QUADTREE_H__
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/patchrenderer.h>
 
-#include <ghoul/misc/assert.h>
+
+
+// forward declaration
+namespace openspace {
+	class ChunkLodGlobe;
+}
 
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
-
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
+enum Quad {
+	NORTH_WEST,
+	NORTH_EAST,
+	SOUTH_WEST,
+	SOUTH_EAST
+};
 
 
+struct ChunkIndex {
+	int x, y, level;
+
+	std::vector<ChunkIndex> childIndices() const {
+		return {
+			{ 2 * x + 0, 2 * y + 0, level + 1 },
+			{ 2 * x + 1, 2 * y + 0, level + 1 },
+			{ 2 * x + 0, 2 * y + 1, level + 1 },
+			{ 2 * x + 1, 2 * y + 1, level + 1 },
+		};
+	}
 
 
+};
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
-	fRenderable->registerClass<GlobeMesh>("GlobeMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
-}
+class ChunkNode {
+public:
+	ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
+	~ChunkNode();
+
+
+	void split(int depth = 1);
+	void merge();
+
+	bool isRoot() const;
+	bool isLeaf() const;
+	
+	const ChunkNode& getChild(Quad quad) const;
+
+	void render(const RenderData& data, ChunkIndex);
+
+	static int instanceCount;
+	static int renderedPatches;
+
+
+private:
+
+	void internalRender(const RenderData& data, ChunkIndex&);
+	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex&);
+	int calculateDesiredLevel(const RenderData& data, const ChunkIndex&);
+	
+	
+	ChunkNode* _parent;
+	std::unique_ptr<ChunkNode> _children[4];
+
+	ChunkLodGlobe& _owner;
+
+	GeodeticPatch _patch;
+	
+};
 
 } // namespace openspace
+
+
+
+#endif // __QUADTREE_H__

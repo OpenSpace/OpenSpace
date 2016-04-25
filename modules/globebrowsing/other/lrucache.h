@@ -22,49 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#ifndef __LRU_CACHE_H__
+#define __LRU_CACHE_H__
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
+#include <glm/glm.hpp>
+#include <memory>
+#include <ostream>
+#include <unordered_map>
+#include <list>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
 
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
-
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
+	// Templated class implementing a Least-Recently-Used Cache
+	template<typename KeyType, typename ValueType>
+	class LRUCache {
+	public:
+		LRUCache(size_t size);
+		~LRUCache();
 
 
+		void put(const KeyType& key, const ValueType& value);
+		bool exist(const KeyType& key) const;
+		ValueType get(const KeyType& key);
 
 
+	private:
+		void clean();
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
-	fRenderable->registerClass<GlobeMesh>("GlobeMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
-}
+	// Member varialbes
+	private:
+		
+		std::list<std::pair<KeyType, ValueType>> _itemList;
+		std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
+		size_t _cacheSize;
+
+	};
+
 
 } // namespace openspace
+
+
+#include <modules/globebrowsing/other/lrucache.inl>
+
+#endif // __LRU_CACHE_H__

@@ -22,49 +22,105 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#ifndef __LATLON_H__
+#define __LATLON_H__
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/assert.h>
-
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
 
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
 
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
 
+struct Geodetic2 {
+	Geodetic2();
+	Geodetic2(Scalar latitude, Scalar longitude);
+	Geodetic2(const Geodetic2& src);
+	
+	static Geodetic2 fromCartesian(const Vec3& v);
+	Vec3 asUnitCartesian() const;
+	Vec2 toLonLatVec2() const;
+
+	inline bool operator==(const Geodetic2& other) const;
+	inline bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
+
+	inline Geodetic2 operator+(const Geodetic2& other) const;
+	inline Geodetic2 operator-(const Geodetic2& other) const;
+	inline Geodetic2 operator*(Scalar scalar) const;
+	inline Geodetic2 operator/(Scalar scalar) const;
+
+	Scalar lat;
+	Scalar lon;
+};
+
+
+
+
+class GeodeticPatch {
+public:
+	GeodeticPatch(Scalar, Scalar, Scalar, Scalar);
+	GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
+	GeodeticPatch(const GeodeticPatch& patch);
+
+
+	void setCenter(const Geodetic2&);
+	void setHalfSize(const Geodetic2&);
+	
+
+	/**
+		Returns the minimal bounding radius that together with the LatLonPatch's
+		center point represents a sphere in which the patch is completely contained
 	*/
+	Scalar minimalBoundingRadius() const;
+
+	/**
+		Returns the area of the patch with unit radius
+	*/
+	Scalar unitArea() const;
 
 
+	Geodetic2 northWestCorner() const;
+	Geodetic2 northEastCorner() const;
+	Geodetic2 southWestCorner() const;
+	Geodetic2 southEastCorner() const;
 
+	/**
+	 * Clamps a point to the patch region
+	 */
+	Geodetic2 clamp(const Geodetic2& p) const;
 
+	/**
+	 * Returns the corner of the patch that is closest to the given point p
+	 */
+	Geodetic2 closestCorner(const Geodetic2& p) const;
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+	/**
+	 * Returns a point on the patch that minimizes the great-circle distance to
+	 * the given point p.
+	 */
+	Geodetic2 closestPoint(const Geodetic2& p) const;
+	
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
-	fRenderable->registerClass<GlobeMesh>("GlobeMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
-}
+	const Geodetic2& center() const;
+	const Geodetic2& halfSize() const;
+	Geodetic2 size() const;
+
+private:
+	Geodetic2 _center;
+	Geodetic2 _halfSize;
+
+};
 
 } // namespace openspace
+
+#endif // __LATLON_H__
