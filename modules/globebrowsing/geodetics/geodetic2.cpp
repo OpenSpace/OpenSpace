@@ -33,7 +33,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "LatLon";
+	const std::string _loggerCat = "Geodetic2";
 }
 
 namespace openspace {

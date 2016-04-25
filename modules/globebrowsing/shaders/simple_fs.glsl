@@ -51,7 +51,7 @@ Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = texture(textureSampler, vec2(uvTransformPatchToTile * vec3(vs_uv.s, vs_uv.t, 1)));
-	//frag.color = 0.001*frag.color + 0.999*texture(textureSampler, vs_uv);
+	frag.color = frag.color + vec4(vs_uv, 1, 1) * 0.3;//0.999*texture(textureSampler, vs_uv);
 
 	vec4 uvColor = vec4(fract(vs_uv * segmentsPerPatch), 0.4,1);
 	frag.color = frag.color.a < 0.1 ? uvColor * 0.5 : frag.color;

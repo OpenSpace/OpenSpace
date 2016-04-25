@@ -22,110 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GEODETIC2_H__
-#define __GEODETIC2_H__
+#ifndef __ELLIPSOID_H__
+#define __ELLIPSOID_H__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <ostream>
-
-
-// Using double precision
-typedef double Scalar;
-typedef glm::dvec2 Vec2;
-typedef glm::dvec3 Vec3;
+#include <modules/globebrowsing/geodetics/geodetic2.h>
 
 namespace openspace {
-
-
-
-
-
-struct Geodetic2 {
-	Geodetic2();
-	Geodetic2(Scalar latitude, Scalar longitude);
-	Geodetic2(const Geodetic2& src);
 	
-	
-	static Geodetic2 fromCartesian(const Vec3& v);
-	Vec3 asUnitCartesian() const;
-	
+	struct EllipsoidCache
+	{
+		const Vec3 _radiiSquared;
+		const Vec3 _oneOverRadiiSquared;
+		const Vec3 _radiiToTheFourth;
+	};
 
-	Vec2 toLonLatVec2() const;
-
-	inline bool operator==(const Geodetic2& other) const;
-	inline bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
-
-	inline Geodetic2 operator+(const Geodetic2& other) const;
-	inline Geodetic2 operator-(const Geodetic2& other) const;
-	inline Geodetic2 operator*(Scalar scalar) const;
-	inline Geodetic2 operator/(Scalar scalar) const;
-
-	Scalar lat;
-	Scalar lon;
-};
-
-struct Geodetic3 {
-	Geodetic2 geodetic2;
-	Scalar height;
-};
-
-class GeodeticPatch {
+	/**
+	This class is based largely on the Ellipsoid class defined in the book
+	"3D Engine Design for Virtual Globes". Most planets or planetary objects are better
+	described using ellipsoids than spheres.
+	*/
+class Ellipsoid {
 public:
-	GeodeticPatch(Scalar, Scalar, Scalar, Scalar);
-	GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
-	GeodeticPatch(const GeodeticPatch& patch);
-
-
-	void setCenter(const Geodetic2&);
-	void setHalfSize(const Geodetic2&);
-	
-
 	/**
-		Returns the minimal bounding radius that together with the LatLonPatch's
-		center point represents a sphere in which the patch is completely contained
+	\param radii defines three radii for the Ellipsoid
 	*/
-	Scalar minimalBoundingRadius() const;
-
-	/**
-		Returns the area of the patch with unit radius
-	*/
-	Scalar unitArea() const;
-
-
-	Geodetic2 northWestCorner() const;
-	Geodetic2 northEastCorner() const;
-	Geodetic2 southWestCorner() const;
-	Geodetic2 southEastCorner() const;
-
-	/**
-	 * Clamps a point to the patch region
-	 */
-	Geodetic2 clamp(const Geodetic2& p) const;
-
-	/**
-	 * Returns the corner of the patch that is closest to the given point p
-	 */
-	Geodetic2 closestCorner(const Geodetic2& p) const;
-
-	/**
-	 * Returns a point on the patch that minimizes the great-circle distance to
-	 * the given point p.
-	 */
-	Geodetic2 closestPoint(const Geodetic2& p) const;
+	Ellipsoid(Vec3 radii);
 	
+	/**
+	\param x defines the radius in x direction.
+	\param y defines the radius in y direction.
+	\param z defines the radius in z direction.
+	*/
+	Ellipsoid(Scalar x, Scalar y, Scalar z);
+	~Ellipsoid();
 
-	const Geodetic2& center() const;
-	const Geodetic2& halfSize() const;
-	Geodetic2 size() const;
+	/**
+	Scales a point along the geocentric normal and places it on the surface of the
+	Ellipsoid.
+	\param p is a point in the cartesian coordinate system to be placed on the surface
+	of the Ellipsoid
+	*/
+	Vec3 scaleToGeocentricSurface(const Vec3& p) const;
+	/**
+	Scales a point along the geodetic normal and places it on the surface of the
+	Ellipsoid.
+	\param p is a point in the cartesian coordinate system to be placed on the surface
+	of the Ellipsoid
+	*/
+	Vec3 scaleToGeodeticSurface(const Vec3& p) const;
+
+	Vec3 geodeticSurfaceNormal(const Vec3& p) const;
+	Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+
+	Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
+	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
+	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
 
 private:
-	Geodetic2 _center;
-	Geodetic2 _halfSize;
-
+	const Vec3 _radii;
+	const EllipsoidCache _cachedValues;
 };
-
 } // namespace openspace
 
-#endif // __GEODETIC2_H__
+#endif // __ELLIPSOID_H__

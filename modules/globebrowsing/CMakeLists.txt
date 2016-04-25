@@ -40,6 +40,7 @@ set(HEADER_FILES
 
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.h
@@ -66,6 +67,7 @@ set(SOURCE_FILES
 
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.cpp
