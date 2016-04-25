@@ -47,6 +47,8 @@ private:
     void updateTexture();
     void loadTexture();
 
+    std::string imageFormat(std::string format);
+
     properties::FloatProperty _updateInterval;
 
     std::string _path;
@@ -56,7 +58,7 @@ private:
 
     std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
     std::string _memorybuffer;
-    
+
     int _id;    
 };
 

@@ -77,7 +77,11 @@ bool TexturePlane::deinitialize(){
 bool TexturePlane::loadTexture() {
     if(_memorybuffer != ""){
 
-         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+            (void*) _memorybuffer.c_str(), 
+            _memorybuffer.size(), 
+            imageFormat(_futureObject->format));
+
         if (texture) {
             texture->uploadTexture();
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
@@ -91,6 +95,8 @@ bool TexturePlane::loadTexture() {
 
     return false;
 }
+
+
 
 bool TexturePlane::updateTexture(){
     if(_futureObject)
@@ -106,6 +112,18 @@ bool TexturePlane::updateTexture(){
     }
 
     return false;
+}
+
+std::string TexturePlane::imageFormat(std::string format){
+    if(format == "image/png"){
+        return std::string("png");
+    }else if(format == "image/jpeg"){
+        return std::string("jpg");
+    }else if(format == "image/gif"){
+        return std::string("gif");
+    }else{
+        return std::string("noImage");
+    }
 }
 
 int TexturePlane::id(){

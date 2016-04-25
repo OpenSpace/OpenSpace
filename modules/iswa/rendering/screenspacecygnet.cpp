@@ -122,6 +122,7 @@ void ScreenSpaceCygnet::update(){
 
     if(_futureTexture && _futureTexture->isFinished){
         loadTexture();
+
         _futureTexture = nullptr;
     }
 }
@@ -149,7 +150,10 @@ void ScreenSpaceCygnet::loadTexture() {
 
     if(_memorybuffer != ""){
 
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTextureFromMemory(_memorybuffer);
+        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+            (void*) _memorybuffer.c_str(), 
+            _memorybuffer.size(), 
+            imageFormat(_futureTexture->format));
         // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
 
         if (texture) {
@@ -161,6 +165,18 @@ void ScreenSpaceCygnet::loadTexture() {
 
             _texture = std::move(texture);
         }
+    }
+}
+
+std::string ScreenSpaceCygnet::imageFormat(std::string format){
+    if(format == "image/png"){
+        return std::string("png");
+    }else if(format == "image/jpeg"){
+        return std::string("jpg");
+    }else if(format == "image/gif"){
+        return std::string("gif");
+    }else{
+        return std::string("noImage");
     }
 }
 
