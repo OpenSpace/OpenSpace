@@ -127,17 +127,10 @@ void CygnetPlane::update(const UpdateData& data){
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());;
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _openSpaceTime);
 
-    if(Time::ref().timeJumped()){
-        updateTexture();
 
-        _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
-
-    if(fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
-            (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval)
-    {
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval));
+    if( Time::ref().timeJumped() || timeToUpdate ){
         updateTexture();
 
         _lastUpdateRealTime = _realTime;

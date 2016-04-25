@@ -23,7 +23,6 @@
 //  ****************************************************************************************/
 
 #include <modules/iswa/rendering/dataplane.h>
-//#include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
