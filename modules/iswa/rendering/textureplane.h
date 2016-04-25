@@ -46,6 +46,8 @@
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
     
+    std::string imageFormat(std::string format);
+
     static int id();
  };
  

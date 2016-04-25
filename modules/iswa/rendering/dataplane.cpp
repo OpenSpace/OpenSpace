@@ -23,11 +23,9 @@
 //  ****************************************************************************************/
 
 #include <modules/iswa/rendering/dataplane.h>
-//#include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
@@ -43,9 +41,9 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0, 1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_useLog("useLog","Use Logarithm Norm", false)
-    ,_useHistogram("useHistogram","Use Histogram Equalization", true)
+    ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
     // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
     // ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
@@ -60,7 +58,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_useLog);
-    addProperty(_useHistogram);
     addProperty(_useRGB);
     addProperty(_normValues);
     addProperty(_dataOptions);
@@ -73,7 +70,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
     OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
@@ -86,7 +82,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     _normValues.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
-    _useHistogram.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){
         if( _useRGB.value() && (_dataOptions.value().size() > 3)){
             LWARNING("More than 3 values, using only the red channel.");
@@ -109,6 +104,7 @@ bool DataPlane::initialize(){
     initializeTime();
 
     createPlane();
+    
     if (_shader == nullptr) {
     // DatePlane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -155,7 +151,7 @@ bool DataPlane::loadTexture() {
         return false;
 
     if (!_texture) {
-        std::unique_ptr<ghoul::opengl::Texture> texture = std::make_unique<ghoul::opengl::Texture>(
+        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                 values, 
                                                                 _dimensions,
                                                                 ghoul::opengl::Texture::Format::RGB,
@@ -257,6 +253,7 @@ float* DataPlane::readData(){
         std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
         
         float* data = new float[3*_dimensions.x*_dimensions.y]{0.0f};
+
 
         int numValues = 0;
         while(getline(memorystream, line)){

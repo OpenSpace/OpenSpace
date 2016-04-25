@@ -32,6 +32,7 @@
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/rendering/kameleonplane.h>
 
 namespace openspace {
 
@@ -46,5 +47,6 @@ namespace openspace {
         fRenderable->registerClass<ISWAContainer>("ISWAContainer");
         fRenderable->registerClass<TexturePlane>("TexturePlane");
         fRenderable->registerClass<DataPlane>("DataPlane");
+        fRenderable->registerClass<KameleonPlane>("KameleonPlane");
     }
 }

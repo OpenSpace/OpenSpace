@@ -70,7 +70,6 @@ class DataPlane : public CygnetPlane {
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _useRGB;
 
-
     // properties::Vec4Property _topColor;
     // properties::Vec4Property _midColor;
     // properties::Vec4Property _botColor;

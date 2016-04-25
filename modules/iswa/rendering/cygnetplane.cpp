@@ -80,7 +80,7 @@ void CygnetPlane::render(const RenderData& data){
         transform = rotation * transform;
     }
 
-    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.y);
+    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
     
 
     // Activate shader
@@ -127,17 +127,10 @@ void CygnetPlane::update(const UpdateData& data){
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());;
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _openSpaceTime);
 
-    if(Time::ref().timeJumped()){
-        updateTexture();
 
-        _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
-
-    if(fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
-            (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval)
-    {
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
         updateTexture();
 
         _lastUpdateRealTime = _realTime;
@@ -162,7 +155,7 @@ void CygnetPlane::createPlane(){
     const GLfloat x = s*_data->scale.x/2.0;
     const GLfloat y = s*_data->scale.y/2.0;
     const GLfloat z = s*_data->scale.z/2.0;
-    const GLfloat w = _data->spatialScale.y;
+    const GLfloat w = _data->spatialScale.w;
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //      x      y     z     w     s     t

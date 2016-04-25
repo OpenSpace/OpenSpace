@@ -85,7 +85,10 @@ namespace openspace{
             metaFuture->type = info;
             metaFuture->id = id;
             _metaFutures.push_back(metaFuture);
-        }
+        }else{ 
+            //create kameleonplane
+            createKameleonPlane(info);
+        } 
     }
 
     void ISWAManager::deleteISWACygnet(std::string name){
@@ -127,9 +130,9 @@ namespace openspace{
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
         metaFuture->id = id;
-        
         DlManager.downloadToMemory(
                     "http://128.183.168.116:3000/" + std::to_string(-id),
+                    // "http://10.0.0.76:3000/" + std::to_string(-id),
                     metaFuture->json,
                     [metaFuture](const DownloadManager::FileFuture& f){
                         LDEBUG("Download to memory finished");
@@ -176,6 +179,7 @@ namespace openspace{
         std::string url;
         if(id < 0){
             url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
+            // url = "http://10.0.0.76:3000/"+type+"/" + std::to_string(-id) + "/";
         } else{
             url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
         }        
@@ -219,6 +223,7 @@ namespace openspace{
 
             std::string parent = j["Central Body"];
             std::string frame = j["Coordinates"];
+            std::string coordinateType = j["Coordinate Type"];
             int updateTime = j["ISWA_UPDATE_SECONDS"];
 
             glm::vec3 max(
@@ -233,11 +238,13 @@ namespace openspace{
                 j["Plot ZMIN"]
             );
 
-            glm::vec2 spatialScale(1, 10);
+            glm::vec4 spatialScale(1, 1, 1, 10);
             std::string spatial = j["Spatial Scale (Custom)"];
             if(spatial == "R_E"){
                 spatialScale.x = 6.371f;
-                spatialScale.y = 6;
+                spatialScale.y = 6.371f;
+                spatialScale.z = 6.371f;
+                spatialScale.w = 6;
             }
 
             std::string table = "{"
@@ -251,6 +258,7 @@ namespace openspace{
                 "Max = " + std::to_string(max) + ", "
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
                 "UpdateTime = " + std::to_string(updateTime) + ", "
+                "CoordinateType = '" + coordinateType + "', "
                 "}"
             "}"
             ;
@@ -261,55 +269,59 @@ namespace openspace{
         return "";
     }
 
-    // std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
-    //     //NEED TO REWRITE IF USED AGAIN
-    //     if(kwPath != ""){
-    //         const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
-    //         if(extension == "cdf"){
-    //             KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
+    std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
+        if(kwPath != ""){
+            const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+            if(extension == "cdf"){
+                KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
          
-    //             std::string parent  = kw.getParent();
-    //             std::string frame   = kw.getFrame();
-    //             glm::vec4 scale     = kw.getModelScaleScaled();
-    //             glm::vec4 offset    = kw.getModelBarycenterOffsetScaled();
+                std::string parent  = kw.getParent();
+                std::string frame   = kw.getFrame();
+                glm::vec3   min     = kw.getGridMin();
+                glm::vec3   max     = kw.getGridMax();
 
-    //             std::string table = "{"
-    //                 "Name = 'DataPlane',"
-    //                 "Parent = '" + parent + "', "
-    //                 "Renderable = {"    
-    //                     "Type = 'DataPlane', "
-    //                     "Id = 0 ,"
-    //                     "Frame = '" + frame + "' , "
-    //                     "Scale = " + std::to_string(scale) + ", "
-    //                     "Offset = " + std::to_string(offset) + ", "
-    //                     "kwPath = '" + kwPath + "'" 
-    //                     "}"
-    //                 "}"
-    //                 ;
-    //             // std::cout << table << std::endl;    
-    //             return table;
-    //         }
-    //     }
-    //     return "";
-    // }
+                glm::vec4 spatialScale;
+                std::string coordinateType;
 
-    //Create KameleonPlane?
-    // void ISWAManager::createDataPlane(std::string kwPath){
-    //     std::string luaTable = parseKWToLuaTable(kwPath);
-    //     if(luaTable != ""){
-    //         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-    //         OsEng.scriptEngine().queueScript(script);
-    //     }
-    // }
+                std::tuple < std::string, std::string, std::string > gridUnits = kw.getGridUnits();
+                if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
+                    spatialScale.x = 6.371f;
+                    spatialScale.y = 6.371f;
+                    spatialScale.z = 6.371f;
+                    spatialScale.w = 6;
 
+                    coordinateType = "Cartesian";
+                }else{
+                    spatialScale = glm::vec4(1.0);
+                    spatialScale.w = 1; //-log10(1.0f/max.x);
 
-    // void ISWAManager::createTexturePlane(int id, std::string json){
-    //     std::string luaTable = parseJSONToLuaTable(id, json);
-    //     if(luaTable != ""){
-    //         std::string script = "openspace.addSceneGraphNode(" + parseJSONToLuaTable(id, json) + ");";
-    //         OsEng.scriptEngine().queueScript(script);
-    //     }
-    // }
+                    coordinateType = "Polar";
+                }
+                std::string table = "{"
+                    "Name = 'KameleonPlane0',"
+                    // "Parent = 'Earth', "
+                    "Parent = '" + parent + "', " 
+                    "Renderable = {"    
+                        "Type = 'KameleonPlane', "
+                        "Id = 0 ,"
+                        "Frame = '" + frame + "' , "
+                        "Min = " + std::to_string(min) + ", "
+                        "Max = " + std::to_string(max) + ", "
+                        "SpatialScale = " + std::to_string(spatialScale) + ", "
+                        "UpdateTime = 0, "
+                        "kwPath = '" + kwPath + "' ," 
+                        "axisCut = 'y' ,"
+                        "CoordinateType = '" + coordinateType + "', "
+                        "}"
+                    "}"
+                    ;
+                // std::cout << table << std::endl;    
+                return table;
+            }
+        }
+        return "";
+    }
+
 
     void ISWAManager::createPlane(int id, std::string json, std::string type){
 
@@ -329,5 +341,21 @@ namespace openspace{
 
     void ISWAManager::createScreenSpace(int id){
         OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id));
+    }
+
+    void ISWAManager::createKameleonPlane(std::string kwPath){
+        kwPath = "${OPENSPACE_DATA}/" + kwPath;
+        const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+
+        if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
+            std::string luaTable = parseKWToLuaTable(kwPath);
+            if(!luaTable.empty()){
+                std::cout << luaTable << std::endl;
+                std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+                OsEng.scriptEngine().queueScript(script);
+            }
+        }else{
+            LWARNING( kwPath + " is not a cdf file or can't be found.");
+        }
     }
 }// namsepace openspace

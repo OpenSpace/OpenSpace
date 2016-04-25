@@ -229,6 +229,15 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             
             CURLcode res = curl_easy_perform(curl);
+            if(res == CURLE_OK){
+                // ask for the content-type
+                char *ct;
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+                if(ct){
+                    future->format = std::string(ct);
+                } 
+            }   
+            
             curl_easy_cleanup(curl);
 
             if (res == CURLE_OK)

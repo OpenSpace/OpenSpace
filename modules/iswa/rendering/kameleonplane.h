@@ -22,46 +22,35 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __SCREENSPACECYGNET_H__
-#define __SCREENSPACECYGNET_H__
+#ifndef __KAMELEONPLANE_H__
+#define __KAMELEONPLANE_H__
 
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/rendering/cygnetplane.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 
-namespace openspace{
+ namespace openspace{
+ 
+ class KameleonPlane : public CygnetPlane {
+ public:
+ 	KameleonPlane(const ghoul::Dictionary& dictionary);
+ 	~KameleonPlane();
 
-class ScreenSpaceCygnet : public ScreenSpaceRenderable {
-public:
-    ScreenSpaceCygnet(int cygnetId);
-    ~ScreenSpaceCygnet();
+ 	virtual bool initialize() override;
+    virtual bool deinitialize() override;
+ 
+ private:
+ 	virtual bool loadTexture() override;
+ 	virtual bool updateTexture() override;
 
-    void render() override;
-    bool initialize() override;
-    bool deinitialize() override;
-    void update() override;
-    bool isReady() const override;
+	static int id();
 
-private:
-    static int id();
-    void updateTexture();
-    void loadTexture();
-
-    std::string imageFormat(std::string format);
-
-    properties::FloatProperty _updateInterval;
-
-    std::string _path;
-    const int _cygnetId;
-    float _time;
-    float _lastUpdateTime = 0.0f;
-
-    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-    std::string _memorybuffer;
-
-    int _id;    
-};
-
+	std::shared_ptr<KameleonWrapper> _kw;
+	std::string _kwPath;
+	glm::size3_t _dimensions;
+	float* _dataSlice;
+	std::string _var;
+ };
+ 
  } // namespace openspace
 
-#endif //__SCREENSPACECYGNET_H__
+#endif //__KAMELEONPLANE_H__

@@ -1005,7 +1005,7 @@ std::string KameleonWrapper::getParent(){
         _type == KameleonWrapper::Model::Adapt3D ||
         _type == KameleonWrapper::Model::SWMF)
     {
-        return "SolarSystem";
+        return "Sun";
     }else{
         return "";
     }
