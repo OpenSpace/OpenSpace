@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,31 +22,35 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/iswa/iswamodule.h>
+#ifndef __KAMELEONPLANE_H__
+#define __KAMELEONPLANE_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/iswa/rendering/cygnetplane.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 
-#include <ghoul/misc/assert.h>
+ namespace openspace{
+ 
+ class KameleonPlane : public CygnetPlane {
+ public:
+ 	KameleonPlane(const ghoul::Dictionary& dictionary);
+ 	~KameleonPlane();
 
-#include <modules/iswa/rendering/iswacontainer.h>
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/kameleonplane.h>
+ 	virtual bool initialize() override;
+    virtual bool deinitialize() override;
+ 
+ private:
+ 	virtual bool loadTexture() override;
+ 	virtual bool updateTexture() override;
 
-namespace openspace {
+	static int id();
 
-    ISWAModule::ISWAModule()
-        : OpenSpaceModule("ISWA")
-    {}
+	std::shared_ptr<KameleonWrapper> _kw;
+	std::string _kwPath;
+	glm::size3_t _dimensions;
+	float* _dataSlice;
+	std::string _var;
+ };
+ 
+ } // namespace openspace
 
-    void ISWAModule::internalInitialize(){
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
-
-        fRenderable->registerClass<ISWAContainer>("ISWAContainer");
-        fRenderable->registerClass<TexturePlane>("TexturePlane");
-        fRenderable->registerClass<DataPlane>("DataPlane");
-        fRenderable->registerClass<KameleonPlane>("KameleonPlane");
-    }
-}
+#endif //__KAMELEONPLANE_H__

@@ -81,12 +81,13 @@ private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string getDictionaryTable(int id, std::string path);
     std::string parseJSONToLuaTable(int id, std::string json, std::string type);
-    // std::string parseKWToLuaTable(std::string kwPath);
+    std::string parseKWToLuaTable(std::string kwPath);
 
     // void createDataPlane(std::string kwPath);
     // void createTexturePlane(int id, std::string json);
     void createPlane(int id, std::string json, std::string type);
     void createScreenSpace(int id);
+    void createKameleonPlane(std::string kwPath); 
 
     std::map<std::string, std::string> _month;
     ISWAContainer* _container;

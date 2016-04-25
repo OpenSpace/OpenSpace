@@ -55,7 +55,7 @@ public:
         bool isAborted;
         std::string filePath;
         std::string errorMessage;
-        std::string extension;
+        std::string format;
         // Values set by others to be consumed by the DownloadManager
         bool abortDownload;
     };

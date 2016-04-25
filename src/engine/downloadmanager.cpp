@@ -234,7 +234,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
                 char *ct;
                 res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if(ct){
-                    future->extension = std::string(ct);
+                    future->format = std::string(ct);
                 } 
             }   
             

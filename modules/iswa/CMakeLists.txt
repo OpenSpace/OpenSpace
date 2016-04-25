@@ -30,6 +30,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/colorbar.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
@@ -42,6 +43,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/colorbar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp

@@ -58,7 +58,7 @@ struct Metadata {
 	glm::vec3 max;
 	glm::vec3 offset;
 	glm::vec3 scale;
-	glm::vec2 spatialScale;
+	glm::vec4 spatialScale;
 	std::string scaleVariable;
 	std::shared_ptr<KameleonWrapper> kw;
 };
@@ -89,7 +89,6 @@ protected:
     // void setParent();
 
     // properties::BoolProperty _enabled;
-    properties::FloatProperty _updateInterval;
     properties::TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

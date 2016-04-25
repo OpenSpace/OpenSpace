@@ -32,7 +32,6 @@ namespace openspace{
 
 ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
     , _delete("delete", "Delete")
     , _shader(nullptr)
     , _texture(nullptr)
@@ -44,7 +43,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	float renderableId;
 	float updateTime;
 	glm::vec3 min, max;
-	glm::vec2 spatialScale;
+	glm::vec4 spatialScale;
 
 	dictionary.getValue("Id", renderableId);
 	dictionary.getValue("UpdateTime", updateTime);
@@ -77,7 +76,6 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	// dictionary.getValue("Parent",_data->parent);
 
     // addProperty(_enabled);
-    addProperty(_updateInterval);
     addProperty(_delete);
 
 	// std::cout << _data->id << std::endl;
@@ -85,6 +83,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 	// std::cout << std::to_string(_data->scale) << std::endl;
 	// std::cout << std::to_string(_data->max) << std::endl;
     // std::cout << std::to_string(_data->min) << std::endl;
+    std::cout << std::to_string(_data->spatialScale) << std::endl;
 	// std::cout << _data->path << std::endl;
 	// std::cout << _data->parent << std::endl;
 	// std::cout << _data->frame << std::endl;
@@ -96,7 +95,6 @@ ISWACygnet::~ISWACygnet(){}
 
 void ISWACygnet::registerProperties(){
     OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-    OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
     OsEng.gui()._iSWAproperty.registerProperty(&_delete);
 }
 
