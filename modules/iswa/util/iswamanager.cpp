@@ -223,6 +223,7 @@ namespace openspace{
 
             std::string parent = j["Central Body"];
             std::string frame = j["Coordinates"];
+            std::string coordinateType = j["Coordinate Type"];
             int updateTime = j["ISWA_UPDATE_SECONDS"];
 
             glm::vec3 max(
@@ -257,6 +258,7 @@ namespace openspace{
                 "Max = " + std::to_string(max) + ", "
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
                 "UpdateTime = " + std::to_string(updateTime) + ", "
+                "CoordinateType = '" + coordinateType + "', "
                 "}"
             "}"
             ;
@@ -279,19 +281,26 @@ namespace openspace{
                 glm::vec3   max     = kw.getGridMax();
 
                 glm::vec4 spatialScale;
+                std::string coordinateType;
+
                 std::tuple < std::string, std::string, std::string > gridUnits = kw.getGridUnits();
                 if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
                     spatialScale.x = 6.371f;
                     spatialScale.y = 6.371f;
                     spatialScale.z = 6.371f;
                     spatialScale.w = 6;
+
+                    coordinateType = "Cartesian";
                 }else{
                     spatialScale = glm::vec4(1.0);
-                    spatialScale.w = -log10(1.0f/max.x);
+                    spatialScale.w = 1; //-log10(1.0f/max.x);
+
+                    coordinateType = "Polar";
                 }
                 std::string table = "{"
                     "Name = 'KameleonPlane0',"
-                    "Parent = '" + parent + "', "
+                    // "Parent = 'Earth', "
+                    "Parent = '" + parent + "', " 
                     "Renderable = {"    
                         "Type = 'KameleonPlane', "
                         "Id = 0 ,"
@@ -301,7 +310,8 @@ namespace openspace{
                         "SpatialScale = " + std::to_string(spatialScale) + ", "
                         "UpdateTime = 0, "
                         "kwPath = '" + kwPath + "' ," 
-                        "axisCut = 'y'"
+                        "axisCut = 'y' ,"
+                        "CoordinateType = '" + coordinateType + "', "
                         "}"
                     "}"
                     ;
@@ -340,6 +350,7 @@ namespace openspace{
         if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
             std::string luaTable = parseKWToLuaTable(kwPath);
             if(!luaTable.empty()){
+                std::cout << luaTable << std::endl;
                 std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
                 OsEng.scriptEngine().queueScript(script);
             }

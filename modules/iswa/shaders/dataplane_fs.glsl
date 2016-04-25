@@ -42,7 +42,8 @@ Fragment getFragment() {
     vec4 diffuse;
     // diffuse = top;
     diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
-    //float v = texture(texture1, vs_st).r;
+    // diffuse = vec4(1,0,0,1);
+    // float v = texture(texture1, vs_st).r;
     //float x = tfValues.x;
     //float y = tfValues.y;
 

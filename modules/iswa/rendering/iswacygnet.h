@@ -60,6 +60,7 @@ struct Metadata {
 	glm::vec3 scale;
 	glm::vec4 spatialScale;
 	std::string scaleVariable;
+    std::string coordinateType;
 };
 
 
