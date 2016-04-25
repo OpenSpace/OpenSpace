@@ -98,14 +98,13 @@ namespace openspace {
 		renderPatch(patch, data, radius, ti);
 	}
 
-	void LatLonPatchRenderer::renderPatch(
-		const LatLonPatch& patch,
-		const RenderData& data,
-		double radius,
-		const TileIndex& tileIndex)
+	void LatLonPatchRenderer::renderPatch(const LatLonPatch& patch,const RenderData& data,
+		double radius, const TileIndex& tileIndex)
 	{
 
 		using namespace glm;
+
+
 
 
 
@@ -120,16 +119,26 @@ namespace openspace {
 		_programObject->activate();
 
 		// Get the textures that should be used for rendering
-		LatLonPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
-		std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
-		glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(patch, tileIndex);
+		std::shared_ptr<ghoul::opengl::Texture> tile00;
+		bool usingTile = true;
+		TileIndex ti;
+		ti.level =tileIndex.level;
+		ti.x = tileIndex.y;
+		ti.y = tileIndex.x;
+		tile00 = tileProvider.getTile(ti);
+
+		if (tile00 == nullptr) {
+			tile00 = _tileSet.getTile(tileIndex);
+			usingTile = false;
+		}
+
+		glm::mat3 uvTransform = usingTile ? glm::mat3(1) : _tileSet.getUvTransformationPatchToTile(patch, tileIndex);
 
 		// Bind and use the texture
 		ghoul::opengl::TextureUnit texUnit;
 		texUnit.activate();
 		tile00->bind();
 		_programObject->setUniform("textureSampler", texUnit);
-
 		_programObject->setUniform("uvTransformPatchToTile", uvTransform);
 
 		LatLon swCorner = patch.southWestCorner();

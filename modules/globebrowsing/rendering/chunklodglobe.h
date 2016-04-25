@@ -41,6 +41,7 @@
 
 #include <modules/globebrowsing/datastructures/chunknode.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/twmstileprovider.h>
 
 namespace ghoul {
 	namespace opengl {
@@ -93,6 +94,7 @@ namespace openspace {
 		static const LatLonPatch RIGHT_HEMISPHERE;
 
 		properties::IntProperty _rotation;
+		
 
 		glm::dmat3 _stateMatrix;
 		std::string _frame;

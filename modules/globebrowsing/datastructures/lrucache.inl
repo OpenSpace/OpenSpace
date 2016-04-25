@@ -38,7 +38,9 @@ namespace openspace {
 		: _cacheSize(size) { }
 
 	template<typename KeyType, typename ValueType>
-	LRUCache<KeyType, ValueType>::~LRUCache() {	}
+	LRUCache<KeyType, ValueType>::~LRUCache() {	
+		// Clean up list and map!
+	}
 
 
 	//////////////////////////////
@@ -69,7 +71,7 @@ namespace openspace {
 	template<typename KeyType, typename ValueType>
 	ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key)
 	{
-		ghoul_assert(exist(key), "Key " << key << " must exists");
+		ghoul_assert(exist(key), "Key " << key << " must exist");
 		auto it = _itemMap.find(key);
 		// Move list iterator pointing to value
 		_itemList.splice(_itemList.begin(), _itemList, it->second);

@@ -28,6 +28,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
+#include <openspace/engine/downloadmanager.h>
+
 
 
 
@@ -47,7 +49,6 @@ namespace openspace {
 	};
 }
 
-
 #include <modules/globebrowsing/datastructures/lrucache.h>
 
 
@@ -56,7 +57,7 @@ namespace openspace {
 //									TWMS TILE PROVIDER									//
 //////////////////////////////////////////////////////////////////////////////////////////
 
-/*
+
 namespace openspace {
 	using namespace ghoul::opengl;
 
@@ -70,11 +71,13 @@ namespace openspace {
 
 
 	private:
-		void downloadTileAndPutInCache(const TileIndex&);
+		std::shared_ptr<DownloadManager::FileFuture> requestTile(const TileIndex&);
+		std::shared_ptr<Texture> loadAndInitTextureDisk(std::string filePath);
 
 		LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
+		LRUCache<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureCache;
 	};
 
 }  // namespace openspace
-*/
+
 #endif  // __TWMS_TILE_PROVIDER_H__

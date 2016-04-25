@@ -102,7 +102,6 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 				requestedMergeMask |= (1 << i);
 			}
 		}
-		
 
 		// check if all children requested merge
 		if (requestedMergeMask == 0xf) {
@@ -119,10 +118,13 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
 	if (isLeaf()) {
 
+		TileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
+
 		LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
+		patchRenderer.renderPatch(_patch, data, _owner.globeRadius, ti);
 		ChunkNode::renderedPatches++;
+
 	}
 	else {
 		std::vector<ChunkIndex> childIndices = traverseData.childIndices();

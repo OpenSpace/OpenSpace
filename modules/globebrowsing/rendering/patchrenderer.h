@@ -85,6 +85,9 @@ namespace openspace {
 			const RenderData& data, 
 			double radius, 
 			const TileIndex& ti);
+
+	private:
+		TwmsTileProvider tileProvider;
 	};
 
 
