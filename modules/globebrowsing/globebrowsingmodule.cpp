@@ -24,9 +24,9 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 
-#include <modules/globebrowsing/rendering/renderableglobe.h>
-#include <modules/globebrowsing/rendering/distanceswitch.h>
-#include <modules/globebrowsing/rendering/globemesh.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/other/distanceswitch.h>
+#include <modules/globebrowsing/globes/globemesh.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>

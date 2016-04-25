@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/rendering/texturetileset.h>
+#include <modules/globebrowsing/other/texturetileset.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -37,9 +37,9 @@ using namespace openspace;
 TEST_F(TextureTileSetTest, getTileIndexLevel) {
 
 	// Create a tile set with maximum depth 0
-	TextureTileSet tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0);
+	TextureTileSet tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 0);
 
-	LatLonPatch patch(LatLon(0, 0), LatLon(M_PI / 16, M_PI / 8));
+	GeodeticPatch patch(Geodetic2(0, 0), Geodetic2(M_PI / 16, M_PI / 8));
 	TileIndex tileIndex0 = tileSet.getTileIndex(patch);
 
 	// Maximum level is 0
@@ -47,10 +47,10 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 
 
 	// Create a tile set with maximum depth 10
-	TextureTileSet tileSetDepth10(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 10);
+	TextureTileSet tileSetDepth10(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 10);
 
 	// A big tile that covers the whole latlon space
-	LatLonPatch patchBig(LatLon(0, 0), LatLon(M_PI / 2, M_PI));
+	GeodeticPatch patchBig(Geodetic2(0, 0), Geodetic2(M_PI / 2, M_PI));
 	tileIndex0 = tileSetDepth10.getTileIndex(patchBig);
 
 	// Should return 0 since the tile covers the whole latlon space
@@ -58,7 +58,7 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 
 	
 	// An edge case tile that covers a fourth of the latlon space
-	LatLonPatch patchEdgeCase(LatLon(0, 0), LatLon(M_PI / 4, M_PI / 2));
+	GeodeticPatch patchEdgeCase(Geodetic2(0, 0), Geodetic2(M_PI / 4, M_PI / 2));
 	TileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
 
 	// Now it can go up a level
@@ -66,7 +66,7 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 
 
 	// Bigger than the edge case
-	LatLonPatch patchEdgeCaseBigger(LatLon(0, 0), LatLon(M_PI / 4 + 0.001, M_PI / 2 + 0.001));
+	GeodeticPatch patchEdgeCaseBigger(Geodetic2(0, 0), Geodetic2(M_PI / 4 + 0.001, M_PI / 2 + 0.001));
 	tileIndex0 = tileSetDepth10.getTileIndex(patchEdgeCaseBigger);
 
 	// Should return 0 again
@@ -76,9 +76,9 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 	// Create a tile set with maximum depth 0
-	TextureTileSet tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0);
+	TextureTileSet tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 0);
 
-	LatLonPatch patch(LatLon(0, 0), LatLon(M_PI / 16, M_PI / 8));
+	GeodeticPatch patch(Geodetic2(0, 0), Geodetic2(M_PI / 16, M_PI / 8));
 	TileIndex tileIndex0 = tileSet.getTileIndex(patch);
 
 	// Maximum level is 0 so the x y indices should also be 0
@@ -87,10 +87,10 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 
 	// Create a tile set with maximum depth 10
-	TextureTileSet tileSetDepth10(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 10);
+	TextureTileSet tileSetDepth10(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 10);
 
 	// A big tile that covers the whole latlon space
-	LatLonPatch patchBig(LatLon(0, 0), LatLon(M_PI / 2, M_PI));
+	GeodeticPatch patchBig(Geodetic2(0, 0), Geodetic2(M_PI / 2, M_PI));
 	tileIndex0 = tileSetDepth10.getTileIndex(patchBig);
 
 	// Should return 0 in x and y since the tile covers the whole latlon space
@@ -99,7 +99,7 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 
 	// A tile that covers a fourth of the latlon space
-	LatLonPatch patchEdgeCase(LatLon(0, 0), LatLon(M_PI / 4, M_PI / 2));
+	GeodeticPatch patchEdgeCase(Geodetic2(0, 0), Geodetic2(M_PI / 4, M_PI / 2));
 	TileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
 
 	// Now it can go up a level (1)
@@ -109,7 +109,7 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 
 	// A smaller edge case tile
-	LatLonPatch patchEdgeCase2(LatLon(0, 0), LatLon(M_PI / 8, M_PI / 4));
+	GeodeticPatch patchEdgeCase2(Geodetic2(0, 0), Geodetic2(M_PI / 8, M_PI / 4));
 	TileIndex tileIndex11 = tileSetDepth10.getTileIndex(patchEdgeCase2);
 
 	// Now it can go up two levels (2)
@@ -122,10 +122,10 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 TEST_F(TextureTileSetTest, getUvTransformationPatchToTile) {
 	// Create a tile set with maximum depth 0
-	TextureTileSet tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, -M_PI), 0);
+	TextureTileSet tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, -M_PI), 0);
 
 	// Create a patch that covers the whole latlon space
-	LatLonPatch patch(LatLon(0, 0), LatLon(M_PI / 2, M_PI));
+	GeodeticPatch patch(Geodetic2(0, 0), Geodetic2(M_PI / 2, M_PI));
 
 	// Should be a 1:1 mapping
 	glm::mat3 patchToTileTransform =
@@ -134,7 +134,7 @@ TEST_F(TextureTileSetTest, getUvTransformationPatchToTile) {
 	ASSERT_EQ(patchToTileTransform, glm::mat3(1));
 	
 	// Create a smaller patch in the upper west side
-	patch = LatLonPatch(LatLon(M_PI / 4, - M_PI / 2), LatLon(M_PI / 4, M_PI / 2));
+	patch = GeodeticPatch(Geodetic2(M_PI / 4, - M_PI / 2), Geodetic2(M_PI / 4, M_PI / 2));
 	patchToTileTransform =
 		tileSet.getUvTransformationPatchToTile(patch, { 0,0,0 });
 

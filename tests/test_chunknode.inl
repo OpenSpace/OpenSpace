@@ -25,8 +25,8 @@
 #include "gtest/gtest.h"
 
 #include <openspace/scene/scenegraphnode.h>
-#include <modules/globebrowsing/rendering/chunklodglobe.h>
-#include <modules/globebrowsing/datastructures/chunknode.h>
+#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/globes/chunknode.h>
 
 #include <fstream>
 #include <glm/glm.hpp>

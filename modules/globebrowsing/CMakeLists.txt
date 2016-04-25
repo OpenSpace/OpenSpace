@@ -26,52 +26,54 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gdaldataconverter.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
 
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.h
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.h
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/angle.h
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/lrucache.h
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/frustrumculler.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
+	${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
 
 )
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/globemesh.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunklodglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustrumculler.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturetileset.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/twmstileprovider.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmappyramid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/gdaldataconverter.cpp
-	
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/chunknode.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/latlon.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/angle.inl
-	${CMAKE_CURRENT_SOURCE_DIR}/datastructures/lrucache.inl
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
+
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
+
+	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/frustrumculler.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

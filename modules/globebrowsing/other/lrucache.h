@@ -22,98 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __LRU_CACHE_H__
+#define __LRU_CACHE_H__
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/../modules/globebrowsing/geodetics/angle.h>
-
-#include <fstream>
 #include <glm/glm.hpp>
-
-using namespace openspace;
-
-class AngleTest : public testing::Test {};
-
-TEST_F(AngleTest, DoubleConversions) {
-	
-	ASSERT_EQ(dAngle::fromRadians(0).asDegrees(), 0) << "from radians to degrees";
-	ASSERT_EQ(dAngle::HALF.asDegrees(), 180) << "from radians to degrees";
-	ASSERT_EQ(dAngle::fromDegrees(180).asRadians(), dAngle::PI) << "from degrees to radians";
-
-}
-
-TEST_F(AngleTest, FloatConversions) {
-
-	ASSERT_EQ(fAngle::ZERO.asDegrees(), 0.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::HALF.asDegrees(), 180.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::fromDegrees(180).asRadians(), fAngle::PI) << "from degrees to radians";
-
-}
+#include <memory>
+#include <ostream>
+#include <unordered_map>
+#include <list>
 
 
-TEST_F(AngleTest, Normalize) {
 
-	
-	ASSERT_NEAR(
-		dAngle::fromDegrees(390).normalize().asDegrees(),
-		30.0,
-		dAngle::EPSILON
-	) << "normalize to [0, 360]";
+namespace openspace {
 
-
-	dAngle a = dAngle::fromDegrees(190);
-	a.normalizeAround(dAngle::ZERO);
-	ASSERT_NEAR(
-		a.asDegrees(),
-		-170,
-		dAngle::EPSILON
-	) << "normalize to [-180,180]";
+	// Templated class implementing a Least-Recently-Used Cache
+	template<typename KeyType, typename ValueType>
+	class LRUCache {
+	public:
+		LRUCache(size_t size);
+		~LRUCache();
 
 
-	dAngle b = dAngle::fromDegrees(190);
-	b.normalizeAround(dAngle::fromDegrees(90));
-	ASSERT_NEAR(
-		b.asDegrees(),
-		190,
-		dAngle::EPSILON
-	) << "normalize to [-90,270]";
+		void put(const KeyType& key, const ValueType& value);
+		bool exist(const KeyType& key) const;
+		ValueType get(const KeyType& key);
 
 
-	dAngle c = dAngle::fromDegrees(360);
-	c.normalizeAround(dAngle::fromDegrees(1083.2));
-	ASSERT_NEAR(
-		c.asDegrees(),
-		1080,
-		dAngle::EPSILON
-		) << "normalize to [903.2, 1263.2]";
-}
+	private:
+		void clean();
 
 
-TEST_F(AngleTest, Clamp) {
+	// Member varialbes
+	private:
+		
+		std::list<std::pair<KeyType, ValueType>> _itemList;
+		std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
+		size_t _cacheSize;
 
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
-
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
+	};
 
 
-TEST_F(AngleTest, ConstClamp) {
-	
-	const dAngle a = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		a.getClamped(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
+} // namespace openspace
 
-	const dAngle b = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		b.getClamped(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
+
+#include <modules/globebrowsing/other/lrucache.inl>
+
+#endif // __LRU_CACHE_H__

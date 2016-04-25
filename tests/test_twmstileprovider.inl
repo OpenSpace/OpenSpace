@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/rendering/twmstileprovider.h>
+#include <modules/globebrowsing/other/twmstileprovider.h>
 #include <thread>
 
 #define _USE_MATH_DEFINES

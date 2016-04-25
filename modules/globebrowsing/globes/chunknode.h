@@ -22,98 +22,89 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __QUADTREE_H__
+#define __QUADTREE_H__
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/../modules/globebrowsing/geodetics/angle.h>
-
-#include <fstream>
 #include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-using namespace openspace;
+#include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/patchrenderer.h>
 
-class AngleTest : public testing::Test {};
 
-TEST_F(AngleTest, DoubleConversions) {
+
+// forward declaration
+namespace openspace {
+	class ChunkLodGlobe;
+}
+
+
+namespace openspace {
+
+enum Quad {
+	NORTH_WEST,
+	NORTH_EAST,
+	SOUTH_WEST,
+	SOUTH_EAST
+};
+
+
+struct ChunkIndex {
+	int x, y, level;
+
+	std::vector<ChunkIndex> childIndices() const {
+		return {
+			{ 2 * x + 0, 2 * y + 0, level + 1 },
+			{ 2 * x + 1, 2 * y + 0, level + 1 },
+			{ 2 * x + 0, 2 * y + 1, level + 1 },
+			{ 2 * x + 1, 2 * y + 1, level + 1 },
+		};
+	}
+
+
+};
+
+
+class ChunkNode {
+public:
+	ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
+	~ChunkNode();
+
+
+	void split(int depth = 1);
+	void merge();
+
+	bool isRoot() const;
+	bool isLeaf() const;
 	
-	ASSERT_EQ(dAngle::fromRadians(0).asDegrees(), 0) << "from radians to degrees";
-	ASSERT_EQ(dAngle::HALF.asDegrees(), 180) << "from radians to degrees";
-	ASSERT_EQ(dAngle::fromDegrees(180).asRadians(), dAngle::PI) << "from degrees to radians";
+	const ChunkNode& getChild(Quad quad) const;
 
-}
+	void render(const RenderData& data, ChunkIndex);
 
-TEST_F(AngleTest, FloatConversions) {
-
-	ASSERT_EQ(fAngle::ZERO.asDegrees(), 0.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::HALF.asDegrees(), 180.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::fromDegrees(180).asRadians(), fAngle::PI) << "from degrees to radians";
-
-}
+	static int instanceCount;
+	static int renderedPatches;
 
 
-TEST_F(AngleTest, Normalize) {
+private:
 
+	void internalRender(const RenderData& data, ChunkIndex&);
+	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex&);
+	int calculateDesiredLevel(const RenderData& data, const ChunkIndex&);
 	
-	ASSERT_NEAR(
-		dAngle::fromDegrees(390).normalize().asDegrees(),
-		30.0,
-		dAngle::EPSILON
-	) << "normalize to [0, 360]";
-
-
-	dAngle a = dAngle::fromDegrees(190);
-	a.normalizeAround(dAngle::ZERO);
-	ASSERT_NEAR(
-		a.asDegrees(),
-		-170,
-		dAngle::EPSILON
-	) << "normalize to [-180,180]";
-
-
-	dAngle b = dAngle::fromDegrees(190);
-	b.normalizeAround(dAngle::fromDegrees(90));
-	ASSERT_NEAR(
-		b.asDegrees(),
-		190,
-		dAngle::EPSILON
-	) << "normalize to [-90,270]";
-
-
-	dAngle c = dAngle::fromDegrees(360);
-	c.normalizeAround(dAngle::fromDegrees(1083.2));
-	ASSERT_NEAR(
-		c.asDegrees(),
-		1080,
-		dAngle::EPSILON
-		) << "normalize to [903.2, 1263.2]";
-}
-
-
-TEST_F(AngleTest, Clamp) {
-
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
-
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
-
-
-TEST_F(AngleTest, ConstClamp) {
 	
-	const dAngle a = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		a.getClamped(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
+	ChunkNode* _parent;
+	std::unique_ptr<ChunkNode> _children[4];
 
-	const dAngle b = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		b.getClamped(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
+	ChunkLodGlobe& _owner;
+
+	GeodeticPatch _patch;
+	
+};
+
+} // namespace openspace
+
+
+
+#endif // __QUADTREE_H__

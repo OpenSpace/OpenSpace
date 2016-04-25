@@ -22,98 +22,105 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __LATLON_H__
+#define __LATLON_H__
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/../modules/globebrowsing/geodetics/angle.h>
-
-#include <fstream>
 #include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-using namespace openspace;
 
-class AngleTest : public testing::Test {};
+// Using double precision
+typedef double Scalar;
+typedef glm::dvec2 Vec2;
+typedef glm::dvec3 Vec3;
 
-TEST_F(AngleTest, DoubleConversions) {
+namespace openspace {
+
+
+
+
+
+struct Geodetic2 {
+	Geodetic2();
+	Geodetic2(Scalar latitude, Scalar longitude);
+	Geodetic2(const Geodetic2& src);
 	
-	ASSERT_EQ(dAngle::fromRadians(0).asDegrees(), 0) << "from radians to degrees";
-	ASSERT_EQ(dAngle::HALF.asDegrees(), 180) << "from radians to degrees";
-	ASSERT_EQ(dAngle::fromDegrees(180).asRadians(), dAngle::PI) << "from degrees to radians";
+	static Geodetic2 fromCartesian(const Vec3& v);
+	Vec3 asUnitCartesian() const;
+	Vec2 toLonLatVec2() const;
 
-}
+	inline bool operator==(const Geodetic2& other) const;
+	inline bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
 
-TEST_F(AngleTest, FloatConversions) {
+	inline Geodetic2 operator+(const Geodetic2& other) const;
+	inline Geodetic2 operator-(const Geodetic2& other) const;
+	inline Geodetic2 operator*(Scalar scalar) const;
+	inline Geodetic2 operator/(Scalar scalar) const;
 
-	ASSERT_EQ(fAngle::ZERO.asDegrees(), 0.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::HALF.asDegrees(), 180.0) << "from radians to degrees";
-	ASSERT_EQ(fAngle::fromDegrees(180).asRadians(), fAngle::PI) << "from degrees to radians";
-
-}
+	Scalar lat;
+	Scalar lon;
+};
 
 
-TEST_F(AngleTest, Normalize) {
 
+
+class GeodeticPatch {
+public:
+	GeodeticPatch(Scalar, Scalar, Scalar, Scalar);
+	GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
+	GeodeticPatch(const GeodeticPatch& patch);
+
+
+	void setCenter(const Geodetic2&);
+	void setHalfSize(const Geodetic2&);
 	
-	ASSERT_NEAR(
-		dAngle::fromDegrees(390).normalize().asDegrees(),
-		30.0,
-		dAngle::EPSILON
-	) << "normalize to [0, 360]";
+
+	/**
+		Returns the minimal bounding radius that together with the LatLonPatch's
+		center point represents a sphere in which the patch is completely contained
+	*/
+	Scalar minimalBoundingRadius() const;
+
+	/**
+		Returns the area of the patch with unit radius
+	*/
+	Scalar unitArea() const;
 
 
-	dAngle a = dAngle::fromDegrees(190);
-	a.normalizeAround(dAngle::ZERO);
-	ASSERT_NEAR(
-		a.asDegrees(),
-		-170,
-		dAngle::EPSILON
-	) << "normalize to [-180,180]";
+	Geodetic2 northWestCorner() const;
+	Geodetic2 northEastCorner() const;
+	Geodetic2 southWestCorner() const;
+	Geodetic2 southEastCorner() const;
 
+	/**
+	 * Clamps a point to the patch region
+	 */
+	Geodetic2 clamp(const Geodetic2& p) const;
 
-	dAngle b = dAngle::fromDegrees(190);
-	b.normalizeAround(dAngle::fromDegrees(90));
-	ASSERT_NEAR(
-		b.asDegrees(),
-		190,
-		dAngle::EPSILON
-	) << "normalize to [-90,270]";
+	/**
+	 * Returns the corner of the patch that is closest to the given point p
+	 */
+	Geodetic2 closestCorner(const Geodetic2& p) const;
 
-
-	dAngle c = dAngle::fromDegrees(360);
-	c.normalizeAround(dAngle::fromDegrees(1083.2));
-	ASSERT_NEAR(
-		c.asDegrees(),
-		1080,
-		dAngle::EPSILON
-		) << "normalize to [903.2, 1263.2]";
-}
-
-
-TEST_F(AngleTest, Clamp) {
-
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
-
-	ASSERT_EQ(
-		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
-
-
-TEST_F(AngleTest, ConstClamp) {
+	/**
+	 * Returns a point on the patch that minimizes the great-circle distance to
+	 * the given point p.
+	 */
+	Geodetic2 closestPoint(const Geodetic2& p) const;
 	
-	const dAngle a = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		a.getClamped(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
-		) << "clamp [0, 180]";
 
-	const dAngle b = dAngle::fromDegrees(390);
-	ASSERT_EQ(
-		b.getClamped(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
-		) << "clamp [0, 360]";
-}
+	const Geodetic2& center() const;
+	const Geodetic2& halfSize() const;
+	Geodetic2 size() const;
+
+private:
+	Geodetic2 _center;
+	Geodetic2 _halfSize;
+
+};
+
+} // namespace openspace
+
+#endif // __LATLON_H__
