@@ -63,6 +63,7 @@ namespace openspace {
 
         unique_ptr<ProgramObject> _programObject;
         TextureTileSet _tileSet;
+        
     };
 
 

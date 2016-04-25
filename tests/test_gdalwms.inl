@@ -25,38 +25,32 @@
 #include "gtest/gtest.h"
 
 #include "gdal.h"
-
 #include "gdal_priv.h"
 
 #include <ogr_spatialref.h>
 
 
 #include "cpl_conv.h"
+#include "cpl_string.h"
 
-//#include "wms/wmsdriver.h"
+// Error: cannot open source file "wms/wmsdriver.h"
+//#include "wms/wmsdriver.h" 
+
+// Error: cannot open source file "wms/wmsmetadataset.h"
 //#include "wms/wmsmetadataset.h"
 
 
 class GdalWmsTest : public testing::Test {};
 
 TEST_F(GdalWmsTest, Simple) {
-	//GDALRegister_WMS();
+    GDALDataset *poDataset;
+    GDALAllRegister();
+    
+    std::string testFile = absPath("../data/scene/debugglobe/map_service_configs/TERRA_CR_B143_2016-04-12.wms");
 
+    poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
 
+    // This assertion fails
+    ASSERT_NE(poDataset, nullptr) << "Failed to load testFile";
 
-	GDALWMSDataset* wms_dataset = GDALOpen("../test.xml", GA_ReadOnly);
-	if (wms_dataset)
-	{
-		;
-	}
-
-
-	/*
-	GDALDataset  *poDataset;
-	GDALAllRegister();
-	poDataset = (GDALDataset *)GDALOpen("filename", GA_ReadOnly);
-	if (poDataset == NULL)
-	{
-		std::cout << "NULL" << std::endl;
-	}*/
 }
