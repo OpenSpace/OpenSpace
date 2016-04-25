@@ -247,51 +247,16 @@ float* DataPlane::readData(){
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();
+        int numSelected = selectedOptions.size();
 
-        std::vector<float> min; 
-        std::vector<float> max;
+        std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
+        std::vector<float> max(numSelected, std::numeric_limits<float>::min());
 
-        std::vector<int> logmean;
-
-        std::vector<float> sum;
-        std::vector<float> mean;
-        std::vector<float> standardDeviation;
-
-        std::vector<std::vector<float>> optionValues;
+        std::vector<int> logmean(numSelected, 0);
+        std::vector<float> sum(numSelected, 0.0f);
+        std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
         
-        // HISTOGRAM
-        // number of levels/bins/values
-        const int levels = 512;    
-        // Normal Histogram where "levels" is the number of steps/bins
-        std::vector<std::vector<int>> histogram;
-        // Maps the old levels to new ones. 
-        std::vector<std::vector<float>> newLevels;
-
-        // maps the data values to the histogram bin/index/level
-        auto mapToHistogram = [levels](float val, float varMin, float varMax) {
-            float probability = (val-varMin)/(varMax-varMin);
-            float mappedValue = probability * levels;
-            return glm::clamp(mappedValue, 0.0f, static_cast<float>(levels - 1));
-        };
-        
-
-        for(int i=0; i < selectedOptions.size(); i++){
-            min.push_back(std::numeric_limits<float>::max());
-            max.push_back(std::numeric_limits<float>::min());
-
-            sum.push_back(0);
-            logmean.push_back(0);
-
-            std::vector<float> v;
-            optionValues.push_back(v);
-            
-            //initialize histogram for chosen values
-            histogram.push_back( std::vector<int>(levels, 0) );
-            //initialize the newLevels for chosen values
-            newLevels.push_back( std::vector<float>(levels, 0.0f) );
-        }
-
-        float* combinedValues = new float[3*_dimensions.x*_dimensions.y];
+        float* data = new float[3*_dimensions.x*_dimensions.y]{0.0f};
 
         int numValues = 0;
         while(getline(memorystream, line)){
@@ -307,7 +272,7 @@ float* DataPlane::readData(){
             }
 
             if(value.size()){
-                for(int i=0; i<optionValues.size(); i++){
+                for(int i=0; i<numSelected; i++){
 
                     float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
                     optionValues[i].push_back(v); 
@@ -326,96 +291,109 @@ float* DataPlane::readData(){
             LWARNING("Number of values read and expected are not the same");
             return nullptr;
         }
-    
-        for(int i=0; i<optionValues.size(); i++){    
-            //Calculate the mean
-            mean.push_back((1.0 / numValues) * sum[i]);
-            //Calculate the Standard Deviation
-            standardDeviation.push_back(sqrt (((pow(sum[i], 2.0)) - ((1.0/numValues) * (pow(sum[i],2.0)))) / (numValues - 1.0)));
-            //calulate log mean
-            logmean[i] /= numValues;   
-                
+        
+        for(int i=0; i<numSelected; i++){
+            if(_useRGB.value() && numSelected <= 3){
+                processData(data, i, optionValues[i], min[i], max[i], sum[i], numSelected, logmean[i]);
+            } else {
+                processData(data, i, optionValues[i], min[i], max[i], sum[i], 1, logmean[i]);
+            }
+            //processData(data, i, optionValues[i], min[i], max[i], sum[i], logmean[i]);
         }
         
-        //HISTOGRAM FUNCTIONALITY
-        //======================
-        if(_useHistogram.value()){
-            for(int j=0; j<optionValues.size(); j++){ 
-                for(int i = 0; i < numValues; i++){
-                    
-                    float v = optionValues[j][i];
-                    float pixelVal = mapToHistogram(v, min[j], max[j]);       
-                    histogram[j][(int)pixelVal]++;
-                    optionValues[j][i] = pixelVal;
-                }
-                
-                // Map mean and standard deviation to histogram levels (Not sure about this)
-                mean[j] = mapToHistogram(mean[j] , min[j], max[j]);
-                logmean[j] = mapToHistogram(logmean[j] , min[j], max[j]);
-                standardDeviation[j] = mapToHistogram(standardDeviation[j], min[j], max[j]);
-                min[j] = 0.0f;
-                max[j] = levels - 1.0f;
-            }
+        return data;
         
-        
-            //Calculate the cumulative distributtion function (CDF)
-            for(int j=0; j<optionValues.size(); j++){ 
-                float previousCdf = 0.0f;
-                for(int i = 0; i < levels; i++){
-                    
-                    float probability = histogram[j][i] / (float)numValues; 
-                    float cdf  = previousCdf + probability;
-                    cdf = glm::clamp(cdf, 0.0f, 1.0f); //just in case
-                    newLevels[j][i] = cdf * (levels-1);
-                    previousCdf = cdf;
-                }
-            }
-        }
-        //======================
-        
-        for(int i=0; i< numValues; i++){
-            combinedValues[3*i+0] = 0;
-            combinedValues[3*i+1] = 0;
-            combinedValues[3*i+2] = 0;
-            for(int j=0; j<optionValues.size(); j++){
-
-                float v = optionValues[j][i];
-
-                // if use histogram get the equalized values
-                if(_useHistogram.value()){
-                    v = newLevels[j][(int)v];
-                    
-                    // Map mean and standard deviation to new histogram levels (Not sure about this)
-                    mean[j] =  newLevels[j][(int) mean[j]];
-                    logmean[j] =  newLevels[j][(int) logmean[j]];
-                    standardDeviation[j] = newLevels[j][(int) standardDeviation[j]];
-                }
-
-                if(_useRGB.value() && (optionValues.size() <= 3)){
-                    
-                    if(_useLog.value()){
-                        combinedValues[3*i+j] += normalizeWithLogarithm(v, logmean[j]);
-                    }else{
-                        combinedValues[3*i+j] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
-                    }
-                    
-                }else{
-                    if(_useLog.value()){
-                        combinedValues[3*i+0] += normalizeWithLogarithm(v, logmean[j]);
-                    }else{
-                        combinedValues[3*i+0] += normalizeWithStandardScore(v, mean[j], standardDeviation[j]);
-                    }
-                    combinedValues[3*i+0] /= selectedOptions.size();
-                }
-            }
-        }
-        return combinedValues;
-    
     } else {
-        LWARNING("Noting in memory buffer, are you connected to the information super highway?");
+        LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
         return nullptr;
     }
 } 
+
+void DataPlane::processData(float* outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum, int numOutputChannels, float logmean){
+ 
+    // HISTOGRAM
+    // number of levels/bins/values
+    const int levels = 512;    
+    // Normal Histogram where "levels" is the number of steps/bins
+    std::vector<int> histogram = std::vector<int>(levels, 0);
+    // Maps the old levels to new ones. 
+    std::vector<float> newLevels = std::vector<float>(levels, 0.0f);
+    
+    const int numValues = inputData.size(); 
+    
+    // maps the data values to the histogram bin/index/level
+    auto mapToHistogram = [levels](float val, float varMin, float varMax) {
+        float probability = (val-varMin)/(varMax-varMin);
+        float mappedValue = probability * levels;
+        return glm::clamp(mappedValue, 0.0f, static_cast<float>(levels - 1));
+    };
+    
+    //Calculate the mean
+    float mean = (1.0 / numValues) * sum;
+    //Calculate the Standard Deviation
+    float standardDeviation = sqrt (((pow(sum, 2.0)) - ((1.0/numValues) * (pow(sum,2.0)))) / (numValues - 1.0));
+    //calulate log mean
+    logmean /= numValues;   
+    
+    //HISTOGRAM FUNCTIONALITY
+    //======================
+    if(_useHistogram.value()){
+        for(int i = 0; i < numValues; i++){
+            float v = inputData[i];
+            float pixelVal = mapToHistogram(v, min, max);       
+            histogram[(int)pixelVal]++;
+            inputData[i] = pixelVal;
+        }
+        
+        // Map mean and standard deviation to histogram levels
+        mean = mapToHistogram(mean , min, max);
+        logmean = mapToHistogram(logmean , min, max);
+        standardDeviation = mapToHistogram(standardDeviation, min, max);
+        min = 0.0f;
+        max = levels - 1.0f;
+
+        //Calculate the cumulative distributtion function (CDF)
+        float previousCdf = 0.0f;
+        for(int i = 0; i < levels; i++){
+            
+            float probability = histogram[i] / (float)numValues; 
+            float cdf  = previousCdf + probability;
+            cdf = glm::clamp(cdf, 0.0f, 1.0f); //just in case
+            newLevels[i] = cdf * (levels-1);
+            previousCdf = cdf;
+        }
+    }
+    //======================
+    
+    for(int i=0; i< numValues; i++){
+        
+        float v = inputData[i];
+   
+        // if use histogram get the equalized values
+        if(_useHistogram.value()){
+            v = newLevels[(int)v];
+            
+            // Map mean and standard deviation to new histogram levels
+            mean =  newLevels[(int) mean];
+            logmean =  newLevels[(int) logmean];
+            standardDeviation = newLevels[(int) standardDeviation];
+        }
+        
+        // Normalize values
+        if(_useLog.value()){
+            v = normalizeWithLogarithm(v, logmean);
+        }else{
+            v = normalizeWithStandardScore(v, mean, standardDeviation);
+        }
+        
+        if(numOutputChannels == 1 && inputChannel > 0){
+            // take the average.
+            outputData[3*i+0] = ( outputData[3*i+0] * inputChannel + v ) / (inputChannel+1);
+        } else {            
+            outputData[3*i+inputChannel] += v;
+        }
+    }
+}
 
 float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){
     
