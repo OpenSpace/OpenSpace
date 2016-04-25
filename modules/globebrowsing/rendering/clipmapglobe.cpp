@@ -28,7 +28,7 @@
 
 #include <modules/globebrowsing/rendering/clipmapglobe.h>
 
-#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -71,16 +71,10 @@ namespace openspace {
 
 		// ---------
 		// init Renderer
-		auto patchRenderer = new ClipMapPatchRenderer(shared_ptr<ClipMapGeometry>(new ClipMapGeometry(32)));
-		_patchRenderer.reset(patchRenderer);
-		auto smallestPatchRenderer = new ClipMapPatchRenderer(shared_ptr<GridGeometry>(
-			new GridGeometry(
-				32,
-				32,
-				Geometry::Positions::No,
-				Geometry::TextureCoordinates::Yes,
-				Geometry::Normals::No)));
-		_smallestPatchRenderer.reset(smallestPatchRenderer);
+		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(32)));
+		_outerPatchRenderer.reset(outerPatchRenderer);
+		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(32)));
+		_innerPatchRenderer.reset(innerPatchRenderer);
 	}
 
 	ClipMapGlobe::~ClipMapGlobe() {
@@ -108,10 +102,10 @@ namespace openspace {
 		for (size_t i = minDepth; i < maxDepth; i++)
 		{
 			LatLon patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
-			_patchRenderer->renderPatch(patchSize, data, 6.3e6);
+			_outerPatchRenderer->renderPatch(patchSize, data, 6.3e6);
 		}
 		LatLon patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
-		_smallestPatchRenderer->renderPatch(patchSize, data, 6.3e6);
+		_innerPatchRenderer->renderPatch(patchSize, data, 6.3e6);
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {

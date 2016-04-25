@@ -22,57 +22,32 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#ifndef __GDALDATACONVERTER_H__
+#define __GDALDATACONVERTER_H__
 
-#ifndef __GRIDGEOMETRY_H__
-#define __GRIDGEOMETRY_H__
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <glm/glm.hpp>
+#include "gdal_priv.h"
 
-#include <modules/globebrowsing/rendering/geometry.h>
-
-#include <vector>
+#include <memory>
 
 namespace openspace {
 
-class GridGeometry : public Geometry
-{
-public:
-	GridGeometry(
-		unsigned int xRes,
-		unsigned int yRes,
-		Positions usePositions = Positions::No, 
-		TextureCoordinates useTextures = TextureCoordinates::No, 
-		Normals useNormals = Normals::No
-	);
+	using namespace ghoul::opengl;
 
-	~GridGeometry();
+	class GdalDataConverter
+	{
+	public:
+		GdalDataConverter();
+		~GdalDataConverter();
 
-	inline const unsigned int xResolution() const;
-	inline const unsigned int yResolution() const;
+		std::shared_ptr<Texture> convertToOpenGLTexture(GDALDataset* dataSet);
 
-	inline static size_t numElements(unsigned int xRes, unsigned int yRes);
-	static size_t numVertices(unsigned int xRes, unsigned int yRes);
+	private:
 
-private:
-	static std::vector<GLuint> CreateElements(unsigned int xRes, unsigned int yRes);
-	static std::vector<glm::vec4> CreatePositions(
-		unsigned int xRes,
-		unsigned int yRes,
-		float xSize = 1.0f,
-		float ySize = 1.0f,
-		float xOffset = 0.0f,
-		float yOffset = 0.0f);
-	static std::vector<glm::vec2> CreateTextureCoordinates(
-		unsigned int xRes,
-		unsigned int yRes);
-	static std::vector<glm::vec3> CreateNormals(unsigned int xRes, unsigned int yRes);
+	};
 
-	inline static void validate(unsigned int xRes, unsigned int yRes);
-	inline void validateIndices(unsigned int x, unsigned int y);
-
-	unsigned int _xRes;
-	unsigned int _yRes;
-};
 } // namespace openspace
-#endif // __GRIDGEOMETRY_H__
+
+#endif  // __GDALDATACONVERTER_H__

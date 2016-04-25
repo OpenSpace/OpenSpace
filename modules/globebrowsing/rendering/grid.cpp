@@ -22,88 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
-
-#include <memory>
-#include <glm/glm.hpp>
-
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-#include <modules/globebrowsing/datastructures/latlon.h>
 #include <modules/globebrowsing/rendering/grid.h>
-#include <modules/globebrowsing/rendering/clipmapgrid.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
-#include <modules/globebrowsing/rendering/texturetileset.h>
 
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
+namespace {
+	const std::string _loggerCat = "Grid";
 }
-}
-
 
 namespace openspace {
 
-    class LonLatPatch;
-    class Geometry;
-    
-    using std::shared_ptr;
-    using std::unique_ptr;
-    using ghoul::opengl::ProgramObject;
+	Grid::Grid(
+		int xSegments,
+		int ySegments,
+		Geometry::Positions usePositions,
+		Geometry::TextureCoordinates useTextures,
+		Geometry::Normals useNormals)
+	: _xSegments(xSegments)
+	, _ySegments(ySegments)
+{
 
-    class PatchRenderer {
-    public:
-        
-        PatchRenderer();
-        ~PatchRenderer();
+}
 
-    protected:
+Grid::~Grid()
+{
 
-        unique_ptr<ProgramObject> _programObject;
-        TextureTileSet _tileSet;
-    };
+}
 
+Geometry& Grid::geometry()
+{
+	return *_geometry;
+}
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //							PATCH RENDERER SUBCLASSES								//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    class LatLonPatchRenderer : public PatchRenderer {
-    public:
-        LatLonPatchRenderer(shared_ptr<Grid> grid);
-
-        void renderPatch(
-            const LatLonPatch& patch,
-            const RenderData& data, 
-            double radius);
-
-        void renderPatch(
-            const LatLonPatch& patch, 
-            const RenderData& data, 
-            double radius, 
-            const TileIndex& ti);
-
-    private:
-        TwmsTileProvider tileProvider;
-        shared_ptr<Grid> _grid;
-
-    };
-
-
-
-    class ClipMapPatchRenderer : public PatchRenderer {
-    public:
-        ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
-
-        void renderPatch(
-            const LatLon& patchSize,
-            const RenderData& data,
-            double radius);
-    private:
-        shared_ptr<ClipMapGrid> _grid;
-    };
-}  // namespace openspace
-
-#endif  // __LATLONPATCH_H__
+}// namespace openspace

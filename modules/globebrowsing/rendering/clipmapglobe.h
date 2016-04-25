@@ -31,7 +31,7 @@
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/rendering/geometry.h>
-#include <modules/globebrowsing/rendering/gridgeometry.h>
+#include <modules/globebrowsing/rendering/grid.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/rendering/clipmappyramid.h>
@@ -57,8 +57,8 @@ namespace openspace {
 		void update(const UpdateData& data) override;
 
 	private:		
-		std::unique_ptr<ClipMapPatchRenderer> _patchRenderer;
-		std::unique_ptr<ClipMapPatchRenderer> _smallestPatchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
+		std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
 		
 		ClipMapPyramid _clipMapPyramid;
 

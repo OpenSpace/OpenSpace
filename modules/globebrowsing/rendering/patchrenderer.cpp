@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 
-#include <modules/globebrowsing/rendering/clipmapgeometry.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -41,7 +41,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "LatLonPatch";
+	const std::string _loggerCat = "PatchRenderer";
 
 	const std::string keyFrame = "Frame";
 	const std::string keyGeometry = "Geometry";
@@ -55,9 +55,8 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//							PATCH RENDERER											//
 	//////////////////////////////////////////////////////////////////////////////////////
-	PatchRenderer::PatchRenderer(shared_ptr<Geometry> geometry)
-		: _geometry(geometry)
-		, _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, - M_PI), 0)
+	PatchRenderer::PatchRenderer()
+		: _tileSet(LatLon(M_PI, M_PI * 2), LatLon(M_PI / 2, -M_PI), 0)
 	{
 
 	}
@@ -75,8 +74,9 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								LATLON PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Geometry> geometry) 
-		: PatchRenderer(geometry)
+	LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
+		: PatchRenderer()
+		, _grid(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -142,6 +142,7 @@ namespace openspace {
 		_programObject->setUniform("uvTransformPatchToTile", uvTransform);
 
 		LatLon swCorner = patch.southWestCorner();
+		_programObject->setUniform("segmentsPerPatch", _grid->xSegments());
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
@@ -152,7 +153,7 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_geometry->drawUsingActiveProgram();
+		_grid->geometry().drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
@@ -163,8 +164,9 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//								CLIPMAP PATCH RENDERER								//
 	//////////////////////////////////////////////////////////////////////////////////////
-	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<Geometry> geometry)
-		: PatchRenderer(geometry)
+	ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid)
+		: PatchRenderer()
+		, _grid(grid)
 	{
 		_programObject = OsEng.renderEngine().buildRenderProgram(
 			"LatLonSphereMappingProgram",
@@ -191,7 +193,7 @@ namespace openspace {
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 
 		// Snap patch position
-		int segmentsPerPatch = 32;
+		int segmentsPerPatch = _grid->segments();
 		LatLon stepSize = LatLon(
 			patchSize.lat / segmentsPerPatch,
 			patchSize.lon / segmentsPerPatch);
@@ -232,6 +234,7 @@ namespace openspace {
 		_programObject->setUniform(
 			"modelViewProjectionTransform",
 			data.camera.projectionMatrix() * viewTransform *  modelTransform);
+		_programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
 		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
 		_programObject->setUniform("globeRadius", float(radius));
@@ -242,7 +245,7 @@ namespace openspace {
 		glCullFace(GL_BACK);
 
 		// render
-		_geometry->drawUsingActiveProgram();
+		_grid->geometry().drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();

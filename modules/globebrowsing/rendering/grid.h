@@ -22,49 +22,53 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGEOMETRY_H__
-#define __CLIPMAPGEOMETRY_H__
+#ifndef __GRIDGEOMETRY_H__
+#define __GRIDGEOMETRY_H__
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <glm/glm.hpp>
 
 #include <modules/globebrowsing/rendering/geometry.h>
 
 #include <vector>
-#include <glm/glm.hpp>
 
 namespace openspace {
 
-class ClipMapGeometry : public Geometry
+class Grid
 {
 public:
-	ClipMapGeometry(
-		unsigned int resolution,
-		Positions usePositions = Positions::No, 
-		TextureCoordinates useTextures = TextureCoordinates::Yes, 
-		Normals useNormals = Normals::No
-	);
+	Grid(
+		int xSegments,
+		int ySegments,
+		Geometry::Positions usePositions = Geometry::Positions::No,
+		Geometry::TextureCoordinates useTextures = Geometry::TextureCoordinates::No,
+		Geometry::Normals useNormals = Geometry::Normals::No);
+	~Grid();
 
-	~ClipMapGeometry();
+	Geometry& geometry();
 
-	const unsigned int resolution() const;
+	/**
+	Returns the number of grid cells in the x direction. Hence the number of vertices
+	in the x direction is xResolution + 1.
+	*/
+	virtual int xSegments() const = 0;
+	
+	/**
+	Returns the number of grid cells in the y direction. Hence the number of vertices
+	in the y direction is xResolution + 1.
+	*/
+	virtual int ySegments() const = 0;
 
-	static size_t numVerticesBottom(unsigned int resolution);
-	static size_t numVerticesLeft(unsigned int resolution);
-	static size_t numVerticesRight(unsigned int resolution);
-	static size_t numVerticesTop(unsigned int resolution);
+protected:
+	virtual std::vector<GLuint>		CreateElements(				int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec4>	CreatePositions(			int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xSegments, int ySegments) = 0;
+	virtual std::vector<glm::vec3>	CreateNormals(				int xSegments, int ySegments) = 0;
 
-	static size_t numElements(unsigned int resolution);
-	static size_t numVertices(unsigned int resolution);
-private:
-	static std::vector<GLuint>		CreateElements(unsigned int resoluion);
-	static std::vector<glm::vec4>	CreatePositions(unsigned int resolution);
-	static std::vector<glm::vec2>	CreateTextureCoordinates(unsigned int resolution);
-	static std::vector<glm::vec3>	CreateNormals(unsigned int resolution);
+	std::unique_ptr<Geometry> _geometry;
 
-	static void validate(unsigned int resolution);
-
-	// _resolution defines how many grid squares the geometry has in one direction.
-	// In its uncontracted state, the clipmap geometry will have two extra grid squares
-	// in each direction.
-	unsigned int _resolution;
+	const int _xSegments;
+	const int _ySegments;
 };
 } // namespace openspace
-#endif // __CLIPMAPGEOMETRY_H__
+#endif // __GRIDGEOMETRY_H__

@@ -134,7 +134,7 @@ namespace openspace {
 		//glCullFace(GL_BACK);
 
 		// render
-		_grid.drawUsingActiveProgram();
+		_grid.geometry().drawUsingActiveProgram();
 
 		// disable shader
 		_programObject->deactivate();
