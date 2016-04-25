@@ -38,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.h
 )
@@ -58,7 +57,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/dynamicephemeris.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.cpp
 )
