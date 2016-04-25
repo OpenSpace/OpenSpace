@@ -21,7 +21,7 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-/*
+
 
 #include <modules/globebrowsing/rendering/twmstileprovider.h>
 
@@ -43,10 +43,14 @@ namespace {
 namespace openspace {
 
 	TwmsTileProvider::TwmsTileProvider()
-	: _tileCache(500) // setting cache size
+	: _tileCache(5000) // setting cache size
+	, _fileFutureCache(5000) // setting cache size
 	{
 		int downloadApplicationVersion = 1;
-		DownloadManager::initialize("../tmp_openspace_downloads/", downloadApplicationVersion);
+		if (!DownloadManager::isInitialized()) {
+			DownloadManager::initialize("../tmp_openspace_downloads/", downloadApplicationVersion);
+		}
+		
 	}
 
 	TwmsTileProvider::~TwmsTileProvider(){
@@ -59,32 +63,66 @@ namespace openspace {
 		if (_tileCache.exist(hashkey)) {
 			return _tileCache.get(hashkey);
 		}
+		else if (_fileFutureCache.exist(hashkey)) {
+			if (_fileFutureCache.get(hashkey)->isFinished) {
+				std::string fileName = _fileFutureCache.get(hashkey)->filePath;
+				std::string filePath = "tiles/" + fileName;
+				std::shared_ptr<Texture> texture = loadAndInitTextureDisk(filePath);
+				LDEBUG("Downloaded " << fileName);
+				_tileCache.put(hashkey, texture);
+			}
+		}
 		else {
-			downloadTileAndPutInCache(tileIndex);
+			std::shared_ptr<DownloadManager::FileFuture> fileFuture = requestTile(tileIndex);
+			_fileFutureCache.put(hashkey, fileFuture);
 		}
 		return nullptr;
 	}
 
+	std::shared_ptr<Texture> TwmsTileProvider::loadAndInitTextureDisk(std::string filePath) {
+		auto textureReader = ghoul::io::TextureReader::ref();
+		std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(filePath)));
+
+		// upload to gpu
+		texture->uploadTexture();
+		texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+		texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+		return texture;
+	}
 
 
-	void TwmsTileProvider::downloadTileAndPutInCache(const TileIndex& tileIndex) {
+
+	std::shared_ptr<DownloadManager::FileFuture> TwmsTileProvider::requestTile(const TileIndex& tileIndex) {
 		// download tile
 		std::stringstream ss;
-		std::string baseUrl = "https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg";
+		//std::string baseUrl = "https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg";
+		//ss << baseUrl;
+		//ss << "&TileMatrix=" << tileIndex.level;
+		//ss << "&TileCol=" << tileIndex.x;
+		//ss << "&TileRow=" << tileIndex.y;
+		// https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=0&TileCol=0&TileRow=0
+
+		std::string baseUrl = "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913";
 		ss << baseUrl;
-		ss << "&TileMatrix=" << tileIndex.level;
-		ss << "&TileCol=" << tileIndex.x;
-		ss << "&TileRow=" << tileIndex.y;
+		ss << "/" << tileIndex.level;
+		ss << "/" << tileIndex.x;
+		ss << "/" << tileIndex.y;
+		ss << ".png?1461277159335";
+		// http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/5/8/12.png?
 		std::string twmsRequestUrl = ss.str();
+		
+		ss = std::stringstream();
+		ss << tileIndex.level;
+		ss << "_" << tileIndex.x;
+		ss << "_" << tileIndex.y;
+		std::string filePath = "tiles/tile" + ss.str() + ".png";
 
 		using ghoul::filesystem::File;
-
-		std::string filename = "tiles/tile" + twmsRequestUrl.substr(baseUrl.length()) + ".jpg";
-		File localTileFile(filename);
+		File localTileFile(filePath);
 		bool overrideFile = true;
 
 
-
+		/*
 		struct OnTileDownloaded {
 			HashKey key;
 			LRUCache<HashKey, std::shared_ptr<Texture>> * tileCache;
@@ -97,21 +135,26 @@ namespace openspace {
 			}
 
 			void operator()(const DownloadManager::FileFuture& ff) const {
-				LDEBUG("Download of tile with hashkey " << key << " done!");
+				//LDEBUG("Download of tile with hashkey " << key << " done!");
 				auto textureReader = ghoul::io::TextureReader::ref();
-				std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(ff.filePath)));
+				std::string relFilePath = "tiles/" + ff.filePath;
+				std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(relFilePath)));
+
+				// upload to gpu
+				texture->uploadTexture();
+				texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
 				tileCache->put(key, texture);
 				LDEBUG("Cache updated");
 			}
 		};
-
-
 		OnTileDownloaded onTileDownloaded(tileIndex.hashKey(), &_tileCache);
+		*/
 
-		std::shared_ptr<DownloadManager::FileFuture> ff = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile, onTileDownloaded);
+		std::shared_ptr<DownloadManager::FileFuture> fileFuture = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile);
+		return fileFuture;
 
 	}
 
 
 }  // namespace openspace
-*/

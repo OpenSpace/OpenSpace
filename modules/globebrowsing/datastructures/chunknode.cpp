@@ -39,6 +39,7 @@ namespace {
 namespace openspace {
 
 int ChunkNode::instanceCount = 0;
+int ChunkNode::renderedPatches = 0;
 
 ChunkNode::ChunkNode(ChunkLodGlobe& owner, const LatLonPatch& patch, ChunkNode* parent)
 : _owner(owner)
@@ -83,6 +84,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 
 	if (isLeaf()) {
 		int desiredLevel = calculateDesiredLevel(data, traverseData);
+		desiredLevel = glm::clamp(desiredLevel, _owner.minSplitDepth, _owner.maxSplitDepth);
 		if (desiredLevel > traverseData.level) {
 			split();
 		}
@@ -100,7 +102,6 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 				requestedMergeMask |= (1 << i);
 			}
 		}
-		
 
 		// check if all children requested merge
 		if (requestedMergeMask == 0xf) {
@@ -116,9 +117,14 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
 	if (isLeaf()) {
+
+		TileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
+
 		LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-		patchRenderer.renderPatch(_patch, data, _owner.globeRadius);
+		patchRenderer.renderPatch(_patch, data, _owner.globeRadius, ti);
+		ChunkNode::renderedPatches++;
+
 	}
 	else {
 		std::vector<ChunkIndex> childIndices = traverseData.childIndices();
@@ -131,8 +137,9 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData) {
 
 
+	Vec3 globePosition = data.position.dvec3();
 	Vec3 patchNormal = _patch.center().asUnitCartesian();
-	Vec3 patchPosition = data.position.dvec3() + _owner.globeRadius * patchNormal;
+	Vec3 patchPosition = globePosition + _owner.globeRadius * patchNormal;
 
 	Vec3 cameraPosition = data.camera.position().dvec3();
 	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
@@ -141,8 +148,21 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 
 	// if camera points at same direction as latlon patch normal,
 	// we see the back side and dont have to split it
-	Scalar cosNormalCameraDirection = glm::dot(patchNormal, cameraDirection);
-	if (cosNormalCameraDirection > 0.3) {
+	//Scalar cosNormalCameraDirection = glm::dot(patchNormal, cameraDirection);
+
+	Vec3 globeToCamera = cameraPosition - globePosition;
+
+	LatLon cameraPositionOnGlobe = LatLon::fromCartesian(globeToCamera);
+	LatLon closestPatchPoint = _patch.closestPoint(cameraPositionOnGlobe);
+
+	Vec3 normalOfClosestPatchPoint = closestPatchPoint.asUnitCartesian();
+	Scalar cosPatchNormalNormalizedGlobeToCamera = glm::dot(normalOfClosestPatchPoint, glm::normalize(globeToCamera));
+
+	//LDEBUG(cosPatchNormalCameraDirection);
+
+	double cosAngleToHorizon = _owner.globeRadius / glm::length(globeToCamera);
+
+	if (cosPatchNormalNormalizedGlobeToCamera < cosAngleToHorizon) {
 		return traverseData.level - 1;
 	}
 
@@ -160,8 +180,8 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 
 	Scalar scaleFactor = 100 * _owner.globeRadius;
 	Scalar projectedScaleFactor = scaleFactor / distance;
-	int desiredDepth = floor( log2(projectedScaleFactor) );
-	return glm::clamp(desiredDepth, _owner.minSplitDepth, _owner.maxSplitDepth);
+	int desiredLevel = floor( log2(projectedScaleFactor) );
+	return desiredLevel;
 }
 
 

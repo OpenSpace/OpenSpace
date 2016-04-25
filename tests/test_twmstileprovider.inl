@@ -37,10 +37,11 @@ using namespace openspace;
 
 TEST_F(TWMSTileProviderTest, Simple) {
 
-	TwmsTileProvider tileProvider;
+	
+	TwmsTileProvider* tileProvider = new TwmsTileProvider();
 
 	TileIndex tileIndex = { 0, 0, 0 };
-	tileProvider.getTile(tileIndex);
+	tileProvider->getTile(tileIndex);
 
 	using namespace std::chrono_literals;
 	std::this_thread::sleep_for(2s);

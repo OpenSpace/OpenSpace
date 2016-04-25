@@ -84,6 +84,8 @@ public:
 	void render(const RenderData& data, ChunkIndex);
 
 	static int instanceCount;
+	static int renderedPatches;
+
 
 private:
 

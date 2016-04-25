@@ -67,7 +67,11 @@ namespace openspace {
 
 		
 		// Set e texture to test
-		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath("textures/earth_bluemarble.jpg")));
+		std::string fileName = "textures/earth_bluemarble.jpg";
+		//std::string fileName = "../../../build/tiles/tile5_8_12.png";
+		//std::string fileName = "tile5_8_12.png";
+		_testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
+		
 		if (_testTexture) {
 			LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
 			_testTexture->uploadTexture();

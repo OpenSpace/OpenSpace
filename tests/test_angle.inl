@@ -22,78 +22,98 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LRU_CACHE__
-#define __LRU_CACHE__
+#include "gtest/gtest.h"
+
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/../modules/globebrowsing/datastructures/angle.h>
+
+#include <fstream>
+#include <glm/glm.hpp>
+
+using namespace openspace;
+
+class AngleTest : public testing::Test {};
+
+TEST_F(AngleTest, DoubleConversions) {
+	
+	ASSERT_EQ(dAngle::fromRadians(0).asDegrees(), 0) << "from radians to degrees";
+	ASSERT_EQ(dAngle::HALF.asDegrees(), 180) << "from radians to degrees";
+	ASSERT_EQ(dAngle::fromDegrees(180).asRadians(), dAngle::PI) << "from degrees to radians";
+
+}
+
+TEST_F(AngleTest, FloatConversions) {
+
+	ASSERT_EQ(fAngle::ZERO.asDegrees(), 0.0) << "from radians to degrees";
+	ASSERT_EQ(fAngle::HALF.asDegrees(), 180.0) << "from radians to degrees";
+	ASSERT_EQ(fAngle::fromDegrees(180).asRadians(), fAngle::PI) << "from degrees to radians";
+
+}
 
 
-#include <ghoul/misc/assert.h>
-//#include <modules/globebrowsing/datastructures/lrucache.h>
-
-
-namespace openspace {
+TEST_F(AngleTest, Normalize) {
 
 	
-	template<typename KeyType, typename ValueType>
-	LRUCache<KeyType, ValueType>::LRUCache(size_t size)
-		: _cacheSize(size) { }
-
-	template<typename KeyType, typename ValueType>
-	LRUCache<KeyType, ValueType>::~LRUCache() {	
-		// Clean up list and map!
-	}
+	ASSERT_NEAR(
+		dAngle::fromDegrees(390).normalize().asDegrees(),
+		30.0,
+		dAngle::EPSILON
+	) << "normalize to [0, 360]";
 
 
-	//////////////////////////////
-	//		PUBLIC INTERFACE	//
-	//////////////////////////////
-
-	template<typename KeyType, typename ValueType>
-	void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value)
-	{
-		auto it = _itemMap.find(key);
-		if (it != _itemMap.end()) {
-			_itemList.erase(it->second);
-			_itemMap.erase(it);
-		}
-		_itemList.push_front(std::make_pair(key, value));
-		_itemMap.insert(std::make_pair(key, _itemList.begin()));
-		clean();
-	}
+	dAngle a = dAngle::fromDegrees(190);
+	a.normalizeAround(dAngle::ZERO);
+	ASSERT_NEAR(
+		a.asDegrees(),
+		-170,
+		dAngle::EPSILON
+	) << "normalize to [-180,180]";
 
 
-	template<typename KeyType, typename ValueType>
-	bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const
-	{
-		return _itemMap.count(key) > 0;
-	}
+	dAngle b = dAngle::fromDegrees(190);
+	b.normalizeAround(dAngle::fromDegrees(90));
+	ASSERT_NEAR(
+		b.asDegrees(),
+		190,
+		dAngle::EPSILON
+	) << "normalize to [-90,270]";
 
 
-	template<typename KeyType, typename ValueType>
-	ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key)
-	{
-		ghoul_assert(exist(key), "Key " << key << " must exist");
-		auto it = _itemMap.find(key);
-		// Move list iterator pointing to value
-		_itemList.splice(_itemList.begin(), _itemList, it->second);
-		return it->second->second;
-	}
+	dAngle c = dAngle::fromDegrees(360);
+	c.normalizeAround(dAngle::fromDegrees(1083.2));
+	ASSERT_NEAR(
+		c.asDegrees(),
+		1080,
+		dAngle::EPSILON
+		) << "normalize to [903.2, 1263.2]";
+}
 
 
+TEST_F(AngleTest, Clamp) {
 
-	//////////////////////////////
-	//		PRIVATE HELPERS		//
-	//////////////////////////////
-	template<typename KeyType, typename ValueType>
-	void LRUCache<KeyType, ValueType>::clean()
-	{
-		while (_itemMap.size() > _cacheSize) {
-			auto last_it = _itemList.end(); last_it--;
-			_itemMap.erase(last_it->first);
-			_itemList.pop_back();
-		}
-	}
+	ASSERT_EQ(
+		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::HALF).asDegrees(),
+		180,
+		) << "clamp [0, 180]";
+
+	ASSERT_EQ(
+		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::FULL).asDegrees(),
+		360,
+		) << "clamp [0, 360]";
+}
 
 
-} // namespace openspace
+TEST_F(AngleTest, ConstClamp) {
+	
+	const dAngle a = dAngle::fromDegrees(390);
+	ASSERT_EQ(
+		a.getClamped(dAngle::ZERO, dAngle::HALF).asDegrees(),
+		180,
+		) << "clamp [0, 180]";
 
-#endif // !__LRU_CACHE__
+	const dAngle b = dAngle::fromDegrees(390);
+	ASSERT_EQ(
+		b.getClamped(dAngle::ZERO, dAngle::FULL).asDegrees(),
+		360,
+		) << "clamp [0, 360]";
+}

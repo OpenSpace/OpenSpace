@@ -39,7 +39,7 @@
 
 namespace ghoul {
 namespace opengl {
-	class ProgramObject;
+    class ProgramObject;
 }
 }
 
@@ -86,6 +86,7 @@ namespace openspace {
 			const TileIndex& ti);
 	private:
 		shared_ptr<Grid> _grid;
+		TwmsTileProvider tileProvider;
 	};
 
 
@@ -101,6 +102,7 @@ namespace openspace {
 	private:
 		shared_ptr<ClipMapGrid> _grid;
 	};
+
 }  // namespace openspace
 
 #endif  // __LATLONPATCH_H__
