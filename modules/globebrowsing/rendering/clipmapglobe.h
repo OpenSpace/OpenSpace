@@ -30,7 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-#include <modules/globebrowsing/rendering/geometry.h>
+#include <modules/globebrowsing/rendering/trianglesoup.h>
 #include <modules/globebrowsing/rendering/grid.h>
 #include <modules/globebrowsing/rendering/distanceswitch.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>

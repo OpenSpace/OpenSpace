@@ -22,16 +22,16 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/geometry.h>
+#include <modules/globebrowsing/rendering/trianglesoup.h>
 
 namespace {
-	const std::string _loggerCat = "Geometry";
+	const std::string _loggerCat = "TriangleSoup";
 }
 
 namespace openspace
 {
 
-Geometry::Geometry(std::vector<unsigned int> elements,
+TriangleSoup::TriangleSoup(std::vector<unsigned int> elements,
 	Positions usePositions, TextureCoordinates useTextures, Normals useNormals)
 	: _vaoID(0)
 	,_vertexBufferID(0)
@@ -43,14 +43,14 @@ Geometry::Geometry(std::vector<unsigned int> elements,
 	setElements(elements);
 }
 
-Geometry::~Geometry() {
+TriangleSoup::~TriangleSoup() {
 	glDeleteBuffers(1, &_vertexBufferID);
 	glDeleteBuffers(1, &_elementBufferID);
 	glDeleteVertexArrays(1, &_vaoID);
 }
 
 
-void Geometry::setVertexPositions(std::vector<glm::vec4> positions) {
+void TriangleSoup::setVertexPositions(std::vector<glm::vec4> positions) {
 	_useVertexPositions = true;
 	_gpuDataNeedUpdate = true;
 	_vertexData.resize(positions.size());
@@ -64,7 +64,7 @@ void Geometry::setVertexPositions(std::vector<glm::vec4> positions) {
 }
 
 
-void Geometry::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
+void TriangleSoup::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
 	_useTextureCoordinates = true;
 	_gpuDataNeedUpdate = true;
 	_vertexData.resize(textures.size());
@@ -76,7 +76,7 @@ void Geometry::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
 }
 
 
-void Geometry::setVertexNormals(std::vector<glm::vec3> normals) {
+void TriangleSoup::setVertexNormals(std::vector<glm::vec3> normals) {
 	_useVertexNormals = true;
 	_gpuDataNeedUpdate = true;
 	_vertexData.resize(normals.size());
@@ -89,7 +89,7 @@ void Geometry::setVertexNormals(std::vector<glm::vec3> normals) {
 }
 
 
-void Geometry::setElements(std::vector<unsigned int> elements) {
+void TriangleSoup::setElements(std::vector<unsigned int> elements) {
 	_elementData.resize(elements.size());
 	_gpuDataNeedUpdate = true;
 	for (size_t i = 0; i < elements.size(); i++)
@@ -98,7 +98,7 @@ void Geometry::setElements(std::vector<unsigned int> elements) {
 	}
 }
 
-bool Geometry::updateDataInGPU() {
+bool TriangleSoup::updateDataInGPU() {
 	// Create VAO
 	if (_vaoID == 0)
 		glGenVertexArrays(1, &_vaoID);
@@ -161,7 +161,7 @@ bool Geometry::updateDataInGPU() {
 	return true;
 }
 
-void Geometry::drawUsingActiveProgram() {
+void TriangleSoup::drawUsingActiveProgram() {
 	if (_gpuDataNeedUpdate) {
 		updateDataInGPU();
 	}

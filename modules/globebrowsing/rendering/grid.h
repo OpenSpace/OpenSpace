@@ -28,7 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <glm/glm.hpp>
 
-#include <modules/globebrowsing/rendering/geometry.h>
+#include <modules/globebrowsing/rendering/trianglesoup.h>
 
 #include <vector>
 
@@ -40,12 +40,12 @@ public:
 	Grid(
 		int xSegments,
 		int ySegments,
-		Geometry::Positions usePositions = Geometry::Positions::No,
-		Geometry::TextureCoordinates useTextures = Geometry::TextureCoordinates::No,
-		Geometry::Normals useNormals = Geometry::Normals::No);
+		TriangleSoup::Positions usePositions = TriangleSoup::Positions::No,
+		TriangleSoup::TextureCoordinates useTextures = TriangleSoup::TextureCoordinates::No,
+		TriangleSoup::Normals useNormals = TriangleSoup::Normals::No);
 	~Grid();
 
-	Geometry& geometry();
+	TriangleSoup& geometry();
 
 	/**
 	Returns the number of grid cells in the x direction. Hence the number of vertices
@@ -65,7 +65,7 @@ protected:
 	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xSegments, int ySegments) = 0;
 	virtual std::vector<glm::vec3>	CreateNormals(				int xSegments, int ySegments) = 0;
 
-	std::unique_ptr<Geometry> _geometry;
+	std::unique_ptr<TriangleSoup> _geometry;
 
 	const int _xSegments;
 	const int _ySegments;

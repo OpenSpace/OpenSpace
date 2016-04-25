@@ -84,9 +84,9 @@ namespace openspace {
 		auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
 			10,
 			10,
-			Geometry::Positions::No,
-			Geometry::TextureCoordinates::Yes,
-			Geometry::Normals::No));
+			TriangleSoup::Positions::No,
+			TriangleSoup::TextureCoordinates::Yes,
+			TriangleSoup::Normals::No));
 
 
 		_patchRenderer.reset(new LatLonPatchRenderer(geometry));

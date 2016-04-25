@@ -33,9 +33,9 @@ namespace openspace {
 BasicGrid::BasicGrid(
 	unsigned int xSegments,
 	unsigned int ySegments,
-	Geometry::Positions usePositions,
-	Geometry::TextureCoordinates useTextureCoordinates,
-	Geometry::Normals useNormals)
+	TriangleSoup::Positions usePositions,
+	TriangleSoup::TextureCoordinates useTextureCoordinates,
+	TriangleSoup::Normals useNormals)
 	: Grid(
 		xSegments, 
 		ySegments,
@@ -43,19 +43,19 @@ BasicGrid::BasicGrid(
 		useTextureCoordinates,
 		useNormals)
 {
-	_geometry = std::unique_ptr<Geometry>(new Geometry(
+	_geometry = std::unique_ptr<TriangleSoup>(new TriangleSoup(
 		CreateElements(xSegments, ySegments),
 		usePositions,
 		useTextureCoordinates,
 		useNormals));
 
-	if (usePositions == Geometry::Positions::Yes) {
+	if (usePositions == TriangleSoup::Positions::Yes) {
 		_geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));
 	}
-	if (useTextureCoordinates == Geometry::TextureCoordinates::Yes) {
+	if (useTextureCoordinates == TriangleSoup::TextureCoordinates::Yes) {
 		_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(_xSegments, _ySegments));
 	}
-	if (useNormals == Geometry::Normals::Yes) {
+	if (useNormals == TriangleSoup::Normals::Yes) {
 		_geometry->setVertexNormals(CreateNormals(_xSegments, _ySegments));
 	}
 }

@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __GEOMETRY_H__
-#define __GEOMETRY_H__
+#ifndef __TRIANGLESOUP_H__
+#define __TRIANGLESOUP_H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/logging/logmanager.h>
@@ -44,19 +44,19 @@ namespace openspace {
 	// TODO : Possibly render triangle strips in this class instead of triangles since
 	// that is faster
 
-class Geometry
+class TriangleSoup
 {
 public:
 	enum class Positions { Yes, No };
 	enum class TextureCoordinates { Yes, No };
 	enum class Normals { Yes, No };
 
-	Geometry(
+	TriangleSoup(
 		std::vector<unsigned int> elements, // At least elements are required
 		Positions usePositions = Positions::No,
 		TextureCoordinates useTextures = TextureCoordinates::No,
 		Normals useNormals = Normals::No);
-	~Geometry();
+	~TriangleSoup();
 
 	// Setters
 	void setVertexPositions(std::vector<glm::vec4> positions);
@@ -100,4 +100,4 @@ private:
 
 } // namespace openspace
 
-#endif // __GEOMETRY_H__
+#endif // __TRIANGLESOUP_H__

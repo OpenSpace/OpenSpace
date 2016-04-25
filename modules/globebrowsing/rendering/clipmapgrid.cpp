@@ -37,7 +37,7 @@ namespace openspace {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 ClipMapGrid::ClipMapGrid(unsigned int segments)
-	: Grid(segments, segments, Geometry::Positions::No, Geometry::TextureCoordinates::Yes, Geometry::Normals::No)
+	: Grid(segments, segments, TriangleSoup::Positions::No, TriangleSoup::TextureCoordinates::Yes, TriangleSoup::Normals::No)
 {
 
 }
@@ -66,11 +66,11 @@ int ClipMapGrid::segments() const {
 OuterClipMapGrid::OuterClipMapGrid(unsigned int segments)
 : ClipMapGrid(segments)
 {
-	_geometry = std::unique_ptr<Geometry>(new Geometry(
+	_geometry = std::unique_ptr<TriangleSoup>(new TriangleSoup(
 		CreateElements(segments, segments),
-		Geometry::Positions::No,
-		Geometry::TextureCoordinates::Yes,
-		Geometry::Normals::No));
+		TriangleSoup::Positions::No,
+		TriangleSoup::TextureCoordinates::Yes,
+		TriangleSoup::Normals::No));
 
 	_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(segments, segments));
 }
@@ -323,11 +323,11 @@ std::vector<glm::vec3> OuterClipMapGrid::CreateNormals(int xRes, int yRes) {
 InnerClipMapGrid::InnerClipMapGrid(unsigned int segments)
 	: ClipMapGrid(segments)
 {
-	_geometry = std::unique_ptr<Geometry>(new Geometry(
+	_geometry = std::unique_ptr<TriangleSoup>(new TriangleSoup(
 		CreateElements(segments, segments),
-		Geometry::Positions::No,
-		Geometry::TextureCoordinates::Yes,
-		Geometry::Normals::No));
+		TriangleSoup::Positions::No,
+		TriangleSoup::TextureCoordinates::Yes,
+		TriangleSoup::Normals::No));
 
 	_geometry->setVertexTextureCoordinates(CreateTextureCoordinates(segments, segments));
 }

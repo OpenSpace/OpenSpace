@@ -50,9 +50,9 @@ public:
 	BasicGrid(
 		unsigned int xSegments,
 		unsigned int ySegments,
-		Geometry::Positions usePositions,
-		Geometry::TextureCoordinates useTextureCoordinates,
-		Geometry::Normals useNormals);
+		TriangleSoup::Positions usePositions,
+		TriangleSoup::TextureCoordinates useTextureCoordinates,
+		TriangleSoup::Normals useNormals);
 	~BasicGrid();
 
 

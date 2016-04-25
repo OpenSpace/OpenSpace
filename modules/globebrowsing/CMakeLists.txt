@@ -30,7 +30,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/trianglesoup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.h
@@ -53,7 +53,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableglobe.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/distanceswitch.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/geometry.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/trianglesoup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/grid.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicgrid.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/clipmapgrid.cpp

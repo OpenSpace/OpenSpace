@@ -33,9 +33,9 @@ namespace openspace {
 	Grid::Grid(
 		int xSegments,
 		int ySegments,
-		Geometry::Positions usePositions,
-		Geometry::TextureCoordinates useTextures,
-		Geometry::Normals useNormals)
+		TriangleSoup::Positions usePositions,
+		TriangleSoup::TextureCoordinates useTextures,
+		TriangleSoup::Normals useNormals)
 	: _xSegments(xSegments)
 	, _ySegments(ySegments)
 {
@@ -47,7 +47,7 @@ Grid::~Grid()
 
 }
 
-Geometry& Grid::geometry()
+TriangleSoup& Grid::geometry()
 {
 	return *_geometry;
 }

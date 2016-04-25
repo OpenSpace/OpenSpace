@@ -47,7 +47,7 @@ namespace opengl {
 namespace openspace {
 
 	class LonLatPatch;
-	class Geometry;
+	class TriangleSoup;
 	
 	using std::shared_ptr;
 	using std::unique_ptr;

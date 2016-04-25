@@ -49,7 +49,7 @@ namespace {
 namespace openspace {
 	GlobeMesh::GlobeMesh(const ghoul::Dictionary& dictionary)
 		: _programObject(nullptr)
-		, _grid(10, 10, Geometry::Positions::Yes, Geometry::TextureCoordinates::No, Geometry::Normals::No)
+		, _grid(10, 10, TriangleSoup::Positions::Yes, TriangleSoup::TextureCoordinates::No, TriangleSoup::Normals::No)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
 		std::string name;
