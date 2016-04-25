@@ -35,8 +35,7 @@ def downloadPage(pageNumber):
             pos = p+beginOffset
             imageName = source[pos:p+imageEnd]
             imageLength = len('imageName')
-            # imageName = source[pos:pos+imageLength]
-            pos = pos + imageLength + utcDateOffset
+            pos = p + imageEnd + utcDateOffset
 
             utcDate = source[pos:pos+utcDateLength]
             pos = pos + utcDateLength + utcTimeOffset
@@ -49,6 +48,12 @@ def downloadPage(pageNumber):
             urlFirstPart = imageName[len('lor_'): len('lor_') + len('029912')]
             imageURL = 'http://pluto.jhuapl.edu/soc/Pluto-Encounter/data/pluto/level2/lor/jpeg/' + urlFirstPart + '/' + imageName
 
+            print("ImageName: " + imageName)
+            print("UTCDate: " + utcDate)
+            print("UTCTime: " + utcTime)
+            print("Target: " + target)
+            print("URL: " + imageURL)
+
             # Download image
             urlretrieve(imageURL, imageName)
 
@@ -58,7 +63,7 @@ def downloadPage(pageNumber):
                 f.write('SEQUENCE_ID = "UNUSED"\n')
                 f.write('TARGET_NAME = "' + target + '"\n')
                 f.write('START_TIME = ' + utcDate + 'T' + utcTime + '.000\n')
-                f.write('START_TIME = ' + utcDate + 'T' + utcTime + '.005\n')
+                f.write('STOP_TIME = ' + utcDate + 'T' + utcTime + '.005\n')
                 f.write('INSTRUMENT_HOST_NAME = "NEW HORIZONS"\n')
                 f.write('INSTRUMENT_ID = "LORRI"\n')
                 f.write('DETECTOR_ID = "LORRI"\n')
