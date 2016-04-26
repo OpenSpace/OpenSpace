@@ -23,8 +23,9 @@
  ****************************************************************************************/
 uniform float time;
 uniform sampler2D texture1;
+uniform sampler2D tf;
 
-uniform float background;
+// uniform float background;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -37,8 +38,10 @@ Fragment getFragment() {
     float depth = pscDepth(position);
     vec4 diffuse;
 
-    diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
-    //float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+    // diffuse = texture(tf, vec2(1-vs_st.s, 0));
+    // diffuse = texture(tf, texture(texture1, vec2(vs_st.s,1-vs_st.t)).r);
+    float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+    diffuse = texture(tf, vec2(v,0));
 
     // if (diffuse.a <= 0.05)
     //     discard;

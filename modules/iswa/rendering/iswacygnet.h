@@ -44,6 +44,7 @@
 #include <modules/iswa/util/iswamanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
 
 
 namespace openspace{
@@ -105,6 +106,8 @@ protected:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
+
+    std::shared_ptr<TransferFunction> _transferFunction;
 
     int _id;
 };

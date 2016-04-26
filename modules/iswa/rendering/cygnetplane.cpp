@@ -93,7 +93,7 @@ void CygnetPlane::render(const RenderData& data){
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
-    _shader->setUniform("background", _backgroundValue);
+    // _shader->setUniform("background", _backgroundValue);
 
     // _shader->setUniform("top", _topColor.value());
     // _shader->setUniform("mid", _midColor.value());
@@ -102,10 +102,21 @@ void CygnetPlane::render(const RenderData& data){
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
+    ghoul::opengl::TextureUnit tfUnit;
+    if(_transferFunction){
+        tfUnit.activate();
+        _transferFunction->bind();
+        _shader->setUniform("tf", tfUnit);
+    }
+
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
     _shader->setUniform("texture1", unit);
+
+
+
+
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -145,13 +156,12 @@ void CygnetPlane::update(const UpdateData& data){
         if(loadTexture())
             _futureObject = nullptr;
     }
+
+    if(_transferFunction)
+        _transferFunction->update();
 }
 
 void CygnetPlane::createPlane(){
-    GLUquadricObj *Cylinder; // Create pointer for our cylinder
-
-    Cylinder = gluNewQuadric();
-
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     

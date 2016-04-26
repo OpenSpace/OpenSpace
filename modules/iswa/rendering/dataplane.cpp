@@ -107,6 +107,8 @@ bool DataPlane::initialize(){
     updateTexture();
 
 
+    std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
+    _transferFunction = std::make_shared<TransferFunction>(tfPath);
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
     // if(_colorbar){

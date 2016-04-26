@@ -36,6 +36,8 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     , _texture(nullptr)
     , _memorybuffer("")
+    ,_transferFunction(nullptr)
+    ,_tfTexture(nullptr)
 {
     _data = std::make_shared<Metadata>();
 
