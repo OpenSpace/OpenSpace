@@ -24,6 +24,7 @@
 
 #include <modules/fieldlines/rendering/renderablefieldlines.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -200,12 +201,13 @@ bool RenderableFieldlines::initialize() {
         return false;
     }
 
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = OsEng.renderEngine().buildRenderProgram(
         "Fieldline",
         "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
     );
+
     if (!_program)
         return false;
 
@@ -225,7 +227,7 @@ void RenderableFieldlines::render(const RenderData& data) {
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
     _program->setUniform("cameraViewDir", data.camera.viewDirection());
-
+    glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 
     _program->setUniform("classification", _classification);
@@ -240,7 +242,7 @@ void RenderableFieldlines::render(const RenderData& data) {
         static_cast<GLsizei>(_lineStart.size())
     );
     glBindVertexArray(0);
-
+    glEnable(GL_CULL_FACE);
     _program->deactivate();
 }
 

@@ -16,7 +16,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = "${OPENSPACE_DATA}/BATSRUS.cdf",
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -42,7 +42,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = "${OPENSPACE_DATA}/BATSRUS.cdf",
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -68,7 +68,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = "${OPENSPACE_DATA}/BATSRUS.cdf",
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -94,7 +94,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = "${OPENSPACE_DATA}/BATSRUS.cdf",
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -120,7 +120,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = "${OPENSPACE_DATA}/BATSRUS.cdf",
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
