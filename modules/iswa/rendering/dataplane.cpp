@@ -292,6 +292,11 @@ float* DataPlane::readData(){
 
                     sum[i] += v;
                     logmean[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
+                    if((_backgroundValue == 0.0f) && (fabs(value[0]) < 2.5f) &&
+                         (fabs(value[1]) < 2.5f) && (fabs(value[2]) < 2.5f) ){
+                        _backgroundValue = v;
+                        std::cout << _backgroundValue << std::endl;
+                    }
                 }
                 numValues++;
             }
@@ -342,6 +347,12 @@ float* DataPlane::readData(){
                 combinedValues[3*i+0] /= selectedOptions.size();
             }
         }
+
+        if(_backgroundValue != 0){
+            _backgroundValue = normalizeWithStandardScore(_backgroundValue, mean[0], standardDeviation[0]);
+            std::cout << _backgroundValue << std::endl;
+        }
+
         return combinedValues;
     
     } else {

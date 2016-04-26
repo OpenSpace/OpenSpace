@@ -1023,7 +1023,7 @@ std::string KameleonWrapper::getFrame(){
         _type == KameleonWrapper::Model::Adapt3D ||
         _type == KameleonWrapper::Model::SWMF)
     {
-        return "GALACTIC";
+        return "HEEQ";
     }else{
         return "";
     }

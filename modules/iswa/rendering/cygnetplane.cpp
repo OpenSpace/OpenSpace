@@ -29,6 +29,7 @@ CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
     ,_futureObject(nullptr)
+    ,_backgroundValue(0.0f)
 {}
 
 CygnetPlane::~CygnetPlane(){}
@@ -60,17 +61,19 @@ void CygnetPlane::render(const RenderData& data){
         }
     }
 
-    transform = transform * rotz * roty; //BATSRUS
 
     // Correct for the small error of x-axis not pointing directly at the sun
     if(_data->frame == "GSM"){
+
+        transform = transform * rotz * roty; //BATSRUS
+
         glm::vec4 v(1,0,0,1);
         glm::vec3 xVec = glm::vec3(transform*v);
         xVec = glm::normalize(xVec);
 
         double  lt;
         glm::vec3 sunVec =
-        SpiceManager::ref().targetPosition("SUN", "Earth", "GALACTIC", {}, _openSpaceTime, lt);
+        SpiceManager::ref().targetPosition("Sun", "Earth", "GALACTIC", {}, _openSpaceTime, lt);
         sunVec = glm::normalize(sunVec);
 
         float angle = acos(glm::dot(xVec, sunVec));
@@ -90,6 +93,7 @@ void CygnetPlane::render(const RenderData& data){
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
+    _shader->setUniform("background", _backgroundValue);
 
     // _shader->setUniform("top", _topColor.value());
     // _shader->setUniform("mid", _midColor.value());

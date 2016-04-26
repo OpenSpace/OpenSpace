@@ -49,17 +49,17 @@
 namespace openspace{
 
 struct Metadata {
-	int id;
-	int updateTime;
-	std::string path;
-	std::string parent;
-	std::string frame;
-	glm::vec3 min;
-	glm::vec3 max;
-	glm::vec3 offset;
-	glm::vec3 scale;
-	glm::vec4 spatialScale;
-	std::string scaleVariable;
+    int id;
+    int updateTime;
+    std::string path;
+    std::string parent;
+    std::string frame;
+    glm::vec3 min;
+    glm::vec3 max;
+    glm::vec3 offset;
+    glm::vec3 scale;
+    glm::vec4 spatialScale;
+    std::string scaleVariable;
     std::string coordinateType;
 };
 

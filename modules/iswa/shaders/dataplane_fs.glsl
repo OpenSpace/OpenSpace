@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "../modules/iswa/ext/glsl-colormap/shaders/MATLAB_parula.frag";
+
 uniform float time;
 uniform sampler2D texture1;
 
@@ -29,6 +31,7 @@ uniform vec4 top;
 uniform vec4 mid;
 uniform vec4 bot;
 uniform vec4 tfValues;
+uniform float background;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -41,9 +44,16 @@ Fragment getFragment() {
     float depth = pscDepth(position);
     vec4 diffuse;
     // diffuse = top;
-    diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
+    // diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
     // diffuse = vec4(1,0,0,1);
-    // float v = texture(texture1, vs_st).r;
+    float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+    diffuse = colormap(v);
+
+    float p = background+0.1;
+    float b = background-0.1;
+    if((v < p) && (p > b)){
+        diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
     //float x = tfValues.x;
     //float y = tfValues.y;
 

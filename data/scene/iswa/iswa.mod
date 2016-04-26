@@ -13,8 +13,9 @@ return {
 			Body = "Sun",
 			Observer = "Earth",
 			Kernels = {
+			 	"${SPICE}/heliospheric.tf",
+			 	"${SPICE}/GSE.ti",
 			 	"${SPICE}/GSM.ti",
-			 	"${SPICE}/GSE.ti"
 			 }
 		}
 	}

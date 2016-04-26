@@ -47,8 +47,6 @@ private:
     void updateTexture();
     void loadTexture();
 
-    std::string imageFormat(std::string format);
-
     properties::FloatProperty _updateInterval;
 
     std::string _path;

@@ -1,0 +1,30 @@
+KPL/SCLK
+
+   This kernel introduces an artificial clock which is TDT with a shifted
+   origin, in order to represent time before J2000.0 as positive s/c clock
+   ticks as required by the SPICE SCLK sub-system.
+
+   This kernel is valid between 1965-12-23 and 2034-01-10.
+
+   The time accuracy loss due to use of this kernel is in the order of
+   0.24 microseconds.
+
+\begindata
+
+      SCLK_KERNEL_ID                = ( @2013-04-05T12:00:00 )
+
+      SCLK_DATA_TYPE_39900001       = ( 1 )
+      SCLK01_TIME_SYSTEM_39900001   = ( 2 )
+      SCLK01_N_FIELDS_39900001      = ( 1 )
+      SCLK01_MODULI_39900001        = ( 2147483648 )
+      SCLK01_OFFSETS_39900001       = ( 1073741824 )
+      SCLK01_OUTPUT_DELIM_39900001  = ( 1 )
+
+      SCLK_PARTITION_START_39900001 = ( -1073741824 )
+      SCLK_PARTITION_END_39900001   = (  1073741823 )
+
+      SCLK01_COEFFICIENTS_39900001  = ( 0, -1073741824, 1 )
+
+\begintext
+
+$Id: tdt_shifted.tsc 4746 2013-04-05 19:49:10Z bogdan $

@@ -77,10 +77,15 @@ bool TexturePlane::deinitialize(){
 bool TexturePlane::loadTexture() {
     if(_memorybuffer != ""){
 
+        std::string format;
+        std::stringstream ss(_futureObject->format);
+        getline(ss, format ,'/');
+        getline(ss, format);
+
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
             (void*) _memorybuffer.c_str(), 
             _memorybuffer.size(), 
-            imageFormat(_futureObject->format));
+            format);
 
         if (texture) {
             texture->uploadTexture();
@@ -112,18 +117,6 @@ bool TexturePlane::updateTexture(){
     }
 
     return false;
-}
-
-std::string TexturePlane::imageFormat(std::string format){
-    if(format == "image/png"){
-        return std::string("png");
-    }else if(format == "image/jpeg"){
-        return std::string("jpg");
-    }else if(format == "image/gif"){
-        return std::string("gif");
-    }else{
-        return std::string("noImage");
-    }
 }
 
 int TexturePlane::id(){

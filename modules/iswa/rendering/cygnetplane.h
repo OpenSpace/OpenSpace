@@ -53,7 +53,7 @@ protected:
     GLuint _vertexPositionBuffer;
 
     std::shared_ptr<DownloadManager::FileFuture> _futureObject;
-
+    float _backgroundValue;
 };
 } //namespace openspace
 
