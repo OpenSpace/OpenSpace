@@ -63,28 +63,17 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     glm::vec3 scale;
     glm::vec3 offset;
 
-    std::cout << _data->coordinateType << std::endl;
-    if(_data->coordinateType == "Cartesian"){
-        scale = glm::vec3(
-            (max.x - min.x),
-            (max.y - min.y),
-            (max.z - min.z)
-        );
+    scale = glm::vec3(
+        (max.x - min.x),
+        (max.y - min.y),
+        (max.z - min.z)
+    );
 
-        offset = glm::vec3(
-                (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
-                (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
-                (min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
-        );
-    } else if(_data->coordinateType == "Polar"){
-        scale = glm::vec3(
-            (max.x - min.x),
-            0.0f
-            (max.x - min.x)
-        );
-
-        offset = glm::vec3(0.0f);
-    }
+    offset = glm::vec3(
+        (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
+        (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
+        (min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
+    );
 
     _data->scale = scale;
     _data->offset = offset;

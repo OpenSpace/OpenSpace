@@ -148,6 +148,10 @@ void CygnetPlane::update(const UpdateData& data){
 }
 
 void CygnetPlane::createPlane(){
+    GLUquadricObj *Cylinder; // Create pointer for our cylinder
+
+    Cylinder = gluNewQuadric();
+
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     

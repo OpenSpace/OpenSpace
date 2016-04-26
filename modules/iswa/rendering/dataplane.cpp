@@ -45,10 +45,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_useLog("useLog","Use Logarithm Norm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
-    // ,_topColor("topColor", "Top Color", glm::vec4(1,0,0,1), glm::vec4(0), glm::vec4(1))
-    // ,_midColor("midColor", "Mid Color", glm::vec4(0,0,0,0), glm::vec4(0), glm::vec4(1))
-    // ,_botColor("botColor", "Bot Color", glm::vec4(0,0,1,1), glm::vec4(0), glm::vec4(1))
-    // ,_tfValues("tfValues", "TF Values", glm::vec2(0.5,0.1), glm::vec2(0), glm::vec2(1))
     // ,_colorbar(nullptr)
 {   
     _id = id();
@@ -61,11 +57,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_useRGB);
     addProperty(_normValues);
     addProperty(_dataOptions);
-    //addProperty(_midLevel);
-    // addProperty(_topColor);
-    // addProperty(_midColor);
-    // addProperty(_botColor);
-    //addProperty(_tfValues);
 
     registerProperties();
 
@@ -73,13 +64,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_topColor);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_midColor);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_botColor);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_tfValues);
     
-
-
     _normValues.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){

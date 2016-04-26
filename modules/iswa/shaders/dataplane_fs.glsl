@@ -21,16 +21,9 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-#include "../modules/iswa/ext/glsl-colormap/shaders/MATLAB_parula.frag";
-
 uniform float time;
 uniform sampler2D texture1;
 
-uniform vec4 top;
-uniform vec4 mid;
-uniform vec4 bot;
-uniform vec4 tfValues;
 uniform float background;
 
 in vec2 vs_st;
@@ -43,40 +36,10 @@ Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
     vec4 diffuse;
-    // diffuse = top;
-    // diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
-    // diffuse = vec4(1,0,0,1);
-    float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
-    diffuse = colormap(v);
 
-    float p = background+0.1;
-    float b = background-0.1;
-    if((v < p) && (p > b)){
-        diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    }
-    //float x = tfValues.x;
-    //float y = tfValues.y;
+    diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
+    //float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
 
-    //if(v > (x+y)){
-    //    v = v - (x+y);
-    //     v = v / (x-y);
-    //     diffuse = mix(mid, top, v);
-    // }else if( v < (x-y)){
-    //     v = v / (x-y);
-    //     diffuse = mix(bot, mid, v);
-    // }else{
-    //     diffuse = mid;
-    // }
-
-    // // vec4 diffuse = vec4(1,vs_st,1);
-    // //vec4 diffuse = vec4(1,0,0,1);
-    // // if(position.w > 9.0) {
-    // //     diffuse = vec4(1,0,0,1);
-    // // }
-
-    // //diffuse.a = diffuse.r;
-    // // float tot = diffuse.r + diffuse.g + diffuse.b;
-    // // tot /= 3.0;
     // if (diffuse.a <= 0.05)
     //     discard;
 
