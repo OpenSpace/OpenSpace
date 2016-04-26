@@ -47,8 +47,7 @@ namespace openspace {
 		Vec3( // _radiiToTheFourth
 			_cachedValues._radiiSquared.x * _cachedValues._radiiSquared.x,
 			_cachedValues._radiiSquared.y * _cachedValues._radiiSquared.y,
-			_cachedValues._radiiSquared.z * _cachedValues._radiiSquared.z),
-	})
+			_cachedValues._radiiSquared.z * _cachedValues._radiiSquared.z),})
 	{
 
 	}
@@ -107,6 +106,7 @@ namespace openspace {
 	Vec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const
 	{
 		Scalar cosLat = glm::cos(geodetic2.lat);
+		//geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
 		return Vec3(
 			cosLat * cos(geodetic2.lon),
 			cosLat * sin(geodetic2.lon), 
@@ -117,8 +117,8 @@ namespace openspace {
 	{
 		Vec3 normal = geodeticSurfaceNormal(p);
 		return Geodetic2(
-			atan2(normal.y, normal.x),
-			asin(normal.z / length(normal)));
+			asin(normal.z / length(normal)),	// Latitude
+			atan2(normal.y, normal.x));			// Longitude
 	}
 
 	Vec3 Ellipsoid::geodetic2ToCartesian(const Geodetic2& geodetic2) const
