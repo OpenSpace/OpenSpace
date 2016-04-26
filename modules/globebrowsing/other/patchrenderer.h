@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 #include <modules/globebrowsing/other/frustrumculler.h>
@@ -77,12 +78,12 @@ namespace openspace {
 		void renderPatch(
 			const GeodeticPatch& patch,
 			const RenderData& data, 
-			double radius);
+			const Ellipsoid& ellipsoid);
 
 		void renderPatch(
 			const GeodeticPatch& patch, 
 			const RenderData& data, 
-			double radius, 
+			const Ellipsoid& ellipsoid,
 			const TileIndex& ti);
 	private:
 		shared_ptr<Grid> _grid;
@@ -98,7 +99,7 @@ namespace openspace {
 		void renderPatch(
 			const Geodetic2& patchSize,
 			const RenderData& data,
-			double radius);
+			const Ellipsoid& ellipsoid);
 	private:
 		shared_ptr<ClipMapGrid> _grid;
 	};

@@ -50,17 +50,22 @@ namespace {
 
 namespace openspace {
 
-	const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
-	const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
+	//const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
+	//const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
 
-	ChunkLodGlobe::ChunkLodGlobe(const ghoul::Dictionary& dictionary)
-		: _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
-		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
-		, globeRadius(1e7)
+	ChunkLodGlobe::ChunkLodGlobe(
+		const ghoul::Dictionary& dictionary,
+		const Ellipsoid& ellipsoid)
+		: _ellipsoid(ellipsoid)
+		, _leftHemisphere(GeodeticPatch(0, -M_PI / 2, M_PI / 2, M_PI / 2, ellipsoid))
+		, _rightHemisphere(GeodeticPatch(0, M_PI / 2, M_PI / 2, M_PI / 2, ellipsoid))
+		,_leftRoot(new ChunkNode(*this, _leftHemisphere))
+		, _rightRoot(new ChunkNode(*this, _rightHemisphere))
 		, minSplitDepth(2)
 		, maxSplitDepth(22)
 		, _rotation("rotation", "Rotation", 0, 0, 360)
+		
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -76,7 +81,7 @@ namespace openspace {
 		addProperty(_rotation);
 
 		
-		globeRadius = dictionary.value<double>("Radius");
+		//globeRadius = dictionary.value<double>("Radius");
 
 
 		// ---------
@@ -147,6 +152,9 @@ namespace openspace {
 		_time = data.time;
 	}
 
-
+	const Ellipsoid& ChunkLodGlobe::ellipsoid() const
+	{
+		return _ellipsoid;
+	}
 
 }  // namespace openspace

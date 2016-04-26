@@ -28,13 +28,6 @@
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 
 namespace openspace {
-	
-	struct EllipsoidCache
-	{
-		const Vec3 _radiiSquared;
-		const Vec3 _oneOverRadiiSquared;
-		const Vec3 _radiiToTheFourth;
-	};
 
 	/**
 	This class is based largely on the Ellipsoid class defined in the book
@@ -79,6 +72,14 @@ public:
 	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
 
 private:
+	
+	struct EllipsoidCache
+	{
+		const Vec3 _radiiSquared;
+		const Vec3 _oneOverRadiiSquared;
+		const Vec3 _radiiToTheFourth;
+	};
+
 	const Vec3 _radii;
 	const EllipsoidCache _cachedValues;
 };

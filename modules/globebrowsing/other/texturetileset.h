@@ -29,7 +29,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/other/twmstileprovider.h>
 
 
@@ -44,7 +44,10 @@ namespace openspace {
 	class TextureTileSet
 	{
 	public:
-		TextureTileSet(Geodetic2 sizeLevel0, Geodetic2 offsetLevel0, int depth);
+		TextureTileSet(
+			Geodetic2 sizeLevel0,
+			Geodetic2 offsetLevel0,
+			int depth);
 		~TextureTileSet();
 
 		/**
@@ -71,7 +74,9 @@ namespace openspace {
 			A tile can be defined with a tile index or a LatLonPatch which defines
 			the position and the size of the tile.
 		*/
-		GeodeticPatch getTilePositionAndScale(const TileIndex& tileIndex);
+		GeodeticPatch getTilePositionAndScale(
+			const TileIndex& tileIndex,
+			const Ellipsoid& ellipsoid);
 
 		/**
 			A transformation (translation and scaling) from the texture space of a patch
@@ -94,7 +99,6 @@ namespace openspace {
 		int _depth;
 
 		std::shared_ptr<Texture> _testTexture;
-
 	};
 
 }  // namespace openspace

@@ -36,6 +36,7 @@
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/globes/globemesh.h>
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 
 
 namespace ghoul {
@@ -62,6 +63,8 @@ private:
 	std::string _frame;
 	std::string _target;
 	double _time;
+
+	Ellipsoid _ellipsoid;
 };
 
 }  // namespace openspace

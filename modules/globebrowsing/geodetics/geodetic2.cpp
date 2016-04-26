@@ -58,7 +58,7 @@ namespace openspace {
 	{
 	
 	}
-	
+	/*
 	Geodetic2 Geodetic2::fromCartesian(const Vec3& v) {
 		Scalar r = glm::length(v);
 		return Geodetic2(glm::asin(v.z / r), atan2(v.y, v.x));
@@ -71,7 +71,7 @@ namespace openspace {
 			glm::cos(lat) * glm::sin(lon),
 			glm::sin(lat));
 	}
-
+	*/
 	Vec2 Geodetic2::toLonLatVec2() const {
 		return Vec2(lon, lat);
 	}
@@ -105,27 +105,33 @@ namespace openspace {
 		Scalar centerLat,
 		Scalar centerLon,
 		Scalar halfSizeLat,
-		Scalar halfSizeLon)
+		Scalar halfSizeLon,
+		const Ellipsoid& ellipsoid)
 		: _center(Geodetic2(centerLat, centerLon))
 		, _halfSize(Geodetic2(halfSizeLat, halfSizeLon))
+		, _ellipsoid(ellipsoid)
 	{
 	
 	}
 
-	GeodeticPatch::GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize)
+	GeodeticPatch::GeodeticPatch(
+		const Geodetic2& center,
+		const Geodetic2& halfSize,
+		const Ellipsoid& ellipsoid)
 		: _center(center)
 		, _halfSize(halfSize) 
+		, _ellipsoid(ellipsoid)
 	{
 	
 	}
 
-	GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
+	GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch, const Ellipsoid& ellipsoid)
 		: _center(patch._center)
-		, _halfSize(patch._halfSize) 
+		, _halfSize(patch._halfSize)
+		, _ellipsoid(ellipsoid)
 	{
 	
 	}
-
 
 	void GeodeticPatch::setCenter(const Geodetic2& center) {
 		_center = center;
@@ -136,17 +142,20 @@ namespace openspace {
 	}
 
 	Scalar GeodeticPatch::minimalBoundingRadius() const {
-		const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
-		return glm::length(_center.asUnitCartesian() - cornerNearEquator.asUnitCartesian());
-	}
 
+		// TODO: THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
+		// A PART OF AN ELLIPSOID AND NOT A SPHERE!THIS MUST BE FIXED
+		const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
+		return glm::length(_ellipsoid.geodetic2ToCartesian(_center) - _ellipsoid.geodetic2ToCartesian(cornerNearEquator));
+	}
+	/*
 	Scalar GeodeticPatch::unitArea() const {
 		Scalar deltaTheta = 2 * _halfSize.lon;
 		Scalar phiMin = _center.lat - _halfSize.lat;
 		Scalar phiMax = _center.lat + _halfSize.lat;
 		return deltaTheta * (sin(phiMax) - sin(phiMin));
 	}
-
+	*/
 	const Geodetic2& GeodeticPatch::center() const {
 		return _center;
 	}
@@ -296,6 +305,11 @@ namespace openspace {
 		Scalar clampedLon = glm::clamp(pointLon.asRadians(), min.lon, max.lon);
 
 		return Geodetic2(clampedLat, clampedLon);
+	}
+
+	const Ellipsoid& GeodeticPatch::ellipsoid() const
+	{
+		return _ellipsoid;
 	}
 
 } // namespace openspace

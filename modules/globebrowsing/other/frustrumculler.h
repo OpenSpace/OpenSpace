@@ -64,8 +64,7 @@ namespace openspace {
 		*/
 		bool isVisible(
 			const RenderData& data,
-			const GeodeticPatch& patch, 
-			double radius);
+			const GeodeticPatch& patch);
 		
 	private:
 

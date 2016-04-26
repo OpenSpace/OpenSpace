@@ -123,7 +123,7 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 
 		LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-		patchRenderer.renderPatch(_patch, data, _owner.globeRadius, ti);
+		patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), ti);
 		ChunkNode::renderedPatches++;
 
 	}
@@ -137,10 +137,12 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 
 int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData) {
 
-
+	/*
 	Vec3 globePosition = data.position.dvec3();
-	Vec3 patchNormal = _patch.center().asUnitCartesian();
-	Vec3 patchPosition = globePosition + _owner.globeRadius * patchNormal;
+	//Vec3 patchNormal = _patch.center().asUnitCartesian();
+	Vec3 patchPosition =
+		globePosition +
+		_owner.ellipsoid().geodetic2ToCartesian(_patch.center());
 
 	Vec3 cameraPosition = data.camera.position().dvec3();
 	Vec3 cameraDirection = Vec3(data.camera.viewDirection());
@@ -153,10 +155,10 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 
 	Vec3 globeToCamera = cameraPosition - globePosition;
 
-	Geodetic2 cameraPositionOnGlobe = Geodetic2::fromCartesian(globeToCamera);
+	Geodetic2 cameraPositionOnGlobe = _owner.ellipsoid().cartesianToGeodetic2(globeToCamera);
 	Geodetic2 closestPatchPoint = _patch.closestPoint(cameraPositionOnGlobe);
 
-	Vec3 normalOfClosestPatchPoint = closestPatchPoint.asUnitCartesian();
+	Vec3 normalOfClosestPatchPoint = _owner.ellipsoid().geodeticSurfaceNormal(closestPatchPoint);
 	Scalar cosPatchNormalNormalizedGlobeToCamera = glm::dot(normalOfClosestPatchPoint, glm::normalize(globeToCamera));
 
 	//LDEBUG(cosPatchNormalCameraDirection);
@@ -183,6 +185,8 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 	Scalar projectedScaleFactor = scaleFactor / distance;
 	int desiredLevel = floor( log2(projectedScaleFactor) );
 	return desiredLevel;
+	*/
+	return 1;
 }
 
 
@@ -196,10 +200,10 @@ void ChunkNode::split(int depth) {
 		Geodetic2 qs = Geodetic2(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds
-		GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs);
-		GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs);
-		GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs);
-		GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs);
+		GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs, _owner.ellipsoid());
+		GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs, _owner.ellipsoid());
+		GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs, _owner.ellipsoid());
+		GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs, _owner.ellipsoid());
 
 		// Create new chunk nodes
 		_children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));

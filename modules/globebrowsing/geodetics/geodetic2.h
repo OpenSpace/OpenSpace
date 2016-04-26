@@ -38,19 +38,18 @@ typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
-
-
-
+	// Forward declaration
+	class Ellipsoid;
 
 struct Geodetic2 {
 	Geodetic2();
 	Geodetic2(Scalar latitude, Scalar longitude);
 	Geodetic2(const Geodetic2& src);
 	
-	
+	/*
 	static Geodetic2 fromCartesian(const Vec3& v);
 	Vec3 asUnitCartesian() const;
-	
+	*/
 
 	Vec2 toLonLatVec2() const;
 
@@ -73,25 +72,34 @@ struct Geodetic3 {
 
 class GeodeticPatch {
 public:
-	GeodeticPatch(Scalar, Scalar, Scalar, Scalar);
-	GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
-	GeodeticPatch(const GeodeticPatch& patch);
-
+	GeodeticPatch(
+		Scalar centerLat,
+		Scalar centerLon,
+		Scalar halfSizeLat,
+		Scalar halfSizeLon,
+		const Ellipsoid& ellipsoid);
+	GeodeticPatch(
+		const Geodetic2& center,
+		const Geodetic2& halfSize,
+		const Ellipsoid& ellipsoid);
+	GeodeticPatch(const GeodeticPatch& patch, const Ellipsoid& ellipsoid);
 
 	void setCenter(const Geodetic2&);
-	void setHalfSize(const Geodetic2&);
-	
+	void setHalfSize(const Geodetic2&);	
 
 	/**
 		Returns the minimal bounding radius that together with the LatLonPatch's
-		center point represents a sphere in which the patch is completely contained
+		center point represents a sphere in which the patch is completely contained.
+		
+		TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
+		A PART OF AN ELLIPSOID AND NOT A SPHERE! THIS MUST BE FIXED
 	*/
 	Scalar minimalBoundingRadius() const;
 
 	/**
 		Returns the area of the patch with unit radius
 	*/
-	Scalar unitArea() const;
+	// Scalar unitArea() const;
 
 
 	Geodetic2 northWestCorner() const;
@@ -120,10 +128,12 @@ public:
 	const Geodetic2& halfSize() const;
 	Geodetic2 size() const;
 
+	const Ellipsoid& ellipsoid() const;
+
 private:
 	Geodetic2 _center;
 	Geodetic2 _halfSize;
-
+	const Ellipsoid& _ellipsoid;
 };
 
 } // namespace openspace

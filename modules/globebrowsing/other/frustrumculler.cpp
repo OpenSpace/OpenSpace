@@ -25,6 +25,8 @@
 
 #include <modules/globebrowsing/other/frustrumculler.h>
 
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
+
 namespace {
 	const std::string _loggerCat = "FrustrumCuller";
 }
@@ -56,7 +58,7 @@ namespace openspace {
 	}
 
 
-	bool FrustrumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch, double radius) {
+	bool FrustrumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch) {
 		// An axis aligned bounding box based on the patch's minimum boudning sphere is
 		// used for testnig
 	
@@ -67,13 +69,13 @@ namespace openspace {
 			* viewTransform * modelTransform;
 
 		// Calculate the patch's center point in screen space
-		vec4 patchCenterModelSpace = vec4(radius * patch.center().asUnitCartesian(), 1);
+		vec4 patchCenterModelSpace = vec4(patch.ellipsoid().geodetic2ToCartesian(patch.center()), 1);
 		vec4 patchCenterProjectionSpace = modelViewProjectionTransform * patchCenterModelSpace;
 		vec2 pointScreenSpace = (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy();
 		
 		// Calculate the screen space margin that represents an axis aligned bounding 
 		// box based on the patch's minimum boudning sphere
-		double boundingRadius = radius * patch.minimalBoundingRadius();
+		double boundingRadius = patch.minimalBoundingRadius();
 		vec4 marginProjectionSpace = vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
 		vec2 marginScreenSpace = (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy();
 

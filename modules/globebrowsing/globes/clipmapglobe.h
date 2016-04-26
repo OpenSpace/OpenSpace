@@ -46,7 +46,7 @@ namespace openspace {
 
 	class ClipMapGlobe : public Renderable {
 	public:
-		ClipMapGlobe(const ghoul::Dictionary& dictionary);
+		ClipMapGlobe(const ghoul::Dictionary& dictionary, const Ellipsoid& ellipsoid);
 		~ClipMapGlobe();
 
 		bool initialize() override;
@@ -56,11 +56,15 @@ namespace openspace {
 		void render(const RenderData& data) override;
 		void update(const UpdateData& data) override;
 
+		const Ellipsoid& ellipsoid() const;
+
 	private:		
 		std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
 		std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
 		
 		ClipMapPyramid _clipMapPyramid;
+
+		const Ellipsoid& _ellipsoid;
 
 		properties::IntProperty _rotation;
 
