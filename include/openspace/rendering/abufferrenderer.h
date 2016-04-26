@@ -110,6 +110,9 @@ private:
 
     ghoul::Dictionary _resolveDictionary;
 
+    GLuint _mainColorTexture;
+    GLuint _mainDepthTexture;
+    GLuint _mainFramebuffer;
     GLuint _screenQuad;
     GLuint _anchorPointerTexture;
     GLuint _anchorPointerTextureInitializer;

@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "PowerScaling/powerScalingMath.hglsl"
 #include <#{fragmentPath}>
 
 out vec4 _out_color_;

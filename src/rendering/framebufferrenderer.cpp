@@ -246,6 +246,8 @@ void FramebufferRenderer::updateResolution() {
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    _dirtyResolution = false;
 }
 
 void FramebufferRenderer::updateRaycastData() {
@@ -393,6 +395,7 @@ void FramebufferRenderer::setCamera(Camera* camera) {
 
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _resolution = res;
+    _dirtyResolution = true;
 }
 
 void FramebufferRenderer::updateRendererData() {
