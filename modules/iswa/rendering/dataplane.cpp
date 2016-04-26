@@ -58,6 +58,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     setName(name);
 
     addProperty(_useLog);
+    addProperty(_useHistogram);
     addProperty(_useRGB);
     addProperty(_normValues);
     addProperty(_dataOptions);
@@ -70,6 +71,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
     OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
@@ -82,6 +84,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     _normValues.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
+    _useHistogram.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){
         if( _useRGB.value() && (_dataOptions.value().size() > 3)){
             LWARNING("More than 3 values, using only the red channel.");
@@ -295,7 +298,6 @@ float* DataPlane::readData(){
             } else {
                 processData(data, i, optionValues[i], min[i], max[i], sum[i], 1, logmean[i]);
             }
-            //processData(data, i, optionValues[i], min[i], max[i], sum[i], logmean[i]);
         }
         
         return data;
