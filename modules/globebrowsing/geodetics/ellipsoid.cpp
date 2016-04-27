@@ -41,13 +41,13 @@ namespace openspace {
 			(_radii.y * _radii.y),
 			(_radii.z * _radii.z)),
 		Vec3( // _oneOverRadiiSquared
-			1.0 / _cachedValues._radiiSquared.x,
-			1.0 / _cachedValues._radiiSquared.y,
-			1.0 / _cachedValues._radiiSquared.z),
+			1.0 / (_radii.x * _radii.x),
+			1.0 / (_radii.y * _radii.y),
+			1.0 / (_radii.z * _radii.z)),
 		Vec3( // _radiiToTheFourth
-			_cachedValues._radiiSquared.x * _cachedValues._radiiSquared.x,
-			_cachedValues._radiiSquared.y * _cachedValues._radiiSquared.y,
-			_cachedValues._radiiSquared.z * _cachedValues._radiiSquared.z),})
+			_radii.x * _radii.x * _radii.x * _radii.x,
+			_radii.y * _radii.y * _radii.y * _radii.y,
+			_radii.z * _radii.z * _radii.z * _radii.z),})
 	{
 
 	}

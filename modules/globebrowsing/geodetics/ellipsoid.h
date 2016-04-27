@@ -74,8 +74,6 @@ public:
 	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
 	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
 
-private:
-	
 	struct EllipsoidCache
 	{
 		const Vec3 _radiiSquared;
@@ -85,6 +83,9 @@ private:
 
 	const Vec3 _radii;
 	const EllipsoidCache _cachedValues;
+private:
+	
+
 };
 } // namespace openspace
 

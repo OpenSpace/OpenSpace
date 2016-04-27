@@ -38,5 +38,8 @@ using namespace openspace;
 TEST_F(EllipsoidTest, GeodeticSurfaceNormal) {
 	Ellipsoid ellipsoid(Vec3(1, 1, 1));
 
-	ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
+	Vec3 geodeticNormal = ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
+	Vec3 expectedNormal = Vec3(0, 0, 1);
+
+	ASSERT_EQ(geodeticNormal, expectedNormal);
 }
