@@ -22,64 +22,89 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#ifndef __LATLONPATCH_H__
+#define __LATLONPATCH_H__
 
-#include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/globes/clipmapglobe.h>
-#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <memory>
+#include <glm/glm.hpp>
 
 // open space includes
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderable.h>
 
-// ghoul includes
-#include <ghoul/misc/assert.h>
+#include <modules/globebrowsing/datastructures/latlon.h>
+#include <modules/globebrowsing/rendering/grid.h>
+#include <modules/globebrowsing/rendering/clipmapgrid.h>
+#include <modules/globebrowsing/rendering/frustrumculler.h>
+#include <modules/globebrowsing/rendering/texturetileset.h>
 
-namespace {
-    const std::string _loggerCat = "RenderableGlobe";
-
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyShading = "PerformShading";
-
-    const std::string keyBody = "Body";
+namespace ghoul {
+namespace opengl {
+    class ProgramObject;
 }
+}
+
 
 namespace openspace {
 
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _rotation("rotation", "Rotation", 0, 0, 360)
-		, _ellipsoid(Vec3(6378137.0, 6378137.0, 6356752.314245)) // Earth's radii
-	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
+    class LonLatPatch;
+    class Geometry;
+    
+    using std::shared_ptr;
+    using std::unique_ptr;
+    using ghoul::opengl::ProgramObject;
 
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
-		
-		//addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary, _ellipsoid)), 1e9);
-		addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary, _ellipsoid)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
-    }
+    class PatchRenderer {
+    public:
+        
+        PatchRenderer();
+        ~PatchRenderer();
 
-    RenderableGlobe::~RenderableGlobe() {
-    }
+    protected:
 
-    void RenderableGlobe::update(const UpdateData& data) {
-        // set spice-orientation in accordance to timestamp
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-        _time = data.time;
-        DistanceSwitch::update(data);
-    }
+        unique_ptr<ProgramObject> _programObject;
+        TextureTileSet _tileSet;
+        
+    };
 
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //							PATCH RENDERER SUBCLASSES								//
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    class LatLonPatchRenderer : public PatchRenderer {
+    public:
+        LatLonPatchRenderer(shared_ptr<Grid> grid);
+
+        void renderPatch(
+            const LatLonPatch& patch,
+            const RenderData& data, 
+            double radius);
+
+        void renderPatch(
+            const LatLonPatch& patch, 
+            const RenderData& data, 
+            double radius, 
+            const TileIndex& ti);
+
+    private:
+        TwmsTileProvider tileProvider;
+        shared_ptr<Grid> _grid;
+
+    };
+
+
+
+    class ClipMapPatchRenderer : public PatchRenderer {
+    public:
+        ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
+
+        void renderPatch(
+            const LatLon& patchSize,
+            const RenderData& data,
+            double radius);
+    private:
+        shared_ptr<ClipMapGrid> _grid;
+    };
 }  // namespace openspace
+
+#endif  // __LATLONPATCH_H__
