@@ -76,13 +76,11 @@ public:
 		Scalar centerLat,
 		Scalar centerLon,
 		Scalar halfSizeLat,
-		Scalar halfSizeLon,
-		const Ellipsoid& ellipsoid);
+		Scalar halfSizeLon);
 	GeodeticPatch(
 		const Geodetic2& center,
-		const Geodetic2& halfSize,
-		const Ellipsoid& ellipsoid);
-	GeodeticPatch(const GeodeticPatch& patch, const Ellipsoid& ellipsoid);
+		const Geodetic2& halfSize);
+	GeodeticPatch(const GeodeticPatch& patch);
 
 	void setCenter(const Geodetic2&);
 	void setHalfSize(const Geodetic2&);	
@@ -94,7 +92,7 @@ public:
 		TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
 		A PART OF AN ELLIPSOID AND NOT A SPHERE! THIS MUST BE FIXED
 	*/
-	Scalar minimalBoundingRadius() const;
+	Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
 
 	/**
 		Returns the area of the patch with unit radius
@@ -128,12 +126,9 @@ public:
 	const Geodetic2& halfSize() const;
 	Geodetic2 size() const;
 
-	const Ellipsoid& ellipsoid() const;
-
 private:
 	Geodetic2 _center;
 	Geodetic2 _halfSize;
-	const Ellipsoid& _ellipsoid;
 };
 
 } // namespace openspace

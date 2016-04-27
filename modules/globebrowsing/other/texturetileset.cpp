@@ -126,8 +126,7 @@ namespace openspace {
 	}
 
 	GeodeticPatch TextureTileSet::getTilePositionAndScale(
-		const TileIndex& tileIndex,
-		const Ellipsoid& ellipsoid) {
+		const TileIndex& tileIndex) {
 		Geodetic2 tileSize = Geodetic2(
 			_sizeLevel0.lat / pow(2, tileIndex.level),
 			_sizeLevel0.lon / pow(2, tileIndex.level));
@@ -137,15 +136,14 @@ namespace openspace {
 		
 		return GeodeticPatch(
 			Geodetic2(northWest.lat - tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
-			Geodetic2(tileSize.lat / 2, tileSize.lon / 2),
-			ellipsoid);
+			Geodetic2(tileSize.lat / 2, tileSize.lon / 2));
 	}
 
 	glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
 		GeodeticPatch patch,
 		const TileIndex& tileIndex)
 	{
-		GeodeticPatch tile = getTilePositionAndScale(tileIndex, patch.ellipsoid());
+		GeodeticPatch tile = getTilePositionAndScale(tileIndex);
 		return getUvTransformationPatchToTile(patch, tile);
 	}
 

@@ -214,8 +214,7 @@ namespace openspace {
 			stepSize.lon * intSnapCoord.y);
 		GeodeticPatch newPatch(
 			newPatchCenter,
-			Geodetic2(patchSize.lat / 2, patchSize.lon / 2),
-			ellipsoid);
+			Geodetic2(patchSize.lat / 2, patchSize.lon / 2));
 
 		ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
@@ -226,7 +225,7 @@ namespace openspace {
 
 		// Get the textures that should be used for rendering
 		TileIndex tileIndex = _tileSet.getTileIndex(newPatch);
-		GeodeticPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex, ellipsoid);
+		GeodeticPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
 		std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
 		glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
 

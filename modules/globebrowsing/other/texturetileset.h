@@ -75,8 +75,7 @@ namespace openspace {
 			the position and the size of the tile.
 		*/
 		GeodeticPatch getTilePositionAndScale(
-			const TileIndex& tileIndex,
-			const Ellipsoid& ellipsoid);
+			const TileIndex& tileIndex);
 
 		/**
 			A transformation (translation and scaling) from the texture space of a patch

@@ -58,7 +58,10 @@ namespace openspace {
 	}
 
 
-	bool FrustrumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch) {
+	bool FrustrumCuller::isVisible(
+		const RenderData& data,
+		const GeodeticPatch& patch,
+		const Ellipsoid& ellipsoid) {
 		// An axis aligned bounding box based on the patch's minimum boudning sphere is
 		// used for testnig
 	
@@ -69,13 +72,13 @@ namespace openspace {
 			* viewTransform * modelTransform;
 
 		// Calculate the patch's center point in screen space
-		vec4 patchCenterModelSpace = vec4(patch.ellipsoid().geodetic2ToCartesian(patch.center()), 1);
+		vec4 patchCenterModelSpace = vec4(ellipsoid.geodetic2ToCartesian(patch.center()), 1);
 		vec4 patchCenterProjectionSpace = modelViewProjectionTransform * patchCenterModelSpace;
 		vec2 pointScreenSpace = (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy();
 		
 		// Calculate the screen space margin that represents an axis aligned bounding 
 		// box based on the patch's minimum boudning sphere
-		double boundingRadius = patch.minimalBoundingRadius();
+		double boundingRadius = patch.minimalBoundingRadius(ellipsoid);
 		vec4 marginProjectionSpace = vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
 		vec2 marginScreenSpace = (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy();
 

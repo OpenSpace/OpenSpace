@@ -90,12 +90,10 @@ namespace openspace {
 		// the patch used for actual rendering
 		std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
 
-		
-		const GeodeticPatch _leftHemisphere;
-		const GeodeticPatch _rightHemisphere;
+		static const GeodeticPatch LEFT_HEMISPHERE;
+		static const GeodeticPatch RIGHT_HEMISPHERE;
 
 		properties::IntProperty _rotation;
-		
 
 		glm::dmat3 _stateMatrix;
 		std::string _frame;

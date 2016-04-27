@@ -186,7 +186,7 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 	int desiredLevel = floor( log2(projectedScaleFactor) );
 	return desiredLevel;
 	*/
-	return 1;
+	return _owner.minSplitDepth;
 }
 
 
@@ -200,10 +200,10 @@ void ChunkNode::split(int depth) {
 		Geodetic2 qs = Geodetic2(0.5 * hs.lat, 0.5 * hs.lon);
 
 		// Subdivide bounds
-		GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs, _owner.ellipsoid());
-		GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs, _owner.ellipsoid());
-		GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs, _owner.ellipsoid());
-		GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs, _owner.ellipsoid());
+		GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs);
+		GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs);
+		GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs);
+		GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs);
 
 		// Create new chunk nodes
 		_children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));

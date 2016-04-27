@@ -105,30 +105,25 @@ namespace openspace {
 		Scalar centerLat,
 		Scalar centerLon,
 		Scalar halfSizeLat,
-		Scalar halfSizeLon,
-		const Ellipsoid& ellipsoid)
+		Scalar halfSizeLon)
 		: _center(Geodetic2(centerLat, centerLon))
 		, _halfSize(Geodetic2(halfSizeLat, halfSizeLon))
-		, _ellipsoid(ellipsoid)
 	{
 	
 	}
 
 	GeodeticPatch::GeodeticPatch(
 		const Geodetic2& center,
-		const Geodetic2& halfSize,
-		const Ellipsoid& ellipsoid)
+		const Geodetic2& halfSize)
 		: _center(center)
-		, _halfSize(halfSize) 
-		, _ellipsoid(ellipsoid)
+		, _halfSize(halfSize)
 	{
 	
 	}
 
-	GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch, const Ellipsoid& ellipsoid)
+	GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
 		: _center(patch._center)
 		, _halfSize(patch._halfSize)
-		, _ellipsoid(ellipsoid)
 	{
 	
 	}
@@ -141,12 +136,11 @@ namespace openspace {
 		_halfSize = halfSize;
 	}
 
-	Scalar GeodeticPatch::minimalBoundingRadius() const {
-
+	Scalar GeodeticPatch::minimalBoundingRadius(const Ellipsoid& ellipsoid) const {
 		// TODO: THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
 		// A PART OF AN ELLIPSOID AND NOT A SPHERE!THIS MUST BE FIXED
 		const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
-		return glm::length(_ellipsoid.geodetic2ToCartesian(_center) - _ellipsoid.geodetic2ToCartesian(cornerNearEquator));
+		return glm::length(ellipsoid.geodetic2ToCartesian(_center) - ellipsoid.geodetic2ToCartesian(cornerNearEquator));
 	}
 	/*
 	Scalar GeodeticPatch::unitArea() const {
@@ -305,11 +299,6 @@ namespace openspace {
 		Scalar clampedLon = glm::clamp(pointLon.asRadians(), min.lon, max.lon);
 
 		return Geodetic2(clampedLat, clampedLon);
-	}
-
-	const Ellipsoid& GeodeticPatch::ellipsoid() const
-	{
-		return _ellipsoid;
 	}
 
 } // namespace openspace
