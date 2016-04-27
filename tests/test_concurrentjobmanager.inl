@@ -37,34 +37,92 @@ class ConcurrentJobManagerTest : public testing::Test {};
 
 
 using namespace openspace;
+using namespace std::chrono_literals;
+
 
 
 struct TestJob : public Job<int> {
+    TestJob(int jobExecutingTime)
+    : _jobExecutingTime(jobExecutingTime) {
+        
+    }
+
     virtual void execute() {
-        std::cout << "executing l33t job" << std::endl;
+        std::cout << "Executing job ... " << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
+        
         prod = 1337;
+        std::cout << "Finished job" << std::endl;
     }
 
     virtual int product() {
         return prod;
     }
 
+private:
+    int _jobExecutingTime;
     int prod;
 };
 
 
+
 TEST_F(ConcurrentJobManagerTest, Basic) {
     ConcurrentJobManager<int> jobManager;
-    std::unique_ptr<TestJob> testJob = std::unique_ptr<TestJob>(new TestJob());
 
-    jobManager.enqueueFutureJob(std::move(testJob));
-    jobManager.startInSeparateThread();
-
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(2s);
+    auto testJob1 = std::shared_ptr<TestJob>(new TestJob(20));
+    auto testJob2 = std::shared_ptr<TestJob>(new TestJob(20));
     
+    jobManager.enqueueJob(testJob1);
+    jobManager.enqueueJob(testJob2);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    EXPECT_EQ(jobManager.numFinishedJobs(), 0) << "A 20ms job should not be done after 10ms";
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    
+    EXPECT_EQ(jobManager.numFinishedJobs(), 1) << "A 20ms job should be done after 10+20 ms";
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    EXPECT_EQ(jobManager.numFinishedJobs(), 2) << "A 20ms job and a 20ms job should be done after 10+20+20 ms"; 
+
+
     auto finishedJob = jobManager.popFinishedJob();
 
     int product = finishedJob->product();
-    std::cout << "product is " << product << std::endl;
+    EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
 }
+
+
+struct VerboseTestJob : public TestJob {
+    VerboseTestJob(int jobExecutingTime)
+        : TestJob(jobExecutingTime) {
+        std::cout << "VerboseTestJob constructor" << std::endl;
+    }
+
+    ~VerboseTestJob() {
+        std::cout << "VerboseTestJob destructor" << std::endl;
+    }
+
+};
+
+TEST_F(ConcurrentJobManagerTest, JobCreation) {
+    ConcurrentJobManager<int> jobManager;
+
+    auto testJob1 = std::shared_ptr<TestJob>(new VerboseTestJob(20));
+
+    jobManager.enqueueJob(testJob1);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    EXPECT_EQ(jobManager.numFinishedJobs(), 0) << "A 20ms job should not be done after 10ms";
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+    EXPECT_EQ(jobManager.numFinishedJobs(), 1) << "A 20ms job should be done after 10+20 ms";
+
+
+    auto finishedJob = jobManager.popFinishedJob();
+
+    int product = finishedJob->product();
+    EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
+}
+

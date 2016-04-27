@@ -24,55 +24,36 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/other/concurrentqueue.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_twmstileprovider.inl>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_texturetileset.inl>
-//#include <test_gdalwms.inl>
 
-#include <test_concurrentqueue.inl>
-#include <test_concurrentjobmanager.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+class ConcurrentQueueTest : public testing::Test {};
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+using namespace openspace;
+
+
+
+TEST_F(ConcurrentQueueTest, Basic) {
+    ConcurrentQueue<int> q1;
+    q1.push(4);
+    int val = q1.pop();
+    std::cout << val << std::endl;
 }
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+/*
+TEST_F(ConcurrentQueueTest, SharedPtr) {
+    ConcurrentQueue<std::shared_ptr<int>> q1;
+    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
 
-	testing::InitGoogleTest(&argc, argv);
-
-	int returnVal = RUN_ALL_TESTS();
-
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
-
-	return returnVal;
+    q1.push(i1);
+    auto val = q1.pop();
+    std::cout << *val << std::endl;
 }
+*/

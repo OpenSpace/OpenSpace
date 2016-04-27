@@ -30,8 +30,11 @@
 #include <ostream>
 #include <thread>
 #include <queue>
+#include <atomic>
 
+#include <modules/globebrowsing/other/concurrentqueue.h>
 
+#include <ghoul/misc/assert.h>
 
 
 
@@ -49,27 +52,21 @@ namespace openspace {
         virtual void execute() = 0;
         virtual P product() = 0;
         
-        /*
-        enum Status {
-            UNKNOWN,
-            QUEUED,
-            IN_PROGRESS,
-            FINISHED
-        };
-
-        Status status;
-        */
-        
     };
 
 
 
 
-    // Templated 
+    /* 
+     * Templated Concurrent Job Manager
+     * This class is used execute specific jobs on one (1) parallell thread
+     */
     template<typename P>
     class ConcurrentJobManager{
     public:
-        ConcurrentJobManager() {
+        ConcurrentJobManager()
+        : _hasWorkingThread(false)
+        {
 
         }
 
@@ -78,29 +75,52 @@ namespace openspace {
         }
 
 
-
-        void enqueueFutureJob(std::unique_ptr<Job<P>> job) {
-            dummy = std::move(job);
+        void enqueueJob(std::shared_ptr<Job<P>> job) {
+            _incomingJobs.push(job);
+            if (!_hasWorkingThread) {
+                _hasWorkingThread = true; // Can only be set to true by the main thread
+                executeJobsInSeparateThread();
+            }
         }
 
-        void startInSeparateThread() {
-            // create new thread
-            dummy->execute();
+        std::shared_ptr<Job<P>> popFinishedJob() {
+            ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+            return _finishedJobs.pop();
         }
 
-        std::unique_ptr<Job<P>> popFinishedJob() {
-            return std::move(dummy);
+        size_t numFinishedJobs() {
+            return _finishedJobs.size();
         }
 
 
     
     private:
+
+
+        void executeJobsInSeparateThread() {
+            // Create new thread and run workerThreadMainTask on that thread
+            std::thread t(&ConcurrentJobManager::workerThreadMainTask, this);
+            t.detach();
+        }
         
         void workerThreadMainTask() {
-            
+            while (_incomingJobs.size() > 0) {
+                auto job = _incomingJobs.pop();                
+
+                job->execute();
+
+                _finishedJobs.push(job);
+            }
+
+            _hasWorkingThread = false; // Can only be set to false by worker thread
         }
 
-        std::unique_ptr<Job<P>> dummy;
+        ConcurrentQueue<std::shared_ptr<Job<P>>> _incomingJobs;
+        ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+
+        // Using this atomic bool is probably not optimal - Should probably
+        // use a conditional variable instead
+        std::atomic<bool> _hasWorkingThread;
 
     };
 
@@ -108,6 +128,5 @@ namespace openspace {
 } // namespace openspace
 
 
-#include <modules/globebrowsing/other/concurrentjobmanager.inl>
 
 #endif // __CONCURRENT_JOB_MANAGER_H__
