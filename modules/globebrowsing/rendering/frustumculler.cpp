@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 
-#include <modules/globebrowsing/other/frustrumculler.h>
+#include <modules/globebrowsing/rendering/frustumculler.h>
 
 namespace {
 	const std::string _loggerCat = "FrustrumCuller";

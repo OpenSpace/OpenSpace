@@ -45,7 +45,11 @@ class GdalWmsTest : public testing::Test {};
 TEST_F(GdalWmsTest, Simple) {
     GDALDataset *poDataset;
     GDALAllRegister();
+
     
+    std::string res = GDALVersionInfo("format");
+    
+
     std::string testFile = absPath("../data/scene/debugglobe/map_service_configs/TERRA_CR_B143_2016-04-12.wms");
 
     poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);

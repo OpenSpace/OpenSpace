@@ -41,9 +41,10 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.h
+
 	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/frustrumculler.h
 	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
 	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.h
 	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
@@ -67,9 +68,10 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.cpp
+
 	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/patchrenderer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/frustrumculler.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp

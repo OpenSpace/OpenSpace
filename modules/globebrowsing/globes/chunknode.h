@@ -31,7 +31,7 @@
 #include <ostream>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
 

@@ -32,7 +32,6 @@
 #include <modules/globebrowsing/globes/chunklodglobe.h>
 
 
-
 namespace {
     const std::string _loggerCat = "ChunkNode";
 }

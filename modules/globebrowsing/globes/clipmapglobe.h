@@ -33,7 +33,7 @@
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/globes/clipmappyramid.h>
 
 namespace ghoul {

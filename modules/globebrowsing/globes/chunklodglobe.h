@@ -40,7 +40,7 @@
 
 
 #include <modules/globebrowsing/globes/chunknode.h>
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/other/twmstileprovider.h>
 
 namespace ghoul {
