@@ -69,12 +69,17 @@ public:
 
 	Vec3 geodeticSurfaceNormal(const Vec3& p) const;
 	Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+	
+	Vec3 radiiSquared() const;
+	Vec3 oneOverRadiiSquared() const;
+	Vec3 radiiToTheFourth() const;
 	Scalar minimumRadius() const;
 
 	Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
 	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
 	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
 
+private:
 	struct EllipsoidCache
 	{
 		const Vec3 _radiiSquared;
@@ -85,9 +90,6 @@ public:
 
 	const Vec3 _radii;
 	const EllipsoidCache _cachedValues;
-private:
-	
-
 };
 } // namespace openspace
 

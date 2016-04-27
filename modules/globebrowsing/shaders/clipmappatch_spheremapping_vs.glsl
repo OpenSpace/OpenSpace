@@ -25,7 +25,7 @@
 #version __CONTEXT__
 
 uniform mat4 modelViewProjectionTransform;
-uniform float globeRadius;
+uniform vec3 radiiSquared;
 
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
@@ -38,6 +38,34 @@ out vec2 vs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
+vec3 geodeticSurfaceNormal(float latitude, float longitude)
+{
+	float cosLat = cos(latitude);
+	return vec3(
+		cosLat * cos(longitude),
+		cosLat * sin(longitude), 
+		sin(latitude));
+}
+
+vec3 geodetic3ToCartesian(
+	float latitude,
+	float longitude,
+	float height,
+	vec3 radiiSquared)
+{
+	vec3 normal = geodeticSurfaceNormal(latitude, longitude);
+	vec3 k = radiiSquared * normal;
+	float gamma = sqrt(dot(k, normal));
+	vec3 rSurface = k / gamma;
+	return rSurface + height * normal;
+}
+
+vec3 geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
+{
+	// Position on surface : height = 0
+	return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
+}
+
 vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 	return radius * vec3(
 		cos(latitude) * cos(longitude),
@@ -49,7 +77,7 @@ vec3 globalInterpolation(vec2 uv) {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * uv.y; // Lat
 	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * uv.x; // Lon
-	vec3 positionModelSpace = latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
+	vec3 positionModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
 	return positionModelSpace;
 }
 

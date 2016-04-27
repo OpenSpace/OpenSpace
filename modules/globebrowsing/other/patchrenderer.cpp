@@ -149,9 +149,7 @@ namespace openspace {
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
-		
-		// TODO : SEND ALL RADII TO GPU FOR RENDERING
-		_programObject->setUniform("globeRadius", float(glm::length(ellipsoid.geodetic2ToCartesian(Geodetic2(0,0)))));
+		_programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -242,9 +240,7 @@ namespace openspace {
 		_programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
 		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-
-		// TODO : SEND ALL RADII TO GPU FOR RENDERING!
-		_programObject->setUniform("globeRadius", float(glm::length(ellipsoid.geodetic2ToCartesian(Geodetic2(0, 0)))));
+		_programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 		_programObject->setUniform("contraction", contraction);
 
 		glEnable(GL_DEPTH_TEST);

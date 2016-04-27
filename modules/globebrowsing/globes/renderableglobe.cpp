@@ -52,7 +52,7 @@ namespace openspace {
 	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 		: DistanceSwitch()
 		, _rotation("rotation", "Rotation", 0, 0, 360)
-		, _ellipsoid(Vec3(6.3e6))
+		, _ellipsoid(Vec3(6378137.0, 6378137.0, 6356752.314245)) // Earth's radii
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);

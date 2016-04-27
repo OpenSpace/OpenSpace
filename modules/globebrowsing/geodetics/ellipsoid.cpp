@@ -114,6 +114,23 @@ namespace openspace {
 			sin(geodetic2.lat));
 	}
 
+	// TODO: IMPLEMENT THESE FUNCTIONS AND SEND RADIISQUARED TO THE SHADER PROGRAM 
+
+	Vec3 Ellipsoid::radiiSquared() const
+	{
+		return _cachedValues._radiiSquared;
+	}
+
+	Vec3 Ellipsoid::oneOverRadiiSquared() const
+	{
+		return _cachedValues._oneOverRadiiSquared;
+	}
+
+	Vec3 Ellipsoid::radiiToTheFourth() const
+	{
+		return _cachedValues._radiiToTheFourth;
+	}
+
 	Scalar Ellipsoid::minimumRadius() const
 	{
 		return _cachedValues._minimumRadius;
