@@ -55,8 +55,8 @@ struct Metadata {
     std::string path;
     std::string parent;
     std::string frame;
-    glm::vec3 min;
-    glm::vec3 max;
+    glm::vec3 gridMin;
+    glm::vec3 gridMax;
     glm::vec3 offset;
     glm::vec3 scale;
     glm::vec4 spatialScale;
@@ -68,28 +68,17 @@ struct Metadata {
 
 class ISWACygnet : public Renderable{
 public:
-    // ISWACygnet(std::shared_ptr<Metadata> data);
     ISWACygnet(const ghoul::Dictionary& dictionary);
     ~ISWACygnet();
 
     virtual bool initialize() = 0;
     virtual bool deinitialize() = 0;
 
-    // virtual void render(const RenderData& data) = 0;
-    // virtual void update(const UpdateData& data) = 0;
-    // virtual bool isReady() = 0;
-
-    // bool enabled(){return _enabled.value();}
-
 protected:
-    // void setPscUniforms(ghoul::opengl::ProgramObject* program, const Camera* camera, const PowerScaledCoordinate& position);
     void registerProperties();
     void unregisterProperties();
     void initializeTime();
-    void updateCygnet();
-    // void setParent();
-
-    // properties::BoolProperty _enabled;
+    
     properties::TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
@@ -108,8 +97,6 @@ protected:
     int _minRealTimeUpdateInterval;
 
     std::shared_ptr<TransferFunction> _transferFunction;
-
-    int _id;
 };
 
 }//namespace openspace

@@ -35,14 +35,6 @@
 
 namespace openspace {
 class ISWACygnet;
-class ISWAContainer;
-
-struct ExtensionFuture {
-    std::string extension;
-    bool isFinished;
-    int id;
-    std::string parent;
-};
 
 struct MetadataFuture {
     int id;
@@ -60,18 +52,13 @@ public:
     ISWAManager();
     ~ISWAManager();
 
-    // std::shared_ptr<ISWACygnet> createISWACygnet(std::shared_ptr<Metadata> metadata);
     void addISWACygnet(std::string info);
     void addISWACygnet(int id, std::string info = "TEXTURE");
     void deleteISWACygnet(std::string);
 
-    std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
+    // std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
-    std::shared_ptr<ExtensionFuture> fileExtension(int);
-
-    void setContainer(ISWAContainer*);
-    std::shared_ptr<ISWACygnet> iSWACygnet(std::string);
 
     void update();
 
@@ -79,20 +66,15 @@ public:
 private:
     std::string iSWAurl(int id, std::string type = "image");
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string getDictionaryTable(int id, std::string path);
     std::string parseJSONToLuaTable(int id, std::string json, std::string type);
     std::string parseKWToLuaTable(std::string kwPath);
 
-    // void createDataPlane(std::string kwPath);
-    // void createTexturePlane(int id, std::string json);
     void createPlane(int id, std::string json, std::string type);
     void createScreenSpace(int id);
     void createKameleonPlane(std::string kwPath); 
 
     std::map<std::string, std::string> _month;
-    ISWAContainer* _container;
-    std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
-    std::vector<std::shared_ptr<MetadataFuture>> _metaFutures;
+    std::vector<std::shared_ptr<MetadataFuture>> _metadataFutures;
 };
 
 } //namespace openspace

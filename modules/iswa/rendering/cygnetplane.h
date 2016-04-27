@@ -39,7 +39,6 @@ public:
     virtual void render(const RenderData& data) override;
     virtual void update(const UpdateData& data) override;
 
-
 protected:
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
@@ -53,7 +52,7 @@ protected:
     GLuint _vertexPositionBuffer;
 
     std::shared_ptr<DownloadManager::FileFuture> _futureObject;
-    float _backgroundValue;
+    // float _backgroundValue;
 };
 } //namespace openspace
 

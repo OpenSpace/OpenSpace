@@ -50,16 +50,16 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Id", renderableId);
     dictionary.getValue("UpdateTime", updateTime);
     dictionary.getValue("SpatialScale", spatialScale);
-    dictionary.getValue("Min", min);
-    dictionary.getValue("Max", max);
+    dictionary.getValue("GridMin", min);
+    dictionary.getValue("GridMax", max);
     dictionary.getValue("Frame",_data->frame);
     dictionary.getValue("CoordinateType", _data->coordinateType);
     
     _data->id = (int) renderableId;
     _data->updateTime = (int) updateTime;
     _data->spatialScale = spatialScale;
-    _data->min = min;
-    _data->max = max;
+    _data->gridMin = min;
+    _data->gridMax = max;
 
 
     glm::vec3 scale;
@@ -79,10 +79,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
     _data->scale = scale;
     _data->offset = offset;
-    // dictionary.getValue("Path",_data->path);
-    // dictionary.getValue("Parent",_data->parent);
 
-    // addProperty(_enabled);
     addProperty(_delete);
 
     // std::cout << _data->id << std::endl;

@@ -25,6 +25,7 @@
 #ifndef __SCREENSPACECYGNET_H__
 #define __SCREENSPACECYGNET_H__
 
+#include <chrono>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
@@ -43,21 +44,17 @@ public:
     bool isReady() const override;
 
 private:
-    static int id();
     void updateTexture();
     void loadTexture();
 
-    properties::FloatProperty _updateInterval;
-
-    std::string _path;
     const int _cygnetId;
-    float _time;
-    float _lastUpdateTime = 0.0f;
+
+    properties::FloatProperty _updateInterval;
+    std::chrono::milliseconds _realTime;
+    std::chrono::milliseconds _lastUpdateRealTime;
 
     std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
     std::string _memorybuffer;
-
-    int _id;    
 };
 
  } // namespace openspace

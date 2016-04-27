@@ -40,7 +40,6 @@ namespace {
 
 namespace openspace{
     ISWAManager::ISWAManager()
-        :_container(nullptr)
     {
         _month["JAN"] = "01";
         _month["FEB"] = "02";
@@ -81,10 +80,10 @@ namespace openspace{
             createScreenSpace(id);
         }else if(id < 0){
             //download metadata to texture plane
-            std::shared_ptr<MetadataFuture> metaFuture = downloadMetadata(id);
-            metaFuture->type = info;
-            metaFuture->id = id;
-            _metaFutures.push_back(metaFuture);
+            std::shared_ptr<MetadataFuture> metadataFuture = downloadMetadata(id);
+            metadataFuture->type = info;
+            metadataFuture->id = id;
+            _metadataFutures.push_back(metadataFuture);
         }else{ 
             //create kameleonplane
             createKameleonPlane(info);
@@ -95,16 +94,16 @@ namespace openspace{
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
     }
 
-    std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
-        return  DlManager.downloadFile(
-                    iSWAurl(id),
-                    path,
-                    true,
-                    [path](const DownloadManager::FileFuture& f){
-                        LDEBUG("Download finished: " << path);
-                    }
-                );
-    }
+    // std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
+    //     return  DlManager.downloadFile(
+    //                 iSWAurl(id),
+    //                 path,
+    //                 true,
+    //                 [path](const DownloadManager::FileFuture& f){
+    //                     LDEBUG("Download finished: " << path);
+    //                 }
+    //             );
+    // }
 
     std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
         return  DlManager.downloadToMemory(
@@ -126,53 +125,21 @@ namespace openspace{
             );
     }
 
-    std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
-        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-
-        metaFuture->id = id;
-        DlManager.downloadToMemory(
-                    "http://128.183.168.116:3000/" + std::to_string(-id),
-                    // "http://10.0.0.76:3000/" + std::to_string(-id),
-                    metaFuture->json,
-                    [metaFuture](const DownloadManager::FileFuture& f){
-                        LDEBUG("Download to memory finished");
-                        metaFuture->isFinished = true;
-                    }
-                );
-        return metaFuture;
-    }
-
-    std::shared_ptr<ExtensionFuture> ISWAManager::fileExtension(int id){
-        std::shared_ptr<ExtensionFuture> extFuture = std::make_shared<ExtensionFuture>();
-        extFuture->isFinished = false;
-        extFuture->id = id;
-        DlManager.getFileExtension(
-                iSWAurl(id),
-                [extFuture](std::string extension){
-                    std::stringstream ss(extension);
-                    std::string token;
-                    std::getline(ss, token, '/');
-                    std::getline(ss, token);
-                    
-
-                    std::string ext = "."+token;
-                    extFuture->extension = ext;
-                    extFuture->isFinished = true;
+    void ISWAManager::update(){
+        for (auto it = _metadataFutures.begin(); it != _metadataFutures.end(); ){
+            if((*it)->isFinished) {
+                if((*it)->type == "TEXTURE"){
+                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
+                }else if ((*it)->type == "DATA"){
+                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
+                } else {
+                    LERROR("\""+ (*it)->type + "\" is not a valid type");
                 }
-            );
-
-        return extFuture;
-    }
-
-    void ISWAManager::setContainer(ISWAContainer* container){
-        _container = container;
-    }
-
-
-    std::shared_ptr<ISWACygnet> ISWAManager::iSWACygnet(std::string name){
-        if(_container)
-            return _container->iSWACygnet(name);
-        return nullptr;
+                it = _metadataFutures.erase( it );
+            }else{
+                ++it;
+            }
+        }    
     }
 
     std::string ISWAManager::iSWAurl(int id, std::string type){
@@ -200,22 +167,22 @@ namespace openspace{
         return url;
     }
 
-    void ISWAManager::update(){
-        for (auto it = _metaFutures.begin(); it != _metaFutures.end(); ){
-            if((*it)->isFinished) {
-                if((*it)->type == "TEXTURE"){
-                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
-                }else if ((*it)->type == "DATA"){
-                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
-                } else {
-                    LERROR("\""+ (*it)->type + "\" is not a valid type");
-                }
-                it = _metaFutures.erase( it );
-            }else{
-                ++it;
-            }
-        }    
+    std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
+        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
+
+        metaFuture->id = id;
+        DlManager.downloadToMemory(
+                    "http://128.183.168.116:3000/" + std::to_string(-id),
+                    // "http://10.0.0.76:3000/" + std::to_string(-id),
+                    metaFuture->json,
+                    [metaFuture](const DownloadManager::FileFuture& f){
+                        LDEBUG("Download to memory finished");
+                        metaFuture->isFinished = true;
+                    }
+                );
+        return metaFuture;
     }
+
 
     std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString, std::string type){
         if(jsonString != ""){
@@ -254,16 +221,14 @@ namespace openspace{
                 "Type = '" + type + "', "
                 "Id = " + std::to_string(id) + ", "
                 "Frame = '" + frame + "' , "
-                "Min = " + std::to_string(min) + ", "
-                "Max = " + std::to_string(max) + ", "
+                "GridMin = " + std::to_string(min) + ", "
+                "GridMax = " + std::to_string(max) + ", "
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
                 "UpdateTime = " + std::to_string(updateTime) + ", "
                 "CoordinateType = '" + coordinateType + "', "
                 "}"
-            "}"
-            ;
-
-            // std::cout << table << std::endl;
+            "}";
+            
             return table;
         }
         return "";
@@ -305,8 +270,8 @@ namespace openspace{
                         "Type = 'KameleonPlane', "
                         "Id = 0 ,"
                         "Frame = '" + frame + "' , "
-                        "Min = " + std::to_string(min) + ", "
-                        "Max = " + std::to_string(max) + ", "
+                        "GridMin = " + std::to_string(min) + ", "
+                        "GridMax = " + std::to_string(max) + ", "
                         "SpatialScale = " + std::to_string(spatialScale) + ", "
                         "UpdateTime = 0, "
                         "kwPath = '" + kwPath + "' ," 

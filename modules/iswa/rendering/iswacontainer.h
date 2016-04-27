@@ -44,18 +44,7 @@ public:
     virtual void render(const RenderData& data) override;
     virtual void update(const UpdateData& data) override;
 
-    void addISWACygnet(std::string path);
-    void addISWACygnet(int id, std::string data);
-    void addISWACygnet(std::shared_ptr<ISWACygnet> cygnet);
-
-    void deleteISWACygnet(std::string name);
-
-    std::shared_ptr<ISWACygnet> iSWACygnet(std::string name);
-
 private:
-std::vector<std::shared_ptr<ISWACygnet>> _iSWACygnets;
-std::vector<std::shared_ptr<ExtensionFuture>> _extFutures;
-std::vector<std::shared_ptr<ISWACygnet>> _deletedCygnets;
 };    
 
 }//namespace openspace

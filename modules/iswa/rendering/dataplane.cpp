@@ -46,9 +46,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
     // ,_colorbar(nullptr)
-{   
-    _id = id();
-    
+{     
     std::string name;
     dictionary.getValue("Name", name);
     setName(name);
@@ -106,9 +104,9 @@ bool DataPlane::initialize(){
 
     updateTexture();
 
-
     std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
     _transferFunction = std::make_shared<TransferFunction>(tfPath);
+    
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
     // if(_colorbar){
@@ -131,9 +129,6 @@ bool DataPlane::deinitialize(){
 
     return true;
 }
-
-// void DataPlane::render(const RenderData& data){} //moved to CygnetPlane
-// void DataPLane::update(const UpdateData& data){} //moved to CygnetPlane
 
 bool DataPlane::loadTexture() {
     float* values = readData();
@@ -268,11 +263,6 @@ float* DataPlane::readData(){
 
                     sum[i] += v;
                     logmean[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
-                    if((_backgroundValue == 0.0f) && (fabs(value[0]) < 2.5f) &&
-                         (fabs(value[1]) < 2.5f) && (fabs(value[2]) < 2.5f) ){
-                        _backgroundValue = v;
-                        std::cout << _backgroundValue << std::endl;
-                    }
                 }
                 numValues++;
             }
@@ -354,7 +344,6 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
         }
     }
     //======================
->>>>>>> cleanup of read data function
     
     for(int i=0; i< numValues; i++){
         
@@ -403,10 +392,5 @@ float DataPlane::normalizeWithLogarithm(float value, int logMean){
 
     float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
     return glm::clamp(logNormalized,0.0f, 1.0f);
-}
-
-int DataPlane::id(){
-    static int id = 0;
-    return id++;
 }
 }// namespace openspace

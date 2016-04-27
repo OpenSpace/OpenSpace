@@ -43,7 +43,6 @@ ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
     :Renderable(dictionary)
 {
     ISWAManager::initialize();
-    ISWAManager::ref().setContainer(this);
     std::string textureCygnets;
     std::string dataCygnets;
     dictionary.getValue("TextureCygnets", textureCygnets);
@@ -67,109 +66,11 @@ ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
 }
 
 ISWAContainer::~ISWAContainer(){}
-
-bool ISWAContainer::initialize(){
-    // ISWAManager::ref().addISWACygnet(0, "BATSRUS.cdf");
-    // ISWAManager::ref().addISWACygnet(5, "Screen");
-    // ISWAManager::ref().addISWACygnet(7, "Sun");
-    return true;
-}
-
-bool ISWAContainer::deinitialize(){
-    for(auto iSWACygnet : _iSWACygnets)
-        iSWACygnet->deinitialize();
-
-    return true;
-}
-
+bool ISWAContainer::initialize(){return true;}
+bool ISWAContainer::deinitialize(){return true;}
 bool ISWAContainer::isReady() const { return true; }
+void ISWAContainer::render(const RenderData& data){} 
 
-void ISWAContainer::render(const RenderData& data){
-    // for(auto iSWACygnet : _iSWACygnets){
-    //     if(iSWACygnet->isEnabled() && iSWACygnet->isReady()){
-    //         iSWACygnet->render(data);
-    //     }
-    // }
-} 
+void ISWAContainer::update(const UpdateData& data){}
 
-void ISWAContainer::update(const UpdateData& data){
-
-    // // Create iSWAcygnets if a ExtensionFuture in _extFutures is finished loading.
-    // // Then remove it from the _extFutures vector.
-    // for (auto it = _extFutures.begin(); it != _extFutures.end(); )
-    // {
-    //     if ((*it)->isFinished) {
-    //         std::string path = "${OPENSPACE_DATA}/scene/iswa/" + std::to_string((*it)->id) + (*it)->extension;
-            
-    //         std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
-    //         data->id = (*it)->id;
-    //         data->path = path;
-    //         data->parent = (*it)->parent;
-
-    //         std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(data);
-    //         if(cygnet){
-    //             _iSWACygnets.push_back(cygnet);
-    //         }
-    //         it = _extFutures.erase( it );
-    //     }
-    //     else {
-    //         ++it;
-    //     }
-    // }
-
-    // if(!_deletedCygnets.empty())
-    //     _deletedCygnets.clear();
-
-    // for(auto& iSWACygnet : _iSWACygnets)
-    //     iSWACygnet->update(data);
-}
-
-void ISWAContainer::addISWACygnet(std::string path){
-    // std::shared_ptr<Metadata> data = std::make_shared<Metadata>();
-    // data->id = 0;
-    // data->path = path;
-
-    // std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().createISWACygnet(data);
-    // if(cygnet){
-    //     _iSWACygnets.push_back(cygnet);
-    // }
-
-}
-
-void ISWAContainer::addISWACygnet(int id, std::string data){
-    // std::shared_ptr<ExtensionFuture> extFuture = ISWAManager::ref().fileExtension(id);
-    // extFuture->parent = data;
-    // _extFutures.push_back(extFuture);
-}
-
-void ISWAContainer::addISWACygnet(std::shared_ptr<ISWACygnet> cygnet){
-    // if(cygnet){
-    //     _iSWACygnets.push_back(cygnet);
-    // }
-}
-
-void ISWAContainer::deleteISWACygnet(std::string name){
-    // std::shared_ptr<ISWACygnet> c = iSWACygnet(name);
-
-    // auto it = std::find(
-    //     _iSWACygnets.begin(),
-    //     _iSWACygnets.end(),
-    //     c
-    // );
-
-    // if (it != _iSWACygnets.end()) {
-    //     c->deinitialize();
-    //     _deletedCygnets.push_back(c);
-    //     _iSWACygnets.erase(it);
-    // }
-}
-
-std::shared_ptr<ISWACygnet> ISWAContainer::iSWACygnet(std::string name){
-/*    for(auto cygnet : _iSWACygnets){
-        if(cygnet->name() == name){
-            return cygnet;
-        }
-    }*/
-    return nullptr;
-}
 }

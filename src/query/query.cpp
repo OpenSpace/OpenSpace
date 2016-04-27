@@ -84,16 +84,7 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
         
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        if(ISWAManager::isInitialized()){
-            std::shared_ptr<ISWACygnet> cygnet = ISWAManager::ref().iSWACygnet(nameUri);
-            if(cygnet){
-                return cygnet->property(remainingUri);
-            }
-        }
-#endif
-        
-        LERROR("Node, iSWACygnet or ScreenSpaceRenderable' " << nameUri << "' did not exist");
+        LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
         return nullptr;
     }
 }

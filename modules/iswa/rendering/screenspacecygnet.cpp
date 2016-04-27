@@ -36,13 +36,10 @@ namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
     : ScreenSpaceRenderable()
-    , _updateInterval("updateInterval", "Update Interval", 0.35, 0.1 , 1.0)
+    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
     , _cygnetId(cygnetId)
-    // , _path(path)
 {
-    std::cout << "screenspacecygnet constructor 1" << std::endl;
-    _id = id();
-    setName("ScreenSpaceCygnet" + std::to_string(_id));
+    setName("iSWACygnet" + std::to_string(_cygnetId));
     addProperty(_updateInterval);
 
     OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
@@ -69,6 +66,9 @@ bool ScreenSpaceCygnet::initialize(){
         useEuclideanCoordinates(_useFlatScreen.value());
     });
 
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _lastUpdateRealTime = _realTime;
+
     return isReady();
 }
 
@@ -89,8 +89,6 @@ bool ScreenSpaceCygnet::deinitialize(){
         _shader = nullptr;
     }
 
-    // std::remove(absPath(_path).c_str());
-    // _path = "";
     _memorybuffer = "";
     return true;
 }
@@ -109,20 +107,18 @@ void ScreenSpaceCygnet::render(){
 }
 
 void ScreenSpaceCygnet::update(){
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    int updateInterval = (int) (_updateInterval.value()*1000);
+    bool timeToUpdate = ((_realTime.count()-_lastUpdateRealTime.count()) > updateInterval) &&
+                        (Time::ref().deltaTime() != 0);
 
-    _time = Time::ref().currentTime();
-
-    float openSpaceUpdateInterval = abs(Time::ref().deltaTime()*_updateInterval);
-    if(openSpaceUpdateInterval){
-        if(abs(_time-_lastUpdateTime) >= openSpaceUpdateInterval){
-            updateTexture();
-            _lastUpdateTime = _time;
-        }
+    if(updateInterval != 0 && (Time::ref().timeJumped() || timeToUpdate )){
+        updateTexture();
+        _lastUpdateRealTime = _realTime;
     }
 
     if(_futureTexture && _futureTexture->isFinished){
         loadTexture();
-
         _futureTexture = nullptr;
     }
 }
@@ -139,7 +135,6 @@ bool ScreenSpaceCygnet::isReady() const{
 void ScreenSpaceCygnet::updateTexture(){
     _memorybuffer = "";
 
-    // std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImage(_cygnetId, absPath(_path));
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
     if(future){
         _futureTexture = future;
@@ -172,10 +167,4 @@ void ScreenSpaceCygnet::loadTexture() {
         }
     }
 }
-
-int ScreenSpaceCygnet::id(){
-    static int id = 0;
-    return id++;
-}
-
 }

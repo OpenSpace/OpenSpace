@@ -43,9 +43,7 @@ namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 	:CygnetPlane(dictionary)
-{	
-	_id = id();
-	
+{		
 	std::string name;
     dictionary.getValue("Name", name);
     setName(name);
@@ -65,8 +63,6 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 	}else{
 		_data->scale.z = 0;
 	}
-
-	std::cout << "Creating kameleonplane" << std::endl;
 }
 
 KameleonPlane::~KameleonPlane(){}
@@ -144,8 +140,4 @@ bool KameleonPlane::updateTexture(){
 	return true;
 }
 
-int KameleonPlane::id(){
-	static int id = 0;
-	return id++;
-}
 }// namespace openspace

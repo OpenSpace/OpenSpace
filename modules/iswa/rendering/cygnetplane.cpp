@@ -29,7 +29,7 @@ CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
     ,_futureObject(nullptr)
-    ,_backgroundValue(0.0f)
+    // ,_backgroundValue(0.0f)
 {}
 
 CygnetPlane::~CygnetPlane(){}
@@ -38,8 +38,6 @@ bool CygnetPlane::isReady() const{
     bool ready = true;
     if (!_shader)
         ready &= false;
-    // if(!_texture)
-    //     ready &= false;
     return ready;
 }
 
@@ -93,12 +91,6 @@ void CygnetPlane::render(const RenderData& data){
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
-    // _shader->setUniform("background", _backgroundValue);
-
-    // _shader->setUniform("top", _topColor.value());
-    // _shader->setUniform("mid", _midColor.value());
-    // _shader->setUniform("bot", _botColor.value());
-    // _shader->setUniform("tfValues", _tfValues.value());
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
@@ -114,32 +106,16 @@ void CygnetPlane::render(const RenderData& data){
     _texture->bind();
     _shader->setUniform("texture1", unit);
 
-
-
-
-
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glEnable(GL_CULL_FACE);
     _shader->deactivate();
 
-    // position += transform*(glm::vec4(0.5f*_data->scale.x+100.0f ,-0.5f*_data->scale.y, 0.0f, _data->scale.w));
-    // // RenderData data = { *_camera, psc(), doPerformanceMeasurements };
-    // ColorBarData cbdata = { data.camera, 
-    //                         position,
-    //                         transform,
-    //                         _topColor.value(),
-    //                         _midColor.value(),
-    //                         _botColor.value(),
-    //                         _tfValues.value()
-    //                         // transform
-    //                       };    
-    // _colorbar->render(cbdata);
 }
 
 void CygnetPlane::update(const UpdateData& data){
     _openSpaceTime = Time::ref().currentTime();
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());;
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _openSpaceTime);
 
 

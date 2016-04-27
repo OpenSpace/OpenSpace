@@ -38,9 +38,6 @@
 
     virtual bool initialize() override;
     virtual bool deinitialize() override;
-
-    // virtual void render(const RenderData& data) override; //moved to cygnetPlane
-    // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
  
  private:
     virtual bool loadTexture() override;

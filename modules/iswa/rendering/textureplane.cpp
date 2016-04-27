@@ -43,7 +43,6 @@ namespace openspace {
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
 {
-    _id = id();
     std::string name;
     dictionary.getValue("Name", name);
     setName(name);
@@ -70,9 +69,6 @@ bool TexturePlane::deinitialize(){
 
     return true;
 }
-
-// void TexturePlane::render(const RenderData& data){} //moved to CygnetPlane
-// void TexturePlane::update(const UpdateData& data){} //moved to CygnetPlane
 
 bool TexturePlane::loadTexture() {
     if(_memorybuffer != ""){
@@ -117,11 +113,6 @@ bool TexturePlane::updateTexture(){
     }
 
     return false;
-}
-
-int TexturePlane::id(){
-        static int id = 0;
-        return id++;
 }
 
 }// namespace openspace

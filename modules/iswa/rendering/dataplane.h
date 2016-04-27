@@ -62,8 +62,6 @@ class DataPlane : public CygnetPlane {
     float normalizeWithStandardScore(float value, float mean, float sd);
     float normalizeWithLogarithm(float value, int logMean);
 
-    static int id();
-
     properties::SelectionProperty _dataOptions;
     properties::Vec2Property _normValues;
     properties::BoolProperty _useLog;
