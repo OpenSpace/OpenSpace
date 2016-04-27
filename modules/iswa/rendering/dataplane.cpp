@@ -41,7 +41,7 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_normValues("normValues", "Normalize Values", glm::vec2(0.1,0.2), glm::vec2(0), glm::vec2(0.5))
+    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5))
     ,_useLog("useLog","Use Logarithm Norm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
