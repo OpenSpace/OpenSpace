@@ -173,6 +173,11 @@ bool DataPlane::updateTexture(){
     return false;
 }
 
+void DataPlane::setUniforms(){
+    _shader->setUniform("numTextures", (int) _textures.size());
+    _shader->setUniform("averageValues", false);
+};
+
 void DataPlane::readHeader(){
     if(!_memorybuffer.empty()){
         std::stringstream memorystream(_memorybuffer);

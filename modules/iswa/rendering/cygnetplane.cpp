@@ -88,26 +88,28 @@ void CygnetPlane::render(const RenderData& data){
     glEnable(GL_ALPHA_TEST);
     glDisable(GL_CULL_FACE);
 
+
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
+    setUniforms();
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
-    ghoul::opengl::TextureUnit tfUnits;
+    ghoul::opengl::TextureUnit tfUnits[_transferFunctions.size()];
     if(!_transferFunctions.empty()){
         if(_transferFunctions.size() == 1){
-            tfUnits.activate();
+            tfUnits[0].activate();
             _transferFunctions[0]->bind();
-            _shader->setUniform("tf", tfUnits);
+            _shader->setUniform("tf", tfUnits[0]);
         }
     }
 
-    ghoul::opengl::TextureUnit txUnits;
+    ghoul::opengl::TextureUnit txUnits[_textures.size()];
     if(_textures.size() == 1){
-        txUnits.activate();
+        txUnits[0].activate();
         _textures[0]->bind();
-        _shader->setUniform("texture1", txUnits);
-    }    
+        _shader->setUniform("texture1", txUnits[0]);
+    }
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

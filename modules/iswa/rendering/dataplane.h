@@ -46,6 +46,8 @@ class DataPlane : public CygnetPlane {
  private:
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
+    virtual void setUniforms() override;
+
     void readHeader();
     float* readData();
     void processData(

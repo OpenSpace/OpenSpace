@@ -42,6 +42,7 @@ public:
 protected:
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
+    virtual void setUniforms() = 0;
 
     void createPlane();
     void destroyPlane();

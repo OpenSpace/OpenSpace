@@ -22,8 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 uniform float time;
+
 uniform sampler2D texture1;
+uniform sampler2D textures[10];
 uniform sampler2D tf;
+uniform sampler2D tfs[10];
+
+uniform int numTextures;
+uniform bool averageValues;
 
 // uniform float background;
 
@@ -36,12 +42,24 @@ in vec4 vs_position;
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
-    vec4 diffuse;
+    vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    float v;
+    if(numTextures > 1){
+        for(uint i=0; i<numTextures; i++){
+            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            diffuse += texture(tfs[i], vec2(v,0));
+        }
+    }else{
+        v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+        diffuse = texture(tf, vec2(v,0));
+    }
 
+    if(averageValues){
+        diffuse /= numTextures;
+    }
+    
     // diffuse = texture(tf, vec2(1-vs_st.s, 0));
     // diffuse = texture(tf, texture(texture1, vec2(vs_st.s,1-vs_st.t)).r);
-    float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
-    diffuse = texture(tf, vec2(v,0));
 
     // if (diffuse.a <= 0.05)
     //     discard;
