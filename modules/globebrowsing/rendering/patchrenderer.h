@@ -31,11 +31,12 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 
-#include <modules/globebrowsing/datastructures/latlon.h>
-#include <modules/globebrowsing/rendering/grid.h>
-#include <modules/globebrowsing/rendering/clipmapgrid.h>
-#include <modules/globebrowsing/rendering/frustrumculler.h>
-#include <modules/globebrowsing/rendering/texturetileset.h>
+#include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
+#include <modules/globebrowsing/meshes/grid.h>
+#include <modules/globebrowsing/meshes/clipmapgrid.h>
+#include <modules/globebrowsing/rendering/frustumculler.h>
+#include <modules/globebrowsing/other/texturetileset.h>
 
 namespace ghoul {
 namespace opengl {
@@ -47,7 +48,7 @@ namespace opengl {
 namespace openspace {
 
     class LonLatPatch;
-    class Geometry;
+    class TriangleSoup;
     
     using std::shared_ptr;
     using std::unique_ptr;
@@ -63,7 +64,6 @@ namespace openspace {
 
         unique_ptr<ProgramObject> _programObject;
         TextureTileSet _tileSet;
-        
     };
 
 
@@ -76,20 +76,18 @@ namespace openspace {
         LatLonPatchRenderer(shared_ptr<Grid> grid);
 
         void renderPatch(
-            const LatLonPatch& patch,
+            const GeodeticPatch& patch,
             const RenderData& data, 
-            double radius);
+            const Ellipsoid& ellipsoid);
 
         void renderPatch(
-            const LatLonPatch& patch, 
+            const GeodeticPatch& patch, 
             const RenderData& data, 
-            double radius, 
+            const Ellipsoid& ellipsoid,
             const TileIndex& ti);
-
     private:
-        TwmsTileProvider tileProvider;
         shared_ptr<Grid> _grid;
-
+        TwmsTileProvider tileProvider;
     };
 
 
@@ -99,12 +97,13 @@ namespace openspace {
         ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
 
         void renderPatch(
-            const LatLon& patchSize,
+            const Geodetic2& patchSize,
             const RenderData& data,
-            double radius);
-    private:
+			const Ellipsoid& ellipsoid);
+	private:
         shared_ptr<ClipMapGrid> _grid;
     };
+
 }  // namespace openspace
 
 #endif  // __LATLONPATCH_H__

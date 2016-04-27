@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 
-#include <modules/globebrowsing/other/frustrumculler.h>
+#include <modules/globebrowsing/rendering/frustumculler.h>
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 
@@ -36,17 +36,17 @@ namespace openspace {
 	//////////////////////////////////////////////////////////////////////////////////////
 	//							PATCH RENDERER											//
 	//////////////////////////////////////////////////////////////////////////////////////
-	FrustrumCuller::FrustrumCuller()
+	FrustumCuller::FrustumCuller()
 	{
 
 	}
 
-	FrustrumCuller::~FrustrumCuller() {
+	FrustumCuller::~FrustumCuller() {
 		
 	}
 
 
-	bool FrustrumCuller::isVisible(const RenderData& data, const vec3& point, const glm::vec2& marginScreenSpace) {
+	bool FrustumCuller::isVisible(const RenderData& data, const vec3& point, const glm::vec2& marginScreenSpace) {
 
 		mat4 modelTransform = translate(mat4(1), data.position.vec3());
 		mat4 viewTransform = data.camera.combinedViewMatrix();
@@ -58,7 +58,7 @@ namespace openspace {
 	}
 
 
-	bool FrustrumCuller::isVisible(
+	bool FrustumCuller::isVisible(
 		const RenderData& data,
 		const GeodeticPatch& patch,
 		const Ellipsoid& ellipsoid) {
@@ -90,7 +90,7 @@ namespace openspace {
 
 
 
-	bool FrustrumCuller::testPoint(const glm::vec2& pointScreenSpace,
+	bool FrustumCuller::testPoint(const glm::vec2& pointScreenSpace,
 		const glm::vec2& marginScreenSpace) const 
 	{
 		
@@ -102,7 +102,7 @@ namespace openspace {
 	}
 
 
-	glm::vec2 FrustrumCuller::transformToScreenSpace(const vec3& point, 
+	glm::vec2 FrustumCuller::transformToScreenSpace(const vec3& point, 
 		const mat4x4& modelViewProjection) const 
 	{
 		vec4 pointProjectionSpace = modelViewProjection * vec4(point, 1.0f);

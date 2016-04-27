@@ -36,15 +36,13 @@
 //#include <test_chunknode.inl>
 //#include <test_lrucache.inl>
 //#include <test_twmstileprovider.inl>
-#include <test_ellipsoid.inl>
-
 
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
 //#include <test_angle.inl>
 //#include <test_latlonpatch.inl>
 //#include <test_texturetileset.inl>
-//#include <test_gdalwms.inl>
+#include <test_gdalwms.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>

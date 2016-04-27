@@ -94,7 +94,7 @@ namespace openspace {
 
 		_patchRenderer.reset(new LatLonPatchRenderer(geometry));
 
-		_frustrumCuller = std::shared_ptr<FrustrumCuller>(new FrustrumCuller());
+		_frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
 
 	}
 
@@ -119,8 +119,8 @@ namespace openspace {
 		return *_patchRenderer;
 	}
 
-	FrustrumCuller& ChunkLodGlobe::getFrustrumCuller() {
-		return *_frustrumCuller;
+	FrustumCuller& ChunkLodGlobe::getFrustumCuller() {
+		return *_frustumCuller;
 	}
 
 

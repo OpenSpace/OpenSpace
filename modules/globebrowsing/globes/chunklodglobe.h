@@ -40,7 +40,7 @@
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/globes/chunknode.h>
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/other/twmstileprovider.h>
 
 namespace ghoul {
@@ -58,7 +58,7 @@ namespace openspace {
 		~ChunkLodGlobe();
 
 		LatLonPatchRenderer& getPatchRenderer();
-		FrustrumCuller& getFrustrumCuller();
+		FrustumCuller& getFrustumCuller();
 
 		bool initialize() override;
 		bool deinitialize() override;
@@ -85,7 +85,7 @@ namespace openspace {
 		std::unique_ptr<ChunkNode> _rightRoot;
 
 		// Frustrum culler
-		std::shared_ptr<FrustrumCuller> _frustrumCuller;
+		std::shared_ptr<FrustumCuller> _frustumCuller;
 
 		// the patch used for actual rendering
 		std::unique_ptr<LatLonPatchRenderer> _patchRenderer;

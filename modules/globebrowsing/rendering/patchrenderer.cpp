@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 

@@ -42,11 +42,11 @@ namespace openspace {
 	using namespace glm;
 	
 
-	class FrustrumCuller {
+	class FrustumCuller {
 	public:
 		
-		FrustrumCuller();
-		~FrustrumCuller();
+		FrustumCuller();
+		~FrustumCuller();
 		
 		/**
 			Returns true if the point is inside the view frustrum defined in RenderData. 

@@ -68,7 +68,7 @@ namespace openspace {
 				std::string fileName = _fileFutureCache.get(hashkey)->filePath;
 				std::string filePath = "tiles/" + fileName;
 				std::shared_ptr<Texture> texture = loadAndInitTextureDisk(filePath);
-				LDEBUG("Downloaded " << fileName);
+				//LDEBUG("Downloaded " << fileName);
 				_tileCache.put(hashkey, texture);
 			}
 		}

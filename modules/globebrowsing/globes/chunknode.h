@@ -31,66 +31,66 @@
 #include <ostream>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/other/patchrenderer.h>
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
 
 // forward declaration
 namespace openspace {
-	class ChunkLodGlobe;
+    class ChunkLodGlobe;
 }
 
 
 namespace openspace {
 
 enum Quad {
-	NORTH_WEST,
-	NORTH_EAST,
-	SOUTH_WEST,
-	SOUTH_EAST
+    NORTH_WEST,
+    NORTH_EAST,
+    SOUTH_WEST,
+    SOUTH_EAST
 };
 
 
 struct ChunkIndex {
-	int x, y, level;
+    int x, y, level;
 
-	std::vector<ChunkIndex> childIndices() const {
-		return {
-			{ 2 * x + 0, 2 * y + 0, level + 1 },
-			{ 2 * x + 1, 2 * y + 0, level + 1 },
-			{ 2 * x + 0, 2 * y + 1, level + 1 },
-			{ 2 * x + 1, 2 * y + 1, level + 1 },
-		};
-	}
-
+    std::vector<ChunkIndex> childIndices() const {
+        return {
+            { 2 * x + 0, 2 * y + 0, level + 1 },
+            { 2 * x + 1, 2 * y + 0, level + 1 },
+            { 2 * x + 0, 2 * y + 1, level + 1 },
+            { 2 * x + 1, 2 * y + 1, level + 1 },
+        };
+    }
 
 };
 
 
 class ChunkNode {
 public:
-	ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
-	~ChunkNode();
+    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
+    ~ChunkNode();
 
 
-	void split(int depth = 1);
-	void merge();
+    void split(int depth = 1);
+    void merge();
 
-	bool isRoot() const;
-	bool isLeaf() const;
-	
-	const ChunkNode& getChild(Quad quad) const;
+    bool isRoot() const;
+    bool isLeaf() const;
+    
+    
+    const ChunkNode& getChild(Quad quad) const;
 
-	void render(const RenderData& data, ChunkIndex);
+    void render(const RenderData& data, ChunkIndex);
 
-	static int instanceCount;
-	static int renderedPatches;
+    static int instanceCount;
+    static int renderedPatches;
 
 
 private:
 
 	void internalRender(const RenderData& data, ChunkIndex&);
-	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex&);
+	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
 
 	/**
 	Uses horizon culling, frustum culling and distance to camera to determine a
@@ -101,16 +101,16 @@ private:
 	be safe. This means that if the ellipsoid has high difference between radii,
 	splitting might accur even though it is not needed.
 	*/
-	int calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData);
+	int calculateDesiredLevelAndUpdateIsVisible(
+		const RenderData& data,
+		const ChunkIndex& traverseData);
 	
 	
 	ChunkNode* _parent;
-	std::unique_ptr<ChunkNode> _children[4];
-
-	ChunkLodGlobe& _owner;
-
-	GeodeticPatch _patch;
-	
+	std::unique_ptr<ChunkNode> _children[4];    
+    ChunkLodGlobe& _owner;
+    GeodeticPatch _patch;
+	bool _isVisible;
 };
 
 } // namespace openspace
