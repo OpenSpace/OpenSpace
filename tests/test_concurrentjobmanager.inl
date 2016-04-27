@@ -24,54 +24,47 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_twmstileprovider.inl>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_texturetileset.inl>
-//#include <test_gdalwms.inl>
 
-#include <test_concurrentjobmanager.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+class ConcurrentJobManagerTest : public testing::Test {};
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
+using namespace openspace;
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
-	testing::InitGoogleTest(&argc, argv);
+struct TestJob : public Job<int> {
+    virtual void execute() {
+        std::cout << "executing l33t job" << std::endl;
+        prod = 1337;
+    }
 
-	int returnVal = RUN_ALL_TESTS();
+    virtual int product() {
+        return prod;
+    }
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+    int prod;
+};
 
-	return returnVal;
+
+TEST_F(ConcurrentJobManagerTest, Basic) {
+    ConcurrentJobManager<int> jobManager;
+    std::unique_ptr<TestJob> testJob = std::unique_ptr<TestJob>(new TestJob());
+
+    jobManager.enqueueFutureJob(std::move(testJob));
+    jobManager.startInSeparateThread();
+
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(2s);
+    
+    auto finishedJob = jobManager.popFinishedJob();
+
+    int product = finishedJob->product();
+    std::cout << "product is " << product << std::endl;
 }

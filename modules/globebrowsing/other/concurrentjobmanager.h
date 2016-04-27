@@ -22,56 +22,92 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __CONCURRENT_JOB_MANAGER_H__
+#define __CONCURRENT_JOB_MANAGER_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <glm/glm.hpp>
+#include <memory>
+#include <ostream>
+#include <thread>
+#include <queue>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_twmstileprovider.inl>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_texturetileset.inl>
-//#include <test_gdalwms.inl>
 
-#include <test_concurrentjobmanager.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+namespace openspace {
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
+    // Templated abstract base class representing a job to be done.
+    // Client code derive from this class and implement the virtual execute() method
+    template<typename P>
+    struct Job {
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+        Job() { }
+        virtual ~Job() { }
 
-	testing::InitGoogleTest(&argc, argv);
+        virtual void execute() = 0;
+        virtual P product() = 0;
+        
+        /*
+        enum Status {
+            UNKNOWN,
+            QUEUED,
+            IN_PROGRESS,
+            FINISHED
+        };
 
-	int returnVal = RUN_ALL_TESTS();
+        Status status;
+        */
+        
+    };
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
 
-	return returnVal;
-}
+
+
+    // Templated 
+    template<typename P>
+    class ConcurrentJobManager{
+    public:
+        ConcurrentJobManager() {
+
+        }
+
+        ~ConcurrentJobManager() {
+
+        }
+
+
+
+        void enqueueFutureJob(std::unique_ptr<Job<P>> job) {
+            dummy = std::move(job);
+        }
+
+        void startInSeparateThread() {
+            // create new thread
+            dummy->execute();
+        }
+
+        std::unique_ptr<Job<P>> popFinishedJob() {
+            return std::move(dummy);
+        }
+
+
+    
+    private:
+        
+        void workerThreadMainTask() {
+            
+        }
+
+        std::unique_ptr<Job<P>> dummy;
+
+    };
+
+
+} // namespace openspace
+
+
+#include <modules/globebrowsing/other/concurrentjobmanager.inl>
+
+#endif // __CONCURRENT_JOB_MANAGER_H__
