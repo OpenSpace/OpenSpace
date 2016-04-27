@@ -69,6 +69,7 @@ public:
 
 	Vec3 geodeticSurfaceNormal(const Vec3& p) const;
 	Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+	Scalar minimumRadius() const;
 
 	Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
 	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
@@ -79,6 +80,7 @@ public:
 		const Vec3 _radiiSquared;
 		const Vec3 _oneOverRadiiSquared;
 		const Vec3 _radiiToTheFourth;
+		const Scalar _minimumRadius;
 	};
 
 	const Vec3 _radii;

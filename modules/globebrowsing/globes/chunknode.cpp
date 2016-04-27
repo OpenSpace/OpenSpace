@@ -135,9 +135,11 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 	}
 }
 
-int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& traverseData) {
+int ChunkNode::calculateDesiredLevel(
+	const RenderData& data,
+	const ChunkIndex& traverseData) {
 
-	/*
+	
 	Vec3 globePosition = data.position.dvec3();
 	//Vec3 patchNormal = _patch.center().asUnitCartesian();
 	Vec3 patchPosition =
@@ -163,7 +165,13 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 
 	//LDEBUG(cosPatchNormalCameraDirection);
 
-	double cosAngleToHorizon = _owner.globeRadius / glm::length(globeToCamera);
+	// Get the minimum radius from the ellipsoid. The closer the ellipsoid is to a
+	// sphere, the better this will make the splitting. Using the minimum radius to
+	// be safe. This means that if the ellipsoid has high difference between radii,
+	// splitting might accur even though it is not needed.
+	Scalar minimumGlobeRadius = _owner.ellipsoid().minimumRadius();
+
+	double cosAngleToHorizon = minimumGlobeRadius / glm::length(globeToCamera);
 
 	if (cosPatchNormalNormalizedGlobeToCamera < cosAngleToHorizon) {
 		return traverseData.level - 1;
@@ -173,7 +181,7 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 	// Do frustrum culling
 	FrustrumCuller& culler = _owner.getFrustrumCuller();
 
-	if (!culler.isVisible(data, _patch, _owner.globeRadius)) {
+	if (!culler.isVisible(data, _patch, _owner.ellipsoid())) {
 		return traverseData.level - 1;
 	}
 
@@ -181,12 +189,10 @@ int ChunkNode::calculateDesiredLevel(const RenderData& data, const ChunkIndex& t
 	Scalar distance = glm::length(cameraToChunk);
 	_owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-	Scalar scaleFactor = 100 * _owner.globeRadius;
+	Scalar scaleFactor = 100 * minimumGlobeRadius;
 	Scalar projectedScaleFactor = scaleFactor / distance;
 	int desiredLevel = floor( log2(projectedScaleFactor) );
 	return desiredLevel;
-	*/
-	return _owner.minSplitDepth;
 }
 
 

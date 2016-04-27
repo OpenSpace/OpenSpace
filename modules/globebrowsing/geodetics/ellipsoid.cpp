@@ -47,7 +47,8 @@ namespace openspace {
 		Vec3( // _radiiToTheFourth
 			_radii.x * _radii.x * _radii.x * _radii.x,
 			_radii.y * _radii.y * _radii.y * _radii.y,
-			_radii.z * _radii.z * _radii.z * _radii.z),})
+			_radii.z * _radii.z * _radii.z * _radii.z),
+		glm::min(_radii.x, glm::min(_radii.y, _radii.z))})
 	{
 
 	}
@@ -111,6 +112,11 @@ namespace openspace {
 			cosLat * cos(geodetic2.lon),
 			cosLat * sin(geodetic2.lon), 
 			sin(geodetic2.lat));
+	}
+
+	Scalar Ellipsoid::minimumRadius() const
+	{
+		return _cachedValues._minimumRadius;
 	}
 
 	Geodetic2 Ellipsoid::cartesianToGeodetic2(const Vec3& p) const

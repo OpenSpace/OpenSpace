@@ -138,7 +138,8 @@ namespace openspace {
 
 	Scalar GeodeticPatch::minimalBoundingRadius(const Ellipsoid& ellipsoid) const {
 		// TODO: THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
-		// A PART OF AN ELLIPSOID AND NOT A SPHERE!THIS MUST BE FIXED
+		// A PART OF AN ELLIPSOID AND NOT A SPHERE!MUST CHECK IF THIS FUNCTION IS STILL
+		// VALID.
 		const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
 		return glm::length(ellipsoid.geodetic2ToCartesian(_center) - ellipsoid.geodetic2ToCartesian(cornerNearEquator));
 	}

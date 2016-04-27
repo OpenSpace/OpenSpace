@@ -90,7 +90,8 @@ public:
 		center point represents a sphere in which the patch is completely contained.
 		
 		TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
-		A PART OF AN ELLIPSOID AND NOT A SPHERE! THIS MUST BE FIXED
+		A PART OF AN ELLIPSOID AND NOT A SPHERE! MUST CHECK IF THIS FUNCTION IS STILL
+		VALID.
 	*/
 	Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
 
