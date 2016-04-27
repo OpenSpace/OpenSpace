@@ -58,20 +58,7 @@ namespace openspace {
 	{
 	
 	}
-	/*
-	Geodetic2 Geodetic2::fromCartesian(const Vec3& v) {
-		Scalar r = glm::length(v);
-		return Geodetic2(glm::asin(v.z / r), atan2(v.y, v.x));
-	}
 
-
-	Vec3 Geodetic2::asUnitCartesian() const{
-		return Vec3(
-			glm::cos(lat) * glm::cos(lon),
-			glm::cos(lat) * glm::sin(lon),
-			glm::sin(lat));
-	}
-	*/
 	Vec2 Geodetic2::toLonLatVec2() const {
 		return Vec2(lon, lat);
 	}
