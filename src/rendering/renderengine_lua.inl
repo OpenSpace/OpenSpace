@@ -39,16 +39,16 @@ int changeCoordinateSystem(lua_State* L) {
 */
 
 /**
-	* \ingroup LuaScripts
-	* takeScreenshot():
-	* Save the rendering to an image file
-	*/
+    * \ingroup LuaScripts
+    * takeScreenshot():
+    * Save the rendering to an image file
+    */
 int takeScreenshot(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-	OsEng.renderEngine().takeScreenshot();
-	return 0;
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    OsEng.renderEngine().takeScreenshot();
+    return 0;
 }
 
 /**
@@ -57,16 +57,16 @@ int takeScreenshot(lua_State* L) {
 * Set renderer
 */
 int setRenderer(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	const int type = lua_type(L, -1);
+    const int type = lua_type(L, -1);
     if (type != LUA_TSTRING)
         return luaL_error(L, "Expected argument of type 'bool'");
     std::string r = lua_tostring(L, -1);
     OsEng.renderEngine().setRendererFromString(r);
-	return 0;
+    return 0;
 }
 
 /**
@@ -75,16 +75,16 @@ int setRenderer(lua_State* L) {
 * Toggle the visualization of the ABuffer
 */
 int showRenderInformation(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	const int type = lua_type(L, -1);
+    const int type = lua_type(L, -1);
     if (type != LUA_TBOOLEAN)
         return luaL_error(L, "Expected argument of type 'bool'");
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().toggleInfoText(b);
-	return 0;
+    bool b = lua_toboolean(L, -1) != 0;
+    OsEng.renderEngine().toggleInfoText(b);
+    return 0;
 }
 
 /**
@@ -93,13 +93,13 @@ int showRenderInformation(lua_State* L) {
 * Toggle the visualization of the ABuffer
 */
 int setPerformanceMeasurement(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	bool b = lua_toboolean(L, -1) != 0;
-	OsEng.renderEngine().setPerformanceMeasurements(b);
-	return 0;
+    bool b = lua_toboolean(L, -1) != 0;
+    OsEng.renderEngine().setPerformanceMeasurements(b);
+    return 0;
 }
 
 /**
@@ -108,14 +108,14 @@ int setPerformanceMeasurement(lua_State* L) {
 * start a global fadein over (float) seconds
 */
 int fadeIn(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	double t = luaL_checknumber(L, -1);
-			
-	OsEng.renderEngine().startFading(1, static_cast<float>(t));
-	return 0;
+    double t = luaL_checknumber(L, -1);
+            
+    OsEng.renderEngine().startFading(1, static_cast<float>(t));
+    return 0;
 }
 /**
 * \ingroup LuaScripts
@@ -123,14 +123,14 @@ int fadeIn(lua_State* L) {
 * start a global fadeout over (float) seconds
 */
 int fadeOut(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	double t = luaL_checknumber(L, -1);
+    double t = luaL_checknumber(L, -1);
 
-	OsEng.renderEngine().startFading(-1, static_cast<float>(t));
-	return 0;
+    OsEng.renderEngine().startFading(-1, static_cast<float>(t));
+    return 0;
 }
 
 } // namespace luascriptfunctions

@@ -5,8 +5,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
-			Frame = "IAU_EUROPA", 
-			Body = "EUROPA",
+            Frame = "IAU_EUROPA", 
+            Body = "EUROPA",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.8213, 6 },
@@ -15,28 +15,28 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/europa.jpg",
-				Project = "textures/defaultProj.png",
-				Sequencing = "true",
+                Project = "textures/defaultProj.png",
+                Sequencing = "true",
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc
                 MieFactor = 1.0,
                 MieColor = {1.0, 1.0, 1.0}
             },
-			Projection = {
-				Observer   = "NEW HORIZONS",
-				Target     = "EUROPA",
-				Aberration = "NONE",
-			},
-			Instrument = {                
-				Name       = "NH_LORRI",
-				Method     = "ELLIPSOID",
-				Aberration = "NONE",
-				Fovy       = 0.2907,
-				Aspect     = 1,
-				Near       = 0.2,
-				Far        = 10000,
-			},
+            Projection = {
+                Observer   = "NEW HORIZONS",
+                Target     = "EUROPA",
+                Aberration = "NONE",
+            },
+            Instrument = {                
+                Name       = "NH_LORRI",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+                Fovy       = 0.2907,
+                Aspect     = 1,
+                Near       = 0.2,
+                Far        = 10000,
+            },
             PotentialTargets = {
                 "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
             }            
@@ -85,7 +85,7 @@ return {
             TropicalOrbitPeriod =  80 ,
             EarthOrbitRatio = 0.009,
             DayLength = 9.9259,
-			LineFade = 2.0,
+            LineFade = 2.0,
             Textures = {
                 Type = "simple",
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",

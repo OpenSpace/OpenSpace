@@ -16,8 +16,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
-			Frame = "IAU_CHARON", 
-			Body = "CHARON",
+            Frame = "IAU_CHARON", 
+            Body = "CHARON",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.035 , 5 },
@@ -26,28 +26,28 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/charon_highres.jpg",
-				Project = "textures/defaultProj.png",
-				Sequencing = "true",
+                Project = "textures/defaultProj.png",
+                Sequencing = "true",
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc
                 MieFactor = 1.0,
                 MieColor = {1.0, 1.0, 1.0}
             },
-			Projection = {
-				Observer   = "NEW HORIZONS",
-				Target     = "CHARON",
-				Aberration = "NONE",
-			},
-			Instrument = {                
-				Name       = "NH_LORRI",
-				Method     = "ELLIPSOID",
-				Aberration = "NONE",
-				Fovy       = 0.2907,
-				Aspect     = 1,
-				Near       = 0.2,
-				Far        = 10000,
-			},
+            Projection = {
+                Observer   = "NEW HORIZONS",
+                Target     = "CHARON",
+                Aberration = "NONE",
+            },
+            Instrument = {                
+                Name       = "NH_LORRI",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+                Fovy       = 0.2907,
+                Aspect     = 1,
+                Near       = 0.2,
+                Far        = 10000,
+            },
             PotentialTargets = {
                 "PLUTO",
                 "CHARON"
@@ -82,18 +82,18 @@ return {
              Position = {0, -10, 0, 5}
         }
     },
-	{
+    {
         Name = "CharonShadow",
         Parent = "Charon",
         Renderable = {
             Type = "RenderableShadowCylinder",
-			TerminatorType = "PENUMBRAL", 
-			LightSource = "SUN",
-			Observer = "NEW HORIZONS",
-			Body = "CHARON",
-			BodyFrame = "IAU_CHARON",
-			MainFrame = "GALACTIC",
-			Aberration = "NONE",
+            TerminatorType = "PENUMBRAL", 
+            LightSource = "SUN",
+            Observer = "NEW HORIZONS",
+            Body = "CHARON",
+            BodyFrame = "IAU_CHARON",
+            MainFrame = "GALACTIC",
+            Aberration = "NONE",
         },
         Ephemeris = {
             Type = "Static",

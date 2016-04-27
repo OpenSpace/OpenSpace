@@ -14,8 +14,8 @@ return {
         Parent = "MercuryBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_MERCURY",
-			Body = "MERCURY",
+            Frame = "IAU_MERCURY",
+            Body = "MERCURY",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.440, 6 },

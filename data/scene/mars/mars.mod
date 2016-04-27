@@ -14,8 +14,8 @@ return {
         Parent = "MarsBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_MARS",
-			Body = "MARS BARYCENTER",
+            Frame = "IAU_MARS",
+            Body = "MARS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.390, 6 },

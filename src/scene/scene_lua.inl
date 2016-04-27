@@ -38,34 +38,34 @@ int property_setValue(lua_State* L) {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
-	int nArguments = lua_gettop(L);
+    int nArguments = lua_gettop(L);
     SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
 
-	std::string uri = luaL_checkstring(L, -2);
-	const int type = lua_type(L, -1);
+    std::string uri = luaL_checkstring(L, -2);
+    const int type = lua_type(L, -1);
 
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
+    openspace::properties::Property* prop = property(uri);
+    if (!prop) {
         LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
         return 0;
     }
 
 
-	if (type != prop->typeLua()) {
+    if (type != prop->typeLua()) {
         LERROR(errorLocation(L) << "Property '" << uri <<
             "' does not accept input of type '" << luaTypeToString(type) <<
             "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
         return 0;
     }
     else{
-		prop->setLuaValue(L);
+        prop->setLuaValue(L);
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
         OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -78,19 +78,19 @@ int property_getValue(lua_State* L) {
     static const std::string _loggerCat = "property_getValue";
     using ghoul::lua::errorLocation;
 
-	int nArguments = lua_gettop(L);
+    int nArguments = lua_gettop(L);
     SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
 
-	std::string uri = luaL_checkstring(L, -1);
+    std::string uri = luaL_checkstring(L, -1);
 
-	openspace::properties::Property* prop = property(uri);
-	if (!prop) {
+    openspace::properties::Property* prop = property(uri);
+    if (!prop) {
         LERROR(errorLocation(L) << "Property with URL '" << uri << "' was not found");
         return 0;
     }
-	else
-		prop->getLuaValue(L);
-	return 1;
+    else
+        prop->getLuaValue(L);
+    return 1;
 }
 
 /**
@@ -102,14 +102,14 @@ int property_getValue(lua_State* L) {
 int loadScene(lua_State* L) {
     static const std::string _loggerCat = "loadScene";
 
-	int nArguments = lua_gettop(L);
+    int nArguments = lua_gettop(L);
     SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
 
-	std::string sceneFile = luaL_checkstring(L, -1);
+    std::string sceneFile = luaL_checkstring(L, -1);
 
-	OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
+    OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
 
-	return 0;
+    return 0;
 }
 
 } // namespace luascriptfunctions
