@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/assert.h>
+#include <ctime>
+#include <cppformat/format.h>
+
 namespace openspace {
 
 namespace luascriptfunctions {
@@ -146,6 +150,29 @@ int time_currentTime(lua_State* L) {
  */
 int time_currentTimeUTC(lua_State* L) {
     lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * currentWallTime():
+ * Returns the current wallclock time as a structured ISO 8601 string in the UTC timezone.
+ */
+int time_currentWallTime(lua_State* L) {
+    std::time_t t = std::time(nullptr);
+    std::tm* utcTime = std::gmtime(&t);
+    ghoul_assert(utcTime, "Conversion to UTC failed");
+
+    std::string time = fmt::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+        utcTime->tm_year + 1900,
+        utcTime->tm_mon + 1,
+        utcTime->tm_mday,
+        utcTime->tm_hour,
+        utcTime->tm_min,
+        utcTime->tm_sec
+    );
+    lua_pushstring(L, time.c_str());
     return 1;
 }
 

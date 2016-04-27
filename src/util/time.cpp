@@ -215,6 +215,13 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
                 "",
                 "Returns the current time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH:MN:SS)"
+            },
+            {
+                "currentWallTime",
+                &luascriptfunctions::time_currentWallTime,
+                "",
+                "Returns the current wall time as an ISO 8601 date string "
+                "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"
             }
         }
     };
