@@ -169,7 +169,7 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(const RenderData& data, c
 
 
     // Do frustrum culling
-    FrustrumCuller& culler = _owner.getFrustrumCuller();
+    FrustumCuller& culler = _owner.getFrustumCuller();
 
     if (!culler.isVisible(data, _patch, _owner.globeRadius)) {
         _isVisible = false;
