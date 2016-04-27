@@ -42,7 +42,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    ,_useLog("useLog","Use Logarithm Norm", false)
+    ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
     // ,_colorbar(nullptr)
@@ -233,7 +233,6 @@ float* DataPlane::readData(){
         std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
         std::vector<float> max(numSelected, std::numeric_limits<float>::min());
 
-        std::vector<int> logmean(numSelected, 0);
         std::vector<float> sum(numSelected, 0.0f);
         std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
         
@@ -256,13 +255,20 @@ float* DataPlane::readData(){
                 for(int i=0; i<numSelected; i++){
 
                     float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
+
+                    if(_useLog.value()){
+                        int sign = (v>0)? 1:-1;
+                        if(v != 0){
+                            v = sign*log(fabs(v));
+                        }
+                    }
+
                     optionValues[i].push_back(v); 
 
                     min[i] = std::min(min[i], v);
                     max[i] = std::max(max[i], v);
 
                     sum[i] += v;
-                    logmean[i] += (v != 0) ? ceil(log10(fabs(v))) : 0.0f;
                 }
                 numValues++;
             }
@@ -275,9 +281,9 @@ float* DataPlane::readData(){
         
         for(int i=0; i<numSelected; i++){
             if(_useRGB.value() && numSelected <= 3){
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], numSelected, logmean[i]);
+                processData(data, i, optionValues[i], min[i], max[i], sum[i], numSelected);
             } else {
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], 1, logmean[i]);
+                processData(data, i, optionValues[i], min[i], max[i], sum[i], 1);
             }
         }
         
@@ -289,7 +295,7 @@ float* DataPlane::readData(){
     }
 } 
 
-void DataPlane::processData(float* outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum, int numOutputChannels, float logmean){
+void DataPlane::processData(float* outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum, int numOutputChannels){
  
     // HISTOGRAM
     // number of levels/bins/values
@@ -313,7 +319,7 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
     //Calculate the Standard Deviation
     float standardDeviation = sqrt (((pow(sum, 2.0)) - ((1.0/numValues) * (pow(sum,2.0)))) / (numValues - 1.0));
     //calulate log mean
-    logmean /= numValues;   
+    // logmean /= numValues;   
     
     //HISTOGRAM FUNCTIONALITY
     //======================
@@ -327,7 +333,7 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
         
         // Map mean and standard deviation to histogram levels
         mean = mapToHistogram(mean , min, max);
-        logmean = mapToHistogram(logmean , min, max);
+        // logmean = mapToHistogram(logmean , min, max);
         standardDeviation = mapToHistogram(standardDeviation, min, max);
         min = 0.0f;
         max = levels - 1.0f;
@@ -355,16 +361,16 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
             
             // Map mean and standard deviation to new histogram levels
             mean =  newLevels[(int) mean];
-            logmean =  newLevels[(int) logmean];
+            // logmean =  newLevels[(int) logmean];
             standardDeviation = newLevels[(int) standardDeviation];
         }
         
         // Normalize values
-        if(_useLog.value()){
-            v = normalizeWithLogarithm(v, logmean);
-        }else{
-            v = normalizeWithStandardScore(v, mean, standardDeviation);
-        }
+        // if(_useLog.value()){
+        //     v = normalizeWithLogarithm(v, logmean);
+        // }else{
+        v = normalizeWithStandardScore(v, mean, standardDeviation);
+        // }
         
         if(numOutputChannels == 1 && inputChannel > 0){
             // take the average.
