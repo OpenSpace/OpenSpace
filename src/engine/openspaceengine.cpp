@@ -398,7 +398,7 @@ bool OpenSpaceEngine::initialize() {
     _interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
     // Run start up scripts
-    runStartupScripts();
+    runStartupScripts(sceneDescriptionPath);
 
     // Load a light and a monospaced font
     loadFonts();
@@ -504,18 +504,45 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
 }
 
 
-void OpenSpaceEngine::runStartupScripts() {
-    ghoul::Dictionary scripts;
-    configurationManager().getValue(
-        ConfigurationManager::KeyStartupScript, scripts);
-    runScripts(scripts);
+void OpenSpaceEngine::runStartupScripts(const std::string& sceneDescription) {
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
+    // file again to load any variables defined inside into the state that is passed to
+    // the modules. This allows us to specify global variables that can then be used
+    // inside the modules to toggle settings
+    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
+
+    lua_getglobal(state, "initialize");
+    if (lua_pcall(state, 0, 0, 0) != 0)
+        LERROR("error running function `f': %s",
+              lua_tostring(L, -1));
+
+    ghoul::lua::destroyLuaState(state);
 }
 
-void OpenSpaceEngine::runSettingsScripts() {
-    ghoul::Dictionary scripts;
-    configurationManager().getValue(
-        ConfigurationManager::KeySettingsScript, scripts);
-    runScripts(scripts);
+void OpenSpaceEngine::runSettingsScripts(const std::string& sceneDescription) {
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
+    // file again to load any variables defined inside into the state that is passed to
+    // the modules. This allows us to specify global variables that can then be used
+    // inside the modules to toggle settings
+    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
+
+    lua_getglobal(state, "setup");
+    if (lua_pcall(state, 0, 0, 0) != 0)
+        LERROR("error running function `f': %s",
+               lua_tostring(L, -1));
+
+    ghoul::lua::destroyLuaState(state);
+
+    //ghoul::Dictionary scripts;
+    //configurationManager().getValue(
+    //    ConfigurationManager::KeySettingsScript, scripts);
+    //runScripts(scripts);
 }
 
 void OpenSpaceEngine::loadFonts() {

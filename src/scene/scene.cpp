@@ -328,7 +328,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
 
-    OsEng.runSettingsScripts();
+    OsEng.runSettingsScripts(sceneDescriptionFilePath);
 
     OsEng.enableBarrier();
 

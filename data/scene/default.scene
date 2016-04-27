@@ -1,3 +1,28 @@
+function initialize ()
+    openspace.setInvertRoll(true);
+    openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setDeltaTime(0)
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+end
+
+function setup()
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.75)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.setPropertyValue("MilkyWay.renderable.enabled", false)
+
+    openspace.printInfo("Done setting default values")
+end
+
+
 return {
     ScenePath = ".",
     CommonFolder = "common",
@@ -30,4 +55,3 @@ return {
         --"gridEquatorial",
     }
 }
-
