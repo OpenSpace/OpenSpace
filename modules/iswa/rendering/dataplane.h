@@ -55,8 +55,7 @@ class DataPlane : public CygnetPlane {
         float min, // min value of the input data
         float max, // max valye of the input data
         float sum, // sum of the input data 
-        int numOutputChannels, // number of data channels that you want in the output
-        float logmean // log mean value of the input data
+        int numOutputChannels // number of data channels that you want in the output
     );
 
     float normalizeWithStandardScore(float value, float mean, float sd);

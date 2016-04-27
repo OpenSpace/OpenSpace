@@ -94,7 +94,7 @@ bool DataPlane::initialize(){
     if (_shader == nullptr) {
     // DatePlane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram("PlaneProgram",
+    _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
         "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
         "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
         );
@@ -105,7 +105,7 @@ bool DataPlane::initialize(){
     updateTexture();
 
     std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
-    _transferFunction = std::make_shared<TransferFunction>(tfPath);
+    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
     
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
@@ -121,7 +121,7 @@ bool DataPlane::deinitialize(){
     destroyPlane();
     destroyShader();
 
-    _texture = nullptr;
+    _textures[0] = nullptr;
     _memorybuffer = "";
     
     // _colorbar->deinitialize();
@@ -135,7 +135,7 @@ bool DataPlane::loadTexture() {
     if(!values)
         return false;
 
-    if (!_texture) {
+    if (!_textures[0]) {
         std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                 values, 
                                                                 _dimensions,
@@ -149,11 +149,11 @@ bool DataPlane::loadTexture() {
         if(texture){
             texture->uploadTexture();
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _texture = std::move(texture);
+            _textures[0] = std::move(texture);
         }
     }else{
-        _texture->setPixelData(values);
-        _texture->uploadTexture();
+        _textures[0]->setPixelData(values);
+        _textures[0]->uploadTexture();
     }
     return true;
 }

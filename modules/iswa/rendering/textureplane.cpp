@@ -87,8 +87,8 @@ bool TexturePlane::loadTexture() {
             texture->uploadTexture();
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-            _texture = std::move(texture);
+            
+            _textures[0] = std::move(texture);
             
             return true;
         }

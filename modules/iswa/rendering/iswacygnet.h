@@ -82,7 +82,7 @@ protected:
     properties::TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
     std::shared_ptr<Metadata> _data;
     std::string _memorybuffer;
@@ -96,7 +96,7 @@ protected:
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
 
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
 };
 
 }//namespace openspace
