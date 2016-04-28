@@ -41,7 +41,7 @@
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/globes/chunknode.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/other/twmstileprovider.h>
+#include <modules/globebrowsing/other/tileprovider.h>
 
 namespace ghoul {
 	namespace opengl {

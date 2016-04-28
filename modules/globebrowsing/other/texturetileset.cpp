@@ -94,7 +94,7 @@ namespace openspace {
 
 	}
 
-	TileIndex TextureTileSet::getTileIndex(GeodeticPatch patch) {
+	GeodeticTileIndex TextureTileSet::getTileIndex(const GeodeticPatch& patch) {
 		// Calculate the level of the index depanding on the size of the incoming patch.
 		// The level is as big as possible (as far down as possible) but it can't be
 		// too big since at maximum four tiles should be used to cover a patch
@@ -115,20 +115,20 @@ namespace openspace {
 		tileIndexXY.y *= -1;
 
 		// Create the tileindex
-		TileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
+		GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
 		return tileIndex;
 	}
 
-	std::shared_ptr<Texture> TextureTileSet::getTile(GeodeticPatch patch) {
+	std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticPatch& patch) {
 		return getTile(getTileIndex(patch));
 	}
 
-	std::shared_ptr<Texture> TextureTileSet::getTile(const TileIndex& tileIndex) {
+	std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticTileIndex& tileIndex) {
 		return _testTexture;
 	}
 
 	GeodeticPatch TextureTileSet::getTilePositionAndScale(
-		const TileIndex& tileIndex) {
+		const GeodeticTileIndex& tileIndex) {
 		Geodetic2 tileSize = Geodetic2(
 			_sizeLevel0.lat / pow(2, tileIndex.level),
 			_sizeLevel0.lon / pow(2, tileIndex.level));
@@ -143,7 +143,7 @@ namespace openspace {
 
 	glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
 		GeodeticPatch patch,
-		const TileIndex& tileIndex)
+		const GeodeticTileIndex& tileIndex)
 	{
 		GeodeticPatch tile = getTilePositionAndScale(tileIndex);
 		return getUvTransformationPatchToTile(patch, tile);

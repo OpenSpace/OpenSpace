@@ -40,7 +40,7 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 	TextureTileSet tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 0);
 
 	GeodeticPatch patch(Geodetic2(0, 0), Geodetic2(M_PI / 16, M_PI / 8));
-	TileIndex tileIndex0 = tileSet.getTileIndex(patch);
+	GeodeticTileIndex tileIndex0 = tileSet.getTileIndex(patch);
 
 	// Maximum level is 0
 	ASSERT_EQ(tileIndex0.level, 0);
@@ -59,7 +59,7 @@ TEST_F(TextureTileSetTest, getTileIndexLevel) {
 	
 	// An edge case tile that covers a fourth of the latlon space
 	GeodeticPatch patchEdgeCase(Geodetic2(0, 0), Geodetic2(M_PI / 4, M_PI / 2));
-	TileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
+	GeodeticTileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
 
 	// Now it can go up a level
 	ASSERT_EQ(tileIndex1.level, 1);
@@ -79,7 +79,7 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 	TextureTileSet tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, - M_PI), 0);
 
 	GeodeticPatch patch(Geodetic2(0, 0), Geodetic2(M_PI / 16, M_PI / 8));
-	TileIndex tileIndex0 = tileSet.getTileIndex(patch);
+	GeodeticTileIndex tileIndex0 = tileSet.getTileIndex(patch);
 
 	// Maximum level is 0 so the x y indices should also be 0
 	ASSERT_EQ(tileIndex0.x, 0);
@@ -100,7 +100,7 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 	// A tile that covers a fourth of the latlon space
 	GeodeticPatch patchEdgeCase(Geodetic2(0, 0), Geodetic2(M_PI / 4, M_PI / 2));
-	TileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
+	GeodeticTileIndex tileIndex1 = tileSetDepth10.getTileIndex(patchEdgeCase);
 
 	// Now it can go up a level (1)
 	// Since the position is 0, 0 it has 0, 0, in x, y index
@@ -110,7 +110,7 @@ TEST_F(TextureTileSetTest, getTileIndexXY) {
 
 	// A smaller edge case tile
 	GeodeticPatch patchEdgeCase2(Geodetic2(0, 0), Geodetic2(M_PI / 8, M_PI / 4));
-	TileIndex tileIndex11 = tileSetDepth10.getTileIndex(patchEdgeCase2);
+	GeodeticTileIndex tileIndex11 = tileSetDepth10.getTileIndex(patchEdgeCase2);
 
 	// Now it can go up two levels (2)
 	// Since the position is 0, 0 it now has 1, 1, in x, y index

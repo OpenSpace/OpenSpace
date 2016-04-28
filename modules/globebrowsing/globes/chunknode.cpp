@@ -120,7 +120,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
     if (isLeaf()) {
         if (_isVisible) {
-            TileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
+            GeodeticTileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
 
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 

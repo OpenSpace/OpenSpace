@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 
-#include <modules/globebrowsing/other/twmstileprovider.h>
+#include <modules/globebrowsing/other/tileprovider.h>
 
 #include <openspace/engine/downloadmanager.h>
 
@@ -43,9 +43,8 @@ namespace {
 namespace openspace {
 
 
-    TwmsTileProvider::TwmsTileProvider()
-    : _tileCache(5000) // setting cache size
-    //, _fileFutureCache(5000) // setting cache size
+    TileProvider::TileProvider(int tileCacheSize)
+    : _tileCache(tileCacheSize) // setting cache size
     {
         int downloadApplicationVersion = 1;
         if (!DownloadManager::isInitialized()) {
@@ -54,12 +53,12 @@ namespace openspace {
         
     }
 
-    TwmsTileProvider::~TwmsTileProvider(){
+    TileProvider::~TileProvider(){
 
     }
 
 
-    void TwmsTileProvider::prerender() {
+    void TileProvider::prerender() {
 
         // Remove filefutures that are inactive 
         auto it = _fileFutureMap.begin();
@@ -81,6 +80,7 @@ namespace openspace {
 
         
         // Move finished texture tiles to cache     
+        /*
         while (_concurrentJobManager.numFinishedJobs() > 0) {
             auto finishedJob = _concurrentJobManager.popFinishedJob();
             
@@ -99,11 +99,11 @@ namespace openspace {
             _tileCache.put(hashkey, texture);
             _fileFutureMap.erase(hashkey);
         }
-        
+        */
     }
 
 
-    std::shared_ptr<Texture> TwmsTileProvider::getTile(const TileIndex& tileIndex) {
+    std::shared_ptr<Texture> TileProvider::getTile(const GeodeticTileIndex& tileIndex) {
         HashKey hashkey = tileIndex.hashKey();
         
         if (_tileCache.exist(hashkey)) {
@@ -126,7 +126,7 @@ namespace openspace {
                 //_concurrentJobManager.enqueueJob(job);
             }
         }
-        else if(_fileFutureMap.size() < 50){
+        else if(_fileFutureMap.size() < 100){
 
             std::shared_ptr<DownloadManager::FileFuture> fileFuture = requestTile(tileIndex);
             _fileFutureMap.insert_or_assign(hashkey, fileFuture);
@@ -134,7 +134,7 @@ namespace openspace {
         return nullptr;
     }
 
-    std::shared_ptr<Texture> TwmsTileProvider::loadAndInitTextureDisk(std::string filePath) {
+    std::shared_ptr<Texture> TileProvider::loadAndInitTextureDisk(std::string filePath) {
         auto textureReader = ghoul::io::TextureReader::ref();
         std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(filePath)));
 
@@ -147,7 +147,7 @@ namespace openspace {
 
 
 
-    std::shared_ptr<DownloadManager::FileFuture> TwmsTileProvider::requestTile(const TileIndex& tileIndex) {
+    std::shared_ptr<DownloadManager::FileFuture> TileProvider::requestTile(const GeodeticTileIndex& tileIndex) {
         // download tile
         std::stringstream ss;
         //std::string baseUrl = "https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg";

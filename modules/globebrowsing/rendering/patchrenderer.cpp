@@ -77,6 +77,7 @@ namespace openspace {
     LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
         : PatchRenderer()
         , _grid(grid)
+        , tileProvider(5000)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -97,7 +98,7 @@ namespace openspace {
     {
         
         // Get the textures that should be used for rendering
-        TileIndex ti = _tileSet.getTileIndex(patch);
+        GeodeticTileIndex ti = _tileSet.getTileIndex(patch);
 
         renderPatch(patch, data, ellipsoid, ti);
     }
@@ -106,7 +107,7 @@ namespace openspace {
         const GeodeticPatch& patch,
         const RenderData& data,
         const Ellipsoid& ellipsoid,
-        const TileIndex& tileIndex)
+        const GeodeticTileIndex& tileIndex)
     {
 
         using namespace glm;
@@ -128,7 +129,7 @@ namespace openspace {
         // Get the textures that should be used for rendering
         std::shared_ptr<ghoul::opengl::Texture> tile00;
         bool usingTile = true;
-        TileIndex ti;
+        GeodeticTileIndex ti;
         ti.level =tileIndex.level;
         ti.x = tileIndex.y;
         ti.y = tileIndex.x;
@@ -226,7 +227,7 @@ namespace openspace {
 
 
         // Get the textures that should be used for rendering
-        TileIndex tileIndex = _tileSet.getTileIndex(newPatch);
+        GeodeticTileIndex tileIndex = _tileSet.getTileIndex(newPatch);
         GeodeticPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
         std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
         glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);

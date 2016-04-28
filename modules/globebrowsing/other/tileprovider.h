@@ -45,7 +45,7 @@
 namespace openspace {
     using HashKey = unsigned long;
 
-    struct TileIndex {
+    struct GeodeticTileIndex {
         int x, y, level;
 
         HashKey hashKey() const {
@@ -100,26 +100,26 @@ namespace openspace {
 namespace openspace {
     using namespace ghoul::opengl;
 
-    class TwmsTileProvider
-    {
+    class TileProvider {
     public:
-        TwmsTileProvider();
-        ~TwmsTileProvider();
+        TileProvider(int tileCacheSize);
+        ~TileProvider();
 
-        std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+        std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
 
         void prerender();
 
 
     private:
-        std::shared_ptr<DownloadManager::FileFuture> requestTile(const TileIndex&);
+        std::shared_ptr<DownloadManager::FileFuture> requestTile(const GeodeticTileIndex&);
         std::shared_ptr<Texture> loadAndInitTextureDisk(std::string filePath);
 
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
         std::unordered_map<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureMap;
+
         //LRUCache<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureCache;
 
-        ConcurrentJobManager<Texture> _concurrentJobManager;
+        //ConcurrentJobManager<Texture> _concurrentJobManager;
     };
 
 }  // namespace openspace

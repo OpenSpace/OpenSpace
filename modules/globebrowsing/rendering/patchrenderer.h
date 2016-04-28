@@ -86,13 +86,13 @@ namespace openspace {
             const GeodeticPatch& patch, 
             const RenderData& data, 
             const Ellipsoid& ellipsoid,
-            const TileIndex& ti);
+            const GeodeticTileIndex& ti);
 
 
 
     private:
 
-        TwmsTileProvider tileProvider;
+        TileProvider tileProvider;
         shared_ptr<Grid> _grid;
     };
 
@@ -105,8 +105,8 @@ namespace openspace {
         void renderPatch(
             const Geodetic2& patchSize,
             const RenderData& data,
-			const Ellipsoid& ellipsoid);
-	private:
+            const Ellipsoid& ellipsoid);
+    private:
         shared_ptr<ClipMapGrid> _grid;
     };
 
