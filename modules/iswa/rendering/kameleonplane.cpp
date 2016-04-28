@@ -69,6 +69,8 @@ KameleonPlane::~KameleonPlane(){}
 
 
 bool KameleonPlane::initialize(){
+	_textures.push_back(nullptr);
+
 	std::cout << "initialize kameleonplane" << std::endl;
 	// std::string kwPath;
 	_kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
@@ -138,6 +140,14 @@ bool KameleonPlane::loadTexture() {
 
 bool KameleonPlane::updateTexture(){
 	return true;
+}
+
+void KameleonPlane::setUniforms(){
+    ghoul::opengl::TextureUnit unit;
+
+    unit.activate();
+    _textures[0]->bind();
+    _shader->setUniform("texture1", unit);
 }
 
 }// namespace openspace

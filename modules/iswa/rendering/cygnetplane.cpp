@@ -42,7 +42,7 @@ bool CygnetPlane::isReady() const{
 }
 
 void CygnetPlane::render(const RenderData& data){
-    if(!_textures[0]) return;
+    if(!textureReady()) return;
     
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
@@ -91,25 +91,10 @@ void CygnetPlane::render(const RenderData& data){
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
-    setUniforms();
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
-    ghoul::opengl::TextureUnit tfUnits[_transferFunctions.size()];
-    if(!_transferFunctions.empty()){
-        if(_transferFunctions.size() == 1){
-            tfUnits[0].activate();
-            _transferFunctions[0]->bind();
-            _shader->setUniform("tf", tfUnits[0]);
-        }
-    }
-
-    ghoul::opengl::TextureUnit txUnits[_textures.size()];
-    if(_textures.size() == 1){
-        txUnits[0].activate();
-        _textures[0]->bind();
-        _shader->setUniform("texture1", txUnits[0]);
-    }
+    setUniforms();
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -140,6 +125,10 @@ void CygnetPlane::update(const UpdateData& data){
 
     if(!_transferFunctions.empty() && _transferFunctions[0])
         _transferFunctions[0]->update();
+}
+
+bool CygnetPlane::textureReady(){
+    return ((!_textures.empty()) && (_textures[0] != nullptr));
 }
 
 void CygnetPlane::createPlane(){

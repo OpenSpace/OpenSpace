@@ -45,6 +45,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
+    ,_averageValues("averageValues", "Average values", false)
     // ,_colorbar(nullptr)
 {     
     std::string name;
@@ -55,6 +56,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_useHistogram);
     addProperty(_useRGB);
     addProperty(_normValues);
+    addProperty(_averageValues);
     addProperty(_dataOptions);
 
     registerProperties();
@@ -63,6 +65,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
     OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
+    OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
     _normValues.onChange([this](){loadTexture();});
@@ -104,7 +107,12 @@ bool DataPlane::initialize(){
 
     updateTexture();
 
-    std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
+    // std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
+    std::string tfPath = "${OPENSPACE_DATA}/red.jpg";
+    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    tfPath = "${OPENSPACE_DATA}/blue.jpg";
+    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    tfPath = "${OPENSPACE_DATA}/green.jpg";
     _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
     
     // std::cout << "Creating Colorbar" << std::endl;
@@ -112,6 +120,8 @@ bool DataPlane::initialize(){
     // if(_colorbar){
     //     _colorbar->initialize(); 
     // }
+
+    // _textures.push_back(nullptr);
 
     return isReady();
 }
@@ -131,31 +141,45 @@ bool DataPlane::deinitialize(){
 }
 
 bool DataPlane::loadTexture() {
-    float* values = readData();
-    if(!values)
+    std::vector<float*> data = readData();
+    if(data.empty())
         return false;
 
-    if (!_textures[0]) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                values, 
-                                                                _dimensions,
-                                                                ghoul::opengl::Texture::Format::RGB,
-                                                                GL_RGB, 
-                                                                GL_FLOAT,
-                                                                ghoul::opengl::Texture::FilterMode::Linear,
-                                                                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                            );
+    bool texturesReady = false;
+    // std::cout << _textures.size() << std::endl;
+    for(int i=0; i<_textures.size(); i++){
+        float* values = data[i];
 
-        if(texture){
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _textures[0] = std::move(texture);
+        if(!values){
+            _textures[i] = nullptr;
+            continue;
         }
-    }else{
-        _textures[0]->setPixelData(values);
-        _textures[0]->uploadTexture();
+
+            // return false;
+
+        if (!_textures[i]) {
+            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                    values, 
+                                                                    _dimensions,
+                                                                    ghoul::opengl::Texture::Format::Red,
+                                                                    GL_RED, 
+                                                                    GL_FLOAT,
+                                                                    ghoul::opengl::Texture::FilterMode::Linear,
+                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                                );
+
+            if(texture){
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                _textures[i] = std::move(texture);
+            }
+        }else{
+            _textures[i]->setPixelData(values);
+            _textures[i]->uploadTexture();
+        }
+        texturesReady = true;
     }
-    return true;
+    return texturesReady;
 }
 
 bool DataPlane::updateTexture(){
@@ -174,9 +198,57 @@ bool DataPlane::updateTexture(){
 }
 
 void DataPlane::setUniforms(){
-    _shader->setUniform("numTextures", (int) _textures.size());
-    _shader->setUniform("averageValues", false);
+
+    // _shader->setUniform("textures", 1, units[1]);
+    // _shader->setUniform("textures", 2, units[2]);
+    // }
+    int activeTextures = 0;
+    for(int i=0; i<_textures.size(); i++){
+        if(_textures[i]) activeTextures++;
+    }
+
+    int activeTransferfunctions = 0;
+    for(auto tf: _transferFunctions){
+        if(tf) activeTransferfunctions++;
+    }
+
+    ghoul::opengl::TextureUnit tfUnits[activeTransferfunctions];
+    int j = 0;
+    for(int i=0; i<_transferFunctions.size(); i++){
+        if(_transferFunctions[i]){
+            tfUnits[j].activate();
+            _transferFunctions[i]->bind();
+            _shader->setUniform(
+                "transferFunctions[" + std::to_string(j) + "]",
+                tfUnits[j]
+            );
+
+            j++;
+        }
+    }
+
+    ghoul::opengl::TextureUnit texUnits[activeTextures];
+    j = 0;
+    for(int i=0; i<_textures.size(); i++){
+        if(_textures[i]){
+            texUnits[j].activate();
+            _textures[i]->bind();
+            _shader->setUniform(
+                "textures[" + std::to_string(j) + "]",
+                texUnits[j]
+            );
+
+            j++;
+        }
+    }
+    _shader->setUniform("numTextures", activeTextures);
+    _shader->setUniform("numTransferFunctions", activeTransferfunctions);
+    _shader->setUniform("averageValues", _averageValues.value());
 };
+
+bool DataPlane::textureReady(){
+    return (!_textures.empty());
+}
 
 void DataPlane::readHeader(){
     if(!_memorybuffer.empty()){
@@ -209,6 +281,7 @@ void DataPlane::readHeader(){
                         if(option != "x" && option != "y" && option != "z"){
                             _dataOptions.addOption({numOptions, name()+"_"+option});
                             numOptions++;
+                            _textures.push_back(nullptr);
                         }
                     }
 
@@ -224,7 +297,7 @@ void DataPlane::readHeader(){
     }
 }
 
-float* DataPlane::readData(){
+std::vector<float*> DataPlane::readData(){
     if(!_memorybuffer.empty()){
         if(!_dataOptions.options().size()) // load options for value selection
             readHeader();
@@ -233,6 +306,7 @@ float* DataPlane::readData(){
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();
+
         int numSelected = selectedOptions.size();
 
         std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
@@ -240,9 +314,12 @@ float* DataPlane::readData(){
 
         std::vector<float> sum(numSelected, 0.0f);
         std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
-        
-        float* data = new float[3*_dimensions.x*_dimensions.y]{0.0f};
 
+        std::vector<float*> data(_dataOptions.options().size(), nullptr);
+        for(int option : selectedOptions){
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+        }
+        
         int numValues = 0;
         while(getline(memorystream, line)){
             if(line.find("#") == 0){ //part of the header
@@ -281,27 +358,25 @@ float* DataPlane::readData(){
 
         if(numValues != _dimensions.x*_dimensions.y){
             LWARNING("Number of values read and expected are not the same");
-            return nullptr;
+            return std::vector<float*>();
         }
         
         for(int i=0; i<numSelected; i++){
-            if(_useRGB.value() && numSelected <= 3){
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], numSelected);
-            } else {
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], 1);
-            }
+            processData(data, selectedOptions[i], optionValues[i], min[i], max[i], sum[i]);
         }
         
         return data;
         
-    } else {
+    } 
+    else {
         LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
-        return nullptr;
+        return std::vector<float*>();
     }
 } 
 
-void DataPlane::processData(float* outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum, int numOutputChannels){
- 
+void DataPlane::processData(std::vector<float*> outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum){
+    
+    float* output = outputData[inputChannel];
     // HISTOGRAM
     // number of levels/bins/values
     const int levels = 512;    
@@ -370,19 +445,9 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
             standardDeviation = newLevels[(int) standardDeviation];
         }
         
-        // Normalize values
-        // if(_useLog.value()){
-        //     v = normalizeWithLogarithm(v, logmean);
-        // }else{
-        v = normalizeWithStandardScore(v, mean, standardDeviation);
-        // }
-        
-        if(numOutputChannels == 1 && inputChannel > 0){
-            // take the average.
-            outputData[3*i+0] = ( outputData[3*i+0] * inputChannel + v ) / (inputChannel+1);
-        } else {            
-            outputData[3*i+inputChannel] += v;
-        }
+        v = normalizeWithStandardScore(v, mean, standardDeviation);         
+        output[i] += v;
+
     }
 }
 

@@ -91,7 +91,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
     _delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
 
-    _textures.push_back(nullptr);
+    // _textures.push_back(nullptr);
     // _transferFunctions.push_back(nullptr);
 }
 

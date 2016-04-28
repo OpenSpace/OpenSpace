@@ -53,6 +53,9 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::initialize(){
+
+    _textures.push_back(nullptr);
+    
     initializeTime();
     createPlane();
     createShader();
@@ -113,6 +116,14 @@ bool TexturePlane::updateTexture(){
     }
 
     return false;
+}
+
+void TexturePlane::setUniforms(){
+    ghoul::opengl::TextureUnit unit;
+
+    unit.activate();
+    _textures[0]->bind();
+    _shader->setUniform("texture1", unit);
 }
 
 }// namespace openspace

@@ -23,12 +23,14 @@
  ****************************************************************************************/
 uniform float time;
 
-uniform sampler2D texture1;
-uniform sampler2D textures[10];
-uniform sampler2D tf;
-uniform sampler2D tfs[10];
+// uniform sampler2D texture1;
+uniform sampler2D textures[6];
+uniform sampler2D transferFunctions[6];
+// uniform sampler2D tf;
+// uniform sampler2D tfs[6];
 
 uniform int numTextures;
+uniform int numTransferFunctions;
 uniform bool averageValues;
 
 // uniform float background;
@@ -44,15 +46,25 @@ Fragment getFragment() {
     float depth = pscDepth(position);
     vec4 diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
     float v;
-    if(numTextures > 1){
-        for(uint i=0; i<numTextures; i++){
-            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
-            diffuse += texture(tfs[i], vec2(v,0));
+
+    for(int i=0; i<numTextures; i++){
+        int j = i;
+        if(numTextures > numTransferFunctions){
+            j = 0;
         }
-    }else{
-        v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
-        diffuse = texture(tf, vec2(v,0));
+    // if(numTextures > 1){
+        // for(uint i=0; i<numTextures; i++){
+        v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+        diffuse += texture(transferFunctions[j], vec2(v,0));
     }
+    // diffuse += texture(textures[1], vec2(vs_st.s, 1-vs_st.t));
+    // diffuse += texture(textures[2], vec2(vs_st.s, 1-vs_st.t));
+            // diffuse += texture(tf, vec2(v,0));
+        // }
+    // }else{
+        // v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+        // diffuse = texture(tf, vec2(v,0));
+    // }
 
     if(averageValues){
         diffuse /= numTextures;
