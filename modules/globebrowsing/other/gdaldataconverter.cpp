@@ -43,7 +43,7 @@ namespace openspace {
 
 	std::shared_ptr<Texture> GdalDataConverter::convertToOpenGLTexture(
 		GDALDataset* dataSet,
-		const TileIndex& tileIndex,
+		const GeodeticTileIndex& tileIndex,
 		int GLType)
 	{
 		int nRasters = dataSet->GetRasterCount();

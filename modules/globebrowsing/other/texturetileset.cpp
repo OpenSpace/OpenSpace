@@ -65,7 +65,7 @@ namespace openspace {
 		assert(poDataset != NULL);
 		GdalDataConverter conv;
 
-		TileIndex ti;
+		GeodeticTileIndex ti;
 		ti.x = 0;
 		ti.y = 0;
 		ti.level = 0;

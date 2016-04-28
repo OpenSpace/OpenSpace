@@ -25,7 +25,7 @@
 #ifndef __GDALDATACONVERTER_H__
 #define __GDALDATACONVERTER_H__
 
-#include <modules/globebrowsing/other/twmstileprovider.h>
+#include <modules/globebrowsing/other/tileprovider.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
@@ -46,7 +46,7 @@ namespace openspace {
 
 		std::shared_ptr<Texture> convertToOpenGLTexture(
 			GDALDataset* dataSet,
-			const TileIndex& tileIndex,
+			const GeodeticTileIndex& tileIndex,
 			int GLType);
 
 	private:
