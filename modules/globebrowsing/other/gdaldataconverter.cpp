@@ -43,12 +43,21 @@ namespace openspace {
 
 	std::shared_ptr<Texture> GdalDataConverter::convertToOpenGLTexture(GDALDataset* dataSet)
 	{
-		int nCols = dataSet->GetRasterBand(1)->GetXSize();
-		int nRows = dataSet->GetRasterBand(1)->GetYSize();
+		//int nCols = dataSet->GetRasterBand(1)->GetXSize();
+		//int nRows = dataSet->GetRasterBand(1)->GetYSize();
 
-		GDALRasterBand* redBand = dataSet->GetRasterBand(1);
-		GDALRasterBand* greenBand = dataSet->GetRasterBand(2);
-		GDALRasterBand* blueBand = dataSet->GetRasterBand(3);
+		//int nLayers = dataSet->GetLayerCount();
+		//int nRasters = dataSet->GetRasterCount();
+
+		int overviewCount = dataSet->GetRasterBand(1)->GetOverviewCount();
+
+		GDALRasterBand* redBand = dataSet->GetRasterBand(1)->GetOverview(overviewCount - 4);
+		GDALRasterBand* greenBand = dataSet->GetRasterBand(2)->GetOverview(overviewCount - 4);
+		GDALRasterBand* blueBand = dataSet->GetRasterBand(3)->GetOverview(overviewCount - 4);
+
+		int nCols = redBand->GetXSize();
+		int nRows = redBand->GetYSize();
+
 
 		int blockSizeX;
 		int blockSizeY;
@@ -59,17 +68,78 @@ namespace openspace {
 		int nBlocksY = nRows / blockSizeY;
 
 		// A block where data is copied
-		GByte* blockR = (GByte*)CPLMalloc(sizeof(GByte) * blockSizeX * blockSizeY);
-		GByte* blockG = (GByte*)CPLMalloc(sizeof(GByte) * blockSizeX * blockSizeY);
-		GByte* blockB = (GByte*)CPLMalloc(sizeof(GByte) * blockSizeX * blockSizeY);
+		GByte* blockR = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
+		GByte* blockG = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
+		GByte* blockB = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
 		// The data that the texture should use
 		GLubyte* imageData = (GLubyte*)CPLMalloc(sizeof(GLubyte) * nCols * nRows * 4);
 
+		redBand->RasterIO(
+			GF_Read,
+			0,
+			0,
+			nCols,
+			nRows,
+			blockR,
+			nCols,
+			nRows,
+			GDT_Byte,
+			0,
+			0);
+
+		greenBand->RasterIO(
+			GF_Read,
+			0,
+			0,
+			nCols,
+			nRows,
+			blockG,
+			nCols,
+			nRows,
+			GDT_Byte,
+			0,
+			0);
+
+		blueBand->RasterIO(
+			GF_Read,
+			0,
+			0,
+			nCols,
+			nRows,
+			blockB,
+			nCols,
+			nRows,
+			GDT_Byte,
+			0,
+			0);
+
+			
+		// For each pixel
+		for (size_t y = 0; y < nRows; y++)
+		{
+			for (size_t x = 0; x < nCols; x++)
+			{
+				size_t pixelIndexInBlock = x + y * nCols;
+				size_t globalPixelIndex = (x + y * nCols) * 4;
+
+				GLubyte pixelR = blockR[pixelIndexInBlock];
+				GLubyte pixelG = blockG[pixelIndexInBlock];
+				GLubyte pixelB = blockB[pixelIndexInBlock];
+
+				imageData[globalPixelIndex + 0] = pixelR;
+				imageData[globalPixelIndex + 1] = pixelG;
+				imageData[globalPixelIndex + 2] = pixelB;
+				imageData[globalPixelIndex + 3] = 255;
+			}
+		}
+		
+		/*
 		// For each block
 		for (size_t blockY = 0; blockY < nBlocksY; blockY++)
 		{
 			for (size_t blockX = 0; blockX < nBlocksX; blockX++)
 			{
+
 				redBand->ReadBlock(blockX, blockY, blockR);
 				greenBand->ReadBlock(blockX, blockY, blockG);
 				blueBand->ReadBlock(blockX, blockY, blockB);
@@ -100,7 +170,7 @@ namespace openspace {
 				}
 			}
 		}
-
+		*/
 		// The texture should take ownership of the data
 		std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(new Texture(
 			static_cast<void*>(imageData),
