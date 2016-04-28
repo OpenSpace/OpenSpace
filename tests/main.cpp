@@ -42,7 +42,10 @@
 //#include <test_angle.inl>
 //#include <test_latlonpatch.inl>
 //#include <test_texturetileset.inl>
-#include <test_gdalwms.inl>
+//#include <test_gdalwms.inl>
+
+#include <test_concurrentqueue.inl>
+#include <test_concurrentjobmanager.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>

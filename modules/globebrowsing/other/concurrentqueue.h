@@ -22,50 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LRU_CACHE_H__
-#define __LRU_CACHE_H__
+#ifndef __CONCURRENT_QUEUE_H__
+#define __CONCURRENT_QUEUE_H__
 
 #include <glm/glm.hpp>
 #include <memory>
 #include <ostream>
-#include <unordered_map>
-#include <list>
-
-
+#include <thread>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
 
 namespace openspace {
 
-    // Templated class implementing a Least-Recently-Used Cache
-    template<typename KeyType, typename ValueType>
-    class LRUCache {
-    public:
-        LRUCache(size_t size);
-        ~LRUCache();
 
 
-        void put(const KeyType& key, const ValueType& value);
-        bool exist(const KeyType& key) const;
-        ValueType get(const KeyType& key);
-        size_t size() const;
+/**
+ * Templated thread-safe queue based on std::thread and std::queue
+ */
+template <typename T>
+class ConcurrentQueue {
+public:
 
+    T pop() {
+        std::unique_lock<std::mutex> mlock(_mutex);
+        while (_queue.empty()) {
+            _cond.wait(mlock);
+        }
+        auto item = _queue.front();
+        _queue.pop();
+        return item;
+    }
 
-    private:
-        void clean();
+    void pop(T& item) {
+        std::unique_lock<std::mutex> mlock(_mutex);
+        while (_queue.empty()) {
+            _cond.wait(mlock);
+        }
+        item = _queue.front();
+        _queue.pop();
+    }
 
+    void push(const T& item) {
+        std::unique_lock<std::mutex> mlock(_mutex);
+        _queue.push(item);
+        mlock.unlock();
+        _cond.notify_one();
+    }
 
-    // Member varialbes
-    private:
-        
-        std::list<std::pair<KeyType, ValueType>> _itemList;
-        std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-        size_t _cacheSize;
+    void push(T&& item) {
+        std::unique_lock<std::mutex> mlock(_mutex);
+        _queue.push(std::move(item));
+        mlock.unlock();
+        _cond.notify_one();
+    }
 
-    };
+    size_t size() {
+        std::unique_lock<std::mutex> mlock(_mutex);
+        size_t s = _queue.size();
+        mlock.unlock();
+        _cond.notify_one();
+        return s;
+    }
 
+private:
+    std::queue<T> _queue;
+    std::mutex _mutex;
+    std::condition_variable _cond;
+};
 
-} // namespace openspace
+}
 
-
-#include <modules/globebrowsing/other/lrucache.inl>
-
-#endif // __LRU_CACHE_H__
+#endif // __CONCURRENT_QUEUE_H__

@@ -49,27 +49,30 @@ namespace {
 
 namespace openspace {
 
-	RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-		: DistanceSwitch()
-		, _rotation("rotation", "Rotation", 0, 0, 360)
-		, _ellipsoid(Vec3(6378137.0, 6378137.0, 6356752.314245)) // Earth's radii
-	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
 
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
-		
-		addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary, _ellipsoid)), 1e9);
-		//addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary, _ellipsoid)), 1e9);
-		addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
+    RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
+        : DistanceSwitch()
+        , _rotation("rotation", "Rotation", 0, 0, 360)
+        //, _ellipsoid(Ellipsoid::Ellipsoid(6e6,6e6, 1e6))
+        , _ellipsoid(Ellipsoid::WGS84)
+    {
+        std::string name;
+        bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+        ghoul_assert(success,
+            "RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
+        setName(name);
+        dictionary.getValue(keyFrame, _frame);
+        dictionary.getValue(keyBody, _target);
+        if (_target != "")
+            setBody(_target);
+
+        // Mainly for debugging purposes @AA
+        addProperty(_rotation);
+        
+        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary, _ellipsoid)), 1e9);
+        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary, _ellipsoid)), 1e9);
+        addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
+
     }
 
     RenderableGlobe::~RenderableGlobe() {

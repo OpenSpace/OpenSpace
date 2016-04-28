@@ -22,50 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LRU_CACHE_H__
-#define __LRU_CACHE_H__
+#include "gtest/gtest.h"
 
+#include <modules/globebrowsing/other/concurrentqueue.h>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <glm/glm.hpp>
-#include <memory>
-#include <ostream>
-#include <unordered_map>
-#include <list>
 
 
 
-namespace openspace {
 
-    // Templated class implementing a Least-Recently-Used Cache
-    template<typename KeyType, typename ValueType>
-    class LRUCache {
-    public:
-        LRUCache(size_t size);
-        ~LRUCache();
+class ConcurrentQueueTest : public testing::Test {};
 
 
-        void put(const KeyType& key, const ValueType& value);
-        bool exist(const KeyType& key) const;
-        ValueType get(const KeyType& key);
-        size_t size() const;
+using namespace openspace;
 
 
-    private:
-        void clean();
 
+TEST_F(ConcurrentQueueTest, Basic) {
+    ConcurrentQueue<int> q1;
+    q1.push(4);
+    int val = q1.pop();
+    std::cout << val << std::endl;
+}
 
-    // Member varialbes
-    private:
-        
-        std::list<std::pair<KeyType, ValueType>> _itemList;
-        std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-        size_t _cacheSize;
+/*
+TEST_F(ConcurrentQueueTest, SharedPtr) {
+    ConcurrentQueue<std::shared_ptr<int>> q1;
+    std::shared_ptr<int> i1 = std::shared_ptr<int>(new int(1337));
 
-    };
-
-
-} // namespace openspace
-
-
-#include <modules/globebrowsing/other/lrucache.inl>
-
-#endif // __LRU_CACHE_H__
+    q1.push(i1);
+    auto val = q1.pop();
+    std::cout << *val << std::endl;
+}
+*/

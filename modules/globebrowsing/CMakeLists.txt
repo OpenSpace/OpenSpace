@@ -26,58 +26,63 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.h
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
 
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
+
 
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.h
 
-	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
 
 )
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
+
 
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
 	${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/twmstileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
