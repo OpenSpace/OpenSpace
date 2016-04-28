@@ -55,8 +55,7 @@ class DataPlane : public CygnetPlane {
         float min, // min value of the input data
         float max, // max valye of the input data
         float sum, // sum of the input data 
-        int numOutputChannels, // number of data channels that you want in the output
-        float logmean // log mean value of the input data
+        int numOutputChannels // number of data channels that you want in the output
     );
 
     float normalizeWithStandardScore(float value, float mean, float sd);
@@ -67,6 +66,11 @@ class DataPlane : public CygnetPlane {
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _useRGB;
+    
+    //FOR TESTING
+    // double _avgBenchmarkTime=0.0;
+    // int _numOfBenchmarks = 0;
+    //===========
 
     // properties::Vec4Property _topColor;
     // properties::Vec4Property _midColor;
