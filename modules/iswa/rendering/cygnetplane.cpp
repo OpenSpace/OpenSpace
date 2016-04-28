@@ -29,7 +29,6 @@ CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
     ,_futureObject(nullptr)
-    // ,_backgroundValue(0.0f)
 {}
 
 CygnetPlane::~CygnetPlane(){}

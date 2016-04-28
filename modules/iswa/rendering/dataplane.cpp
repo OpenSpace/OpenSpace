@@ -42,6 +42,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_useRGB("useRGB","Use RGB Channels", false)
@@ -56,6 +57,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_useHistogram);
     addProperty(_useRGB);
     addProperty(_normValues);
+    addProperty(_backgroundValues);
     addProperty(_averageValues);
     addProperty(_dataOptions);
 
@@ -65,6 +67,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
     OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
+    OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
@@ -107,13 +110,13 @@ bool DataPlane::initialize(){
 
     updateTexture();
 
-    // std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
-    std::string tfPath = "${OPENSPACE_DATA}/red.jpg";
+    std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
+    // std::string tfPath = "${OPENSPACE_DATA}/red.jpg";
     _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-    tfPath = "${OPENSPACE_DATA}/blue.jpg";
-    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-    tfPath = "${OPENSPACE_DATA}/green.jpg";
-    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    // tfPath = "${OPENSPACE_DATA}/blue.jpg";
+    // _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    // tfPath = "${OPENSPACE_DATA}/green.jpg";
+    // _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
     
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
@@ -244,6 +247,7 @@ void DataPlane::setUniforms(){
     _shader->setUniform("numTextures", activeTextures);
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("averageValues", _averageValues.value());
+    _shader->setUniform("backgroundValues", _backgroundValues.value());
 };
 
 bool DataPlane::textureReady(){

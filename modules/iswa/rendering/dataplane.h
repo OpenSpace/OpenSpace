@@ -66,6 +66,7 @@ class DataPlane : public CygnetPlane {
 
     properties::SelectionProperty _dataOptions;
     properties::Vec2Property _normValues;
+    properties::Vec2Property _backgroundValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _useRGB;
