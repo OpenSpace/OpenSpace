@@ -56,10 +56,12 @@ namespace openspace {
 
 		// Read using GDAL
 
-		/*
+		std::string testFile = absPath("map_service_configs/TERRA_CR_B143_2016-04-12.wms");
+
+		
 		GDALDataset  *poDataset;
 		GDALAllRegister();
-		poDataset = (GDALDataset *)GDALOpen(absPath("textures/earth_bluemarble.jpg").c_str(), GA_ReadOnly);
+		poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
 		assert(poDataset != NULL);
 		GdalDataConverter conv;
 
@@ -67,8 +69,8 @@ namespace openspace {
 
 		_testTexture->uploadTexture();
 		_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-		*/
-
+		
+		/*
 		
 		// Set e texture to test
 		std::string fileName = "textures/earth_bluemarble.jpg";
@@ -85,7 +87,7 @@ namespace openspace {
 			//_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 			_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 		}
-		
+		*/
 	}
 
 	TextureTileSet::~TextureTileSet(){
