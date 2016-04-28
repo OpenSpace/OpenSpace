@@ -25,6 +25,8 @@
 #ifndef __GDALDATACONVERTER_H__
 #define __GDALDATACONVERTER_H__
 
+#include <modules/globebrowsing/other/twmstileprovider.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
@@ -42,10 +44,18 @@ namespace openspace {
 		GdalDataConverter();
 		~GdalDataConverter();
 
-		std::shared_ptr<Texture> convertToOpenGLTexture(GDALDataset* dataSet);
+		std::shared_ptr<Texture> convertToOpenGLTexture(
+			GDALDataset* dataSet,
+			const TileIndex& tileIndex,
+			int GLType);
 
 	private:
-
+		struct TextureFormat
+		{
+			Texture::Format ghoulFormat;
+			GLuint glFormat;
+		};
+		TextureFormat getTextureFormatFromRasterCount(int rasterCount);
 	};
 
 } // namespace openspace

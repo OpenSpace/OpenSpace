@@ -65,7 +65,11 @@ namespace openspace {
 		assert(poDataset != NULL);
 		GdalDataConverter conv;
 
-		_testTexture = conv.convertToOpenGLTexture(poDataset);
+		TileIndex ti;
+		ti.x = 0;
+		ti.y = 0;
+		ti.level = 0;
+		_testTexture = conv.convertToOpenGLTexture(poDataset, ti, GL_UNSIGNED_BYTE);
 
 		_testTexture->uploadTexture();
 		_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
