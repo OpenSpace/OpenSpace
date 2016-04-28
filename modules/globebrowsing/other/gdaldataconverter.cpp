@@ -41,154 +41,99 @@ namespace openspace {
 
 	}
 
-	std::shared_ptr<Texture> GdalDataConverter::convertToOpenGLTexture(GDALDataset* dataSet)
+	std::shared_ptr<Texture> GdalDataConverter::convertToOpenGLTexture(
+		GDALDataset* dataSet,
+		const TileIndex& tileIndex,
+		int GLType)
 	{
-		//int nCols = dataSet->GetRasterBand(1)->GetXSize();
-		//int nRows = dataSet->GetRasterBand(1)->GetYSize();
+		int nRasters = dataSet->GetRasterCount();
 
-		//int nLayers = dataSet->GetLayerCount();
-		//int nRasters = dataSet->GetRasterCount();
+		ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
 
-		int overviewCount = dataSet->GetRasterBand(1)->GetOverviewCount();
+		GDALRasterBand* firstBand = dataSet->GetRasterBand(1);
 
-		GDALRasterBand* redBand = dataSet->GetRasterBand(1)->GetOverview(overviewCount - 4);
-		GDALRasterBand* greenBand = dataSet->GetRasterBand(2)->GetOverview(overviewCount - 4);
-		GDALRasterBand* blueBand = dataSet->GetRasterBand(3)->GetOverview(overviewCount - 4);
+		// Level = overviewCount - overview
+		int overviewCount = firstBand->GetOverviewCount();
+		int overview = overviewCount - tileIndex.level - 1;
 
-		int nCols = redBand->GetXSize();
-		int nRows = redBand->GetYSize();
+		// The output texture will have this size
+		int xSizelevel0 = firstBand->GetOverview(overviewCount - 1)->GetXSize();
+		int ySizelevel0 = firstBand->GetOverview(overviewCount - 1)->GetYSize();
 
-
-		int blockSizeX;
-		int blockSizeY;
-
-		redBand->GetBlockSize(&blockSizeX, &blockSizeY);
-
-		int nBlocksX = nCols / blockSizeX;
-		int nBlocksY = nRows / blockSizeY;
-
-		// A block where data is copied
-		GByte* blockR = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
-		GByte* blockG = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
-		GByte* blockB = (GByte*)CPLMalloc(sizeof(GByte) * nCols * nRows);
-		// The data that the texture should use
-		GLubyte* imageData = (GLubyte*)CPLMalloc(sizeof(GLubyte) * nCols * nRows * 4);
-
-		redBand->RasterIO(
-			GF_Read,
-			0,
-			0,
-			nCols,
-			nRows,
-			blockR,
-			nCols,
-			nRows,
-			GDT_Byte,
-			0,
-			0);
-
-		greenBand->RasterIO(
-			GF_Read,
-			0,
-			0,
-			nCols,
-			nRows,
-			blockG,
-			nCols,
-			nRows,
-			GDT_Byte,
-			0,
-			0);
-
-		blueBand->RasterIO(
-			GF_Read,
-			0,
-			0,
-			nCols,
-			nRows,
-			blockB,
-			nCols,
-			nRows,
-			GDT_Byte,
-			0,
-			0);
-
-			
-		// For each pixel
-		for (size_t y = 0; y < nRows; y++)
+		// Create all the raster bands (Commonly one for each channel: red, green, blue)
+		std::vector<GDALRasterBand*> rasterBands;
+		for (size_t i = 0; i < nRasters; i++)
 		{
-			for (size_t x = 0; x < nCols; x++)
-			{
-				size_t pixelIndexInBlock = x + y * nCols;
-				size_t globalPixelIndex = (x + y * nCols) * 4;
-
-				GLubyte pixelR = blockR[pixelIndexInBlock];
-				GLubyte pixelG = blockG[pixelIndexInBlock];
-				GLubyte pixelB = blockB[pixelIndexInBlock];
-
-				imageData[globalPixelIndex + 0] = pixelR;
-				imageData[globalPixelIndex + 1] = pixelG;
-				imageData[globalPixelIndex + 2] = pixelB;
-				imageData[globalPixelIndex + 3] = 255;
-			}
+			rasterBands.push_back(dataSet->GetRasterBand(i + 1)->GetOverview(overview));
 		}
-		
-		/*
-		// For each block
-		for (size_t blockY = 0; blockY < nBlocksY; blockY++)
+		// The data that the texture should read
+		GLubyte* imageData = new GLubyte[xSizelevel0 * ySizelevel0 * nRasters];
+
+		// Read the data
+		for (size_t i = 0; i < nRasters; i++)
 		{
-			for (size_t blockX = 0; blockX < nBlocksX; blockX++)
-			{
 
-				redBand->ReadBlock(blockX, blockY, blockR);
-				greenBand->ReadBlock(blockX, blockY, blockG);
-				blueBand->ReadBlock(blockX, blockY, blockB);
-
-				size_t blockPixelIndexX = blockSizeX * blockX;
-				size_t blockPixelIndexY = blockSizeY * blockY;
-
-				size_t startPixelIndex = blockPixelIndexY * nCols + blockPixelIndexX;
-
-
-				// For each pixel in each block
-				for (size_t yInBlock = 0; yInBlock < blockSizeY; yInBlock++)
-				{
-					for (size_t xInBlock = 0; xInBlock < blockSizeX; xInBlock++)
-					{
-						size_t pixelIndexInBlock = xInBlock + yInBlock * blockSizeX;
-						size_t globalPixelIndex = (startPixelIndex + xInBlock + yInBlock * nCols) * 4;
-						
-						GLubyte pixelR = blockR[pixelIndexInBlock];
-						GLubyte pixelG = blockG[pixelIndexInBlock];
-						GLubyte pixelB = blockB[pixelIndexInBlock];
-
-						imageData[globalPixelIndex + 0] = pixelR;
-						imageData[globalPixelIndex + 1] = pixelG;
-						imageData[globalPixelIndex + 2] = pixelB;
-						imageData[globalPixelIndex + 3] = 255;
-					}
-				}
-			}
+			int xBeginRead = tileIndex.x * pow(2, tileIndex.level) *  xSizelevel0;
+			int yBeginRead = tileIndex.y * pow(2, tileIndex.level) *  ySizelevel0;
+			rasterBands[i]->RasterIO(
+				GF_Read,
+				xBeginRead,					// Begin read x
+				yBeginRead,					// Begin read y
+				xSizelevel0,				// width to read x
+				ySizelevel0,				// width to read y
+				imageData + i,				// Where to put data
+				xSizelevel0,				// width to read x in destination
+				ySizelevel0,				// width to read y in destination
+				GDT_Byte,					// Type
+				sizeof(GLubyte) * nRasters,	// Pixel spacing
+				0);							// Line spacing
 		}
-		*/
+
+		GdalDataConverter::TextureFormat textrureFormat =
+			getTextureFormatFromRasterCount(nRasters);
+
 		// The texture should take ownership of the data
 		std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(new Texture(
 			static_cast<void*>(imageData),
-			glm::uvec3(nCols, nRows, 1),
-			Texture::Format::RGBA,
-			GL_RGBA,
+			glm::uvec3(xSizelevel0, ySizelevel0, 1),
+			textrureFormat.ghoulFormat,
+			textrureFormat.glFormat,
 			GL_UNSIGNED_BYTE,
 			Texture::FilterMode::Linear,
 			Texture::WrappingMode::Repeat));
 
-		// Free the row
-		CPLFree(blockR);
-		CPLFree(blockG);
-		CPLFree(blockB);
-
 		// Do not free imageData since the texture now has ownership of it
-		
 		return texture;
+	}
+
+	GdalDataConverter::TextureFormat GdalDataConverter::getTextureFormatFromRasterCount(
+		int rasterCount)
+	{
+		TextureFormat format;
+
+		switch (rasterCount)
+		{
+		case 1:
+			format.ghoulFormat = Texture::Format::Red;
+			format.glFormat = GL_RED;
+			break;
+		case 2:
+			format.ghoulFormat = Texture::Format::RG;
+			format.glFormat = GL_RG;
+			break;
+		case 3:
+			format.ghoulFormat = Texture::Format::RGB;
+			format.glFormat = GL_RGB;
+			break;
+		case 4:
+			format.ghoulFormat = Texture::Format::RGBA;
+			format.glFormat = GL_RGBA;
+			break;
+		default:
+
+			break;
+		}
+		return format;
 	}
 
 }  // namespace openspace
