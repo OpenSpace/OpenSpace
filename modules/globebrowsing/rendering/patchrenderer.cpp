@@ -89,17 +89,20 @@ namespace openspace {
 	}
 
 	void LatLonPatchRenderer::renderPatch(
-		const GeodeticPatch& patch, const RenderData& data, double radius) 
+		const GeodeticPatch& patch, const RenderData& data, const Ellipsoid& ellipsoid)
 	{
 		
 		// Get the textures that should be used for rendering
 		TileIndex ti = _tileSet.getTileIndex(patch);
 
-		renderPatch(patch, data, radius, ti);
+		renderPatch(patch, data, ellipsoid, ti);
 	}
 
-	void LatLonPatchRenderer::renderPatch(const GeodeticPatch& patch,const RenderData& data,
-		double radius, const TileIndex& tileIndex)
+	void LatLonPatchRenderer::renderPatch(
+		const GeodeticPatch& patch,
+		const RenderData& data,
+		const Ellipsoid& ellipsoid,
+		const TileIndex& tileIndex)
 	{
 
 		using namespace glm;
@@ -146,7 +149,7 @@ namespace openspace {
 		_programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 		_programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
-		_programObject->setUniform("globeRadius", float(radius));
+		_programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -181,7 +184,7 @@ namespace openspace {
 	void ClipMapPatchRenderer::renderPatch(
 		const Geodetic2& patchSize,
 		const RenderData& data,
-		double radius)
+		const Ellipsoid& ellipsoid)
 	{
 		// activate shader
 		_programObject->activate();
@@ -200,7 +203,7 @@ namespace openspace {
 		ivec2 patchesToCoverGlobe = ivec2(
 			M_PI / patchSize.lat + 0.5,
 			M_PI * 2 / patchSize.lon + 0.5);
-		Geodetic2 cameraPosLatLon = Geodetic2::fromCartesian(data.camera.position().dvec3());
+		Geodetic2 cameraPosLatLon = ellipsoid.cartesianToGeodetic2(data.camera.position().dvec3());
 		ivec2 intSnapCoord = ivec2(
 			cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
 			cameraPosLatLon.lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
@@ -237,7 +240,7 @@ namespace openspace {
 		_programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
 		_programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
 		_programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-		_programObject->setUniform("globeRadius", float(radius));
+		_programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 		_programObject->setUniform("contraction", contraction);
 
 		glEnable(GL_DEPTH_TEST);

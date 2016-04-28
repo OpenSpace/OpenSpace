@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 
 
 namespace openspace {
@@ -64,8 +65,8 @@ namespace openspace {
 		*/
 		bool isVisible(
 			const RenderData& data,
-			const GeodeticPatch& patch, 
-			double radius);
+			const GeodeticPatch& patch,
+			const Ellipsoid& ellipsoid);
 		
 	private:
 

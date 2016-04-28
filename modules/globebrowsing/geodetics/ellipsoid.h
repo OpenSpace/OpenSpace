@@ -22,99 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
-
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <ostream>
+#ifndef __ELLIPSOID_H__
+#define __ELLIPSOID_H__
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
-
-
-
-// forward declaration
-namespace openspace {
-    class ChunkLodGlobe;
-}
-
 
 namespace openspace {
-
-enum Quad {
-    NORTH_WEST,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
-};
-
-
-struct ChunkIndex {
-    int x, y, level;
-
-    std::vector<ChunkIndex> childIndices() const {
-        return {
-            { 2 * x + 0, 2 * y + 0, level + 1 },
-            { 2 * x + 1, 2 * y + 0, level + 1 },
-            { 2 * x + 0, 2 * y + 1, level + 1 },
-            { 2 * x + 1, 2 * y + 1, level + 1 },
-        };
-    }
-
-};
-
-
-class ChunkNode {
-public:
-    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
-    ~ChunkNode();
-
-
-    void split(int depth = 1);
-    void merge();
-
-    bool isRoot() const;
-    bool isLeaf() const;
-    
-    
-    const ChunkNode& getChild(Quad quad) const;
-
-    void render(const RenderData& data, ChunkIndex);
-
-    static int instanceCount;
-    static int renderedPatches;
-
-
-private:
-
-	void internalRender(const RenderData& data, ChunkIndex&);
-	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
 
 	/**
-	Uses horizon culling, frustum culling and distance to camera to determine a
-	desired level.
-	In the current implementation of the horizon culling and the distance to the
-	camera, the closer the ellipsoid is to a
-	sphere, the better this will make the splitting. Using the minimum radius to
-	be safe. This means that if the ellipsoid has high difference between radii,
-	splitting might accur even though it is not needed.
+	This class is based largely on the Ellipsoid class defined in the book
+	"3D Engine Design for Virtual Globes". Most planets or planetary objects are better
+	described using ellipsoids than spheres. All inputs and outputs to this class is
+	in the WGS84 standard coordinate system where the x-axis points towards geographic
+	(lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
+	z-axis points towards the north pole.
 	*/
-	int calculateDesiredLevelAndUpdateIsVisible(
-		const RenderData& data,
-		const ChunkIndex& traverseData);
+class Ellipsoid {
+public:
+	/**
+	\param radii defines three radii for the Ellipsoid
+	*/
+	Ellipsoid(Vec3 radii);
 	
-	
-	ChunkNode* _parent;
-	std::unique_ptr<ChunkNode> _children[4];    
-    ChunkLodGlobe& _owner;
-    GeodeticPatch _patch;
-	bool _isVisible;
-};
+	/**
+	\param x defines the radius in x direction.
+	\param y defines the radius in y direction.
+	\param z defines the radius in z direction.
+	*/
+	Ellipsoid(Scalar x, Scalar y, Scalar z);
+	~Ellipsoid();
 
+	/**
+	Scales a point along the geocentric normal and places it on the surface of the
+	Ellipsoid.
+	\param p is a point in the cartesian coordinate system to be placed on the surface
+	of the Ellipsoid
+	*/
+	Vec3 scaleToGeocentricSurface(const Vec3& p) const;
+	/**
+	Scales a point along the geodetic normal and places it on the surface of the
+	Ellipsoid.
+	\param p is a point in the cartesian coordinate system to be placed on the surface
+	of the Ellipsoid
+	*/
+	Vec3 scaleToGeodeticSurface(const Vec3& p) const;
+
+	Vec3 geodeticSurfaceNormal(const Vec3& p) const;
+	Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+	
+	Vec3 radiiSquared() const;
+	Vec3 oneOverRadiiSquared() const;
+	Vec3 radiiToTheFourth() const;
+	Scalar minimumRadius() const;
+
+	Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
+	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
+	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
+
+private:
+	struct EllipsoidCache
+	{
+		const Vec3 _radiiSquared;
+		const Vec3 _oneOverRadiiSquared;
+		const Vec3 _radiiToTheFourth;
+		const Scalar _minimumRadius;
+	};
+
+	const Vec3 _radii;
+	const EllipsoidCache _cachedValues;
+};
 } // namespace openspace
 
-
-
-#endif // __QUADTREE_H__
+#endif // __ELLIPSOID_H__

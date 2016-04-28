@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LATLON_H__
-#define __LATLON_H__
+#ifndef __GEODETIC2_H__
+#define __GEODETIC2_H__
 
 #include <glm/glm.hpp>
 #include <vector>
@@ -38,17 +38,19 @@ typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
-
-
-
+	// Forward declaration
+	class Ellipsoid;
 
 struct Geodetic2 {
 	Geodetic2();
 	Geodetic2(Scalar latitude, Scalar longitude);
 	Geodetic2(const Geodetic2& src);
 	
+	/*
 	static Geodetic2 fromCartesian(const Vec3& v);
 	Vec3 asUnitCartesian() const;
+	*/
+
 	Vec2 toLonLatVec2() const;
 
 	inline bool operator==(const Geodetic2& other) const;
@@ -63,30 +65,40 @@ struct Geodetic2 {
 	Scalar lon;
 };
 
-
-
+struct Geodetic3 {
+	Geodetic2 geodetic2;
+	Scalar height;
+};
 
 class GeodeticPatch {
 public:
-	GeodeticPatch(Scalar, Scalar, Scalar, Scalar);
-	GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize);
+	GeodeticPatch(
+		Scalar centerLat,
+		Scalar centerLon,
+		Scalar halfSizeLat,
+		Scalar halfSizeLon);
+	GeodeticPatch(
+		const Geodetic2& center,
+		const Geodetic2& halfSize);
 	GeodeticPatch(const GeodeticPatch& patch);
 
-
 	void setCenter(const Geodetic2&);
-	void setHalfSize(const Geodetic2&);
-	
+	void setHalfSize(const Geodetic2&);	
 
 	/**
 		Returns the minimal bounding radius that together with the LatLonPatch's
-		center point represents a sphere in which the patch is completely contained
+		center point represents a sphere in which the patch is completely contained.
+		
+		TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
+		A PART OF AN ELLIPSOID AND NOT A SPHERE! MUST CHECK IF THIS FUNCTION IS STILL
+		VALID.
 	*/
-	Scalar minimalBoundingRadius() const;
+	Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
 
 	/**
 		Returns the area of the patch with unit radius
 	*/
-	Scalar unitArea() const;
+	// Scalar unitArea() const;
 
 
 	Geodetic2 northWestCorner() const;
@@ -118,9 +130,8 @@ public:
 private:
 	Geodetic2 _center;
 	Geodetic2 _halfSize;
-
 };
 
 } // namespace openspace
 
-#endif // __LATLON_H__
+#endif // __GEODETIC2_H__

@@ -33,7 +33,7 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "LatLon";
+	const std::string _loggerCat = "Geodetic2";
 }
 
 namespace openspace {
@@ -57,19 +57,6 @@ namespace openspace {
 		: Geodetic2(p.lat, p.lon) 
 	{
 	
-	}
-	
-	Geodetic2 Geodetic2::fromCartesian(const Vec3& v) {
-		Scalar r = glm::length(v);
-		return Geodetic2(glm::asin(v.z / r), atan2(v.y, v.x));
-	}
-
-
-	Vec3 Geodetic2::asUnitCartesian() const{
-		return Vec3(
-			glm::cos(lat) * glm::cos(lon),
-			glm::cos(lat) * glm::sin(lon),
-			glm::sin(lat));
 	}
 
 	Vec2 Geodetic2::toLonLatVec2() const {
@@ -112,20 +99,21 @@ namespace openspace {
 	
 	}
 
-	GeodeticPatch::GeodeticPatch(const Geodetic2& center, const Geodetic2& halfSize)
+	GeodeticPatch::GeodeticPatch(
+		const Geodetic2& center,
+		const Geodetic2& halfSize)
 		: _center(center)
-		, _halfSize(halfSize) 
+		, _halfSize(halfSize)
 	{
 	
 	}
 
 	GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
 		: _center(patch._center)
-		, _halfSize(patch._halfSize) 
+		, _halfSize(patch._halfSize)
 	{
 	
 	}
-
 
 	void GeodeticPatch::setCenter(const Geodetic2& center) {
 		_center = center;
@@ -135,18 +123,21 @@ namespace openspace {
 		_halfSize = halfSize;
 	}
 
-	Scalar GeodeticPatch::minimalBoundingRadius() const {
+	Scalar GeodeticPatch::minimalBoundingRadius(const Ellipsoid& ellipsoid) const {
+		// TODO: THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
+		// A PART OF AN ELLIPSOID AND NOT A SPHERE!MUST CHECK IF THIS FUNCTION IS STILL
+		// VALID.
 		const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
-		return glm::length(_center.asUnitCartesian() - cornerNearEquator.asUnitCartesian());
+		return glm::length(ellipsoid.geodetic2ToCartesian(_center) - ellipsoid.geodetic2ToCartesian(cornerNearEquator));
 	}
-
+	/*
 	Scalar GeodeticPatch::unitArea() const {
 		Scalar deltaTheta = 2 * _halfSize.lon;
 		Scalar phiMin = _center.lat - _halfSize.lat;
 		Scalar phiMax = _center.lat + _halfSize.lat;
 		return deltaTheta * (sin(phiMax) - sin(phiMin));
 	}
-
+	*/
 	const Geodetic2& GeodeticPatch::center() const {
 		return _center;
 	}

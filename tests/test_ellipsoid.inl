@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,72 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "gtest/gtest.h"
 
-uniform mat4 modelViewProjectionTransform;
-uniform vec3 radiiSquared;
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
+#include <thread>
 
-uniform vec2 minLatLon;
-uniform vec2 lonLatScalingFactor;
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-layout(location = 1) in vec2 in_UV;
+class EllipsoidTest : public testing::Test {};
 
-out vec4 vs_position;
-out vec2 vs_uv;
+using namespace openspace;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+TEST_F(EllipsoidTest, GeodeticSurfaceNormal) {
+	Ellipsoid ellipsoid(Vec3(1, 1, 1));
 
+	Vec3 geodeticNormal = ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
+	Vec3 expectedNormal = Vec3(0, 0, 1);
 
-vec3 geodeticSurfaceNormal(float latitude, float longitude)
-{
-	float cosLat = cos(latitude);
-	return vec3(
-		cosLat * cos(longitude),
-		cosLat * sin(longitude), 
-		sin(latitude));
-}
-
-vec3 geodetic3ToCartesian(
-	float latitude,
-	float longitude,
-	float height,
-	vec3 radiiSquared)
-{
-	vec3 normal = geodeticSurfaceNormal(latitude, longitude);
-	vec3 k = radiiSquared * normal;
-	float gamma = sqrt(dot(k, normal));
-	vec3 rSurface = k / gamma;
-	return rSurface + height * normal;
-}
-
-vec3 geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
-{
-	// Position on surface : height = 0
-	return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
-}
-
-vec3 latLonToCartesian(float latitude, float longitude, float radius) {
-	return radius * vec3(
-		cos(latitude) * cos(longitude),
-		cos(latitude) * sin(longitude),
-		sin(latitude));
-}
-
-vec3 globalInterpolation() {
-	vec2 lonLatInput;
-	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_UV.y; // Lat
-	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_UV.x; // Lon
-	vec3 positionModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
-	return positionModelSpace;
-}
-
-void main()
-{
-	vs_uv = in_UV;
-	vec3 p = globalInterpolation();
-
-	vec4 position = modelViewProjectionTransform * vec4(p, 1);
-
-	vs_position = z_normalization(position);
-	gl_Position = vs_position;
+	ASSERT_EQ(geodeticNormal, expectedNormal);
 }

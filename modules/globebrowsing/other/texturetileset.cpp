@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/other/texturetileset.h>
 
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/other/gdaldataconverter.h>
 
 #include <ghoul/opengl/texturemanager.h>
@@ -43,7 +44,10 @@ namespace {
 
 namespace openspace {
 
-	TextureTileSet::TextureTileSet(Geodetic2 sizeLevel0, Geodetic2 offsetLevel0, int depth)
+	TextureTileSet::TextureTileSet(
+		Geodetic2 sizeLevel0,
+		Geodetic2 offsetLevel0,
+		int depth)
 		: _sizeLevel0(sizeLevel0)
 		, _offsetLevel0(offsetLevel0)
 		, _depth(depth)
@@ -121,7 +125,8 @@ namespace openspace {
 		return _testTexture;
 	}
 
-	GeodeticPatch TextureTileSet::getTilePositionAndScale(const TileIndex& tileIndex) {
+	GeodeticPatch TextureTileSet::getTilePositionAndScale(
+		const TileIndex& tileIndex) {
 		Geodetic2 tileSize = Geodetic2(
 			_sizeLevel0.lat / pow(2, tileIndex.level),
 			_sizeLevel0.lon / pow(2, tileIndex.level));

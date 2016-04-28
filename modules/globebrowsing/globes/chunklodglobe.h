@@ -38,7 +38,7 @@
 #include <openspace/util/updatestructures.h>
 
 
-
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/globes/chunknode.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/other/twmstileprovider.h>
@@ -54,7 +54,7 @@ namespace openspace {
 	class ChunkLodGlobe : 
 		public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
 	public:
-		ChunkLodGlobe(const ghoul::Dictionary& dictionary);
+		ChunkLodGlobe(const ghoul::Dictionary& dictionary, const Ellipsoid& ellipsoid);
 		~ChunkLodGlobe();
 
 		LatLonPatchRenderer& getPatchRenderer();
@@ -69,7 +69,8 @@ namespace openspace {
 
 		double minDistToCamera;
 
-		Scalar globeRadius;
+		//Scalar globeRadius;
+		const Ellipsoid& ellipsoid() const;
 
 		const int minSplitDepth;
 		const int maxSplitDepth;
@@ -89,17 +90,17 @@ namespace openspace {
 		// the patch used for actual rendering
 		std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
 
-		
 		static const GeodeticPatch LEFT_HEMISPHERE;
 		static const GeodeticPatch RIGHT_HEMISPHERE;
 
 		properties::IntProperty _rotation;
-		
 
 		glm::dmat3 _stateMatrix;
 		std::string _frame;
 		std::string _target;
 		double _time;
+
+		const Ellipsoid& _ellipsoid;
 	};
 
 }  // namespace openspace

@@ -30,6 +30,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/rendering/frustumculler.h>
 
 
 namespace {
@@ -123,7 +124,7 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
 
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-            patchRenderer.renderPatch(_patch, data, _owner.globeRadius, ti);
+            patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), ti);
             ChunkNode::renderedPatches++;
         }
     }
@@ -135,11 +136,14 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
     }
 }
 
-int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(const RenderData& data, const ChunkIndex& traverseData) {
+int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
+	const RenderData& data,
+	const ChunkIndex& traverseData) {
     _isVisible = true;
     Vec3 globePosition = data.position.dvec3();
-    Vec3 patchNormal = _patch.center().asUnitCartesian();
-    Vec3 patchPosition = globePosition + _owner.globeRadius * patchNormal;
+	Vec3 patchPosition =
+		globePosition +
+		_owner.ellipsoid().geodetic2ToCartesian(_patch.center());
 
     Vec3 cameraPosition = data.camera.position().dvec3();
     Vec3 cameraDirection = Vec3(data.camera.viewDirection());
@@ -152,38 +156,45 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(const RenderData& data, c
 
     Vec3 globeToCamera = cameraPosition - globePosition;
 
-    Geodetic2 cameraPositionOnGlobe = Geodetic2::fromCartesian(globeToCamera);
-    Geodetic2 closestPatchPoint = _patch.closestPoint(cameraPositionOnGlobe);
+	Geodetic2 cameraPositionOnGlobe =
+		_owner.ellipsoid().cartesianToGeodetic2(globeToCamera);
+	Geodetic2 closestPatchPoint = _patch.closestPoint(cameraPositionOnGlobe);
 
-    Vec3 normalOfClosestPatchPoint = closestPatchPoint.asUnitCartesian();
-    Scalar cosPatchNormalNormalizedGlobeToCamera = glm::dot(normalOfClosestPatchPoint, glm::normalize(globeToCamera));
+	Vec3 normalOfClosestPatchPoint =
+		_owner.ellipsoid().geodeticSurfaceNormal(closestPatchPoint);
+	Scalar cosPatchNormalNormalizedGlobeToCamera =
+		glm::dot(normalOfClosestPatchPoint, glm::normalize(globeToCamera));
 
     //LDEBUG(cosPatchNormalCameraDirection);
 
-    double cosAngleToHorizon = _owner.globeRadius / glm::length(globeToCamera);
-
+	// Get the minimum radius from the ellipsoid. The closer the ellipsoid is to a
+	// sphere, the better this will make the splitting. Using the minimum radius to
+	// be safe. This means that if the ellipsoid has high difference between radii,
+	// splitting might accur even though it is not needed.
+	Scalar minimumGlobeRadius = _owner.ellipsoid().minimumRadius();
+	double cosAngleToHorizon = minimumGlobeRadius / glm::length(globeToCamera);
     if (cosPatchNormalNormalizedGlobeToCamera < cosAngleToHorizon) {
         _isVisible = false;
         return traverseData.level - 1;
     }
 
-
     // Do frustrum culling
     FrustumCuller& culler = _owner.getFrustumCuller();
 
-    if (!culler.isVisible(data, _patch, _owner.globeRadius)) {
-        _isVisible = false;
-        return traverseData.level - 1;
-    }
+	if (!culler.isVisible(data, _patch, _owner.ellipsoid())) {
+		_isVisible = false;
+		return traverseData.level - 1;
+	}
+
 
     // Calculate desired level based on distance
     Scalar distance = glm::length(cameraToChunk);
     _owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-    Scalar scaleFactor = 100 * _owner.globeRadius;
-    Scalar projectedScaleFactor = scaleFactor / distance;
-    int desiredLevel = floor( log2(projectedScaleFactor) );
-    return desiredLevel;
+	Scalar scaleFactor = 100 * minimumGlobeRadius;
+	Scalar projectedScaleFactor = scaleFactor / distance;
+	int desiredLevel = floor( log2(projectedScaleFactor) );
+	return desiredLevel;
 }
 
 

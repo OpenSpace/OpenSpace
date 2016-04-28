@@ -51,9 +51,12 @@ namespace {
 }
 
 namespace openspace {
-	ClipMapGlobe::ClipMapGlobe(const ghoul::Dictionary& dictionary)
+	ClipMapGlobe::ClipMapGlobe(
+		const ghoul::Dictionary& dictionary,
+		const Ellipsoid& ellipsoid)
 		: _rotation("rotation", "Rotation", 0, 0, 360)
 		, _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
+		, _ellipsoid(ellipsoid)
 	{
 		std::string name;
 		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -79,6 +82,11 @@ namespace openspace {
 
 	ClipMapGlobe::~ClipMapGlobe() {
 	}
+	
+	const Ellipsoid& ClipMapGlobe::ellipsoid() const
+	{
+		return _ellipsoid;
+	}
 
 	bool ClipMapGlobe::initialize() {
 		return isReady();
@@ -102,10 +110,10 @@ namespace openspace {
 		for (size_t i = minDepth; i < maxDepth; i++)
 		{
 			Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
-			_outerPatchRenderer->renderPatch(patchSize, data, 6.3e6);
+			_outerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
 		}
 		Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
-		_innerPatchRenderer->renderPatch(patchSize, data, 6.3e6);
+		_innerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {
