@@ -39,120 +39,124 @@
 #include <math.h>
 
 namespace {
-	const std::string _loggerCat = "ChunkLodGlobe";
+    const std::string _loggerCat = "ChunkLodGlobe";
 
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
+    const std::string keyFrame = "Frame";
+    const std::string keyGeometry = "Geometry";
+    const std::string keyShading = "PerformShading";
 
-	const std::string keyBody = "Body";
+    const std::string keyBody = "Body";
 }
 
 namespace openspace {
 
-	const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
-	const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
+    const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
+    const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
 
-	ChunkLodGlobe::ChunkLodGlobe(
-		const ghoul::Dictionary& dictionary,
-		const Ellipsoid& ellipsoid)
-		: _ellipsoid(ellipsoid)
-		, _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
-		, _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
-		, minSplitDepth(2)
-		, maxSplitDepth(22)
-		, _rotation("rotation", "Rotation", 0, 0, 360)
-		
-	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		//ghoul_assert(success, "ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
+    ChunkLodGlobe::ChunkLodGlobe(
+        const ghoul::Dictionary& dictionary,
+        const Ellipsoid& ellipsoid)
+        : _ellipsoid(ellipsoid)
+        , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
+        , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
+        , minSplitDepth(2)
+        , maxSplitDepth(22)
+        , _rotation("rotation", "Rotation", 0, 0, 360)
+        
+    {
+        std::string name;
+        bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+        //ghoul_assert(success, "ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
+        setName(name);
 
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
+        dictionary.getValue(keyFrame, _frame);
+        dictionary.getValue(keyBody, _target);
+        if (_target != "")
+            setBody(_target);
 
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
+        // Mainly for debugging purposes @AA
+        addProperty(_rotation);
 
-		
-		//globeRadius = dictionary.value<double>("Radius");
-
-
-		// ---------
-		// init Renderer
-		auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-			10,
-			10,
-			TriangleSoup::Positions::No,
-			TriangleSoup::TextureCoordinates::Yes,
-			TriangleSoup::Normals::No));
+        
+        //globeRadius = dictionary.value<double>("Radius");
 
 
-		_patchRenderer.reset(new LatLonPatchRenderer(geometry));
-
-		_frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
-
-	}
-
-	ChunkLodGlobe::~ChunkLodGlobe() {
-
-	}
-
-	bool ChunkLodGlobe::initialize() {
-		return isReady();
-	}
-
-	bool ChunkLodGlobe::deinitialize() {
-		return true;
-	}
-
-	bool ChunkLodGlobe::isReady() const {
-		bool ready = true;
-		return ready;
-	}
-
-	LatLonPatchRenderer& ChunkLodGlobe::getPatchRenderer() {
-		return *_patchRenderer;
-	}
-
-	FrustumCuller& ChunkLodGlobe::getFrustumCuller() {
-		return *_frustumCuller;
-	}
+        // ---------
+        // init Renderer
+        auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
+            10,
+            10,
+            TriangleSoup::Positions::No,
+            TriangleSoup::TextureCoordinates::Yes,
+            TriangleSoup::Normals::No));
 
 
+        _patchRenderer.reset(new LatLonPatchRenderer(geometry));
 
-	void ChunkLodGlobe::render(const RenderData& data){
-		minDistToCamera = INFINITY;
-		ChunkNode::renderedPatches = 0;
+        _frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
 
-		ChunkIndex leftRootTileIndex = { 0, 0, 1 };
-		_leftRoot->render(data, leftRootTileIndex);
+    }
 
-		ChunkIndex rightRootTileIndex = { 1, 0, 1 };
-		_rightRoot->render(data, rightRootTileIndex);
+    ChunkLodGlobe::~ChunkLodGlobe() {
 
-		//LDEBUG("min distnace to camera: " << minDistToCamera);
+    }
 
-		Vec3 cameraPos = data.camera.position().dvec3();
-		//LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+    bool ChunkLodGlobe::initialize() {
+        return isReady();
+    }
 
-		//LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
-		//LDEBUG("RenderedPatches count: " << ChunkNode::renderedPatches);
-	}
+    bool ChunkLodGlobe::deinitialize() {
+        return true;
+    }
 
-	void ChunkLodGlobe::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
-	}
+    bool ChunkLodGlobe::isReady() const {
+        bool ready = true;
+        return ready;
+    }
 
-	const Ellipsoid& ChunkLodGlobe::ellipsoid() const
-	{
-		return _ellipsoid;
-	}
+    LatLonPatchRenderer& ChunkLodGlobe::getPatchRenderer() {
+        return *_patchRenderer;
+    }
+
+    FrustumCuller& ChunkLodGlobe::getFrustumCuller() {
+        return *_frustumCuller;
+    }
+
+
+
+    void ChunkLodGlobe::render(const RenderData& data){
+        minDistToCamera = INFINITY;
+        ChunkNode::renderedPatches = 0;        
+
+
+        ChunkIndex leftRootTileIndex = { 0, 0, 1 };
+        _leftRoot->render(data, leftRootTileIndex);
+
+        ChunkIndex rightRootTileIndex = { 1, 0, 1 };
+        _rightRoot->render(data, rightRootTileIndex);
+
+        //LDEBUG("min distnace to camera: " << minDistToCamera);
+
+        Vec3 cameraPos = data.camera.position().dvec3();
+        //LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
+
+        //LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
+        //LDEBUG("RenderedPatches count: " << ChunkNode::renderedPatches);
+    }
+
+    void ChunkLodGlobe::update(const UpdateData& data) {
+
+        // set spice-orientation in accordance to timestamp
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+        _time = data.time;
+
+        _patchRenderer->update();
+    }
+
+    const Ellipsoid& ChunkLodGlobe::ellipsoid() const
+    {
+        return _ellipsoid;
+    }
 
 }  // namespace openspace

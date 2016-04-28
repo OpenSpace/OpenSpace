@@ -50,8 +50,8 @@ namespace openspace {
         virtual ~Job() { }
 
         virtual void execute() = 0;
-        virtual P product() = 0;
-        
+        virtual std::shared_ptr<P> product() = 0;
+    
     };
 
 

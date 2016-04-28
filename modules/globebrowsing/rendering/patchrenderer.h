@@ -75,6 +75,8 @@ namespace openspace {
     public:
         LatLonPatchRenderer(shared_ptr<Grid> grid);
 
+        void update();
+
         void renderPatch(
             const GeodeticPatch& patch,
             const RenderData& data, 
@@ -85,9 +87,13 @@ namespace openspace {
             const RenderData& data, 
             const Ellipsoid& ellipsoid,
             const TileIndex& ti);
+
+
+
     private:
-        shared_ptr<Grid> _grid;
+
         TwmsTileProvider tileProvider;
+        shared_ptr<Grid> _grid;
     };
 
 

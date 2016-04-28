@@ -29,67 +29,80 @@
 
 namespace openspace {
 
-	/**
-	This class is based largely on the Ellipsoid class defined in the book
-	"3D Engine Design for Virtual Globes". Most planets or planetary objects are better
-	described using ellipsoids than spheres. All inputs and outputs to this class is
-	in the WGS84 standard coordinate system where the x-axis points towards geographic
-	(lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
-	z-axis points towards the north pole.
-	*/
+    /**
+    This class is based largely on the Ellipsoid class defined in the book
+    "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
+    described using ellipsoids than spheres. All inputs and outputs to this class is
+    in the WGS84 standard coordinate system where the x-axis points towards geographic
+    (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
+    z-axis points towards the north pole.
+    */
 class Ellipsoid {
 public:
-	/**
-	\param radii defines three radii for the Ellipsoid
-	*/
-	Ellipsoid(Vec3 radii);
-	
-	/**
-	\param x defines the radius in x direction.
-	\param y defines the radius in y direction.
-	\param z defines the radius in z direction.
-	*/
-	Ellipsoid(Scalar x, Scalar y, Scalar z);
-	~Ellipsoid();
 
-	/**
-	Scales a point along the geocentric normal and places it on the surface of the
-	Ellipsoid.
-	\param p is a point in the cartesian coordinate system to be placed on the surface
-	of the Ellipsoid
-	*/
-	Vec3 scaleToGeocentricSurface(const Vec3& p) const;
-	/**
-	Scales a point along the geodetic normal and places it on the surface of the
-	Ellipsoid.
-	\param p is a point in the cartesian coordinate system to be placed on the surface
-	of the Ellipsoid
-	*/
-	Vec3 scaleToGeodeticSurface(const Vec3& p) const;
+    /**
+    World Geodetic System 1984 coordinate system
+    */
+    static const Ellipsoid WGS84;
 
-	Vec3 geodeticSurfaceNormal(const Vec3& p) const;
-	Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
-	
-	Vec3 radiiSquared() const;
-	Vec3 oneOverRadiiSquared() const;
-	Vec3 radiiToTheFourth() const;
-	Scalar minimumRadius() const;
+    static const Ellipsoid UnitSphere;
 
-	Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
-	Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
-	Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
+
+    /**
+    \param radii defines three radii for the Ellipsoid
+    */
+    Ellipsoid(Vec3 radii);
+    
+
+    /**
+    \param x defines the radius in x direction.
+    \param y defines the radius in y direction.
+    \param z defines the radius in z direction.
+    */
+    Ellipsoid(Scalar x, Scalar y, Scalar z);
+    ~Ellipsoid();
+
+
+    /**
+    Scales a point along the geocentric normal and places it on the surface of the
+    Ellipsoid.
+    \param p is a point in the cartesian coordinate system to be placed on the surface
+    of the Ellipsoid
+    */
+    Vec3 scaleToGeocentricSurface(const Vec3& p) const;
+
+
+    /**
+    Scales a point along the geodetic normal and places it on the surface of the
+    Ellipsoid.
+    \param p is a point in the cartesian coordinate system to be placed on the surface
+    of the Ellipsoid
+    */
+    Vec3 scaleToGeodeticSurface(const Vec3& p) const;
+
+    Vec3 geodeticSurfaceNormal(const Vec3& p) const;
+    Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+    
+    Vec3 radiiSquared() const;
+    Vec3 oneOverRadiiSquared() const;
+    Vec3 radiiToTheFourth() const;
+    Scalar minimumRadius() const;
+
+    Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
+    Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
+    Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
 
 private:
-	struct EllipsoidCache
-	{
-		const Vec3 _radiiSquared;
-		const Vec3 _oneOverRadiiSquared;
-		const Vec3 _radiiToTheFourth;
-		const Scalar _minimumRadius;
-	};
+    struct EllipsoidCache
+    {
+        const Vec3 _radiiSquared;
+        const Vec3 _oneOverRadiiSquared;
+        const Vec3 _radiiToTheFourth;
+        const Scalar _minimumRadius;
+    };
 
-	const Vec3 _radii;
-	const EllipsoidCache _cachedValues;
+    const Vec3 _radii;
+    const EllipsoidCache _cachedValues;
 };
 } // namespace openspace
 

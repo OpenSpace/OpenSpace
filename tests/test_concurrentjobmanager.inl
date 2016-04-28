@@ -55,8 +55,8 @@ struct TestJob : public Job<int> {
         std::cout << "Finished job" << std::endl;
     }
 
-    virtual int product() {
-        return prod;
+    virtual std::shared_ptr<int> product() {
+        return std::make_shared<int>(prod);
     }
 
 private:
@@ -88,27 +88,68 @@ TEST_F(ConcurrentJobManagerTest, Basic) {
 
     auto finishedJob = jobManager.popFinishedJob();
 
-    int product = finishedJob->product();
+    int product = *finishedJob->product();
     EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
 }
 
 
-struct VerboseTestJob : public TestJob {
-    VerboseTestJob(int jobExecutingTime)
-        : TestJob(jobExecutingTime) {
+
+
+
+
+
+struct VerboseProduct {
+    VerboseProduct(int v)
+    : val(v){
+        std::cout << "VerboseProduct constructor" << std::endl;
+    }
+
+    ~VerboseProduct() {
+        std::cout << "VerboseProduct destructor" << std::endl;
+    }
+
+    int val;
+};
+
+
+struct VerboseJob : public Job<VerboseProduct>{
+    VerboseJob(int jobExecutingTime)
+        : _jobExecutingTime(jobExecutingTime) {
         std::cout << "VerboseTestJob constructor" << std::endl;
     }
 
-    ~VerboseTestJob() {
+    ~VerboseJob() {
         std::cout << "VerboseTestJob destructor" << std::endl;
     }
 
+    virtual void execute() {
+        std::cout << " ** Executing job ... " << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(_jobExecutingTime));
+        _product = std::shared_ptr<VerboseProduct>(new VerboseProduct(1337));
+        std::cout << " ** Finished job" << std::endl;
+    }
+
+    virtual std::shared_ptr<VerboseProduct> product() {
+        return _product;
+    }
+
+    int _jobExecutingTime;
+    std::shared_ptr<VerboseProduct> _product;
+
 };
 
-TEST_F(ConcurrentJobManagerTest, JobCreation) {
-    ConcurrentJobManager<int> jobManager;
 
-    auto testJob1 = std::shared_ptr<TestJob>(new VerboseTestJob(20));
+
+
+
+
+TEST_F(ConcurrentJobManagerTest, JobCreation) {
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    ConcurrentJobManager<VerboseProduct> jobManager;
+
+    auto testJob1 = std::shared_ptr<VerboseJob>(new VerboseJob(20));
 
     jobManager.enqueueJob(testJob1);
 
@@ -121,8 +162,12 @@ TEST_F(ConcurrentJobManagerTest, JobCreation) {
 
 
     auto finishedJob = jobManager.popFinishedJob();
+    {
+        auto product = finishedJob->product();
+    }
+    
 
-    int product = finishedJob->product();
-    EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
+    int a;
+    
 }
 

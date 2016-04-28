@@ -26,9 +26,13 @@
 #define __TWMS_TILE_PROVIDER_H__
 
 #include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
+
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
+#include <ghoul/io/texture/texturereader.h>
 
 #include <openspace/engine/downloadmanager.h>
 
@@ -39,15 +43,52 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-	using HashKey = unsigned long;
+    using HashKey = unsigned long;
 
-	struct TileIndex {
-		int x, y, level;
+    struct TileIndex {
+        int x, y, level;
 
-		HashKey hashKey() const {
-			return x ^ (y << 16) ^ (level << 21);
-		}
-	};
+        HashKey hashKey() const {
+            return x ^ (y << 16) ^ (level << 21);
+        }
+    };
+}
+
+
+namespace openspace {
+    
+    using namespace ghoul::opengl;
+
+    struct TextureLoadJob : public Job<Texture> {
+        TextureLoadJob(const std::string& filePath, HashKey hashkey)
+        : _filePath(filePath)
+        , _hashkey(hashkey){
+            
+        }
+
+        virtual ~TextureLoadJob() { }
+
+        virtual void execute() {
+        
+            auto textureReader = ghoul::io::TextureReader::ref();
+            _texture = std::move(textureReader.loadTexture(absPath(_filePath)));
+        
+        }
+        
+        virtual std::shared_ptr<Texture> product() {
+            return _texture;
+        }
+        
+        HashKey hashKey() { return _hashkey; }
+
+
+    private:
+        std::string _filePath;
+        HashKey _hashkey;
+        std::shared_ptr<Texture> _texture;
+    };
+    
+
 }
 
 
@@ -57,24 +98,29 @@ namespace openspace {
 
 
 namespace openspace {
-	using namespace ghoul::opengl;
+    using namespace ghoul::opengl;
 
-	class TwmsTileProvider
-	{
-	public:
-		TwmsTileProvider();
-		~TwmsTileProvider();
+    class TwmsTileProvider
+    {
+    public:
+        TwmsTileProvider();
+        ~TwmsTileProvider();
 
-		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+        std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+
+        void prerender();
 
 
-	private:
-		std::shared_ptr<DownloadManager::FileFuture> requestTile(const TileIndex&);
-		std::shared_ptr<Texture> loadAndInitTextureDisk(std::string filePath);
+    private:
+        std::shared_ptr<DownloadManager::FileFuture> requestTile(const TileIndex&);
+        std::shared_ptr<Texture> loadAndInitTextureDisk(std::string filePath);
 
-		LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
-		LRUCache<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureCache;
-	};
+        LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
+        std::unordered_map<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureMap;
+        //LRUCache<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureCache;
+
+        ConcurrentJobManager<Texture> _concurrentJobManager;
+    };
 
 }  // namespace openspace
 
