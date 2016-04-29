@@ -54,7 +54,7 @@ namespace openspace {
 	class ChunkLodGlobe : 
 		public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
 	public:
-		ChunkLodGlobe(const ghoul::Dictionary& dictionary, const Ellipsoid& ellipsoid);
+		ChunkLodGlobe(const Ellipsoid& ellipsoid);
 		~ChunkLodGlobe();
 
 		LatLonPatchRenderer& getPatchRenderer();
@@ -92,13 +92,6 @@ namespace openspace {
 
 		static const GeodeticPatch LEFT_HEMISPHERE;
 		static const GeodeticPatch RIGHT_HEMISPHERE;
-
-		properties::IntProperty _rotation;
-
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
 
 		const Ellipsoid& _ellipsoid;
 	};

@@ -40,12 +40,6 @@
 
 namespace {
     const std::string _loggerCat = "ChunkLodGlobe";
-
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyShading = "PerformShading";
-
-    const std::string keyBody = "Body";
 }
 
 namespace openspace {
@@ -54,36 +48,13 @@ namespace openspace {
     const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
 
-    ChunkLodGlobe::ChunkLodGlobe(
-        const ghoul::Dictionary& dictionary,
-        const Ellipsoid& ellipsoid)
+    ChunkLodGlobe::ChunkLodGlobe(const Ellipsoid& ellipsoid)
         : _ellipsoid(ellipsoid)
         , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
         , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
         , minSplitDepth(2)
         , maxSplitDepth(22)
-        , _rotation("rotation", "Rotation", 0, 0, 360)
-        
     {
-        std::string name;
-        bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-        //ghoul_assert(success, "ChunkLodGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-        setName(name);
-
-        dictionary.getValue(keyFrame, _frame);
-        dictionary.getValue(keyBody, _target);
-        if (_target != "")
-            setBody(_target);
-
-        // Mainly for debugging purposes @AA
-        addProperty(_rotation);
-
-        
-        //globeRadius = dictionary.value<double>("Radius");
-
-
-        // ---------
-        // init Renderer
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
             10,
             10,
@@ -91,11 +62,8 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
 
-
         _patchRenderer.reset(new LatLonPatchRenderer(geometry));
-
         _frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
-
     }
 
     ChunkLodGlobe::~ChunkLodGlobe() {
@@ -146,12 +114,7 @@ namespace openspace {
     }
 
     void ChunkLodGlobe::update(const UpdateData& data) {
-
-        // set spice-orientation in accordance to timestamp
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-        _time = data.time;
-
-        _patchRenderer->update();
+		_patchRenderer->update();
     }
 
     const Ellipsoid& ChunkLodGlobe::ellipsoid() const

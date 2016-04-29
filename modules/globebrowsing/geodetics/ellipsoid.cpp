@@ -33,10 +33,11 @@ namespace {
 
 namespace openspace {
 
-    const Ellipsoid Ellipsoid::UnitSphere = Ellipsoid(1, 1, 1);
+    Ellipsoid::Ellipsoid()
+        : Ellipsoid(1,1,1)
+    {
 
-    const Ellipsoid Ellipsoid::WGS84 = Ellipsoid(6378137.0, 6378137.0, 6356752.314245);
-
+    }
 
     Ellipsoid::Ellipsoid(Vec3 radii)
         : _radii(radii)

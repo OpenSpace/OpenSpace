@@ -46,7 +46,7 @@ namespace openspace {
 
 	class ClipMapGlobe : public Renderable {
 	public:
-		ClipMapGlobe(const ghoul::Dictionary& dictionary, const Ellipsoid& ellipsoid);
+		ClipMapGlobe(const Ellipsoid& ellipsoid);
 		~ClipMapGlobe();
 
 		bool initialize() override;
@@ -65,13 +65,6 @@ namespace openspace {
 		ClipMapPyramid _clipMapPyramid;
 
 		const Ellipsoid& _ellipsoid;
-
-		properties::IntProperty _rotation;
-
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
 	};
 
 }  // namespace openspace

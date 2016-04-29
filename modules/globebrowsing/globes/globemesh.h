@@ -45,7 +45,7 @@ namespace openspace {
 
 	class GlobeMesh : public Renderable {
 	public:
-		GlobeMesh(const ghoul::Dictionary& dictionary);
+		GlobeMesh();
 		~GlobeMesh();
 
 		bool initialize() override;
@@ -58,16 +58,7 @@ namespace openspace {
 	private:
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
-		//std::unique_ptr<Geometry> _testGeometry;
 		BasicGrid _grid;
-		
-
-		properties::IntProperty _rotation;
-
-		glm::dmat3 _stateMatrix;
-		std::string _frame;
-		std::string _target;
-		double _time;
 	};
 
 }  // namespace openspace

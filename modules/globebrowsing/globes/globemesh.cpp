@@ -38,33 +38,14 @@
 
 namespace {
 	const std::string _loggerCat = "GlobeMesh";
-
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
-
-	const std::string keyBody = "Body";
 }
 
 namespace openspace {
-	GlobeMesh::GlobeMesh(const ghoul::Dictionary& dictionary)
+	GlobeMesh::GlobeMesh()
 		: _programObject(nullptr)
 		, _grid(10, 10, TriangleSoup::Positions::Yes, TriangleSoup::TextureCoordinates::No, TriangleSoup::Normals::No)
-		, _rotation("rotation", "Rotation", 0, 0, 360)
 	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"GlobeMesh need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
-
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
+		
 	}
 
 	GlobeMesh::~GlobeMesh() {
@@ -112,18 +93,6 @@ namespace openspace {
 		// scale the planet to appropriate size since the planet is a unit sphere. Ehm no?
 		glm::mat4 transform = glm::mat4(1);
 
-		//earth needs to be rotated for that to work.
-		glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-		glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-		glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
-
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-			}
-		}
-		transform = transform * rot * roty * rotProp;
-
 		// setup the data to the shader
 		//	_programObject->setUniform("camdir", camSpaceEye);
 		_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -141,9 +110,6 @@ namespace openspace {
 	}
 
 	void GlobeMesh::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
 	}
 
 }  // namespace openspace

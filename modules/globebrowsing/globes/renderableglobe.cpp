@@ -40,11 +40,9 @@
 namespace {
     const std::string _loggerCat = "RenderableGlobe";
 
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyShading = "PerformShading";
-
-    const std::string keyBody = "Body";
+    // Keys for the dictionary
+    const std::string keyRadii = "Radii";
+    const std::string keyHej = "hej";
 }
 
 namespace openspace {
@@ -52,35 +50,21 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : DistanceSwitch()
-        , _rotation("rotation", "Rotation", 0, 0, 360)
-        //, _ellipsoid(Ellipsoid::Ellipsoid(6e6,6e6, 1e6))
-        , _ellipsoid(Ellipsoid::WGS84)
     {
-        std::string name;
-        bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-        ghoul_assert(success,
-            "RenderableGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-        setName(name);
-        dictionary.getValue(keyFrame, _frame);
-        dictionary.getValue(keyBody, _target);
-        if (_target != "")
-            setBody(_target);
+        // Read the radii in to its own dictionary
+        Vec3 radii;
+        dictionary.getValue(keyRadii, radii);
+        _ellipsoid = Ellipsoid(radii);
 
-        // Mainly for debugging purposes @AA
-        addProperty(_rotation);
-        
-        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(dictionary, _ellipsoid)), 1e9);
-        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(dictionary, _ellipsoid)), 1e9);
-        addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh(dictionary)), 1e10);
-
+        addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(_ellipsoid)), 1e8);
+        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(_ellipsoid)), 1e9);
+        addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
     }
 
     RenderableGlobe::~RenderableGlobe() {
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
-        // set spice-orientation in accordance to timestamp
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
         _time = data.time;
         DistanceSwitch::update(data);
     }

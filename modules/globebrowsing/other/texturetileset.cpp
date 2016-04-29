@@ -56,13 +56,13 @@ namespace openspace {
 
 		// Read using GDAL
 
-		std::string testFile = absPath("map_service_configs/TERRA_CR_B143_2016-04-12.wms");
+		std::string testFile = absPath("textures/earth_bluemarble.jpg");
 
 		
 		GDALDataset  *poDataset;
 		GDALAllRegister();
 		poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
-		assert(poDataset != NULL);
+		ghoul_assert(poDataset != NULL, "Unable to read dataset" << testFile);
 		GdalDataConverter conv;
 
 		TileIndex ti;

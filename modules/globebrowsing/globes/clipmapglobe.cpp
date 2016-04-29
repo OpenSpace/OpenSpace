@@ -42,37 +42,13 @@
 
 namespace {
 	const std::string _loggerCat = "ClipMapGlobe";
-
-	const std::string keyFrame = "Frame";
-	const std::string keyGeometry = "Geometry";
-	const std::string keyShading = "PerformShading";
-
-	const std::string keyBody = "Body";
 }
 
 namespace openspace {
-	ClipMapGlobe::ClipMapGlobe(
-		const ghoul::Dictionary& dictionary,
-		const Ellipsoid& ellipsoid)
-		: _rotation("rotation", "Rotation", 0, 0, 360)
-		, _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
+	ClipMapGlobe::ClipMapGlobe(const Ellipsoid& ellipsoid)
+		: _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
 		, _ellipsoid(ellipsoid)
 	{
-		std::string name;
-		bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-		ghoul_assert(success,
-			"ClipMapGlobe need the '" << SceneGraphNode::KeyName << "' be specified");
-		setName(name);
-
-		dictionary.getValue(keyFrame, _frame);
-		dictionary.getValue(keyBody, _target);
-		if (_target != "")
-			setBody(_target);
-
-		// Mainly for debugging purposes @AA
-		addProperty(_rotation);
-
-		// ---------
 		// init Renderer
 		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(32)));
 		_outerPatchRenderer.reset(outerPatchRenderer);
@@ -117,9 +93,7 @@ namespace openspace {
 	}
 
 	void ClipMapGlobe::update(const UpdateData& data) {
-		// set spice-orientation in accordance to timestamp
-		_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-		_time = data.time;
+		
 	}
 
 }  // namespace openspace

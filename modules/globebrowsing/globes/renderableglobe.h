@@ -57,11 +57,6 @@ public:
 
 private:
 
-	properties::IntProperty _rotation;
-
-	glm::dmat3 _stateMatrix;
-	std::string _frame;
-	std::string _target;
 	double _time;
 
 	Ellipsoid _ellipsoid;

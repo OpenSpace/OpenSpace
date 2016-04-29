@@ -40,19 +40,12 @@ namespace openspace {
 class Ellipsoid {
 public:
 
-    /**
-    World Geodetic System 1984 coordinate system
-    */
-    static const Ellipsoid WGS84;
-
-    static const Ellipsoid UnitSphere;
-
+    Ellipsoid();
 
     /**
     \param radii defines three radii for the Ellipsoid
     */
     Ellipsoid(Vec3 radii);
-    
 
     /**
     \param x defines the radius in x direction.
@@ -95,14 +88,14 @@ public:
 private:
     struct EllipsoidCache
     {
-        const Vec3 _radiiSquared;
-        const Vec3 _oneOverRadiiSquared;
-        const Vec3 _radiiToTheFourth;
-        const Scalar _minimumRadius;
+        Vec3 _radiiSquared;
+        Vec3 _oneOverRadiiSquared;
+        Vec3 _radiiToTheFourth;
+        Scalar _minimumRadius;
     };
 
-    const Vec3 _radii;
-    const EllipsoidCache _cachedValues;
+    Vec3 _radii;
+    EllipsoidCache _cachedValues;
 };
 } // namespace openspace
 
