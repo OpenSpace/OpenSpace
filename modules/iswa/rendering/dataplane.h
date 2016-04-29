@@ -64,6 +64,8 @@ class DataPlane : public CygnetPlane {
     float normalizeWithStandardScore(float value, float mean, float sd);
     float normalizeWithLogarithm(float value, int logMean);
 
+    void changeTransferFunctions(bool multiple);
+
     properties::SelectionProperty _dataOptions;
     properties::Vec2Property _normValues;
     properties::Vec2Property _backgroundValues;

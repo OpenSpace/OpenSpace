@@ -82,10 +82,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     });
 
     _useRGB.onChange([this](){
-        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
-            LWARNING("More than 3 values, using only the red channel.");
-        }
-            loadTexture();
+            changeTransferFunctions(_useRGB.value());
     });
 }
 
@@ -110,13 +107,8 @@ bool DataPlane::initialize(){
 
     updateTexture();
 
-    std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
-    // std::string tfPath = "${OPENSPACE_DATA}/red.jpg";
+    std::string tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
     _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-    // tfPath = "${OPENSPACE_DATA}/blue.jpg";
-    // _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-    // tfPath = "${OPENSPACE_DATA}/green.jpg";
-    // _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
     
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
@@ -149,18 +141,13 @@ bool DataPlane::loadTexture() {
         return false;
 
     bool texturesReady = false;
-    // std::cout << _textures.size() << std::endl;
-    for(int i=0; i<_textures.size(); i++){
-        float* values = data[i];
+    std::vector<int> selectedOptions = _dataOptions.value();
 
-        if(!values){
-            _textures[i] = nullptr;
-            continue;
-        }
+    for(int option: selectedOptions){
+        float* values = data[option];
+        if(!values) continue;
 
-            // return false;
-
-        if (!_textures[i]) {
+        if(!_textures[option]){
             std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                     values, 
                                                                     _dimensions,
@@ -174,14 +161,15 @@ bool DataPlane::loadTexture() {
             if(texture){
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                _textures[i] = std::move(texture);
+                _textures[option] = std::move(texture);
             }
         }else{
-            _textures[i]->setPixelData(values);
-            _textures[i]->uploadTexture();
+            _textures[option]->setPixelData(values);
+            _textures[option]->uploadTexture();
         }
         texturesReady = true;
     }
+
     return texturesReady;
 }
 
@@ -205,48 +193,55 @@ void DataPlane::setUniforms(){
     // _shader->setUniform("textures", 1, units[1]);
     // _shader->setUniform("textures", 2, units[2]);
     // }
-    int activeTextures = 0;
-    for(int i=0; i<_textures.size(); i++){
-        if(_textures[i]) activeTextures++;
-    }
+    std::vector<int> selectedOptions = _dataOptions.value();
+    int activeTextures = selectedOptions.size();
 
-    int activeTransferfunctions = 0;
-    for(auto tf: _transferFunctions){
-        if(tf) activeTransferfunctions++;
+    int activeTransferfunctions = _transferFunctions.size();
+
+    ghoul::opengl::TextureUnit txUnits[activeTextures];
+    int j = 0;
+    for(int option : selectedOptions){
+        if(_textures[option]){
+            txUnits[j].activate();
+            _textures[option]->bind();
+            _shader->setUniform(
+                "textures[" + std::to_string(j) + "]",
+                txUnits[j]
+            );
+
+            j++;
+        }
     }
 
     ghoul::opengl::TextureUnit tfUnits[activeTransferfunctions];
-    int j = 0;
-    for(int i=0; i<_transferFunctions.size(); i++){
-        if(_transferFunctions[i]){
-            tfUnits[j].activate();
-            _transferFunctions[i]->bind();
-            _shader->setUniform(
+    j = 0;
+
+    if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())) {
+        tfUnits[0].activate();
+        _transferFunctions[0]->bind();
+        _shader->setUniform(
+            "transferFunctions[0]",
+            tfUnits[0]
+        );
+    }else{
+        for(int option : selectedOptions){
+            std::cout << option << std::endl;
+            if(_transferFunctions[option]){
+                tfUnits[j].activate();
+                _transferFunctions[option]->bind();
+                _shader->setUniform(
                 "transferFunctions[" + std::to_string(j) + "]",
                 tfUnits[j]
-            );
+                );
 
-            j++;
+                j++;
+            }
         }
     }
 
-    ghoul::opengl::TextureUnit texUnits[activeTextures];
-    j = 0;
-    for(int i=0; i<_textures.size(); i++){
-        if(_textures[i]){
-            texUnits[j].activate();
-            _textures[i]->bind();
-            _shader->setUniform(
-                "textures[" + std::to_string(j) + "]",
-                texUnits[j]
-            );
 
-            j++;
-        }
-    }
     _shader->setUniform("numTextures", activeTextures);
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
-    _shader->setUniform("averageValues", _averageValues.value());
     _shader->setUniform("backgroundValues", _backgroundValues.value());
 };
 
@@ -472,5 +467,21 @@ float DataPlane::normalizeWithLogarithm(float value, int logMean){
 
     float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
     return glm::clamp(logNormalized,0.0f, 1.0f);
+}
+
+void DataPlane::changeTransferFunctions(bool multiple){
+    _transferFunctions.clear();
+    std::string tfPath;
+    if(multiple){
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/red.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/blue.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/green.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    }else{
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    }
 }
 }// namespace openspace
