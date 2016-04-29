@@ -71,8 +71,8 @@ class DataPlane : public CygnetPlane {
     properties::Vec2Property _backgroundValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
-    properties::BoolProperty _useRGB;
-    properties::BoolProperty _averageValues;
+    properties::BoolProperty _useMultipleTf;
+    // properties::BoolProperty _averageValues;
 
     // properties::Vec4Property _topColor;
     // properties::Vec4Property _midColor;

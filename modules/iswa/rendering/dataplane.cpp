@@ -45,8 +45,8 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
-    ,_useRGB("useRGB","Use RGB Channels", false)
-    ,_averageValues("averageValues", "Average values", false)
+    ,_useMultipleTf("_useMultipleTf","Use Multiple transferfunctions", false)
+    // ,_averageValues("averageValues", "Average values", false)
     // ,_colorbar(nullptr)
 {     
     std::string name;
@@ -55,34 +55,29 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     addProperty(_useLog);
     addProperty(_useHistogram);
-    addProperty(_useRGB);
+    addProperty(_useMultipleTf);
     addProperty(_normValues);
     addProperty(_backgroundValues);
-    addProperty(_averageValues);
+    // addProperty(_averageValues);
     addProperty(_dataOptions);
 
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
     OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useMultipleTf);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
-    OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
+    // OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
     _normValues.onChange([this](){loadTexture();});
     _useLog.onChange([this](){loadTexture();});
     _useHistogram.onChange([this](){loadTexture();});
-    _dataOptions.onChange([this](){
-        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
-            LWARNING("More than 3 values, using only the red channel.");
-        }
-        loadTexture();
-    });
+    _dataOptions.onChange([this](){loadTexture();});
 
-    _useRGB.onChange([this](){
-            changeTransferFunctions(_useRGB.value());
+    _useMultipleTf.onChange([this](){
+            changeTransferFunctions(_useMultipleTf.value());
     });
 }
 
@@ -216,7 +211,7 @@ void DataPlane::setUniforms(){
     ghoul::opengl::TextureUnit tfUnits[activeTransferfunctions];
     j = 0;
 
-    if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())) {
+    if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())){
         tfUnits[0].activate();
         _transferFunctions[0]->bind();
         _shader->setUniform(
@@ -225,7 +220,6 @@ void DataPlane::setUniforms(){
         );
     }else{
         for(int option : selectedOptions){
-            std::cout << option << std::endl;
             if(_transferFunctions[option]){
                 tfUnits[j].activate();
                 _transferFunctions[option]->bind();
