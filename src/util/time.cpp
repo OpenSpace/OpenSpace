@@ -24,13 +24,14 @@
 
 #include <openspace/util/time.h>
 
+#include "time_lua.inl"
+
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
-#include "time_lua.inl"
 
 namespace openspace {
 
