@@ -59,6 +59,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
+#include <ghoul/misc/onscopeexit.h>
 
 #include <fstream>
 
@@ -87,6 +88,9 @@ namespace {
     const std::string _defaultCacheLocation = "${BASE_PATH}/cache";
     
     const std::string _sgctConfigArgumentCommand = "-config";
+    
+    const std::string PreInitializeFunction = "preInitialization";
+    const std::string PostInitializationFunction = "postInitialization";
 
     const int CacheVersion = 1;
     const int DownloadVersion = 1;
@@ -398,7 +402,7 @@ bool OpenSpaceEngine::initialize() {
     _interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
     // Run start up scripts
-    runStartupScripts(sceneDescriptionPath);
+    runPreInitializationScripts(sceneDescriptionPath);
 
     // Load a light and a monospaced font
     loadFonts();
@@ -504,45 +508,64 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
 }
 
 
-void OpenSpaceEngine::runStartupScripts(const std::string& sceneDescription) {
+void OpenSpaceEngine::runPreInitializationScripts(const std::string& sceneDescription) {
+    LINFO("Running Initialization scripts");
     lua_State* state = ghoul::lua::createNewLuaState();
+    OnExit(
+           // Delete the Lua state at the end of the scope, no matter what
+           [state](){ghoul::lua::destroyLuaState(state);}
+    );
     OsEng.scriptEngine().initializeLuaState(state);
 
-    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
-    // file again to load any variables defined inside into the state that is passed to
-    // the modules. This allows us to specify global variables that can then be used
-    // inside the modules to toggle settings
+    // First execute the script to get all global variables
     ghoul::lua::runScriptFile(state, absPath(sceneDescription));
 
-    lua_getglobal(state, "initialize");
-    if (lua_pcall(state, 0, 0, 0) != 0)
-        LERROR("error running function `f': %s",
-              lua_tostring(L, -1));
-
-    ghoul::lua::destroyLuaState(state);
+    // Get the preinitialize function
+    lua_getglobal(state, PreInitializeFunction.c_str());
+    bool isFunction = lua_isfunction(state, -1);
+    if (!isFunction) {
+        LERROR("Error executing startup script '" << sceneDescription << "'. Scene '" <<
+               sceneDescription << "' does not have a function '" <<
+               PreInitializeFunction << "'");
+        return;
+    }
+    
+    // And execute the preinitialize function
+    int success = lua_pcall(state, 0, 0, 0);
+    if (success != 0) {
+        LERROR("Error executing '" << PreInitializeFunction << "': " <<
+               lua_tostring(state, -1));
+    }
 }
 
-void OpenSpaceEngine::runSettingsScripts(const std::string& sceneDescription) {
+void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescription) {
+    LINFO("Running Setup scripts");
     lua_State* state = ghoul::lua::createNewLuaState();
+    OnExit(
+           // Delete the Lua state at the end of the scope, no matter what
+           [state](){ghoul::lua::destroyLuaState(state);}
+           );
     OsEng.scriptEngine().initializeLuaState(state);
-
-    // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
-    // file again to load any variables defined inside into the state that is passed to
-    // the modules. This allows us to specify global variables that can then be used
-    // inside the modules to toggle settings
+    
+    // First execute the script to get all global variables
     ghoul::lua::runScriptFile(state, absPath(sceneDescription));
-
-    lua_getglobal(state, "setup");
-    if (lua_pcall(state, 0, 0, 0) != 0)
-        LERROR("error running function `f': %s",
-               lua_tostring(L, -1));
-
-    ghoul::lua::destroyLuaState(state);
-
-    //ghoul::Dictionary scripts;
-    //configurationManager().getValue(
-    //    ConfigurationManager::KeySettingsScript, scripts);
-    //runScripts(scripts);
+    
+    // Get the preinitialize function
+    lua_getglobal(state, PostInitializationFunction.c_str());
+    bool isFunction = lua_isfunction(state, -1);
+    if (!isFunction) {
+        LERROR("Error executing startup script '" << sceneDescription << "'. Scene '" <<
+               sceneDescription << "' does not have a function '" <<
+               PostInitializationFunction << "'");
+        return;
+    }
+    
+    // And execute the preinitialize function
+    int success = lua_pcall(state, 0, 0, 0);
+    if (success != 0) {
+        LERROR("Error executing '" << PostInitializationFunction << "': " <<
+               lua_tostring(state, -1));
+    }
 }
 
 void OpenSpaceEngine::loadFonts() {
