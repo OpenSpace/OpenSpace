@@ -24,10 +24,8 @@ function postInitialization()
     openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
     openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
 
-    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.75)
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
-
-    openspace.setPropertyValue("MilkyWay.renderable.enabled", false)
 
     openspace.printInfo("Done setting default values")
 end
