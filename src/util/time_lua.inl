@@ -23,8 +23,9 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
-#include <ctime>
+
 #include <cppformat/format.h>
+#include <ctime>
 
 namespace openspace {
 
