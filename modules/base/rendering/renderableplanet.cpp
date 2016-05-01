@@ -131,9 +131,10 @@ bool RenderablePlanet::initialize() {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
             "nightTextureProgram",
-            "${SHADERS}/nighttexture_vs.glsl",
-            "${SHADERS}/nighttexture_fs.glsl");
-        if (!_programObject) return false;
+            "${MODULE_BASE}/shaders/nighttexture_vs.glsl",
+            "${MODULE_BASE}/shaders/nighttexture_fs.glsl");
+        if (!_programObject)
+            return false;
     }
     else if (_programObject == nullptr) {
         // pscstandard
