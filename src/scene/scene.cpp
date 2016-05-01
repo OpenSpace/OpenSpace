@@ -78,24 +78,7 @@ Scene::~Scene() {
 }
 
 bool Scene::initialize() {
-    LDEBUG("Initializing SceneGraph");
-   
-    using ghoul::opengl::ShaderObject;
-    using ghoul::opengl::ProgramObject;
-   
-    std::unique_ptr<ProgramObject> tmpProgram;
-
-    // fboPassthrough program
-    tmpProgram = ProgramObject::Build(
-        "fboPassProgram",
-        "${SHADERS}/fboPass_vs.glsl",
-        "${SHADERS}/fboPass_fs.glsl");
-    if (!tmpProgram)
-        return false;
-
-    tmpProgram->setIgnoreSubroutineUniformLocationError(ProgramObject::IgnoreError::Yes);
-    OsEng.configurationManager().setValue("fboPassProgram", tmpProgram.get());
-
+    LDEBUG("Initializing SceneGraph");   
     return true;
 }
 
