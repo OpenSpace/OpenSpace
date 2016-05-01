@@ -140,8 +140,8 @@ bool RenderablePlanet::initialize() {
         // pscstandard
         _programObject = renderEngine.buildRenderProgram(
             "pscstandard",
-            "${SHADERS}/pscstandard_vs.glsl",
-            "${SHADERS}/pscstandard_fs.glsl");
+            "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
+            "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
         if (!_programObject) return false;
 
     }
