@@ -73,7 +73,13 @@ namespace openspace {
 
 
     void TileProvider::prerender() {
-
+        while (_tileLoadManager.numFinishedJobs() > 0) {
+            auto finishedJob = _tileLoadManager.popFinishedJob();
+            std::shared_ptr<UninitializedTextureTile> uninitedTex = finishedJob->product();
+            HashKey key = uninitedTex->tileIndex.hashKey();
+            std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
+            _tileCache.put(key, texture);
+        }
     }
 
 
@@ -84,14 +90,15 @@ namespace openspace {
             return _tileCache.get(hashkey);
         }
         else {
-            //GeodeticTileIndex ti0 = { 0, 0, 0 };
-            //auto texture = _converter.convertToOpenGLTexture(_gdalDataSet, tileIndex, GL_UNSIGNED_BYTE);
-            auto texture = getTileInternal(tileIndex, GL_UNSIGNED_BYTE);
-            texture->uploadTexture();
-            texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _tileCache.put(hashkey, texture);
-            return texture;
+            // enque load job
+            std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
+                new TextureTileLoadJob(this, tileIndex));
+
+            _tileLoadManager.enqueueJob(job);
+
+            // map key to nullptr while tile is loaded
+            _tileCache.put(hashkey, nullptr);
+            return nullptr;
         }
     }
 
@@ -99,10 +106,7 @@ namespace openspace {
 
 
 
-    std::shared_ptr<Texture> TileProvider::getTileInternal(const GeodeticTileIndex& tileIndex, int GLType) {
-
-
-
+    std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(const GeodeticTileIndex& tileIndex) {
         int nRasters = _gdalDataSet->GetRasterCount();
 
         ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
@@ -120,24 +124,21 @@ namespace openspace {
         glm::uvec2 pixelStart0 = _converter.geodeticToPixel(_gdalDataSet, patch.northWestCorner());
         glm::uvec2 pixelEnd0 = _converter.geodeticToPixel(_gdalDataSet, patch.southEastCorner());
         glm::uvec2 numberOfPixels0 = pixelEnd0 - pixelStart0;
-            
+
 
         int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
 
         int minNumPixelsRequired = 256;
         int ov = log2(minNumPixels0) - log2(minNumPixelsRequired);
 
-        ov = glm::clamp(ov, 0, numOverviews-1);
+        ov = glm::clamp(ov, 0, numOverviews - 1);
 
-        glm::uvec2 pixelStart(pixelStart0.x >> (ov+1), pixelStart0.y >> (ov + 1));
+        glm::uvec2 pixelStart(pixelStart0.x >> (ov + 1), pixelStart0.y >> (ov + 1));
         glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
 
-        // For testing
-        /*pixelStart = glm::uvec2(0, 0);
-        numberOfPixels = glm::uvec2(512, 256);
-        ov = 15;
-        */
-        // The data that the texture should read
+
+
+        // GDAL reads image data top to bottom
         GLubyte* imageData = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
 
         // Read the data (each rasterband is a separate channel)
@@ -168,15 +169,22 @@ namespace openspace {
             }
         }
 
+        delete[] imageData;
 
+        glm::uvec3 dims(numberOfPixels.x, numberOfPixels.y, 1);
         GdalDataConverter::TextureFormat textrureFormat = _converter.getTextureFormatFromRasterCount(nRasters);
+        UninitializedTextureTile* uninitedTexPtr = new UninitializedTextureTile(imageDataYflipped, dims, textrureFormat, tileIndex);
+        std::shared_ptr<UninitializedTextureTile> uninitedTex = std::shared_ptr<UninitializedTextureTile>(uninitedTexPtr);
+        return uninitedTex;
+    }
 
 
+    std::shared_ptr<Texture> TileProvider::initializeTexture(std::shared_ptr<UninitializedTextureTile> uninitedTexture) {
         Texture* tex = new Texture(
-            static_cast<void*>(imageDataYflipped),
-            glm::uvec3(numberOfPixels.x, numberOfPixels.y, 1),
-            textrureFormat.ghoulFormat,
-            textrureFormat.glFormat,
+            static_cast<void*>(uninitedTexture->imageData),
+            uninitedTexture->dimensions,
+            uninitedTexture->texFormat.ghoulFormat,
+            uninitedTexture->texFormat.glFormat,
             GL_UNSIGNED_BYTE,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::Repeat);
@@ -184,11 +192,13 @@ namespace openspace {
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
 
-        delete[] imageData;
+        texture->uploadTexture();
+        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-        // Do not free imageData since the texture now has ownership of it
         return texture;
-
     }
+
+
 
 }  // namespace openspace

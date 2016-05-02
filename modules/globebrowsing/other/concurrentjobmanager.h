@@ -121,6 +121,7 @@ namespace openspace {
         // Using this atomic bool is probably not optimal - Should probably
         // use a conditional variable instead
         std::atomic<bool> _hasWorkingThread;
+        std::atomic<int> _numActiveThreads;
 
     };
 
