@@ -21,8 +21,9 @@
 //  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 //  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 //  ****************************************************************************************/
-
 #include <modules/iswa/rendering/dataplane.h>
+
+#include <fstream>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -31,6 +32,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 
 namespace {
     const std::string _loggerCat = "DataPlane";
@@ -40,13 +42,12 @@ namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
-    ,_dataOptions("dataOptions", "Data Options")
-    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
-    ,_useMultipleTf("_useMultipleTf","Use Multiple transferfunctions", false)
-    // ,_averageValues("averageValues", "Average values", false)
+    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/parula.tf")
+    ,_dataOptions("dataOptions", "Data Options")
     // ,_colorbar(nullptr)
 {     
     std::string name;
@@ -55,20 +56,18 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     addProperty(_useLog);
     addProperty(_useHistogram);
-    addProperty(_useMultipleTf);
     addProperty(_normValues);
     addProperty(_backgroundValues);
-    // addProperty(_averageValues);
+    addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
     OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useMultipleTf);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
-    // OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
+    OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
     _normValues.onChange([this](){
@@ -80,8 +79,9 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _useHistogram.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){ loadTexture();} );
 
-    _useMultipleTf.onChange([this](){
-            changeTransferFunctions(_useMultipleTf.value());
+
+    _transferFunctionsFile.onChange([this](){
+        setTransferFunctions(_transferFunctionsFile.value());
     });
 }
 
@@ -105,9 +105,7 @@ bool DataPlane::initialize(){
     }
 
     updateTexture();
-
-    std::string tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
-    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    setTransferFunctions(_transferFunctionsFile.value());
     
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
@@ -515,19 +513,24 @@ float DataPlane::normalizeWithLogarithm(float value, int logMean){
     return glm::clamp(logNormalized,0.0f, 1.0f);
 }
 
-void DataPlane::changeTransferFunctions(bool multiple){
-    _transferFunctions.clear();
-    std::string tfPath;
-    if(multiple){
-        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/red.jpg";
-        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/blue.jpg";
-        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/green.jpg";
-        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
-    }else{
-        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
-        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+void DataPlane::setTransferFunctions(std::string tfPath){
+    std::string line;
+    std::ifstream tfFile(absPath(tfPath));
+
+    std::vector<std::shared_ptr<TransferFunction>> tfs;
+
+    if(tfFile.is_open()){
+        while(getline(tfFile, line)){
+            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(line);
+            if(tf)
+                tfs.push_back(tf);
+        }
     }
+
+    if(!tfs.empty()){
+        _transferFunctions.clear();
+        _transferFunctions = tfs;
+    }
+
 }
 }// namespace openspace
