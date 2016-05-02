@@ -31,11 +31,17 @@ uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 uniform ivec2 contraction; // [-1, 1]
 
-uniform mat3 uvTransformPatchToTile;
+uniform mat3 uvTransformPatchToTile00;
+uniform mat3 uvTransformPatchToTile10;
+uniform mat3 uvTransformPatchToTile01;
+uniform mat3 uvTransformPatchToTile11;
 
 uniform int segmentsPerPatch;
 
-uniform sampler2D textureSampler;
+uniform sampler2D textureSampler00;
+uniform sampler2D textureSampler10;
+uniform sampler2D textureSampler01;
+uniform sampler2D textureSampler11;
 
 layout(location = 1) in vec2 in_uv;
 
@@ -107,9 +113,19 @@ void main()
 
 	PositionNormalPair pair = globalInterpolation(fs_uv);
 
-	vec4 textureColor = texture(textureSampler, vec2(uvTransformPatchToTile * vec3(fs_uv.s, fs_uv.t, 1)));
+	
+	vec4 textureColor = vec4(0);
 
-	pair.position += pair.normal * textureColor.r * 3e4;
+	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
+	textureColor += texture(textureSampler00, uv00);
+	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
+	textureColor += texture(textureSampler10, uv10);
+	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
+	textureColor += texture(textureSampler01, uv01);
+	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
+	textureColor += texture(textureSampler11, uv11);
+
+	pair.position += pair.normal * textureColor.r * 1e4;
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 	fs_position = pair.position;

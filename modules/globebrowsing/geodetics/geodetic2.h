@@ -99,7 +99,7 @@ struct GeodeticTileIndex {
     bool operator==(const GeodeticTileIndex& other) const;
 };
 
-
+std::ostream& operator<<(std::ostream& os, const GeodeticTileIndex& ti);
 
 
 //////////////////////////////////////////////////////////////////////////////////////

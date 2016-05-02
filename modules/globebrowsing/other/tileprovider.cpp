@@ -88,7 +88,7 @@ namespace openspace {
             //auto texture = _converter.convertToOpenGLTexture(_gdalDataSet, tileIndex, GL_UNSIGNED_BYTE);
             auto texture = getTileInternal(tileIndex, GL_UNSIGNED_BYTE);
             texture->uploadTexture();
-            texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+            texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _tileCache.put(hashkey, texture);
             return texture;

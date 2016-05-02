@@ -146,8 +146,8 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnit;
         texUnit.activate();
         tile00->bind();
-        _programObject->setUniform("textureSampler", texUnit);
-        _programObject->setUniform("uvTransformPatchToTile", uvTransform);
+        _programObject->setUniform("textureSampler00", texUnit);
+        _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
 
         Geodetic2 swCorner = newPatch.southWestCorner();
         _programObject->setUniform("segmentsPerPatch", _grid->xSegments());
@@ -176,6 +176,7 @@ namespace openspace {
         : PatchRenderer()
         , _grid(grid)
         , _tileProvider("map_service_configs/TERRAIN.wms", 5000)
+        , _patchCoverageProvider(Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(-M_PI -M_PI/2, -M_PI), 10)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -234,20 +235,49 @@ namespace openspace {
 
 
         // Get the textures that should be used for rendering
-        GeodeticTileIndex tileIndex = _tileSet.getTileIndex(newPatch);
-        GeodeticPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
+        GeodeticTileIndex tileIndex00 = _patchCoverageProvider.getTileIndex(newPatch);
+        GeodeticTileIndex tileIndex10 = tileIndex00; tileIndex10.x += 1;
+        GeodeticTileIndex tileIndex01 = tileIndex00; tileIndex01.y += 1;
+        GeodeticTileIndex tileIndex11 = tileIndex00; tileIndex11.x += 1; tileIndex11.y += 1;
 
-        std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileProvider.getTile(tileIndex);
-        glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
+        std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileProvider.getTile(tileIndex00);
+        std::shared_ptr<ghoul::opengl::Texture> tile10 = _tileProvider.getTile(tileIndex10);
+        std::shared_ptr<ghoul::opengl::Texture> tile01 = _tileProvider.getTile(tileIndex01);
+        std::shared_ptr<ghoul::opengl::Texture> tile11 = _tileProvider.getTile(tileIndex11);
+
+        glm::mat3 uvTransform00 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex00);
+        glm::mat3 uvTransform10 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex10);
+        glm::mat3 uvTransform01 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex01);
+        glm::mat3 uvTransform11 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex11);
 
         //std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
         
         // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnit;
-        texUnit.activate();
+        ghoul::opengl::TextureUnit texUnit00;
+        texUnit00.activate();
         tile00->bind();
-        _programObject->setUniform("textureSampler", texUnit);
-        _programObject->setUniform("uvTransformPatchToTile", mat3(uvTransform));
+        _programObject->setUniform("textureSampler00", texUnit00);
+
+        ghoul::opengl::TextureUnit texUnit10;
+        texUnit10.activate();
+        tile10->bind();
+        _programObject->setUniform("textureSampler10", texUnit10);
+
+        ghoul::opengl::TextureUnit texUnit01;
+        texUnit01.activate();
+        tile01->bind();
+        _programObject->setUniform("textureSampler01", texUnit01);
+
+        ghoul::opengl::TextureUnit texUnit11;
+        texUnit11.activate();
+        tile11->bind();
+        _programObject->setUniform("textureSampler11", texUnit11);
+
+
+        _programObject->setUniform("uvTransformPatchToTile00", mat3(uvTransform00));
+        _programObject->setUniform("uvTransformPatchToTile10", mat3(uvTransform10));
+        _programObject->setUniform("uvTransformPatchToTile01", mat3(uvTransform01));
+        _programObject->setUniform("uvTransformPatchToTile11", mat3(uvTransform11));
 
         _programObject->setUniform(
             "modelViewProjectionTransform",

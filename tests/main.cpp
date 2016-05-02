@@ -45,8 +45,8 @@
 //#include <test_gdalwms.inl>
 #include <test_patchcoverageprovider.inl>
 
-#include <test_concurrentqueue.inl>
-#include <test_concurrentjobmanager.inl>
+//#include <test_concurrentqueue.inl>
+//#include <test_concurrentjobmanager.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>

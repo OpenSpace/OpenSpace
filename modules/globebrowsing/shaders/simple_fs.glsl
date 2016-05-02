@@ -35,8 +35,14 @@ uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
-uniform sampler2D textureSampler;
-uniform mat3 uvTransformPatchToTile;
+uniform sampler2D textureSampler00;
+uniform sampler2D textureSampler10;
+uniform sampler2D textureSampler01;
+uniform sampler2D textureSampler11;
+uniform mat3 uvTransformPatchToTile00;
+uniform mat3 uvTransformPatchToTile10;
+uniform mat3 uvTransformPatchToTile01;
+uniform mat3 uvTransformPatchToTile11;
 
 uniform int segmentsPerPatch;
 
@@ -51,8 +57,21 @@ in vec2 fs_uv;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = texture(textureSampler, vec2(uvTransformPatchToTile * vec3(fs_uv.s, fs_uv.t, 1)));
+	frag.color = vec4(0);
+	
+	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
+	frag.color += texture(textureSampler00, uv00);
+
+	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
+	frag.color += texture(textureSampler10, uv10);
+	
+	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
+	frag.color += texture(textureSampler01, uv01);
+	
+	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
+	frag.color += texture(textureSampler11, uv11);
 	//frag.color = frag.color * 0.5 + 0.999*texture(textureSampler, fs_uv);
+	//frag.color /= 4;
 
 	vec4 uvColor = vec4(fract(fs_uv * segmentsPerPatch), 0.4,1);
 	frag.color = frag.color.a < 0.1 ? uvColor * 0.5 : frag.color;

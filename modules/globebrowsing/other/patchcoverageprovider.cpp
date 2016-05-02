@@ -61,13 +61,13 @@ namespace openspace {
         level = glm::min(level, _depth);
         
         // Calculate the index in x y where the tile should be positioned
-        Vec2 tileSize = _sizeLevel0.toLonLatVec2() / pow(2, level);
-        Vec2 nw = patch.northWestCorner().toLonLatVec2();
-        Vec2 offset = _offsetLevel0.toLonLatVec2();
-        glm::ivec2 tileIndexXY = (nw - offset) / tileSize;
+        Geodetic2 tileSize = _sizeLevel0 / pow(2, level);
+        Geodetic2 nw = patch.northWestCorner();
+        glm::ivec2 tileIndexXY =
+            (nw.toLonLatVec2() - _offsetLevel0.toLonLatVec2()) / tileSize.toLonLatVec2();
 
         // Flip y since indices increase from top to bottom
-        //tileIndexXY.y = pow(2, level - 1) - tileIndexXY.y;
+        tileIndexXY.y = pow(2, level) - 1 - tileIndexXY.y;
 
         // Create the tileindex
         GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };

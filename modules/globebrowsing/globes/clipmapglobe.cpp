@@ -52,7 +52,7 @@ namespace openspace {
 		// init Renderer
 		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
 		_outerPatchRenderer.reset(outerPatchRenderer);
-		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256 )));
+		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
 		_innerPatchRenderer.reset(innerPatchRenderer);
 	}
 
@@ -80,7 +80,7 @@ namespace openspace {
 	void ClipMapGlobe::render(const RenderData& data)
 	{
 		// TODO : Choose the max depth and the min depth depending on the camera
-		int maxDepth = 3;
+		int maxDepth = 10;
 		int minDepth = 0;
 		// render patches
 		for (size_t i = minDepth; i < maxDepth; i++)

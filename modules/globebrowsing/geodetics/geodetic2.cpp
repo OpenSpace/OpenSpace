@@ -99,6 +99,12 @@ namespace openspace {
         return x == other.x && y == other.y && level == other.level;
     }
 
+    std::ostream& operator<<(std::ostream& os, const GeodeticTileIndex& ti)
+    {
+        os << "{ x = " << ti.x << ", y = " << ti.y << ", level = " << ti.level << " }";
+        return os;
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////
     //							 	GEODETICPATCH										//
     //////////////////////////////////////////////////////////////////////////////////////

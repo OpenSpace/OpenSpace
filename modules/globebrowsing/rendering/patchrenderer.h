@@ -37,6 +37,7 @@
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 #include <modules/globebrowsing/rendering/frustumculler.h>
 #include <modules/globebrowsing/other/texturetileset.h>
+#include <modules/globebrowsing/other/patchcoverageprovider.h>
 
 namespace ghoul {
 namespace opengl {
@@ -113,6 +114,7 @@ namespace openspace {
         
     private:
         TileProvider _tileProvider;
+        PatchCoverageProvider _patchCoverageProvider;
         shared_ptr<ClipMapGrid> _grid;
     };
 
