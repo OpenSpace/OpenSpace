@@ -42,15 +42,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
     setName("iSWACygnet" + std::to_string(_cygnetId));
     addProperty(_updateInterval);
 
-    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useFlatScreen);
-    OsEng.gui()._iSWAproperty.registerProperty(&_euclideanPosition);
-    OsEng.gui()._iSWAproperty.registerProperty(&_sphericalPosition);
-    OsEng.gui()._iSWAproperty.registerProperty(&_depth);
-    OsEng.gui()._iSWAproperty.registerProperty(&_scale);
-    OsEng.gui()._iSWAproperty.registerProperty(&_alpha);
-    OsEng.gui()._iSWAproperty.registerProperty(&_updateInterval);
-    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    registerProperties();
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -60,11 +52,6 @@ bool ScreenSpaceCygnet::initialize(){
     createPlane();
     createShaders();
     updateTexture();
-
-    // Setting spherical/euclidean onchange handler
-    _useFlatScreen.onChange([this](){
-        useEuclideanCoordinates(_useFlatScreen.value());
-    });
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;

@@ -70,7 +70,11 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
-    _normValues.onChange([this](){loadTexture();});
+    _normValues.onChange([this](){
+        // FOR TESTING (should be done on all onChange)
+        // _avgBenchmarkTime = 0.0;
+        // _numOfBenchmarks = 0;
+        loadTexture();});
     _useLog.onChange([this](){loadTexture();});
     _useHistogram.onChange([this](){loadTexture();});
     _dataOptions.onChange([this](){loadTexture();});
@@ -129,6 +133,7 @@ bool DataPlane::deinitialize(){
 }
 
 bool DataPlane::loadTexture() {
+
     std::vector<float*> data = readData();
     if(data.empty())
         return false;
@@ -292,7 +297,7 @@ std::vector<float*> DataPlane::readData(){
     if(!_memorybuffer.empty()){
         if(!_dataOptions.options().size()) // load options for value selection
             readHeader();
-
+        
         std::stringstream memorystream(_memorybuffer);
         std::string line;
 
@@ -352,10 +357,27 @@ std::vector<float*> DataPlane::readData(){
             return std::vector<float*>();
         }
         
+        // // FOR TESTING
+        // // ===========
+        // std::chrono::time_point<std::chrono::system_clock> start, end;
+        // start = std::chrono::system_clock::now();
+        // // ===========
+        
         for(int i=0; i<numSelected; i++){
             processData(data, selectedOptions[i], optionValues[i], min[i], max[i], sum[i]);
         }
         
+        // // FOR TESTING
+        // // ===========
+        // end = std::chrono::system_clock::now();
+        // _numOfBenchmarks++;
+        // std::chrono::duration<double> elapsed_seconds = end-start;
+        // _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
+        // std::cout << " readData():" << std::endl;
+        // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
+        // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
+        // // ===========
+
         return data;
         
     } 
@@ -364,6 +386,7 @@ std::vector<float*> DataPlane::readData(){
         return std::vector<float*>();
     }
 } 
+
 
 void DataPlane::processData(std::vector<float*> outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum){
     
@@ -378,12 +401,28 @@ void DataPlane::processData(std::vector<float*> outputData, int inputChannel, st
     
     const int numValues = inputData.size(); 
     
+    //FOR TESTING ONLY
+    //================
+    // float entropyBefore;
+    // float entropyAfter;
+    // std::vector<int> histogramAfter = std::vector<int>(levels, 0);
+    // auto calulateEntropy = [levels, numValues](std::vector<int> histogram){
+    //     float entropy;
+    //     for(auto frequency : histogram){
+    //         if(frequency != 0)
+    //             entropy -= ((float)frequency/numValues) * log2((float)frequency/numValues);
+    //     }
+    //     return entropy;
+    // };
+    //================
+    
     // maps the data values to the histogram bin/index/level
     auto mapToHistogram = [levels](float val, float varMin, float varMax) {
         float probability = (val-varMin)/(varMax-varMin);
         float mappedValue = probability * levels;
         return glm::clamp(mappedValue, 0.0f, static_cast<float>(levels - 1));
     };
+    
     
     //Calculate the mean
     float mean = (1.0 / numValues) * sum;
@@ -408,6 +447,9 @@ void DataPlane::processData(std::vector<float*> outputData, int inputChannel, st
         standardDeviation = mapToHistogram(standardDeviation, min, max);
         min = 0.0f;
         max = levels - 1.0f;
+        
+        //FOR TESTING
+        //entropyBefore = calulateEntropy(histogram);
 
         //Calculate the cumulative distributtion function (CDF)
         float previousCdf = 0.0f;
@@ -430,6 +472,9 @@ void DataPlane::processData(std::vector<float*> outputData, int inputChannel, st
         if(_useHistogram.value()){
             v = newLevels[(int)v];
             
+            // FOR TESTING
+            //histogramAfter[(int)v]++;
+
             // Map mean and standard deviation to new histogram levels
             mean =  newLevels[(int) mean];
             // logmean =  newLevels[(int) logmean];
@@ -440,6 +485,14 @@ void DataPlane::processData(std::vector<float*> outputData, int inputChannel, st
         output[i] += v;
 
     }
+    
+    // FOR TESTING
+    // ===========
+    // entropyAfter = calulateEntropy(histogramAfter);
+    // std::cout << "Entropy Before: "<< entropyBefore << std::endl;
+    // std::cout << "Entropy After: "<< entropyAfter << std::endl;
+    // ===========
+    
 }
 
 float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){

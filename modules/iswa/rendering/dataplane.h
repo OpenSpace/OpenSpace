@@ -59,7 +59,6 @@ class DataPlane : public CygnetPlane {
         float min, // min value of the input data
         float max, // max valye of the input data
         float sum // sum of the input data 
-        // int numOutputChannels // number of data channels that you want in the output
     );
 
     float normalizeWithStandardScore(float value, float mean, float sd);
@@ -76,6 +75,7 @@ class DataPlane : public CygnetPlane {
     // properties::BoolProperty _useMultipleTf;
     // properties::BoolProperty _averageValues;
 
+
     // properties::Vec4Property _topColor;
     // properties::Vec4Property _midColor;
     // properties::Vec4Property _botColor;
@@ -83,6 +83,11 @@ class DataPlane : public CygnetPlane {
     
     glm::size3_t _dimensions;
     // std::shared_ptr<ColorBar> _colorbar;
+    
+    //FOR TESTING
+    // double _avgBenchmarkTime=0.0;
+    // int _numOfBenchmarks = 0;
+    //===========
  };
  
  } // namespace openspace

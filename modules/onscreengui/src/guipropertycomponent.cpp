@@ -336,7 +336,7 @@ namespace gui {
 
 //}
 
-void GuiPropertyComponent::registerProperty(properties::Property* prop) {
+void GuiPropertyComponent::registerProperty(properties::Property* prop, properties::Property* sibling) {
         //void GuiPropertyComponent::registerProperty(const std::string& propertyDescription) {
     using namespace properties;
 
@@ -372,15 +372,67 @@ void GuiPropertyComponent::registerProperty(properties::Property* prop) {
     std::string owner = fullyQualifiedId.substr(0, pos);
 
     auto it = _propertiesByOwner.find(owner);
-    if (it == _propertiesByOwner.end())
+    if (it == _propertiesByOwner.end()){
         _propertiesByOwner[owner] = { prop };
-    else
-        it->second.push_back(prop);
+    } else {
+        std::vector<properties::Property*>::iterator position = std::find(it->second.begin(), it->second.end(), sibling);
+        if (position != it->second.end()){
+            it->second.insert(++position, prop);       
+        } else {
+            it->second.push_back(prop);
+        }
+    }
 
     //ghoul::Dictionary dictionary;
     //ghoul::lua::loadDictionaryFromString(propertyDescription, dictionary);
 
     //handleProperty(dictionary);
+}
+
+void GuiPropertyComponent::unregisterProperty(properties::Property* prop) {
+
+    using namespace properties;
+
+    std::string className = prop->className();
+
+    if (className == "BoolProperty")
+        _boolProperties.erase(prop);
+    else if (className == "IntProperty")
+        _intProperties.erase(prop);
+    else if (className == "FloatProperty")
+        _floatProperties.erase(prop);
+    else if (className == "StringProperty")
+        _stringProperties.erase(prop);
+    else if (className == "Vec2Property")
+        _vec2Properties.erase(prop);
+    else if (className == "Vec3Property")
+        _vec3Properties.erase(prop);
+    else if (className == "Vec4Property")
+        _vec4Properties.erase(prop);
+    else if (className == "OptionProperty")
+        _optionProperties.erase(prop);
+    else if (className == "TriggerProperty")
+        _triggerProperties.erase(prop);
+    else if (className == "SelectionProperty")
+        _selectionProperties.erase(prop);
+    else {
+        LWARNING("Class name '" << className << "' not handled in GUI generation");
+        return;
+    }
+
+    std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
+    size_t pos = fullyQualifiedId.find('.');
+    std::string owner = fullyQualifiedId.substr(0, pos);
+
+    auto it = _propertiesByOwner.find(owner);
+    if (it == _propertiesByOwner.end()){
+        LWARNING("Cannot find owner for " + className);
+    }
+    else{
+        std::vector<properties::Property*>::iterator position = std::find(it->second.begin(), it->second.end(), prop);
+        if (position != it->second.end())
+            it->second.erase(position);
+    }
 }
 
 void GuiPropertyComponent::unregisterProperties(std::string owner){
@@ -389,25 +441,25 @@ void GuiPropertyComponent::unregisterProperties(std::string owner){
         for(auto prop : it->second){
             std::string className = prop->className();
             if (className == "BoolProperty")
-                _boolProperties.insert(prop);
+                _boolProperties.erase(prop);
             else if (className == "IntProperty")
-                _intProperties.insert(prop);
+                _intProperties.erase(prop);
             else if (className == "FloatProperty")
-                _floatProperties.insert(prop);
+                _floatProperties.erase(prop);
             else if (className == "StringProperty")
-                _stringProperties.insert(prop);
+                _stringProperties.erase(prop);
             else if (className == "Vec2Property")
-                _vec2Properties.insert(prop);
+                _vec2Properties.erase(prop);
             else if (className == "Vec3Property")
-                _vec3Properties.insert(prop);
+                _vec3Properties.erase(prop);
             else if (className == "Vec4Property")
-                _vec4Properties.insert(prop);
+                _vec4Properties.erase(prop);
             else if (className == "OptionProperty")
-                _optionProperties.insert(prop);
+                _optionProperties.erase(prop);
             else if (className == "TriggerProperty")
-                _triggerProperties.insert(prop);
+                _triggerProperties.erase(prop);
             else if (className == "SelectionProperty")
-                _selectionProperties.insert(prop);
+                _selectionProperties.erase(prop);
         }
         it->second.clear();
         _propertiesByOwner.erase(it);
