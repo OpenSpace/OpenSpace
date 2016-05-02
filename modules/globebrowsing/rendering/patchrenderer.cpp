@@ -56,7 +56,7 @@ namespace openspace {
     //							PATCH RENDERER											//
     //////////////////////////////////////////////////////////////////////////////////////
     PatchRenderer::PatchRenderer()
-        : _tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, -M_PI), 1)
+        : _tileSet(Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(M_PI, -M_PI), 1)
     {
 
     }

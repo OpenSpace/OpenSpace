@@ -22,29 +22,19 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/other/texturetileset.h>
-
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/gdaldataconverter.h>
-
-#include <ghoul/opengl/texturemanager.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <modules/globebrowsing/other/patchcoverageprovider.h>
 
 #include <ghoul/logging/logmanager.h>
-
-#include "gdal_priv.h"
-#include "cpl_conv.h" // for CPLMalloc()
 
 #include <glm/glm.hpp>
 
 namespace {
-    const std::string _loggerCat = "TextureTileSet";
+    const std::string _loggerCat = "PatchCoverageProvider";
 }
 
 namespace openspace {
 
-    TextureTileSet::TextureTileSet(
+    PatchCoverageProvider::PatchCoverageProvider(
         Geodetic2 sizeLevel0,
         Geodetic2 offsetLevel0,
         int depth)
@@ -52,58 +42,14 @@ namespace openspace {
         , _offsetLevel0(offsetLevel0)
         , _depth(depth)
     {
-        
-
-
-        // Read using GDAL
-
-        //std::string testFile = absPath("map_service_configs/TERRA_CR_B143_2016-04-12.wms");
-        //std::string testFile = absPath("map_service_configs/TERRAIN.wms");
-        std::string testFile = absPath("textures/earth_bluemarble.jpg");
-
-        
-        GDALDataset  *poDataset;
-        GDALAllRegister();
-        poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
-
-        assert(poDataset != nullptr, "Unable to read dataset" << testFile);
-        GdalDataConverter conv;
-
-        GeodeticTileIndex ti;
-        ti.x = 0;
-        ti.y = 0;
-        ti.level = 0;
-        _testTexture = conv.convertToOpenGLTexture(poDataset, ti, GL_UNSIGNED_BYTE);
-
-        _testTexture->uploadTexture();
-        _testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-        
-        /*        
-        // Set e texture to test
-        std::string fileName = "textures/earth_bluemarble.jpg";
-        //std::string fileName = "../../../build/tiles/tile5_8_12.png";
-        //std::string fileName = "tile5_8_12.png";
-        _testTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
-        
-        if (_testTexture) {
-            LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
-            _testTexture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-
-        */
-    }
-
-    TextureTileSet::~TextureTileSet(){
 
     }
 
-    GeodeticTileIndex TextureTileSet::getTileIndex(const GeodeticPatch& patch) {
+    PatchCoverageProvider::~PatchCoverageProvider(){
+
+    }
+
+    GeodeticTileIndex PatchCoverageProvider::getTileIndex(const GeodeticPatch& patch) {
         // Calculate the level of the index depanding on the size of the incoming patch.
         // The level is as big as possible (as far down as possible) but it can't be
         // too big since at maximum four tiles should be used to cover a patch
@@ -128,37 +74,15 @@ namespace openspace {
         return tileIndex;
     }
 
-    std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticPatch& patch) {
-        return getTile(getTileIndex(patch));
-    }
-
-    std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticTileIndex& tileIndex) {
-        return _testTexture;
-    }
-
-    GeodeticPatch TextureTileSet::getTilePositionAndScale(
-        const GeodeticTileIndex& tileIndex) {
-        Geodetic2 tileSize = Geodetic2(
-            _sizeLevel0.lat / pow(2, tileIndex.level),
-            _sizeLevel0.lon / pow(2, tileIndex.level));
-        Geodetic2 northWest = Geodetic2(
-            _offsetLevel0.lat + tileIndex.y * tileSize.lat,
-            _offsetLevel0.lon + tileIndex.x * tileSize.lon);
-        
-        return GeodeticPatch(
-            Geodetic2(northWest.lat - tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
-            Geodetic2(tileSize.lat / 2, tileSize.lon / 2));
-    }
-
-    glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
+    glm::mat3 PatchCoverageProvider::getUvTransformationPatchToTile(
         GeodeticPatch patch,
         const GeodeticTileIndex& tileIndex)
     {
-        GeodeticPatch tile = getTilePositionAndScale(tileIndex);
+        GeodeticPatch tile(tileIndex);
         return getUvTransformationPatchToTile(patch, tile);
     }
 
-    glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
+    glm::mat3 PatchCoverageProvider::getUvTransformationPatchToTile(
         GeodeticPatch patch,
         GeodeticPatch tile)
     {

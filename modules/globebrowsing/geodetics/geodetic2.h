@@ -95,6 +95,8 @@ struct GeodeticTileIndex {
     int x, y, level;
 
     HashKey hashKey() const;
+
+    bool operator==(const GeodeticTileIndex& other) const;
 };
 
 

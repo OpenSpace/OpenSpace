@@ -22,78 +22,58 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#ifndef __PATCHCOVERAGEPROVIDER_H__
+#define __PATCHCOVERAGEPROVIDER_H__
 
-#include <modules/globebrowsing/globes/clipmapglobe.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/meshes/clipmapgrid.h>
-
-// open space includes
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
-
-// ghoul includes
-#include <ghoul/misc/assert.h>
-
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <modules/globebrowsing/geodetics/geodetic2.h>
 
 
-namespace {
-	const std::string _loggerCat = "ClipMapGlobe";
-}
+//////////////////////////////////////////////////////////////////////////////////////////
+//									PATCH TILE CONVERTER							    //
+//////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-	ClipMapGlobe::ClipMapGlobe(const Ellipsoid& ellipsoid)
-		: _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
-		, _ellipsoid(ellipsoid)
-	{
-		// init Renderer
-		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
-		_outerPatchRenderer.reset(outerPatchRenderer);
-		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256 )));
-		_innerPatchRenderer.reset(innerPatchRenderer);
-	}
+    class PatchCoverageProvider
+    {
+    public:
+        PatchCoverageProvider(
+            Geodetic2 sizeLevel0,
+            Geodetic2 offsetLevel0,
+            int depth);
+        ~PatchCoverageProvider();
 
-	ClipMapGlobe::~ClipMapGlobe() {
-	}
-	
-	const Ellipsoid& ClipMapGlobe::ellipsoid() const
-	{
-		return _ellipsoid;
-	}
+        /**
+            Returns the index of the tile at an appropriate level.
+            Appropriate meaning that the tile should be at as high level as possible
+            Without the tile being smaller than the patch in lat-lon space.
+            The tile is at least as big as the patch.
+        */
+        GeodeticTileIndex getTileIndex(const GeodeticPatch& patch);
 
-	bool ClipMapGlobe::initialize() {
-		return isReady();
-	}
+        /**
+            A transformation (translation and scaling) from the texture space of a patch
+            to the texture space of a tile.
+        */
+        glm::mat3 getUvTransformationPatchToTile( 
+            GeodeticPatch patch,
+            const GeodeticTileIndex& tileIndex);
 
-	bool ClipMapGlobe::deinitialize() {
-		return true;
-	}
+        /**
+            Overloaded function
+        */
+        glm::mat3 getUvTransformationPatchToTile(
+            GeodeticPatch patch,
+            GeodeticPatch tile);
 
-	bool ClipMapGlobe::isReady() const {
-		bool ready = true; 
-		return ready;
-	}
-
-	void ClipMapGlobe::render(const RenderData& data)
-	{
-		// TODO : Choose the max depth and the min depth depending on the camera
-		int maxDepth = 3;
-		int minDepth = 0;
-		// render patches
-		for (size_t i = minDepth; i < maxDepth; i++)
-		{
-			Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
-			_outerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
-		}
-		Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
-		_innerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
-	}
-
-	void ClipMapGlobe::update(const UpdateData& data) {
-		
-	}
+    private:
+        Geodetic2 _sizeLevel0;
+        Geodetic2 _offsetLevel0;
+        int _depth;
+        
+    };
 
 }  // namespace openspace
+
+#endif  // __PATCHCOVERAGEPROVIDER_H__

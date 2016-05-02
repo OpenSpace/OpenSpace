@@ -95,6 +95,9 @@ namespace openspace {
         return x ^ (y << 16) ^ (level << 21);
     }
 
+    bool GeodeticTileIndex::operator==(const GeodeticTileIndex& other) const {
+        return x == other.x && y == other.y && level == other.level;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////
     //							 	GEODETICPATCH										//

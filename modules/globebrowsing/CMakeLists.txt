@@ -48,6 +48,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
@@ -79,6 +80,7 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
