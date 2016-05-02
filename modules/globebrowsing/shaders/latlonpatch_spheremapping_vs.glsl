@@ -33,7 +33,7 @@ uniform vec2 lonLatScalingFactor;
 layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
-out vec2 vs_uv;
+out vec2 fs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -83,7 +83,7 @@ vec3 globalInterpolation() {
 
 void main()
 {
-	vs_uv = in_UV;
+	fs_uv = in_UV;
 	vec3 p = globalInterpolation();
 
 	vec4 position = modelViewProjectionTransform * vec4(p, 1);

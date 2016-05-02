@@ -50,9 +50,9 @@ namespace openspace {
 		, _ellipsoid(ellipsoid)
 	{
 		// init Renderer
-		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(32)));
+		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
 		_outerPatchRenderer.reset(outerPatchRenderer);
-		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(32)));
+		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
 		_innerPatchRenderer.reset(innerPatchRenderer);
 	}
 

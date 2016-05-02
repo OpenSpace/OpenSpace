@@ -84,7 +84,7 @@ namespace openspace {
 		// Covers all positive longitudes
 		std::unique_ptr<ChunkNode> _rightRoot;
 
-		// Frustrum culler
+		// Frustum culler
 		std::shared_ptr<FrustumCuller> _frustumCuller;
 
 		// the patch used for actual rendering

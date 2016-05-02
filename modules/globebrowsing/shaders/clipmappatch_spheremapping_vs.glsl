@@ -31,12 +31,24 @@ uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 uniform ivec2 contraction; // [-1, 1]
 
+uniform mat3 uvTransformPatchToTile;
+
+uniform int segmentsPerPatch;
+
+uniform sampler2D textureSampler;
+
 layout(location = 1) in vec2 in_uv;
 
 out vec4 vs_position;
-out vec2 vs_uv;
+out vec3 fs_position;
+out vec2 fs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
+
+struct PositionNormalPair {
+	vec3 position;
+	vec3 normal;
+};
 
 vec3 geodeticSurfaceNormal(float latitude, float longitude)
 {
@@ -47,7 +59,7 @@ vec3 geodeticSurfaceNormal(float latitude, float longitude)
 		sin(latitude));
 }
 
-vec3 geodetic3ToCartesian(
+PositionNormalPair geodetic3ToCartesian(
 	float latitude,
 	float longitude,
 	float height,
@@ -57,10 +69,13 @@ vec3 geodetic3ToCartesian(
 	vec3 k = radiiSquared * normal;
 	float gamma = sqrt(dot(k, normal));
 	vec3 rSurface = k / gamma;
-	return rSurface + height * normal;
+	PositionNormalPair toReturn;
+	toReturn.position = rSurface + height * normal;
+	toReturn.normal = normal;
+	return toReturn;
 }
 
-vec3 geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
+PositionNormalPair geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
 {
 	// Position on surface : height = 0
 	return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
@@ -73,26 +88,32 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 		sin(latitude));
 }
 
-vec3 globalInterpolation(vec2 uv) {
+PositionNormalPair globalInterpolation(vec2 uv) {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * uv.y; // Lat
 	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * uv.x; // Lon
-	vec3 positionModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
-	return positionModelSpace;
+	return geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);;
 }
 
 void main()
 {
-	vs_uv = in_uv;
+	fs_uv = in_uv;
 
-	vec2 scaledContraction = contraction / 32.0f;
-	vs_uv += scaledContraction;
-	vs_uv = clamp(vs_uv, 0, 1);
-	vs_uv -= scaledContraction;
+	// Contract
+	vec2 scaledContraction = contraction / float(segmentsPerPatch);
+	fs_uv += scaledContraction;
+	fs_uv = clamp(fs_uv, 0, 1);
+	fs_uv -= scaledContraction;
 
-	vec3 p = globalInterpolation(vs_uv);
+	PositionNormalPair pair = globalInterpolation(fs_uv);
 
-	vec4 position = modelViewProjectionTransform * vec4(p, 1);
-	vs_position = z_normalization(position);
-	gl_Position = vs_position;
+	vec4 textureColor = texture(textureSampler, vec2(uvTransformPatchToTile * vec3(fs_uv.s, fs_uv.t, 1)));
+
+	pair.position += pair.normal * textureColor.r * 3e4;
+
+	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
+	fs_position = pair.position;
+
+	gl_Position = z_normalization(position);
+	vs_position = gl_Position;
 }

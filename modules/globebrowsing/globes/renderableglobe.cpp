@@ -42,7 +42,6 @@ namespace {
 
     // Keys for the dictionary
     const std::string keyRadii = "Radii";
-    const std::string keyHej = "hej";
 }
 
 namespace openspace {
