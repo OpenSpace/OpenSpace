@@ -64,9 +64,8 @@ friend class ISWAGroup;
     void readHeader();
     std::vector<float*> readData();
     void processData(
-        std::vector<float*> outputData, // Where you want your processed data to go 
-        int inputChannel, // index of the data channel
-        std::vector<float> inputData, //data that needs processing 
+        float* outputData, // Where you want your processed data to go 
+        std::vector<float>& inputData, //data that needs processing 
         float min, // min value of the input data
         float max, // max valye of the input data
         float sum // sum of the input data 
@@ -83,7 +82,6 @@ friend class ISWAGroup;
     properties::Vec2Property _backgroundValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
-
     
     glm::size3_t _dimensions;
     // std::shared_ptr<ColorBar> _colorbar;
