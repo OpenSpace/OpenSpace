@@ -53,6 +53,9 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::initialize(){
+
+    _textures.push_back(nullptr);
+    
     initializeTime();
     createPlane();
     createShader();
@@ -87,8 +90,8 @@ bool TexturePlane::loadTexture() {
             texture->uploadTexture();
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-            _texture = std::move(texture);
+            
+            _textures[0] = std::move(texture);
             
             return true;
         }
@@ -113,6 +116,14 @@ bool TexturePlane::updateTexture(){
     }
 
     return false;
+}
+
+void TexturePlane::setUniforms(){
+    ghoul::opengl::TextureUnit unit;
+
+    unit.activate();
+    _textures[0]->bind();
+    _shader->setUniform("texture1", unit);
 }
 
 }// namespace openspace

@@ -42,9 +42,11 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_dataOptions("dataOptions", "Data Options")
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
-    ,_useRGB("useRGB","Use RGB Channels", false)
+    ,_useMultipleTf("_useMultipleTf","Use Multiple transferfunctions", false)
+    // ,_averageValues("averageValues", "Average values", false)
     // ,_colorbar(nullptr)
 {     
     std::string name;
@@ -53,16 +55,20 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     addProperty(_useLog);
     addProperty(_useHistogram);
-    addProperty(_useRGB);
+    addProperty(_useMultipleTf);
     addProperty(_normValues);
+    addProperty(_backgroundValues);
+    // addProperty(_averageValues);
     addProperty(_dataOptions);
 
     registerProperties();
 
     OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
     OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useRGB);
+    OsEng.gui()._iSWAproperty.registerProperty(&_useMultipleTf);
     OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
+    OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
+    // OsEng.gui()._iSWAproperty.registerProperty(&_averageValues);
     OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
     
     _normValues.onChange([this](){
@@ -72,18 +78,10 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         loadTexture();});
     _useLog.onChange([this](){loadTexture();});
     _useHistogram.onChange([this](){loadTexture();});
-    _dataOptions.onChange([this](){
-        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
-            LWARNING("More than 3 values, using only the red channel.");
-        }
-        loadTexture();
-    });
+    _dataOptions.onChange([this](){loadTexture();});
 
-    _useRGB.onChange([this](){
-        if( _useRGB.value() && (_dataOptions.value().size() > 3)){
-            LWARNING("More than 3 values, using only the red channel.");
-        }
-        loadTexture();
+    _useMultipleTf.onChange([this](){
+            changeTransferFunctions(_useMultipleTf.value());
     });
 }
 
@@ -98,7 +96,7 @@ bool DataPlane::initialize(){
     if (_shader == nullptr) {
     // DatePlane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram("PlaneProgram",
+    _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
         "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
         "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
         );
@@ -108,14 +106,16 @@ bool DataPlane::initialize(){
 
     updateTexture();
 
-    std::string tfPath = "${OPENSPACE_DATA}/colormap_parula.jpg";
-    _transferFunction = std::make_shared<TransferFunction>(tfPath);
+    std::string tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
+    _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
     
     // std::cout << "Creating Colorbar" << std::endl;
     // _colorbar = std::make_shared<ColorBar>();
     // if(_colorbar){
     //     _colorbar->initialize(); 
     // }
+
+    // _textures.push_back(nullptr);
 
     return isReady();
 }
@@ -125,7 +125,7 @@ bool DataPlane::deinitialize(){
     destroyPlane();
     destroyShader();
 
-    _texture = nullptr;
+    _textures[0] = nullptr;
     _memorybuffer = "";
     
     // _colorbar->deinitialize();
@@ -135,32 +135,42 @@ bool DataPlane::deinitialize(){
 }
 
 bool DataPlane::loadTexture() {
-    
-    float* values = readData();
-    if(!values)
-        return false;
-        
-    if (!_texture) {
-        std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                values, 
-                                                                _dimensions,
-                                                                ghoul::opengl::Texture::Format::RGB,
-                                                                GL_RGB, 
-                                                                GL_FLOAT,
-                                                                ghoul::opengl::Texture::FilterMode::Linear,
-                                                                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                            );                                                        
 
-        if(texture){
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _texture = std::move(texture);
+    std::vector<float*> data = readData();
+    if(data.empty())
+        return false;
+
+    bool texturesReady = false;
+    std::vector<int> selectedOptions = _dataOptions.value();
+
+    for(int option: selectedOptions){
+        float* values = data[option];
+        if(!values) continue;
+
+        if(!_textures[option]){
+            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                    values, 
+                                                                    _dimensions,
+                                                                    ghoul::opengl::Texture::Format::Red,
+                                                                    GL_RED, 
+                                                                    GL_FLOAT,
+                                                                    ghoul::opengl::Texture::FilterMode::Linear,
+                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                                );
+
+            if(texture){
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                _textures[option] = std::move(texture);
+            }
+        }else{
+            _textures[option]->setPixelData(values);
+            _textures[option]->uploadTexture();
         }
-    }else{
-        _texture->setPixelData(values);
-        _texture->uploadTexture();
+        texturesReady = true;
     }
-    return true;
+
+    return texturesReady;
 }
 
 bool DataPlane::updateTexture(){
@@ -176,6 +186,66 @@ bool DataPlane::updateTexture(){
     }
 
     return false;
+}
+
+void DataPlane::setUniforms(){
+
+    // _shader->setUniform("textures", 1, units[1]);
+    // _shader->setUniform("textures", 2, units[2]);
+    // }
+    std::vector<int> selectedOptions = _dataOptions.value();
+    int activeTextures = selectedOptions.size();
+
+    int activeTransferfunctions = _transferFunctions.size();
+
+    ghoul::opengl::TextureUnit txUnits[activeTextures];
+    int j = 0;
+    for(int option : selectedOptions){
+        if(_textures[option]){
+            txUnits[j].activate();
+            _textures[option]->bind();
+            _shader->setUniform(
+                "textures[" + std::to_string(j) + "]",
+                txUnits[j]
+            );
+
+            j++;
+        }
+    }
+
+    ghoul::opengl::TextureUnit tfUnits[activeTransferfunctions];
+    j = 0;
+
+    if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())){
+        tfUnits[0].activate();
+        _transferFunctions[0]->bind();
+        _shader->setUniform(
+            "transferFunctions[0]",
+            tfUnits[0]
+        );
+    }else{
+        for(int option : selectedOptions){
+            if(_transferFunctions[option]){
+                tfUnits[j].activate();
+                _transferFunctions[option]->bind();
+                _shader->setUniform(
+                "transferFunctions[" + std::to_string(j) + "]",
+                tfUnits[j]
+                );
+
+                j++;
+            }
+        }
+    }
+
+
+    _shader->setUniform("numTextures", activeTextures);
+    _shader->setUniform("numTransferFunctions", activeTransferfunctions);
+    _shader->setUniform("backgroundValues", _backgroundValues.value());
+};
+
+bool DataPlane::textureReady(){
+    return (!_textures.empty());
 }
 
 void DataPlane::readHeader(){
@@ -209,6 +279,7 @@ void DataPlane::readHeader(){
                         if(option != "x" && option != "y" && option != "z"){
                             _dataOptions.addOption({numOptions, name()+"_"+option});
                             numOptions++;
+                            _textures.push_back(nullptr);
                         }
                     }
 
@@ -224,7 +295,7 @@ void DataPlane::readHeader(){
     }
 }
 
-float* DataPlane::readData(){
+std::vector<float*> DataPlane::readData(){
     if(!_memorybuffer.empty()){
         if(!_dataOptions.options().size()) // load options for value selection
             readHeader();
@@ -233,6 +304,7 @@ float* DataPlane::readData(){
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();
+
         int numSelected = selectedOptions.size();
 
         std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
@@ -240,9 +312,12 @@ float* DataPlane::readData(){
 
         std::vector<float> sum(numSelected, 0.0f);
         std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
-        
-        float* data = new float[3*_dimensions.x*_dimensions.y]{0.0f};
 
+        std::vector<float*> data(_dataOptions.options().size(), nullptr);
+        for(int option : selectedOptions){
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+        }
+        
         int numValues = 0;
         while(getline(memorystream, line)){
             if(line.find("#") == 0){ //part of the header
@@ -281,7 +356,7 @@ float* DataPlane::readData(){
 
         if(numValues != _dimensions.x*_dimensions.y){
             LWARNING("Number of values read and expected are not the same");
-            return nullptr;
+            return std::vector<float*>();
         }
         
         // // FOR TESTING
@@ -291,11 +366,7 @@ float* DataPlane::readData(){
         // // ===========
         
         for(int i=0; i<numSelected; i++){
-            if(_useRGB.value() && numSelected <= 3){
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], numSelected);
-            } else {
-                processData(data, i, optionValues[i], min[i], max[i], sum[i], 1);
-            }
+            processData(data, selectedOptions[i], optionValues[i], min[i], max[i], sum[i]);
         }
         
         // // FOR TESTING
@@ -311,16 +382,17 @@ float* DataPlane::readData(){
 
         return data;
         
-    } else {
+    } 
+    else {
         LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
-        return nullptr;
+        return std::vector<float*>();
     }
 } 
 
-void DataPlane::processData(float* outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum, int numOutputChannels){
 
-
-
+void DataPlane::processData(std::vector<float*> outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum){
+    
+    float* output = outputData[inputChannel];
     // HISTOGRAM
     // number of levels/bins/values
     const int levels = 512;    
@@ -411,19 +483,9 @@ void DataPlane::processData(float* outputData, int inputChannel, std::vector<flo
             standardDeviation = newLevels[(int) standardDeviation];
         }
         
-        // Normalize values
-        // if(_useLog.value()){
-        //     v = normalizeWithLogarithm(v, logmean);
-        // }else{
-        v = normalizeWithStandardScore(v, mean, standardDeviation);
-        // }
-        
-        if(numOutputChannels == 1 && inputChannel > 0){
-            // take the average.
-            outputData[3*i+0] = ( outputData[3*i+0] * inputChannel + v ) / (inputChannel+1);
-        } else {            
-            outputData[3*i+inputChannel] += v;
-        }
+        v = normalizeWithStandardScore(v, mean, standardDeviation);         
+        output[i] += v;
+
     }
     
     // FOR TESTING
@@ -452,5 +514,21 @@ float DataPlane::normalizeWithLogarithm(float value, int logMean){
 
     float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
     return glm::clamp(logNormalized,0.0f, 1.0f);
+}
+
+void DataPlane::changeTransferFunctions(bool multiple){
+    _transferFunctions.clear();
+    std::string tfPath;
+    if(multiple){
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/red.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/blue.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/green.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    }else{
+        tfPath = "${OPENSPACE_DATA}/scene/iswa/transferfunctions/colormap_parula.jpg";
+        _transferFunctions.push_back(std::make_shared<TransferFunction>(tfPath));
+    }
 }
 }// namespace openspace

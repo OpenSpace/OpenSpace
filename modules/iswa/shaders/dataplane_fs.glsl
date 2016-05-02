@@ -22,8 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 uniform float time;
-uniform sampler2D texture1;
-uniform sampler2D tf;
+
+// uniform sampler2D texture1;
+uniform sampler2D textures[6];
+uniform sampler2D transferFunctions[6];
+// uniform sampler2D tf;
+// uniform sampler2D tfs[6];
+
+uniform int numTextures;
+uniform int numTransferFunctions;
+uniform bool averageValues;
+uniform vec2 backgroundValues;
 
 // uniform float background;
 
@@ -36,15 +45,48 @@ in vec4 vs_position;
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
-    vec4 diffuse;
+    vec4 transparent = vec4(0.0f);
+    vec4 diffuse = transparent;
+    float v = 0;
 
+    if(numTextures > numTransferFunctions){
+        for(int i=0; i<numTextures; i++){
+            v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+        }
+        v /= numTextures;
+
+        vec4 color = texture(transferFunctions[0], vec2(v,0));
+        float x = backgroundValues.x;
+        float y = backgroundValues.y;
+        if((v<(x+y)) && v>(x-y))
+            color = mix(transparent, color, abs(v-x));
+
+        diffuse = color;
+    }else{
+        for(int i=0; i<numTextures; i++){
+            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            vec4 color = texture(transferFunctions[i], vec2(v,0));
+            diffuse += color;
+        }
+    }
+    // diffuse += texture(textures[1], vec2(vs_st.s, 1-vs_st.t));
+    // diffuse += texture(textures[2], vec2(vs_st.s, 1-vs_st.t));
+            // diffuse += texture(tf, vec2(v,0));
+        // }
+    // }else{
+        // v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
+        // diffuse = texture(tf, vec2(v,0));
+    // }
+
+    // if(averageValues){
+        // diffuse /= numTextures;
+    // }
+    
     // diffuse = texture(tf, vec2(1-vs_st.s, 0));
     // diffuse = texture(tf, texture(texture1, vec2(vs_st.s,1-vs_st.t)).r);
-    float v = texture(texture1, vec2(vs_st.s, 1-vs_st.t)).r;
-    diffuse = texture(tf, vec2(v,0));
 
-    // if (diffuse.a <= 0.05)
-    //     discard;
+    if (diffuse.a <= backgroundValues.y)
+        discard;
 
     Fragment frag;
     frag.color = diffuse;

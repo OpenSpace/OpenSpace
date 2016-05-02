@@ -41,6 +41,7 @@
  private:
  	virtual bool loadTexture() override;
  	virtual bool updateTexture() override;
+ 	virtual void setUniforms() override;
 
 	static int id();
 

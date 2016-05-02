@@ -34,9 +34,9 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
-    , _texture(nullptr)
+    // , _texture(nullptr)
     , _memorybuffer("")
-    ,_transferFunction(nullptr)
+    // ,_transferFunction(nullptr)
 {
     _data = std::make_shared<Metadata>();
 
@@ -90,6 +90,9 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     // std::cout << std::to_string(_data->spatialScale) << std::endl;
 
     _delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
+
+    // _textures.push_back(nullptr);
+    // _transferFunctions.push_back(nullptr);
 }
 
 ISWACygnet::~ISWACygnet(){}
