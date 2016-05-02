@@ -78,7 +78,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         loadTexture();});
     _useLog.onChange([this](){loadTexture();});
     _useHistogram.onChange([this](){loadTexture();});
-    _dataOptions.onChange([this](){loadTexture();});
+    _dataOptions.onChange([this](){ loadTexture();} );
 
     _useMultipleTf.onChange([this](){
             changeTransferFunctions(_useMultipleTf.value());
@@ -359,18 +359,18 @@ std::vector<float*> DataPlane::readData(){
             return std::vector<float*>();
         }
         
-        // // FOR TESTING
-        // // ===========
+        // FOR TESTING
+        // ===========
         // std::chrono::time_point<std::chrono::system_clock> start, end;
         // start = std::chrono::system_clock::now();
-        // // ===========
-        
+        // ===========
+
         for(int i=0; i<numSelected; i++){
-            processData(data, selectedOptions[i], optionValues[i], min[i], max[i], sum[i]);
+            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
         }
         
-        // // FOR TESTING
-        // // ===========
+        // FOR TESTING
+        // ===========
         // end = std::chrono::system_clock::now();
         // _numOfBenchmarks++;
         // std::chrono::duration<double> elapsed_seconds = end-start;
@@ -378,7 +378,7 @@ std::vector<float*> DataPlane::readData(){
         // std::cout << " readData():" << std::endl;
         // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
         // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
-        // // ===========
+        // ===========
 
         return data;
         
@@ -390,9 +390,8 @@ std::vector<float*> DataPlane::readData(){
 } 
 
 
-void DataPlane::processData(std::vector<float*> outputData, int inputChannel, std::vector<float> inputData, float min, float max,float sum){
+void DataPlane::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     
-    float* output = outputData[inputChannel];
     // HISTOGRAM
     // number of levels/bins/values
     const int levels = 512;    
@@ -484,7 +483,7 @@ void DataPlane::processData(std::vector<float*> outputData, int inputChannel, st
         }
         
         v = normalizeWithStandardScore(v, mean, standardDeviation);         
-        output[i] += v;
+        outputData[i] += v;
 
     }
     
