@@ -30,7 +30,7 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/twmstileprovider.h>
+#include <modules/globebrowsing/other/tileprovider.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -56,26 +56,26 @@ namespace openspace {
 			Without the tile being smaller than the patch in lat-lon space.
 			The tile is at least as big as the patch.
 		*/
-		TileIndex getTileIndex(GeodeticPatch patch);
+		GeodeticTileIndex getTileIndex(const GeodeticPatch& patch);
 
 		/**
 			Returns a texture that can be used for the specified patch
 		*/
-		std::shared_ptr<Texture> getTile(GeodeticPatch patch);
+		std::shared_ptr<Texture> getTile(const GeodeticPatch& patch);
 
 		/**
 			Returns the texture for the given tile index. The indices reaches from left
 			to right and top to bottom while the texture coordinates and the latlon
 			coordinates reaches from left to right and bottom to top.
 		*/
-		std::shared_ptr<Texture> getTile(const TileIndex& tileIndex);
+		std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
 
 		/**
 			A tile can be defined with a tile index or a LatLonPatch which defines
 			the position and the size of the tile.
 		*/
 		GeodeticPatch getTilePositionAndScale(
-			const TileIndex& tileIndex);
+			const GeodeticTileIndex& tileIndex);
 
 		/**
 			A transformation (translation and scaling) from the texture space of a patch
@@ -83,7 +83,7 @@ namespace openspace {
 		*/
 		glm::mat3 getUvTransformationPatchToTile( 
 			GeodeticPatch patch,
-			const TileIndex& tileIndex);
+			const GeodeticTileIndex& tileIndex);
 
 		/**
 			Overloaded function

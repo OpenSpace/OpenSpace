@@ -25,10 +25,12 @@
 #ifndef __GDALDATACONVERTER_H__
 #define __GDALDATACONVERTER_H__
 
-#include <modules/globebrowsing/other/twmstileprovider.h>
+//#include <modules/globebrowsing/other/tileprovider.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+
+#include <modules/globebrowsing/geodetics/geodetic2.h>
 
 #include "gdal_priv.h"
 
@@ -36,27 +38,33 @@
 
 namespace openspace {
 
-	using namespace ghoul::opengl;
+    using namespace ghoul::opengl;
 
-	class GdalDataConverter
-	{
-	public:
-		GdalDataConverter();
-		~GdalDataConverter();
+    // forward declaration
+    class GeodeticTileIndex;
+    //class Geodetic2;
 
-		std::shared_ptr<Texture> convertToOpenGLTexture(
-			GDALDataset* dataSet,
-			const TileIndex& tileIndex,
-			int GLType);
+    class GdalDataConverter
+    {
+    public:
+        GdalDataConverter();
+        ~GdalDataConverter();
 
-	private:
-		struct TextureFormat
-		{
-			Texture::Format ghoulFormat;
-			GLuint glFormat;
-		};
-		TextureFormat getTextureFormatFromRasterCount(int rasterCount);
-	};
+        std::shared_ptr<Texture> convertToOpenGLTexture(
+            GDALDataset* dataSet,
+            const GeodeticTileIndex& tileIndex,
+            int GLType);
+
+        struct TextureFormat
+        {
+            Texture::Format ghoulFormat;
+            GLuint glFormat;
+        };
+
+        TextureFormat getTextureFormatFromRasterCount(int rasterCount);
+
+        glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
+    };
 
 } // namespace openspace
 

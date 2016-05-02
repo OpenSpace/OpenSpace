@@ -38,9 +38,9 @@ using namespace openspace;
 TEST_F(TWMSTileProviderTest, Simple) {
 
 	
-	TwmsTileProvider* tileProvider = new TwmsTileProvider();
+	TileProvider* tileProvider = new TileProvider();
 
-	TileIndex tileIndex = { 0, 0, 0 };
+	GeodeticTileIndex tileIndex = { 0, 0, 0 };
 	tileProvider->getTile(tileIndex);
 
 	using namespace std::chrono_literals;

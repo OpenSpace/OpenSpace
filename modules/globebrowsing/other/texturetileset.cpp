@@ -53,19 +53,23 @@ namespace openspace {
         , _depth(depth)
     {
         
-        /*
+
+
         // Read using GDAL
 
+        //std::string testFile = absPath("map_service_configs/TERRA_CR_B143_2016-04-12.wms");
+        //std::string testFile = absPath("map_service_configs/TERRAIN.wms");
         std::string testFile = absPath("textures/earth_bluemarble.jpg");
 
         
         GDALDataset  *poDataset;
         GDALAllRegister();
         poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
-        ghoul_assert(poDataset != NULL, "Unable to read dataset" << testFile);
+
+        assert(poDataset != nullptr, "Unable to read dataset" << testFile);
         GdalDataConverter conv;
 
-        TileIndex ti;
+        GeodeticTileIndex ti;
         ti.x = 0;
         ti.y = 0;
         ti.level = 0;
@@ -73,9 +77,9 @@ namespace openspace {
 
         _testTexture->uploadTexture();
         _testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        */
+
         
-        
+        /*        
         // Set e texture to test
         std::string fileName = "textures/earth_bluemarble.jpg";
         //std::string fileName = "../../../build/tiles/tile5_8_12.png";
@@ -91,14 +95,15 @@ namespace openspace {
             //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             _testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
-        
+
+        */
     }
 
     TextureTileSet::~TextureTileSet(){
 
     }
 
-    TileIndex TextureTileSet::getTileIndex(GeodeticPatch patch) {
+    GeodeticTileIndex TextureTileSet::getTileIndex(const GeodeticPatch& patch) {
         // Calculate the level of the index depanding on the size of the incoming patch.
         // The level is as big as possible (as far down as possible) but it can't be
         // too big since at maximum four tiles should be used to cover a patch
@@ -119,20 +124,20 @@ namespace openspace {
         tileIndexXY.y *= -1;
 
         // Create the tileindex
-        TileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
+        GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
         return tileIndex;
     }
 
-    std::shared_ptr<Texture> TextureTileSet::getTile(GeodeticPatch patch) {
+    std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticPatch& patch) {
         return getTile(getTileIndex(patch));
     }
 
-    std::shared_ptr<Texture> TextureTileSet::getTile(const TileIndex& tileIndex) {
+    std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticTileIndex& tileIndex) {
         return _testTexture;
     }
 
     GeodeticPatch TextureTileSet::getTilePositionAndScale(
-        const TileIndex& tileIndex) {
+        const GeodeticTileIndex& tileIndex) {
         Geodetic2 tileSize = Geodetic2(
             _sizeLevel0.lat / pow(2, tileIndex.level),
             _sizeLevel0.lon / pow(2, tileIndex.level));
@@ -147,7 +152,7 @@ namespace openspace {
 
     glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
         GeodeticPatch patch,
-        const TileIndex& tileIndex)
+        const GeodeticTileIndex& tileIndex)
     {
         GeodeticPatch tile = getTilePositionAndScale(tileIndex);
         return getUvTransformationPatchToTile(patch, tile);
@@ -162,8 +167,8 @@ namespace openspace {
             tile.southWestCorner().toLonLatVec2();
 
         glm::mat3 invTileScale = glm::mat3(
-        {	1 / (tile.halfSize().lon * 2),	0,								0,
-            0,								1 / (tile.halfSize().lat * 2),	0,
+        {	1 / (tile.size().lon),	        0,								0,
+            0,								1 / (tile.size().lat),          0,
             0,								0,								1 });
 
         glm::mat3 globalTranslation = glm::mat3(

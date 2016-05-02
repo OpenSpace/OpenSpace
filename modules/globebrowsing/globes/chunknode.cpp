@@ -120,11 +120,12 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
     if (isLeaf()) {
         if (_isVisible) {
-            TileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
+            GeodeticTileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
 
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
             patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), ti);
+            //patchRenderer.renderPatch(_patch, data, _owner.ellipsoid());
             ChunkNode::renderedPatches++;
         }
     }
@@ -208,15 +209,17 @@ void ChunkNode::split(int depth) {
         Geodetic2 qs = Geodetic2(0.5 * hs.lat, 0.5 * hs.lon);
 
         // Subdivide bounds
+
         GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs);
-        GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs);
-        GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs);
+        GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs);
+        GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs);
         GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs);
 
         // Create new chunk nodes
+
         _children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));
-        _children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, neBounds, this));
         _children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, swBounds, this));
+        _children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, neBounds, this));
         _children[Quad::SOUTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, seBounds, this));
     }
 

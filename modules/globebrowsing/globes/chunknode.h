@@ -54,6 +54,9 @@ enum Quad {
 struct ChunkIndex {
     int x, y, level;
 
+
+    // TODO : NOT SURE WHAT IS RIGHT BUT I SWITCHED THE TWO MIDDLE INDICES FOR IT TO WORK
+
     std::vector<ChunkIndex> childIndices() const {
         return {
             { 2 * x + 0, 2 * y + 0, level + 1 },
@@ -89,28 +92,28 @@ public:
 
 private:
 
-	void internalRender(const RenderData& data, ChunkIndex&);
-	bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
+    void internalRender(const RenderData& data, ChunkIndex&);
+    bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
 
-	/**
-	Uses horizon culling, frustum culling and distance to camera to determine a
-	desired level.
-	In the current implementation of the horizon culling and the distance to the
-	camera, the closer the ellipsoid is to a
-	sphere, the better this will make the splitting. Using the minimum radius to
-	be safe. This means that if the ellipsoid has high difference between radii,
-	splitting might accur even though it is not needed.
-	*/
-	int calculateDesiredLevelAndUpdateIsVisible(
-		const RenderData& data,
-		const ChunkIndex& traverseData);
-	
-	
-	ChunkNode* _parent;
-	std::unique_ptr<ChunkNode> _children[4];    
+    /**
+    Uses horizon culling, frustum culling and distance to camera to determine a
+    desired level.
+    In the current implementation of the horizon culling and the distance to the
+    camera, the closer the ellipsoid is to a
+    sphere, the better this will make the splitting. Using the minimum radius to
+    be safe. This means that if the ellipsoid has high difference between radii,
+    splitting might accur even though it is not needed.
+    */
+    int calculateDesiredLevelAndUpdateIsVisible(
+        const RenderData& data,
+        const ChunkIndex& traverseData);
+    
+    
+    ChunkNode* _parent;
+    std::unique_ptr<ChunkNode> _children[4];    
     ChunkLodGlobe& _owner;
     GeodeticPatch _patch;
-	bool _isVisible;
+    bool _isVisible;
 };
 
 } // namespace openspace
