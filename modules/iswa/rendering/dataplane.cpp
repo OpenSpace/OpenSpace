@@ -54,6 +54,8 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setName(name);
 
+    registerProperties();
+
     addProperty(_useLog);
     addProperty(_useHistogram);
     addProperty(_normValues);
@@ -61,15 +63,15 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    registerProperties();
+    if(_data->groupId < 0){
+        OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
+        OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
+        OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
+        OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
+        OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
+    }
 
-    OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
-    OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-    OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
-    OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
-    OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
-    OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
-    
     _normValues.onChange([this](){
         // FOR TESTING (should be done on all onChange)
         // _avgBenchmarkTime = 0.0;
@@ -83,6 +85,8 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _transferFunctionsFile.onChange([this](){
         setTransferFunctions(_transferFunctionsFile.value());
     });
+
+
 }
 
 DataPlane::~DataPlane(){}
@@ -114,11 +118,18 @@ bool DataPlane::initialize(){
     // }
 
     // _textures.push_back(nullptr);
+    ISWAManager::ref().registerToGroup(_data->groupId, this, "data");
+
 
     return isReady();
 }
 
 bool DataPlane::deinitialize(){
+
+    if(_data->groupId > 0)
+        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
+
+
     unregisterProperties();
     destroyPlane();
     destroyShader();
@@ -281,8 +292,12 @@ void DataPlane::readHeader(){
                         }
                     }
 
-                    std::vector<int> v(1,0);
-                    _dataOptions.setValue(v);
+                    
+                    _dataOptions.setValue(std::vector<int>(1,0));
+
+                    if(_data->groupId > 0)
+                        ISWAManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
+                    
                 }
             }else{
                 break;

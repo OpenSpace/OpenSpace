@@ -48,9 +48,11 @@
 
 
 namespace openspace{
+class ISWAGroup;
 
 struct Metadata {
     int id;
+    int groupId;
     int updateTime;
     std::string path;
     std::string parent;
@@ -66,7 +68,9 @@ struct Metadata {
 
 
 
-class ISWACygnet : public Renderable{
+class ISWACygnet : public Renderable, public std::enable_shared_from_this<ISWACygnet> {
+    friend class ISWAGroup;
+
 public:
     ISWACygnet(const ghoul::Dictionary& dictionary);
     ~ISWACygnet();
@@ -79,6 +83,8 @@ protected:
     void unregisterProperties();
     void initializeTime();
     
+    void enabled(bool enabled){_enabled.setValue(enabled);};
+
     properties::TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
@@ -97,6 +103,8 @@ protected:
     int _minRealTimeUpdateInterval;
 
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
+
+
 };
 
 }//namespace openspace

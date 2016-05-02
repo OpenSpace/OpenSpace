@@ -86,7 +86,7 @@ namespace openspace{
             _metadataFutures.push_back(metadataFuture);
         }else{ 
             //create kameleonplane
-            createKameleonPlane(info);
+            createKameleonPlane(info, -1);
         } 
     }
 
@@ -129,9 +129,9 @@ namespace openspace{
         for (auto it = _metadataFutures.begin(); it != _metadataFutures.end(); ){
             if((*it)->isFinished) {
                 if((*it)->type == "TEXTURE"){
-                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"));
+                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"), -1);
                 }else if ((*it)->type == "DATA"){
-                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"));
+                    createPlane((*it)->id,(*it)->json,std::string("DataPlane"), 1);
                 } else {
                     LERROR("\""+ (*it)->type + "\" is not a valid type");
                 }
@@ -184,7 +184,7 @@ namespace openspace{
     }
 
 
-    std::string ISWAManager::parseJSONToLuaTable(int id, std::string jsonString, std::string type){
+    std::string ISWAManager::parseJSONToLuaTable(int id, std::string name, std::string jsonString, std::string type, int group){
         if(jsonString != ""){
             json j = json::parse(jsonString);
 
@@ -215,7 +215,7 @@ namespace openspace{
             }
 
             std::string table = "{"
-            "Name = '" + type + std::to_string(id) +"' , "
+            "Name = '" + name +"' , "
             "Parent = '" + parent + "', "
             "Renderable = {"    
                 "Type = '" + type + "', "
@@ -226,6 +226,7 @@ namespace openspace{
                 "SpatialScale = " + std::to_string(spatialScale) + ", "
                 "UpdateTime = " + std::to_string(updateTime) + ", "
                 "CoordinateType = '" + coordinateType + "', "
+                "Group = "+ std::to_string(group) + " ,"
                 "}"
             "}";
             
@@ -234,7 +235,7 @@ namespace openspace{
         return "";
     }
 
-    std::string ISWAManager::parseKWToLuaTable(std::string kwPath){
+    std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
         if(kwPath != ""){
             const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
             if(extension == "cdf"){
@@ -277,6 +278,7 @@ namespace openspace{
                         "kwPath = '" + kwPath + "' ," 
                         "axisCut = 'y' ,"
                         "CoordinateType = '" + coordinateType + "', "
+                        "Group = "+ std::to_string(group) + " ,"
                         "}"
                     "}"
                     ;
@@ -288,16 +290,18 @@ namespace openspace{
     }
 
 
-    void ISWAManager::createPlane(int id, std::string json, std::string type){
-
+    void ISWAManager::createPlane(int id, std::string json, std::string type, int group){
         // check if this plane already exist
         std::string name = type + std::to_string(id); 
+        if(group > 0)
+            name += "_Group" + std::to_string(group);
+
         if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
             LERROR("A node with name \"" + name +"\" already exist");
             return;
         }
 
-        std::string luaTable = parseJSONToLuaTable(id, json, type);
+        std::string luaTable = parseJSONToLuaTable(id, name, json, type, group);
         if(luaTable != ""){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             OsEng.scriptEngine().queueScript(script);
@@ -308,12 +312,12 @@ namespace openspace{
         OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id));
     }
 
-    void ISWAManager::createKameleonPlane(std::string kwPath){
+    void ISWAManager::createKameleonPlane(std::string kwPath, int group){
         kwPath = "${OPENSPACE_DATA}/" + kwPath;
         const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
 
         if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
-            std::string luaTable = parseKWToLuaTable(kwPath);
+            std::string luaTable = parseKWToLuaTable(kwPath, group);
             if(!luaTable.empty()){
                 std::cout << luaTable << std::endl;
                 std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
@@ -323,4 +327,37 @@ namespace openspace{
             LWARNING( kwPath + " is not a cdf file or can't be found.");
         }
     }
+
+    void ISWAManager::registerToGroup(int id, ISWACygnet* cygnet, std::string type){
+        if(_groups.find(id) != _groups.end()){
+            _groups[id]->registerCygnet(cygnet, type);
+        }else{
+            _groups.insert(std::pair<int, std::shared_ptr<ISWAGroup>>(id, std::make_shared<ISWAGroup>(id, type)));
+            _groups[id]->registerCygnet(cygnet, type);
+        }
+
+    }
+
+    void ISWAManager::unregisterFromGroup(int id, ISWACygnet* cygnet){
+        if(_groups.find(id) != _groups.end()){
+            _groups[id]->unregisterCygnet(cygnet);
+        }
+    }
+
+    std::shared_ptr<ISWAGroup> ISWAManager::iSWAGroup(std::string name){
+        for(auto group : _groups){
+            if(group.second->name() == name){
+                return group.second;
+            }
+        }
+
+        return nullptr;
+    }
+
+    void ISWAManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
+        if(_groups.find(id) != _groups.end()){
+            _groups[id]->registerOptions(options);
+        }
+    }
+
 }// namsepace openspace

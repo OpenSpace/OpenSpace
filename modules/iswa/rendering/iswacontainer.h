@@ -28,7 +28,6 @@
 
 
 namespace openspace{
-class ISWACygnet;
 struct ExtensionFuture;
 
 class ISWAContainer : public Renderable{

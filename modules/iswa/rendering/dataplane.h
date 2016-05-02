@@ -30,11 +30,12 @@
 #include <openspace/properties/vectorproperty.h>
 #include <modules/iswa/rendering/colorbar.h>
 #include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/optionproperty.h>
 
 namespace openspace{
- 
+class ISWAGroup;
+
 class DataPlane : public CygnetPlane {
+friend class ISWAGroup;
  public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
@@ -43,7 +44,17 @@ class DataPlane : public CygnetPlane {
     virtual bool deinitialize() override;
     // virtual void render(const RenderData& data) override; //moved to cygnetPlane
     // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
- 
+
+ protected:
+    void transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+    void normValues(glm::vec2 normValues){ _normValues.setValue(normValues); };
+    void backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
+    void useLog(bool useLog){ _useLog.setValue(useLog); };
+    void useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
+    void dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+
+    // const std::vector<openspace::properties::SelectionProperty::Option>& dataOptions() const {return _dataOptions.options(); };
+
  private:
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
@@ -64,7 +75,7 @@ class DataPlane : public CygnetPlane {
     float normalizeWithStandardScore(float value, float mean, float sd);
     float normalizeWithLogarithm(float value, int logMean);
 
-    void setTransferFunctions(std::string id);
+    void setTransferFunctions(std::string tfPath);
 
     properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;
@@ -72,14 +83,7 @@ class DataPlane : public CygnetPlane {
     properties::Vec2Property _backgroundValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
-    // properties::BoolProperty _useMultipleTf;
-    // properties::BoolProperty _averageValues;
 
-
-    // properties::Vec4Property _topColor;
-    // properties::Vec4Property _midColor;
-    // properties::Vec4Property _botColor;
-    // properties::Vec2Property _tfValues;
     
     glm::size3_t _dimensions;
     // std::shared_ptr<ColorBar> _colorbar;

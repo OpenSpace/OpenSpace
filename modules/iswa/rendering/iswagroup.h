@@ -21,69 +21,47 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __ISWAMANAGER_H__
-#define __ISWAMANAGER_H__
 
-#include <ghoul/designpattern/singleton.h>
-#include <modules/iswa/rendering/iswagroup.h>
-#include <memory>
-#include <map>
-#include <openspace/engine/downloadmanager.h>
-#include <ghoul/glm.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/rendering/renderable.h>
+#ifndef __ISWAGROUP_H__
+#define __ISWAGROUP_H__
+
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/openspaceengine.h>
 
-namespace openspace {
+namespace openspace{
 class ISWACygnet;
-class ISWAGroup;
 
-struct MetadataFuture {
-    int id;
-    std::string type;
-    std::string json;
-    bool isFinished;
-};
-
-
-class ISWAManager : public ghoul::Singleton<ISWAManager> {
-    friend class ghoul::Singleton<ISWAManager>;
-
+class ISWAGroup : public properties::PropertyOwner{
 public:
-
-    ISWAManager();
-    ~ISWAManager();
-
-    void addISWACygnet(std::string info);
-    void addISWACygnet(int id, std::string info = "TEXTURE");
-    void deleteISWACygnet(std::string);
-
-    // std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
-    std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
-    std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
-
-    void update();
-
-    void registerToGroup(int id, ISWACygnet* cygnet, std::string type);
-    void unregisterFromGroup(int id, ISWACygnet* cygnet);
-    void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
-    std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);
-
+	ISWAGroup(int id, std::string type);
+	~ISWAGroup();
+	void registerCygnet(ISWACygnet* cygnet, std::string type);
+	void unregisterCygnet(ISWACygnet* cygnet);
+	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
 private:
-    std::string iSWAurl(int id, std::string type = "image");
-    std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string parseJSONToLuaTable(int id, std::string name, std::string json, std::string type, int group);
-    std::string parseKWToLuaTable(std::string kwPath, int group);
+	properties::BoolProperty _enabled;
 
-    void createPlane(int id, std::string json, std::string type, int group);
-    void createScreenSpace(int id);
-    void createKameleonPlane(std::string kwPath, int group); 
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::Vec2Property _normValues;
+    properties::Vec2Property _backgroundValues;
+    properties::StringProperty _transferFunctionsFile;
+	properties::SelectionProperty _dataOptions;
+	// properties::SelectionProperty _dataOptions;
+ //    properties::StringProperty _transferFunctionsFile;
+ //    properties::Vec2Property _normValues;
+ //    properties::Vec2Property _backgroundValues;
+ //    properties::BoolProperty _useLog;
+ //    properties::BoolProperty _useHistogram;;
 
-    std::map<std::string, std::string> _month;
-    std::vector<std::shared_ptr<MetadataFuture>> _metadataFutures;
-
-    std::map<int, std::shared_ptr<ISWAGroup>> _groups;
+	// int groupId;
+	// ISWACygnet cygnet;
+	std::vector<ISWACygnet* > _cygnets;
+	std::string _type;
 };
 
 } //namespace openspace
-#endif //__ISWAMANAGER_H__
+#endif

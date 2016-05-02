@@ -49,7 +49,7 @@ Fragment getFragment() {
     vec4 diffuse = transparent;
     float v = 0;
 
-    if(numTextures > numTransferFunctions){
+    if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
         for(int i=0; i<numTextures; i++){
             v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
         }

@@ -83,6 +83,12 @@ properties::Property* property(const std::string& uri) {
             properties::Property* property = ssr->property(remainingUri);
             return property;
         }
+
+        std::shared_ptr<ISWAGroup> group = ISWAManager::ref().iSWAGroup(nameUri);
+        if(group){
+            properties::Property* property = group->property(remainingUri);
+            return property;
+        }
         
         LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
         return nullptr;
