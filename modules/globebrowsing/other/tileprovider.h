@@ -40,53 +40,36 @@
 #include <modules/globebrowsing/other/gdaldataconverter.h>
 
 
-
-
-
-
-
-/*
 namespace openspace {
-    
-    using namespace ghoul::opengl;
 
-    struct TextureLoadJob : public Job<Texture> {
-        TextureLoadJob(const std::string& filePath, HashKey hashkey)
-        : _filePath(filePath)
-        , _hashkey(hashkey){
-            
+
+    struct UninitializedTextureTile {
+        UninitializedTextureTile(GLubyte* data, glm::uvec3 dims,
+            GdalDataConverter::TextureFormat format, const GeodeticTileIndex& ti) 
+        : imageData(data)
+        , dimensions(dims)
+        , texFormat(format)
+        , tileIndex(ti){
+
         }
 
-        virtual ~TextureLoadJob() { }
 
-        virtual void execute() {
-        
-            auto textureReader = ghoul::io::TextureReader::ref();
-            _texture = std::move(textureReader.loadTexture(absPath(_filePath)));
-        
-        }
-        
-        virtual std::shared_ptr<Texture> product() {
-            return _texture;
-        }
-        
-        HashKey hashKey() { return _hashkey; }
-
-
-    private:
-        std::string _filePath;
-        HashKey _hashkey;
-        std::shared_ptr<Texture> _texture;
+        GLubyte * imageData;
+        glm::uvec3 dimensions;
+        GdalDataConverter::TextureFormat texFormat;
+        const GeodeticTileIndex tileIndex;
     };
+
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //									TILE PROVIDER									    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-
 namespace openspace {
+
+
+
     using namespace ghoul::opengl;
 
     class TileProvider {
@@ -101,7 +84,10 @@ namespace openspace {
 
     private:
 
-        std::shared_ptr<Texture> getTileInternal(const GeodeticTileIndex& tileIndex, int GLType);
+        friend class TextureTileLoadJob;
+
+        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(const GeodeticTileIndex& tileIndex);
+        std::shared_ptr<Texture> initializeTexture(std::shared_ptr<UninitializedTextureTile> uninitedTexture);
 
 
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
@@ -113,10 +99,39 @@ namespace openspace {
         GDALDataset* _gdalDataSet;
         GdalDataConverter _converter;
 
-        
+        ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
 
     };
 
 }  // namespace openspace
+
+namespace openspace {
+
+    using namespace ghoul::opengl;
+
+    struct TextureTileLoadJob : public Job<UninitializedTextureTile> {
+        TextureTileLoadJob(TileProvider * tileProvider, const GeodeticTileIndex& tileIndex)
+            : _tileProvider(tileProvider)
+            , _tileIndex(tileIndex) {
+
+        }
+
+        virtual ~TextureTileLoadJob() { }
+
+        virtual void execute() {
+            _uninitedTexture = _tileProvider->getUninitializedTextureTile(_tileIndex);
+        }
+
+        virtual std::shared_ptr<UninitializedTextureTile> product() {
+            return _uninitedTexture;
+        }
+
+
+    private:
+        GeodeticTileIndex _tileIndex;
+        TileProvider * _tileProvider;
+        std::shared_ptr<UninitializedTextureTile> _uninitedTexture;
+    };
+}
 
 #endif  // __TILE_PROVIDER_H__

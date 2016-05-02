@@ -189,7 +189,7 @@ namespace openspace {
     }
 
     void ClipMapPatchRenderer::update() {
-
+        _tileProvider.prerender();
     }
 
 
@@ -236,14 +236,27 @@ namespace openspace {
 
         // Get the textures that should be used for rendering
         GeodeticTileIndex tileIndex00 = _patchCoverageProvider.getTileIndex(newPatch);
-        GeodeticTileIndex tileIndex10 = tileIndex00; tileIndex10.x += 1;
-        GeodeticTileIndex tileIndex01 = tileIndex00; tileIndex01.y += 1;
-        GeodeticTileIndex tileIndex11 = tileIndex00; tileIndex11.x += 1; tileIndex11.y += 1;
+        GeodeticTileIndex tileIndex10 = { tileIndex00.x + 1, tileIndex00.y, tileIndex00.level };
+        GeodeticTileIndex tileIndex01 = { tileIndex00.x, tileIndex00.y + 1, tileIndex00.level };
+        GeodeticTileIndex tileIndex11 = { tileIndex00.x + 1, tileIndex00.y + 1, tileIndex00.level };
 
         std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileProvider.getTile(tileIndex00);
         std::shared_ptr<ghoul::opengl::Texture> tile10 = _tileProvider.getTile(tileIndex10);
         std::shared_ptr<ghoul::opengl::Texture> tile01 = _tileProvider.getTile(tileIndex01);
         std::shared_ptr<ghoul::opengl::Texture> tile11 = _tileProvider.getTile(tileIndex11);
+        
+        if (tile00 == nullptr) {
+            tile00 = _tileSet.getTile(tileIndex00);
+        }
+        if (tile10 == nullptr) {
+            tile10 = _tileSet.getTile(tileIndex01);
+        }
+        if (tile01 == nullptr) {
+            tile01 = _tileSet.getTile(tileIndex10);
+        }
+        if (tile11 == nullptr) {
+            tile11 = _tileSet.getTile(tileIndex11);
+        }
 
         glm::mat3 uvTransform00 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex00);
         glm::mat3 uvTransform10 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex10);
@@ -252,6 +265,8 @@ namespace openspace {
 
         //std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
         
+
+
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit00;
         texUnit00.activate();

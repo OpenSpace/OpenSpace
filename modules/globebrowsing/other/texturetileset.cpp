@@ -69,10 +69,8 @@ namespace openspace {
         assert(poDataset != nullptr, "Unable to read dataset" << testFile);
         GdalDataConverter conv;
 
-        GeodeticTileIndex ti;
-        ti.x = 0;
-        ti.y = 0;
-        ti.level = 0;
+        GeodeticTileIndex ti(0, 0, 0);
+        
         _testTexture = conv.convertToOpenGLTexture(poDataset, ti, GL_UNSIGNED_BYTE);
 
         _testTexture->uploadTexture();

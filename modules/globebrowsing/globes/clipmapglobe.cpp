@@ -41,59 +41,60 @@
 
 
 namespace {
-	const std::string _loggerCat = "ClipMapGlobe";
+    const std::string _loggerCat = "ClipMapGlobe";
 }
 
 namespace openspace {
-	ClipMapGlobe::ClipMapGlobe(const Ellipsoid& ellipsoid)
-		: _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
-		, _ellipsoid(ellipsoid)
-	{
-		// init Renderer
-		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
-		_outerPatchRenderer.reset(outerPatchRenderer);
-		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
-		_innerPatchRenderer.reset(innerPatchRenderer);
-	}
+    ClipMapGlobe::ClipMapGlobe(const Ellipsoid& ellipsoid)
+        : _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
+        , _ellipsoid(ellipsoid)
+    {
+        // init Renderer
+        auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
+        _outerPatchRenderer.reset(outerPatchRenderer);
+        auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
+        _innerPatchRenderer.reset(innerPatchRenderer);
+    }
 
-	ClipMapGlobe::~ClipMapGlobe() {
-	}
-	
-	const Ellipsoid& ClipMapGlobe::ellipsoid() const
-	{
-		return _ellipsoid;
-	}
+    ClipMapGlobe::~ClipMapGlobe() {
+    }
+    
+    const Ellipsoid& ClipMapGlobe::ellipsoid() const
+    {
+        return _ellipsoid;
+    }
 
-	bool ClipMapGlobe::initialize() {
-		return isReady();
-	}
+    bool ClipMapGlobe::initialize() {
+        return isReady();
+    }
 
-	bool ClipMapGlobe::deinitialize() {
-		return true;
-	}
+    bool ClipMapGlobe::deinitialize() {
+        return true;
+    }
 
-	bool ClipMapGlobe::isReady() const {
-		bool ready = true; 
-		return ready;
-	}
+    bool ClipMapGlobe::isReady() const {
+        bool ready = true; 
+        return ready;
+    }
 
-	void ClipMapGlobe::render(const RenderData& data)
-	{
-		// TODO : Choose the max depth and the min depth depending on the camera
-		int maxDepth = 10;
-		int minDepth = 0;
-		// render patches
-		for (size_t i = minDepth; i < maxDepth; i++)
-		{
-			Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
-			_outerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
-		}
-		Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
-		_innerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
-	}
+    void ClipMapGlobe::render(const RenderData& data)
+    {
+        // TODO : Choose the max depth and the min depth depending on the camera
+        int maxDepth = 5;
+        int minDepth = 0;
+        // render patches
+        for (size_t i = minDepth; i < maxDepth; i++)
+        {
+            Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(i);
+            _outerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
+        }
+        Geodetic2 patchSize = _clipMapPyramid.getPatchSizeAtLevel(maxDepth);
+        _innerPatchRenderer->renderPatch(patchSize, data, _ellipsoid);
+    }
 
-	void ClipMapGlobe::update(const UpdateData& data) {
-		
-	}
+    void ClipMapGlobe::update(const UpdateData& data) {
+        _innerPatchRenderer->update();
+        _outerPatchRenderer->update();
+    }
 
 }  // namespace openspace
