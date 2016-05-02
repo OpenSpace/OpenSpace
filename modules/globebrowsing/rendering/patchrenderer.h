@@ -112,6 +112,7 @@ namespace openspace {
 
         
     private:
+        TileProvider _tileProvider;
         shared_ptr<ClipMapGrid> _grid;
     };
 

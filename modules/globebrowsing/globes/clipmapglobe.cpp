@@ -52,7 +52,7 @@ namespace openspace {
 		// init Renderer
 		auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
 		_outerPatchRenderer.reset(outerPatchRenderer);
-		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
+		auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256 )));
 		_innerPatchRenderer.reset(innerPatchRenderer);
 	}
 

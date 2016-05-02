@@ -56,7 +56,7 @@ namespace openspace {
     //							PATCH RENDERER											//
     //////////////////////////////////////////////////////////////////////////////////////
     PatchRenderer::PatchRenderer()
-        : _tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, -M_PI), 0)
+        : _tileSet(Geodetic2(M_PI, M_PI * 2), Geodetic2(M_PI / 2, -M_PI), 1)
     {
 
     }
@@ -175,6 +175,7 @@ namespace openspace {
     ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid)
         : PatchRenderer()
         , _grid(grid)
+        , _tileProvider("map_service_configs/TERRAIN.wms", 5000)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -235,9 +236,12 @@ namespace openspace {
         // Get the textures that should be used for rendering
         GeodeticTileIndex tileIndex = _tileSet.getTileIndex(newPatch);
         GeodeticPatch tilePatch = _tileSet.getTilePositionAndScale(tileIndex);
-        std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
+
+        std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileProvider.getTile(tileIndex);
         glm::mat3 uvTransform = _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
 
+        //std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
+        
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit;
         texUnit.activate();
