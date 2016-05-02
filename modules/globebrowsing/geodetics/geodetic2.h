@@ -31,6 +31,7 @@
 #include <ostream>
 
 
+
 // Using double precision
 typedef double Scalar;
 typedef glm::dvec2 Vec2;
@@ -38,98 +39,135 @@ typedef glm::dvec3 Vec3;
 
 namespace openspace {
 
-	// Forward declaration
-	class Ellipsoid;
+    // Forward declaration
+    class Ellipsoid;
 
 struct Geodetic2 {
-	Geodetic2();
-	Geodetic2(Scalar latitude, Scalar longitude);
-	Geodetic2(const Geodetic2& src);
-	
-	/*
-	static Geodetic2 fromCartesian(const Vec3& v);
-	Vec3 asUnitCartesian() const;
-	*/
+    Geodetic2();
+    Geodetic2(Scalar latitude, Scalar longitude);
+    Geodetic2(const Geodetic2& src);
 
-	Vec2 toLonLatVec2() const;
+    
+    /*
+    static Geodetic2 fromCartesian(const Vec3& v);
+    Vec3 asUnitCartesian() const;
+    */
 
-	inline bool operator==(const Geodetic2& other) const;
-	inline bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
 
-	inline Geodetic2 operator+(const Geodetic2& other) const;
-	inline Geodetic2 operator-(const Geodetic2& other) const;
-	inline Geodetic2 operator*(Scalar scalar) const;
-	inline Geodetic2 operator/(Scalar scalar) const;
 
-	Scalar lat;
-	Scalar lon;
+    Vec2 toLonLatVec2() const;
+
+    bool operator==(const Geodetic2& other) const;
+    bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
+
+    Geodetic2 operator+(const Geodetic2& other) const;
+    Geodetic2 operator-(const Geodetic2& other) const;
+    Geodetic2 operator*(Scalar scalar) const;
+    Geodetic2 operator/(Scalar scalar) const;
+
+    Scalar lat;
+    Scalar lon;
 };
+
+
 
 struct Geodetic3 {
-	Geodetic2 geodetic2;
-	Scalar height;
+    Geodetic2 geodetic2;
+    Scalar height;
 };
 
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//									TILE INDEX										//
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+    
+using HashKey = unsigned long;
+
+
+struct GeodeticTileIndex {
+
+
+    int x, y, level;
+
+    HashKey hashKey() const;
+};
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//							 	GEODETICPATCH										//
+//////////////////////////////////////////////////////////////////////////////////////
 class GeodeticPatch {
 public:
-	GeodeticPatch(
-		Scalar centerLat,
-		Scalar centerLon,
-		Scalar halfSizeLat,
-		Scalar halfSizeLon);
-	GeodeticPatch(
-		const Geodetic2& center,
-		const Geodetic2& halfSize);
-	GeodeticPatch(const GeodeticPatch& patch);
+    GeodeticPatch(
+        Scalar centerLat,
+        Scalar centerLon,
+        Scalar halfSizeLat,
+        Scalar halfSizeLon);
 
-	void setCenter(const Geodetic2&);
-	void setHalfSize(const Geodetic2&);	
+    GeodeticPatch(
+        const Geodetic2& center,
+        const Geodetic2& halfSize);
 
-	/**
-		Returns the minimal bounding radius that together with the LatLonPatch's
-		center point represents a sphere in which the patch is completely contained.
-		
-		TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
-		A PART OF AN ELLIPSOID AND NOT A SPHERE! MUST CHECK IF THIS FUNCTION IS STILL
-		VALID.
-	*/
-	Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
+    GeodeticPatch(const GeodeticPatch& patch);
 
-	/**
-		Returns the area of the patch with unit radius
-	*/
-	// Scalar unitArea() const;
+    GeodeticPatch::GeodeticPatch(const GeodeticTileIndex& tileIndex);
 
 
-	Geodetic2 northWestCorner() const;
-	Geodetic2 northEastCorner() const;
-	Geodetic2 southWestCorner() const;
-	Geodetic2 southEastCorner() const;
+    void setCenter(const Geodetic2&);
+    void setHalfSize(const Geodetic2&);	
 
-	/**
-	 * Clamps a point to the patch region
-	 */
-	Geodetic2 clamp(const Geodetic2& p) const;
+    /**
+        Returns the minimal bounding radius that together with the LatLonPatch's
+        center point represents a sphere in which the patch is completely contained.
+        
+        TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
+        A PART OF AN ELLIPSOID AND NOT A SPHERE! MUST CHECK IF THIS FUNCTION IS STILL
+        VALID.
+    */
+    Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
 
-	/**
-	 * Returns the corner of the patch that is closest to the given point p
-	 */
-	Geodetic2 closestCorner(const Geodetic2& p) const;
+    /**
+        Returns the area of the patch with unit radius
+    */
+    // Scalar unitArea() const;
 
-	/**
-	 * Returns a point on the patch that minimizes the great-circle distance to
-	 * the given point p.
-	 */
-	Geodetic2 closestPoint(const Geodetic2& p) const;
-	
 
-	const Geodetic2& center() const;
-	const Geodetic2& halfSize() const;
-	Geodetic2 size() const;
+    Geodetic2 northWestCorner() const;
+    Geodetic2 northEastCorner() const;
+    Geodetic2 southWestCorner() const;
+    Geodetic2 southEastCorner() const;
+
+    /**
+     * Clamps a point to the patch region
+     */
+    Geodetic2 clamp(const Geodetic2& p) const;
+
+    /**
+     * Returns the corner of the patch that is closest to the given point p
+     */
+    Geodetic2 closestCorner(const Geodetic2& p) const;
+
+    /**
+     * Returns a point on the patch that minimizes the great-circle distance to
+     * the given point p.
+     */
+    Geodetic2 closestPoint(const Geodetic2& p) const;
+    
+
+    const Geodetic2& center() const;
+    const Geodetic2& halfSize() const;
+    Geodetic2 size() const;
 
 private:
-	Geodetic2 _center;
-	Geodetic2 _halfSize;
+    Geodetic2 _center;
+    Geodetic2 _halfSize;
 };
 
 } // namespace openspace

@@ -60,6 +60,7 @@ namespace openspace {
         PatchRenderer();
         ~PatchRenderer();
 
+
     protected:
 
         unique_ptr<ProgramObject> _programObject;
@@ -102,10 +103,14 @@ namespace openspace {
     public:
         ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
 
+        void update();
+
         void renderPatch(
             const Geodetic2& patchSize,
             const RenderData& data,
             const Ellipsoid& ellipsoid);
+
+        
     private:
         shared_ptr<ClipMapGrid> _grid;
     };

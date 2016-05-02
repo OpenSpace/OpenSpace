@@ -22,39 +22,30 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TWMS_TILE_PROVIDER_H__
-#define __TWMS_TILE_PROVIDER_H__
+#ifndef __TILE_PROVIDER_H__
+#define __TILE_PROVIDER_H__
 
-#include <modules/globebrowsing/other/lrucache.h>
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include "gdal_priv.h"
 
+#include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
 #include <ghoul/io/texture/texturereader.h>
 
-#include <openspace/engine/downloadmanager.h>
+#include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/globebrowsing/other/gdaldataconverter.h>
 
 
 
-//////////////////////////////////////////////////////////////////////////////////////
-//									TILE INDEX										//
-//////////////////////////////////////////////////////////////////////////////////////
-
-namespace openspace {
-    using HashKey = unsigned long;
-
-    struct GeodeticTileIndex {
-        int x, y, level;
-
-        HashKey hashKey() const {
-            return x ^ (y << 16) ^ (level << 21);
-        }
-    };
-}
 
 
+
+
+/*
 namespace openspace {
     
     using namespace ghoul::opengl;
@@ -87,13 +78,11 @@ namespace openspace {
         HashKey _hashkey;
         std::shared_ptr<Texture> _texture;
     };
-    
-
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//									TWMS TILE PROVIDER									//
+//									TILE PROVIDER									    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -102,7 +91,7 @@ namespace openspace {
 
     class TileProvider {
     public:
-        TileProvider(int tileCacheSize);
+        TileProvider(const std::string& fileName, int tileCacheSize);
         ~TileProvider();
 
         std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
@@ -111,17 +100,23 @@ namespace openspace {
 
 
     private:
-        std::shared_ptr<DownloadManager::FileFuture> requestTile(const GeodeticTileIndex&);
-        std::shared_ptr<Texture> loadAndInitTextureDisk(std::string filePath);
+
+        std::shared_ptr<Texture> getTileInternal(const GeodeticTileIndex& tileIndex, int GLType);
+
 
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
-        std::unordered_map<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureMap;
 
-        //LRUCache<HashKey, std::shared_ptr<DownloadManager::FileFuture>> _fileFutureCache;
 
-        //ConcurrentJobManager<Texture> _concurrentJobManager;
+        const std::string _filePath;
+
+        static bool hasInitializedGDAL;
+        GDALDataset* _gdalDataSet;
+        GdalDataConverter _converter;
+
+        
+
     };
 
 }  // namespace openspace
 
-#endif  // __TWMS_TILE_PROVIDER_H__
+#endif  // __TILE_PROVIDER_H__

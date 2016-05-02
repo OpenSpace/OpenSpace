@@ -77,7 +77,9 @@ namespace openspace {
     LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
         : PatchRenderer()
         , _grid(grid)
-        , tileProvider(5000)
+        , tileProvider("map_service_configs/TERRAIN.wms" , 5000)
+        //, tileProvider("map_service_configs/frmt_wms_virtualearth.xml", 5000)
+        //, tileProvider("textures/earth_bluemarble.jpg", 5000)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -99,7 +101,6 @@ namespace openspace {
         
         // Get the textures that should be used for rendering
         GeodeticTileIndex ti = _tileSet.getTileIndex(patch);
-
         renderPatch(patch, data, ellipsoid, ti);
     }
 
@@ -112,8 +113,11 @@ namespace openspace {
 
         using namespace glm;
 
+        // PATCH DID NOT MATCH THE TILEINDEX SO I CREATED A NEW PATCH FROM THE INDEX
 
+        GeodeticPatch newPatch = patch;//GeodeticPatch(tileIndex);
 
+        //GeodeticTileIndex tmpTileIndex = _tileSet.getTileIndex(patch);
 
 
         // TODO : Model transform should be fetched as a matrix directly.
@@ -129,18 +133,14 @@ namespace openspace {
         // Get the textures that should be used for rendering
         std::shared_ptr<ghoul::opengl::Texture> tile00;
         bool usingTile = true;
-        GeodeticTileIndex ti;
-        ti.level =tileIndex.level;
-        ti.x = tileIndex.y;
-        ti.y = tileIndex.x;
-        tile00 = tileProvider.getTile(ti);
+        tile00 = tileProvider.getTile(tileIndex);
 
         if (tile00 == nullptr) {
             tile00 = _tileSet.getTile(tileIndex);
             usingTile = false;
         }
 
-        glm::mat3 uvTransform = usingTile ? glm::mat3(1) : _tileSet.getUvTransformationPatchToTile(patch, tileIndex);
+        glm::mat3 uvTransform = usingTile ? glm::mat3(1) : _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit;
@@ -149,11 +149,11 @@ namespace openspace {
         _programObject->setUniform("textureSampler", texUnit);
         _programObject->setUniform("uvTransformPatchToTile", uvTransform);
 
-        Geodetic2 swCorner = patch.southWestCorner();
+        Geodetic2 swCorner = newPatch.southWestCorner();
         _programObject->setUniform("segmentsPerPatch", _grid->xSegments());
         _programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         _programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-        _programObject->setUniform("lonLatScalingFactor", vec2(patch.size().toLonLatVec2()));
+        _programObject->setUniform("lonLatScalingFactor", vec2(newPatch.size().toLonLatVec2()));
         _programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
         glEnable(GL_DEPTH_TEST);
@@ -185,6 +185,12 @@ namespace openspace {
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
+
+    void ClipMapPatchRenderer::update() {
+
+    }
+
+
 
     void ClipMapPatchRenderer::renderPatch(
         const Geodetic2& patchSize,

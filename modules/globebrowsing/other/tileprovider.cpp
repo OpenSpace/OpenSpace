@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
+#include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 
 #include <openspace/engine/downloadmanager.h>
@@ -37,69 +37,43 @@
 
 
 namespace {
-    const std::string _loggerCat = "TwmsTileProvider";
+    const std::string _loggerCat = "TileProvider";
 }
+
 
 namespace openspace {
 
+    bool TileProvider::hasInitializedGDAL = false;
 
-    TileProvider::TileProvider(int tileCacheSize)
-    : _tileCache(tileCacheSize) // setting cache size
+    TileProvider::TileProvider(const std::string& filePath, int tileCacheSize)
+    : _filePath(filePath)
+    , _tileCache(tileCacheSize) // setting cache size
     {
         int downloadApplicationVersion = 1;
         if (!DownloadManager::isInitialized()) {
             DownloadManager::initialize("../tmp_openspace_downloads/", downloadApplicationVersion);
         }
         
+        if (!hasInitializedGDAL) {
+            GDALAllRegister();
+            hasInitializedGDAL = true;
+        }
+
+        std::string absFilePath = absPath(filePath);
+        _gdalDataSet = (GDALDataset *)GDALOpen(absFilePath.c_str(), GA_ReadOnly);
+        //auto desc = _gdalDataSet->GetDescription();
+        
+        ghoul_assert(_gdalDataSet != nullptr, "Failed to load dataset: " << filePath);
+
     }
 
     TileProvider::~TileProvider(){
-
+        delete _gdalDataSet;
     }
 
 
     void TileProvider::prerender() {
 
-        // Remove filefutures that are inactive 
-        auto it = _fileFutureMap.begin();
-        auto end = _fileFutureMap.end();
-        for (; it != end;){
-            
-            if (it->second->isAborted ||
-                it->second->secondsRemaining > 20 ||
-                it->second->errorMessage.compare("") != 0 ||
-                it->second->isFinished)
-            {
-                it = _fileFutureMap.erase(it);
-                //LDEBUG("removnig filefuture");
-            }
-            else {
-                it++;
-            }
-        }
-
-        
-        // Move finished texture tiles to cache     
-        /*
-        while (_concurrentJobManager.numFinishedJobs() > 0) {
-            auto finishedJob = _concurrentJobManager.popFinishedJob();
-            
-            TextureLoadJob* finishedTextureLoadJob = reinterpret_cast<TextureLoadJob*>(finishedJob.get());
-            
-            ghoul_assert(finishedTextureLoadJob != nullptr, "unable to reinterpret cast to TextureLoadJob*");
-
-            auto texture = finishedTextureLoadJob->product();
-            // upload to gpu
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-
-            //LDEBUG("uploaded texture " << finishedTextureLoadJob->hashKey());
-            HashKey hashkey = finishedTextureLoadJob->hashKey();
-            _tileCache.put(hashkey, texture);
-            _fileFutureMap.erase(hashkey);
-        }
-        */
     }
 
 
@@ -109,77 +83,112 @@ namespace openspace {
         if (_tileCache.exist(hashkey)) {
             return _tileCache.get(hashkey);
         }
-        else if (_fileFutureMap.find(hashkey) != _fileFutureMap.end()) {
-            if (_fileFutureMap.find(hashkey)->second->isFinished) {
-                
-                std::string fileName = _fileFutureMap.find(hashkey)->second->filePath;
-                std::string filePath = "tiles/" + fileName;
-                
-                std::shared_ptr<Texture> texture = loadAndInitTextureDisk(filePath);
-                _tileCache.put(hashkey, texture);
-                _fileFutureMap.erase(hashkey);
+        else {
+            //GeodeticTileIndex ti0 = { 0, 0, 0 };
+            //auto texture = _converter.convertToOpenGLTexture(_gdalDataSet, tileIndex, GL_UNSIGNED_BYTE);
+            auto texture = getTileInternal(tileIndex, GL_UNSIGNED_BYTE);
+            texture->uploadTexture();
+            texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _tileCache.put(hashkey, texture);
+            return texture;
+        }
+    }
 
-                //LDEBUG("Downloaded " << fileName);
-                
 
-                //auto job = std::shared_ptr<TextureLoadJob>(new TextureLoadJob(filePath, hashkey));
-                //_concurrentJobManager.enqueueJob(job);
+
+
+
+    std::shared_ptr<Texture> TileProvider::getTileInternal(const GeodeticTileIndex& tileIndex, int GLType) {
+
+
+
+        int nRasters = _gdalDataSet->GetRasterCount();
+
+        ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
+
+        GDALRasterBand* firstBand = _gdalDataSet->GetRasterBand(1);
+
+        // Level = overviewCount - overview
+        int numOverviews = firstBand->GetOverviewCount();
+
+
+        int xSize0 = firstBand->GetXSize();
+        int ySize0 = firstBand->GetYSize();
+
+        GeodeticPatch patch = GeodeticPatch(tileIndex);
+        glm::uvec2 pixelStart0 = _converter.geodeticToPixel(_gdalDataSet, patch.northWestCorner());
+        glm::uvec2 pixelEnd0 = _converter.geodeticToPixel(_gdalDataSet, patch.southEastCorner());
+        glm::uvec2 numberOfPixels0 = pixelEnd0 - pixelStart0;
+            
+
+        int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
+
+        int minNumPixelsRequired = 256;
+        int ov = log2(minNumPixels0) - log2(minNumPixelsRequired);
+
+        ov = glm::clamp(ov, 0, numOverviews-1);
+
+        glm::uvec2 pixelStart(pixelStart0.x >> (ov+1), pixelStart0.y >> (ov + 1));
+        glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
+
+        // For testing
+        /*pixelStart = glm::uvec2(0, 0);
+        numberOfPixels = glm::uvec2(512, 256);
+        ov = 15;
+        */
+        // The data that the texture should read
+        GLubyte* imageData = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
+
+        // Read the data (each rasterband is a separate channel)
+        for (size_t i = 0; i < nRasters; i++) {
+            GDALRasterBand* rasterBand = _gdalDataSet->GetRasterBand(i + 1)->GetOverview(ov);
+
+            int xSize = rasterBand->GetXSize();
+            int ySize = rasterBand->GetYSize();
+
+            rasterBand->RasterIO(
+                GF_Read,
+                pixelStart.x,					// Begin read x
+                pixelStart.y,					// Begin read y
+                numberOfPixels.x,				// width to read x
+                numberOfPixels.y,				// width to read y
+                imageData + i,				// Where to put data
+                numberOfPixels.x,				// width to write x in destination
+                numberOfPixels.y,				// width to write y in destination
+                GDT_Byte,					// Type
+                sizeof(GLubyte) * nRasters,	// Pixel spacing
+                0);							// Line spacing
+        }
+
+        GLubyte* imageDataYflipped = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
+        for (size_t y = 0; y < numberOfPixels.y; y++) {
+            for (size_t x = 0; x < numberOfPixels.x; x++) {
+                imageDataYflipped[x + y * numberOfPixels.x] = imageData[x + (numberOfPixels.y - y) * numberOfPixels.x];
             }
         }
-        else if(_fileFutureMap.size() < 100){
 
-            std::shared_ptr<DownloadManager::FileFuture> fileFuture = requestTile(tileIndex);
-            _fileFutureMap.insert_or_assign(hashkey, fileFuture);
-        }
-        return nullptr;
-    }
 
-    std::shared_ptr<Texture> TileProvider::loadAndInitTextureDisk(std::string filePath) {
-        auto textureReader = ghoul::io::TextureReader::ref();
-        std::shared_ptr<Texture> texture = std::move(textureReader.loadTexture(absPath(filePath)));
+        GdalDataConverter::TextureFormat textrureFormat = _converter.getTextureFormatFromRasterCount(nRasters);
 
-        // upload to gpu
-        texture->uploadTexture();
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+
+        Texture* tex = new Texture(
+            static_cast<void*>(imageDataYflipped),
+            glm::uvec3(numberOfPixels.x, numberOfPixels.y, 1),
+            textrureFormat.ghoulFormat,
+            textrureFormat.glFormat,
+            GL_UNSIGNED_BYTE,
+            Texture::FilterMode::Linear,
+            Texture::WrappingMode::Repeat);
+
+        // The texture should take ownership of the data
+        std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
+
+        delete[] imageData;
+
+        // Do not free imageData since the texture now has ownership of it
         return texture;
-    }
-
-
-
-    std::shared_ptr<DownloadManager::FileFuture> TileProvider::requestTile(const GeodeticTileIndex& tileIndex) {
-        // download tile
-        std::stringstream ss;
-        //std::string baseUrl = "https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg";
-        //ss << baseUrl;
-        //ss << "&TileMatrix=" << tileIndex.level;
-        //ss << "&TileCol=" << tileIndex.x;
-        //ss << "&TileRow=" << tileIndex.y;
-        // https://map1c.vis.earthdata.nasa.gov/wmts-geo/wmts.cgi?TIME=2016-04-17&layer=MODIS_Terra_CorrectedReflectance_TrueColor&tilematrixset=EPSG4326_250m&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=0&TileCol=0&TileRow=0
-
-        std::string baseUrl = "http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913";
-        ss << baseUrl;
-        ss << "/" << tileIndex.level;
-        ss << "/" << tileIndex.x;
-        ss << "/" << tileIndex.y;
-        ss << ".png?1461277159335";
-        // http://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/5/8/12.png?
-        std::string twmsRequestUrl = ss.str();
-        
-        ss = std::stringstream();
-        ss << tileIndex.level;
-        ss << "_" << tileIndex.x;
-        ss << "_" << tileIndex.y;
-        std::string filePath = "tiles/tile" + ss.str() + ".png";
-
-        using ghoul::filesystem::File;
-        File localTileFile(filePath);
-        bool overrideFile = true;
-
-        std::shared_ptr<DownloadManager::FileFuture> fileFuture = DownloadManager::ref().downloadFile(twmsRequestUrl, localTileFile, overrideFile);
-        return fileFuture;
 
     }
-
 
 }  // namespace openspace
