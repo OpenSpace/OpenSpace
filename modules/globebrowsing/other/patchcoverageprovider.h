@@ -28,17 +28,29 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/tileprovider.h>
+#include <ghoul/opengl/texture.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//									PATCH TILE CONVERTER							    //
+//									PATCH COVERAGE PROVIDER							    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
+
+    using namespace ghoul::opengl;
+
+    struct PatchCoverage
+    {
+        using TextureTransformPair = std::pair<std::shared_ptr<Texture>, glm::mat3>;
+        TextureTransformPair textureTransformPairs[4];
+    };
+
     class PatchCoverageProvider
     {
     public:
         PatchCoverageProvider(
+            std::shared_ptr<TileProvider> tileProvider,
             Geodetic2 sizeLevel0,
             Geodetic2 offsetLevel0,
             int depth);
@@ -67,10 +79,17 @@ namespace openspace {
             GeodeticPatch patch,
             GeodeticPatch tile);
 
+        PatchCoverage getCoverage(GeodeticPatch patch);
+
     private:
+
+        std::shared_ptr<TileProvider> _tileProvider;
         Geodetic2 _sizeLevel0;
         Geodetic2 _offsetLevel0;
         int _depth;
+
+        std::shared_ptr<Texture> _tempTexture;
+
         
     };
 

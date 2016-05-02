@@ -49,10 +49,15 @@ namespace openspace {
         : _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
         , _ellipsoid(ellipsoid)
     {
+        _tileProvider = shared_ptr<TileProvider>(new TileProvider("map_service_configs/TERRAIN.wms", 100));
         // init Renderer
-        auto outerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)));
+        auto outerPatchRenderer = new ClipMapPatchRenderer(
+            shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)),
+            _tileProvider);
         _outerPatchRenderer.reset(outerPatchRenderer);
-        auto innerPatchRenderer = new ClipMapPatchRenderer(shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)));
+        auto innerPatchRenderer = new ClipMapPatchRenderer(
+            shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)),
+            _tileProvider);
         _innerPatchRenderer.reset(innerPatchRenderer);
     }
 
@@ -80,7 +85,7 @@ namespace openspace {
     void ClipMapGlobe::render(const RenderData& data)
     {
         // TODO : Choose the max depth and the min depth depending on the camera
-        int maxDepth = 5;
+        int maxDepth = 10;
         int minDepth = 0;
         // render patches
         for (size_t i = minDepth; i < maxDepth; i++)

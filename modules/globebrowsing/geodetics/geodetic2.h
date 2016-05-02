@@ -91,10 +91,12 @@ using HashKey = unsigned long;
 
 struct GeodeticTileIndex {
 
-    const int x, y, level;
+    int x, y, level;
 
-    
-    GeodeticTileIndex() = delete;
+    GeodeticTileIndex()
+    : x(0), y(0), level(0) {
+
+    }
 
     GeodeticTileIndex(int x, int y, int level) 
     : x(x), y(y), level(level) {

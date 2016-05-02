@@ -37,35 +37,36 @@
 #include <modules/globebrowsing/globes/clipmappyramid.h>
 
 namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
+    namespace opengl {
+        class ProgramObject;
+    }
 }
 
 namespace openspace {
 
-	class ClipMapGlobe : public Renderable {
-	public:
-		ClipMapGlobe(const Ellipsoid& ellipsoid);
-		~ClipMapGlobe();
+    class ClipMapGlobe : public Renderable {
+    public:
+        ClipMapGlobe(const Ellipsoid& ellipsoid);
+        ~ClipMapGlobe();
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+        bool initialize() override;
+        bool deinitialize() override;
+        bool isReady() const override;
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+        void render(const RenderData& data) override;
+        void update(const UpdateData& data) override;
 
-		const Ellipsoid& ellipsoid() const;
+        const Ellipsoid& ellipsoid() const;
 
-	private:		
-		std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
-		std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
-		
-		ClipMapPyramid _clipMapPyramid;
+    private:
+        shared_ptr<TileProvider> _tileProvider;
+        std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
+        std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
+        
+        ClipMapPyramid _clipMapPyramid;
 
-		const Ellipsoid& _ellipsoid;
-	};
+        const Ellipsoid& _ellipsoid;
+    };
 
 }  // namespace openspace
 

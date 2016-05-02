@@ -35,14 +35,30 @@ namespace {
 namespace openspace {
 
     PatchCoverageProvider::PatchCoverageProvider(
+        std::shared_ptr<TileProvider> tileProvider,
         Geodetic2 sizeLevel0,
         Geodetic2 offsetLevel0,
         int depth)
-        : _sizeLevel0(sizeLevel0)
+        : _tileProvider(tileProvider)
+        , _sizeLevel0(sizeLevel0)
         , _offsetLevel0(offsetLevel0)
         , _depth(depth)
     {
+        // Set e texture to test
+        std::string fileName = "textures/earth_bluemarble.jpg";
+        //std::string fileName = "../../../build/tiles/tile5_8_12.png";
+        //std::string fileName = "tile5_8_12.png";
+        _tempTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
 
+        if (_tempTexture) {
+            LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
+            _tempTexture->uploadTexture();
+
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _tempTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        }
     }
 
     PatchCoverageProvider::~PatchCoverageProvider(){
@@ -106,6 +122,56 @@ namespace openspace {
             0,							0,								1 });
 
         return invTileScale * globalTranslation * patchScale;
+    }
+
+    PatchCoverage PatchCoverageProvider::getCoverage(GeodeticPatch patch)
+    {
+        static const int numTilesInCoverageX = 2;
+        static const int numTilesInCoverageY = 2;
+        PatchCoverage patchCoverageToReturn;
+
+        for (int y = 0; y < numTilesInCoverageY; y++)
+        {
+            for (int x = 0; x < numTilesInCoverageX; x++)
+            {
+                int linearIdx = x + y * numTilesInCoverageX;
+                GeodeticTileIndex tileIndex = getTileIndex(patch);
+                // Offset tileIndex
+                tileIndex.x += x;
+                tileIndex.y += y;
+
+                int numLevelsToLoop = tileIndex.level;
+                // Start at the highest level and go down if the texture don't exist
+                for (int j = numLevelsToLoop; j >= 0; j--)
+                {
+                    // Try if the texture exists
+                    std::shared_ptr<Texture> tile = _tileProvider->getTile(tileIndex);
+                    if (tile == nullptr)
+                    { // If it doesn't exist, go down a level
+                        tileIndex.x /= 2;
+                        tileIndex.y /= 2;
+                        tileIndex.level -= 1;
+                    }
+                    else
+                    { // A texture was found, put it in the data structure to return
+                        patchCoverageToReturn.textureTransformPairs[linearIdx].first =
+                            tile;
+                        patchCoverageToReturn.textureTransformPairs[linearIdx].second =
+                            getUvTransformationPatchToTile(patch, tileIndex);
+                    }
+                }
+                // If the texture still doesn't exist put a temporary texture
+                if (patchCoverageToReturn.textureTransformPairs[linearIdx].first == nullptr)
+                {
+                    patchCoverageToReturn.textureTransformPairs[linearIdx].first =
+                        _tempTexture;
+                    patchCoverageToReturn.textureTransformPairs[linearIdx].second =
+                        glm::mat3(1);
+                }
+            }
+        }
+        
+        return patchCoverageToReturn;
     }
 
 }  // namespace openspace

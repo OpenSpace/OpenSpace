@@ -102,7 +102,9 @@ namespace openspace {
 
     class ClipMapPatchRenderer : public PatchRenderer {
     public:
-        ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid);
+        ClipMapPatchRenderer(
+            shared_ptr<ClipMapGrid> grid,
+            shared_ptr<TileProvider> tileProvider);
 
         void update();
 
@@ -113,7 +115,7 @@ namespace openspace {
 
         
     private:
-        TileProvider _tileProvider;
+        std::shared_ptr<TileProvider> _tileProvider;
         PatchCoverageProvider _patchCoverageProvider;
         shared_ptr<ClipMapGrid> _grid;
     };

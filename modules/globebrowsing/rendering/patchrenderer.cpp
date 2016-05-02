@@ -172,11 +172,14 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //								CLIPMAP PATCH RENDERER								//
     //////////////////////////////////////////////////////////////////////////////////////
-    ClipMapPatchRenderer::ClipMapPatchRenderer(shared_ptr<ClipMapGrid> grid)
+    ClipMapPatchRenderer::ClipMapPatchRenderer(
+        shared_ptr<ClipMapGrid> grid,
+        shared_ptr<TileProvider> tileProvider)
         : PatchRenderer()
         , _grid(grid)
-        , _tileProvider("map_service_configs/TERRAIN.wms", 5000)
-        , _patchCoverageProvider(Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(-M_PI -M_PI/2, -M_PI), 10)
+        , _tileProvider(tileProvider)
+        , _patchCoverageProvider(_tileProvider,
+            Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(-M_PI -M_PI/2, -M_PI), 10)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -189,7 +192,7 @@ namespace openspace {
     }
 
     void ClipMapPatchRenderer::update() {
-        _tileProvider.prerender();
+        _tileProvider->prerender();
     }
 
 
@@ -229,70 +232,43 @@ namespace openspace {
 
         ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
-        //LDEBUG("patch.center = [ " << patch.center.lat << " , " << patch.center.lon << " ]");
-        //LDEBUG("intSnapCoord = [ " << intSnapCoord.x << " , " << intSnapCoord.y << " ]");
-        //LDEBUG("contraction = [ " << contraction.x << " , " << contraction.y << " ]");
 
-
-        // Get the textures that should be used for rendering
-        GeodeticTileIndex tileIndex00 = _patchCoverageProvider.getTileIndex(newPatch);
-        GeodeticTileIndex tileIndex10 = { tileIndex00.x + 1, tileIndex00.y, tileIndex00.level };
-        GeodeticTileIndex tileIndex01 = { tileIndex00.x, tileIndex00.y + 1, tileIndex00.level };
-        GeodeticTileIndex tileIndex11 = { tileIndex00.x + 1, tileIndex00.y + 1, tileIndex00.level };
-
-        std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileProvider.getTile(tileIndex00);
-        std::shared_ptr<ghoul::opengl::Texture> tile10 = _tileProvider.getTile(tileIndex10);
-        std::shared_ptr<ghoul::opengl::Texture> tile01 = _tileProvider.getTile(tileIndex01);
-        std::shared_ptr<ghoul::opengl::Texture> tile11 = _tileProvider.getTile(tileIndex11);
-        
-        if (tile00 == nullptr) {
-            tile00 = _tileSet.getTile(tileIndex00);
-        }
-        if (tile10 == nullptr) {
-            tile10 = _tileSet.getTile(tileIndex01);
-        }
-        if (tile01 == nullptr) {
-            tile01 = _tileSet.getTile(tileIndex10);
-        }
-        if (tile11 == nullptr) {
-            tile11 = _tileSet.getTile(tileIndex11);
-        }
-
-        glm::mat3 uvTransform00 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex00);
-        glm::mat3 uvTransform10 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex10);
-        glm::mat3 uvTransform01 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex01);
-        glm::mat3 uvTransform11 = _patchCoverageProvider.getUvTransformationPatchToTile(newPatch, tileIndex11);
-
-        //std::shared_ptr<ghoul::opengl::Texture> tile00 = _tileSet.getTile(tileIndex);
-        
-
+        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit00;
         texUnit00.activate();
-        tile00->bind();
+        patchCoverage.textureTransformPairs[0].first->bind(); // tile00
         _programObject->setUniform("textureSampler00", texUnit00);
 
         ghoul::opengl::TextureUnit texUnit10;
         texUnit10.activate();
-        tile10->bind();
+        patchCoverage.textureTransformPairs[1].first->bind(); // tile10
         _programObject->setUniform("textureSampler10", texUnit10);
 
         ghoul::opengl::TextureUnit texUnit01;
         texUnit01.activate();
-        tile01->bind();
+        patchCoverage.textureTransformPairs[2].first->bind(); // tile01
         _programObject->setUniform("textureSampler01", texUnit01);
 
         ghoul::opengl::TextureUnit texUnit11;
         texUnit11.activate();
-        tile11->bind();
+        patchCoverage.textureTransformPairs[3].first->bind(); // tile11
         _programObject->setUniform("textureSampler11", texUnit11);
 
 
-        _programObject->setUniform("uvTransformPatchToTile00", mat3(uvTransform00));
-        _programObject->setUniform("uvTransformPatchToTile10", mat3(uvTransform10));
-        _programObject->setUniform("uvTransformPatchToTile01", mat3(uvTransform01));
-        _programObject->setUniform("uvTransformPatchToTile11", mat3(uvTransform11));
+        _programObject->setUniform(
+            "uvTransformPatchToTile00",
+            patchCoverage.textureTransformPairs[0].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTile10",
+            patchCoverage.textureTransformPairs[1].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTile01",
+            patchCoverage.textureTransformPairs[2].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTile11",
+            patchCoverage.textureTransformPairs[3].second);
 
         _programObject->setUniform(
             "modelViewProjectionTransform",
