@@ -30,6 +30,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <modules/iswa/rendering/colorbar.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/optionproperty.h>
 
 namespace openspace{
  
@@ -64,14 +65,15 @@ class DataPlane : public CygnetPlane {
     float normalizeWithStandardScore(float value, float mean, float sd);
     float normalizeWithLogarithm(float value, int logMean);
 
-    void changeTransferFunctions(bool multiple);
+    void setTransferFunctions(std::string id);
 
     properties::SelectionProperty _dataOptions;
+    properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _normValues;
     properties::Vec2Property _backgroundValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
-    properties::BoolProperty _useMultipleTf;
+    // properties::BoolProperty _useMultipleTf;
     // properties::BoolProperty _averageValues;
 
     // properties::Vec4Property _topColor;
