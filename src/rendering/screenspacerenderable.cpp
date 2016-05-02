@@ -60,16 +60,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 
     useEuclideanCoordinates(_useFlatScreen.value());
 
-    _euclideanPosition.onChange([this](){
-        _sphericalPosition.set(toSpherical(_euclideanPosition.value()));
-    });
-    
-    _sphericalPosition.onChange([this](){
-        _euclideanPosition.set(toEuclidean(_sphericalPosition.value(), _radius));
-    });
-
     // Setting spherical/euclidean onchange handler
-    _useFlatScreen.onChange([this](){
+    _useFlatScreen.onChange([this](){   
+        if(_useFlatScreen.value()){
+            OsEng.gui()._screenSpaceProperty.registerProperty(&_euclideanPosition, &_useFlatScreen);
+            OsEng.gui()._screenSpaceProperty.unregisterProperty(&_sphericalPosition);
+        } else {
+            OsEng.gui()._screenSpaceProperty.unregisterProperty(&_euclideanPosition);
+            OsEng.gui()._screenSpaceProperty.registerProperty(&_sphericalPosition, &_useFlatScreen);          
+        }
         useEuclideanCoordinates(_useFlatScreen.value());
     });
 
@@ -135,7 +134,6 @@ void ScreenSpaceRenderable::registerProperties(){
     OsEng.gui()._screenSpaceProperty.registerProperty(&_enabled);
     OsEng.gui()._screenSpaceProperty.registerProperty(&_useFlatScreen);
     OsEng.gui()._screenSpaceProperty.registerProperty(&_euclideanPosition);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_sphericalPosition);
     OsEng.gui()._screenSpaceProperty.registerProperty(&_depth);
     OsEng.gui()._screenSpaceProperty.registerProperty(&_scale);
     OsEng.gui()._screenSpaceProperty.registerProperty(&_alpha);

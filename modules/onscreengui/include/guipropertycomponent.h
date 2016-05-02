@@ -43,7 +43,8 @@ namespace gui {
 class GuiPropertyComponent : public GuiComponent {
 public:
     //void registerProperty(const std::string& propertyDescription);
-    void registerProperty(properties::Property* prop);
+    void registerProperty(properties::Property* prop, properties::Property* sibling = nullptr);
+    void unregisterProperty(properties::Property* prop);
     void unregisterProperties(std::string owner);
     void render();
 
