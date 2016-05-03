@@ -42,6 +42,7 @@ public:
     SelectionProperty(std::string identifier, std::string guiName);
     
     void addOption(Option option);
+    void removeOptions();
     const std::vector<Option>& options() const;
 
 private:

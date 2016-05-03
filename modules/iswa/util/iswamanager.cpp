@@ -72,7 +72,9 @@ ISWAManager::ISWAManager()
     _geom[CygnetGeometry::Sphere] = "Sphere";
 }
 
-ISWAManager::~ISWAManager(){}
+ISWAManager::~ISWAManager(){
+    _groups.clear();
+}
 
 void ISWAManager::addISWACygnet(std::string info){
     std::string token;
@@ -226,7 +228,7 @@ void ISWAManager::createScreenSpace(int id){
 
 void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
-    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id); 
+    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
     if(data->group > 0)
         name += "_Group" + std::to_string(data->group);
 
@@ -342,7 +344,6 @@ std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
             }
             std::string table = "{"
                 "Name = 'KameleonPlane0',"
-                // "Parent = 'Earth', "
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "
@@ -366,14 +367,17 @@ std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
     return "";
 }
 
-void ISWAManager::registerToGroup(int id, ISWACygnet* cygnet, CygnetType type){
-    if(_groups.find(id) != _groups.end()){
-        _groups[id]->registerCygnet(cygnet, type);
-    }else{
-        _groups.insert(std::pair<int, std::shared_ptr<ISWAGroup>>(id, std::make_shared<ISWAGroup>(id, type)));
-        _groups[id]->registerCygnet(cygnet, type);
+
+void ISWAManager::registerGroup(int id){
+    _groups.insert(std::pair<int, std::shared_ptr<ISWAGroup>>(id, std::make_shared<ISWAGroup>(id)));
+} 
+
+void ISWAManager::registerToGroup(int id, CygnetType type, ISWACygnet* cygnet){
+    if(_groups.find(id) == _groups.end()){
+        registerGroup(id);
     }
 
+    _groups[id]->registerCygnet(cygnet, type);
 }
 
 void ISWAManager::unregisterFromGroup(int id, ISWACygnet* cygnet){
@@ -406,9 +410,7 @@ scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
                 "addCygnet",
                 &luascriptfunctions::iswa_addCygnet,
                 "string",
-                "Sets a property identified by the URI in "
-                "the first argument. The second argument can be any type, but it has to "
-                " agree with the type that the property expects",
+                "Adds a ISWACygnet",
                 true
             }
         }

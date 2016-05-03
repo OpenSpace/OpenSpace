@@ -52,6 +52,10 @@ void SelectionProperty::addOption(Option option) {
     _options.push_back(std::move(option));
 }
 
+void SelectionProperty::removeOptions(){
+    _options.clear();
+}
+
 const std::vector<SelectionProperty::Option>& SelectionProperty::options() const {
     return _options;
 }

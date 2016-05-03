@@ -58,7 +58,7 @@ class ISWAManager : public ghoul::Singleton<ISWAManager> {
     friend class ghoul::Singleton<ISWAManager>;
 
 public:
-    enum CygnetType {Texture, Data, Kameleon};
+    enum CygnetType {Texture, Data, Kameleon, NoType};
     enum CygnetGeometry {Plane, Sphere};
 
     ISWAManager();
@@ -72,7 +72,9 @@ public:
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
 
-    void registerToGroup(int id, ISWACygnet* cygnet, CygnetType type);
+
+    void registerGroup(int id);
+    void registerToGroup(int id, CygnetType type, ISWACygnet* cygnet);
     void unregisterFromGroup(int id, ISWACygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);

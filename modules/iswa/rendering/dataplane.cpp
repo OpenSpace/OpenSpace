@@ -119,7 +119,7 @@ bool DataPlane::initialize(){
 
     // _textures.push_back(nullptr);
     if(_data->groupId > 0)
-        ISWAManager::ref().registerToGroup(_data->groupId, this, _type);
+        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
 
 
     return isReady();

@@ -31,6 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 // #include <modules/iswa/rendering/iswacygnet.h>
+#include <openspace/properties/triggerproperty.h>
 #include <modules/iswa/util/iswamanager.h>
 
 
@@ -39,21 +40,24 @@ class ISWACygnet;
 
 class ISWAGroup : public properties::PropertyOwner{
 public:
-	ISWAGroup(int id, ISWAManager::CygnetType type);
+	ISWAGroup(int id);
 	~ISWAGroup();
 	void registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type);
 	void unregisterCygnet(ISWACygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
 
 private:
-	properties::BoolProperty _enabled;
+	void registerProperties();
+	void unregisterProperties();
 
+	properties::BoolProperty _enabled;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::Vec2Property _normValues;
     properties::Vec2Property _backgroundValues;
     properties::StringProperty _transferFunctionsFile;
 	properties::SelectionProperty _dataOptions;
+	properties::TriggerProperty _delete;
 	// properties::SelectionProperty _dataOptions;
  //    properties::StringProperty _transferFunctionsFile;
  //    properties::Vec2Property _normValues;
@@ -63,6 +67,7 @@ private:
 
 	// int groupId;
 	// ISWACygnet cygnet;
+	int _id;
 	std::vector<ISWACygnet* > _cygnets;
 	ISWAManager::CygnetType _type;
 };
