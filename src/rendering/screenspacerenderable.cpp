@@ -101,7 +101,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
         useEuclideanCoordinates(_useFlatScreen.value());
     });
 
-    _delete.onChange([this](){OsEng.renderEngine().unregisterScreenSpaceRenderable(name());});
+    _delete.onChange([this](){
+        std::string script = "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
+        OsEng.scriptEngine().queueScript(script);
+    });
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}

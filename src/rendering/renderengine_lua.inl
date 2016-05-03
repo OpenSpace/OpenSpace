@@ -138,8 +138,8 @@ int registerScreenSpaceRenderable(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     ghoul::Dictionary d;
     try {
@@ -149,9 +149,30 @@ int registerScreenSpaceRenderable(lua_State* L) {
         LERROR(e.what());
         return 0;
     }
-	
-	std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
+
+    std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
     OsEng.renderEngine().registerScreenSpaceRenderable(s);
+      
+    return 1;
+}
+
+int unregisterScreenSpaceRenderable(lua_State* L) {
+    static const std::string _loggerCat = "unregisterScreenSpaceRenderable";
+    using ghoul::lua::errorLocation;
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string name = luaL_checkstring(L, -1);
+
+    std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
+    if (!s) {
+        LERROR(errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        return 0;
+    }
+
+    OsEng.renderEngine().unregisterScreenSpaceRenderable(s);
       
     return 1;
 }

@@ -75,7 +75,7 @@ bool ScreenSpaceCygnet::initialize(){
 }
 
 bool ScreenSpaceCygnet::deinitialize(){
-    OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._screenSpaceProperty.unregisterProperties(name());
 
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;

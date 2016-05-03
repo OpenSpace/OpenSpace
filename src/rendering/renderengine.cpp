@@ -375,9 +375,6 @@ void RenderEngine::postSynchronizationPreDraw() {
             program->rebuildFromFile();
         }
     }
-
-    if(!_deletedScreenSpaceRenderables.empty())
-        _deletedScreenSpaceRenderables.clear(); 
     
     for (auto screenspacerenderable : _screenSpaceRenderables) {
             screenspacerenderable->update();
@@ -651,6 +648,12 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::registerScreenSpaceRenderable,
                 "table",
                 "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+            },
+            {
+                "unregisterScreenSpaceRenderable",
+                &luascriptfunctions::unregisterScreenSpaceRenderable,
+                "string",
+                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
             },
         },
     };
@@ -1154,7 +1157,6 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 
     if (it != _screenSpaceRenderables.end()) {
         s->deinitialize();
-        _deletedScreenSpaceRenderables.push_back(s);
         _screenSpaceRenderables.erase(it);
     }
 }
