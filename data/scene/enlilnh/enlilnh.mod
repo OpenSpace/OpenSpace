@@ -13,9 +13,9 @@ return {
             Rotation = {2.1, 0, 0},
             Scaling = {1.1, 1.1, 1.1},
             ScalingExponent = 12,
-			Source = "tsp/enlil_nh_128_128_16.tsp",
+            Source = "tsp/enlil_nh_128_128_16.tsp",
             TransferFunction = "transferfunctions/fire.txt",
-			BrickSelector = "tf",
+            BrickSelector = "tf",
         },
         GuiName = "/Volumes/ENLIL New Horizons"
     }

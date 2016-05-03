@@ -218,7 +218,7 @@ return {
         },
         GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
-	-- NewHorizonsFov module NH_RALPH_MVIC_NIR
+    -- NewHorizonsFov module NH_RALPH_MVIC_NIR
     {   
         Name = "NH_RALPH_MVIC_NIR",
         Parent = "NewHorizons",
@@ -245,7 +245,7 @@ return {
         },
         GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
-	-- NewHorizonsFov module NH_ALICE_AIRGLOW
+    -- NewHorizonsFov module NH_ALICE_AIRGLOW
     {   
         Name = "NH_ALICE_AIRGLOW",
         Parent = "NewHorizons",
@@ -272,7 +272,7 @@ return {
         },
         GuiName = "/Solar/NH_ALICE_AIRGLOW"
     },
-	-- NewHorizonsFov module NH_ALICE_SOC
+    -- NewHorizonsFov module NH_ALICE_SOC
     {   
         Name = "NH_ALICE_SOC",
         Parent = "NewHorizons",

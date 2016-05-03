@@ -27,7 +27,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",
-			Body = "EARTH",
+            Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
@@ -36,7 +36,7 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-				Night = "textures/earth_night.jpg",
+                Night = "textures/earth_night.jpg",
                 -- Depth = "textures/earth_depth.png"
             },
             Atmosphere = {
@@ -82,7 +82,7 @@ return {
             Billboard = true,
             Texture = "textures/marker.png"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

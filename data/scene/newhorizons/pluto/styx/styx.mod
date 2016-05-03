@@ -15,8 +15,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_PLUTO",
-			Body = "STYX",
+            Frame = "IAU_PLUTO",
+            Body = "STYX",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.75 , 4 },
@@ -83,5 +83,5 @@ return {
         },
         GuiName = "/Solar/CharonTrail"
     }
-	
+    
 }

@@ -32,12 +32,12 @@ namespace luascriptfunctions {
  * Shows the console
  */
 int show(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().setVisible(true);
-	return 0;
+    OsEng.console().setVisible(true);
+    return 0;
 }
 
 /**
@@ -46,12 +46,12 @@ int show(lua_State* L) {
  * Hides the console
  */
 int hide(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().setVisible(false);
-	return 0;
+    OsEng.console().setVisible(false);
+    return 0;
 }
 
 /**
@@ -60,12 +60,12 @@ int hide(lua_State* L) {
  * Toggles the console
  */
 int toggle(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 0)
-		return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-	OsEng.console().toggleVisibility();
-	return 0;
+    OsEng.console().toggleVisibility();
+    return 0;
 }
 
 } // namespace luascriptfunctions

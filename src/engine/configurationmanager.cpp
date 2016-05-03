@@ -50,8 +50,6 @@ const string ConfigurationManager::KeyPropertyDocumentationType =
 const string ConfigurationManager::KeyPropertyDocumentationFile =
     "PropertyDocumentationFile.File";
 const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeyStartupScript = "StartupScripts";
-const string ConfigurationManager::KeySettingsScript = "SettingsScripts";
 const string ConfigurationManager::KeySpiceTimeKernel = "SpiceKernel.Time";
 const string ConfigurationManager::KeySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 const string ConfigurationManager::KeyLogLevel = "Logging.LogLevel";

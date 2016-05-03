@@ -65,7 +65,7 @@ public:
     ~ISWAManager();
 
     void addISWACygnet(std::string info);
-    void addISWACygnet(int id, std::string info = "TEXTURE", int group = -1);
+    void addISWACygnet(int id, std::string info = "Texture", int group = -1);
     void deleteISWACygnet(std::string);
 
     // std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);

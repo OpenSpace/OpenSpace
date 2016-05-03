@@ -37,6 +37,7 @@ if len(sys.argv) > 1:
 
 positivePathList = [
     'src/**/*.cpp',
+    'src/**/*.inl',
     'include/**/*.h',
     'include/**/*.inl',
     'apps/**/*.cpp',
@@ -53,7 +54,8 @@ positivePathList = [
     'shaders/**/*.hglsl',
     'shaders/**/*.vert',
     'shaders/**/*.gs',
-    'shaders/**/*.frag'
+    'shaders/**/*.frag',
+    'data/**/*.mod'
 ]
 
 negativePathList = [

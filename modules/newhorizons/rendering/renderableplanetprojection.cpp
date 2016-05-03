@@ -255,8 +255,8 @@ bool RenderablePlanetProjection::initialize() {
     }
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
-                                      "${SHADERS}/fboPass_vs.glsl",
-                                      "${SHADERS}/fboPass_fs.glsl");
+                                      "${MODULES}/newhorizons/shaders/fboPass_vs.glsl",
+                                      "${MODULES}/newhorizons/shaders/fboPass_fs.glsl");
     
     loadTexture();
     loadProjectionTexture();

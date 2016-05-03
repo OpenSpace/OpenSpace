@@ -14,8 +14,8 @@ return {
         Parent = "UranusBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_URANUS",
-			Body = "URANUS BARYCENTER",
+            Frame = "IAU_URANUS",
+            Body = "URANUS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.5362 , 7 },

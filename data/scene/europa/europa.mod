@@ -5,8 +5,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_EUROPA", -- should exist. 
-			Body = "EUROPA",
+            Frame = "IAU_EUROPA", -- should exist. 
+            Body = "EUROPA",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.561, 6},
