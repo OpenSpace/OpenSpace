@@ -39,6 +39,7 @@ class ScreenSpaceImage : public ScreenSpaceRenderable {
 
 public:
     ScreenSpaceImage(std::string texturePath);
+    ScreenSpaceImage(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceImage();
 
     bool initialize() override;

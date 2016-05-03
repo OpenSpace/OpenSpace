@@ -180,7 +180,6 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
-    std::vector<std::shared_ptr<ScreenSpaceRenderable>> _deletedScreenSpaceRenderables;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

@@ -23,8 +23,37 @@
  ****************************************************************************************/
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/util/factorymanager.h>
+
+namespace {
+    const std::string _loggerCat = "ScreenSpaceRenderable";
+    const std::string KeyType = "Type";
+}
 
 namespace openspace {
+
+ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
+
+    std::string renderableType;
+    bool success = dictionary.getValue(KeyType, renderableType);
+
+    if (!success) {
+        LERROR("ScreenSpaceRenderable did not have key '" << KeyType << "'");
+        return nullptr;
+    }
+
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* factory
+          = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ScreenSpaceRenderable* result = factory->create(renderableType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed to create a ScreenSpaceRenderable object of type '" << renderableType << "'");
+        return nullptr;
+    }
+
+    return result;
+}
+
+
 ScreenSpaceRenderable::ScreenSpaceRenderable()
     :_enabled("enabled", "Is Enabled", true)
     ,_useFlatScreen("flatScreen", "Flat Screen", true)
@@ -72,7 +101,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
         useEuclideanCoordinates(_useFlatScreen.value());
     });
 
-    _delete.onChange([this](){OsEng.renderEngine().unregisterScreenSpaceRenderable(name());});
+    _delete.onChange([this](){
+        std::string script = "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
+        OsEng.scriptEngine().queueScript(script);
+    });
 }
 
 ScreenSpaceRenderable::~ScreenSpaceRenderable(){}

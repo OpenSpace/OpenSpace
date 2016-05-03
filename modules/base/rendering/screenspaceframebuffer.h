@@ -38,7 +38,7 @@ namespace openspace {
  */
 class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
-    ScreenSpaceFramebuffer();
+    ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     ~ScreenSpaceFramebuffer();
 
     bool initialize() override;

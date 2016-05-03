@@ -375,12 +375,9 @@ void RenderEngine::postSynchronizationPreDraw() {
             program->rebuildFromFile();
         }
     }
-
-    if(!_deletedScreenSpaceRenderables.empty())
-        _deletedScreenSpaceRenderables.clear(); 
     
     for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
+            screenspacerenderable->update();
     }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
@@ -645,6 +642,18 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "number",
                 "",
                 true
+            },
+            {
+                "registerScreenSpaceRenderable",
+                &luascriptfunctions::registerScreenSpaceRenderable,
+                "table",
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+            },
+            {
+                "unregisterScreenSpaceRenderable",
+                &luascriptfunctions::unregisterScreenSpaceRenderable,
+                "string",
+                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
             },
         },
     };
@@ -1148,7 +1157,6 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 
     if (it != _screenSpaceRenderables.end()) {
         s->deinitialize();
-        _deletedScreenSpaceRenderables.push_back(s);
         _screenSpaceRenderables.erase(it);
     }
 }

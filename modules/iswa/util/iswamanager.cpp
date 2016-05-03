@@ -216,7 +216,9 @@ std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
 }
 
 void ISWAManager::createScreenSpace(int id){
-    OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceCygnet>(id));
+    std::string luaTable = "{ Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
+    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    OsEng.scriptEngine().queueScript(script);
 }
 
 void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){

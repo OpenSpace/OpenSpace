@@ -33,11 +33,28 @@ namespace openspace {
 ScreenSpaceImage::ScreenSpaceImage(std::string texturePath)
     :ScreenSpaceRenderable()
     ,_texturePath("texturePath", "Texture path", texturePath)
-
 {
     _id = id();
     setName("ScreenSpaceImage" + std::to_string(_id));
     
+    registerProperties();
+
+    addProperty(_texturePath);
+    OsEng.gui()._screenSpaceProperty.registerProperty(&_texturePath);    
+    _texturePath.onChange([this](){ loadTexture(); });
+}
+
+ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
+    :ScreenSpaceRenderable()
+    ,_texturePath("texturePath", "Texture path", "")
+{
+    _id = id();
+    setName("ScreenSpaceImage" + std::to_string(_id));
+
+    std::string texturePath;
+    dictionary.getValue("TexturePath", texturePath);
+    _texturePath.set(texturePath);
+
     registerProperties();
 
     addProperty(_texturePath);
