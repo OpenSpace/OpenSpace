@@ -23,20 +23,22 @@
 ****************************************************************************************/
 #include <modules/iswa/util/iswamanager.h>
 
-#include <ghoul/filesystem/filesystem>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
-#include <openspace/util/time.h>
+#include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/iswagroup.h>
+
 #include <fstream>
+#include <ghoul/filesystem/filesystem>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/util/time.h>
+#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswagroup.h>
 
 #include "iswamanager_lua.inl";
 

@@ -46,12 +46,12 @@ friend class ISWAGroup;
     // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
 
  protected:
-    void transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
-    void normValues(glm::vec2 normValues){ _normValues.setValue(normValues); };
-    void backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
     void useLog(bool useLog){ _useLog.setValue(useLog); };
+    void normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
     void useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
     void dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+    void transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+    void backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
     // const std::vector<openspace::properties::SelectionProperty::Option>& dataOptions() const {return _dataOptions.options(); };
 

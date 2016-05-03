@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,28 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/iswa/iswamodule.h>
+#ifndef __CYGNETSPHERE_H__
+#define __CYGNETSPHERE_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/iswa/rendering/iswacygnet.h>
 
-#include <ghoul/misc/assert.h>
+namespace openspace{
+class CygnetSphere : public ISWACygnet {
+public:
+    CygnetSphere(const ghoul::Dictionary& dictionary);
+    ~CygnetSphere();
 
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/kameleonplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/screenspacecygnet.h>
+    virtual bool isReady() const override;
+    virtual void render(const RenderData& data) override;
+    virtual void update(const UpdateData& data) override;
 
-namespace openspace {
+protected:
+    virtual bool loadTexture() = 0;
+    virtual bool updateTexture() = 0;
 
-    ISWAModule::ISWAModule()
-        : OpenSpaceModule("ISWA")
-    {}
+    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+};
 
-    void ISWAModule::internalInitialize(){
-        FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
+} //namespace openspace
 
-        fRenderable->registerClass<TexturePlane>("TexturePlane");
-        fRenderable->registerClass<DataPlane>("DataPlane");
-        fRenderable->registerClass<KameleonPlane>("KameleonPlane");
-        fRenderable->registerClass<DataSphere>("DataSphere");
-
-        auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-        ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
-
-        fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
-    }
-}
+#endif // __CYGNETSPHERE_H__

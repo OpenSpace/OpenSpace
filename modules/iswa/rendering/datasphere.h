@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,29 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/iswa/iswamodule.h>
+#ifndef __DATASPHERE_H__
+#define __DATASPHERE_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/iswa/rendering/cygnetsphere.h>
 
-#include <ghoul/misc/assert.h>
+namespace openspace{
 
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/kameleonplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/screenspacecygnet.h>
+class DataSphere : public CygnetSphere {
+public:
+    DataSphere(const ghoul::Dictionary& dictionary);
+    ~DataSphere();
 
-namespace openspace {
+    virtual bool initialize() override;
+    virtual bool deinitialize() override;
 
-    ISWAModule::ISWAModule()
-        : OpenSpaceModule("ISWA")
-    {}
+protected:
 
-    void ISWAModule::internalInitialize(){
-        FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
-        auto fRenderable = FactoryManager::ref().factory<Renderable>();
-        ghoul_assert(fRenderable, "No renderable factory existed");
+private:
+    virtual bool loadTexture() override; 
+    virtual bool updateTexture() override;
+};
 
-        fRenderable->registerClass<TexturePlane>("TexturePlane");
-        fRenderable->registerClass<DataPlane>("DataPlane");
-        fRenderable->registerClass<KameleonPlane>("KameleonPlane");
-        fRenderable->registerClass<DataSphere>("DataSphere");
 
-        auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-        ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
+} //namespace openspace 
 
-        fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
-    }
-}
+#endif //__DATASPHERE_H__
