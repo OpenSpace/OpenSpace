@@ -36,7 +36,7 @@ ISWAGroup::ISWAGroup(int id, ISWAManager::CygnetType type)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/parula.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
     ,_type(type)
 {
