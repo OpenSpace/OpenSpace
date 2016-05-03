@@ -46,7 +46,6 @@ class ISWACygnet;
 struct MetadataFuture {
     int id;
     int group;
-    std::string guiType;
     std::string name;
     std::string json;
     int type;
@@ -73,8 +72,6 @@ public:
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
 
-    void update();
-
     void registerToGroup(int id, ISWACygnet* cygnet, CygnetType type);
     void unregisterFromGroup(int id, ISWACygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
@@ -96,8 +93,6 @@ private:
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
-
-    std::vector<std::shared_ptr<MetadataFuture>> _metadataFutures;
 
     std::map<int, std::shared_ptr<ISWAGroup>> _groups;
 };
