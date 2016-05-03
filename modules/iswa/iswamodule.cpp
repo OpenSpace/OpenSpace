@@ -29,7 +29,6 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/kameleonplane.h>
@@ -44,7 +43,6 @@ namespace openspace {
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
         ghoul_assert(fRenderable, "No renderable factory existed");
 
-        fRenderable->registerClass<ISWAContainer>("ISWAContainer");
         fRenderable->registerClass<TexturePlane>("TexturePlane");
         fRenderable->registerClass<DataPlane>("DataPlane");
         fRenderable->registerClass<KameleonPlane>("KameleonPlane");

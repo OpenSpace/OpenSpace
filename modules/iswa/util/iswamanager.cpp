@@ -28,7 +28,6 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/util/time.h>
-#include <modules/iswa/rendering/iswacontainer.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/ext/json/json.hpp>
 #include <fstream>

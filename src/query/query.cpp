@@ -31,7 +31,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswacontainer.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <modules/iswa/rendering/iswagroup.h>
 
