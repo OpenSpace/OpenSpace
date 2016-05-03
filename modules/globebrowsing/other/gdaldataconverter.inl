@@ -44,7 +44,8 @@ namespace openspace {
     template<class T>
     std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
         GDALDataset* dataSet,
-        const GeodeticTileIndex& tileIndex) {
+        const GeodeticTileIndex& tileIndex,
+        int minNumPixelsRequired) {
         int nRasters = dataSet->GetRasterCount();
 
         ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
@@ -67,7 +68,6 @@ namespace openspace {
 
         int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
 
-        int minNumPixelsRequired = 512;
         int ov = log2(minNumPixels0) - log2(minNumPixelsRequired + 1);
 
         ov = glm::clamp(ov, 0, numOverviews - 1);

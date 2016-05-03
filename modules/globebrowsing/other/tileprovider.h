@@ -53,10 +53,14 @@ namespace openspace {
     */
     class TileProvider {
     public:
-        TileProvider(const std::string& fileName, int tileCacheSize);
+        TileProvider(
+            const std::string& fileName,
+            int tileCacheSize,
+            int minimumPixelsize);
         ~TileProvider();
 
         std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
+        std::shared_ptr<Texture> getTemporaryTexture();
 
         void prerender();
 
@@ -93,6 +97,9 @@ namespace openspace {
         GdalDataConverter<GLdouble> _doubleConverter;
 
         ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
+
+        std::shared_ptr<Texture> _tempTexture;
+        int _minimumPixelSize;
     };
 
 }  // namespace openspace

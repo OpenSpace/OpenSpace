@@ -73,9 +73,7 @@ void main()
 
 	PositionNormalPair pair = globalInterpolation(fs_uv);
 
-	
 	float sampledHeight00, sampledHeight10, sampledHeight01, sampledHeight11;
-
 
 	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
 	sampledHeight00 = texture(textureSampler00, uv00).r;

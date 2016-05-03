@@ -77,7 +77,7 @@ namespace openspace {
     LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
         : PatchRenderer()
         , _grid(grid)
-        , tileProvider("map_service_configs/TERRAIN.wms" , 5000)
+        , tileProvider("map_service_configs/TERRAIN.wms" , 5000, 128)
         //, tileProvider("map_service_configs/frmt_wms_virtualearth.xml", 5000)
         //, tileProvider("textures/earth_bluemarble.jpg", 5000)
     {
@@ -126,7 +126,6 @@ namespace openspace {
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
             * viewTransform * modelTransform;
 
-
         // activate shader
         _programObject->activate();
 
@@ -135,19 +134,17 @@ namespace openspace {
         bool usingTile = true;
         tile00 = tileProvider.getTile(tileIndex);
 
-        if (tile00 != nullptr) {
-            //tile00 = _tileSet.getTile(tileIndex);
-            usingTile = false;
-
-            glm::mat3 uvTransform = glm::mat3(1);
-            // Bind and use the texture
-            ghoul::opengl::TextureUnit texUnit;
-            texUnit.activate();
-            tile00->bind();
-            _programObject->setUniform("textureSampler00", texUnit);
-            _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
-
+        if (tile00 == nullptr) {
+            tile00 = tileProvider.getTemporaryTexture();
         }
+        
+        glm::mat3 uvTransform = glm::mat3(1);
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnit;
+        texUnit.activate();
+        tile00->bind();
+        _programObject->setUniform("textureSampler00", texUnit);
+        _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
 
 
         Geodetic2 swCorner = newPatch.southWestCorner();

@@ -44,21 +44,6 @@ namespace openspace {
         , _offsetLevel0(offsetLevel0)
         , _depth(depth)
     {
-        // Set e texture to test
-        std::string fileName = "textures/earth_bluemarble.jpg";
-        //std::string fileName = "../../../build/tiles/tile5_8_12.png";
-        //std::string fileName = "tile5_8_12.png";
-        _tempTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
-
-        if (_tempTexture) {
-            LDEBUG("Loaded texture from '" << "textures/earth_bluemarble.jpg" << "'");
-            _tempTexture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _tempTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
     }
 
     PatchCoverageProvider::~PatchCoverageProvider(){
@@ -164,7 +149,7 @@ namespace openspace {
                 if (patchCoverageToReturn.textureTransformPairs[linearIdx].first == nullptr)
                 {
                     patchCoverageToReturn.textureTransformPairs[linearIdx].first =
-                        _tempTexture;
+                        _tileProvider->getTemporaryTexture();
                     patchCoverageToReturn.textureTransformPairs[linearIdx].second =
                         glm::mat3(1);
                 }

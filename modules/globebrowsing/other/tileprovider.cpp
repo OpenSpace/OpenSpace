@@ -45,10 +45,29 @@ namespace openspace {
 
     bool TileProvider::hasInitializedGDAL = false;
 
-    TileProvider::TileProvider(const std::string& filePath, int tileCacheSize)
+    TileProvider::TileProvider(
+        const std::string& filePath,
+        int tileCacheSize,
+        int minimumPixelSize)
     : _filePath(filePath)
     , _tileCache(tileCacheSize) // setting cache size
+    , _minimumPixelSize(minimumPixelSize)
     {
+        // Set a temporary texture
+        std::string fileName = "textures/earth_bluemarble.jpg";
+        _tempTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
+
+        if (_tempTexture) {
+            LDEBUG("Loaded texture from '" << fileName << "'");
+            _tempTexture->uploadTexture();
+
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            _tempTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        }
+
+
         int downloadApplicationVersion = 1;
         if (!DownloadManager::isInitialized()) {
             DownloadManager::initialize(
@@ -102,6 +121,10 @@ namespace openspace {
         }
     }
 
+    std::shared_ptr<Texture> TileProvider::getTemporaryTexture() {
+        return _tempTexture;
+    }
+
     std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
         const GeodeticTileIndex& tileIndex) {
         
@@ -111,25 +134,46 @@ namespace openspace {
         switch (gdalType)
         {
         case GDT_Byte:
-            return _uByteConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _uByteConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_UInt16:
-            return _uShortConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _uShortConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_Int16:
-            return _shortConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _shortConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_UInt32:
-            return _uIntConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _uIntConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_Int32:
-            return _intConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _intConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_Float32:
-            return _floatConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _floatConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         case GDT_Float64:
-            return _doubleConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            return _doubleConverter.getUninitializedTextureTile(
+                _gdalDataSet,
+                tileIndex,
+                _minimumPixelSize);
             break;
         default:
             LERROR("GDAL data type unknown to OpenGL: " << gdalType);

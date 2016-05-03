@@ -74,9 +74,6 @@ Fragment getFragment() {
 
 	frag.color = max(color00, max(color10, max(color01, color11))) * 10;
 
-	//frag.color = frag.color * 0.5 + 0.999*texture(textureSampler, fs_uv);
-	//frag.color /= 4;
-
 	vec4 uvColor = vec4(fract(fs_uv * segmentsPerPatch), 0.4,1);
 	frag.color = frag.color.a < 0.1 ? uvColor * 0.5 : frag.color;
 

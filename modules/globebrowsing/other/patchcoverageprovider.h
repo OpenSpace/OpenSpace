@@ -87,10 +87,6 @@ namespace openspace {
         Geodetic2 _sizeLevel0;
         Geodetic2 _offsetLevel0;
         int _depth;
-
-        std::shared_ptr<Texture> _tempTexture;
-
-        
     };
 
 }  // namespace openspace

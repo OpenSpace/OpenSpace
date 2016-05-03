@@ -30,6 +30,8 @@ uniform vec3 radiiSquared;
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
+uniform sampler2D textureSampler00;
+
 layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
@@ -38,20 +40,23 @@ out vec2 fs_uv;
 #include "PowerScaling/powerScaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
-vec3 globalInterpolation() {
+PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_UV.y; // Lat
 	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_UV.x; // Lon
 	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
-	return positionPairModelSpace.position;
+	return positionPairModelSpace;
 }
 
 void main()
 {
 	fs_uv = in_UV;
-	vec3 p = globalInterpolation();
+	PositionNormalPair pair = globalInterpolation();
 
-	vec4 position = modelViewProjectionTransform * vec4(p, 1);
+	float sampledHeight = texture(textureSampler00, fs_uv).r;
+	pair.position += pair.normal * sampledHeight * 1e5;
+
+	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 
 	vs_position = z_normalization(position);
 	gl_Position = vs_position;
