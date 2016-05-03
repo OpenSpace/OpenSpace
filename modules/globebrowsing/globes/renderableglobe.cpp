@@ -55,8 +55,8 @@ namespace openspace {
         dictionary.getValue(keyRadii, radii);
         _ellipsoid = Ellipsoid(radii);
 
-        addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(_ellipsoid)), 1e8);
-        //addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(_ellipsoid)), 1e9);
+        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(_ellipsoid)), 1e8);
+        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(_ellipsoid)), 1e9);
         addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
     }
 

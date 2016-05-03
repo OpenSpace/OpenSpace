@@ -85,12 +85,8 @@ namespace openspace {
 
     void ClipMapGlobe::render(const RenderData& data)
     {
-        // TODO : Choose the max depth and the min depth depending on the camera
         int minDepth, maxDepth;
         calculateDesiredMinAndMaxDepth(data, minDepth, maxDepth);
-
-        LDEBUG(minDepth, "minDepth = ");
-        LDEBUG(maxDepth, "MaxDepth = ");
 
         // render patches
         for (size_t i = minDepth; i < maxDepth; i++)

@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
 #version __CONTEXT__
 
 uniform mat4 modelViewProjectionTransform;
@@ -49,50 +50,9 @@ out vec4 vs_position;
 out vec3 fs_position;
 out vec2 fs_uv;
 
+
 #include "PowerScaling/powerScaling_vs.hglsl"
-
-struct PositionNormalPair {
-	vec3 position;
-	vec3 normal;
-};
-
-vec3 geodeticSurfaceNormal(float latitude, float longitude)
-{
-	float cosLat = cos(latitude);
-	return vec3(
-		cosLat * cos(longitude),
-		cosLat * sin(longitude), 
-		sin(latitude));
-}
-
-PositionNormalPair geodetic3ToCartesian(
-	float latitude,
-	float longitude,
-	float height,
-	vec3 radiiSquared)
-{
-	vec3 normal = geodeticSurfaceNormal(latitude, longitude);
-	vec3 k = radiiSquared * normal;
-	float gamma = sqrt(dot(k, normal));
-	vec3 rSurface = k / gamma;
-	PositionNormalPair toReturn;
-	toReturn.position = rSurface + height * normal;
-	toReturn.normal = normal;
-	return toReturn;
-}
-
-PositionNormalPair geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
-{
-	// Position on surface : height = 0
-	return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
-}
-
-vec3 latLonToCartesian(float latitude, float longitude, float radius) {
-	return radius * vec3(
-		cos(latitude) * cos(longitude),
-		cos(latitude) * sin(longitude),
-		sin(latitude));
-}
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
 PositionNormalPair globalInterpolation(vec2 uv) {
 	vec2 lonLatInput;

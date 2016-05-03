@@ -38,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
 
-
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
@@ -70,7 +69,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
 
-
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
@@ -90,7 +88,9 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
 )
+
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(

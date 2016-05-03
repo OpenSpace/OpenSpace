@@ -135,19 +135,20 @@ namespace openspace {
         bool usingTile = true;
         tile00 = tileProvider.getTile(tileIndex);
 
-        if (tile00 == nullptr) {
-            tile00 = _tileSet.getTile(tileIndex);
+        if (tile00 != nullptr) {
+            //tile00 = _tileSet.getTile(tileIndex);
             usingTile = false;
+
+            glm::mat3 uvTransform = glm::mat3(1);
+            // Bind and use the texture
+            ghoul::opengl::TextureUnit texUnit;
+            texUnit.activate();
+            tile00->bind();
+            _programObject->setUniform("textureSampler00", texUnit);
+            _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
+
         }
 
-        glm::mat3 uvTransform = usingTile ? glm::mat3(1) : _tileSet.getUvTransformationPatchToTile(newPatch, tileIndex);
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnit;
-        texUnit.activate();
-        tile00->bind();
-        _programObject->setUniform("textureSampler00", texUnit);
-        _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
 
         Geodetic2 swCorner = newPatch.southWestCorner();
         _programObject->setUniform("segmentsPerPatch", _grid->xSegments());
