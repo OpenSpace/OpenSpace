@@ -44,7 +44,6 @@
 #include <modules/base/rendering/multimodelgeometry.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
-#include <modules/base/ephemeris/dynamicephemeris.h>
 #include <modules/base/ephemeris/spiceephemeris.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -75,7 +74,6 @@ void BaseModule::internalInitialize() {
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
     fEphemeris->registerClass<StaticEphemeris>("Static");
-    fEphemeris->registerClass<StaticEphemeris>("Dynamic");
     fEphemeris->registerClass<SpiceEphemeris>("Spice");
 
     auto fPlanetGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();

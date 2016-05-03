@@ -149,7 +149,7 @@ function (add_external_dependencies)
     # Unfortunately, we have to set this value manually; sigh
     # In the future, if the Qt version is updated, just add to this variable ---abock
     if (APPLE)
-        set(CMAKE_PREFIX_PATH "~/Qt/5.5/clang_64/lib/cmake" PARENT_SCOPE)
+        set(CMAKE_PREFIX_PATH "~/Qt/5.6/clang_64/lib/cmake" PARENT_SCOPE)
     endif ()
 endfunction ()
 

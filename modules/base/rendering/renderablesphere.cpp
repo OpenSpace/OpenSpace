@@ -121,7 +121,7 @@ bool RenderableSphere::initialize() {
     // pscstandard
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram("Sphere",
-        "${MODULES}/base/shaders/sphere_vs.glsl",
+        "${MODULE_BASE}/shaders/sphere_vs.glsl",
         "${MODULES}/base/shaders/sphere_fs.glsl");
     if (!_shader)
         return false;

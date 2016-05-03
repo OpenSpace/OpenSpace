@@ -5,8 +5,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_CALLISTO", -- should exist. 
-			Body = "CALLISTO",
+            Frame = "IAU_CALLISTO", -- should exist. 
+            Body = "CALLISTO",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.631, 6},

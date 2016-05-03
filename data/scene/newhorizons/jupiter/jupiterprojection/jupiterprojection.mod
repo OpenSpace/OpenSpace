@@ -3,7 +3,7 @@ return {
     {
         Name = "JupiterBarycenter",
         Parent = "SolarSystemBarycenter",     
-		Ephemeris = {
+        Ephemeris = {
             Type = "Spice",
             Body = "JUPITER BARYCENTER",
             Reference = "ECLIPJ2000",
@@ -11,7 +11,7 @@ return {
             Kernels = {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
             }
-		},
+        },
     },
     -- JupiterProjection module
     {   
@@ -19,8 +19,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
-			Frame = "IAU_JUPITER",
-			Body = "JUPITER",
+            Frame = "IAU_JUPITER",
+            Body = "JUPITER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.71492, 8 },
@@ -29,71 +29,71 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/jupiterFlipped_low.jpg",
-				Project = "textures/lorriTest1.jpg",
-				Sequencing = "true",
+                Project = "textures/lorriTest1.jpg",
+                Sequencing = "true",
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc
                 MieFactor = 1.0,
                 MieColor = {1.0, 1.0, 1.0}
             },
-			Projection = {
-				--Sequence   = "F:/JupiterFullSequence",
-				Sequence   = "${OPENSPACE_DATA}/scene/newhorizons/jupiter/jupiterprojection/ProjectionsOfInterest",
+            Projection = {
+                --Sequence   = "F:/JupiterFullSequence",
+                Sequence   = "${OPENSPACE_DATA}/scene/newhorizons/jupiter/jupiterprojection/ProjectionsOfInterest",
                 SequenceType = "image-sequence",
-				Observer   = "NEW HORIZONS",
-				Target     = "JUPITER",
-				Aberration = "NONE",
-			},
-			DataInputTranslation = {
-				Instrument = {
-					LORRI = {
-						DetectorType  = "Camera",
-						Spice = {"NH_LORRI"},
-					},		
-				},					
-				Target ={ 
-					Read  = {
-						"TARGET_NAME",
-						"INSTRUMENT_HOST_NAME",
-						"INSTRUMENT_ID", 
-						"START_TIME", 
-						"STOP_TIME", 
-						"DETECTOR_TYPE",
-						--"SEQUENCE_ID",
-					},
-					Convert = { 
-						JRINGS      = {"IMAGE-PLANE" },
-						J1IO        = {"IO"          },
-						J2EUROPA    = {"EUROPA"      },
-						J6HIMALIA   = {"IMAGE-PLANE" },
-						J7ELARA     = {"IMAGE-PLANE" },
-						CALIBRATION = {"CALIBRATION" },
-						JUPITER     = {"JUPITER"     },
-						CALLISTO    = {"CALLISTO"    },
-						GANYMEDE    = {"GANYMEDE"    },
-						EARTH       = {"EARTH"       },
-						NEWHORIZONS = {"NEW HORIZONS"},
-						CCD         = {"CAMERA"      },
-						FRAMECCD    = {"SCANNER"     },
-					},
-				},
-			},
-			Instrument = {                
-				Name       = "NH_LORRI",
-				Method     = "ELLIPSOID",
-				Aberration = "NONE",
-				Fovy       = 0.2907,
-				Aspect     = 1,
-				Near       = 0.2,
-				Far        = 10000,
-			},
+                Observer   = "NEW HORIZONS",
+                Target     = "JUPITER",
+                Aberration = "NONE",
+            },
+            DataInputTranslation = {
+                Instrument = {
+                    LORRI = {
+                        DetectorType  = "Camera",
+                        Spice = {"NH_LORRI"},
+                    },        
+                },                    
+                Target ={ 
+                    Read  = {
+                        "TARGET_NAME",
+                        "INSTRUMENT_HOST_NAME",
+                        "INSTRUMENT_ID", 
+                        "START_TIME", 
+                        "STOP_TIME", 
+                        "DETECTOR_TYPE",
+                        --"SEQUENCE_ID",
+                    },
+                    Convert = { 
+                        JRINGS      = {"IMAGE-PLANE" },
+                        J1IO        = {"IO"          },
+                        J2EUROPA    = {"EUROPA"      },
+                        J6HIMALIA   = {"IMAGE-PLANE" },
+                        J7ELARA     = {"IMAGE-PLANE" },
+                        CALIBRATION = {"CALIBRATION" },
+                        JUPITER     = {"JUPITER"     },
+                        CALLISTO    = {"CALLISTO"    },
+                        GANYMEDE    = {"GANYMEDE"    },
+                        EARTH       = {"EARTH"       },
+                        NEWHORIZONS = {"NEW HORIZONS"},
+                        CCD         = {"CAMERA"      },
+                        FRAMECCD    = {"SCANNER"     },
+                    },
+                },
+            },
+            Instrument = {                
+                Name       = "NH_LORRI",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+                Fovy       = 0.2907,
+                Aspect     = 1,
+                Near       = 0.2,
+                Far        = 10000,
+            },
             PotentialTargets = {
                 "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
             }
         },
-		Ephemeris = {
-			Type = "Static"
+        Ephemeris = {
+            Type = "Static"
         },
 
         Rotation = {
@@ -139,5 +139,5 @@ return {
          },
          GuiName = "/Solar/JupiterTrail"
      }
-	
+    
 }

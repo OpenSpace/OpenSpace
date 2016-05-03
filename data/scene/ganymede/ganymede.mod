@@ -5,7 +5,7 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_GANYMEDE", -- should exist. 
+            Frame = "IAU_GANYMEDE", -- should exist. 
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.631, 6},

@@ -14,8 +14,8 @@ return {
         Parent = "VenusBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_VENUS",
-			Body = "VENUS",
+            Frame = "IAU_VENUS",
+            Body = "VENUS",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 3.760, 6 },

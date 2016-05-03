@@ -40,6 +40,7 @@ Fragment getFragment()
     vec4 diffuse;
 
     vec2 texCoord = vs_st;
+    // Why is this here? ---abock
     texCoord.s = 1 - texCoord.s;
     texCoord.t = 1 - texCoord.y;
 

@@ -3,7 +3,7 @@ return {
     {
         Name = "JupiterBarycenter",
         Parent = "SolarSystemBarycenter",
-		Ephemeris = {
+        Ephemeris = {
             Type = "Spice",
             Body = "JUPITER BARYCENTER",
             Reference = "ECLIPJ2000",
@@ -11,7 +11,7 @@ return {
             Kernels = {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-		},
+        },
     },
     -- Jupiter module
     {   
@@ -19,8 +19,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_JUPITER",
-			Body = "JUPITER BARYCENTER",
+            Frame = "IAU_JUPITER",
+            Body = "JUPITER BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.71492, 8 },
@@ -36,7 +36,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static" -- jupiter is at its barycenter
         },
         Rotation = {
