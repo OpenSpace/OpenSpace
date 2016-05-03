@@ -1,13 +1,7 @@
 return {
 	{
 		Name = "iSWA",
-		Parent = "SolarSystem",
-		Renderable = {
-			Type = "ISWAContainer",
-			TextureCygnets = "[]",
-			DataCygnets = "[-2]",
-			Frame = "GALACTIC"
-		},
+		Parent = "Root",
 		Ephemeris = {
 			Type = "Spice",
 			Body = "Sun",

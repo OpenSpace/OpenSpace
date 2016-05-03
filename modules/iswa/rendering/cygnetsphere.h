@@ -22,29 +22,28 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __ISWACONTAINER_H__
-#define __ISWACONTAINER_H__
-#include <openspace/rendering/renderable.h>
+#ifndef __CYGNETSPHERE_H__
+#define __CYGNETSPHERE_H__
 
+#include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace{
-struct ExtensionFuture;
-
-class ISWAContainer : public Renderable{
+class CygnetSphere : public ISWACygnet {
 public:
-    ISWAContainer(const ghoul::Dictionary& dictionary);
-    ~ISWAContainer();
+    CygnetSphere(const ghoul::Dictionary& dictionary);
+    ~CygnetSphere();
 
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
+    virtual bool isReady() const override;
     virtual void render(const RenderData& data) override;
     virtual void update(const UpdateData& data) override;
 
-private:
-};    
+protected:
+    virtual bool loadTexture() = 0;
+    virtual bool updateTexture() = 0;
 
-}//namespace openspace
-#endif
+    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+};
+
+} //namespace openspace
+
+#endif // __CYGNETSPHERE_H__

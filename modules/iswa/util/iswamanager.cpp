@@ -23,21 +23,22 @@
 ****************************************************************************************/
 #include <modules/iswa/util/iswamanager.h>
 
-#include <ghoul/filesystem/filesystem>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
-#include <openspace/util/time.h>
-#include <modules/iswa/rendering/iswacontainer.h>
+#include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/screenspacecygnet.h>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/iswagroup.h>
+
 #include <fstream>
+#include <ghoul/filesystem/filesystem>
+#include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/util/time.h>
+#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswagroup.h>
 
 #include "iswamanager_lua.inl";
 
@@ -105,15 +106,14 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
     if(id > 0){
         createScreenSpace(id);
     }else if(id < 0){
-        //download metadata to texture plane
-        //std::shared_ptr<MetadataFuture> metadataFuture = downloadMetadata(id);
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = id;
         metaFuture->group = group;
-        if(info == "TEXTURE"){
+
+        if(info == _type[CygnetType::Texture]){
             metaFuture->type = CygnetType::Texture;
             metaFuture->geom  = CygnetGeometry::Plane;
-        } else if (info  == "DATA") {
+        } else if (info  == _type[CygnetType::Data]) {
             metaFuture->type = CygnetType::Data;
             metaFuture->geom  = CygnetGeometry::Plane;
         } else {
@@ -128,6 +128,7 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
             createPlane(metaFuture);
         };
 
+        // Download metadata
         DlManager.downloadToMemory(
             "http://128.183.168.116:3000/" + std::to_string(-id),
             // "http://10.0.0.76:3000/" + std::to_string(-id),
@@ -174,6 +175,7 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
             }
         );
 }
+
 
 std::string ISWAManager::iSWAurl(int id, std::string type){
     std::string url;

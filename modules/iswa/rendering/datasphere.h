@@ -21,55 +21,30 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/rendering/iswacontainer.h>
-#include <ghoul/filesystem/filesystem>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/screenspacecygnet.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/rendering/renderable.h>
-#include <modules/iswa/ext/json/json.hpp>
 
+#ifndef __DATASPHERE_H__
+#define __DATASPHERE_H__
 
-namespace {
-    using json = nlohmann::json;
-    const std::string _loggerCat = "ISWAContainer";
-}
+#include <modules/iswa/rendering/cygnetsphere.h>
 
 namespace openspace{
 
-ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
-    :Renderable(dictionary)
-{
-    // std::string textureCygnets;
-    // std::string dataCygnets;
-    // dictionary.getValue("TextureCygnets", textureCygnets);
-    // dictionary.getValue("DataCygnets", dataCygnets);
-    // std::cout << textureCygnets << std::endl;
-    // std::cout << dataCygnets << std::endl;
-    
-    // if(textureCygnets != ""){
-    //     json j = json::parse(textureCygnets);
-    //     for (auto& id : j) {
-    //         ISWAManager::ref().addISWACygnet(id, "TEXTURE");
-    //     }
-    // }
-    
-    // if(dataCygnets != ""){
-    //     json j = json::parse(dataCygnets);
-    //     for (auto& id : j) {
-    //         ISWAManager::ref().addISWACygnet(id, "DATA");
-    //     }
-    // }
-}
+class DataSphere : public CygnetSphere {
+public:
+    DataSphere(const ghoul::Dictionary& dictionary);
+    ~DataSphere();
 
-ISWAContainer::~ISWAContainer(){}
-bool ISWAContainer::initialize(){return true;}
-bool ISWAContainer::deinitialize(){return true;}
-bool ISWAContainer::isReady() const { return true; }
-void ISWAContainer::render(const RenderData& data){} 
+    virtual bool initialize() override;
+    virtual bool deinitialize() override;
 
-void ISWAContainer::update(const UpdateData& data){}
+protected:
 
-}
+private:
+    virtual bool loadTexture() override; 
+    virtual bool updateTexture() override;
+};
+
+
+} //namespace openspace 
+
+#endif //__DATASPHERE_H__
