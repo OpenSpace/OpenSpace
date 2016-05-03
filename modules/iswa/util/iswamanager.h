@@ -31,10 +31,15 @@
 #include <ghoul/glm.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/selectionproperty.h>
+// #include <modules/iswa/rendering/iswacygnet.h>
+// #include <modules/iswa/rendering/iswagroup.h>
 
 
 namespace openspace {
-class ISWACygnet;
+class ISWAGroup;
+class ISWACygnet; 
+
 
 struct MetadataFuture {
     int id;
@@ -48,6 +53,7 @@ class ISWAManager : public ghoul::Singleton<ISWAManager> {
     friend class ghoul::Singleton<ISWAManager>;
 
 public:
+    enum CygnetType {Texture, Data};
 
     ISWAManager();
     ~ISWAManager();
@@ -62,19 +68,25 @@ public:
 
     void update();
 
+    void registerToGroup(int id, ISWACygnet* cygnet, CygnetType type);
+    void unregisterFromGroup(int id, ISWACygnet* cygnet);
+    void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
+    std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);
 
 private:
     std::string iSWAurl(int id, std::string type = "image");
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string parseJSONToLuaTable(int id, std::string json, std::string type);
-    std::string parseKWToLuaTable(std::string kwPath);
+    std::string parseJSONToLuaTable(int id, std::string name, std::string json, std::string type, int group);
+    std::string parseKWToLuaTable(std::string kwPath, int group);
 
-    void createPlane(int id, std::string json, std::string type);
+    void createPlane(int id, std::string json, std::string type, int group = -1);
     void createScreenSpace(int id);
-    void createKameleonPlane(std::string kwPath); 
+    void createKameleonPlane(std::string kwPath, int group = -1); 
 
     std::map<std::string, std::string> _month;
     std::vector<std::shared_ptr<MetadataFuture>> _metadataFutures;
+
+    std::map<int, std::shared_ptr<ISWAGroup>> _groups;
 };
 
 } //namespace openspace

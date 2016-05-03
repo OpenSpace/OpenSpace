@@ -81,6 +81,11 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 
     addProperty(_delete);
 
+    float groupId = -1;
+    // if(dictionary.hasValue<float>("Group")){
+        dictionary.getValue("Group", groupId);
+    // }
+    _data->groupId = groupId;
     // std::cout << _data->id << std::endl;
     // std::cout << _data->frame << std::endl;
     // std::cout << std::to_string(_data->offset) << std::endl;

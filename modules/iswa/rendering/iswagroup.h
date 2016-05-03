@@ -22,90 +22,50 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __ISWACYGNET_H__
-#define __ISWACYGNET_H__
+#ifndef __ISWAGROUP_H__
+#define __ISWAGROUP_H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <memory>
-#include <chrono>
 #include <openspace/properties/propertyowner.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/onscreengui/include/gui.h>
-#include <ghoul/opengl/texture.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/vectorproperty.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/openspaceengine.h>
+// #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/util/iswamanager.h>
-#include <ghoul/misc/dictionary.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/transferfunction.h>
 
 
 namespace openspace{
-class ISWAGroup;
+class ISWACygnet;
 
-struct Metadata {
-    int id;
-    int groupId;
-    int updateTime;
-    std::string path;
-    std::string parent;
-    std::string frame;
-    glm::vec3 gridMin;
-    glm::vec3 gridMax;
-    glm::vec3 offset;
-    glm::vec3 scale;
-    glm::vec4 spatialScale;
-    std::string scaleVariable;
-    std::string coordinateType;
-};
-
-
-
-class ISWACygnet : public Renderable, public std::enable_shared_from_this<ISWACygnet> {
-    friend class ISWAGroup;
-
+class ISWAGroup : public properties::PropertyOwner{
 public:
-    ISWACygnet(const ghoul::Dictionary& dictionary);
-    ~ISWACygnet();
+	ISWAGroup(int id, ISWAManager::CygnetType type);
+	~ISWAGroup();
+	void registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type);
+	void unregisterCygnet(ISWACygnet* cygnet);
+	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
 
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
+private:
+	properties::BoolProperty _enabled;
 
-protected:
-    void registerProperties();
-    void unregisterProperties();
-    void initializeTime();
-    
-    void enabled(bool enabled){_enabled.setValue(enabled);};
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::Vec2Property _normValues;
+    properties::Vec2Property _backgroundValues;
+    properties::StringProperty _transferFunctionsFile;
+	properties::SelectionProperty _dataOptions;
+	// properties::SelectionProperty _dataOptions;
+ //    properties::StringProperty _transferFunctionsFile;
+ //    properties::Vec2Property _normValues;
+ //    properties::Vec2Property _backgroundValues;
+ //    properties::BoolProperty _useLog;
+ //    properties::BoolProperty _useHistogram;;
 
-    properties::TriggerProperty _delete;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-
-    std::shared_ptr<Metadata> _data;
-    std::string _memorybuffer;
-
-    glm::dmat3 _stateMatrix;
-
-    double _openSpaceTime;
-    double _lastUpdateOpenSpaceTime;
-
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
-    int _minRealTimeUpdateInterval;
-
-    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
-
-    ISWAManager::CygnetType _type;
+	// int groupId;
+	// ISWACygnet cygnet;
+	std::vector<ISWACygnet* > _cygnets;
+	ISWAManager::CygnetType _type;
 };
 
-}//namespace openspace
+} //namespace openspace
 #endif

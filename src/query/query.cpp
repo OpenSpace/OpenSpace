@@ -33,7 +33,7 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswacontainer.h>
 #include <openspace/rendering/screenspacerenderable.h>
-
+#include <modules/iswa/rendering/iswagroup.h>
 
 namespace openspace {
 
@@ -81,6 +81,12 @@ properties::Property* property(const std::string& uri) {
         std::shared_ptr<ScreenSpaceRenderable> ssr = OsEng.renderEngine().screenSpaceRenderable(nameUri);
         if(ssr){
             properties::Property* property = ssr->property(remainingUri);
+            return property;
+        }
+
+        std::shared_ptr<ISWAGroup> group = ISWAManager::ref().iSWAGroup(nameUri);
+        if(group){
+            properties::Property* property = group->property(remainingUri);
             return property;
         }
         
