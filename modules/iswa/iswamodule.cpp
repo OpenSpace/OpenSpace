@@ -25,6 +25,7 @@
 #include <modules/iswa/iswamodule.h>
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
@@ -33,6 +34,7 @@
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/iswa/rendering/screenspacecygnet.h>
 
 namespace openspace {
 
@@ -41,6 +43,7 @@ namespace openspace {
     {}
 
     void ISWAModule::internalInitialize(){
+        FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
         ghoul_assert(fRenderable, "No renderable factory existed");
 
@@ -48,5 +51,10 @@ namespace openspace {
         fRenderable->registerClass<TexturePlane>("TexturePlane");
         fRenderable->registerClass<DataPlane>("DataPlane");
         fRenderable->registerClass<KameleonPlane>("KameleonPlane");
+
+        auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+        ghoul_assert(fScreenSpaceRenderable, "No fScreenSpaceRenderable factory existed");
+
+        fScreenSpaceRenderable->registerClass<ScreenSpaceCygnet>("ScreenSpaceCygnet");
     }
 }

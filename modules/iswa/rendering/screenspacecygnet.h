@@ -35,6 +35,7 @@ namespace openspace{
 class ScreenSpaceCygnet : public ScreenSpaceRenderable {
 public:
     ScreenSpaceCygnet(int cygnetId);
+    ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet();
 
     void render() override;
@@ -47,7 +48,7 @@ private:
     void updateTexture();
     void loadTexture();
 
-    const int _cygnetId;
+    int _cygnetId;
 
     properties::FloatProperty _updateInterval;
     std::chrono::milliseconds _realTime;

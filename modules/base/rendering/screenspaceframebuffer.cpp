@@ -32,7 +32,7 @@
 #include <openspace/rendering/framebufferrenderer.h>
 
 namespace openspace {
-ScreenSpaceFramebuffer::ScreenSpaceFramebuffer() 
+ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
     :ScreenSpaceRenderable()
     ,_size("size", "Size", glm::vec4(0), glm::vec4(0), glm::vec4(2000))
     ,_framebuffer(nullptr)

@@ -133,6 +133,29 @@ int fadeOut(lua_State* L) {
 	return 0;
 }
 
+int registerScreenSpaceRenderable(lua_State* L) {
+    static const std::string _loggerCat = "registerScreenSpaceRenderable";
+    using ghoul::lua::errorLocation;
+
+    int nArguments = lua_gettop(L);
+	if (nArguments != 1)
+		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    ghoul::Dictionary d;
+    try {
+        ghoul::lua::luaDictionaryFromState(L, d);
+    }
+    catch (const ghoul::lua::LuaFormatException& e) {
+        LERROR(e.what());
+        return 0;
+    }
+	
+	std::shared_ptr<ScreenSpaceRenderable> s( ScreenSpaceRenderable::createFromDictionary(d) );
+    OsEng.renderEngine().registerScreenSpaceRenderable(s);
+      
+    return 1;
+}
+
 } // namespace luascriptfunctions
 
 }// namespace openspace

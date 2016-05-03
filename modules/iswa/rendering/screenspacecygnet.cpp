@@ -45,6 +45,21 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
     registerProperties();
 }
 
+ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderable()
+    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
+{
+    // hacky, have to first get as float and the cast to int.
+    float cygnetid;
+    dictionary.getValue("CygnetId", cygnetid);
+    _cygnetId = (int)cygnetid;
+    
+    setName("iSWACygnet" + std::to_string(_cygnetId));
+    addProperty(_updateInterval);
+
+    registerProperties();
+}
+
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
 bool ScreenSpaceCygnet::initialize(){

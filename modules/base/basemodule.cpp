@@ -25,6 +25,7 @@
 #include <modules/base/basemodule.h>
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
@@ -42,6 +43,8 @@
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
+#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
 #include <modules/base/ephemeris/dynamicephemeris.h>
@@ -58,6 +61,12 @@ BaseModule::BaseModule()
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
+
+    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+
+    fScreenSpaceRenderable->registerClass<ScreenSpaceImage>("ScreenSpaceImage");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

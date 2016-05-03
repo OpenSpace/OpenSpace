@@ -380,7 +380,7 @@ void RenderEngine::postSynchronizationPreDraw() {
         _deletedScreenSpaceRenderables.clear(); 
     
     for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
+            screenspacerenderable->update();
     }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
@@ -645,6 +645,12 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "number",
                 "",
                 true
+            },
+            {
+                "registerScreenSpaceRenderable",
+                &luascriptfunctions::registerScreenSpaceRenderable,
+                "table",
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
             },
         },
     };
