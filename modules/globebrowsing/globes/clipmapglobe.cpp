@@ -52,11 +52,11 @@ namespace openspace {
         _tileProvider = shared_ptr<TileProvider>(new TileProvider("map_service_configs/TERRAIN.wms", 100));
         // init Renderer
         auto outerPatchRenderer = new ClipMapPatchRenderer(
-            shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(256)),
+            shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(512)),
             _tileProvider);
         _outerPatchRenderer.reset(outerPatchRenderer);
         auto innerPatchRenderer = new ClipMapPatchRenderer(
-            shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(256)),
+            shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(512)),
             _tileProvider);
         _innerPatchRenderer.reset(innerPatchRenderer);
     }
@@ -85,8 +85,12 @@ namespace openspace {
     void ClipMapGlobe::render(const RenderData& data)
     {
         // TODO : Choose the max depth and the min depth depending on the camera
-        int maxDepth = 10;
-        int minDepth = 0;
+        int minDepth, maxDepth;
+        calculateDesiredMinAndMaxDepth(data, minDepth, maxDepth);
+
+        LDEBUG(minDepth, "minDepth = ");
+        LDEBUG(maxDepth, "MaxDepth = ");
+
         // render patches
         for (size_t i = minDepth; i < maxDepth; i++)
         {
@@ -100,6 +104,42 @@ namespace openspace {
     void ClipMapGlobe::update(const UpdateData& data) {
         _innerPatchRenderer->update();
         _outerPatchRenderer->update();
+    }
+
+    void ClipMapGlobe::calculateDesiredMinAndMaxDepth(
+        const RenderData& data,
+        int& minDepth,
+        int& maxDepth)
+    {
+        Scalar minimumRadius = _ellipsoid.minimumRadius();
+        Vec3 cameraPosition = data.camera.position().dvec3();
+        Vec3 cameraPositionOnSurface = _ellipsoid.scaleToGeodeticSurface(cameraPosition);
+        Scalar h = glm::length(cameraPosition - cameraPositionOnSurface);
+        Scalar cosAngleToHorizon = minimumRadius / (minimumRadius + h);
+        Scalar angleToHorizon = glm::acos(cosAngleToHorizon);
+        Scalar minimumPatchSize = glm::min(
+            _clipMapPyramid.getPatchSizeAtLevel0().lat,
+            _clipMapPyramid.getPatchSizeAtLevel0().lon);
+        minDepth = log2(minimumPatchSize / 2 / angleToHorizon);
+
+        // Calculate desired level based on distance
+        Scalar scaleFactor = 1 * minimumRadius;
+        Scalar projectedScaleFactor = scaleFactor / h;
+        maxDepth = glm::max(static_cast<int>(log2(projectedScaleFactor)), 0);
+
+        // Test smaller and smaller patches until one is outside of frustum
+        int i;
+        for (i = minDepth; i < maxDepth; i++)
+        {
+            Geodetic2 center = _ellipsoid.cartesianToGeodetic2(cameraPosition);
+            Geodetic2 halfSize = _clipMapPyramid.getPatchSizeAtLevel(i) / 2;
+            GeodeticPatch testPatch(center, halfSize);
+            // Do frustrum culling
+            if (!_frustumCuller.isVisible(data, testPatch, _ellipsoid)) {
+                break;
+            }
+        }
+        maxDepth = i;
     }
 
 }  // namespace openspace

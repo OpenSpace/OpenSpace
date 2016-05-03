@@ -33,23 +33,27 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-	const std::string _loggerCat = "ClipMapPyramid";
+    const std::string _loggerCat = "ClipMapPyramid";
 }
 
 namespace openspace {
-	ClipMapPyramid::ClipMapPyramid(Geodetic2 sizeLevel0)
-		: _sizeLevel0(sizeLevel0)
-	{
+    ClipMapPyramid::ClipMapPyramid(Geodetic2 sizeLevel0)
+        : _sizeLevel0(sizeLevel0)
+    {
 
-	}
+    }
 
-	ClipMapPyramid::~ClipMapPyramid()
-	{}
+    ClipMapPyramid::~ClipMapPyramid()
+    {}
 
-	Geodetic2 ClipMapPyramid::getPatchSizeAtLevel(int level)
-	{
-		return Geodetic2(_sizeLevel0.lat / pow(2, level), _sizeLevel0.lon / pow(2, level));
-	}
+    Geodetic2 ClipMapPyramid::getPatchSizeAtLevel(int level)
+    {
+        return Geodetic2(_sizeLevel0.lat / pow(2, level), _sizeLevel0.lon / pow(2, level));
+    }
 
+    Geodetic2 ClipMapPyramid::getPatchSizeAtLevel0()
+    {
+        return _sizeLevel0;
+    }
 
 }  // namespace openspace

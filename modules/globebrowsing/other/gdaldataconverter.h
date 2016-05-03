@@ -61,6 +61,12 @@ namespace openspace {
             GLuint glFormat;
         };
 
+        struct TextureDataType
+        {
+            Texture::Format ghoulFormat;
+            GLuint glFormat;
+        };
+
         TextureFormat getTextureFormatFromRasterCount(int rasterCount);
 
         glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);

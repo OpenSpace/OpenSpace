@@ -120,8 +120,6 @@ namespace openspace {
             sin(geodetic2.lat));
     }
 
-    // TODO: IMPLEMENT THESE FUNCTIONS AND SEND RADIISQUARED TO THE SHADER PROGRAM 
-
     Vec3 Ellipsoid::radiiSquared() const
     {
         return _cachedValues._radiiSquared;

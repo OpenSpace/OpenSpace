@@ -128,7 +128,7 @@ namespace openspace {
 
         int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
 
-        int minNumPixelsRequired = 256;
+        int minNumPixelsRequired = 512;
         int ov = log2(minNumPixels0) - log2(minNumPixelsRequired);
 
         ov = glm::clamp(ov, 0, numOverviews - 1);
@@ -162,6 +162,7 @@ namespace openspace {
                 0);							// Line spacing
         }
 
+        // GDAL reads image data top to bottom. We want the opposite.
         GLubyte* imageDataYflipped = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
         for (size_t y = 0; y < numberOfPixels.y; y++) {
             for (size_t x = 0; x < numberOfPixels.x; x++) {

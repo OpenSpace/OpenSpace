@@ -34,6 +34,7 @@
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/frustumculler.h>
 #include <modules/globebrowsing/globes/clipmappyramid.h>
 
 namespace ghoul {
@@ -59,12 +60,17 @@ namespace openspace {
         const Ellipsoid& ellipsoid() const;
 
     private:
+        void calculateDesiredMinAndMaxDepth(
+            const RenderData& data,
+            int& minDepth,
+            int& maxDepth);
+        
         shared_ptr<TileProvider> _tileProvider;
         std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
         std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
         
         ClipMapPyramid _clipMapPyramid;
-
+        FrustumCuller _frustumCuller;
         const Ellipsoid& _ellipsoid;
     };
 

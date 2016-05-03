@@ -30,21 +30,22 @@
 
 namespace openspace {
 
-	class ClipMapPyramid {
-	public:
-		/**
-			\Param sizeLevel0 is the size of the biggest patch in the pyramid.
-			The parameter needs to be M_PI / pow(2, i) where i is a positive or zero
-			valued integer.
-		*/
-		ClipMapPyramid(Geodetic2 sizeLevel0);
-		~ClipMapPyramid();
+    class ClipMapPyramid {
+    public:
+        /**
+            \Param sizeLevel0 is the size of the biggest patch in the pyramid.
+            The parameter needs to be M_PI / pow(2, i) where i is a positive or zero
+            valued integer.
+        */
+        ClipMapPyramid(Geodetic2 sizeLevel0);
+        ~ClipMapPyramid();
 
-		Geodetic2 getPatchSizeAtLevel(int level);
+        Geodetic2 getPatchSizeAtLevel(int level);
+        Geodetic2 getPatchSizeAtLevel0();
 
-	private:
-		const Geodetic2 _sizeLevel0;
-	};
+    private:
+        const Geodetic2 _sizeLevel0;
+    };
 
 }  // namespace openspace
 
