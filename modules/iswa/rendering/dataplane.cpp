@@ -46,7 +46,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/parula.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
     // ,_colorbar(nullptr)
 {     
@@ -118,7 +118,8 @@ bool DataPlane::initialize(){
     // }
 
     // _textures.push_back(nullptr);
-    ISWAManager::ref().registerToGroup(_data->groupId, this, _type);
+    if(_data->groupId > 0)
+        ISWAManager::ref().registerToGroup(_data->groupId, this, _type);
 
 
     return isReady();
@@ -397,10 +398,10 @@ std::vector<float*> DataPlane::readData(){
         return data;
         
     } 
-    // else {
+    else {
     //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
-    //     return std::vector<float*>();
-    // }
+        return std::vector<float*>();
+    }
 } 
 
 

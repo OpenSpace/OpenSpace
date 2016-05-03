@@ -66,6 +66,10 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/iswa/util/iswamanager.h>
+#endif
+
 #ifdef _MSC_VER
 #ifdef OPENSPACE_ENABLE_VLD
 #include <vld.h>
@@ -134,6 +138,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     SpiceManager::initialize();
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    ISWAManager::initialize();
+#endif
+
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -354,6 +362,10 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(LuaConsole::luaLibrary());
     _scriptEngine->addLibrary(gui::GUI::luaLibrary());
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    _scriptEngine->addLibrary(ISWAManager::luaLibrary());
+#endif
 
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
