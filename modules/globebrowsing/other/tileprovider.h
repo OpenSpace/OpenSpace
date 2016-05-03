@@ -39,39 +39,18 @@
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/other/gdaldataconverter.h>
 
-
-namespace openspace {
-
-
-    struct UninitializedTextureTile {
-        UninitializedTextureTile(GLubyte* data, glm::uvec3 dims,
-            GdalDataConverter::TextureFormat format, const GeodeticTileIndex& ti) 
-        : imageData(data)
-        , dimensions(dims)
-        , texFormat(format)
-        , tileIndex(ti){
-
-        }
-
-
-        GLubyte * imageData;
-        glm::uvec3 dimensions;
-        GdalDataConverter::TextureFormat texFormat;
-        const GeodeticTileIndex tileIndex;
-    };
-
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //									TILE PROVIDER									    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
 
-
-
     using namespace ghoul::opengl;
 
+    /**
+        Provides tiles through GDAL datasets which can be defined with xml files
+        for example for wms.
+    */
     class TileProvider {
     public:
         TileProvider(const std::string& fileName, int tileCacheSize);
@@ -81,26 +60,39 @@ namespace openspace {
 
         void prerender();
 
-
     private:
 
         friend class TextureTileLoadJob;
 
-        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(const GeodeticTileIndex& tileIndex);
-        std::shared_ptr<Texture> initializeTexture(std::shared_ptr<UninitializedTextureTile> uninitedTexture);
-
+        /**
+            Fetches all the needeed texture data from the GDAL dataset.
+        */
+        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
+            const GeodeticTileIndex& tileIndex);
+        
+        /**
+            Creates an OpenGL texture and pushes the data to the GPU.
+        */
+        std::shared_ptr<Texture> initializeTexture(
+            std::shared_ptr<UninitializedTextureTile> uninitedTexture);
 
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
-
 
         const std::string _filePath;
 
         static bool hasInitializedGDAL;
         GDALDataset* _gdalDataSet;
-        GdalDataConverter _converter;
+
+        // Converters are needed for all different data types since they are templated.
+        GdalDataConverter<GLbyte>   _uByteConverter;
+        GdalDataConverter<GLushort> _uShortConverter;
+        GdalDataConverter<GLshort>  _shortConverter;
+        GdalDataConverter<GLuint>   _uIntConverter;
+        GdalDataConverter<GLint>    _intConverter;
+        GdalDataConverter<GLfloat>  _floatConverter;
+        GdalDataConverter<GLdouble> _doubleConverter;
 
         ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
-
     };
 
 }  // namespace openspace

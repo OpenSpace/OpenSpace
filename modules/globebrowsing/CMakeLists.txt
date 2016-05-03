@@ -82,7 +82,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
    

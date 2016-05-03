@@ -51,7 +51,9 @@ namespace openspace {
     {
         int downloadApplicationVersion = 1;
         if (!DownloadManager::isInitialized()) {
-            DownloadManager::initialize("../tmp_openspace_downloads/", downloadApplicationVersion);
+            DownloadManager::initialize(
+                "../tmp_openspace_downloads/",
+                downloadApplicationVersion);
         }
         
         if (!hasInitializedGDAL) {
@@ -64,24 +66,22 @@ namespace openspace {
         //auto desc = _gdalDataSet->GetDescription();
         
         ghoul_assert(_gdalDataSet != nullptr, "Failed to load dataset: " << filePath);
-
     }
 
     TileProvider::~TileProvider(){
         delete _gdalDataSet;
     }
 
-
     void TileProvider::prerender() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
-            std::shared_ptr<UninitializedTextureTile> uninitedTex = finishedJob->product();
+            std::shared_ptr<UninitializedTextureTile> uninitedTex =
+                finishedJob->product();
             HashKey key = uninitedTex->tileIndex.hashKey();
             std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
             _tileCache.put(key, texture);
         }
     }
-
 
     std::shared_ptr<Texture> TileProvider::getTile(const GeodeticTileIndex& tileIndex) {
         HashKey hashkey = tileIndex.hashKey();
@@ -102,101 +102,60 @@ namespace openspace {
         }
     }
 
+    std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
+        const GeodeticTileIndex& tileIndex) {
+        
+        // We assume here that all rasterbands have the same data type
+        GDALDataType gdalType = _gdalDataSet->GetRasterBand(1)->GetRasterDataType();
 
-
-
-
-    std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(const GeodeticTileIndex& tileIndex) {
-        int nRasters = _gdalDataSet->GetRasterCount();
-
-        ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
-
-        GDALRasterBand* firstBand = _gdalDataSet->GetRasterBand(1);
-
-        // Level = overviewCount - overview
-        int numOverviews = firstBand->GetOverviewCount();
-
-
-        int xSize0 = firstBand->GetXSize();
-        int ySize0 = firstBand->GetYSize();
-
-        GeodeticPatch patch = GeodeticPatch(tileIndex);
-        glm::uvec2 pixelStart0 = _converter.geodeticToPixel(_gdalDataSet, patch.northWestCorner());
-        glm::uvec2 pixelEnd0 = _converter.geodeticToPixel(_gdalDataSet, patch.southEastCorner());
-        glm::uvec2 numberOfPixels0 = pixelEnd0 - pixelStart0;
-
-
-        int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
-
-        int minNumPixelsRequired = 512;
-        int ov = log2(minNumPixels0) - log2(minNumPixelsRequired);
-
-        ov = glm::clamp(ov, 0, numOverviews - 1);
-
-        glm::uvec2 pixelStart(pixelStart0.x >> (ov + 1), pixelStart0.y >> (ov + 1));
-        glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
-
-
-
-        // GDAL reads image data top to bottom
-        GLubyte* imageData = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
-
-        // Read the data (each rasterband is a separate channel)
-        for (size_t i = 0; i < nRasters; i++) {
-            GDALRasterBand* rasterBand = _gdalDataSet->GetRasterBand(i + 1)->GetOverview(ov);
-
-            int xSize = rasterBand->GetXSize();
-            int ySize = rasterBand->GetYSize();
-
-            rasterBand->RasterIO(
-                GF_Read,
-                pixelStart.x,					// Begin read x
-                pixelStart.y,					// Begin read y
-                numberOfPixels.x,				// width to read x
-                numberOfPixels.y,				// width to read y
-                imageData + i,				// Where to put data
-                numberOfPixels.x,				// width to write x in destination
-                numberOfPixels.y,				// width to write y in destination
-                GDT_Byte,					// Type
-                sizeof(GLubyte) * nRasters,	// Pixel spacing
-                0);							// Line spacing
+        switch (gdalType)
+        {
+        case GDT_Byte:
+            return _uByteConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_UInt16:
+            return _uShortConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_Int16:
+            return _shortConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_UInt32:
+            return _uIntConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_Int32:
+            return _intConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_Float32:
+            return _floatConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        case GDT_Float64:
+            return _doubleConverter.getUninitializedTextureTile(_gdalDataSet, tileIndex);
+            break;
+        default:
+            LERROR("GDAL data type unknown to OpenGL: " << gdalType);
         }
-
-        // GDAL reads image data top to bottom. We want the opposite.
-        GLubyte* imageDataYflipped = new GLubyte[numberOfPixels.x * numberOfPixels.y * nRasters];
-        for (size_t y = 0; y < numberOfPixels.y; y++) {
-            for (size_t x = 0; x < numberOfPixels.x; x++) {
-                imageDataYflipped[x + y * numberOfPixels.x] = imageData[x + (numberOfPixels.y - y) * numberOfPixels.x];
-            }
-        }
-
-        delete[] imageData;
-
-        glm::uvec3 dims(numberOfPixels.x, numberOfPixels.y, 1);
-        GdalDataConverter::TextureFormat textrureFormat = _converter.getTextureFormatFromRasterCount(nRasters);
-        UninitializedTextureTile* uninitedTexPtr = new UninitializedTextureTile(imageDataYflipped, dims, textrureFormat, tileIndex);
-        std::shared_ptr<UninitializedTextureTile> uninitedTex = std::shared_ptr<UninitializedTextureTile>(uninitedTexPtr);
-        return uninitedTex;
+        return nullptr;
     }
 
-
-    std::shared_ptr<Texture> TileProvider::initializeTexture(std::shared_ptr<UninitializedTextureTile> uninitedTexture) {
+    std::shared_ptr<Texture> TileProvider::initializeTexture(
+        std::shared_ptr<UninitializedTextureTile> uninitedTexture) {
         Texture* tex = new Texture(
-            static_cast<void*>(uninitedTexture->imageData),
+            uninitedTexture->imageData,
             uninitedTexture->dimensions,
             uninitedTexture->texFormat.ghoulFormat,
             uninitedTexture->texFormat.glFormat,
-            GL_UNSIGNED_BYTE,
+            uninitedTexture->glType,
             Texture::FilterMode::Linear,
-            Texture::WrappingMode::Repeat);
+            Texture::WrappingMode::ClampToBorder);
 
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
 
         texture->uploadTexture();
+        /*
         texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
+        */
         return texture;
     }
 

@@ -58,18 +58,22 @@ Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = vec4(0);
-	
+	vec4 color00, color10, color01, color11;
+
 	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
-	frag.color += texture(textureSampler00, uv00);
+	color00 = texture(textureSampler00, uv00);
 
 	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
-	frag.color += texture(textureSampler10, uv10);
+	color10 += texture(textureSampler10, uv10);
 	
 	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
-	frag.color += texture(textureSampler01, uv01);
+	color01 += texture(textureSampler01, uv01);
 	
 	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
-	frag.color += texture(textureSampler11, uv11);
+	color11 += texture(textureSampler11, uv11);
+
+	frag.color = max(color00, max(color10, max(color01, color11))) * 10;
+
 	//frag.color = frag.color * 0.5 + 0.999*texture(textureSampler, fs_uv);
 	//frag.color /= 4;
 

@@ -52,7 +52,7 @@ namespace openspace {
         , _offsetLevel0(offsetLevel0)
         , _depth(depth)
     {
-        
+        /*
 
 
         // Read using GDAL
@@ -76,7 +76,7 @@ namespace openspace {
         _testTexture->uploadTexture();
         _testTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-        
+        */
         /*        
         // Set e texture to test
         std::string fileName = "textures/earth_bluemarble.jpg";

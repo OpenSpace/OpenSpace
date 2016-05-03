@@ -36,24 +36,11 @@
 
 #include <memory>
 
-namespace openspace {
 
+namespace openspace {
     using namespace ghoul::opengl;
 
-    // forward declaration
-    class GeodeticTileIndex;
-    //class Geodetic2;
-
-    class GdalDataConverter
-    {
-    public:
-        GdalDataConverter();
-        ~GdalDataConverter();
-
-        std::shared_ptr<Texture> convertToOpenGLTexture(
-            GDALDataset* dataSet,
-            const GeodeticTileIndex& tileIndex,
-            int GLType);
+    struct UninitializedTextureTile {
 
         struct TextureFormat
         {
@@ -61,17 +48,49 @@ namespace openspace {
             GLuint glFormat;
         };
 
-        struct TextureDataType
+        UninitializedTextureTile(
+            void* data,
+            glm::uvec3 dims,
+            TextureFormat format,
+            GLuint glType,
+            const GeodeticTileIndex& ti)
+            : imageData(data)
+            , dimensions(dims)
+            , texFormat(format)
+            , glType(glType)
+            , tileIndex(ti)
         {
-            Texture::Format ghoulFormat;
-            GLuint glFormat;
-        };
 
-        TextureFormat getTextureFormatFromRasterCount(int rasterCount);
+        }
+
+        void* imageData;
+        glm::uvec3 dimensions;
+        TextureFormat texFormat;
+        GLuint glType;
+        const GeodeticTileIndex tileIndex;
+    };
+
+    template<class T>
+    class GdalDataConverter
+    {
+    public:
+
+        GdalDataConverter();
+        ~GdalDataConverter();
+
+        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
+            GDALDataset * dataSet,
+            const GeodeticTileIndex & tileIndex);
+
+        UninitializedTextureTile::TextureFormat getTextureFormatFromRasterCount(
+            int rasterCount);
+        GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
 
         glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
     };
 
 } // namespace openspace
+
+#include <modules/globebrowsing/other/gdaldataconverter.inl>
 
 #endif  // __GDALDATACONVERTER_H__

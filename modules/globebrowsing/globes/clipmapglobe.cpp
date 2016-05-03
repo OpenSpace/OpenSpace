@@ -49,7 +49,8 @@ namespace openspace {
         : _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
         , _ellipsoid(ellipsoid)
     {
-        _tileProvider = shared_ptr<TileProvider>(new TileProvider("map_service_configs/TERRAIN.wms", 100));
+        _tileProvider = shared_ptr<TileProvider>(new TileProvider(
+            "map_service_configs/TERRAIN.wms", 100));
         // init Renderer
         auto outerPatchRenderer = new ClipMapPatchRenderer(
             shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(512)),

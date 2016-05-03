@@ -114,18 +114,21 @@ void main()
 	PositionNormalPair pair = globalInterpolation(fs_uv);
 
 	
-	vec4 textureColor = vec4(0);
+	float sampledHeight00, sampledHeight10, sampledHeight01, sampledHeight11;
+
 
 	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
-	textureColor += texture(textureSampler00, uv00);
+	sampledHeight00 = texture(textureSampler00, uv00).r;
 	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
-	textureColor += texture(textureSampler10, uv10);
+	sampledHeight10 = texture(textureSampler10, uv10).r;
 	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
-	textureColor += texture(textureSampler01, uv01);
+	sampledHeight01 = texture(textureSampler01, uv01).r;
 	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
-	textureColor += texture(textureSampler11, uv11);
+	sampledHeight11 = texture(textureSampler11, uv11).r;
 
-	pair.position += pair.normal * textureColor.r * 1e4;
+	float sampledHeight = max(sampledHeight00, max(sampledHeight10, max(sampledHeight01, sampledHeight11)));
+
+	pair.position += pair.normal * sampledHeight * 1e5;
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 	fs_position = pair.position;
