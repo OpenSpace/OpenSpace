@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/rendering/iswacygnet.h>
+
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/iswa/rendering/dataplane.h>
@@ -32,6 +32,8 @@
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/ext/json/json.hpp>
 #include <fstream>
+#include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/rendering/iswagroup.h>
 
 namespace {
     using json = nlohmann::json;
@@ -86,7 +88,7 @@ namespace openspace{
             _metadataFutures.push_back(metadataFuture);
         }else{ 
             //create kameleonplane
-            createKameleonPlane(info, -1);
+            createKameleonPlane(info);
         } 
     }
 
@@ -129,7 +131,7 @@ namespace openspace{
         for (auto it = _metadataFutures.begin(); it != _metadataFutures.end(); ){
             if((*it)->isFinished) {
                 if((*it)->type == "TEXTURE"){
-                    createPlane((*it)->id,(*it)->json,std::string("TexturePlane"), -1);
+                    createPlane((*it)->id,(*it)->json, std::string("TexturePlane"));
                 }else if ((*it)->type == "DATA"){
                     createPlane((*it)->id,(*it)->json,std::string("DataPlane"), 1);
                 } else {
@@ -328,7 +330,7 @@ namespace openspace{
         }
     }
 
-    void ISWAManager::registerToGroup(int id, ISWACygnet* cygnet, std::string type){
+    void ISWAManager::registerToGroup(int id, ISWACygnet* cygnet, CygnetType type){
         if(_groups.find(id) != _groups.end()){
             _groups[id]->registerCygnet(cygnet, type);
         }else{
@@ -344,6 +346,12 @@ namespace openspace{
         }
     }
 
+    void ISWAManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
+        if(_groups.find(id) != _groups.end()){
+            _groups[id]->registerOptions(options);
+        }
+    }
+
     std::shared_ptr<ISWAGroup> ISWAManager::iSWAGroup(std::string name){
         for(auto group : _groups){
             if(group.second->name() == name){
@@ -352,12 +360,6 @@ namespace openspace{
         }
 
         return nullptr;
-    }
-
-    void ISWAManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
-        if(_groups.find(id) != _groups.end()){
-            _groups[id]->registerOptions(options);
-        }
     }
 
 }// namsepace openspace

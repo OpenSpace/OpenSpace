@@ -30,17 +30,21 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
+// #include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/util/iswamanager.h>
+
 
 namespace openspace{
 class ISWACygnet;
 
 class ISWAGroup : public properties::PropertyOwner{
 public:
-	ISWAGroup(int id, std::string type);
+	ISWAGroup(int id, ISWAManager::CygnetType type);
 	~ISWAGroup();
-	void registerCygnet(ISWACygnet* cygnet, std::string type);
+	void registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type);
 	void unregisterCygnet(ISWACygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
+
 private:
 	properties::BoolProperty _enabled;
 
@@ -60,7 +64,7 @@ private:
 	// int groupId;
 	// ISWACygnet cygnet;
 	std::vector<ISWACygnet* > _cygnets;
-	std::string _type;
+	ISWAManager::CygnetType _type;
 };
 
 } //namespace openspace

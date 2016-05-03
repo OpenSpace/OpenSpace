@@ -22,12 +22,15 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/rendering/iswagroup.h>
-#include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/dataplane.h>
+
+namespace {
+    const std::string _loggerCat = "ISWAGroup";
+}
 
 namespace openspace {
 
-ISWAGroup::ISWAGroup(int id, std::string type)
+ISWAGroup::ISWAGroup(int id, ISWAManager::CygnetType type)
     :_enabled("enabled", "Enabled", true)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
@@ -47,7 +50,7 @@ ISWAGroup::ISWAGroup(int id, std::string type)
             cygnet->enabled(_enabled.value());
     });
 
-    if(type == "data"){
+    if(type == ISWAManager::CygnetType::Data){
         addProperty(_useLog);
         addProperty(_useHistogram);
         addProperty(_normValues);
@@ -98,8 +101,13 @@ ISWAGroup::~ISWAGroup(){
     _cygnets.clear();
 }
 
-void ISWAGroup::registerCygnet(ISWACygnet* cygnet, std::string type){
-    if(type == "data"){
+void ISWAGroup::registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type){
+    if(type != _type){
+        LERROR("Can't register cygnet with a different class from the group");
+        return;
+    }
+
+    if(type == ISWAManager::CygnetType::Data){
         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
         
         dataplane->useLog(_useLog.value());
@@ -125,7 +133,7 @@ void ISWAGroup::unregisterCygnet(ISWACygnet* cygnet){
 
 
 void ISWAGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    if(_type == "data"){
+    if(_type == ISWAManager::CygnetType::Data){
         if(_dataOptions.options().empty()){
             for(auto option : options){
                 _dataOptions.addOption(option);

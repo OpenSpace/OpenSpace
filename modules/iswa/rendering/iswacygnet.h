@@ -104,7 +104,7 @@ protected:
 
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
 
-
+    ISWAManager::CygnetType _type;
 };
 
 }//namespace openspace

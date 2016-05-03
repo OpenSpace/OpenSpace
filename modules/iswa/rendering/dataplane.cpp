@@ -86,7 +86,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-
+    _type = ISWAManager::CygnetType::Data;
 }
 
 DataPlane::~DataPlane(){}
@@ -118,7 +118,7 @@ bool DataPlane::initialize(){
     // }
 
     // _textures.push_back(nullptr);
-    ISWAManager::ref().registerToGroup(_data->groupId, this, "data");
+    ISWAManager::ref().registerToGroup(_data->groupId, this, _type);
 
 
     return isReady();
@@ -303,9 +303,10 @@ void DataPlane::readHeader(){
                 break;
             }
         }
-    }else{
-        LWARNING("Noting in memory buffer, are you connected to the information super highway?");
     }
+    // else{
+    //     LWARNING("Noting in memory buffer, are you connected to the information super highway?");
+    // }
 }
 
 std::vector<float*> DataPlane::readData(){
@@ -396,10 +397,10 @@ std::vector<float*> DataPlane::readData(){
         return data;
         
     } 
-    else {
-        LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
-        return std::vector<float*>();
-    }
+    // else {
+    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
+    //     return std::vector<float*>();
+    // }
 } 
 
 
