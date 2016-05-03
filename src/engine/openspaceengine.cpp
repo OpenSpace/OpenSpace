@@ -652,8 +652,8 @@ void OpenSpaceEngine::preSynchronization() {
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     Time::ref().postSynchronizationPreDraw();
 
-    _scriptEngine->postSynchronizationPreDraw();    
     _renderEngine->postSynchronizationPreDraw();
+    _scriptEngine->postSynchronizationPreDraw();    
     
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();

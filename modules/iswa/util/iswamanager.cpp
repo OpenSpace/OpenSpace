@@ -106,12 +106,35 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
     if(id > 0){
         createScreenSpace(id);
     }else if(id < 0){
-        //download metadata to texture plane
-        std::shared_ptr<MetadataFuture> metadataFuture = downloadMetadata(id);
-        metadataFuture->guiType = info;
-        metadataFuture->id = id;
-        metadataFuture->group = group;
-        _metadataFutures.push_back(metadataFuture);
+        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
+        metaFuture->id = id;
+        metaFuture->group = group;
+
+        if(info == _type[CygnetType::Texture]){
+            metaFuture->type = CygnetType::Texture;
+            metaFuture->geom  = CygnetGeometry::Plane;
+        } else if (info  == _type[CygnetType::Data]) {
+            metaFuture->type = CygnetType::Data;
+            metaFuture->geom  = CygnetGeometry::Plane;
+        } else {
+            LERROR("\""+ info + "\" is not a valid type");
+            return;
+        }
+
+        auto metadataCallback = 
+        [this, metaFuture](const DownloadManager::FileFuture& f){
+            LDEBUG("Download to memory finished");
+            metaFuture->isFinished = true;
+            createPlane(metaFuture);
+        };
+
+        // Download metadata
+        DlManager.downloadToMemory(
+            "http://128.183.168.116:3000/" + std::to_string(-id),
+            // "http://10.0.0.76:3000/" + std::to_string(-id),
+            metaFuture->json,
+            metadataCallback
+        );
     }else{ 
         //create kameleonplane
         createKameleonPlane(info);
@@ -153,28 +176,6 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
         );
 }
 
-void ISWAManager::update(){
-    for (auto it = _metadataFutures.begin(); it != _metadataFutures.end(); ){
-        if((*it)->isFinished) {
-            if((*it)->guiType == _type[CygnetType::Texture]){
-                (*it)->type = CygnetType::Texture;
-                (*it)->geom  = CygnetGeometry::Plane;
-                // (*it)->group = -1;
-            }else if ((*it)->guiType == _type[CygnetType::Data]){
-                (*it)->type = CygnetType::Data;
-                (*it)->geom  = CygnetGeometry::Plane;
-                // (*it)->group = 1;
-            } else {
-                LERROR("\""+ (*it)->guiType + "\" is not a valid type");
-                return;
-            }
-            createPlane((*it));
-            it = _metadataFutures.erase( it );
-        }else{
-            ++it;
-        }
-    }    
-}
 
 std::string ISWAManager::iSWAurl(int id, std::string type){
     std::string url;
