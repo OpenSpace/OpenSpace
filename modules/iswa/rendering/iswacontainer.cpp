@@ -42,27 +42,26 @@ namespace openspace{
 ISWAContainer::ISWAContainer(const ghoul::Dictionary& dictionary)
     :Renderable(dictionary)
 {
-    ISWAManager::initialize();
-    std::string textureCygnets;
-    std::string dataCygnets;
-    dictionary.getValue("TextureCygnets", textureCygnets);
-    dictionary.getValue("DataCygnets", dataCygnets);
-    std::cout << textureCygnets << std::endl;
-    std::cout << dataCygnets << std::endl;
+    // std::string textureCygnets;
+    // std::string dataCygnets;
+    // dictionary.getValue("TextureCygnets", textureCygnets);
+    // dictionary.getValue("DataCygnets", dataCygnets);
+    // std::cout << textureCygnets << std::endl;
+    // std::cout << dataCygnets << std::endl;
     
-    if(textureCygnets != ""){
-        json j = json::parse(textureCygnets);
-        for (auto& id : j) {
-            ISWAManager::ref().addISWACygnet(id, "TEXTURE");
-        }
-    }
+    // if(textureCygnets != ""){
+    //     json j = json::parse(textureCygnets);
+    //     for (auto& id : j) {
+    //         ISWAManager::ref().addISWACygnet(id, "TEXTURE");
+    //     }
+    // }
     
-    if(dataCygnets != ""){
-        json j = json::parse(dataCygnets);
-        for (auto& id : j) {
-            ISWAManager::ref().addISWACygnet(id, "DATA");
-        }
-    }
+    // if(dataCygnets != ""){
+    //     json j = json::parse(dataCygnets);
+    //     for (auto& id : j) {
+    //         ISWAManager::ref().addISWACygnet(id, "DATA");
+    //     }
+    // }
 }
 
 ISWAContainer::~ISWAContainer(){}

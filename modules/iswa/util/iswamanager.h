@@ -32,6 +32,8 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/selectionproperty.h>
+#include <openspace/scripting/scriptengine.h>
+
 // #include <modules/iswa/rendering/iswacygnet.h>
 // #include <modules/iswa/rendering/iswagroup.h>
 
@@ -77,6 +79,8 @@ public:
     void unregisterFromGroup(int id, ISWACygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);
+
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
     std::string iSWAurl(int id, std::string type = "image");
