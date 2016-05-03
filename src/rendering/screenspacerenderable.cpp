@@ -54,7 +54,7 @@ ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(const ghoul::
 }
 
 
-ScreenSpaceRenderable::ScreenSpaceRenderable()
+ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     :_enabled("enabled", "Is Enabled", true)
     ,_useFlatScreen("flatScreen", "Flat Screen", true)
     ,_euclideanPosition("euclideanPosition", "Euclidean coordinates", glm::vec2(0),glm::vec2(-4),glm::vec2(4))
@@ -87,7 +87,43 @@ ScreenSpaceRenderable::ScreenSpaceRenderable()
 
     _radius = _planeDepth;
 
+
+    if(dictionary.hasValue<bool>("FlatScreen")){
+        bool useFlatScreen;
+        dictionary.getValue("FlatScreen", useFlatScreen);
+
+        _useFlatScreen.setValue(useFlatScreen); 
+    }
+
     useEuclideanCoordinates(_useFlatScreen.value());
+    
+    if(dictionary.hasValue<glm::vec2>("Position")){
+        glm::vec2 pos;
+        dictionary.getValue("Position", pos);
+        if(_useFlatScreen)
+            _euclideanPosition.setValue(pos);
+        else
+            _sphericalPosition.setValue(pos);
+    }
+
+    if(dictionary.hasValue<float>("Scale")){
+        float scale;
+        dictionary.getValue("Scale", scale);
+        _scale.setValue(scale);
+    }
+
+    if(dictionary.hasValue<float>("Depth")){
+        float depth;
+        dictionary.getValue("Depth", depth);
+        _depth.setValue(depth);
+    }
+
+    if(dictionary.hasValue<float>("Alpha")){
+        float alpha;
+        dictionary.getValue("Scale", alpha);
+        _alpha.setValue(alpha);
+    }
+
 
     // Setting spherical/euclidean onchange handler
     _useFlatScreen.onChange([this](){   
