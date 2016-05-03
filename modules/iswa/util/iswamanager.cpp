@@ -154,11 +154,11 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
 void ISWAManager::update(){
     for (auto it = _metadataFutures.begin(); it != _metadataFutures.end(); ){
         if((*it)->isFinished) {
-            if((*it)->guiType == "TEXTURE"){
+            if((*it)->guiType == _type[CygnetType::Texture]){
                 (*it)->type = CygnetType::Texture;
                 (*it)->geom  = CygnetGeometry::Plane;
                 // (*it)->group = -1;
-            }else if ((*it)->guiType == "DATA"){
+            }else if ((*it)->guiType == _type[CygnetType::Data]){
                 (*it)->type = CygnetType::Data;
                 (*it)->geom  = CygnetGeometry::Plane;
                 // (*it)->group = 1;
