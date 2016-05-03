@@ -36,49 +36,14 @@ out vec4 vs_position;
 out vec2 fs_uv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
-
-
-vec3 geodeticSurfaceNormal(float latitude, float longitude)
-{
-	float cosLat = cos(latitude);
-	return vec3(
-		cosLat * cos(longitude),
-		cosLat * sin(longitude), 
-		sin(latitude));
-}
-
-vec3 geodetic3ToCartesian(
-	float latitude,
-	float longitude,
-	float height,
-	vec3 radiiSquared)
-{
-	vec3 normal = geodeticSurfaceNormal(latitude, longitude);
-	vec3 k = radiiSquared * normal;
-	float gamma = sqrt(dot(k, normal));
-	vec3 rSurface = k / gamma;
-	return rSurface + height * normal;
-}
-
-vec3 geodetic2ToCartesian(float latitude, float longitude, vec3 radiiSquared)
-{
-	// Position on surface : height = 0
-	return geodetic3ToCartesian(latitude, longitude, 0, radiiSquared);
-}
-
-vec3 latLonToCartesian(float latitude, float longitude, float radius) {
-	return radius * vec3(
-		cos(latitude) * cos(longitude),
-		cos(latitude) * sin(longitude),
-		sin(latitude));
-}
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 
 vec3 globalInterpolation() {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_UV.y; // Lat
 	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_UV.x; // Lon
-	vec3 positionModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
-	return positionModelSpace;
+	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
+	return positionPairModelSpace.position;
 }
 
 void main()

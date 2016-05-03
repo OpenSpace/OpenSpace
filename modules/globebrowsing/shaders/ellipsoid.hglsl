@@ -68,4 +68,4 @@ vec3 latLonToCartesian(float latitude, float longitude, float radius) {
 		sin(latitude));
 }
 
-#endif
+#endif // ELLIPSOID_HGLSL
