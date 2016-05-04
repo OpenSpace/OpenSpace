@@ -46,9 +46,9 @@ void CygnetPlane::render(const RenderData& data){
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
 
-    glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-    glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
+    // glm::mat4 rotx = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
+    // glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
+    // glm::mat4 rotz = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, 0, 1));
 
     glm::mat4 rot = glm::mat4(1.0);
     for (int i = 0; i < 3; i++){
@@ -59,25 +59,25 @@ void CygnetPlane::render(const RenderData& data){
 
 
     // Correct for the small error of x-axis not pointing directly at the sun
-    if(_data->frame == "GSM"){
+    // if(_data->frame == "GSM"){
 
-        transform = transform * rotz * roty; //BATSRUS
+    //     transform = transform * rotz * roty; //BATSRUS
 
-        glm::vec4 v(1,0,0,1);
-        glm::vec3 xVec = glm::vec3(transform*v);
-        xVec = glm::normalize(xVec);
+    //     glm::vec4 v(1,0,0,1);
+    //     glm::vec3 xVec = glm::vec3(transform*v);
+    //     xVec = glm::normalize(xVec);
 
-        double  lt;
-        glm::vec3 sunVec =
-        SpiceManager::ref().targetPosition("Sun", "Earth", "GALACTIC", {}, _openSpaceTime, lt);
-        sunVec = glm::normalize(sunVec);
+    //     double  lt;
+    //     glm::vec3 sunVec =
+    //     SpiceManager::ref().targetPosition("Sun", "Earth", "GALACTIC", {}, _openSpaceTime, lt);
+    //     sunVec = glm::normalize(sunVec);
 
-        float angle = acos(glm::dot(xVec, sunVec));
-        glm::vec3 ref =  glm::cross(xVec, sunVec);
+    //     float angle = acos(glm::dot(xVec, sunVec));
+    //     glm::vec3 ref =  glm::cross(xVec, sunVec);
 
-        glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
-        transform = rotation * transform;
-    }
+    //     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), angle, ref); 
+    //     transform = rotation * transform;
+    // }
 
     position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
     
@@ -105,8 +105,11 @@ void CygnetPlane::render(const RenderData& data){
 void CygnetPlane::update(const UpdateData& data){
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix("GALACTIC", _data->frame, _openSpaceTime);
 
+
+     _stateMatrix = ISWAManager::ref().getTransform(_data->frame, "GALACTIC", _openSpaceTime);
+    // glm::dmat3 spiceMatrix    = SpiceManager::ref().positionTransformMatrix("J2000", "GALACTIC", _openSpaceTime);
+     // = spiceMatrix*kameleonMatrix;
 
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);

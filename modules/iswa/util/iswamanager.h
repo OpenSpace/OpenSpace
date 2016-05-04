@@ -35,6 +35,8 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/spicemanager.h>
+
 // #include <modules/iswa/rendering/iswacygnet.h>
 // #include <modules/iswa/rendering/iswagroup.h>
 
@@ -80,6 +82,8 @@ public:
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);
 
+    glm::dmat3 getTransform(std::string from, std::string to, double et);
+
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
@@ -100,6 +104,7 @@ private:
     std::map<int, std::shared_ptr<ISWAGroup>> _groups;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;
+    std::set<std::string> _kameleonFrames;
 };
 
 } //namespace openspace

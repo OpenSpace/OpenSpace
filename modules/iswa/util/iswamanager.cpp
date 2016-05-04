@@ -70,6 +70,11 @@ ISWAManager::ISWAManager()
 
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
+
+    _kameleon = std::make_shared<ccmc::Kameleon>();
+    _kameleonFrames =   { "J200", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
+                          "HEE", "HAE", "HEEQ"                                              //heliocentric
+                        };
 }
 
 ISWAManager::~ISWAManager(){
@@ -419,6 +424,68 @@ scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
             }
         }
     };
+}
+
+glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et){
+    auto fromit = _kameleonFrames.find(from);
+    auto toit   = _kameleonFrames.find(to);
+
+    bool fromKameleon   = (fromit != _kameleonFrames.end());
+    bool toKameleon     = (toit   != _kameleonFrames.end());
+
+    ccmc::Position in0 = {1, 0, 0};
+    ccmc::Position in1 = {0, 1, 0};
+    ccmc::Position in2 = {0, 0, 1};
+
+    ccmc::Position out0;
+    ccmc::Position out1;
+    ccmc::Position out2;
+
+    if(fromKameleon && toKameleon){
+        _kameleon->_cxform(from.c_str(), to.c_str(), et, &in0, &out0);
+        _kameleon->_cxform(from.c_str(), to.c_str(), et, &in1, &out1);
+        _kameleon->_cxform(from.c_str(), to.c_str(), et, &in2, &out2);
+    
+
+        return glm::dmat3(
+            out0.c0 , out0.c1   , out0.c2,
+            out1.c0 , out1.c1   , out1.c2,
+            out2.c0 , out2.c1   , out2.c2
+        );
+
+    }else if(fromKameleon && !toKameleon){
+        _kameleon->_cxform(from.c_str(), "J2000", et, &in0, &out0);
+        _kameleon->_cxform(from.c_str(), "J2000", et, &in1, &out1);
+        _kameleon->_cxform(from.c_str(), "J2000", et, &in2, &out2);
+
+        glm::dmat3 kameleonTrans(
+            out0.c0 , out0.c1   , out0.c2,
+            out1.c0 , out1.c1   , out1.c2,
+            out2.c0 , out2.c1   , out2.c2
+        );
+
+        glm::dmat3 spiceTrans = SpiceManager::ref().positionTransformMatrix("J2000", to, et);
+
+        return spiceTrans*kameleonTrans;
+    
+    }else if(!fromKameleon && toKameleon){
+        glm::dmat3 spiceTrans = SpiceManager::ref().positionTransformMatrix(from, "J2000", et);
+
+        _kameleon->_cxform("J2000", to.c_str(), et, &in0, &out0);
+        _kameleon->_cxform("J2000", to.c_str(), et, &in1, &out1);
+        _kameleon->_cxform("J2000", to.c_str(), et, &in2, &out2);
+
+        glm::dmat3 kameleonTrans(
+            out0.c0 , out0.c1   , out0.c2,
+            out1.c0 , out1.c1   , out1.c2,
+            out2.c0 , out2.c1   , out2.c2
+        );
+
+        return kameleonTrans*spiceTrans;
+    }else{
+
+        return SpiceManager::ref().positionTransformMatrix(from, to, et);
+    }
 }
 
 }// namsepace openspace
