@@ -54,7 +54,7 @@ namespace openspace {
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
     static ScreenSpaceRenderable* createFromDictionary(const ghoul::Dictionary& dictionary);
-    ScreenSpaceRenderable();
+    ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceRenderable();
 
     virtual void render() = 0;

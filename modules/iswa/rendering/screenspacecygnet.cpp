@@ -34,20 +34,20 @@ namespace {
 
 namespace openspace {
 
-ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
-    : ScreenSpaceRenderable()
-    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
-    , _cygnetId(cygnetId)
-{
-    setName("iSWACygnet" + std::to_string(_cygnetId));
-    addProperty(_updateInterval);
+// ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
+//     : ScreenSpaceRenderable()
+//     , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
+//     , _cygnetId(cygnetId)
+// {
+//     setName("iSWACygnet" + std::to_string(_cygnetId));
+//     addProperty(_updateInterval);
 
-    registerProperties();
-}
+//     registerProperties();
+// }
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable()
-    , _updateInterval("updateInterval", "Update Interval", 0.4, 0.0 , 10.0)
+    : ScreenSpaceRenderable(dictionary)
+    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
 {
     // hacky, have to first get as float and then cast to int.
     float cygnetid;

@@ -47,6 +47,8 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setName(name);
     registerProperties();
+
+    _type = ISWAManager::CygnetType::Texture;
 }
 
 
@@ -61,10 +63,16 @@ bool TexturePlane::initialize(){
     createShader();
     updateTexture();
 
+    if(_data->groupId > 0)
+        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
+
     return isReady();
 }
 
 bool TexturePlane::deinitialize(){
+    if(_data->groupId > 0)
+        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
+
     unregisterProperties();
     destroyPlane();
     destroyShader();

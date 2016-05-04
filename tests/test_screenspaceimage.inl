@@ -23,49 +23,49 @@
  ****************************************************************************************/
  
 
-#include "gtest/gtest.h"
-//Make private variables public for testing
-#define private public
-#include <modules/base/rendering/screenspaceimage.h>
-#define private private
-/*
- * For each test the following is run:
- * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
- */
+// #include "gtest/gtest.h"
+// //Make private variables public for testing
+// #define private public
+// #include <modules/base/rendering/screenspaceimage.h>
+// #define private private
+// /*
+//  * For each test the following is run:
+//  * Constructor() -> setUp() -> test -> tearDown() -> Deconstructor()
+//  */
 
-namespace openspace {
+// namespace openspace {
 
-class ScreenSpaceRenderableTest : public testing::Test{
-protected:
+// class ScreenSpaceRenderableTest : public testing::Test{
+// protected:
 
-	ScreenSpaceRenderableTest() :
-		_ssr(texturePath) 
-	{
-		_sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
-	}
+// 	ScreenSpaceRenderableTest()
+// 		// _ssr(texturePath) 
+// 	{
+// 		// _sharedSsr = std::make_shared<ScreenSpaceImage>("${OPENSPACE_DATA}/test3.jpg");
+// 	}
 
-	~ScreenSpaceRenderableTest(){}
-
-
-	void reset() {}
-
-	// These variables are shared by all tests
-	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
-	ScreenSpaceImage _ssr;
-	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
-};
+// 	~ScreenSpaceRenderableTest(){}
 
 
-TEST_F(ScreenSpaceRenderableTest, initialize){
-	bool isReady = _ssr.isReady();
-	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
+// 	void reset() {}
 
-	// cannot test initialize, crashes at createplane becasue of opengl functions. needs mocking
-	//_ssr.initialize();
-	//isReady = _ssr.isReady();
-	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is not ready after initialize";
-	//_ssr.deinitialize();
-	//isReady = _ssr.isReady();
-	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is still ready after deinitialize";
-}
-}//namespace openspace
+// 	// These variables are shared by all tests
+// 	std::string texturePath = "${OPENSPACE_DATA}/test2.jpg";
+// 	ScreenSpaceImage _ssr;
+// 	std::shared_ptr<ScreenSpaceRenderable> _sharedSsr;
+// };
+
+
+// TEST_F(ScreenSpaceRenderableTest, initialize){
+// 	bool isReady = _ssr.isReady();
+// 	ASSERT_TRUE(!isReady) << "ScreenSpaceImage is ready before initialize";
+
+// 	// cannot test initialize, crashes at createplane becasue of opengl functions. needs mocking
+// 	//_ssr.initialize();
+// 	//isReady = _ssr.isReady();
+// 	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is not ready after initialize";
+// 	//_ssr.deinitialize();
+// 	//isReady = _ssr.isReady();
+// 	//ASSERT_TRUE(!isReady) << "ScreenSpaceImage is still ready after deinitialize";
+// }
+// }//namespace openspace
