@@ -47,9 +47,9 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable()
-    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
+    , _updateInterval("updateInterval", "Update Interval", 0.4, 0.0 , 10.0)
 {
-    // hacky, have to first get as float and the cast to int.
+    // hacky, have to first get as float and then cast to int.
     float cygnetid;
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
@@ -135,12 +135,17 @@ bool ScreenSpaceCygnet::isReady() const{
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-    _memorybuffer = "";
+    // If a download is in progress, dont send another request.
+    //What if image failed to download?
+    if(_futureTexture && !_futureTexture->isFinished)
+        return;
 
+    _memorybuffer = "";
     std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
     if(future){
         _futureTexture = future;
     }
+
 }
 
 void ScreenSpaceCygnet::loadTexture() {

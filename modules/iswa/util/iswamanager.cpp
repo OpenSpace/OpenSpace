@@ -96,10 +96,6 @@ void ISWAManager::addISWACygnet(std::string info){
     }
 
     addISWACygnet(cygnetId);
-    
-    /*if(data == "")
-    else*/
-        
 }
 
 void ISWAManager::addISWACygnet(int id, std::string info, int group){
