@@ -108,7 +108,7 @@ namespace openspace {
             const Geodetic2& patchSize,
             const RenderData& data,
             const Ellipsoid& ellipsoid);
-        void renderPatchCameraSpace(
+        void renderPatchLocally(
             const Geodetic2& patchSize,
             const RenderData& data,
             const Ellipsoid& ellipsoid);

@@ -96,6 +96,7 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localclipmappatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_fs.glsl
 )
