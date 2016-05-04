@@ -48,7 +48,9 @@ namespace openspace {
     const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
 
-    ChunkLodGlobe::ChunkLodGlobe(const Ellipsoid& ellipsoid)
+    ChunkLodGlobe::ChunkLodGlobe(
+        const Ellipsoid& ellipsoid,
+        std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
         , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
         , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
@@ -62,7 +64,7 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
 
-        _patchRenderer.reset(new LatLonPatchRenderer(geometry));
+        _patchRenderer.reset(new LatLonPatchRenderer(geometry, tileProviderManager));
         _frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
     }
 
@@ -91,8 +93,6 @@ namespace openspace {
         return *_frustumCuller;
     }
 
-
-
     void ChunkLodGlobe::render(const RenderData& data){
         minDistToCamera = INFINITY;
         ChunkNode::renderedPatches = 0;        
@@ -114,7 +114,7 @@ namespace openspace {
     }
 
     void ChunkLodGlobe::update(const UpdateData& data) {
-		_patchRenderer->update();
+        _patchRenderer->update();
     }
 
     const Ellipsoid& ChunkLodGlobe::ellipsoid() const

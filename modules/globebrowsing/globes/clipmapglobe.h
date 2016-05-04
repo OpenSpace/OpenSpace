@@ -36,6 +36,7 @@
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/rendering/frustumculler.h>
 #include <modules/globebrowsing/globes/clipmappyramid.h>
+#include <modules/globebrowsing/other/TileProviderManager.h>
 
 namespace ghoul {
     namespace opengl {
@@ -47,7 +48,9 @@ namespace openspace {
 
     class ClipMapGlobe : public Renderable {
     public:
-        ClipMapGlobe(const Ellipsoid& ellipsoid);
+        ClipMapGlobe(
+            const Ellipsoid& ellipsoid,
+            std::shared_ptr<TileProviderManager> tileProviderManager);
         ~ClipMapGlobe();
 
         bool initialize() override;
@@ -65,7 +68,7 @@ namespace openspace {
             int& minDepth,
             int& maxDepth);
         
-        shared_ptr<TileProvider> _tileProvider;
+        //shared_ptr<TileProvider> _tileProvider;
         std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
         std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
         

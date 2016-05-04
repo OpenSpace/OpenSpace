@@ -38,6 +38,7 @@
 #include <modules/globebrowsing/rendering/frustumculler.h>
 #include <modules/globebrowsing/other/texturetileset.h>
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 
 namespace ghoul {
 namespace opengl {
@@ -58,14 +59,14 @@ namespace openspace {
     class PatchRenderer {
     public:
         
-        PatchRenderer();
+        PatchRenderer(std::shared_ptr<TileProviderManager> _tileProviderManager);
         ~PatchRenderer();
 
+        void update();
 
     protected:
-
         unique_ptr<ProgramObject> _programObject;
-        TextureTileSet _tileSet;
+        std::shared_ptr<TileProviderManager> _tileProviderManager;
     };
 
 
@@ -75,26 +76,16 @@ namespace openspace {
 
     class LatLonPatchRenderer : public PatchRenderer {
     public:
-        LatLonPatchRenderer(shared_ptr<Grid> grid);
-
-        void update();
-
-        void renderPatch(
-            const GeodeticPatch& patch,
-            const RenderData& data, 
-            const Ellipsoid& ellipsoid);
+        LatLonPatchRenderer(
+            shared_ptr<Grid> grid,
+            shared_ptr<TileProviderManager> tileProviderManager);
 
         void renderPatch(
             const GeodeticPatch& patch, 
             const RenderData& data, 
             const Ellipsoid& ellipsoid,
             const GeodeticTileIndex& ti);
-
-
-
     private:
-
-        TileProvider tileProvider;
         shared_ptr<Grid> _grid;
     };
 
@@ -104,18 +95,13 @@ namespace openspace {
     public:
         ClipMapPatchRenderer(
             shared_ptr<ClipMapGrid> grid,
-            shared_ptr<TileProvider> tileProvider);
-
-        void update();
+            shared_ptr<TileProviderManager> tileProviderManager);
 
         void renderPatch(
             const Geodetic2& patchSize,
             const RenderData& data,
             const Ellipsoid& ellipsoid);
-
-        
     private:
-        std::shared_ptr<TileProvider> _tileProvider;
         PatchCoverageProvider _patchCoverageProvider;
         shared_ptr<ClipMapGrid> _grid;
     };

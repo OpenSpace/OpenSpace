@@ -42,6 +42,9 @@ namespace {
 
     // Keys for the dictionary
     const std::string keyRadii = "Radii";
+    const std::string keyTextures = "Textures";
+    const std::string keyColorTextures = "ColorTextures";
+    const std::string keyHeightMaps = "HeightMaps";
 }
 
 namespace openspace {
@@ -49,14 +52,29 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : DistanceSwitch()
+        , _tileProviderManager(std::shared_ptr<TileProviderManager>(new TileProviderManager))
     {
         // Read the radii in to its own dictionary
         Vec3 radii;
         dictionary.getValue(keyRadii, radii);
         _ellipsoid = Ellipsoid(radii);
 
-        addSwitchValue(std::shared_ptr<ClipMapGlobe>(new ClipMapGlobe(_ellipsoid)), 1e8);
-        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(new ChunkLodGlobe(_ellipsoid)), 1e9);
+
+        std::shared_ptr<TileProvider> heightMapProvider =
+            std::shared_ptr<TileProvider>(new TileProvider(
+                "map_service_configs/TERRAIN.wms", 5000, 512));
+
+        std::shared_ptr<TileProvider> colorTextureProvider =
+            std::shared_ptr<TileProvider>(new TileProvider(
+                "map_service_configs/TERRAIN.wms", 5000, 512));
+
+        _tileProviderManager->addHeightMap("TERRAIN", heightMapProvider);
+        _tileProviderManager->addColorTexture("COLOR", colorTextureProvider);
+
+        addSwitchValue(std::shared_ptr<ClipMapGlobe>(
+            new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
+        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(
+            new ChunkLodGlobe(_ellipsoid, _tileProviderManager)), 1e9);
         addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
     }
 

@@ -125,7 +125,6 @@ void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData)
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
             patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), ti);
-            //patchRenderer.renderPatch(_patch, data, _owner.ellipsoid());
             ChunkNode::renderedPatches++;
         }
     }

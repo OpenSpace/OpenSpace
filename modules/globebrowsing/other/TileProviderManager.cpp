@@ -22,72 +22,60 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __PATCHCOVERAGEPROVIDER_H__
-#define __PATCHCOVERAGEPROVIDER_H__
-
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/other/tileprovider.h>
-#include <ghoul/opengl/texture.h>
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//									PATCH COVERAGE PROVIDER							    //
-//////////////////////////////////////////////////////////////////////////////////////////
+namespace {
+    const std::string _loggerCat = "TileProviderManager";
+}
 
 namespace openspace {
 
-    using namespace ghoul::opengl;
-
-    struct PatchCoverage
+    TileProviderManager::TileProviderManager()
     {
-        using TextureTransformPair = std::pair<std::shared_ptr<Texture>, glm::mat3>;
-        TextureTransformPair textureTransformPairs[4];
-    };
+    }
 
-    class PatchCoverageProvider
+    TileProviderManager::~TileProviderManager()
     {
-    public:
-        PatchCoverageProvider(
-            Geodetic2 sizeLevel0,
-            Geodetic2 offsetLevel0,
-            int depth);
-        ~PatchCoverageProvider();
+    }
 
-        /**
-            Returns the index of the tile at an appropriate level.
-            Appropriate meaning that the tile should be at as high level as possible
-            Without the tile being smaller than the patch in lat-lon space.
-            The tile is at least as big as the patch.
-        */
-        GeodeticTileIndex getTileIndex(const GeodeticPatch& patch);
+    void TileProviderManager::addHeightMap(
+        std::string name,
+        std::shared_ptr<TileProvider> tileProvider)
+    {
+        _heightMapProviders.insert(
+            std::pair<std::string, std::shared_ptr<TileProvider> >(name, tileProvider));
+    }
 
-        /**
-            A transformation (translation and scaling) from the texture space of a patch
-            to the texture space of a tile.
-        */
-        glm::mat3 getUvTransformationPatchToTile( 
-            GeodeticPatch patch,
-            const GeodeticTileIndex& tileIndex);
+    void TileProviderManager::addColorTexture(
+        std::string name,
+        std::shared_ptr<TileProvider> tileProvider)
+    {
+        _colorTextureProviders.insert(
+            std::pair<std::string, std::shared_ptr<TileProvider> >(name, tileProvider));
+    }
 
-        /**
-            Overloaded function
-        */
-        glm::mat3 getUvTransformationPatchToTile(
-            GeodeticPatch patch,
-            GeodeticPatch tile);
+    std::shared_ptr<TileProvider> TileProviderManager::getHeightMap(std::string name)
+    {
+        return _heightMapProviders[name];
+    }
+    
+    std::shared_ptr<TileProvider> TileProviderManager::getColorTexture(std::string name)
+    {
+        return _colorTextureProviders[name];
+    }
 
-        PatchCoverage getCoverage(
-            GeodeticPatch patch,
-            std::shared_ptr<TileProvider> tileProvider);
 
-    private:
-        Geodetic2 _sizeLevel0;
-        Geodetic2 _offsetLevel0;
-        int _depth;
-    };
+    const std::map<std::string, std::shared_ptr<TileProvider> >&
+        TileProviderManager::heightMapProviders()
+    {
+        return _heightMapProviders;
+    }
+
+    const std::map<std::string, std::shared_ptr<TileProvider> >&
+        TileProviderManager::colorTextureProviders()
+    {
+        return _colorTextureProviders;
+    }
 
 }  // namespace openspace
-
-#endif  // __PATCHCOVERAGEPROVIDER_H__

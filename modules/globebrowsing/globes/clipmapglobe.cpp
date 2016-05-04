@@ -45,20 +45,20 @@ namespace {
 }
 
 namespace openspace {
-    ClipMapGlobe::ClipMapGlobe(const Ellipsoid& ellipsoid)
+    ClipMapGlobe::ClipMapGlobe(
+        const Ellipsoid& ellipsoid,
+        std::shared_ptr<TileProviderManager> tileProviderManager)
         : _clipMapPyramid(Geodetic2(M_PI / 2, M_PI / 2))
         , _ellipsoid(ellipsoid)
     {
-        _tileProvider = shared_ptr<TileProvider>(new TileProvider(
-            "map_service_configs/TERRAIN.wms", 5000, 512));
         // init Renderer
         auto outerPatchRenderer = new ClipMapPatchRenderer(
             shared_ptr<OuterClipMapGrid>(new OuterClipMapGrid(512)),
-            _tileProvider);
+            tileProviderManager);
         _outerPatchRenderer.reset(outerPatchRenderer);
         auto innerPatchRenderer = new ClipMapPatchRenderer(
             shared_ptr<InnerClipMapGrid>(new InnerClipMapGrid(512)),
-            _tileProvider);
+            tileProviderManager);
         _innerPatchRenderer.reset(innerPatchRenderer);
     }
 

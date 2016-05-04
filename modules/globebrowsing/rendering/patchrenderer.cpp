@@ -55,8 +55,8 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //							PATCH RENDERER											//
     //////////////////////////////////////////////////////////////////////////////////////
-    PatchRenderer::PatchRenderer()
-        : _tileSet(Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(M_PI, -M_PI), 1)
+    PatchRenderer::PatchRenderer(shared_ptr<TileProviderManager> tileProviderManager)
+        : _tileProviderManager(tileProviderManager)
     {
 
     }
@@ -69,17 +69,27 @@ namespace openspace {
         }
     }
 
-
+    void PatchRenderer::update() {
+        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
+        {
+            iter->second->prerender();
+        }
+        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
+        {
+            iter->second->prerender();
+        }
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////
     //								LATLON PATCH RENDERER								//
     //////////////////////////////////////////////////////////////////////////////////////
-    LatLonPatchRenderer::LatLonPatchRenderer(shared_ptr<Grid> grid)
-        : PatchRenderer()
+    LatLonPatchRenderer::LatLonPatchRenderer(
+        shared_ptr<Grid> grid,
+        shared_ptr<TileProviderManager> tileProviderManager)
+        : PatchRenderer(tileProviderManager)
         , _grid(grid)
-        , tileProvider("map_service_configs/TERRAIN.wms" , 5000, 128)
-        //, tileProvider("map_service_configs/frmt_wms_virtualearth.xml", 5000)
-        //, tileProvider("textures/earth_bluemarble.jpg", 5000)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -91,26 +101,12 @@ namespace openspace {
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
-    void LatLonPatchRenderer::update() {
-        tileProvider.prerender();
-    }
-
-    void LatLonPatchRenderer::renderPatch(
-        const GeodeticPatch& patch, const RenderData& data, const Ellipsoid& ellipsoid)
-    {
-        
-        // Get the textures that should be used for rendering
-        GeodeticTileIndex ti = _tileSet.getTileIndex(patch);
-        renderPatch(patch, data, ellipsoid, ti);
-    }
-
     void LatLonPatchRenderer::renderPatch(
         const GeodeticPatch& patch,
         const RenderData& data,
         const Ellipsoid& ellipsoid,
         const GeodeticTileIndex& tileIndex)
     {
-
         using namespace glm;
 
         // PATCH DID NOT MATCH THE TILEINDEX SO I CREATED A NEW PATCH FROM THE INDEX
@@ -132,10 +128,14 @@ namespace openspace {
         // Get the textures that should be used for rendering
         std::shared_ptr<ghoul::opengl::Texture> tile00;
         bool usingTile = true;
-        tile00 = tileProvider.getTile(tileIndex);
+
+        // For now just pick the first one from height maps
+        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto tileProvider = heightMapProviders.begin()->second;
+        tile00 = tileProvider->getTile(tileIndex);
 
         if (tile00 == nullptr) {
-            tile00 = tileProvider.getTemporaryTexture();
+            tile00 = tileProvider->getTemporaryTexture();
         }
         
         glm::mat3 uvTransform = glm::mat3(1);
@@ -165,19 +165,18 @@ namespace openspace {
         _programObject->deactivate();
     }
     
-
-
     //////////////////////////////////////////////////////////////////////////////////////
     //								CLIPMAP PATCH RENDERER								//
     //////////////////////////////////////////////////////////////////////////////////////
     ClipMapPatchRenderer::ClipMapPatchRenderer(
         shared_ptr<ClipMapGrid> grid,
-        shared_ptr<TileProvider> tileProvider)
-        : PatchRenderer()
+        shared_ptr<TileProviderManager> tileProviderManager)
+        : PatchRenderer(tileProviderManager)
         , _grid(grid)
-        , _tileProvider(tileProvider)
-        , _patchCoverageProvider(_tileProvider,
-            Geodetic2(M_PI * 2, M_PI * 2), Geodetic2(-M_PI -M_PI/2, -M_PI), 10)
+        , _patchCoverageProvider(
+            Geodetic2(M_PI * 2, M_PI * 2),
+            Geodetic2(-M_PI -M_PI/2, -M_PI),
+            10)
     {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             "LatLonSphereMappingProgram",
@@ -188,12 +187,6 @@ namespace openspace {
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
-
-    void ClipMapPatchRenderer::update() {
-        _tileProvider->prerender();
-    }
-
-
 
     void ClipMapPatchRenderer::renderPatch(
         const Geodetic2& patchSize,
@@ -231,7 +224,9 @@ namespace openspace {
         ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
 
-        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch);
+        // For now just pick the first one from height maps
+        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, heightMapProviders.begin()->second);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit00;

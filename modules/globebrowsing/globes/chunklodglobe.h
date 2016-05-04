@@ -44,57 +44,58 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 
 namespace ghoul {
-	namespace opengl {
-		class ProgramObject;
-	}
+    namespace opengl {
+        class ProgramObject;
+    }
 }
 
 namespace openspace {
 
-	class ChunkLodGlobe : 
-		public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
-	public:
-		ChunkLodGlobe(const Ellipsoid& ellipsoid);
-		~ChunkLodGlobe();
+    class ChunkLodGlobe : 
+        public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
+    public:
+        ChunkLodGlobe(
+            const Ellipsoid& ellipsoid,
+            std::shared_ptr<TileProviderManager> tileProviderManager);
+        ~ChunkLodGlobe();
 
-		LatLonPatchRenderer& getPatchRenderer();
-		FrustumCuller& getFrustumCuller();
+        LatLonPatchRenderer& getPatchRenderer();
+        FrustumCuller& getFrustumCuller();
 
-		bool initialize() override;
-		bool deinitialize() override;
-		bool isReady() const override;
+        bool initialize() override;
+        bool deinitialize() override;
+        bool isReady() const override;
 
-		void render(const RenderData& data) override;
-		void update(const UpdateData& data) override;
+        void render(const RenderData& data) override;
+        void update(const UpdateData& data) override;
 
-		double minDistToCamera;
+        double minDistToCamera;
 
-		//Scalar globeRadius;
-		const Ellipsoid& ellipsoid() const;
+        //Scalar globeRadius;
+        const Ellipsoid& ellipsoid() const;
 
-		const int minSplitDepth;
-		const int maxSplitDepth;
+        const int minSplitDepth;
+        const int maxSplitDepth;
 
+    private:		
 
-	private:		
+        // Covers all negative longitudes
+        std::unique_ptr<ChunkNode> _leftRoot;
 
-		// Covers all negative longitudes
-		std::unique_ptr<ChunkNode> _leftRoot;
+        // Covers all positive longitudes
+        std::unique_ptr<ChunkNode> _rightRoot;
 
-		// Covers all positive longitudes
-		std::unique_ptr<ChunkNode> _rightRoot;
+        // Frustum culler
+        std::shared_ptr<FrustumCuller> _frustumCuller;
 
-		// Frustum culler
-		std::shared_ptr<FrustumCuller> _frustumCuller;
+        // the patch used for actual rendering
+        std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
 
-		// the patch used for actual rendering
-		std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
+        static const GeodeticPatch LEFT_HEMISPHERE;
+        static const GeodeticPatch RIGHT_HEMISPHERE;
 
-		static const GeodeticPatch LEFT_HEMISPHERE;
-		static const GeodeticPatch RIGHT_HEMISPHERE;
-
-		const Ellipsoid& _ellipsoid;
-	};
+        const Ellipsoid& _ellipsoid;
+    };
 
 }  // namespace openspace
 

@@ -35,12 +35,10 @@ namespace {
 namespace openspace {
 
     PatchCoverageProvider::PatchCoverageProvider(
-        std::shared_ptr<TileProvider> tileProvider,
         Geodetic2 sizeLevel0,
         Geodetic2 offsetLevel0,
         int depth)
-        : _tileProvider(tileProvider)
-        , _sizeLevel0(sizeLevel0)
+        : _sizeLevel0(sizeLevel0)
         , _offsetLevel0(offsetLevel0)
         , _depth(depth)
     {
@@ -109,7 +107,9 @@ namespace openspace {
         return invTileScale * globalTranslation * patchScale;
     }
 
-    PatchCoverage PatchCoverageProvider::getCoverage(GeodeticPatch patch)
+    PatchCoverage PatchCoverageProvider::getCoverage(
+        GeodeticPatch patch,
+        std::shared_ptr<TileProvider> tileProvider)
     {
         static const int numTilesInCoverageX = 2;
         static const int numTilesInCoverageY = 2;
@@ -130,7 +130,7 @@ namespace openspace {
                 for (int j = numLevelsToLoop; j >= 0; j--)
                 {
                     // Try if the texture exists
-                    std::shared_ptr<Texture> tile = _tileProvider->getTile(tileIndex);
+                    std::shared_ptr<Texture> tile = tileProvider->getTile(tileIndex);
                     if (tile == nullptr)
                     { // If it doesn't exist, go down a level
                         tileIndex.x /= 2;
@@ -149,7 +149,7 @@ namespace openspace {
                 if (patchCoverageToReturn.textureTransformPairs[linearIdx].first == nullptr)
                 {
                     patchCoverageToReturn.textureTransformPairs[linearIdx].first =
-                        _tileProvider->getTemporaryTexture();
+                        tileProvider->getTemporaryTexture();
                     patchCoverageToReturn.textureTransformPairs[linearIdx].second =
                         glm::mat3(1);
                 }

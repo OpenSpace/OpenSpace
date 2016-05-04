@@ -38,10 +38,11 @@
 #include <modules/globebrowsing/globes/globemesh.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 
 namespace ghoul {
 namespace opengl {
-	class ProgramObject;
+    class ProgramObject;
 }
 }
 
@@ -50,16 +51,21 @@ namespace openspace {
 
 class RenderableGlobe : public DistanceSwitch {
 public:
-	RenderableGlobe(const ghoul::Dictionary& dictionary);
-	~RenderableGlobe();
+    RenderableGlobe(const ghoul::Dictionary& dictionary);
+    ~RenderableGlobe();
 
-	void update(const UpdateData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
 
-	double _time;
+    double _time;
 
-	Ellipsoid _ellipsoid;
+    Ellipsoid _ellipsoid;
+
+    //std::vector<std::string> _heightMapKeys;
+    //std::vector<std::string> _colorTextureKeys;
+
+    std::shared_ptr<TileProviderManager> _tileProviderManager;
 };
 
 }  // namespace openspace
