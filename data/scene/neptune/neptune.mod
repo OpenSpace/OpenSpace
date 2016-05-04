@@ -14,8 +14,8 @@ return {
         Parent = "NeptuneBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_NEPTUNE",
-			Body = "NEPTUNE BARYCENTER",
+            Frame = "IAU_NEPTUNE",
+            Body = "NEPTUNE BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.4622 , 7 },

@@ -15,8 +15,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_PLUTO",
-			Body = "KERBEROS",
+            Frame = "IAU_PLUTO",
+            Body = "KERBEROS",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.1 , 5 },
@@ -83,5 +83,5 @@ return {
         },
         GuiName = "/Solar/KerberosTrail"
     }
-	
+    
 }

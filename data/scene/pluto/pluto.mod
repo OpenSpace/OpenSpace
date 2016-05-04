@@ -21,8 +21,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_PLUTO",
-			Body = "PLUTO",
+            Frame = "IAU_PLUTO",
+            Body = "PLUTO",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.173 , 6 },
@@ -46,7 +46,7 @@ return {
             Kernels = {
                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
                   -- "${OPENSPACE_DATA}/spice/Pluto/EPHEMERIDES/nh_plu017.bsp"
-			   -- "C:/Users/michal/NewHorizons/SPICE/nh_plu017.bsp"
+               -- "C:/Users/michal/NewHorizons/SPICE/nh_plu017.bsp"
             }
         },
         Rotation = {
@@ -56,7 +56,7 @@ return {
         },
         GuiName = "/Solar/Planets/Pluto"
     },
-	--[[
+    --[[
     -- PlutoTrail module
     {   
         Name = "PlutoTrail",

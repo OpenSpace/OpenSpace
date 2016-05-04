@@ -4,8 +4,8 @@ return {
         Name = "SolarSystemBarycenter",
         Parent = "SolarSystem",
         Ephemeris = {
-        	Type = "Static",
-	    },
+            Type = "Static",
+        },
     },
 
     -- Sun module
@@ -14,8 +14,8 @@ return {
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_SUN",
-			Body = "SUN", 
+            Frame = "IAU_SUN",
+            Body = "SUN", 
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.783200, 9 },
@@ -72,7 +72,7 @@ return {
             Billboard = true,
             Texture = "textures/marker.png"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

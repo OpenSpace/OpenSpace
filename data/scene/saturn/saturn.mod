@@ -14,8 +14,8 @@ return {
         Parent = "SaturnBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_SATURN",
-			Body = "SATURN BARYCENTER",
+            Frame = "IAU_SATURN",
+            Body = "SATURN BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 5.8232, 7 },

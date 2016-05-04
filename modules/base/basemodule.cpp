@@ -47,7 +47,6 @@
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
-#include <modules/base/ephemeris/dynamicephemeris.h>
 #include <modules/base/ephemeris/spiceephemeris.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -61,6 +60,7 @@ BaseModule::BaseModule()
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
+            FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
 
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
@@ -84,7 +84,6 @@ void BaseModule::internalInitialize() {
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
     fEphemeris->registerClass<StaticEphemeris>("Static");
-    fEphemeris->registerClass<StaticEphemeris>("Dynamic");
     fEphemeris->registerClass<SpiceEphemeris>("Spice");
 
     auto fPlanetGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();

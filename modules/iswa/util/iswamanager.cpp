@@ -103,10 +103,6 @@ void ISWAManager::addISWACygnet(std::string info){
     }
 
     addISWACygnet(cygnetId);
-    
-    /*if(data == "")
-    else*/
-        
 }
 
 void ISWAManager::addISWACygnet(int id, std::string info, int group){
@@ -116,7 +112,6 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = id;
         metaFuture->group = group;
-
         if(info == _type[CygnetType::Texture]){
             metaFuture->type = CygnetType::Texture;
             metaFuture->geom  = CygnetGeometry::Plane;

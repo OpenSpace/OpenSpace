@@ -5,8 +5,8 @@ return {
         Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_IO", -- should exist. 
-			Body = "IO",
+            Frame = "IAU_IO", -- should exist. 
+            Body = "IO",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.8213, 6 },
@@ -29,7 +29,7 @@ return {
             Observer = "JUPITER BARYCENTER",
             Kernels = {
                 --"${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-				"${SPICE}/jup260.bsp",
+                "${SPICE}/jup260.bsp",
             }
         },
         Rotation = {
