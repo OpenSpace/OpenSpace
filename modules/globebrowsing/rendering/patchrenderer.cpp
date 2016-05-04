@@ -226,7 +226,8 @@ namespace openspace {
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, heightMapProviders.begin()->second);
+        auto tileProvider = heightMapProviders.begin()->second;
+        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProvider);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnit00;

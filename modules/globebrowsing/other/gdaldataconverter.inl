@@ -104,7 +104,7 @@ namespace openspace {
         for (size_t y = 0; y < numberOfPixels.y; y++) {
             for (size_t x = 0; x < numberOfPixels.x; x++) {
                 imageDataYflipped[x + y * numberOfPixels.x] =
-                    imageData[x + (numberOfPixels.y - y) * numberOfPixels.x];
+                    imageData[x + (numberOfPixels.y - 1 - y) * numberOfPixels.x];
             }
         }
 

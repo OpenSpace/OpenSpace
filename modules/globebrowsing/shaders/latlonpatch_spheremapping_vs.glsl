@@ -44,7 +44,7 @@ PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_UV.y; // Lat
 	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_UV.x; // Lon
-	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);// latLonToCartesian(lonLatInput.y, lonLatInput.x, globeRadius);
+	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
 	return positionPairModelSpace;
 }
 
@@ -53,7 +53,7 @@ void main()
 	fs_uv = in_UV;
 	PositionNormalPair pair = globalInterpolation();
 
-	float sampledHeight = texture(textureSampler00, fs_uv).r;
+	float sampledHeight = texture(textureSampler00, in_UV).r;
 	pair.position += pair.normal * sampledHeight * 1e5;
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
