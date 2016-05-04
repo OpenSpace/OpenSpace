@@ -25,15 +25,16 @@
 #define __ISWAMANAGER_H__
 
 #include <ghoul/designpattern/singleton.h>
+
 #include <memory>
 #include <map>
-#include <openspace/engine/downloadmanager.h>
 #include <ghoul/glm.h>
+#include <ccmc/Kameleon.h>
+#include <openspace/engine/downloadmanager.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/scripting/scriptengine.h>
-
 // #include <modules/iswa/rendering/iswacygnet.h>
 // #include <modules/iswa/rendering/iswagroup.h>
 
@@ -97,6 +98,8 @@ private:
     std::map<int, std::string> _geom;
 
     std::map<int, std::shared_ptr<ISWAGroup>> _groups;
+
+    std::shared_ptr<ccmc::Kameleon> _kameleon;
 };
 
 } //namespace openspace

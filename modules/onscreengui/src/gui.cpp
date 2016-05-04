@@ -36,8 +36,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <modules/base/rendering/screenspaceimage.h>
-#include <modules/iswa/util/iswamanager.h>
-
+// #include <modules/iswa/util/iswamanager.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -297,10 +296,10 @@ void GUI::endFrame() {
 
     if (_property.isEnabled())
         _property.render();
-    if (_iSWAproperty.isEnabled())
-        _iSWAproperty.render();
     if (_screenSpaceProperty.isEnabled())
         _screenSpaceProperty.render();
+    if (_iSWAproperty.isEnabled())
+        _iSWAproperty.render();
     if (_performance.isEnabled())
         _performance.render();
     if (_help.isEnabled())
@@ -434,15 +433,13 @@ void GUI::renderMainWindow() {
     }
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-       if(ISWAManager::isInitialized()){
         static const int addCygnetBufferSize = 256;
         static char addCygnetBuffer[addCygnetBufferSize];
         ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
-        if(ImGui::SmallButton("Add Cygnet")){
+        if(ImGui::SmallButton("Add Cygnet"))
             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
-        }
-    }
+    
 #endif
 
     ImGui::End();

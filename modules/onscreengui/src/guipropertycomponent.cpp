@@ -514,22 +514,22 @@ void GuiPropertyComponent::handleProperty(const ghoul::Dictionary& dictionary) {
 void GuiPropertyComponent::render() {
     ImGui::Begin("Properties", &_isEnabled, size, 0.5f);
 
-    if (ImGui::CollapsingHeader("OnScreen GUI")) {
-        glm::vec2& pos = OsEng.renderEngine()._onScreenInformation._position;
-        Vec2Property::ValueType value = pos;
-        ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
-        pos = value;
+    // if (ImGui::CollapsingHeader("OnScreen GUI")) {
+    //     glm::vec2& pos = OsEng.renderEngine()._onScreenInformation._position;
+    //     Vec2Property::ValueType value = pos;
+    //     ImGui::SliderFloat2("Position", &value.x, -1.f, 1.f);
+    //     pos = value;
      
-        unsigned int& size = OsEng.renderEngine()._onScreenInformation._size;
-        int sizeValue = static_cast<int>(size);
-        ImGui::SliderInt("Size", &sizeValue, 0, 36);
-        size = static_cast<unsigned int>(sizeValue);
+    //     unsigned int& size = OsEng.renderEngine()._onScreenInformation._size;
+    //     int sizeValue = static_cast<int>(size);
+    //     ImGui::SliderInt("Size", &sizeValue, 0, 36);
+    //     size = static_cast<unsigned int>(sizeValue);
 
-        int& node = OsEng.renderEngine()._onScreenInformation._node;
-        int iValue = node;
-        ImGui::SliderInt("Node#", &iValue, 0, 30);
-        node = iValue;
-    }
+    //     int& node = OsEng.renderEngine()._onScreenInformation._node;
+    //     int iValue = node;
+    //     ImGui::SliderInt("Node#", &iValue, 0, 30);
+    //     node = iValue;
+    // }
 
     ImGui::Spacing();
 
