@@ -102,6 +102,16 @@ namespace openspace {
             const RenderData& data,
             const Ellipsoid& ellipsoid);
     private:
+
+        void renderPatchGlobally(
+            const Geodetic2& patchSize,
+            const RenderData& data,
+            const Ellipsoid& ellipsoid);
+        void renderPatchCameraSpace(
+            const Geodetic2& patchSize,
+            const RenderData& data,
+            const Ellipsoid& ellipsoid);
+
         PatchCoverageProvider _patchCoverageProvider;
         shared_ptr<ClipMapGrid> _grid;
     };

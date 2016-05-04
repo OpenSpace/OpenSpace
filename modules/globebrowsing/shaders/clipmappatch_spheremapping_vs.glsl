@@ -32,17 +32,17 @@ uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 uniform ivec2 contraction; // [-1, 1]
 
-uniform mat3 uvTransformPatchToTile00;
-uniform mat3 uvTransformPatchToTile10;
-uniform mat3 uvTransformPatchToTile01;
-uniform mat3 uvTransformPatchToTile11;
-
 uniform int segmentsPerPatch;
 
-uniform sampler2D textureSampler00;
-uniform sampler2D textureSampler10;
-uniform sampler2D textureSampler01;
-uniform sampler2D textureSampler11;
+uniform mat3 uvTransformPatchToTileHeight00;
+uniform mat3 uvTransformPatchToTileHeight10;
+uniform mat3 uvTransformPatchToTileHeight01;
+uniform mat3 uvTransformPatchToTileHeight11;
+
+uniform sampler2D textureSamplerHeight00;
+uniform sampler2D textureSamplerHeight10;
+uniform sampler2D textureSamplerHeight01;
+uniform sampler2D textureSamplerHeight11;
 
 layout(location = 1) in vec2 in_uv;
 
@@ -75,18 +75,18 @@ void main()
 
 	float sampledHeight00, sampledHeight10, sampledHeight01, sampledHeight11;
 
-	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
-	sampledHeight00 = texture(textureSampler00, uv00).r;
-	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
-	sampledHeight10 = texture(textureSampler10, uv10).r;
-	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
-	sampledHeight01 = texture(textureSampler01, uv01).r;
-	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
-	sampledHeight11 = texture(textureSampler11, uv11).r;
+	vec2 uv00 = vec2(uvTransformPatchToTileHeight00 * vec3(fs_uv.s, fs_uv.t, 1));
+	sampledHeight00 = texture(textureSamplerHeight00, uv00).r;
+	vec2 uv10 = vec2(uvTransformPatchToTileHeight10 * vec3(fs_uv.s, fs_uv.t, 1));
+	sampledHeight10 = texture(textureSamplerHeight10, uv10).r;
+	vec2 uv01 = vec2(uvTransformPatchToTileHeight01 * vec3(fs_uv.s, fs_uv.t, 1));
+	sampledHeight01 = texture(textureSamplerHeight01, uv01).r;
+	vec2 uv11 = vec2(uvTransformPatchToTileHeight11 * vec3(fs_uv.s, fs_uv.t, 1));
+	sampledHeight11 = texture(textureSamplerHeight11, uv11).r;
 
 	float sampledHeight = max(sampledHeight00, max(sampledHeight10, max(sampledHeight01, sampledHeight11)));
 
-	pair.position += pair.normal * sampledHeight * 1e5;
+	pair.position += pair.normal * sampledHeight * pow(2,15);
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 	fs_position = pair.position;

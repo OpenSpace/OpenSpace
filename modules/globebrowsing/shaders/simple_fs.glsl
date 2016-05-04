@@ -35,14 +35,28 @@ uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D nightTex;
 
-uniform sampler2D textureSampler00;
-uniform sampler2D textureSampler10;
-uniform sampler2D textureSampler01;
-uniform sampler2D textureSampler11;
-uniform mat3 uvTransformPatchToTile00;
-uniform mat3 uvTransformPatchToTile10;
-uniform mat3 uvTransformPatchToTile01;
-uniform mat3 uvTransformPatchToTile11;
+/*
+// Heightmap coverage
+uniform sampler2D textureSamplerHeight00;
+uniform sampler2D textureSamplerHeight10;
+uniform sampler2D textureSamplerHeight01;
+uniform sampler2D textureSamplerHeight11;
+uniform mat3 uvTransformPatchToTileHeight00;
+uniform mat3 uvTransformPatchToTileHeight10;
+uniform mat3 uvTransformPatchToTileHeight01;
+uniform mat3 uvTransformPatchToTileHeight11;
+*/
+
+// Colortexture coverage
+uniform sampler2D textureSamplerColor00;
+uniform sampler2D textureSamplerColor10;
+uniform sampler2D textureSamplerColor01;
+uniform sampler2D textureSamplerColor11;
+uniform mat3 uvTransformPatchToTileColor00;
+uniform mat3 uvTransformPatchToTileColor10;
+uniform mat3 uvTransformPatchToTileColor01;
+uniform mat3 uvTransformPatchToTileColor11;
+
 
 //uniform int segmentsPerPatch;
 
@@ -60,18 +74,19 @@ Fragment getFragment() {
 	frag.color = vec4(0);
 	vec4 color00, color10, color01, color11;
 
-	vec2 uv00 = vec2(uvTransformPatchToTile00 * vec3(fs_uv.s, fs_uv.t, 1));
-	color00 = texture(textureSampler00, uv00);
+	vec2 uv00 = vec2(uvTransformPatchToTileColor00 * vec3(fs_uv.s, fs_uv.t, 1));
+	color00 = texture(textureSamplerColor00, uv00);
 
-	vec2 uv10 = vec2(uvTransformPatchToTile10 * vec3(fs_uv.s, fs_uv.t, 1));
-	color10 += texture(textureSampler10, uv10);
+	vec2 uv10 = vec2(uvTransformPatchToTileColor10 * vec3(fs_uv.s, fs_uv.t, 1));
+	color10 += texture(textureSamplerColor10, uv10);
 	
-	vec2 uv01 = vec2(uvTransformPatchToTile01 * vec3(fs_uv.s, fs_uv.t, 1));
-	color01 += texture(textureSampler01, uv01);
+	vec2 uv01 = vec2(uvTransformPatchToTileColor01 * vec3(fs_uv.s, fs_uv.t, 1));
+	color01 += texture(textureSamplerColor01, uv01);
 	
-	vec2 uv11 = vec2(uvTransformPatchToTile11 * vec3(fs_uv.s, fs_uv.t, 1));
-	color11 += texture(textureSampler11, uv11);
+	vec2 uv11 = vec2(uvTransformPatchToTileColor11 * vec3(fs_uv.s, fs_uv.t, 1));
+	color11 += texture(textureSamplerColor11, uv11);
 
+	
 	frag.color = max(color00, max(color10, max(color01, color11))) * 10;
 
 	//vec4 uvColor = vec4(fract(fs_uv * segmentsPerPatch), 0.4,1);

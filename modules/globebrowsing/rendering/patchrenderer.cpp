@@ -131,20 +131,43 @@ namespace openspace {
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProvider = heightMapProviders.begin()->second;
-        tile00 = tileProvider->getTile(tileIndex);
+        auto tileProviderHeight = heightMapProviders.begin()->second;
+        tile00 = tileProviderHeight->getTile(tileIndex);
 
         if (tile00 == nullptr) {
-            tile00 = tileProvider->getTemporaryTexture();
+            tile00 = tileProviderHeight->getTemporaryTexture();
         }
         
-        glm::mat3 uvTransform = glm::mat3(1);
         // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnit;
-        texUnit.activate();
+        ghoul::opengl::TextureUnit texUnitHeight;
+        texUnitHeight.activate();
         tile00->bind();
-        _programObject->setUniform("textureSampler00", texUnit);
-        _programObject->setUniform("uvTransformPatchToTile00", uvTransform);
+        _programObject->setUniform("textureSamplerHeight00", texUnitHeight);
+
+
+
+
+
+        // Pick the first color texture
+        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto tileProviderColor = colorTextureProviders.begin()->second;
+        tile00 = tileProviderColor->getTile(tileIndex);
+
+        if (tile00 == nullptr) {
+            tile00 = tileProviderColor->getTemporaryTexture();
+        }
+
+        // Now we use the same shader as for clipmap rendering so this uv transform is needed
+        glm::mat3 uvTransformColor = glm::mat3(1);
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitColor;
+        texUnitColor.activate();
+        tile00->bind();
+        _programObject->setUniform("textureSamplerColor00", texUnitColor);
+        _programObject->setUniform("uvTransformPatchToTileColor00", uvTransformColor);
+
+
+
 
 
         Geodetic2 swCorner = newPatch.southWestCorner();
@@ -192,6 +215,14 @@ namespace openspace {
         const RenderData& data,
         const Ellipsoid& ellipsoid)
     {
+        renderPatchGlobally(patchSize, data, ellipsoid);
+    }
+
+    void ClipMapPatchRenderer::renderPatchGlobally(
+        const Geodetic2& patchSize,
+        const RenderData& data,
+        const Ellipsoid& ellipsoid)
+    {
         // activate shader
         _programObject->activate();
         using namespace glm;
@@ -212,7 +243,7 @@ namespace openspace {
         Geodetic2 cameraPosLatLon = ellipsoid.cartesianToGeodetic2(data.camera.position().dvec3());
         ivec2 intSnapCoord = ivec2(
             cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
-            cameraPosLatLon.lon / (M_PI) * segmentsPerPatch * patchesToCoverGlobe.x);
+            cameraPosLatLon.lon / (M_PI)* segmentsPerPatch * patchesToCoverGlobe.x);
         Geodetic2 newPatchCenter = Geodetic2(
             stepSize.lat * intSnapCoord.x,
             stepSize.lon * intSnapCoord.y);
@@ -223,45 +254,253 @@ namespace openspace {
         ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
 
+
+
+
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProvider = heightMapProviders.begin()->second;
-        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProvider);
+        auto tileProviderHeight = heightMapProviders.begin()->second;
+        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
         // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnit00;
-        texUnit00.activate();
+        ghoul::opengl::TextureUnit texUnitHeight00;
+        texUnitHeight00.activate();
         patchCoverage.textureTransformPairs[0].first->bind(); // tile00
-        _programObject->setUniform("textureSampler00", texUnit00);
+        _programObject->setUniform("textureSamplerHeight00", texUnitHeight00);
 
-        ghoul::opengl::TextureUnit texUnit10;
-        texUnit10.activate();
+        ghoul::opengl::TextureUnit texUnitHeight10;
+        texUnitHeight10.activate();
         patchCoverage.textureTransformPairs[1].first->bind(); // tile10
-        _programObject->setUniform("textureSampler10", texUnit10);
+        _programObject->setUniform("textureSamplerHeight10", texUnitHeight10);
 
-        ghoul::opengl::TextureUnit texUnit01;
-        texUnit01.activate();
+        ghoul::opengl::TextureUnit texUnitHeight01;
+        texUnitHeight01.activate();
         patchCoverage.textureTransformPairs[2].first->bind(); // tile01
-        _programObject->setUniform("textureSampler01", texUnit01);
+        _programObject->setUniform("textureSamplerHeight01", texUnitHeight01);
 
-        ghoul::opengl::TextureUnit texUnit11;
-        texUnit11.activate();
+        ghoul::opengl::TextureUnit texUnitHeight11;
+        texUnitHeight11.activate();
         patchCoverage.textureTransformPairs[3].first->bind(); // tile11
-        _programObject->setUniform("textureSampler11", texUnit11);
+        _programObject->setUniform("textureSamplerHeight11", texUnitHeight11);
 
 
         _programObject->setUniform(
-            "uvTransformPatchToTile00",
+            "uvTransformPatchToTileHeight00",
             patchCoverage.textureTransformPairs[0].second);
         _programObject->setUniform(
-            "uvTransformPatchToTile10",
+            "uvTransformPatchToTileHeight10",
             patchCoverage.textureTransformPairs[1].second);
         _programObject->setUniform(
-            "uvTransformPatchToTile01",
+            "uvTransformPatchToTileHeight01",
             patchCoverage.textureTransformPairs[2].second);
         _programObject->setUniform(
-            "uvTransformPatchToTile11",
+            "uvTransformPatchToTileHeight11",
             patchCoverage.textureTransformPairs[3].second);
+
+
+
+
+
+
+
+
+
+
+        // Pick the first color texture
+        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto tileProviderColor = colorTextureProviders.begin()->second;
+        PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
+
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitColor00;
+        texUnitColor00.activate();
+        patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
+        _programObject->setUniform("textureSamplerColor00", texUnitColor00);
+
+        ghoul::opengl::TextureUnit texUnitColor10;
+        texUnitColor10.activate();
+        patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
+        _programObject->setUniform("textureSamplerColor10", texUnitColor10);
+
+        ghoul::opengl::TextureUnit texUnitColor01;
+        texUnitColor01.activate();
+        patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
+        _programObject->setUniform("textureSamplerColor01", texUnitColor01);
+
+        ghoul::opengl::TextureUnit texUnitColor11;
+        texUnitColor11.activate();
+        patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
+        _programObject->setUniform("textureSamplerColor11", texUnitColor11);
+
+
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor00",
+            patchCoverageColor.textureTransformPairs[0].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor10",
+            patchCoverageColor.textureTransformPairs[1].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor01",
+            patchCoverageColor.textureTransformPairs[2].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor11",
+            patchCoverageColor.textureTransformPairs[3].second);
+
+
+
+
+
+        _programObject->setUniform(
+            "modelViewProjectionTransform",
+            data.camera.projectionMatrix() * viewTransform *  modelTransform);
+        _programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
+        _programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
+        _programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
+        _programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        _programObject->setUniform("contraction", contraction);
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        // render
+        _grid->geometry().drawUsingActiveProgram();
+
+        // disable shader
+        _programObject->deactivate();
+    }
+
+    void ClipMapPatchRenderer::renderPatchCameraSpace(
+        const Geodetic2& patchSize,
+        const RenderData& data,
+        const Ellipsoid& ellipsoid)
+    {
+        // activate shader
+        _programObject->activate();
+        using namespace glm;
+
+        mat4 viewTransform = data.camera.combinedViewMatrix();
+
+        // TODO : Model transform should be fetched as a matrix directly.
+        mat4 modelTransform = translate(mat4(1), data.position.vec3());
+
+        // Snap patch position
+        int segmentsPerPatch = _grid->segments();
+        Geodetic2 stepSize = Geodetic2(
+            patchSize.lat / segmentsPerPatch,
+            patchSize.lon / segmentsPerPatch);
+        ivec2 patchesToCoverGlobe = ivec2(
+            M_PI / patchSize.lat + 0.5,
+            M_PI * 2 / patchSize.lon + 0.5);
+        Geodetic2 cameraPosLatLon = ellipsoid.cartesianToGeodetic2(data.camera.position().dvec3());
+        ivec2 intSnapCoord = ivec2(
+            cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
+            cameraPosLatLon.lon / (M_PI)* segmentsPerPatch * patchesToCoverGlobe.x);
+        Geodetic2 newPatchCenter = Geodetic2(
+            stepSize.lat * intSnapCoord.x,
+            stepSize.lon * intSnapCoord.y);
+        GeodeticPatch newPatch(
+            newPatchCenter,
+            Geodetic2(patchSize.lat / 2, patchSize.lon / 2));
+
+        ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
+
+
+
+
+
+        // For now just pick the first one from height maps
+        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto tileProviderHeight = heightMapProviders.begin()->second;
+        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
+
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitHeight00;
+        texUnitHeight00.activate();
+        patchCoverage.textureTransformPairs[0].first->bind(); // tile00
+        _programObject->setUniform("textureSamplerHeight00", texUnitHeight00);
+
+        ghoul::opengl::TextureUnit texUnitHeight10;
+        texUnitHeight10.activate();
+        patchCoverage.textureTransformPairs[1].first->bind(); // tile10
+        _programObject->setUniform("textureSamplerHeight10", texUnitHeight10);
+
+        ghoul::opengl::TextureUnit texUnitHeight01;
+        texUnitHeight01.activate();
+        patchCoverage.textureTransformPairs[2].first->bind(); // tile01
+        _programObject->setUniform("textureSamplerHeight01", texUnitHeight01);
+
+        ghoul::opengl::TextureUnit texUnitHeight11;
+        texUnitHeight11.activate();
+        patchCoverage.textureTransformPairs[3].first->bind(); // tile11
+        _programObject->setUniform("textureSamplerHeight11", texUnitHeight11);
+
+
+        _programObject->setUniform(
+            "uvTransformPatchToTileHeight00",
+            patchCoverage.textureTransformPairs[0].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileHeight10",
+            patchCoverage.textureTransformPairs[1].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileHeight01",
+            patchCoverage.textureTransformPairs[2].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileHeight11",
+            patchCoverage.textureTransformPairs[3].second);
+
+
+
+
+
+
+
+
+
+
+        // Pick the first color texture
+        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto tileProviderColor = colorTextureProviders.begin()->second;
+        PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
+
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitColor00;
+        texUnitColor00.activate();
+        patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
+        _programObject->setUniform("textureSamplerColor00", texUnitColor00);
+
+        ghoul::opengl::TextureUnit texUnitColor10;
+        texUnitColor10.activate();
+        patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
+        _programObject->setUniform("textureSamplerColor10", texUnitColor10);
+
+        ghoul::opengl::TextureUnit texUnitColor01;
+        texUnitColor01.activate();
+        patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
+        _programObject->setUniform("textureSamplerColor01", texUnitColor01);
+
+        ghoul::opengl::TextureUnit texUnitColor11;
+        texUnitColor11.activate();
+        patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
+        _programObject->setUniform("textureSamplerColor11", texUnitColor11);
+
+
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor00",
+            patchCoverageColor.textureTransformPairs[0].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor10",
+            patchCoverageColor.textureTransformPairs[1].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor01",
+            patchCoverageColor.textureTransformPairs[2].second);
+        _programObject->setUniform(
+            "uvTransformPatchToTileColor11",
+            patchCoverageColor.textureTransformPairs[3].second);
+
+
+
+
 
         _programObject->setUniform(
             "modelViewProjectionTransform",
