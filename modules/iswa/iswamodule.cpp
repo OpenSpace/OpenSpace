@@ -43,7 +43,6 @@ namespace openspace {
     {}
 
     void ISWAModule::internalInitialize(){
-        FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
         ghoul_assert(fRenderable, "No renderable factory existed");
 

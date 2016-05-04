@@ -208,7 +208,7 @@ void DataPlane::setUniforms(){
 
     int activeTransferfunctions = _transferFunctions.size();
 
-    ghoul::opengl::TextureUnit txUnits[activeTextures];
+    ghoul::opengl::TextureUnit txUnits[10];
     int j = 0;
     for(int option : selectedOptions){
         if(_textures[option]){
@@ -223,7 +223,7 @@ void DataPlane::setUniforms(){
         }
     }
 
-    ghoul::opengl::TextureUnit tfUnits[activeTransferfunctions];
+    ghoul::opengl::TextureUnit tfUnits[10];
     j = 0;
 
     if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())){
@@ -538,7 +538,7 @@ void DataPlane::setTransferFunctions(std::string tfPath){
 
     if(tfFile.is_open()){
         while(getline(tfFile, line)){
-            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(line);
+            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(absPath(line));
             if(tf)
                 tfs.push_back(tf);
         }

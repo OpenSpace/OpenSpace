@@ -60,6 +60,7 @@ BaseModule::BaseModule()
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
+            FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
 
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
