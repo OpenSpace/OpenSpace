@@ -67,7 +67,7 @@ void ISWAGroup::registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type)
     }
 
     if(type != _type){
-        LERROR("Can't register cygnet with a different class from the group");
+        LWARNING("Can't register cygnet with a different type from the group");
         return;
     }
 
@@ -94,6 +94,9 @@ void ISWAGroup::unregisterCygnet(ISWACygnet* cygnet){
 
     if(it != _cygnets.end())
         _cygnets.erase(it);
+
+    if(_cygnets.empty())
+        unregisterProperties();
 }
 
 
@@ -108,6 +111,11 @@ void ISWAGroup::registerOptions(const std::vector<properties::SelectionProperty:
         for(auto cygnet : _cygnets)
             static_cast<DataPlane*>(cygnet)->dataOptions(_dataOptions.value());
     }
+}
+
+bool ISWAGroup::checkType(ISWAManager::CygnetType type){
+    if(_type == ISWAManager::CygnetType::NoType) return true;
+    return (_type == type);
 }
 
 void ISWAGroup::registerProperties(){
@@ -166,11 +174,15 @@ void ISWAGroup::registerProperties(){
             ISWAManager::ref().deleteISWACygnet((*it)->name());
             it = _cygnets.erase(it);
         }
-        _dataOptions.removeOptions();
-        OsEng.gui()._iSWAproperty.unregisterProperties(name());
-        _type = ISWAManager::CygnetType::NoType;
         // ISWAManager::ref().unregisterGroup(_id);
+        unregisterProperties();
     }); 
+}
+
+void ISWAGroup::unregisterProperties(){
+    _dataOptions.removeOptions();
+    OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    _type = ISWAManager::CygnetType::NoType;
 }
 
 } //namespace openspace

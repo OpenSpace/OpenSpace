@@ -229,8 +229,12 @@ void ISWAManager::createScreenSpace(int id){
 void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
-    if(data->group > 0)
-        name += "_Group" + std::to_string(data->group);
+
+    if(data->group > 0){
+        auto it = _groups.find(data->group);
+        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
+            name += "_Group" + std::to_string(data->group);
+    }
 
     data->name = name;
 

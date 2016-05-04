@@ -45,7 +45,7 @@ public:
 	void registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type);
 	void unregisterCygnet(ISWACygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
-
+	bool checkType(ISWAManager::CygnetType type);
 private:
 	void registerProperties();
 	void unregisterProperties();
