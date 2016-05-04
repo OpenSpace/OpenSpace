@@ -65,7 +65,8 @@ namespace openspace {
         void update();
 
     protected:
-        unique_ptr<ProgramObject> _programObject;
+        unique_ptr<ProgramObject> _programObjectGlobalRendering;
+        unique_ptr<ProgramObject> _programObjectLocalRendering;
         std::shared_ptr<TileProviderManager> _tileProviderManager;
     };
 

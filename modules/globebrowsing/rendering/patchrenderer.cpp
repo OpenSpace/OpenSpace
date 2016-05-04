@@ -62,10 +62,10 @@ namespace openspace {
     }
 
     PatchRenderer::~PatchRenderer() {
-        if (_programObject) {
+        if (_programObjectGlobalRendering) {
             RenderEngine& renderEngine = OsEng.renderEngine();
-            renderEngine.removeRenderProgram(_programObject);
-            _programObject = nullptr;
+            renderEngine.removeRenderProgram(_programObjectGlobalRendering);
+            _programObjectGlobalRendering = nullptr;
         }
     }
 
@@ -91,14 +91,14 @@ namespace openspace {
         : PatchRenderer(tileProviderManager)
         , _grid(grid)
     {
-        _programObject = OsEng.renderEngine().buildRenderProgram(
-            "LatLonSphereMappingProgram",
-            "${MODULE_GLOBEBROWSING}/shaders/latlonpatch_spheremapping_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/simple_fs.glsl");
-        ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
+        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
+            "GlobalChunkedLodPatch",
+            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
+            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
+        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
 
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
     void LatLonPatchRenderer::renderPatch(
@@ -123,7 +123,7 @@ namespace openspace {
             * viewTransform * modelTransform;
 
         // activate shader
-        _programObject->activate();
+        _programObjectGlobalRendering->activate();
 
         // Get the textures that should be used for rendering
         std::shared_ptr<ghoul::opengl::Texture> tile00;
@@ -142,7 +142,7 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitHeight;
         texUnitHeight.activate();
         tile00->bind();
-        _programObject->setUniform("textureSamplerHeight00", texUnitHeight);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight", texUnitHeight);
 
 
 
@@ -163,18 +163,17 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitColor;
         texUnitColor.activate();
         tile00->bind();
-        _programObject->setUniform("textureSamplerColor00", texUnitColor);
-        _programObject->setUniform("uvTransformPatchToTileColor00", uvTransformColor);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor", texUnitColor);
 
 
 
 
 
         Geodetic2 swCorner = newPatch.southWestCorner();
-        _programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-        _programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-        _programObject->setUniform("lonLatScalingFactor", vec2(newPatch.size().toLonLatVec2()));
-        _programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
+        _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(newPatch.size().toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -184,7 +183,7 @@ namespace openspace {
         _grid->geometry().drawUsingActiveProgram();
 
         // disable shader
-        _programObject->deactivate();
+        _programObjectGlobalRendering->deactivate();
     }
     
     //////////////////////////////////////////////////////////////////////////////////////
@@ -200,14 +199,21 @@ namespace openspace {
             Geodetic2(-M_PI -M_PI/2, -M_PI),
             10)
     {
-        _programObject = OsEng.renderEngine().buildRenderProgram(
-            "LatLonSphereMappingProgram",
-            "${MODULE_GLOBEBROWSING}/shaders/clipmappatch_spheremapping_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/simple_fs.glsl");
-        ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
+        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
+            "GlobalClipMapPatch",
+            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_vs.glsl",
+            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_fs.glsl");
+        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
+        
+        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
+            "GlobalClipMapPatch",
+            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_vs.glsl",
+            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_fs.glsl");
+        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
 
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
     void ClipMapPatchRenderer::renderPatch(
@@ -224,7 +230,7 @@ namespace openspace {
         const Ellipsoid& ellipsoid)
     {
         // activate shader
-        _programObject->activate();
+        _programObjectGlobalRendering->activate();
         using namespace glm;
 
         mat4 viewTransform = data.camera.combinedViewMatrix();
@@ -266,34 +272,34 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitHeight00;
         texUnitHeight00.activate();
         patchCoverage.textureTransformPairs[0].first->bind(); // tile00
-        _programObject->setUniform("textureSamplerHeight00", texUnitHeight00);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
 
         ghoul::opengl::TextureUnit texUnitHeight10;
         texUnitHeight10.activate();
         patchCoverage.textureTransformPairs[1].first->bind(); // tile10
-        _programObject->setUniform("textureSamplerHeight10", texUnitHeight10);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
 
         ghoul::opengl::TextureUnit texUnitHeight01;
         texUnitHeight01.activate();
         patchCoverage.textureTransformPairs[2].first->bind(); // tile01
-        _programObject->setUniform("textureSamplerHeight01", texUnitHeight01);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
 
         ghoul::opengl::TextureUnit texUnitHeight11;
         texUnitHeight11.activate();
         patchCoverage.textureTransformPairs[3].first->bind(); // tile11
-        _programObject->setUniform("textureSamplerHeight11", texUnitHeight11);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight00",
             patchCoverage.textureTransformPairs[0].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight10",
             patchCoverage.textureTransformPairs[1].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight01",
             patchCoverage.textureTransformPairs[2].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight11",
             patchCoverage.textureTransformPairs[3].second);
 
@@ -315,34 +321,34 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitColor00;
         texUnitColor00.activate();
         patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
-        _programObject->setUniform("textureSamplerColor00", texUnitColor00);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor00", texUnitColor00);
 
         ghoul::opengl::TextureUnit texUnitColor10;
         texUnitColor10.activate();
         patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
-        _programObject->setUniform("textureSamplerColor10", texUnitColor10);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor10", texUnitColor10);
 
         ghoul::opengl::TextureUnit texUnitColor01;
         texUnitColor01.activate();
         patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
-        _programObject->setUniform("textureSamplerColor01", texUnitColor01);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor01", texUnitColor01);
 
         ghoul::opengl::TextureUnit texUnitColor11;
         texUnitColor11.activate();
         patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
-        _programObject->setUniform("textureSamplerColor11", texUnitColor11);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor11", texUnitColor11);
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor00",
             patchCoverageColor.textureTransformPairs[0].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor10",
             patchCoverageColor.textureTransformPairs[1].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor01",
             patchCoverageColor.textureTransformPairs[2].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor11",
             patchCoverageColor.textureTransformPairs[3].second);
 
@@ -350,14 +356,14 @@ namespace openspace {
 
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "modelViewProjectionTransform",
             data.camera.projectionMatrix() * viewTransform *  modelTransform);
-        _programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
-        _programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
-        _programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-        _programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
-        _programObject->setUniform("contraction", contraction);
+        _programObjectGlobalRendering->setUniform("segmentsPerPatch", segmentsPerPatch);
+        _programObjectGlobalRendering->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        _programObjectGlobalRendering->setUniform("contraction", contraction);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -367,7 +373,7 @@ namespace openspace {
         _grid->geometry().drawUsingActiveProgram();
 
         // disable shader
-        _programObject->deactivate();
+        _programObjectGlobalRendering->deactivate();
     }
 
     void ClipMapPatchRenderer::renderPatchCameraSpace(
@@ -376,7 +382,7 @@ namespace openspace {
         const Ellipsoid& ellipsoid)
     {
         // activate shader
-        _programObject->activate();
+        _programObjectGlobalRendering->activate();
         using namespace glm;
 
         mat4 viewTransform = data.camera.combinedViewMatrix();
@@ -418,34 +424,34 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitHeight00;
         texUnitHeight00.activate();
         patchCoverage.textureTransformPairs[0].first->bind(); // tile00
-        _programObject->setUniform("textureSamplerHeight00", texUnitHeight00);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
 
         ghoul::opengl::TextureUnit texUnitHeight10;
         texUnitHeight10.activate();
         patchCoverage.textureTransformPairs[1].first->bind(); // tile10
-        _programObject->setUniform("textureSamplerHeight10", texUnitHeight10);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
 
         ghoul::opengl::TextureUnit texUnitHeight01;
         texUnitHeight01.activate();
         patchCoverage.textureTransformPairs[2].first->bind(); // tile01
-        _programObject->setUniform("textureSamplerHeight01", texUnitHeight01);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
 
         ghoul::opengl::TextureUnit texUnitHeight11;
         texUnitHeight11.activate();
         patchCoverage.textureTransformPairs[3].first->bind(); // tile11
-        _programObject->setUniform("textureSamplerHeight11", texUnitHeight11);
+        _programObjectGlobalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight00",
             patchCoverage.textureTransformPairs[0].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight10",
             patchCoverage.textureTransformPairs[1].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight01",
             patchCoverage.textureTransformPairs[2].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight11",
             patchCoverage.textureTransformPairs[3].second);
 
@@ -467,34 +473,34 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitColor00;
         texUnitColor00.activate();
         patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
-        _programObject->setUniform("textureSamplerColor00", texUnitColor00);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor00", texUnitColor00);
 
         ghoul::opengl::TextureUnit texUnitColor10;
         texUnitColor10.activate();
         patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
-        _programObject->setUniform("textureSamplerColor10", texUnitColor10);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor10", texUnitColor10);
 
         ghoul::opengl::TextureUnit texUnitColor01;
         texUnitColor01.activate();
         patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
-        _programObject->setUniform("textureSamplerColor01", texUnitColor01);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor01", texUnitColor01);
 
         ghoul::opengl::TextureUnit texUnitColor11;
         texUnitColor11.activate();
         patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
-        _programObject->setUniform("textureSamplerColor11", texUnitColor11);
+        _programObjectGlobalRendering->setUniform("textureSamplerColor11", texUnitColor11);
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor00",
             patchCoverageColor.textureTransformPairs[0].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor10",
             patchCoverageColor.textureTransformPairs[1].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor01",
             patchCoverageColor.textureTransformPairs[2].second);
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileColor11",
             patchCoverageColor.textureTransformPairs[3].second);
 
@@ -502,14 +508,14 @@ namespace openspace {
 
 
 
-        _programObject->setUniform(
+        _programObjectGlobalRendering->setUniform(
             "modelViewProjectionTransform",
             data.camera.projectionMatrix() * viewTransform *  modelTransform);
-        _programObject->setUniform("segmentsPerPatch", segmentsPerPatch);
-        _programObject->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
-        _programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-        _programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
-        _programObject->setUniform("contraction", contraction);
+        _programObjectGlobalRendering->setUniform("segmentsPerPatch", segmentsPerPatch);
+        _programObjectGlobalRendering->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        _programObjectGlobalRendering->setUniform("contraction", contraction);
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -519,7 +525,7 @@ namespace openspace {
         _grid->geometry().drawUsingActiveProgram();
 
         // disable shader
-        _programObject->deactivate();
+        _programObjectGlobalRendering->deactivate();
     }
 
 }  // namespace openspace

@@ -91,6 +91,13 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})

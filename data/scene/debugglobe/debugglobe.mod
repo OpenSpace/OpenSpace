@@ -9,15 +9,18 @@ return {
             Textures = {
                 ColorTextures = {
                     {
-                        Name = "BlueMarble",
-                        FilePath = "textures/earth_bluemarble.jpg",
+                        Name = "Terrain tileset",
+                        FilePath = "map_service_configs/TERRAIN.wms",
                     },
+                    --[[
                     {
-                        Name = "MODIS TERRA tileset",
+                        Name = "MODIS Terra tileset",
                         FilePath = "map_service_configs/TERRA_CR_B143_2016-04-12.wms",
                     },
+                    --]]
+
                 },
-                HightMaps = {
+                HeightMaps = {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
