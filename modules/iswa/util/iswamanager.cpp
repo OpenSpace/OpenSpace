@@ -427,7 +427,8 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
 
     bool fromKameleon   = (fromit != _kameleonFrames.end());
     bool toKameleon     = (toit   != _kameleonFrames.end());
-
+    
+    // std::cout << et << " - " << te << " = " << et-te << std::endl; 
     ccmc::Position in0 = {1, 0, 0};
     ccmc::Position in1 = {0, 1, 0};
     ccmc::Position in2 = {0, 0, 1};
@@ -440,7 +441,6 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
         _kameleon->_cxform(from.c_str(), to.c_str(), et, &in0, &out0);
         _kameleon->_cxform(from.c_str(), to.c_str(), et, &in1, &out1);
         _kameleon->_cxform(from.c_str(), to.c_str(), et, &in2, &out2);
-    
 
         return glm::dmat3(
             out0.c0 , out0.c1   , out0.c2,
@@ -459,12 +459,13 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
             out2.c0 , out2.c1   , out2.c2
         );
 
-        glm::dmat3 spiceTrans = SpiceManager::ref().positionTransformMatrix("J2000", to, et);
+
+        glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix("J2000", to, et);
 
         return spiceTrans*kameleonTrans;
     
     }else if(!fromKameleon && toKameleon){
-        glm::dmat3 spiceTrans = SpiceManager::ref().positionTransformMatrix(from, "J2000", et);
+        glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix(from, "J2000", et);
 
         _kameleon->_cxform("J2000", to.c_str(), et, &in0, &out0);
         _kameleon->_cxform("J2000", to.c_str(), et, &in1, &out1);
@@ -478,8 +479,7 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
 
         return kameleonTrans*spiceTrans;
     }else{
-
-        return SpiceManager::ref().positionTransformMatrix(from, to, et);
+        return SpiceManager::ref().frameTransformationMatrix(from, to, et);
     }
 }
 

@@ -125,8 +125,9 @@ void CygnetPlane::update(const UpdateData& data){
             _futureObject = nullptr;
     }
 
-    if(!_transferFunctions.empty() && _transferFunctions[0])
-        _transferFunctions[0]->update();
+    if(!_transferFunctions.empty())
+        for(auto tf : _transferFunctions)
+            tf->update();
 }
 
 bool CygnetPlane::textureReady(){
