@@ -104,7 +104,7 @@ public:
     void enableBarrier();
     void disableBarrier();
 
-    void runSettingsScripts();
+    void runPostInitializationScripts(const std::string& sceneDescription);
 
 private:
     OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
@@ -115,7 +115,7 @@ private:
     bool loadSpiceKernels();
     void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
-    void runStartupScripts();
+    void runPreInitializationScripts(const std::string& sceneDescription);
     void configureLogging();
     
     // Components

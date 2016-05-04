@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/onscopeexit.h>
 
 #include <stack>
 
@@ -89,10 +90,24 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
     }
     LINFO("Loading SceneGraph from file '" << absSceneFile << "'");
 
+    
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OnExit(
+       // Delete the Lua state at the end of the scope, no matter what
+       [state](){ghoul::lua::destroyLuaState(state);}
+    );
+    
+    OsEng.scriptEngine().initializeLuaState(state);
+    
+    
     // Load dictionary
     ghoul::Dictionary sceneDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absSceneFile, sceneDictionary);
+        ghoul::lua::loadDictionaryFromFile(
+            absSceneFile,
+            sceneDictionary,
+            state
+        );
     }
     catch (...) {
         return false;
@@ -127,8 +142,8 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         // There are no modules that are loaded
         return true;
     
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OsEng.scriptEngine().initializeLuaState(state);
+//    lua_State* state = ghoul::lua::createNewLuaState();
+//    OsEng.scriptEngine().initializeLuaState(state);
 
     // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
     // file again to load any variables defined inside into the state that is passed to
@@ -324,7 +339,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
             addModule(i);
         }
     }
-    ghoul::lua::destroyLuaState(state);
+//    ghoul::lua::destroyLuaState(state);
     FileSys.setCurrentDirectory(oldDirectory);
 
     for (SceneGraphNodeInternal* node : _nodes) {

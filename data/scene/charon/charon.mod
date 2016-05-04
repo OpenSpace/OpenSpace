@@ -5,8 +5,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_CHARON",
-			Body = "CHARON",
+            Frame = "IAU_CHARON",
+            Body = "CHARON",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.035 , 5 },

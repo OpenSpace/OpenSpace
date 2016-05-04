@@ -64,6 +64,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fboPass_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fboPass_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_fs.glsl

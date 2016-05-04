@@ -15,8 +15,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_PLUTO",
-			Body = "NIX",
+            Frame = "IAU_PLUTO",
+            Body = "NIX",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.45 , 5 },
@@ -83,5 +83,5 @@ return {
         },
         GuiName = "/Solar/NixTrail"
     }
-	
+    
 }

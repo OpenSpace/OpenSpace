@@ -22,6 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/assert.h>
+
+#include <cppformat/format.h>
+#include <ctime>
+
 namespace openspace {
 
 namespace luascriptfunctions {
@@ -32,24 +37,24 @@ namespace luascriptfunctions {
  * Sets the delta time by calling the Time::setDeltaTime method
  */
 int time_setDeltaTime(lua_State* L) {
-	const bool isFunction = (lua_isfunction(L, -1) != 0);
-	if (isFunction) {
-		// If the top of the stack is a function, it is ourself
-		const char* msg = lua_pushfstring(L, "method called without argument");
-		return luaL_error(L, "bad argument (%s)", msg);
-	}
+    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    if (isFunction) {
+        // If the top of the stack is a function, it is ourself
+        const char* msg = lua_pushfstring(L, "method called without argument");
+        return luaL_error(L, "bad argument (%s)", msg);
+    }
 
-	const bool isNumber = (lua_isnumber(L, -1) != 0);
-	if (isNumber) {
-		double value = lua_tonumber(L, -1);
-		openspace::Time::ref().setDeltaTime(value);
-		return 0;
-	}
-	else {
-		const char* msg = lua_pushfstring(L, "%s expected, got %s",
-								lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
-		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
-	}
+    const bool isNumber = (lua_isnumber(L, -1) != 0);
+    if (isNumber) {
+        double value = lua_tonumber(L, -1);
+        openspace::Time::ref().setDeltaTime(value);
+        return 0;
+    }
+    else {
+        const char* msg = lua_pushfstring(L, "%s expected, got %s",
+                                lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+    }
 
 }
 
@@ -59,8 +64,8 @@ int time_setDeltaTime(lua_State* L) {
  * Returns the delta time by calling the Time::deltaTime method
  */
 int time_deltaTime(lua_State* L) {
-	lua_pushnumber(L, openspace::Time::ref().deltaTime());
-	return 1;
+    lua_pushnumber(L, openspace::Time::ref().deltaTime());
+    return 1;
 }
 
 /**
@@ -99,32 +104,32 @@ int time_setPause(lua_State* L) {
  * is called
  */
 int time_setTime(lua_State* L) {
-	const bool isFunction = (lua_isfunction(L, -1) != 0);
-	if (isFunction) {
-		// If the top of the stack is a function, it is ourself
-		const char* msg = lua_pushfstring(L, "method called without argument");
-		return luaL_error(L, "bad argument (%s)", 1, msg);
-	}
+    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    if (isFunction) {
+        // If the top of the stack is a function, it is ourself
+        const char* msg = lua_pushfstring(L, "method called without argument");
+        return luaL_error(L, "bad argument (%s)", 1, msg);
+    }
 
-	const bool isNumber = (lua_isnumber(L, -1) != 0);
-	const bool isString = (lua_isstring(L, -1) != 0);
-	if (!isNumber && !isString) {
-		const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
-								lua_typename(L, LUA_TNUMBER),
-								lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
-		return luaL_error(L, "bad argument #%d (%s)", 1, msg);
-	}
-	if (isNumber) {
-		double value = lua_tonumber(L, -1);
-		openspace::Time::ref().setTime(value);
-		return 0;
-	}
-	if (isString) {
-		const char* time = lua_tostring(L, -1);
-		openspace::Time::ref().setTime(time);
-		return 0;
-	}
-	return 0;
+    const bool isNumber = (lua_isnumber(L, -1) != 0);
+    const bool isString = (lua_isstring(L, -1) != 0);
+    if (!isNumber && !isString) {
+        const char* msg = lua_pushfstring(L, "%s or %s expected, got %s",
+                                lua_typename(L, LUA_TNUMBER),
+                                lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
+        return luaL_error(L, "bad argument #%d (%s)", 1, msg);
+    }
+    if (isNumber) {
+        double value = lua_tonumber(L, -1);
+        openspace::Time::ref().setTime(value);
+        return 0;
+    }
+    if (isString) {
+        const char* time = lua_tostring(L, -1);
+        openspace::Time::ref().setTime(time);
+        return 0;
+    }
+    return 0;
 }
 
 /**
@@ -134,8 +139,8 @@ int time_setTime(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-	lua_pushnumber(L, openspace::Time::ref().currentTime());
-	return 1;
+    lua_pushnumber(L, openspace::Time::ref().currentTime());
+    return 1;
 }
 
 /**
@@ -145,8 +150,31 @@ int time_currentTime(lua_State* L) {
  * timezone by calling the Time::currentTimeUTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-	lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
-	return 1;
+    lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * currentWallTime():
+ * Returns the current wallclock time as a structured ISO 8601 string in the UTC timezone.
+ */
+int time_currentWallTime(lua_State* L) {
+    std::time_t t = std::time(nullptr);
+    std::tm* utcTime = std::gmtime(&t);
+    ghoul_assert(utcTime, "Conversion to UTC failed");
+
+    std::string time = fmt::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+        utcTime->tm_year + 1900,
+        utcTime->tm_mon + 1,
+        utcTime->tm_mday,
+        utcTime->tm_hour,
+        utcTime->tm_min,
+        utcTime->tm_sec
+    );
+    lua_pushstring(L, time.c_str());
+    return 1;
 }
 
 } // namespace luascriptfunctions

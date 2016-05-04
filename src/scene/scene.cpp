@@ -41,6 +41,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -77,24 +78,7 @@ Scene::~Scene() {
 }
 
 bool Scene::initialize() {
-    LDEBUG("Initializing SceneGraph");
-   
-    using ghoul::opengl::ShaderObject;
-    using ghoul::opengl::ProgramObject;
-   
-    std::unique_ptr<ProgramObject> tmpProgram;
-
-    // fboPassthrough program
-    tmpProgram = ProgramObject::Build(
-        "fboPassProgram",
-        "${SHADERS}/fboPass_vs.glsl",
-        "${SHADERS}/fboPass_fs.glsl");
-    if (!tmpProgram)
-        return false;
-
-    tmpProgram->setIgnoreSubroutineUniformLocationError(ProgramObject::IgnoreError::Yes);
-    OsEng.configurationManager().setValue("fboPassProgram", tmpProgram.get());
-
+    LDEBUG("Initializing SceneGraph");   
     return true;
 }
 
@@ -159,7 +143,21 @@ void Scene::clearSceneGraph() {
 
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     ghoul::Dictionary dictionary;
-    ghoul::lua::loadDictionaryFromFile(sceneDescriptionFilePath, dictionary);
+    
+    
+    lua_State* state = ghoul::lua::createNewLuaState();
+    OnExit(
+           // Delete the Lua state at the end of the scope, no matter what
+           [state](){ghoul::lua::destroyLuaState(state);}
+           );
+    
+    OsEng.scriptEngine().initializeLuaState(state);
+
+    ghoul::lua::loadDictionaryFromFile(
+        sceneDescriptionFilePath,
+        dictionary,
+        state
+    );
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
@@ -295,6 +293,9 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     // the camera position
     const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
+    if (!fn) {
+        throw ghoul::RuntimeError("Could not find focus node");
+    }
     // Check crash for when fn == nullptr
     
 	glm::mat4 la = glm::lookAt(glm::vec3(0,0,0), fn->worldPosition().vec3() - cameraPosition.vec3(), c->lookUpVector());
@@ -332,7 +333,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
 
-    OsEng.runSettingsScripts();
+    OsEng.runPostInitializationScripts(sceneDescriptionFilePath);
 
     OsEng.enableBarrier();
 

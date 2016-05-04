@@ -275,13 +275,20 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
     
     const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
         //      x      y     z     w     s     t
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
-        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
-        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
-        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
-        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
+        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 1
+        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper right 2
+        projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 1, // Upper left 3
+        projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 4 = 1
+        projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0, // Lower right 5
+        projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper left 6 = 2
     };
+    //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
+    //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
+    //    projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
+    //    projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
+    //    projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
+    //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
+
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer

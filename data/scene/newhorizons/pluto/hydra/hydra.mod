@@ -15,8 +15,8 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_PLUTO",
-			Body = "HYDRA",
+            Frame = "IAU_PLUTO",
+            Body = "HYDRA",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 0.53 , 5 },
@@ -83,5 +83,5 @@ return {
         },
         GuiName = "/Solar/HydraTrail"
     }
-	
+    
 }
