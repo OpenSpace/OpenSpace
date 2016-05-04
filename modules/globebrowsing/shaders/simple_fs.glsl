@@ -44,7 +44,7 @@ uniform mat3 uvTransformPatchToTile10;
 uniform mat3 uvTransformPatchToTile01;
 uniform mat3 uvTransformPatchToTile11;
 
-uniform int segmentsPerPatch;
+//uniform int segmentsPerPatch;
 
 in vec4 vs_position;
 in vec3 fs_position;
@@ -74,8 +74,10 @@ Fragment getFragment() {
 
 	frag.color = max(color00, max(color10, max(color01, color11))) * 10;
 
-	vec4 uvColor = vec4(fract(fs_uv * segmentsPerPatch), 0.4,1);
-	frag.color = frag.color.a < 0.1 ? uvColor * 0.5 : frag.color;
+	//vec4 uvColor = vec4(fract(fs_uv * segmentsPerPatch), 0.4,1);
+	//frag.color = frag.color.a < 0.1 ? uvColor * 0.5 : frag.color;
+
+	frag.color = vec4(frag.color.r, frag.color.r, frag.color.r, 1);
 
 	frag.depth =  vs_position.w;
 

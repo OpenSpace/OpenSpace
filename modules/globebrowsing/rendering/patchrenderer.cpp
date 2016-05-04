@@ -148,7 +148,6 @@ namespace openspace {
 
 
         Geodetic2 swCorner = newPatch.southWestCorner();
-        _programObject->setUniform("segmentsPerPatch", _grid->xSegments());
         _programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         _programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         _programObject->setUniform("lonLatScalingFactor", vec2(newPatch.size().toLonLatVec2()));
