@@ -51,6 +51,7 @@ TEST_F(GdalWmsTest, Simple) {
     
     std::string res = GDALVersionInfo("format");
     
+    std::cout << res << std::endl;
 
     std::string testFile = absPath("../data/scene/debugglobe/map_service_configs/TERRA_CR_B143_2016-04-12.wms");
 

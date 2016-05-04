@@ -59,7 +59,7 @@ namespace openspace {
             int minimumPixelsize);
         ~TileProvider();
 
-        std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
+        std::shared_ptr<Texture> getTile(GeodeticTileIndex tileIndex);
         std::shared_ptr<Texture> getTemporaryTexture();
 
         void prerender();

@@ -175,3 +175,31 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithSmallPatch) {
 
     ASSERT_EQ(tiExpected, ti);
 }
+
+
+TEST_F(PatchCoverageProviderTest, getTileIndexWrapAround) {
+
+    // Allocate data
+    GeodeticPatch patch(0, 0, 0, 0);
+    GeodeticTileIndex ti;
+    GeodeticTileIndex tiExpected;
+
+    // Create a provider with 2 in depth
+    // We still expect the same result since the patches are big
+    PatchCoverageProvider provider(
+        Geodetic2(M_PI * 2, M_PI * 2), // size at level 0
+        Geodetic2(-M_PI, -M_PI), // offset at level 0
+        2); // depth
+
+    // A small patch
+    patch = GeodeticPatch(
+        Geodetic2(0, - M_PI + M_PI / 16), // Center
+        Geodetic2(M_PI / 8, M_PI / 8)); // Halfsize
+
+    // Get its index
+    // We want negative indices
+    ti = provider.getTileIndex(patch);
+    tiExpected = { -1, 1, 2 };
+
+    ASSERT_EQ(tiExpected, ti);
+}

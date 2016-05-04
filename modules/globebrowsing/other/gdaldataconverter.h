@@ -80,7 +80,7 @@ namespace openspace {
 
         std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
             GDALDataset * dataSet,
-            const GeodeticTileIndex & tileIndex,
+            GeodeticTileIndex tileIndex,
             int minNumPixelsRequired);
 
         UninitializedTextureTile::TextureFormat getTextureFormatFromRasterCount(

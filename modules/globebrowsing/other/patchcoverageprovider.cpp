@@ -49,7 +49,7 @@ namespace openspace {
     }
 
     GeodeticTileIndex PatchCoverageProvider::getTileIndex(const GeodeticPatch& patch) {
-        // Calculate the level of the index depanding on the size of the incoming patch.
+        // Calculate the level of the index depending on the size of the incoming patch.
         // The level is as big as possible (as far down as possible) but it can't be
         // too big since at maximum four tiles should be used to cover a patch
         int level = log2(static_cast<int>(glm::max(
@@ -60,13 +60,14 @@ namespace openspace {
         level = glm::min(level, _depth);
         
         // Calculate the index in x y where the tile should be positioned
-        Geodetic2 tileSize = _sizeLevel0 / pow(2, level);
+        int nIndices = pow(2, level);
+        Geodetic2 tileSize = _sizeLevel0 / nIndices;
         Geodetic2 nw = patch.northWestCorner();
         glm::ivec2 tileIndexXY =
-            (nw.toLonLatVec2() - _offsetLevel0.toLonLatVec2()) / tileSize.toLonLatVec2();
+            glm::floor((nw.toLonLatVec2() - _offsetLevel0.toLonLatVec2()) / tileSize.toLonLatVec2());
 
         // Flip y since indices increase from top to bottom
-        tileIndexXY.y = pow(2, level) - 1 - tileIndexXY.y;
+        tileIndexXY.y = nIndices - 1 - tileIndexXY.y;
 
         // Create the tileindex
         GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
@@ -125,6 +126,9 @@ namespace openspace {
                 tileIndex.x += x;
                 tileIndex.y += y;
 
+                int xMax = static_cast<int>(glm::pow(2, tileIndex.level));
+                int yMax = static_cast<int>(glm::pow(2, tileIndex.level));
+
                 int numLevelsToLoop = tileIndex.level;
                 // Start at the highest level and go down if the texture don't exist
                 for (int j = numLevelsToLoop; j >= 0; j--)
@@ -151,7 +155,7 @@ namespace openspace {
                     patchCoverageToReturn.textureTransformPairs[linearIdx].first =
                         tileProvider->getTemporaryTexture();
                     patchCoverageToReturn.textureTransformPairs[linearIdx].second =
-                        glm::mat3(1);
+                        getUvTransformationPatchToTile(patch, tileIndex);
                 }
             }
         }

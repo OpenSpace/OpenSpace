@@ -44,7 +44,7 @@ namespace openspace {
     template<class T>
     std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
         GDALDataset* dataSet,
-        const GeodeticTileIndex& tileIndex,
+        GeodeticTileIndex tileIndex,
         int minNumPixelsRequired) {
         int nRasters = dataSet->GetRasterCount();
 
@@ -64,7 +64,6 @@ namespace openspace {
         glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.northWestCorner());
         glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.southEastCorner());
         glm::uvec2 numberOfPixels0 = pixelEnd0 - pixelStart0;
-
 
         int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
 
