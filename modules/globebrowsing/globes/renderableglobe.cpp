@@ -59,17 +59,43 @@ namespace openspace {
         dictionary.getValue(keyRadii, radii);
         _ellipsoid = Ellipsoid(radii);
 
+        ghoul::Dictionary texturesDictionary;
+        dictionary.getValue(keyTextures, texturesDictionary);
 
-        std::shared_ptr<TileProvider> heightMapProvider =
-            std::shared_ptr<TileProvider>(new TileProvider(
-                "map_service_configs/TERRAIN.wms", 5000, 512));
+        ghoul::Dictionary colorTexturesDictionary;
+        texturesDictionary.getValue(keyColorTextures, colorTexturesDictionary);
 
-        std::shared_ptr<TileProvider> colorTextureProvider =
-            std::shared_ptr<TileProvider>(new TileProvider(
-                "map_service_configs/TERRAIN.wms", 5000, 512));
+        
+        // Create TileProviders for all color textures
+        for (size_t i = 1; i < colorTexturesDictionary.size() + 1; i++)
+        {
+            std::string name, path;
+            ghoul::Dictionary colorTextureDictionary =
+                colorTexturesDictionary.value<ghoul::Dictionary>(std::to_string(i));
+            colorTextureDictionary.getValue("Name", name);
+            colorTextureDictionary.getValue("FilePath", path);
+            std::shared_ptr<TileProvider> colorTextureProvider =
+                std::shared_ptr<TileProvider>(new TileProvider(
+                    path, 5000, 512));
+            _tileProviderManager->addColorTexture(name, colorTextureProvider);
+        }
 
-        _tileProviderManager->addHeightMap("TERRAIN", heightMapProvider);
-        _tileProviderManager->addColorTexture("COLOR", colorTextureProvider);
+        ghoul::Dictionary heightMapsDictionary;
+        texturesDictionary.getValue(keyHeightMaps, heightMapsDictionary);
+
+        // Create TileProviders for all height maps
+        for (size_t i = 1; i < heightMapsDictionary.size() + 1; i++)
+        {
+            std::string name, path;
+            ghoul::Dictionary heightMapDictionary =
+                heightMapsDictionary.value<ghoul::Dictionary>(std::to_string(i));
+            heightMapDictionary.getValue("Name", name);
+            heightMapDictionary.getValue("FilePath", path);
+            std::shared_ptr<TileProvider> heightMapProvider =
+                std::shared_ptr<TileProvider>(new TileProvider(
+                    path, 5000, 512));
+            _tileProviderManager->addHeightMap(name, heightMapProvider);
+        }
 
         addSwitchValue(std::shared_ptr<ClipMapGlobe>(
             new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
