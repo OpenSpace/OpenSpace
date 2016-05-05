@@ -31,27 +31,12 @@ CygnetSphere::CygnetSphere(const ghoul::Dictionary& dictionary)
     :ISWACygnet(dictionary)
     ,_geometry(nullptr)
 {
-	//read segments from dictronary
-	_segments = 20;
+    _geometry = std::make_shared<planetgeometry::SimpleSphereGeometry>(dictionary);
 }
 
 CygnetSphere::~CygnetSphere(){}
 
 bool CygnetSphere::createGeometry(){
-    glm::vec4 radius(6.371f, 6.371f, 6.371f, 6); //use scale in _data
-
-    ghoul::Dictionary geometryDictionary;
-    geometryDictionary.setValue(SceneGraphNode::KeyName, name());
-    geometryDictionary.setValue("Radius", radius);
-    geometryDictionary.setValue("Segments", _segments);
-
-    glm::vec4 radiuss;
-    bool success = geometryDictionary.getValue("Radius", radiuss);
-    if(success){
-        std::cout << "It exists" << std::endl;
-    }
-
-    _geometry = std::make_shared<planetgeometry::SimpleSphereGeometry>(geometryDictionary);
     _geometry->initialize(this);
 }
 

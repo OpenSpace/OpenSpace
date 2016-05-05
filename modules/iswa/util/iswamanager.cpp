@@ -139,7 +139,27 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
         );
     }else{ 
         //create kameleonplane
-        createKameleonPlane(info);
+        // createKameleonPlane(info);
+        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
+        metaFuture->id = -1;
+        metaFuture->group = group;
+        metaFuture->type = CygnetType::Data;
+        metaFuture->geom  = CygnetGeometry::Sphere;
+
+        auto metadataCallback = 
+        [this, metaFuture](const DownloadManager::FileFuture& f){
+            LDEBUG("Download to memory finished");
+            metaFuture->isFinished = true;
+            createPlane(metaFuture);
+        };
+
+        // Download metadata
+        DlManager.downloadToMemory(
+            "http://128.183.168.116:3000/" + std::to_string(1),
+            // "http://10.0.0.76:3000/" + std::to_string(-id),
+            metaFuture->json,
+            metadataCallback
+        );
     } 
 }
 
@@ -259,6 +279,8 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
         std::string coordinateType = j["Coordinate Type"];
         int updateTime = j["ISWA_UPDATE_SECONDS"];
 
+        j["Radius"];
+
         glm::vec3 max(
             j["Plot XMAX"],
             j["Plot YMAX"],
@@ -294,8 +316,8 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = "+ std::to_string(data->group) + " ,"
-            // "Radius = {6.371, 6.371, 6.371, 6} , "
-            // "Segments = 20,"
+            "Radius = {6.371, 6.01}, "
+            "Segments = 20,"
             "}"
         "}";
         
@@ -430,9 +452,9 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
     bool fromKameleon   = (fromit != _kameleonFrames.end());
     bool toKameleon     = (toit   != _kameleonFrames.end());
     
-    ccmc::Position in0 = {1, 0, 0};
-    ccmc::Position in1 = {0, 1, 0};
-    ccmc::Position in2 = {0, 0, 1};
+    ccmc::Position in0 = {1.f, 0.f, 0.f};
+    ccmc::Position in1 = {0.f, 1.f, 0.f};
+    ccmc::Position in2 = {0.f, 0.f , 1.f};
 
     ccmc::Position out0;
     ccmc::Position out1;
@@ -459,6 +481,8 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
             out1.c0 , out1.c1   , out1.c2,
             out2.c0 , out2.c1   , out2.c2
         );
+
+        // std::cout << std::to_string(kameleonTrans) << std::endl;
 
         glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix("J2000", to, et);
 

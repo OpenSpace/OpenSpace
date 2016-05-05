@@ -43,14 +43,11 @@ DataSphere::~DataSphere(){}
 
 
 bool DataSphere::loadTexture(){
-	std::cout << "Load texture" << std::endl;
-
 	_textures[0] = nullptr;
 	std::string texturepath = "${OPENSPACE_DATA}/scene/mars/textures/mars.jpg";
 	 
 	auto texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturepath));
 	 if(texture){
-	 	std::cout << "Created the texture" << std::endl;
 	 	texture->uploadTexture();
 	 	texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 	 	_textures[0] = std::move(texture);
@@ -63,7 +60,6 @@ bool DataSphere::updateTexture(){
 	if(_textures.empty())
         _textures.push_back(nullptr);
 
-	std::cout << "Update texture" << std::endl;
 	loadTexture();
     return true; 
 }
@@ -75,8 +71,9 @@ bool DataSphere::readyToRender(){
 
 
 bool DataSphere::setUniformAndTextures(){
-	ghoul::opengl::TextureUnit unit;
-
+    _shader->setUniform("transparency",0.5f);
+    
+    ghoul::opengl::TextureUnit unit;
     unit.activate();
     _textures[0]->bind();
     _shader->setUniform("texture1", unit);
@@ -88,9 +85,9 @@ bool DataSphere::createShader(){
     // Plane Program
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
-            "pscstandard",
-            "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
-            "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
+            "DataSphereProgram",
+            "${MODULE_ISWA}/shaders/datasphere_vs.glsl",
+            "${MODULE_ISWA}/shaders/datasphere_fs.glsl");
     if (!_shader)
         return false;
     }
