@@ -36,8 +36,7 @@ Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = texture(textureSamplerColor, fs_uv);
-	frag.color = vec4(frag.color.r, frag.color.r, frag.color.r, 1) * 10;
-
+	
 	frag.depth =  vs_position.w;
 
 	return frag;

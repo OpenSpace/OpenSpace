@@ -551,6 +551,7 @@ namespace openspace {
             "uvTransformPatchToTileColor11",
             patchCoverageColor.textureTransformPairs[3].second);
 
+
         uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy;
         uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy;
         uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy;

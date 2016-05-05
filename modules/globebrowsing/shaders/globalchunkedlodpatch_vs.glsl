@@ -54,7 +54,7 @@ void main()
 	PositionNormalPair pair = globalInterpolation();
 
 	float sampledHeight = texture(textureSamplerHeight, in_UV).r;
-	pair.position += pair.normal * sampledHeight * 1e5;
+	pair.position += pair.normal * sampledHeight * 1e1;
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 

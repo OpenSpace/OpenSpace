@@ -82,8 +82,8 @@ Fragment getFragment() {
 	if (uv11.x > -d11.x && uv11.x < 1 + d11.x && uv11.y > -d11.y && uv11.y < 1 + d11.y)
 		color11 = texture(textureSamplerColor11, uv11);
 
-	frag.color = max(color00, max(color10, max(color01, color11))) * 10;
-	frag.color = vec4(frag.color.r, frag.color.r, frag.color.r, 1);
+	frag.color = max(color00, max(color10, max(color01, color11)));
+	//frag.color = vec4(frag.color.r, frag.color.r, frag.color.r, 1);
 
 	frag.depth =  vs_position.w;
 

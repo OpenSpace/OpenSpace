@@ -74,6 +74,9 @@ namespace openspace {
         glm::uvec2 pixelStart(pixelStart0.x >> (ov + 1), pixelStart0.y >> (ov + 1));
         glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
 
+        if (numberOfPixels.x < 32 || numberOfPixels.y < 32)
+            numberOfPixels = glm::uvec2(32, 32);
+
         //glm::uvec2 pixelStart(0, 0);
         //glm::uvec2 numberOfPixels(xSize0, ySize0);
 
