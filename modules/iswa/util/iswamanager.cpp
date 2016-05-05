@@ -72,7 +72,7 @@ ISWAManager::ISWAManager()
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
     _kameleon = std::make_shared<ccmc::Kameleon>();
-    _kameleonFrames =   { "J200", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
+    _kameleonFrames =   { "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
                           "HEE", "HAE", "HEEQ"                                              //heliocentric
                         };
 }
@@ -428,7 +428,6 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
     bool fromKameleon   = (fromit != _kameleonFrames.end());
     bool toKameleon     = (toit   != _kameleonFrames.end());
     
-    // std::cout << et << " - " << te << " = " << et-te << std::endl; 
     ccmc::Position in0 = {1, 0, 0};
     ccmc::Position in1 = {0, 1, 0};
     ccmc::Position in2 = {0, 0, 1};
@@ -459,6 +458,7 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
             out2.c0 , out2.c1   , out2.c2
         );
 
+        // std::cout << std::to_string(kameleonTrans) << std::endl;
 
         glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix("J2000", to, et);
 

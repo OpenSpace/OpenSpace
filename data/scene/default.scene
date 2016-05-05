@@ -17,7 +17,8 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
@@ -29,10 +30,11 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    openspace.iswa.addCygnet("-1,Data,1");
+    --openspace.iswa.addCygnet("-1,Data,1");
     openspace.iswa.addCygnet("-2,Data,1");
     openspace.iswa.addCygnet("-3,Data,1");
 
+    --[[
     openspace.registerScreenSpaceRenderable(
     {
         Type = "ScreenSpaceCygnet",
@@ -50,6 +52,7 @@ function postInitialization()
         FlatScreen = true,
         Scale = 0.25,
     });
+    ]]--
 end
 
 
