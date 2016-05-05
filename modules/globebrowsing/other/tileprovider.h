@@ -88,7 +88,7 @@ namespace openspace {
         GDALDataset* _gdalDataSet;
 
         // Converters are needed for all different data types since they are templated.
-        GdalDataConverter<GLbyte>   _uByteConverter;
+        GdalDataConverter<GLubyte>   _uByteConverter;
         GdalDataConverter<GLushort> _uShortConverter;
         GdalDataConverter<GLshort>  _shortConverter;
         GdalDataConverter<GLuint>   _uIntConverter;

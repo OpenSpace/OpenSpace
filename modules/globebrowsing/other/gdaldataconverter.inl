@@ -57,8 +57,8 @@ namespace openspace {
         // Level = overviewCount - overview
         int numOverviews = firstBand->GetOverviewCount();
 
-        int xSize0 = firstBand->GetXSize();
-        int ySize0 = firstBand->GetYSize();
+        int xSize0 = firstBand->GetOverview(0)->GetXSize();
+        int ySize0 = firstBand->GetOverview(0)->GetYSize();
 
         GeodeticPatch patch = GeodeticPatch(tileIndex);
         glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.northWestCorner());
@@ -73,6 +73,9 @@ namespace openspace {
 
         glm::uvec2 pixelStart(pixelStart0.x >> (ov + 1), pixelStart0.y >> (ov + 1));
         glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
+
+        //glm::uvec2 pixelStart(0, 0);
+        //glm::uvec2 numberOfPixels(xSize0, ySize0);
 
         // GDAL reads image data top to bottom
         T* imageData = new T[numberOfPixels.x * numberOfPixels.y * nRasters];
@@ -97,18 +100,17 @@ namespace openspace {
                 sizeof(T) * nRasters,	// Pixel spacing
                 0);                     // Line spacing
         }
-
         // GDAL reads image data top to bottom. We want the opposite.
         T* imageDataYflipped = new T[numberOfPixels.x * numberOfPixels.y * nRasters];
         for (size_t y = 0; y < numberOfPixels.y; y++) {
-            for (size_t x = 0; x < numberOfPixels.x; x++) {
-                imageDataYflipped[x + y * numberOfPixels.x] =
-                    imageData[x + (numberOfPixels.y - 1 - y) * numberOfPixels.x];
+            for (size_t x = 0; x < numberOfPixels.x * nRasters; x++) {
+                imageDataYflipped[x + y * numberOfPixels.x * nRasters] =
+                    imageData[x + (numberOfPixels.y - 1 - y) * numberOfPixels.x * nRasters];
             }
         }
 
         delete[] imageData;
-
+        
         glm::uvec3 dims(numberOfPixels.x, numberOfPixels.y, 1);
         UninitializedTextureTile::TextureFormat textrureFormat =
             getTextureFormatFromRasterCount(nRasters);
@@ -196,7 +198,7 @@ namespace openspace {
         switch (gdalType)
         {
         case GDT_Byte:
-            return GL_BYTE;
+            return GL_UNSIGNED_BYTE;
             break;
         case GDT_UInt16:
             return GL_UNSIGNED_SHORT;
