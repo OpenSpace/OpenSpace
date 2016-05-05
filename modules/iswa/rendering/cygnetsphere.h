@@ -28,6 +28,11 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace{
+
+namespace planetgeometry {
+	class PlanetGeometry;
+}
+
 class CygnetSphere : public ISWACygnet {
 public:
     CygnetSphere(const ghoul::Dictionary& dictionary);
@@ -41,7 +46,15 @@ protected:
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
 
+    void createSphere();
+    void destroySphere();
+    bool createShader();
+    void destroyShader();
+
     std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+    std::shared_ptr<planetgeometry::PlanetGeometry> _geometry;
+
+    double _segments;
 };
 
 } //namespace openspace

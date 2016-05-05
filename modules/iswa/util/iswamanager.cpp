@@ -458,8 +458,6 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
             out2.c0 , out2.c1   , out2.c2
         );
 
-        // std::cout << std::to_string(kameleonTrans) << std::endl;
-
         glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix("J2000", to, et);
 
         return spiceTrans*kameleonTrans;
