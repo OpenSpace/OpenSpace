@@ -37,6 +37,7 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     // , _texture(nullptr)
     , _memorybuffer("")
     ,_type(ISWAManager::CygnetType::NoType)
+    ,_futureObject(nullptr)
     // ,_transferFunction(nullptr)
 {
     _data = std::make_shared<Metadata>();
@@ -102,6 +103,108 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
 }
 
 ISWACygnet::~ISWACygnet(){}
+bool ISWACygnet::initialize(){
+    _textures.push_back(nullptr);
+    
+    initializeTime();
+    createGeometry();
+    createShader();
+    updateTexture();
+
+    if(_data->groupId > 0)
+        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
+
+    return isReady();
+}
+
+bool ISWACygnet::deinitialize(){
+    if(_data->groupId > 0)
+        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
+
+    unregisterProperties();
+    destroyGeometry();
+    destroyShader();
+    _memorybuffer = "";
+
+    return true;
+}
+
+bool ISWACygnet::isReady() const{
+    bool ready = true;
+    if (!_shader)
+        ready &= false;
+    return ready;
+}
+
+void ISWACygnet::render(const RenderData& data){
+    if(!readyToRender()) return;
+    
+    psc position = data.position;
+    glm::mat4 transform = glm::mat4(1.0);
+
+    glm::mat4 rot = glm::mat4(1.0);
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
+        }
+    }
+
+    position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
+    
+    // Activate shader
+    _shader->activate();
+    glEnable(GL_ALPHA_TEST);
+    glDisable(GL_CULL_FACE);
+
+
+    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("ModelTransform", transform);
+
+    setPscUniforms(*_shader.get(), data.camera, position);
+
+    setUniformAndTextures();
+    renderGeometry();
+
+    glEnable(GL_CULL_FACE);
+    _shader->deactivate();
+}
+
+void ISWACygnet::update(const UpdateData& data){
+    _openSpaceTime = Time::ref().currentTime();
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+
+     _stateMatrix = ISWAManager::ref().getTransform(_data->frame, "GALACTIC", _openSpaceTime);
+    // glm::dmat3 spiceMatrix    = SpiceManager::ref().positionTransformMatrix("J2000", "GALACTIC", _openSpaceTime);
+     // = spiceMatrix*kameleonMatrix;
+
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
+        updateTexture();
+
+        _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime = _openSpaceTime;
+    }
+
+    if(_futureObject && _futureObject->isFinished){
+        if(loadTexture())
+            _futureObject = nullptr;
+    }
+
+    if(!_transferFunctions.empty())
+        for(auto tf : _transferFunctions)
+            tf->update();
+}
+
+
+bool ISWACygnet::destroyShader(){
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+}
 
 void ISWACygnet::registerProperties(){
     OsEng.gui()._iSWAproperty.registerProperty(&_enabled);

@@ -38,22 +38,12 @@ public:
     CygnetSphere(const ghoul::Dictionary& dictionary);
     ~CygnetSphere();
 
-    virtual bool isReady() const override;
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
+private:
+    virtual bool createGeometry() override;
+    virtual bool destroyGeometry() override;
+    virtual bool renderGeometry() override;
 
-protected:
-    virtual bool loadTexture() = 0;
-    virtual bool updateTexture() = 0;
-
-    void createSphere();
-    void destroySphere();
-    bool createShader();
-    void destroyShader();
-
-    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
     std::shared_ptr<planetgeometry::PlanetGeometry> _geometry;
-
     double _segments;
 };
 

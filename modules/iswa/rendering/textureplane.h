@@ -35,16 +35,14 @@
  public:
      TexturePlane(const ghoul::Dictionary& dictionary);
      ~TexturePlane();
-
-    virtual bool initialize() override;
-    virtual bool deinitialize() override;
  
  private:
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
-    virtual void setUniforms() override;
 
-    static int id();
+    virtual bool readyToRender() override;
+    virtual bool setUniformAndTextures() override;
+    virtual bool createShader() override;
  };
  
  } // namespace openspace

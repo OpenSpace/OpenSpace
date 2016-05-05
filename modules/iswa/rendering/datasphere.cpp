@@ -23,30 +23,79 @@
 ****************************************************************************************/
 
 #include <modules/iswa/rendering/datasphere.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <modules/base/rendering/planetgeometry.h>
 
 namespace openspace {
 
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     :CygnetSphere(dictionary)
-{}
+{
+	std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
+
+    registerProperties();
+}
 
 DataSphere::~DataSphere(){}
 
 
-bool DataSphere::initialize(){
-    return true;
-}
-
-bool DataSphere::deinitialize(){
-    return true;
-}
-
 bool DataSphere::loadTexture(){
+	std::cout << "Load texture" << std::endl;
+
+	_textures[0] = nullptr;
+	std::string texturepath = "${OPENSPACE_DATA}/scene/mars/textures/mars.jpg";
+	 
+	auto texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturepath));
+	 if(texture){
+	 	std::cout << "Created the texture" << std::endl;
+	 	texture->uploadTexture();
+	 	texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+	 	_textures[0] = std::move(texture);
+	 }
+
     return true;
 }
 
 bool DataSphere::updateTexture(){
+	if(_textures.empty())
+        _textures.push_back(nullptr);
+
+	std::cout << "Update texture" << std::endl;
+	loadTexture();
     return true; 
 }
+
+
+bool DataSphere::readyToRender(){
+	return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
+}
+
+
+bool DataSphere::setUniformAndTextures(){
+	ghoul::opengl::TextureUnit unit;
+
+    unit.activate();
+    _textures[0]->bind();
+    _shader->setUniform("texture1", unit);
+}
+
+
+bool DataSphere::createShader(){
+	if (_shader == nullptr) {
+    // Plane Program
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram(
+            "pscstandard",
+            "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
+            "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
+    if (!_shader)
+        return false;
+    }
+    return true;
+}
+
 
 } //namespace openspace

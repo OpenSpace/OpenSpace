@@ -294,6 +294,8 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = "+ std::to_string(data->group) + " ,"
+            // "Radius = {6.371, 6.371, 6.371, 6} , "
+            // "Segments = 20,"
             "}"
         "}";
         

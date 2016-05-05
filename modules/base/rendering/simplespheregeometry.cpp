@@ -78,6 +78,8 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     else
         _segments = static_cast<int>(segments);
 
+    glm::vec4 rradius(6.371f, 6.371f, 6.371f, 7);
+    _realRadius.setValue(rradius);
     // The shader need the radii values but they are not changeable runtime
     // TODO: Possibly add a scaling property @AA
     addProperty(_realRadius);

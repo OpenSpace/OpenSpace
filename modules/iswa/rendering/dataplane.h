@@ -40,11 +40,6 @@ friend class ISWAGroup;
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
 
-    virtual bool initialize() override;
-    virtual bool deinitialize() override;
-    // virtual void render(const RenderData& data) override; //moved to cygnetPlane
-    // virtual void update(const UpdateData& data) override; //moved to cygnetPlane
-
  protected:
     void useLog(bool useLog){ _useLog.setValue(useLog); };
     void normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
@@ -53,13 +48,13 @@ friend class ISWAGroup;
     void transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
     void backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
-    // const std::vector<openspace::properties::SelectionProperty::Option>& dataOptions() const {return _dataOptions.options(); };
-
  private:
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
-    virtual void setUniforms() override;
-    virtual bool textureReady() override;
+
+    virtual bool readyToRender() override;
+    virtual bool setUniformAndTextures() override;
+    virtual bool createShader() override;
 
     void readHeader();
     std::vector<float*> readData();
@@ -72,8 +67,6 @@ friend class ISWAGroup;
     );
 
     float normalizeWithStandardScore(float value, float mean, float sd);
-    float normalizeWithLogarithm(float value, int logMean);
-
     void setTransferFunctions(std::string tfPath);
 
     properties::SelectionProperty _dataOptions;
