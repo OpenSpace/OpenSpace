@@ -196,16 +196,12 @@ namespace openspace {
             uninitedTexture->texFormat.glFormat,
             uninitedTexture->glType,
             Texture::FilterMode::Linear,
-            Texture::WrappingMode::ClampToBorder);
+            Texture::WrappingMode::ClampToEdge);
 
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
 
         texture->uploadTexture();
-        /*
-        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        */
         return texture;
     }
 

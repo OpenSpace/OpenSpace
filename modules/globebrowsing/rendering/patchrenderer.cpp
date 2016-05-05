@@ -267,53 +267,59 @@ namespace openspace {
 
 
 
-
+        
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
         auto tileProviderHeight = heightMapProviders.begin()->second;
-        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
+        PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitHeight00;
         texUnitHeight00.activate();
-        patchCoverage.textureTransformPairs[0].first->bind(); // tile00
+        patchCoverageHeight.textureTransformPairs[0].first->bind(); // tile00
         _programObjectGlobalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
 
         ghoul::opengl::TextureUnit texUnitHeight10;
         texUnitHeight10.activate();
-        patchCoverage.textureTransformPairs[1].first->bind(); // tile10
+        patchCoverageHeight.textureTransformPairs[1].first->bind(); // tile10
         _programObjectGlobalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
 
         ghoul::opengl::TextureUnit texUnitHeight01;
         texUnitHeight01.activate();
-        patchCoverage.textureTransformPairs[2].first->bind(); // tile01
+        patchCoverageHeight.textureTransformPairs[2].first->bind(); // tile01
         _programObjectGlobalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
 
         ghoul::opengl::TextureUnit texUnitHeight11;
         texUnitHeight11.activate();
-        patchCoverage.textureTransformPairs[3].first->bind(); // tile11
+        patchCoverageHeight.textureTransformPairs[3].first->bind(); // tile11
         _programObjectGlobalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
 
 
         _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight00",
-            patchCoverage.textureTransformPairs[0].second);
+            patchCoverageHeight.textureTransformPairs[0].second);
         _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight10",
-            patchCoverage.textureTransformPairs[1].second);
+            patchCoverageHeight.textureTransformPairs[1].second);
         _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight01",
-            patchCoverage.textureTransformPairs[2].second);
+            patchCoverageHeight.textureTransformPairs[2].second);
         _programObjectGlobalRendering->setUniform(
             "uvTransformPatchToTileHeight11",
-            patchCoverage.textureTransformPairs[3].second);
+            patchCoverageHeight.textureTransformPairs[3].second);
 
 
 
 
+        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy;
+        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy;
+        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy;
+        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy;
 
-
-
+        _programObjectGlobalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
+        _programObjectGlobalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
+        _programObjectGlobalRendering->setUniform("texture01DimensionsHeight", texture01DimensionsHeight);
+        _programObjectGlobalRendering->setUniform("texture11DimensionsHeight", texture11DimensionsHeight);
 
 
 
@@ -358,6 +364,15 @@ namespace openspace {
             patchCoverageColor.textureTransformPairs[3].second);
 
 
+        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy;
+        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy;
+        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy;
+        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy;
+
+        _programObjectGlobalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
+        _programObjectGlobalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);
+        _programObjectGlobalRendering->setUniform("texture01DimensionsColor", texture01DimensionsColor);
+        _programObjectGlobalRendering->setUniform("texture11DimensionsColor", texture11DimensionsColor);
 
 
 
@@ -443,47 +458,54 @@ namespace openspace {
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
         auto tileProviderHeight = heightMapProviders.begin()->second;
-        PatchCoverage patchCoverage = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
+        PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitHeight00;
         texUnitHeight00.activate();
-        patchCoverage.textureTransformPairs[0].first->bind(); // tile00
+        patchCoverageHeight.textureTransformPairs[0].first->bind(); // tile00
         _programObjectLocalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
 
         ghoul::opengl::TextureUnit texUnitHeight10;
         texUnitHeight10.activate();
-        patchCoverage.textureTransformPairs[1].first->bind(); // tile10
+        patchCoverageHeight.textureTransformPairs[1].first->bind(); // tile10
         _programObjectLocalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
 
         ghoul::opengl::TextureUnit texUnitHeight01;
         texUnitHeight01.activate();
-        patchCoverage.textureTransformPairs[2].first->bind(); // tile01
+        patchCoverageHeight.textureTransformPairs[2].first->bind(); // tile01
         _programObjectLocalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
 
         ghoul::opengl::TextureUnit texUnitHeight11;
         texUnitHeight11.activate();
-        patchCoverage.textureTransformPairs[3].first->bind(); // tile11
+        patchCoverageHeight.textureTransformPairs[3].first->bind(); // tile11
         _programObjectLocalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
 
 
         _programObjectLocalRendering->setUniform(
             "uvTransformPatchToTileHeight00",
-            patchCoverage.textureTransformPairs[0].second);
+            patchCoverageHeight.textureTransformPairs[0].second);
         _programObjectLocalRendering->setUniform(
             "uvTransformPatchToTileHeight10",
-            patchCoverage.textureTransformPairs[1].second);
+            patchCoverageHeight.textureTransformPairs[1].second);
         _programObjectLocalRendering->setUniform(
             "uvTransformPatchToTileHeight01",
-            patchCoverage.textureTransformPairs[2].second);
+            patchCoverageHeight.textureTransformPairs[2].second);
         _programObjectLocalRendering->setUniform(
             "uvTransformPatchToTileHeight11",
-            patchCoverage.textureTransformPairs[3].second);
+            patchCoverageHeight.textureTransformPairs[3].second);
 
 
 
+        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy;
+        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy;
+        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy;
+        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy;
 
-
+        _programObjectLocalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
+        _programObjectLocalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
+        _programObjectLocalRendering->setUniform("texture01DimensionsHeight", texture01DimensionsHeight);
+        _programObjectLocalRendering->setUniform("texture11DimensionsHeight", texture11DimensionsHeight);
 
 
 
@@ -529,8 +551,15 @@ namespace openspace {
             "uvTransformPatchToTileColor11",
             patchCoverageColor.textureTransformPairs[3].second);
 
+        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy;
+        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy;
+        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy;
+        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy;
 
-
+        _programObjectLocalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
+        _programObjectLocalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);
+        _programObjectLocalRendering->setUniform("texture01DimensionsColor", texture01DimensionsColor);
+        _programObjectLocalRendering->setUniform("texture11DimensionsColor", texture11DimensionsColor);
 
 
         _programObjectLocalRendering->setUniform(
