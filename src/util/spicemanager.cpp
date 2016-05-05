@@ -473,9 +473,10 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
     if (!targetHasCoverage && !observerHasCoverage){
         throw SpiceException(
-            format("Neither the target '{}' nor observer '{}' has SPK coverage",
+            format("Neither target '{}' nor observer '{}' has SPK coverage at time {}",
                    target,
-                   observer
+                   observer,
+                   ephemerisTime
             )
         );
     }
@@ -491,10 +492,11 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
             &lightTime
         );
         throwOnSpiceError(format(
-            "Error getting target position from '{}' to '{}' in reference frame '{}",
+            "Error getting position from '{}' to '{}' in reference frame '{}' at time {}",
             target,
             observer,
-            referenceFrame
+            referenceFrame,
+            ephemerisTime
         ));
         return position;
     }
