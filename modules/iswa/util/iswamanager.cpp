@@ -125,10 +125,14 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
 
         auto metadataCallback = 
         [this, metaFuture](const DownloadManager::FileFuture& f){
-            LDEBUG("Download to memory finished");
-            metaFuture->isFinished = true;
-            createPlane(metaFuture);
-        };
+                if(f.isFinished){
+                    metaFuture->isFinished;
+                    createPlane(metaFuture);
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
+            };
 
         // Download metadata
         DlManager.downloadToMemory(
@@ -163,7 +167,11 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(
             iSWAurl(id, "image"),
             buffer,
             [](const DownloadManager::FileFuture& f){
-                LDEBUG("Download to memory finished");
+                if(f.isFinished){
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
             }
         );
 }
@@ -173,7 +181,11 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
             iSWAurl(id, "data"),
             buffer,
             [](const DownloadManager::FileFuture& f){
-                LDEBUG("Download data finished");
+                if(f.isFinished){
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
             }
         );
 }
@@ -213,8 +225,12 @@ std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
                 // "http://10.0.0.76:3000/" + std::to_string(-id),
                 metaFuture->json,
                 [metaFuture](const DownloadManager::FileFuture& f){
-                    LDEBUG("Download to memory finished");
-                    metaFuture->isFinished = true;
+                    if(f.isFinished){
+                        metaFuture->isFinished;
+                        LDEBUG("Download to memory finished");
+                    } else if (f.isAborted){
+                        LWARNING("Download to memory was aborted: " + f.errorMessage);
+                    }
                 }
             );
     return metaFuture;

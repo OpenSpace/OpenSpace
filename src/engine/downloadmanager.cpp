@@ -227,26 +227,27 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
             
             CURLcode res = curl_easy_perform(curl);
             if(res == CURLE_OK){
                 // ask for the content-type
                 char *ct;
                 res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-                if(ct){
+                if (res == CURLE_OK){
                     future->format = std::string(ct);
-                } 
-            }   
-            
-            curl_easy_cleanup(curl);
-
-            if (res == CURLE_OK)
-                future->isFinished = true;
-            else
+                    future->isFinished = true;
+                }
+            } else{
                 future->errorMessage = curl_easy_strerror(res);
-            
+                future->isAborted = true;
+            }
+
             if (finishedCallback)
                 finishedCallback(*future);
+    
+            curl_easy_cleanup(curl);
+            
         }
     };
     
