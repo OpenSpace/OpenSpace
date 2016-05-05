@@ -78,8 +78,7 @@ public:
 
     std::shared_ptr<FileFuture> downloadToMemory(
         const std::string& url, std::string& memoryBuffer,
-        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback()
     );
 
     std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,

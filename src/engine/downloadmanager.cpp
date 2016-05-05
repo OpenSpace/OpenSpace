@@ -205,28 +205,19 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
     const std::string& url, std::string& memoryBuffer,
-    DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
+    DownloadFinishedCallback finishedCallback)
 {
 
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(std::string("memory"));
     LDEBUG("Start downloading file: '" << url << "' into memory");
     
-    auto downloadFunction = [url, finishedCallback, progressCallback, future, &memoryBuffer]() {
+    auto downloadFunction = [url, finishedCallback, future, &memoryBuffer]() {
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, &memoryBuffer);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
-            
-            ProgressInformation p = {
-                future,
-                std::chrono::system_clock::now(),
-                &progressCallback
-            };
-            curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
-            curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
             
             CURLcode res = curl_easy_perform(curl);
@@ -238,14 +229,14 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
                     future->format = std::string(ct);
                     future->isFinished = true;
                 }
-            } else{
+            } else {
                 future->errorMessage = curl_easy_strerror(res);
                 future->isAborted = true;
             }
 
             if (finishedCallback)
                 finishedCallback(*future);
-    
+
             curl_easy_cleanup(curl);
             
         }
