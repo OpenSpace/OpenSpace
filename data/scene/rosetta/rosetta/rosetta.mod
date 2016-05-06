@@ -8,12 +8,12 @@ return {
             Body = "ROSETTA", 
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/mainbodyros.obj",   
+                GeometryFile = "obj/mainbodyros.obj",   
                 Magnification = 1,
             },
             Textures = {
                 Type = "simple",
-                Color = "textures/pluto.jpg",
+                Color = "textures/gray.png",
             },
             Rotation = {
                 Source = "ROS_SPACECRAFT",
@@ -116,7 +116,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 Magnification = 1,    
-                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelleft.obj", 
+                GeometryFile = "obj/solarpanelleft.obj", 
             }, 
             Textures = {
                 Type = "simple",
@@ -139,7 +139,7 @@ return {
             Body = "ROSETTA",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "${OPENSPACE_DATA}/scene/rosetta/obj/solarpanelright.obj", 
+                GeometryFile = "obj/solarpanelright.obj", 
                 Magnification = 1,
             },
             Textures = {

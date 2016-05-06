@@ -6,6 +6,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_GANYMEDE", -- should exist. 
+            Body = "JUPITER BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 2.631, 6},

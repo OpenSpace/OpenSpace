@@ -9,7 +9,7 @@ return {
             Body = "CHURYUMOV-GERASIMENKO",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "${OPENSPACE_DATA}/scene/67P/obj/67P_rotated_5_130.obj",
+                GeometryFile = "obj/67P_rotated_5_130.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -23,7 +23,7 @@ return {
                 Destination = "GALACTIC"
             },
             Projection = {
-                Sequence   = "${OPENSPACE_DATA}/scene/67P/rosettaimages",
+                Sequence   = "rosettaimages",
                 SequenceType = "image-sequence",
                 Observer   = "ROSETTA",
                 Target     = "CHURYUMOV-GERASIMENKO",

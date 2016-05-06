@@ -123,3 +123,11 @@ data/spice/jup260.bsp
 data/scene/newhorizons/pluto/plutoprojection/images
 data/spice/nh_kernels/
 data/scene/jupiter/jupiter/textures/Jupiter-text.png
+data/scene/jupiter/callisto/textures/callisto.jpg
+data/scene/jupiter/europa/textures/europa.jpg
+data/scene/jupiter/ganymede/textures/ganymede.jpg
+data/scene/jupiter/io/textures/io.jpg
+data/scene/milkyway-eso/textures/eso0932a_blend.png
+data/scene/stars-denver/denver_colorbv.cmap
+data/scene/stars-denver/speck/stars.speck
+data/scene/stars-denver/textures/halo.png
