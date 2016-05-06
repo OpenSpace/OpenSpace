@@ -270,9 +270,16 @@ std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
 }
 
 void ISWAManager::createScreenSpace(int id){
-    std::string luaTable = "{ Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
-    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script);
+
+    std::string name = "iSWACygnet" + std::to_string(id);
+    if(OsEng.renderEngine().screenSpaceRenderable(name)){
+        LERROR("A cygnet with the name \"" + name +"\" already exist");
+        return;
+    }else{
+        std::string luaTable = "{ Name = '" + name + "', Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
+        std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+        OsEng.scriptEngine().queueScript(script);
+    }
 }
 
 void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){
