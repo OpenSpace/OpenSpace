@@ -125,10 +125,14 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
 
         auto metadataCallback = 
         [this, metaFuture](const DownloadManager::FileFuture& f){
-            LDEBUG("Download to memory finished");
-            metaFuture->isFinished = true;
-            createPlane(metaFuture);
-        };
+                if(f.isFinished){
+                    metaFuture->isFinished;
+                    createPlane(metaFuture);
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
+            };
 
         // Download metadata
         DlManager.downloadToMemory(
@@ -183,7 +187,11 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(
             iSWAurl(id, "image"),
             buffer,
             [](const DownloadManager::FileFuture& f){
-                LDEBUG("Download to memory finished");
+                if(f.isFinished){
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
             }
         );
 }
@@ -193,7 +201,11 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
             iSWAurl(id, "data"),
             buffer,
             [](const DownloadManager::FileFuture& f){
-                LDEBUG("Download data finished");
+                if(f.isFinished){
+                    LDEBUG("Download to memory finished");
+                } else if (f.isAborted){
+                    LWARNING("Download to memory was aborted: " + f.errorMessage);
+                }
             }
         );
 }
@@ -233,8 +245,12 @@ std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
                 // "http://10.0.0.76:3000/" + std::to_string(-id),
                 metaFuture->json,
                 [metaFuture](const DownloadManager::FileFuture& f){
-                    LDEBUG("Download to memory finished");
-                    metaFuture->isFinished = true;
+                    if(f.isFinished){
+                        metaFuture->isFinished;
+                        LDEBUG("Download to memory finished");
+                    } else if (f.isAborted){
+                        LWARNING("Download to memory was aborted: " + f.errorMessage);
+                    }
                 }
             );
     return metaFuture;
@@ -279,7 +295,11 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
         std::string coordinateType = j["Coordinate Type"];
         int updateTime = j["ISWA_UPDATE_SECONDS"];
 
-        j["Radius"];
+        std::string radius = "";
+        if(j["Radius"] == NULL){
+            radius ="Radius =  {6.371, 6.01}, "
+                    "Segments = 100,";
+        }
 
         glm::vec3 max(
             j["Plot XMAX"],
@@ -316,8 +336,7 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = "+ std::to_string(data->group) + " ,"
-            "Radius = {6.371, 6.01}, "
-            "Segments = 20,"
+            + radius +
             "}"
         "}";
         
@@ -446,8 +465,17 @@ scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
 }
 
 glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et){
-    auto fromit = _kameleonFrames.find(from);
-    auto toit   = _kameleonFrames.find(to);
+    std::set<std::string> _diopoleFrames =    {"GSM", "SM", "MAG"};
+
+    auto fromit = _diopoleFrames.find(from);
+    auto toit   = _diopoleFrames.find(to);
+
+    //diopole frame to J200 makes the frame rotate.
+    if(fromit != _diopoleFrames.end()) from = "GSE";
+    if(toit   != _diopoleFrames.end()) to   = "GSE";
+
+    fromit = _kameleonFrames.find(from);
+    toit   = _kameleonFrames.find(to);
 
     bool fromKameleon   = (fromit != _kameleonFrames.end());
     bool toKameleon     = (toit   != _kameleonFrames.end());
@@ -481,8 +509,6 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
             out1.c0 , out1.c1   , out1.c2,
             out2.c0 , out2.c1   , out2.c2
         );
-
-        // std::cout << std::to_string(kameleonTrans) << std::endl;
 
         glm::dmat3 spiceTrans = SpiceManager::ref().frameTransformationMatrix("J2000", to, et);
 

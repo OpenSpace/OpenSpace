@@ -43,7 +43,6 @@ DataSphere::~DataSphere(){}
 
 
 bool DataSphere::loadTexture(){
-	_textures[0] = nullptr;
 	std::string texturepath = "${OPENSPACE_DATA}/scene/mars/textures/mars.jpg";
 	 
 	auto texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturepath));
@@ -59,14 +58,17 @@ bool DataSphere::loadTexture(){
 bool DataSphere::updateTexture(){
 	if(_textures.empty())
         _textures.push_back(nullptr);
-
-	loadTexture();
+    if(!_textures[0])
+	   loadTexture();
     return true; 
 }
 
 
 bool DataSphere::readyToRender(){
-	return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
+    bool ready = isReady();
+    ready &= (!_textures.empty() && _textures[0]);
+    ready &= (_sphere != nullptr);
+	return ready;
 }
 
 

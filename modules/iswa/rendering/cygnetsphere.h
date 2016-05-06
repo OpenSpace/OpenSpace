@@ -28,6 +28,7 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace{
+class PowerScaledSphere;
 
 namespace planetgeometry {
 	class PlanetGeometry;
@@ -38,13 +39,12 @@ public:
     CygnetSphere(const ghoul::Dictionary& dictionary);
     ~CygnetSphere();
 
+protected:
+    std::shared_ptr<PowerScaledSphere> _sphere;
 private:
     virtual bool createGeometry() override;
     virtual bool destroyGeometry() override;
     virtual bool renderGeometry() override;
-
-    std::shared_ptr<planetgeometry::PlanetGeometry> _geometry;
-    double _segments;
 };
 
 } //namespace openspace

@@ -48,12 +48,12 @@ bool CygnetPlane::createGeometry() {
 
     const GLfloat vertex_data[] = { // square of two triangles (sigh)
         //      x      y     z     w     s     t
-        -x, -z,             -y,  w, 0, 1,
-         x,  z,              y,  w, 1, 0,
-        -x,  ((x>0)?z:-z),   y,  w, 0, 0,
-        -x, -z,             -y,  w, 0, 1,
-         x,  ((x>0)?-z:z),  -y,  w, 1, 1,
-         x,  z,              y,  w, 1, 0,
+        -x, -y,             -z,  w, 0, 1,
+         x,  y,              z,  w, 1, 0,
+        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x, -y,             -z,  w, 0, 1,
+         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  y,              z,  w, 1, 0,
     };
 
     glBindVertexArray(_quad); // bind array

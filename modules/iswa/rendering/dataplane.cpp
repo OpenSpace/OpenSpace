@@ -132,7 +132,9 @@ bool DataPlane::loadTexture() {
 }
 
 bool DataPlane::updateTexture(){
-    if(_futureObject)
+
+    // If a download is in progress, dont send another request.
+    if(_futureObject && !_futureObject->isFinished && !_futureObject->isAborted)
         return false;
 
     _memorybuffer = "";

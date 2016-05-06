@@ -114,7 +114,7 @@ bool ISWACygnet::initialize(){
     if(_data->groupId > 0)
         ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
 
-    return isReady();
+    // return isReady();
 }
 
 bool ISWACygnet::deinitialize(){

@@ -84,10 +84,12 @@ bool TexturePlane::loadTexture() {
 
 
 bool TexturePlane::updateTexture(){
+
     if(_textures.empty())
         _textures.push_back(nullptr);
 
-    if(_futureObject)
+    // If a download is in progress, dont send another request.
+    if(_futureObject && !_futureObject->isFinished && !_futureObject->isAborted)
         return false;
 
     _memorybuffer = "";
@@ -114,6 +116,8 @@ bool TexturePlane::setUniformAndTextures(){
     unit.activate();
     _textures[0]->bind();
     _shader->setUniform("texture1", unit);
+
+    return true;
 }
 
 

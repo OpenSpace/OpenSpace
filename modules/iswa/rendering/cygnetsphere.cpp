@@ -24,33 +24,33 @@
 #include <openspace/util/time.h>
 #include <modules/base/rendering/planetgeometry.h>
 #include <modules/base/rendering/simplespheregeometry.h>
+#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/powerscaledscalar.h>
 
 namespace openspace{
 
 CygnetSphere::CygnetSphere(const ghoul::Dictionary& dictionary)
     :ISWACygnet(dictionary)
-    ,_geometry(nullptr)
-{
-    _geometry = std::make_shared<planetgeometry::SimpleSphereGeometry>(dictionary);
-}
+    ,_sphere(nullptr)
+{}
 
 CygnetSphere::~CygnetSphere(){}
 
 bool CygnetSphere::createGeometry(){
-    _geometry->initialize(this);
+    PowerScaledScalar radius =  PowerScaledScalar(3*6.371f, 6.0);
+    int segments = 100;
+    _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
+    _sphere->initialize();
 }
 
 bool CygnetSphere::destroyGeometry(){
-    if(_geometry)
-        _geometry->deinitialize();
-
-    _geometry = nullptr;
+    _sphere = nullptr;
 }
 
 bool CygnetSphere::renderGeometry(){
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    _geometry->render();
+    _sphere->render();
 }
 
 

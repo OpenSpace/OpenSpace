@@ -28,7 +28,7 @@
 #include <modules/iswa/rendering/cygnetsphere.h>
 
 namespace openspace{
-
+class PowerScaledSphere;
 class DataSphere : public CygnetSphere {
 public:
     DataSphere(const ghoul::Dictionary& dictionary);

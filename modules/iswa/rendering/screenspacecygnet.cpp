@@ -136,8 +136,7 @@ bool ScreenSpaceCygnet::isReady() const{
 
 void ScreenSpaceCygnet::updateTexture(){
     // If a download is in progress, dont send another request.
-    //What if image failed to download?
-    if(_futureTexture && !_futureTexture->isFinished)
+    if(_futureTexture && !_futureTexture->isFinished && !_futureTexture->isAborted)
         return;
 
     _memorybuffer = "";
