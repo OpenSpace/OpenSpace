@@ -34,19 +34,8 @@ namespace {
 
 namespace openspace {
 
-// ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
-//     : ScreenSpaceRenderable()
-//     , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
-//     , _cygnetId(cygnetId)
-// {
-//     setName("iSWACygnet" + std::to_string(_cygnetId));
-//     addProperty(_updateInterval);
-
-//     registerProperties();
-// }
-
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceRenderable(dictionary)
+    : ScreenSpaceImage(dictionary)
     , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
 {
     // hacky, have to first get as float and then cast to int.
@@ -58,55 +47,15 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     addProperty(_updateInterval);
 
     registerProperties();
+
+    _downloadImage = true;
+
+    _url = ISWAManager::ref().iSWAurl(_cygnetId);
+    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _lastUpdateRealTime = _realTime;
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
-
-bool ScreenSpaceCygnet::initialize(){
-    _originalViewportSize = OsEng.windowWrapper().currentWindowResolution();
-    createPlane();
-    createShaders();
-    updateTexture();
-
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    _lastUpdateRealTime = _realTime;
-
-    return isReady();
-}
-
-bool ScreenSpaceCygnet::deinitialize(){
-    OsEng.gui()._screenSpaceProperty.unregisterProperties(name());
-
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    _texture = nullptr;
-
-     RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
-
-    _memorybuffer = "";
-    return true;
-}
-
-void ScreenSpaceCygnet::render(){
-
-    if(!isReady()) return;
-    if(!_enabled) return;
-
-    glm::mat4 rotation = rotationMatrix();
-    glm::mat4 translation = translationMatrix();
-    glm::mat4 scale = scaleMatrix();
-    glm::mat4 modelTransform = rotation*translation*scale;
-
-    draw(modelTransform);
-}
 
 void ScreenSpaceCygnet::update(){
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -115,6 +64,7 @@ void ScreenSpaceCygnet::update(){
                         (Time::ref().deltaTime() != 0);
 
     if(updateInterval != 0 && (Time::ref().timeJumped() || timeToUpdate )){
+        _url = ISWAManager::ref().iSWAurl(_cygnetId);
         updateTexture();
         _lastUpdateRealTime = _realTime;
     }
@@ -125,52 +75,4 @@ void ScreenSpaceCygnet::update(){
     }
 }
 
-bool ScreenSpaceCygnet::isReady() const{
-    bool ready = true;
-    if (!_shader)
-        ready &= false;
-    if(!_texture)
-        ready &= false;
-    return ready;
-}
-
-void ScreenSpaceCygnet::updateTexture(){
-    // If a download is in progress, dont send another request.
-    if(_futureTexture && !_futureTexture->isFinished && !_futureTexture->isAborted)
-        return;
-
-    _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
-    if(future){
-        _futureTexture = future;
-    }
-
-}
-
-void ScreenSpaceCygnet::loadTexture() {
-
-    if(_memorybuffer != ""){
-
-        std::string format;
-        std::stringstream ss(_futureTexture->format);
-        getline(ss, format ,'/');
-        getline(ss, format);
-
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-            (void*) _memorybuffer.c_str(), 
-            _memorybuffer.size(), 
-            format);
-        // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
-
-        if (texture) {
-            // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
-
-            texture->uploadTexture();
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-            _texture = std::move(texture);
-        }
-    }
-}
 }

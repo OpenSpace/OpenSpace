@@ -30,17 +30,16 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    openspace.iswa.addCygnet("0");
+    --openspace.iswa.addCygnet("0");
     --openspace.iswa.addCygnet("-1,Data,1");
     --openspace.iswa.addCygnet("-2,Data,1");
     --openspace.iswa.addCygnet("-3,Data,1");
-
-    --[[
+    
     openspace.registerScreenSpaceRenderable(
     {
         Type = "ScreenSpaceCygnet",
         CygnetId = 7,
-        Position = {-0.8, 0.3},
+        Position = {0.0, 0.0},
         FlatScreen = true,
         Scale = 0.25,
     });
@@ -53,7 +52,15 @@ function postInitialization()
         FlatScreen = true,
         Scale = 0.25,
     });
-    ]]--
+
+    openspace.registerScreenSpaceRenderable(
+    {
+        Type = "ScreenSpaceImage",
+        URL = "http://i.imgur.com/KUunHgr.jpg",
+        Position = {-0.8, 0.3},
+        FlatScreen = true,
+        Scale = 0.25,
+    });
 end
 
 

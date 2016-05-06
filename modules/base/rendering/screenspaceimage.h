@@ -26,6 +26,8 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/engine/downloadmanager.h>
+
  
 namespace openspace {
 /**
@@ -45,14 +47,27 @@ public:
     bool initialize() override;
     bool deinitialize() override;
     void render() override;
-    void update() override;
+    virtual void update() override;
     bool isReady() const override;
 
-private:
-    void loadTexture();
-    static int id();
+protected:
+    std::string _url;
+    bool _downloadImage;
+    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
     
+    void loadTexture();
+    void updateTexture();
+private:
+
+    static int id();
+    std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(std::string url, std::string& buffer);
+    std::unique_ptr<ghoul::opengl::Texture> loadFromDisk();
+    std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
+
     properties::StringProperty _texturePath;
+    std::string _memorybuffer;
+
+
     int _id;
 };
 

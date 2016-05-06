@@ -87,8 +87,8 @@ public:
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-private:
     std::string iSWAurl(int id, std::string type = "image");
+private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 
     void createScreenSpace(int id);

@@ -27,35 +27,26 @@
 
 #include <chrono>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base/rendering/screenspaceimage.h>
+
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
 
 namespace openspace{
 
-class ScreenSpaceCygnet : public ScreenSpaceRenderable {
+class ScreenSpaceCygnet : public ScreenSpaceImage {
 public:
-    ScreenSpaceCygnet(int cygnetId);
     ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet();
 
-    void render() override;
-    bool initialize() override;
-    bool deinitialize() override;
-    void update() override;
-    bool isReady() const override;
+    virtual void update() override;
+
 
 private:
-    void updateTexture();
-    void loadTexture();
-
     int _cygnetId;
-
     properties::FloatProperty _updateInterval;
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
-
-    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-    std::string _memorybuffer;
 };
 
  } // namespace openspace
