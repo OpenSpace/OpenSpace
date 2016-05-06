@@ -64,6 +64,7 @@ public:
     struct MemoryFile {
         std::string buffer;
         std::string format;
+        bool corrupted;
     };
 
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;

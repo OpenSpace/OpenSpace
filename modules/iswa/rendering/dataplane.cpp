@@ -95,15 +95,15 @@ DataPlane::~DataPlane(){}
 
 bool DataPlane::loadTexture() {
     
+    // if The future is done then get the new dataFile
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-        try {
-            _dataFile = _futureObject.get();
-        } catch( std::exception& e ) {
-            LWARNING( "DataPlane future data exception: " + std::string(e.what()) );
+         _dataFile = _futureObject.get();
+
+         if(_dataFile.corrupted)
             return false;
-        }
     }
 
+    // if the buffer in the datafile is empty, do not proceed
     if(_dataFile.buffer.empty())
         return false;
 

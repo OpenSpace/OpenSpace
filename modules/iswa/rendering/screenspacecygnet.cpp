@@ -134,26 +134,24 @@ void ScreenSpaceCygnet::updateTexture(){
 
 void ScreenSpaceCygnet::loadTexture() {
 
-    try {
+    DownloadManager::MemoryFile imageFile = _futureImage.get();
 
-        DownloadManager::MemoryFile imageFile = _futureImage.get();
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-            (void*) imageFile.buffer.c_str(),
-            imageFile.buffer.size(), 
-            imageFile.format);
+    if(imageFile.corrupted)
+        return;
 
-        if (texture) {
-            LDEBUG("Loaded texture from iswa cygnet with id: '" << _cygnetId << "'");
+    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+        (void*) imageFile.buffer.c_str(),
+        imageFile.buffer.size(), 
+        imageFile.format);
 
-            texture->uploadTexture();
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    if (texture) {
+        LDEBUG("Loaded texture from iswa cygnet with id: '" << _cygnetId << "'");
 
-            _texture = std::move(texture);
-        }
+        texture->uploadTexture();
+        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-    } catch( std::exception& e ) {
-        LWARNING( "ScreenSpaceCygnet futureImage exception: " + std::string(e.what()) );
+        _texture = std::move(texture);
     }
 }
 }

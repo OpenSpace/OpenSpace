@@ -56,13 +56,10 @@ TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::loadTexture() {
 
-    DownloadManager::MemoryFile imageFile;
-    try {
-        imageFile = _futureObject.get();
-    } catch( std::exception& e ) {
-        LWARNING( "Textureplane futureImage exception: " + std::string(e.what()) );
+    DownloadManager::MemoryFile imageFile = _futureObject.get();
+
+    if(imageFile.corrupted)
         return false;
-    }
 
     std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
                                                         (void*) imageFile.buffer.c_str(),

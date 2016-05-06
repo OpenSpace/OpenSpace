@@ -294,15 +294,19 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 }
                 successCallback(file);
                 curl_easy_cleanup(curl);
+                file.corrupted = false;
                 return std::move(file);
             } else {
                 std::string err = curl_easy_strerror(res);
                 errorCallback(err);
                 curl_easy_cleanup(curl);
                 // Throw an error and use try-catch around future.get() call
-                throw std::runtime_error( err );
+                //throw std::runtime_error( err );
+
                 // or set a boolean variable in MemoryFile to determine if it is valid/corrupted or not.
                 // Return MemoryFile even if it is not valid, and check if it is after future.get() call.
+                file.corrupted = true;
+                return std::move(file);
             }
         }
     };

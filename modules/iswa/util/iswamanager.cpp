@@ -203,10 +203,10 @@ std::future<DownloadManager::MemoryFile> ISWAManager::fetchImageCygnet(int id){
     return std::move( DlManager.fetchFile(
             iSWAurl(id, "image"),
             [id](const DownloadManager::MemoryFile& file){
-                LDEBUG("Download to memory finished");
+                LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
             },
             [id](const std::string& err){
-                LDEBUG("Download to memory was aborted: " + err);
+                LDEBUG("Download to memory was aborted for image cygnet with id "+ std::to_string(id)+": " + err);
             }
         ) );   
 }
