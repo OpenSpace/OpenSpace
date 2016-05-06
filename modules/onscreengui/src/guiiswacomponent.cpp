@@ -53,25 +53,25 @@ namespace {
         OsEng.scriptEngine().queueScript(script);
     }
 
-    void renderBoolProperty(Property* prop, const std::string& ownerName) {
+    void renderBoolProperty(Property* prop) {
         BoolProperty* p = static_cast<BoolProperty*>(prop);
         std::string name = p->guiName();
 
         BoolProperty::ValueType value = *p;
-        ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+        ImGui::Checkbox((name).c_str(), &value);
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(), value ? "true": "false");
     }
 
-    void renderOptionProperty(Property* prop, const std::string& ownerName) {
+    void renderOptionProperty(Property* prop) {
         OptionProperty* p = static_cast<OptionProperty*>(prop);
         std::string name = p->guiName();
 
         int value = *p;
         std::vector<OptionProperty::Option> options = p->options();
         for (const OptionProperty::Option& o : options) {
-            ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
+            ImGui::RadioButton((name).c_str(), &value, o.value);
             ImGui::SameLine();
             ImGui::Text(o.description.c_str());
         }
@@ -79,11 +79,11 @@ namespace {
             executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
     }
 
-    void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+    void renderSelectionProperty(Property* prop) {
         SelectionProperty* p = static_cast<SelectionProperty*>(prop);
         std::string name = p->guiName();
 
-        if (ImGui::CollapsingHeader((ownerName + "." + name).c_str())) {
+        if (ImGui::CollapsingHeader((name).c_str())) {
             const std::vector<SelectionProperty::Option>& options = p->options();
             std::vector<int> newSelectedIndices;
 
@@ -108,7 +108,7 @@ namespace {
         }
     }
 
-    void renderStringProperty(Property* prop, const std::string& ownerName) {
+    void renderStringProperty(Property* prop) {
         StringProperty* p = static_cast<StringProperty*>(prop);
         std::string name = p->guiName();
 
@@ -119,56 +119,56 @@ namespace {
 #else
         strcpy(buffer, p->value().c_str());
 #endif
-        ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
+        ImGui::InputText((name).c_str(), buffer, bufferSize);
         std::string newValue(buffer);
 
         if (newValue != p->value() && FileSys.fileExists(newValue))
             executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
     }
 
-    void renderIntProperty(Property* prop, const std::string& ownerName) {
+    void renderIntProperty(Property* prop) {
         IntProperty* p = static_cast<IntProperty*>(prop);
         std::string name = p->guiName();
 
         IntProperty::ValueType value = *p;
-        ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+        ImGui::SliderInt((name).c_str(), &value, p->minValue(), p->maxValue());
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
     }
 
-    void renderFloatProperty(Property* prop, const std::string& ownerName) {
+    void renderFloatProperty(Property* prop) {
         FloatProperty* p = static_cast<FloatProperty*>(prop);
         std::string name = p->guiName();
 
         FloatProperty::ValueType value = *p;
-        ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+        ImGui::SliderFloat((name).c_str(), &value, p->minValue(), p->maxValue());
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
 
     }
 
-    void renderVec2Property(Property* prop, const std::string& ownerName) {
+    void renderVec2Property(Property* prop) {
         Vec2Property* p = static_cast<Vec2Property*>(prop);
         std::string name = p->guiName();
 
         Vec2Property::ValueType value = *p;
 
-        ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
+        ImGui::SliderFloat2((name).c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
     }
 
-    void renderVec3Property(Property* prop, const std::string& ownerName) {
+    void renderVec3Property(Property* prop) {
         Vec3Property* p = static_cast<Vec3Property*>(prop);
         std::string name = p->guiName();
 
         Vec3Property::ValueType value = *p;
 
-        ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+        ImGui::SliderFloat3((name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(),
@@ -177,13 +177,13 @@ namespace {
                   std::to_string(value.z) + "}");
     }
 
-    void renderVec4Property(Property* prop, const std::string& ownerName) {
+    void renderVec4Property(Property* prop) {
         Vec4Property* p = static_cast<Vec4Property*>(prop);
         std::string name = p->guiName();
 
         Vec4Property::ValueType value = *p;
 
-        ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+        ImGui::SliderFloat4((name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
 
         if (value != p->value())
             executeScript(p->fullyQualifiedIdentifier(),
@@ -193,9 +193,9 @@ namespace {
                   std::to_string(value.w) + "}");
     }
 
-    void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+    void renderTriggerProperty(Property* prop) {
         std::string name = prop->guiName();
-        bool pressed = ImGui::Button((ownerName + "." + name).c_str());
+        bool pressed = ImGui::Button((name).c_str());
         if (pressed)
             executeScript(prop->fullyQualifiedIdentifier(), "nil");
     }
@@ -266,52 +266,52 @@ void GuiISWAComponent::render() {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
             for (properties::Property* prop : p.second) {
                 if (_boolProperties.find(prop) != _boolProperties.end()) {
-                    renderBoolProperty(prop, p.first);
+                    renderBoolProperty(prop);
                     continue;
                 }
 
                 if (_intProperties.find(prop) != _intProperties.end()) {
-                    renderIntProperty(prop, p.first);
+                    renderIntProperty(prop);
                     continue;
                 }
 
                 if (_floatProperties.find(prop) != _floatProperties.end()) {
-                    renderFloatProperty(prop, p.first);
+                    renderFloatProperty(prop);
                     continue;
                 }
 
                 if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-                    renderVec2Property(prop, p.first);
+                    renderVec2Property(prop);
                     continue;
                 }
 
                 if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-                    renderVec3Property(prop, p.first);
+                    renderVec3Property(prop);
                     continue;
                 }
 
                 if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-                    renderVec4Property(prop, p.first);
+                    renderVec4Property(prop);
                     continue;
                 }
 
                 if (_optionProperties.find(prop) != _optionProperties.end()) {
-                    renderOptionProperty(prop, p.first);
+                    renderOptionProperty(prop);
                     continue;
                 }
 
                 if (_triggerProperties.find(prop) != _triggerProperties.end()) {
-                    renderTriggerProperty(prop, p.first);
+                    renderTriggerProperty(prop);
                     continue;
                 }
 
                 if (_selectionProperties.find(prop) != _selectionProperties.end()) {
-                    renderSelectionProperty(prop, p.first);
+                    renderSelectionProperty(prop);
                     continue;
                 }
 
                 if (_stringProperties.find(prop) != _stringProperties.end()) {
-                    renderStringProperty(prop, p.first);
+                    renderStringProperty(prop);
                     continue;
                 }
             }
