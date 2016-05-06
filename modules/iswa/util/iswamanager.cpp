@@ -171,17 +171,6 @@ void ISWAManager::deleteISWACygnet(std::string name){
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
 }
 
-// std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImage(int id, std::string path){
-//     return  DlManager.downloadFile(
-//                 iSWAurl(id),
-//                 path,
-//                 true,
-//                 [path](const DownloadManager::FileFuture& f){
-//                     LDEBUG("Download finished: " << path);
-//                 }
-//             );
-// }
-
 std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
     return  DlManager.downloadToMemory(
             iSWAurl(id, "image"),
@@ -210,14 +199,26 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
         );
 }
 
-std::future<DownloadManager::MemoryFile> ISWAManager::fetchCygnet(int id){
+std::future<DownloadManager::MemoryFile> ISWAManager::fetchImageCygnet(int id){
     return std::move( DlManager.fetchFile(
             iSWAurl(id, "image"),
-            [](const DownloadManager::MemoryFile& file){
+            [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished");
             },
-            [](const std::string& err){
+            [id](const std::string& err){
                 LDEBUG("Download to memory was aborted: " + err);
+            }
+        ) );   
+}
+
+std::future<DownloadManager::MemoryFile> ISWAManager::fetchDataCygnet(int id){
+    return std::move( DlManager.fetchFile(
+            iSWAurl(id, "data"),
+            [id](const DownloadManager::MemoryFile& file){
+                LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
+            },
+            [id](const std::string& err){
+                LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
             }
         ) );   
 }

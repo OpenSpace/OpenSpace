@@ -107,7 +107,7 @@ void ScreenSpaceCygnet::update(){
         _lastUpdateRealTime = _realTime;
     }
 
-    if(_futureImage.valid() && _futureImage.wait_for(std::chrono::seconds(0)) == std::future_status::ready){
+    if(_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
         loadTexture();
     }
 }
@@ -122,11 +122,11 @@ bool ScreenSpaceCygnet::isReady() const{
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-    std::cout << "updateTexture begin" << std::endl;
-    if(_futureImage.valid() && _futureImage.wait_for(std::chrono::seconds(0)) == std::future_status::timeout)
+
+    if(_futureImage.valid())
         return;
 
-    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchCygnet(_cygnetId);
+    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchImageCygnet(_cygnetId);
     if(future.valid()){
         _futureImage = std::move(future);
     }
@@ -143,7 +143,7 @@ void ScreenSpaceCygnet::loadTexture() {
             imageFile.format);
 
         if (texture) {
-            // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+            LDEBUG("Loaded texture from iswa cygnet with id: '" << _cygnetId << "'");
 
             texture->uploadTexture();
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear

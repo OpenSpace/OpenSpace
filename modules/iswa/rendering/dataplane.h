@@ -56,8 +56,8 @@ friend class ISWAGroup;
     virtual bool setUniformAndTextures() override;
     virtual bool createShader() override;
 
-    void readHeader();
-    std::vector<float*> readData();
+    void readHeader(std::string&);
+    std::vector<float*> readData(std::string&);
     void processData(
         float* outputData, // Where you want your processed data to go 
         std::vector<float>& inputData, //data that needs processing 
@@ -77,6 +77,7 @@ friend class ISWAGroup;
     properties::BoolProperty _useHistogram;
     
     glm::size3_t _dimensions;
+    DownloadManager::MemoryFile _dataFile;
     // std::shared_ptr<ColorBar> _colorbar;
     
     //FOR TESTING

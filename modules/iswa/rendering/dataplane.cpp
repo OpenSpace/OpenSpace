@@ -94,7 +94,21 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 DataPlane::~DataPlane(){}
 
 bool DataPlane::loadTexture() {
-    std::vector<float*> data = readData();
+    
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+        try {
+            _dataFile = _futureObject.get();
+        } catch( std::exception& e ) {
+            LWARNING( "DataPlane future data exception: " + std::string(e.what()) );
+            return false;
+        }
+    }
+
+    if(_dataFile.buffer.empty())
+        return false;
+
+    std::vector<float*> data = readData(_dataFile.buffer);
+
     if(data.empty())
         return false;
 
@@ -129,19 +143,18 @@ bool DataPlane::loadTexture() {
     }
 
     return texturesReady;
+
 }
 
 bool DataPlane::updateTexture(){
 
-    // If a download is in progress, dont send another request.
-    if(_futureObject && !_futureObject->isFinished && !_futureObject->isAborted)
+    if(_futureObject.valid())
         return false;
 
-    _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadDataToMemory(_data->id, _memorybuffer);
+    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchDataCygnet(_data->id);
 
-    if(future){
-        _futureObject = future;
+    if(future.valid()){
+        _futureObject = std::move(future);
         return true;
     }
 
@@ -220,7 +233,7 @@ bool DataPlane::createShader(){
     }
 }
 
-void DataPlane::readHeader(){
+void DataPlane::readHeader(std::string& _memorybuffer){
     if(!_memorybuffer.empty()){
         std::stringstream memorystream(_memorybuffer);
         std::string line;
@@ -267,15 +280,12 @@ void DataPlane::readHeader(){
             }
         }
     }
-    // else{
-    //     LWARNING("Noting in memory buffer, are you connected to the information super highway?");
-    // }
 }
 
-std::vector<float*> DataPlane::readData(){
+std::vector<float*> DataPlane::readData(std::string& _memorybuffer){
     if(!_memorybuffer.empty()){
         if(!_dataOptions.options().size()) // load options for value selection
-            readHeader();
+            readHeader(_memorybuffer);
         
         std::stringstream memorystream(_memorybuffer);
         std::string line;

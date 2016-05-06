@@ -105,7 +105,6 @@ protected:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
 
     std::shared_ptr<Metadata> _data;
-    std::string _memorybuffer;
 
     glm::dmat3 _stateMatrix;
 
@@ -117,7 +116,7 @@ protected:
     int _minRealTimeUpdateInterval;
 
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
-    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+    std::future<DownloadManager::MemoryFile> _futureObject;
 
     ISWAManager::CygnetType _type;
 };

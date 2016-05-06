@@ -72,12 +72,11 @@ public:
     void addISWACygnet(int id, std::string info = "Texture", int group = -1);
     void deleteISWACygnet(std::string);
 
-    // std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
 
-    std::future<DownloadManager::MemoryFile> fetchCygnet(int id);
-
+    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
+    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
 
     void registerGroup(int id);
     void registerToGroup(int id, CygnetType type, ISWACygnet* cygnet);

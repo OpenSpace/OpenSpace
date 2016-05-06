@@ -35,9 +35,9 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
     // , _texture(nullptr)
-    , _memorybuffer("")
+    //, _memorybuffer("")
     ,_type(ISWAManager::CygnetType::NoType)
-    ,_futureObject(nullptr)
+    //,_futureObject(nullptr)
     // ,_transferFunction(nullptr)
 {
     _data = std::make_shared<Metadata>();
@@ -124,7 +124,7 @@ bool ISWACygnet::deinitialize(){
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-    _memorybuffer = "";
+    //_memorybuffer = "";
 
     return true;
 }
@@ -187,9 +187,8 @@ void ISWACygnet::update(const UpdateData& data){
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
-    if(_futureObject && _futureObject->isFinished){
-        if(loadTexture())
-            _futureObject = nullptr;
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
+        loadTexture();
     }
 
     if(!_transferFunctions.empty())

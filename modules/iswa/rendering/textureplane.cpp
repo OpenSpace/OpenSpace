@@ -55,28 +55,29 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::loadTexture() {
-    if(_memorybuffer != ""){
 
-        std::string format;
-        std::stringstream ss(_futureObject->format);
-        getline(ss, format ,'/');
-        getline(ss, format);
+    DownloadManager::MemoryFile imageFile;
+    try {
+        imageFile = _futureObject.get();
+    } catch( std::exception& e ) {
+        LWARNING( "Textureplane futureImage exception: " + std::string(e.what()) );
+        return false;
+    }
 
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-            (void*) _memorybuffer.c_str(), 
-            _memorybuffer.size(), 
-            format);
+    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+                                                        (void*) imageFile.buffer.c_str(),
+                                                        imageFile.buffer.size(), 
+                                                        imageFile.format);
 
-        if (texture) {
-            texture->uploadTexture();
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            
-            _textures[0] = std::move(texture);
-            
-            return true;
-        }
-    }   
+    if (texture) {
+        LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
+
+        texture->uploadTexture();
+        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+        _textures[0]  = std::move(texture);
+    }
 
     return false;
 }
@@ -88,16 +89,13 @@ bool TexturePlane::updateTexture(){
     if(_textures.empty())
         _textures.push_back(nullptr);
 
-    // If a download is in progress, dont send another request.
-    if(_futureObject && !_futureObject->isFinished && !_futureObject->isAborted)
+    if(_futureObject.valid())
         return false;
 
-    _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_data->id, _memorybuffer);
+    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchImageCygnet(_data->id);
 
-    if(future){
-        _futureObject = future;
-
+    if(future.valid()){
+        _futureObject = std::move(future);
         return true;
     }
 
