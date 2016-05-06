@@ -43,10 +43,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
     
-    setName("iSWACygnet" + std::to_string(_cygnetId));
+    // setName("iSWACygnet" + std::to_string(_cygnetId));
     addProperty(_updateInterval);
 
-    registerProperties();
+    // registerProperties();
 
     _downloadImage = true;
 
