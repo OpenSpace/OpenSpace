@@ -28,20 +28,21 @@
 #include <modules/iswa/rendering/cygnetsphere.h>
 
 namespace openspace{
-
+class PowerScaledSphere;
 class DataSphere : public CygnetSphere {
 public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
-
-    virtual bool initialize() override;
-    virtual bool deinitialize() override;
 
 protected:
 
 private:
     virtual bool loadTexture() override; 
     virtual bool updateTexture() override;
+
+    virtual bool readyToRender() override;
+    virtual bool setUniformAndTextures() override;
+    virtual bool createShader() override;
 };
 
 

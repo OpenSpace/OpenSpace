@@ -87,65 +87,13 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     });
 
     _type = ISWAManager::CygnetType::Data;
+
+    setTransferFunctions(_transferFunctionsFile.value());
 }
 
 DataPlane::~DataPlane(){}
 
-
-bool DataPlane::initialize(){
-    initializeTime();
-
-    createPlane();
-    
-    if (_shader == nullptr) {
-    // DatePlane Program
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
-        "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
-        "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
-        );
-    if (!_shader)
-        return false;
-    }
-
-    updateTexture();
-    setTransferFunctions(_transferFunctionsFile.value());
-    
-    // std::cout << "Creating Colorbar" << std::endl;
-    // _colorbar = std::make_shared<ColorBar>();
-    // if(_colorbar){
-    //     _colorbar->initialize(); 
-    // }
-
-    // _textures.push_back(nullptr);
-    if(_data->groupId > 0)
-        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
-
-
-    return isReady();
-}
-
-bool DataPlane::deinitialize(){
-
-    if(_data->groupId > 0)
-        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
-
-
-    unregisterProperties();
-    destroyPlane();
-    destroyShader();
-
-    _textures[0] = nullptr;
-    _memorybuffer = "";
-    
-    // _colorbar->deinitialize();
-    // _colorbar = nullptr;
-
-    return true;
-}
-
 bool DataPlane::loadTexture() {
-
     std::vector<float*> data = readData();
     if(data.empty())
         return false;
@@ -200,8 +148,12 @@ bool DataPlane::updateTexture(){
     return false;
 }
 
-void DataPlane::setUniforms(){
+bool DataPlane::readyToRender(){
+    return (!_textures.empty());
+}
 
+bool DataPlane::setUniformAndTextures(){
+    
     // _shader->setUniform("textures", 1, units[1]);
     // _shader->setUniform("textures", 2, units[2]);
     // }
@@ -254,10 +206,18 @@ void DataPlane::setUniforms(){
     _shader->setUniform("numTextures", activeTextures);
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
-};
+}
 
-bool DataPlane::textureReady(){
-    return (!_textures.empty());
+bool DataPlane::createShader(){
+    if (_shader == nullptr) {
+        // DatePlane Program
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
+            "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
+            "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
+            );
+        if (!_shader) return false;
+    }
 }
 
 void DataPlane::readHeader(){
@@ -407,6 +367,7 @@ std::vector<float*> DataPlane::readData(){
 } 
 
 
+
 void DataPlane::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     
     // HISTOGRAM
@@ -524,13 +485,6 @@ float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){
     return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
 }
 
-float DataPlane::normalizeWithLogarithm(float value, int logMean){
-    float logMin = 10*_normValues.value().x;
-    float logMax = 10*_normValues.value().y;
-
-    float logNormalized = ((value/pow(10,logMean)+logMin))/(logMin+logMax);
-    return glm::clamp(logNormalized,0.0f, 1.0f);
-}
 
 void DataPlane::setTransferFunctions(std::string tfPath){
     std::string line;
@@ -552,4 +506,12 @@ void DataPlane::setTransferFunctions(std::string tfPath){
     }
 
 }
+
+
+
+
+
+
+
+
 }// namespace openspace

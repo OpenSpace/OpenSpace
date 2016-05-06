@@ -75,15 +75,29 @@ public:
     ISWACygnet(const ghoul::Dictionary& dictionary);
     ~ISWACygnet();
 
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
+    virtual bool initialize() override;
+    virtual bool deinitialize() override;
+    virtual bool isReady() const override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 protected:
+    void enabled(bool enabled){_enabled.setValue(enabled);};
+
     void registerProperties();
     void unregisterProperties();
     void initializeTime();
+    bool destroyShader();
     
-    void enabled(bool enabled){_enabled.setValue(enabled);};
+    virtual bool createGeometry() = 0;
+    virtual bool destroyGeometry() = 0;
+    virtual bool renderGeometry() = 0;
+    
+    virtual bool loadTexture() = 0;
+    virtual bool updateTexture() = 0;
+    virtual bool readyToRender() = 0;
+    virtual bool setUniformAndTextures() = 0;
+    virtual bool createShader() = 0;
 
     properties::TriggerProperty _delete;
 
@@ -103,6 +117,7 @@ protected:
     int _minRealTimeUpdateInterval;
 
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
+    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
 
     ISWAManager::CygnetType _type;
 };

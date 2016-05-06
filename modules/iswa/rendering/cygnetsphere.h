@@ -28,20 +28,23 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace{
+class PowerScaledSphere;
+
+namespace planetgeometry {
+	class PlanetGeometry;
+}
+
 class CygnetSphere : public ISWACygnet {
 public:
     CygnetSphere(const ghoul::Dictionary& dictionary);
     ~CygnetSphere();
 
-    virtual bool isReady() const override;
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
-
 protected:
-    virtual bool loadTexture() = 0;
-    virtual bool updateTexture() = 0;
-
-    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
+    std::shared_ptr<PowerScaledSphere> _sphere;
+private:
+    virtual bool createGeometry() override;
+    virtual bool destroyGeometry() override;
+    virtual bool renderGeometry() override;
 };
 
 } //namespace openspace

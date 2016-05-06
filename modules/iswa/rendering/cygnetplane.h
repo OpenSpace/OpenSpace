@@ -35,26 +35,13 @@ public:
     CygnetPlane(const ghoul::Dictionary& dictionary);
     ~CygnetPlane();
 
-    virtual bool isReady() const override;
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
-
-protected:
-    virtual bool loadTexture() = 0;
-    virtual bool updateTexture() = 0;
-    virtual void setUniforms() = 0;
-    virtual bool textureReady();
-
-    void createPlane();
-    void destroyPlane();
-    bool createShader();
-    void destroyShader();
+private:
+    virtual bool createGeometry() override;
+    virtual bool destroyGeometry() override;
+    virtual bool renderGeometry() override;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-
-    std::shared_ptr<DownloadManager::FileFuture> _futureObject;
-    // float _backgroundValue;
 };
 } //namespace openspace
 

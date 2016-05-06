@@ -54,33 +54,6 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
 TexturePlane::~TexturePlane(){}
 
-bool TexturePlane::initialize(){
-
-    _textures.push_back(nullptr);
-    
-    initializeTime();
-    createPlane();
-    createShader();
-    updateTexture();
-
-    if(_data->groupId > 0)
-        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
-
-    return isReady();
-}
-
-bool TexturePlane::deinitialize(){
-    if(_data->groupId > 0)
-        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
-
-    unregisterProperties();
-    destroyPlane();
-    destroyShader();
-    _memorybuffer = "";
-
-    return true;
-}
-
 bool TexturePlane::loadTexture() {
     if(_memorybuffer != ""){
 
@@ -112,6 +85,9 @@ bool TexturePlane::loadTexture() {
 
 bool TexturePlane::updateTexture(){
 
+    if(_textures.empty())
+        _textures.push_back(nullptr);
+
     // If a download is in progress, dont send another request.
     if(_futureObject && !_futureObject->isFinished && !_futureObject->isAborted)
         return false;
@@ -128,12 +104,34 @@ bool TexturePlane::updateTexture(){
     return false;
 }
 
-void TexturePlane::setUniforms(){
+
+bool TexturePlane::readyToRender(){
+    return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
+}
+
+
+bool TexturePlane::setUniformAndTextures(){
     ghoul::opengl::TextureUnit unit;
 
     unit.activate();
     _textures[0]->bind();
     _shader->setUniform("texture1", unit);
+
+    return true;
+}
+
+
+bool TexturePlane::createShader(){
+    if (_shader == nullptr) {
+        // Plane Program
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram("PlaneProgram",
+            "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
+            "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
+            );
+        if (!_shader) return false;
+    }
+    return true;
 }
 
 }// namespace openspace

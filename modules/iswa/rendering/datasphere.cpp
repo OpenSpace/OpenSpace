@@ -23,30 +23,78 @@
 ****************************************************************************************/
 
 #include <modules/iswa/rendering/datasphere.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <modules/base/rendering/planetgeometry.h>
 
 namespace openspace {
 
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     :CygnetSphere(dictionary)
-{}
+{
+	std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
+
+    registerProperties();
+}
 
 DataSphere::~DataSphere(){}
 
 
-bool DataSphere::initialize(){
-    return true;
-}
-
-bool DataSphere::deinitialize(){
-    return true;
-}
-
 bool DataSphere::loadTexture(){
+	std::string texturepath = "${OPENSPACE_DATA}/scene/mars/textures/mars.jpg";
+	 
+	auto texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturepath));
+	 if(texture){
+	 	texture->uploadTexture();
+	 	texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+	 	_textures[0] = std::move(texture);
+	 }
+
     return true;
 }
 
 bool DataSphere::updateTexture(){
+	if(_textures.empty())
+        _textures.push_back(nullptr);
+    if(!_textures[0])
+	   loadTexture();
     return true; 
 }
+
+
+bool DataSphere::readyToRender(){
+    bool ready = isReady();
+    ready &= (!_textures.empty() && _textures[0]);
+    ready &= (_sphere != nullptr);
+	return ready;
+}
+
+
+bool DataSphere::setUniformAndTextures(){
+    _shader->setUniform("transparency",0.5f);
+    
+    ghoul::opengl::TextureUnit unit;
+    unit.activate();
+    _textures[0]->bind();
+    _shader->setUniform("texture1", unit);
+}
+
+
+bool DataSphere::createShader(){
+	if (_shader == nullptr) {
+    // Plane Program
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _shader = renderEngine.buildRenderProgram(
+            "DataSphereProgram",
+            "${MODULE_ISWA}/shaders/datasphere_vs.glsl",
+            "${MODULE_ISWA}/shaders/datasphere_fs.glsl");
+    if (!_shader)
+        return false;
+    }
+    return true;
+}
+
 
 } //namespace openspace

@@ -17,30 +17,42 @@
 //  ****************************************************************************************/
 
 #include <modules/iswa/rendering/cygnetsphere.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <modules/base/rendering/planetgeometry.h>
+#include <modules/base/rendering/simplespheregeometry.h>
+#include <openspace/util/powerscaledsphere.h>
+#include <openspace/util/powerscaledscalar.h>
 
 namespace openspace{
 
 CygnetSphere::CygnetSphere(const ghoul::Dictionary& dictionary)
     :ISWACygnet(dictionary)
-    ,_futureObject(nullptr)
+    ,_sphere(nullptr)
 {}
 
 CygnetSphere::~CygnetSphere(){}
 
-bool CygnetSphere::isReady() const{
-    return true;
+bool CygnetSphere::createGeometry(){
+    PowerScaledScalar radius =  PowerScaledScalar(3*6.371f, 6.0);
+    int segments = 100;
+    _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
+    _sphere->initialize();
 }
 
-void CygnetSphere::render(const RenderData& data){
-
+bool CygnetSphere::destroyGeometry(){
+    _sphere = nullptr;
 }
 
-void CygnetSphere::update(const UpdateData& data){
-
+bool CygnetSphere::renderGeometry(){
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    _sphere->render();
 }
+
+
 
 } //namespace openspace
