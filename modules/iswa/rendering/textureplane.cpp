@@ -62,8 +62,8 @@ bool TexturePlane::loadTexture() {
         return false;
 
     std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) imageFile.buffer.c_str(),
-                                                        imageFile.buffer.size(), 
+                                                        (void*) imageFile.buffer,
+                                                        imageFile.size, 
                                                         imageFile.format);
 
     if (texture) {

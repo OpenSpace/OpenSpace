@@ -62,7 +62,8 @@ public:
     };
 
     struct MemoryFile {
-        std::string buffer;
+        char* buffer;
+        size_t size;
         std::string format;
         bool corrupted;
     };

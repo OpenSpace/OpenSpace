@@ -77,7 +77,7 @@ friend class ISWAGroup;
     properties::BoolProperty _useHistogram;
     
     glm::size3_t _dimensions;
-    DownloadManager::MemoryFile _dataFile;
+    std::string _dataBuffer;
     // std::shared_ptr<ColorBar> _colorbar;
     
     //FOR TESTING

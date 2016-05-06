@@ -97,17 +97,19 @@ bool DataPlane::loadTexture() {
     
     // if The future is done then get the new dataFile
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-         _dataFile = _futureObject.get();
+         DownloadManager::MemoryFile dataFile = _futureObject.get();
 
-         if(_dataFile.corrupted)
+         if(dataFile.corrupted)
             return false;
+
+        _dataBuffer.append(dataFile.buffer, dataFile.size);
     }
 
     // if the buffer in the datafile is empty, do not proceed
-    if(_dataFile.buffer.empty())
+    if(_dataBuffer.empty())
         return false;
 
-    std::vector<float*> data = readData(_dataFile.buffer);
+    std::vector<float*> data = readData(_dataBuffer);
 
     if(data.empty())
         return false;
@@ -233,9 +235,9 @@ bool DataPlane::createShader(){
     }
 }
 
-void DataPlane::readHeader(std::string& _memorybuffer){
-    if(!_memorybuffer.empty()){
-        std::stringstream memorystream(_memorybuffer);
+void DataPlane::readHeader(std::string& dataBuffer){
+    if(!dataBuffer.empty()){
+        std::stringstream memorystream(dataBuffer);
         std::string line;
 
         int numOptions = 0;
@@ -282,12 +284,12 @@ void DataPlane::readHeader(std::string& _memorybuffer){
     }
 }
 
-std::vector<float*> DataPlane::readData(std::string& _memorybuffer){
-    if(!_memorybuffer.empty()){
+std::vector<float*> DataPlane::readData(std::string& dataBuffer){
+    if(!dataBuffer.empty()){
         if(!_dataOptions.options().size()) // load options for value selection
-            readHeader(_memorybuffer);
+            readHeader(dataBuffer);
         
-        std::stringstream memorystream(_memorybuffer);
+        std::stringstream memorystream(dataBuffer);
         std::string line;
 
         std::vector<int> selectedOptions = _dataOptions.value();

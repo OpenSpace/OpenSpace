@@ -31,6 +31,7 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
+#include <cstring>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #include <curl/curl.h>
@@ -66,6 +67,24 @@ namespace {
     {
         ((std::string*)userp)->append((char*)contents, size * nmemb);
         return size * nmemb;
+    }
+
+    size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp){
+        size_t realsize = size * nmemb;
+        openspace::DownloadManager::MemoryFile *mem = (openspace::DownloadManager::MemoryFile *)userp;
+
+        mem->buffer = (char*)realloc(mem->buffer, mem->size + realsize + 1);
+        if(mem->buffer == NULL) {
+            /* out of memory! */ 
+            printf("not enough memory (realloc returned NULL)\n");
+            return 0;
+        }
+
+        std::memcpy(&(mem->buffer[mem->size]), contents, realsize);
+        mem->size += realsize;
+        mem->buffer[mem->size] = 0;
+
+        return realsize;
     }
 
     int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
@@ -270,12 +289,16 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     
     auto downloadFunction = [url, successCallback, errorCallback]() {
         DownloadManager::MemoryFile file;
+        file.buffer = (char*)malloc(1);
+        file.size = 0;
+        file.corrupted = false;
+
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &file.buffer);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&file);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
             
             CURLcode res = curl_easy_perform(curl);
@@ -294,7 +317,6 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 }
                 successCallback(file);
                 curl_easy_cleanup(curl);
-                file.corrupted = false;
                 return std::move(file);
             } else {
                 std::string err = curl_easy_strerror(res);
