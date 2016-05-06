@@ -77,6 +77,7 @@ public:
 
 
     void registerGroup(int id);
+    void unregisterGroup(int id);
     void registerToGroup(int id, CygnetType type, ISWACygnet* cygnet);
     void unregisterFromGroup(int id, ISWACygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);

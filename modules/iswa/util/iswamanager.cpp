@@ -417,7 +417,12 @@ std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
 
 void ISWAManager::registerGroup(int id){
     _groups.insert(std::pair<int, std::shared_ptr<ISWAGroup>>(id, std::make_shared<ISWAGroup>(id)));
-} 
+}
+
+void ISWAManager::unregisterGroup(int id){
+    if(_groups.find(id) != _groups.end())
+        _groups[id]->clearGroup();
+}
 
 void ISWAManager::registerToGroup(int id, CygnetType type, ISWACygnet* cygnet){
     if(_groups.find(id) == _groups.end()){
@@ -449,20 +454,6 @@ std::shared_ptr<ISWAGroup> ISWAManager::iSWAGroup(std::string name){
     return nullptr;
 }
 
-scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
-    return {
-        "iswa",
-        {
-            {
-                "addCygnet",
-                &luascriptfunctions::iswa_addCygnet,
-                "string",
-                "Adds a ISWACygnet",
-                true
-            }
-        }
-    };
-}
 
 glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et){
     std::set<std::string> _diopoleFrames =    {"GSM", "SM", "MAG"};
@@ -531,6 +522,28 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
     }else{
         return SpiceManager::ref().frameTransformationMatrix(from, to, et);
     }
+}
+
+scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
+    return {
+        "iswa",
+        {
+            {
+                "addCygnet",
+                &luascriptfunctions::iswa_addCygnet,
+                "string",
+                "Adds a ISWACygnet",
+                true
+            },
+            {
+                "removeGroup",
+                &luascriptfunctions::iswa_removeGroup,
+                "int",
+                "Remove a group of Cygnets",
+                true
+            }
+        }
+    };
 }
 
 }// namsepace openspace

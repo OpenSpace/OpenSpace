@@ -26,14 +26,22 @@
 #define __GUIISWACOMPONENT_H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+#include <modules/onscreengui/include/guipropertycomponent.h>
+
 
 namespace openspace {
 namespace gui {
 
-class GuiISWAComponent : public GuiComponent {
+class GuiISWAComponent : public GuiPropertyComponent {
 public:
-    void render();
+    virtual void render() override;
+
+private:
+	bool gmdata;
+	bool gmimage;
+	bool iondata;
 };
+
 
 } // namespace gui
 } // namespace openspace
