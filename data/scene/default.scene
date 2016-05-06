@@ -37,6 +37,7 @@ function postInitialization()
     
     openspace.registerScreenSpaceRenderable(
     {
+        Name = "iSWACygnet7", 
         Type = "ScreenSpaceCygnet",
         CygnetId = 7,
         Position = {0.0, 0.0},
@@ -46,6 +47,7 @@ function postInitialization()
 
     openspace.registerScreenSpaceRenderable(
     {
+        Name = "Crazy Cat",
         Type = "ScreenSpaceImage",
         TexturePath = "${OPENSPACE_DATA}/test2.jpg",
         Position = {0.8, -0.3},
@@ -55,6 +57,7 @@ function postInitialization()
 
     openspace.registerScreenSpaceRenderable(
     {
+        Name = "From Online", 
         Type = "ScreenSpaceImage",
         URL = "http://i.imgur.com/KUunHgr.jpg",
         Position = {-0.8, 0.3},

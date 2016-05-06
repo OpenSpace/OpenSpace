@@ -36,8 +36,13 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     ,_downloadImage(false)
     ,_futureTexture(nullptr)
 {
-    _id = id();
-    setName("ScreenSpaceImage" + std::to_string(_id));
+    std::string name;
+    if(dictionary.getValue("Name", name)){
+        setName(name);
+    }else{
+        _id = id();
+        setName("ScreenSpaceImage" + std::to_string(_id));
+    }
 
     addProperty(_texturePath);
     registerProperties();

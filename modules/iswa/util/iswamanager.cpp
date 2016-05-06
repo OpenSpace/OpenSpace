@@ -263,7 +263,7 @@ void ISWAManager::createScreenSpace(int id){
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return;
     }else{
-        std::string luaTable = "{ Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
+        std::string luaTable = "{ Name = '" + name + "', Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
         std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
     }

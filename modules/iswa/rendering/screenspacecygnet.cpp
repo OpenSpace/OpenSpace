@@ -46,8 +46,6 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     // setName("iSWACygnet" + std::to_string(_cygnetId));
     addProperty(_updateInterval);
 
-    // registerProperties();
-
     _downloadImage = true;
 
     _url = ISWAManager::ref().iSWAurl(_cygnetId);
