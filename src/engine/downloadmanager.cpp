@@ -262,6 +262,54 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
     return future;
 }
 
+std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
+    const std::string& url,
+    SuccessCallback successCallback, ErrorCallback errorCallback)
+{
+    LDEBUG("Start downloading file: '" << url << "' into memory");
+    
+    auto downloadFunction = [url, successCallback, errorCallback]() {
+        DownloadManager::MemoryFile file;
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &file.buffer);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+            
+            CURLcode res = curl_easy_perform(curl);
+            if(res == CURLE_OK){
+                // ask for the content-type
+                char *ct;
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+                if(res == CURLE_OK){
+                    std::string extension = std::string(ct);
+                    std::stringstream ss(extension);
+                    getline(ss, extension ,'/');
+                    getline(ss, extension);
+                    file.format = extension;
+                } else{
+                    LWARNING("Could not get File extension from file downloaded from: " + url);
+                }
+                successCallback(file);
+                curl_easy_cleanup(curl);
+                return std::move(file);
+            } else {
+                std::string err = curl_easy_strerror(res);
+                errorCallback(err);
+                curl_easy_cleanup(curl);
+                // Throw an error and use try-catch around future.get() call
+                throw std::runtime_error( err );
+                // or set a boolean variable in MemoryFile to determine if it is valid/corrupted or not.
+                // Return MemoryFile even if it is not valid, and check if it is after future.get() call.
+            }
+        }
+    };
+
+    return std::move( std::async(std::launch::async, downloadFunction) );
+}
+
 std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
     int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,

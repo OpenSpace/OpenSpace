@@ -190,6 +190,18 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
         );
 }
 
+std::future<DownloadManager::MemoryFile> ISWAManager::fetchCygnet(int id){
+    return std::move( DlManager.fetchFile(
+            iSWAurl(id, "image"),
+            [](const DownloadManager::MemoryFile& file){
+                LDEBUG("Download to memory finished");
+            },
+            [](const std::string& err){
+                LDEBUG("Download to memory was aborted: " + err);
+            }
+        ) );   
+}
+
 
 std::string ISWAManager::iSWAurl(int id, std::string type){
     std::string url;

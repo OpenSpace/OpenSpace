@@ -34,17 +34,6 @@ namespace {
 
 namespace openspace {
 
-// ScreenSpaceCygnet::ScreenSpaceCygnet(int cygnetId)
-//     : ScreenSpaceRenderable()
-//     , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
-//     , _cygnetId(cygnetId)
-// {
-//     setName("iSWACygnet" + std::to_string(_cygnetId));
-//     addProperty(_updateInterval);
-
-//     registerProperties();
-// }
-
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
@@ -91,7 +80,6 @@ bool ScreenSpaceCygnet::deinitialize(){
         _shader = nullptr;
     }
 
-    _memorybuffer = "";
     return true;
 }
 
@@ -119,9 +107,8 @@ void ScreenSpaceCygnet::update(){
         _lastUpdateRealTime = _realTime;
     }
 
-    if(_futureTexture && _futureTexture->isFinished){
+    if(_futureImage.valid() && _futureImage.wait_for(std::chrono::seconds(0)) == std::future_status::ready){
         loadTexture();
-        _futureTexture = nullptr;
     }
 }
 
@@ -135,32 +122,25 @@ bool ScreenSpaceCygnet::isReady() const{
 }
 
 void ScreenSpaceCygnet::updateTexture(){
-    // If a download is in progress, dont send another request.
-    if(_futureTexture && !_futureTexture->isFinished && !_futureTexture->isAborted)
+    std::cout << "updateTexture begin" << std::endl;
+    if(_futureImage.valid() && _futureImage.wait_for(std::chrono::seconds(0)) == std::future_status::timeout)
         return;
 
-    _memorybuffer = "";
-    std::shared_ptr<DownloadManager::FileFuture> future = ISWAManager::ref().downloadImageToMemory(_cygnetId, _memorybuffer);
-    if(future){
-        _futureTexture = future;
+    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchCygnet(_cygnetId);
+    if(future.valid()){
+        _futureImage = std::move(future);
     }
-
 }
 
 void ScreenSpaceCygnet::loadTexture() {
 
-    if(_memorybuffer != ""){
+    try {
 
-        std::string format;
-        std::stringstream ss(_futureTexture->format);
-        getline(ss, format ,'/');
-        getline(ss, format);
-
+        DownloadManager::MemoryFile imageFile = _futureImage.get();
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-            (void*) _memorybuffer.c_str(), 
-            _memorybuffer.size(), 
-            format);
-        // std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_path));
+            (void*) imageFile.buffer.c_str(),
+            imageFile.buffer.size(), 
+            imageFile.format);
 
         if (texture) {
             // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
@@ -171,6 +151,9 @@ void ScreenSpaceCygnet::loadTexture() {
 
             _texture = std::move(texture);
         }
+
+    } catch( std::exception& e ) {
+        LWARNING( "ScreenSpaceCygnet futureImage exception: " + std::string(e.what()) );
     }
 }
 }

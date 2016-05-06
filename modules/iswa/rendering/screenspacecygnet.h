@@ -26,6 +26,7 @@
 #define __SCREENSPACECYGNET_H__
 
 #include <chrono>
+#include <future>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
@@ -54,8 +55,7 @@ private:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
 
-    std::shared_ptr<DownloadManager::FileFuture> _futureTexture;
-    std::string _memorybuffer;
+    std::future<DownloadManager::MemoryFile> _futureImage;
 };
 
  } // namespace openspace

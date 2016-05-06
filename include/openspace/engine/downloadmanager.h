@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <future>
 
 namespace openspace {
 
@@ -60,8 +61,17 @@ public:
         bool abortDownload;
     };
 
+    struct MemoryFile {
+        std::string buffer;
+        std::string format;
+    };
+
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
+
+    using SuccessCallback = std::function<void(const MemoryFile&)>;
+    using ErrorCallback = std::function<void(const std::string&)>;
+
     using RequestFinishedCallback = std::function<void(std::string)>;
     using AsyncDownloadFinishedCallback =
         std::function<void(const std::vector<std::shared_ptr<FileFuture>>&)>;
@@ -80,6 +90,10 @@ public:
         const std::string& url, std::string& memoryBuffer,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback()
     );
+
+    std::future<MemoryFile> fetchFile(
+    const std::string& url,
+    SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());
 
     std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,
         const ghoul::filesystem::Directory& destination, int version,

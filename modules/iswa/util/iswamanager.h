@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <map>
+#include <future>
 #include <ghoul/glm.h>
 #include <ccmc/Kameleon.h>
 #include <openspace/engine/downloadmanager.h>
@@ -74,6 +75,8 @@ public:
     // std::shared_ptr<DownloadManager::FileFuture> downloadImage(int, std::string);
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
+
+    std::future<DownloadManager::MemoryFile> fetchCygnet(int id);
 
 
     void registerGroup(int id);
