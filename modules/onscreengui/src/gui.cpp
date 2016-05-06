@@ -205,10 +205,10 @@ void GUI::initialize() {
     //io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
 
     _property.initialize();
-    _iSWAproperty.initialize();
     _screenSpaceProperty.initialize();
     _performance.initialize();
     _help.initialize();
+    _iswa.initialize();
 }
 
 void GUI::initializeGL() {
@@ -253,10 +253,10 @@ void GUI::initializeGL() {
     
 
     _property.initializeGL();
-    _iSWAproperty.initializeGL();
     _screenSpaceProperty.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
+    _iswa.initializeGL();
 }
 
 void GUI::deinitializeGL() {
@@ -266,10 +266,10 @@ void GUI::deinitializeGL() {
     glDeleteBuffers(1, &vbo);
 
     _property.deinitializeGL();
-    _iSWAproperty.deinitializeGL();
     _screenSpaceProperty.deinitializeGL();
     _performance.deinitializeGL();
     _help.deinitializeGL();
+    _iswa.deinitializeGL();
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
@@ -298,12 +298,12 @@ void GUI::endFrame() {
         _property.render();
     if (_screenSpaceProperty.isEnabled())
         _screenSpaceProperty.render();
-    if (_iSWAproperty.isEnabled())
-        _iSWAproperty.render();
     if (_performance.isEnabled())
         _performance.render();
     if (_help.isEnabled())
         _help.render();
+    if (_iswa.isEnabled())
+        _iswa.render();
 
     ImGui::Render();
 }
@@ -401,7 +401,7 @@ void GUI::renderMainWindow() {
     ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
     ImGui::Checkbox("ScreenSpace Properties", &_screenSpaceProperty._isEnabled);
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    ImGui::Checkbox("iSWA Properties", &_iSWAproperty._isEnabled);
+    ImGui::Checkbox("iSWA", &_iswa._isEnabled);
 #endif
     ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
@@ -432,15 +432,15 @@ void GUI::renderMainWindow() {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        static const int addCygnetBufferSize = 256;
-        static char addCygnetBuffer[addCygnetBufferSize];
-        ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+// #ifdef OPENSPACE_MODULE_ISWA_ENABLED
+//         static const int addCygnetBufferSize = 256;
+//         static char addCygnetBuffer[addCygnetBufferSize];
+//         ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
-        if(ImGui::SmallButton("Add Cygnet"))
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
+//         if(ImGui::SmallButton("Add Cygnet"))
+//             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
     
-#endif
+// #endif
 
     ImGui::End();
 }

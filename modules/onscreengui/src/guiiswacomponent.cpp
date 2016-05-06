@@ -24,18 +24,299 @@
 
 #include <modules/onscreengui/include/guiiswacomponent.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
+
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+
 #include "imgui.h"
 
 namespace {
+    // const ImVec2 size = ImVec2(350, 200);
+    const std::string _loggerCat = "iSWAComponent";
     const ImVec2 size = ImVec2(350, 500);
+
+    using namespace openspace::properties;
+
+    void executeScript(const std::string& id, const std::string& value) {
+        std::string script =
+            "openspace.setPropertyValue('" + id + "', " + value + ");";
+        OsEng.scriptEngine().queueScript(script);
+    }
+
+    void renderBoolProperty(Property* prop, const std::string& ownerName) {
+        BoolProperty* p = static_cast<BoolProperty*>(prop);
+        std::string name = p->guiName();
+
+        BoolProperty::ValueType value = *p;
+        ImGui::Checkbox((ownerName + "." + name).c_str(), &value);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), value ? "true": "false");
+    }
+
+    void renderOptionProperty(Property* prop, const std::string& ownerName) {
+        OptionProperty* p = static_cast<OptionProperty*>(prop);
+        std::string name = p->guiName();
+
+        int value = *p;
+        std::vector<OptionProperty::Option> options = p->options();
+        for (const OptionProperty::Option& o : options) {
+            ImGui::RadioButton((ownerName + "." + name).c_str(), &value, o.value);
+            ImGui::SameLine();
+            ImGui::Text(o.description.c_str());
+        }
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    }
+
+    void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+        SelectionProperty* p = static_cast<SelectionProperty*>(prop);
+        std::string name = p->guiName();
+
+        if (ImGui::CollapsingHeader((ownerName + "." + name).c_str())) {
+            const std::vector<SelectionProperty::Option>& options = p->options();
+            std::vector<int> newSelectedIndices;
+
+            std::vector<int> selectedIndices = p->value();
+            
+            for (int i = 0; i < options.size(); ++i) {
+                std::string description = options[i].description;
+                bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+                ImGui::Checkbox(description.c_str(), &selected);
+
+                if (selected)
+                    newSelectedIndices.push_back(i);
+            }
+
+            if (newSelectedIndices != p->value()) {
+                std::string parameters = "{";
+                for (int i : newSelectedIndices)
+                    parameters += std::to_string(i) + ",";
+                parameters += "}";
+                executeScript(p->fullyQualifiedIdentifier(), parameters);
+            }
+        }
+    }
+
+    void renderStringProperty(Property* prop, const std::string& ownerName) {
+        StringProperty* p = static_cast<StringProperty*>(prop);
+        std::string name = p->guiName();
+
+        static const int bufferSize = 256;
+        static char buffer[bufferSize];
+#ifdef _MSC_VER
+        strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
+#else
+        strcpy(buffer, p->value().c_str());
+#endif
+        ImGui::InputText((ownerName + "." + name).c_str(), buffer, bufferSize);
+        std::string newValue(buffer);
+
+        if (newValue != p->value() && FileSys.fileExists(newValue))
+            executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
+    }
+
+    void renderIntProperty(Property* prop, const std::string& ownerName) {
+        IntProperty* p = static_cast<IntProperty*>(prop);
+        std::string name = p->guiName();
+
+        IntProperty::ValueType value = *p;
+        ImGui::SliderInt((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    }
+
+    void renderFloatProperty(Property* prop, const std::string& ownerName) {
+        FloatProperty* p = static_cast<FloatProperty*>(prop);
+        std::string name = p->guiName();
+
+        FloatProperty::ValueType value = *p;
+        ImGui::SliderFloat((ownerName + "." + name).c_str(), &value, p->minValue(), p->maxValue());
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+
+    }
+
+    void renderVec2Property(Property* prop, const std::string& ownerName) {
+        Vec2Property* p = static_cast<Vec2Property*>(prop);
+        std::string name = p->guiName();
+
+        Vec2Property::ValueType value = *p;
+
+        ImGui::SliderFloat2((ownerName + "." + name).c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
+    }
+
+    void renderVec3Property(Property* prop, const std::string& ownerName) {
+        Vec3Property* p = static_cast<Vec3Property*>(prop);
+        std::string name = p->guiName();
+
+        Vec3Property::ValueType value = *p;
+
+        ImGui::SliderFloat3((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+                  std::to_string(value.y) + "," +
+                  std::to_string(value.z) + "}");
+    }
+
+    void renderVec4Property(Property* prop, const std::string& ownerName) {
+        Vec4Property* p = static_cast<Vec4Property*>(prop);
+        std::string name = p->guiName();
+
+        Vec4Property::ValueType value = *p;
+
+        ImGui::SliderFloat4((ownerName + "." + name).c_str(), &value.x, p->minValue().x, p->maxValue().x);
+
+        if (value != p->value())
+            executeScript(p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+                  std::to_string(value.y) + "," +
+                  std::to_string(value.z) + "," +
+                  std::to_string(value.w) + "}");
+    }
+
+    void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+        std::string name = prop->guiName();
+        bool pressed = ImGui::Button((ownerName + "." + name).c_str());
+        if (pressed)
+            executeScript(prop->fullyQualifiedIdentifier(), "nil");
+    }
 }
 
 namespace openspace {
 namespace gui {
 
-void GuiHelpComponent::render() {
+void GuiISWAComponent::render() {
+    bool gmdatavalue = gmdata;
+    bool gmimagevalue = gmimage;
+    bool iondatavalue = iondata;
+
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
-    ImGui::ShowUserGuide();
+    ImGui::Text("Global Magnetosphere");
+    ImGui::Checkbox("Gm From Data", &gmdata); ImGui::SameLine();
+    ImGui::Checkbox("Gm From Images", &gmimage);
+
+    ImGui::Text("Ionosphere");
+    ImGui::Checkbox("Ion From Data", &iondata);
+
+    ImGui::Spacing();
+    static const int addCygnetBufferSize = 256;
+    static char addCygnetBuffer[addCygnetBufferSize];
+    ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+
+    if(ImGui::SmallButton("Add Cygnet"))
+        OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
+
+    if(gmdata != gmdatavalue){
+        if(gmdata){
+            std::string x = "openspace.iswa.addCygnet('-1,Data,1');";
+            std::string y = "openspace.iswa.addCygnet('-2,Data,1');";
+            std::string z = "openspace.iswa.addCygnet('-3,Data,1');";
+            OsEng.scriptEngine().queueScript(x+y+z);
+        }else{
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(1);");
+        }
+    }
+
+    if(gmimage != gmimagevalue){
+        if(gmimage){
+            std::string x = "openspace.iswa.addCygnet('-1,Texture,2');";
+            std::string y = "openspace.iswa.addCygnet('-2,Texture,2');";
+            std::string z = "openspace.iswa.addCygnet('-3,Texture,2');";
+            OsEng.scriptEngine().queueScript(x+y+z);
+        }else{
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(2);");
+        }
+    }
+
+    if(iondata != iondatavalue){
+        if(iondata){
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('0,Data,3');");
+        }else{
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(3);");
+        }
+    }
+    // bool gmdata = ImGui::Button("Create Global Magnetosphere from data");
+    // bool gmtext = ImGui::Button("Create Global Magnetosphere from images");
+    // bool iodata = ImGui::Button("Create Ionosphere from data");
+    // ImGui::ShowUserGuide();
+
+
+    ImGui::Spacing();
+
+    for (const auto& p : _propertiesByOwner) {
+        if (ImGui::CollapsingHeader(p.first.c_str())) {
+            for (properties::Property* prop : p.second) {
+                if (_boolProperties.find(prop) != _boolProperties.end()) {
+                    renderBoolProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_intProperties.find(prop) != _intProperties.end()) {
+                    renderIntProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_floatProperties.find(prop) != _floatProperties.end()) {
+                    renderFloatProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
+                    renderVec2Property(prop, p.first);
+                    continue;
+                }
+
+                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
+                    renderVec3Property(prop, p.first);
+                    continue;
+                }
+
+                if (_vec4Properties.find(prop) != _vec4Properties.end()) {
+                    renderVec4Property(prop, p.first);
+                    continue;
+                }
+
+                if (_optionProperties.find(prop) != _optionProperties.end()) {
+                    renderOptionProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_triggerProperties.find(prop) != _triggerProperties.end()) {
+                    renderTriggerProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_selectionProperties.find(prop) != _selectionProperties.end()) {
+                    renderSelectionProperty(prop, p.first);
+                    continue;
+                }
+
+                if (_stringProperties.find(prop) != _stringProperties.end()) {
+                    renderStringProperty(prop, p.first);
+                    continue;
+                }
+            }
+        }
+    }
     ImGui::End();
 }
 

@@ -206,12 +206,12 @@ bool ISWACygnet::destroyShader(){
 }
 
 void ISWACygnet::registerProperties(){
-    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
-    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    OsEng.gui()._iswa.registerProperty(&_enabled);
+    OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
 void ISWACygnet::unregisterProperties(){
-    OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._iswa.unregisterProperties(name());
 }
 
 void ISWACygnet::initializeTime(){

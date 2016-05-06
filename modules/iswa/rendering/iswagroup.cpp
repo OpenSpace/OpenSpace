@@ -119,7 +119,7 @@ bool ISWAGroup::checkType(ISWAManager::CygnetType type){
 }
 
 void ISWAGroup::registerProperties(){
-    OsEng.gui()._iSWAproperty.registerProperty(&_enabled);
+    OsEng.gui()._iswa.registerProperty(&_enabled);
 
     _enabled.onChange([this]{
         for(auto cygnet : _cygnets)
@@ -128,12 +128,12 @@ void ISWAGroup::registerProperties(){
 
 
     if(_type == ISWAManager::CygnetType::Data){
-        OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
-        OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-        OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
-        OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
-        OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
+        OsEng.gui()._iswa.registerProperty(&_useLog);
+        OsEng.gui()._iswa.registerProperty(&_useHistogram);
+        OsEng.gui()._iswa.registerProperty(&_normValues);
+        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iswa.registerProperty(&_dataOptions);
 
         _useLog.onChange([this]{
             for(auto cygnet : _cygnets)
@@ -168,21 +168,25 @@ void ISWAGroup::registerProperties(){
 
     }
 
-    OsEng.gui()._iSWAproperty.registerProperty(&_delete);
+    OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{
-        for(auto it = _cygnets.begin(); it != _cygnets.end();){
-            ISWAManager::ref().deleteISWACygnet((*it)->name());
-            it = _cygnets.erase(it);
-        }
+        clearGroup();
         // ISWAManager::ref().unregisterGroup(_id);
-        unregisterProperties();
     }); 
 }
 
 void ISWAGroup::unregisterProperties(){
     _dataOptions.removeOptions();
-    OsEng.gui()._iSWAproperty.unregisterProperties(name());
+    OsEng.gui()._iswa.unregisterProperties(name());
     _type = ISWAManager::CygnetType::NoType;
+}
+
+void ISWAGroup::clearGroup(){
+    for(auto it = _cygnets.begin(); it != _cygnets.end();){
+            ISWAManager::ref().deleteISWACygnet((*it)->name());
+            it = _cygnets.erase(it);
+    }
+    unregisterProperties();
 }
 
 } //namespace openspace

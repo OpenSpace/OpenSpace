@@ -64,12 +64,12 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_dataOptions);
 
     if(_data->groupId < 0){
-        OsEng.gui()._iSWAproperty.registerProperty(&_useLog);
-        OsEng.gui()._iSWAproperty.registerProperty(&_useHistogram);
-        OsEng.gui()._iSWAproperty.registerProperty(&_normValues);
-        OsEng.gui()._iSWAproperty.registerProperty(&_backgroundValues);
-        OsEng.gui()._iSWAproperty.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iSWAproperty.registerProperty(&_dataOptions);
+        OsEng.gui()._iswa.registerProperty(&_useLog);
+        OsEng.gui()._iswa.registerProperty(&_useHistogram);
+        OsEng.gui()._iswa.registerProperty(&_normValues);
+        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iswa.registerProperty(&_dataOptions);
     }
 
     _normValues.onChange([this](){
