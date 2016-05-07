@@ -49,6 +49,7 @@ namespace openspace {
         };
 
         UninitializedTextureTile(
+
             void* data,
             glm::uvec3 dims,
             TextureFormat format,
@@ -88,9 +89,12 @@ namespace openspace {
         GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
 
         glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
+
     };
 
 } // namespace openspace
+
+
 
 #include <modules/globebrowsing/other/gdaldataconverter.inl>
 

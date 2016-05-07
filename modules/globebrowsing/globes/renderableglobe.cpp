@@ -97,8 +97,8 @@ namespace openspace {
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
 
-        addSwitchValue(std::shared_ptr<ClipMapGlobe>(
-            new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
+        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(
+        //    new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
         addSwitchValue(std::shared_ptr<ChunkLodGlobe>(
             new ChunkLodGlobe(_ellipsoid, _tileProviderManager)), 1e9);
         addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);

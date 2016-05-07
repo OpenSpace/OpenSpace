@@ -81,6 +81,8 @@ namespace openspace {
             hasInitializedGDAL = true;
         }
 
+        
+
         std::string absFilePath = absPath(filePath);
         _gdalDataSet = (GDALDataset *)GDALOpen(absFilePath.c_str(), GA_ReadOnly);
         //auto desc = _gdalDataSet->GetDescription();

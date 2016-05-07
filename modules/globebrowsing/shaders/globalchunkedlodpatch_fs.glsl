@@ -32,12 +32,23 @@ in vec2 fs_uv;
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
+vec4 borderOverlay(vec2 uv, vec3 borderColor, float borderSize){
+
+	vec2 uvOffset = uv - vec2(0.5);
+	float thres = 0.5 - borderSize/2;
+	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+	vec3 color = isBorder ? borderColor : vec3(0);
+	return vec4(color, 1);
+}
+
+
+
 Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = texture(textureSamplerColor, fs_uv);
-	
-	frag.depth =  vs_position.w;
+	frag.color = 1*frag.color;// + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.01);
+	frag.depth = vs_position.w;
 
 	return frag;
 }

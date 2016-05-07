@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
+
 namespace openspace {
 
     template<class T>
@@ -41,47 +42,56 @@ namespace openspace {
 
     }
 
+
     template<class T>
     std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
         GDALDataset* dataSet,
         GeodeticTileIndex tileIndex,
-        int minNumPixelsRequired) {
+        int minNumPixelsRequired) 
+    {
         int nRasters = dataSet->GetRasterCount();
 
         ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
 
         GDALRasterBand* firstBand = dataSet->GetRasterBand(1);
+
         // Assume all raster bands have the same data type
         GDALDataType gdalType = firstBand->GetRasterDataType();
 
-        // Level = overviewCount - overview
+        // Level = overviewCount - overview (default, levels may be overridden)
         int numOverviews = firstBand->GetOverviewCount();
+        //int xSize0 = firstBand->GetOverview(0)->GetXSize();
+        //int ySize0 = firstBand->GetOverview(0)->GetYSize();
 
-        int xSize0 = firstBand->GetOverview(0)->GetXSize();
-        int ySize0 = firstBand->GetOverview(0)->GetYSize();
-
+        // Generate a patch from the tileIndex, extract the bounds which
+        // are used to calculated where in the GDAL data set to read data. 
+        // pixelStart0 and pixelEnd0 defines the interval in the pixel space 
+        // at overview 0
         GeodeticPatch patch = GeodeticPatch(tileIndex);
         glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.northWestCorner());
         glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.southEastCorner());
-        glm::uvec2 numberOfPixels0 = pixelEnd0 - pixelStart0;
+        glm::uvec2 numPixels0 = pixelEnd0 - pixelStart0;
 
-        int minNumPixels0 = glm::min(numberOfPixels0.x, numberOfPixels0.y);
-
+        // Calculate a suitable overview to choose from the GDAL dataset
+        int minNumPixels0 = glm::min(numPixels0.x, numPixels0.y);
         int ov = log2(minNumPixels0) - log2(minNumPixelsRequired + 1);
-
         ov = glm::clamp(ov, 0, numOverviews - 1);
 
-        glm::uvec2 pixelStart(pixelStart0.x >> (ov + 1), pixelStart0.y >> (ov + 1));
-        glm::uvec2 numberOfPixels(numberOfPixels0.x >> (ov + 1), numberOfPixels0.y >> (ov + 1));
+        // Convert the interval [pixelStart0, pixelEnd0] to pixel space at 
+        // the calculated suitable overview, ov. using a >> b = a / 2^b
+        int toShift = ov + 1;
+        glm::uvec2 pixelStart(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
+        glm::uvec2 pixelEnd(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
+        glm::uvec2 numPixels = pixelEnd - pixelStart;
 
-        if (numberOfPixels.x < 32 || numberOfPixels.y < 32)
-            numberOfPixels = glm::uvec2(32, 32);
-
-        //glm::uvec2 pixelStart(0, 0);
-        //glm::uvec2 numberOfPixels(xSize0, ySize0);
+        // When GDAL reads rasterbands of small size, the image data gets screwed up.
+        // This is not a solution to the problem, but makes it look a little better
+        if (numPixels.x < 32 || numPixels.y < 32) {
+            numPixels = glm::uvec2(32, 32);
+        }
 
         // GDAL reads image data top to bottom
-        T* imageData = new T[numberOfPixels.x * numberOfPixels.y * nRasters];
+        T* imageData = new T[numPixels.x * numPixels.y * nRasters];
 
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < nRasters; i++) {
@@ -90,31 +100,35 @@ namespace openspace {
             int xSize = rasterBand->GetXSize();
             int ySize = rasterBand->GetYSize();
 
-            rasterBand->RasterIO(
+            CPLErr err = rasterBand->RasterIO(
                 GF_Read,
                 pixelStart.x,           // Begin read x
                 pixelStart.y,           // Begin read y
-                numberOfPixels.x,       // width to read x
-                numberOfPixels.y,       // width to read y
+                numPixels.x,       // width to read x
+                numPixels.y,       // width to read y
                 imageData + i,          // Where to put data
-                numberOfPixels.x,       // width to write x in destination
-                numberOfPixels.y,       // width to write y in destination
+                numPixels.x,       // width to write x in destination
+                numPixels.y,       // width to write y in destination
                 gdalType,		        // Type
                 sizeof(T) * nRasters,	// Pixel spacing
                 0);                     // Line spacing
+
+            if (err != CE_None) {
+                LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
+            }
         }
         // GDAL reads image data top to bottom. We want the opposite.
-        T* imageDataYflipped = new T[numberOfPixels.x * numberOfPixels.y * nRasters];
-        for (size_t y = 0; y < numberOfPixels.y; y++) {
-            for (size_t x = 0; x < numberOfPixels.x * nRasters; x++) {
-                imageDataYflipped[x + y * numberOfPixels.x * nRasters] =
-                    imageData[x + (numberOfPixels.y - 1 - y) * numberOfPixels.x * nRasters];
+        T* imageDataYflipped = new T[numPixels.x * numPixels.y * nRasters];
+        for (size_t y = 0; y < numPixels.y; y++) {
+            for (size_t x = 0; x < numPixels.x * nRasters; x++) {
+                imageDataYflipped[x + y * numPixels.x * nRasters] =
+                    imageData[x + (numPixels.y - 1 - y) * numPixels.x * nRasters];
             }
         }
 
         delete[] imageData;
         
-        glm::uvec3 dims(numberOfPixels.x, numberOfPixels.y, 1);
+        glm::uvec3 dims(numPixels.x, numPixels.y, 1);
         UninitializedTextureTile::TextureFormat textrureFormat =
             getTextureFormatFromRasterCount(nRasters);
         GLuint glType = getGlDataTypeFromGdalDataType(gdalType);
@@ -161,7 +175,10 @@ namespace openspace {
         double Xp = a[0] + P*a[1] + L*a[2];
         double Yp = b[0] + P*b[1] + L*b[2];
 
-        return glm::uvec2(P, L);
+        ghoul_assert(abs(X - Xp) < 1e-10, "inverse should yield X as before");
+        ghoul_assert(abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
+        
+        return glm::uvec2(glm::round(P), glm::round(L));
     }
 
     template<class T>
