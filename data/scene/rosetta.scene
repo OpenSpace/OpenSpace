@@ -6,7 +6,7 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2011 JUL 28 12:00:00")
+    openspace.time.setTime("2014 AUG 21 18:00:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end
 
