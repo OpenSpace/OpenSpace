@@ -311,10 +311,10 @@ namespace openspace {
 
 
 
-        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy;
-        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy;
-        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy;
-        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy;
+        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy();
+        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy();
+        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy();
+        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy();
 
         _programObjectGlobalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
         _programObjectGlobalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
@@ -364,10 +364,10 @@ namespace openspace {
             patchCoverageColor.textureTransformPairs[3].second);
 
 
-        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy;
-        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy;
-        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy;
-        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy;
+        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy();
+        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy();
+        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy();
+        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy();
 
         _programObjectGlobalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
         _programObjectGlobalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);
@@ -497,10 +497,10 @@ namespace openspace {
 
 
 
-        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy;
-        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy;
-        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy;
-        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy;
+        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy();
+        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy();
+        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy();
+        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy();
 
         _programObjectLocalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
         _programObjectLocalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
@@ -552,10 +552,10 @@ namespace openspace {
             patchCoverageColor.textureTransformPairs[3].second);
 
 
-        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy;
-        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy;
-        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy;
-        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy;
+        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy();
+        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy();
+        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy();
+        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy();
 
         _programObjectLocalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
         _programObjectLocalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);

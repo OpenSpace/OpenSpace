@@ -76,7 +76,7 @@ namespace openspace {
             colorTextureDictionary.getValue("FilePath", path);
             std::shared_ptr<TileProvider> colorTextureProvider =
                 std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 512));
+                    path, 5000, 1024));
             _tileProviderManager->addColorTexture(name, colorTextureProvider);
         }
 
@@ -97,8 +97,8 @@ namespace openspace {
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
 
-        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(
-        //    new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
+        addSwitchValue(std::shared_ptr<ClipMapGlobe>(
+            new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
         addSwitchValue(std::shared_ptr<ChunkLodGlobe>(
             new ChunkLodGlobe(_ellipsoid, _tileProviderManager)), 1e9);
         addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);

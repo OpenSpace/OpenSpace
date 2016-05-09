@@ -25,7 +25,7 @@
 #ifndef __TILE_PROVIDER_MANAGER_H__
 #define __TILE_PROVIDER_MANAGER_H__
 
-#include "modules\globebrowsing\other\tileprovider.h"
+#include "modules/globebrowsing/other/tileprovider.h"
 
 #include <memory>
 #include <vector>

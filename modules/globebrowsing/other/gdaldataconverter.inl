@@ -114,7 +114,7 @@ namespace openspace {
                 0);                     // Line spacing
 
             if (err != CE_None) {
-                LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
+                //LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
             }
         }
         // GDAL reads image data top to bottom. We want the opposite.
@@ -206,7 +206,7 @@ namespace openspace {
             format.glFormat = GL_RGBA;
             break;
         default:
-            LERROR("Too many channels for OpenGL.");
+            //LERROR("Too many channels for OpenGL.");
             break;
         }
         return format;
@@ -239,7 +239,7 @@ namespace openspace {
             return GL_DOUBLE;
             break;
         default:
-            LERROR("GDAL data type unknown to OpenGL: " << gdalType); 
+            //LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             return GL_UNSIGNED_BYTE;
         }
     }

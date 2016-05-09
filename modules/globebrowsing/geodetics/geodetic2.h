@@ -135,7 +135,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch);
 
-    GeodeticPatch::GeodeticPatch(const GeodeticTileIndex& tileIndex);
+    GeodeticPatch(const GeodeticTileIndex& tileIndex);
 
 
     void setCenter(const Geodetic2&);
