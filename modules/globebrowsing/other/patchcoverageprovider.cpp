@@ -133,8 +133,12 @@ namespace openspace {
                 tileIndex.y += y;
 
 
-                // Returns only positive indices
-                //GeodeticTileIndex tileIndex2 = startIndex.getRelatedTile(x, y);
+                // If the tile index is negative or too big it needs to wrap around
+                int nIndices = pow(2, tileIndex.level);
+                GeodeticTileIndex positiveTileIndex = GeodeticTileIndex(tileIndex);
+                positiveTileIndex.x += (tileIndex.x < 0) ? nIndices : ((tileIndex.x > nIndices - 1) ? -nIndices : 0);
+                positiveTileIndex.y += (tileIndex.y < 0) ? nIndices : ((tileIndex.y > nIndices - 1) ? -nIndices : 0);
+
 
 
                 int numLevelsToLoop = tileIndex.level;
@@ -142,7 +146,7 @@ namespace openspace {
                 for (int j = numLevelsToLoop; j >= 0; j--)
                 {
                     // Try if the texture exists
-                    std::shared_ptr<Texture> tile = tileProvider->getTile(tileIndex);
+                    std::shared_ptr<Texture> tile = tileProvider->getTile(positiveTileIndex);
                     if (tile == nullptr)
                     { // If it doesn't exist, go down a level
                         tileIndex.x /= 2;

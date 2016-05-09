@@ -106,11 +106,7 @@ namespace openspace {
     }
 
     std::shared_ptr<Texture> TileProvider::getTile(GeodeticTileIndex tileIndex) {
-        // If the tile index is negative or too big it needs to wrap around
-        int nIndices = pow(2, tileIndex.level);
-        tileIndex.x += (tileIndex.x < 0) ? nIndices : ((tileIndex.x > nIndices - 1) ? -nIndices : 0);
-        tileIndex.y += (tileIndex.y < 0) ? nIndices : ((tileIndex.y > nIndices - 1) ? -nIndices : 0);
-
+        
         HashKey hashkey = tileIndex.hashKey();
         
         if (_tileCache.exist(hashkey)) {
