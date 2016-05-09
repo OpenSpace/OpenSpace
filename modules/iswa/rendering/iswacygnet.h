@@ -91,12 +91,12 @@ protected:
     
     virtual bool createGeometry() = 0;
     virtual bool destroyGeometry() = 0;
-    virtual bool renderGeometry() = 0;
+    virtual void renderGeometry() = 0;
     
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
     virtual bool readyToRender() = 0;
-    virtual bool setUniformAndTextures() = 0;
+    virtual void setUniformAndTextures() = 0;
     virtual bool createShader() = 0;
 
     properties::TriggerProperty _delete;

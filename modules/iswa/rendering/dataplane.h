@@ -53,7 +53,7 @@ friend class IswaGroup;
     virtual bool updateTexture() override;
 
     virtual bool readyToRender() override;
-    virtual bool setUniformAndTextures() override;
+    virtual void setUniformAndTextures() override;
     virtual bool createShader() override;
 
     void readHeader(std::string&);

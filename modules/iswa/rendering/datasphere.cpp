@@ -72,7 +72,7 @@ bool DataSphere::readyToRender(){
 }
 
 
-bool DataSphere::setUniformAndTextures(){
+void DataSphere::setUniformAndTextures(){
     _shader->setUniform("transparency",0.5f);
     
     ghoul::opengl::TextureUnit unit;

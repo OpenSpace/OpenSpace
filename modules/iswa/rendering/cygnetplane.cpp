@@ -64,6 +64,7 @@ bool CygnetPlane::createGeometry() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
+	return true;
 }
 
 bool CygnetPlane::destroyGeometry(){
@@ -72,9 +73,11 @@ bool CygnetPlane::destroyGeometry(){
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
+
+	return true;
 }
 
-bool CygnetPlane::renderGeometry(){
+void CygnetPlane::renderGeometry(){
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }

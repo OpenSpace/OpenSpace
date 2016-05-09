@@ -105,14 +105,12 @@ bool TexturePlane::readyToRender(){
 }
 
 
-bool TexturePlane::setUniformAndTextures(){
+void TexturePlane::setUniformAndTextures(){
     ghoul::opengl::TextureUnit unit;
 
     unit.activate();
     _textures[0]->bind();
     _shader->setUniform("texture1", unit);
-
-    return true;
 }
 
 
