@@ -28,8 +28,7 @@
 
 #include <ghoul/misc/assert.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+
 
 namespace {
     const std::string _loggerCat = "Geodetic2";
@@ -47,15 +46,15 @@ namespace openspace {
 
     Geodetic2::Geodetic2(Scalar latitude, Scalar longitude)
         : lat(latitude)
-        , lon(longitude) 
+        , lon(longitude)
     {
-    
+
     }
 
-    Geodetic2::Geodetic2(const Geodetic2& p) 
-        : Geodetic2(p.lat, p.lon) 
+    Geodetic2::Geodetic2(const Geodetic2& p)
+        : Geodetic2(p.lat, p.lon)
     {
-    
+
     }
 
 
@@ -91,8 +90,8 @@ namespace openspace {
     //									TILE INDEX										//
     //////////////////////////////////////////////////////////////////////////////////////
 
-    HashKey GeodeticTileIndex::hashKey() const{
-        return x ^ (y << 16) ^ (level << 21);
+    HashKey GeodeticTileIndex::hashKey() const {
+        return x ^ (y << 16) ^ (level << 24);
     }
 
     bool GeodeticTileIndex::operator==(const GeodeticTileIndex& other) const {
@@ -117,7 +116,7 @@ namespace openspace {
         : _center(Geodetic2(centerLat, centerLon))
         , _halfSize(Geodetic2(halfSizeLat, halfSizeLon))
     {
-    
+
     }
 
     GeodeticPatch::GeodeticPatch(
@@ -126,20 +125,20 @@ namespace openspace {
         : _center(center)
         , _halfSize(halfSize)
     {
-    
+
     }
 
     GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
         : _center(patch._center)
         , _halfSize(patch._halfSize)
     {
-    
+
     }
 
 
     GeodeticPatch::GeodeticPatch(const GeodeticTileIndex& tileIndex) {
-        Scalar deltaLat = (2*M_PI) / ((double)(1 << tileIndex.level));
-        Scalar deltaLon = (2*M_PI) / ((double)(1 << tileIndex.level));
+        Scalar deltaLat = (2 * M_PI) / ((double)(1 << tileIndex.level));
+        Scalar deltaLon = (2 * M_PI) / ((double)(1 << tileIndex.level));
         Geodetic2 nwCorner(M_PI / 2 - deltaLat * tileIndex.y, -M_PI + deltaLon * tileIndex.x);
         _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
         _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
@@ -171,6 +170,17 @@ namespace openspace {
         return deltaTheta * (sin(phiMax) - sin(phiMin));
     }
     */
+
+    Scalar GeodeticPatch::maximumTileLevel() const {
+        // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
+        return log2(M_PI / glm::min(_halfSize.lat, _halfSize.lon));
+    }
+
+    Scalar GeodeticPatch::minimumTileLevel() const {
+        // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
+        return log2(M_PI / glm::max(_halfSize.lat, _halfSize.lon));
+    }
+
     const Geodetic2& GeodeticPatch::center() const {
         return _center;
     }

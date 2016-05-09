@@ -109,12 +109,9 @@ namespace openspace {
     {
         using namespace glm;
 
-        // PATCH DID NOT MATCH THE TILEINDEX SO I CREATED A NEW PATCH FROM THE INDEX
 
-        GeodeticPatch newPatch = patch;//GeodeticPatch(tileIndex);
-
-        //GeodeticTileIndex tmpTileIndex = _tileSet.getTileIndex(patch);
-
+        GeodeticPatch newPatch = patch;
+        
 
         // TODO : Model transform should be fetched as a matrix directly.
         mat4 modelTransform = translate(mat4(1), data.position.vec3());
@@ -127,7 +124,6 @@ namespace openspace {
 
         // Get the textures that should be used for rendering
         std::shared_ptr<ghoul::opengl::Texture> tile00;
-        bool usingTile = true;
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();

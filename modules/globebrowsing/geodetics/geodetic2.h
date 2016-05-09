@@ -30,6 +30,12 @@
 #include <memory>
 #include <ostream>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include <ghoul/misc/assert.h>
+
+
 
 
 // Using double precision
@@ -108,7 +114,37 @@ struct GeodeticTileIndex {
 
     }
 
-    
+    /**
+        Creates the geodetic tile index for the Geodetic patch that covers the 
+        point p at the specified level
+    */
+    GeodeticTileIndex(const Geodetic2& point, int level)
+        : level(level) {
+        int numIndicesAtLevel = 1 << level;
+        double u = 0.5 + point.lon / (2*M_PI);
+        double v = 0.25 - point.lat / (2*M_PI);
+        double xIndexSpace = u * numIndicesAtLevel;
+        double yIndexSpace = v * numIndicesAtLevel;
+
+        x = floor(xIndexSpace);
+        y = floor(yIndexSpace);
+    }
+
+    GeodeticTileIndex parent() const {
+        ghoul_assert(level > 0, "tile at level 0 has no parent!");
+        return GeodeticTileIndex(x / 2, y / 2, level - 1);
+    }
+
+    /**
+        Gets the tile at a specified offset from this tile. 
+        Accepts delta indices ranging from [-2^level, Infinity[
+    */
+    GeodeticTileIndex getRelatedTile(int deltaX, int deltaY) const {
+        int indicesAtThisLevel = 1 << level;
+        int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
+        int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
+        return GeodeticTileIndex(newX, newY, level);
+    }
 
     HashKey hashKey() const;
 
@@ -177,7 +213,16 @@ public:
      * the given point p.
      */
     Geodetic2 closestPoint(const Geodetic2& p) const;
-    
+
+    /**
+     * Returns the minimum tile level of the patch (based on largest side)
+     */
+    Scalar minimumTileLevel() const;
+
+    /**
+    * Returns the maximum level of the patch (based on smallest side)
+    */
+    Scalar maximumTileLevel() const;
 
     const Geodetic2& center() const;
     const Geodetic2& halfSize() const;

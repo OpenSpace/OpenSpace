@@ -116,18 +116,26 @@ namespace openspace {
         static const int numTilesInCoverageY = 2;
         PatchCoverage patchCoverageToReturn;
 
+        Geodetic2 startPoint = patch.northWestCorner();
+        int level = (int) patch.minimumTileLevel();
+        GeodeticTileIndex startIndex = GeodeticTileIndex(startPoint, level);
+
         for (int y = 0; y < numTilesInCoverageY; y++)
         {
             for (int x = 0; x < numTilesInCoverageX; x++)
             {
                 int linearIdx = x + y * numTilesInCoverageX;
+
+                // May return negative indices
                 GeodeticTileIndex tileIndex = getTileIndex(patch);
                 // Offset tileIndex
                 tileIndex.x += x;
                 tileIndex.y += y;
 
-                int xMax = static_cast<int>(glm::pow(2, tileIndex.level));
-                int yMax = static_cast<int>(glm::pow(2, tileIndex.level));
+
+                // Returns only positive indices
+                //GeodeticTileIndex tileIndex2 = startIndex.getRelatedTile(x, y);
+
 
                 int numLevelsToLoop = tileIndex.level;
                 // Start at the highest level and go down if the texture don't exist

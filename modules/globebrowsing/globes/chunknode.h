@@ -52,10 +52,7 @@ enum Quad {
 
 
 struct ChunkIndex {
-    int x, y, level;
-
-
-    // TODO : NOT SURE WHAT IS RIGHT BUT I SWITCHED THE TWO MIDDLE INDICES FOR IT TO WORK
+    
 
     std::vector<ChunkIndex> childIndices() const {
         return {
@@ -65,6 +62,12 @@ struct ChunkIndex {
             { 2 * x + 1, 2 * y + 1, level + 1 },
         };
     }
+
+    ChunkIndex parent() const {
+        return { x / 2, y / 2, level - 1 };
+    }
+
+    int x, y, level;
 
 };
 

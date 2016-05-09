@@ -100,7 +100,7 @@ namespace openspace {
             int xSize = rasterBand->GetXSize();
             int ySize = rasterBand->GetYSize();
 
-            CPLErr err = rasterBand->RasterIO(
+            CPLErr err = rasterBand->RasterIO( 
                 GF_Read,
                 pixelStart.x,           // Begin read x
                 pixelStart.y,           // Begin read y
