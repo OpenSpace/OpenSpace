@@ -115,6 +115,7 @@ bool ISWACygnet::initialize(){
         ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
 
     // return isReady();
+	return true;
 }
 
 bool ISWACygnet::deinitialize(){
@@ -203,6 +204,7 @@ bool ISWACygnet::destroyShader(){
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
+	return true;
 }
 
 void ISWACygnet::registerProperties(){

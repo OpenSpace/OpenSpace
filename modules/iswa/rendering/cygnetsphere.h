@@ -44,7 +44,7 @@ protected:
 private:
     virtual bool createGeometry() override;
     virtual bool destroyGeometry() override;
-    virtual bool renderGeometry() override;
+    virtual void renderGeometry() override;
 };
 
 } //namespace openspace

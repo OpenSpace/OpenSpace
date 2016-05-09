@@ -167,7 +167,7 @@ bool DataPlane::readyToRender(){
     return (!_textures.empty());
 }
 
-bool DataPlane::setUniformAndTextures(){
+void DataPlane::setUniformAndTextures(){
     
     // _shader->setUniform("textures", 1, units[1]);
     // _shader->setUniform("textures", 2, units[2]);

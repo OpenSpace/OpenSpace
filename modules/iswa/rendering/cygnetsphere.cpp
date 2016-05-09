@@ -41,13 +41,15 @@ bool CygnetSphere::createGeometry(){
     int segments = 100;
     _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
     _sphere->initialize();
+	return true;
 }
 
 bool CygnetSphere::destroyGeometry(){
     _sphere = nullptr;
+	return true;
 }
 
-bool CygnetSphere::renderGeometry(){
+void CygnetSphere::renderGeometry(){
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     _sphere->render();

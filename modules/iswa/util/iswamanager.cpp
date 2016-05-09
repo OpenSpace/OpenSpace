@@ -315,12 +315,6 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
         std::string coordinateType = j["Coordinate Type"];
         int updateTime = j["ISWA_UPDATE_SECONDS"];
 
-        std::string radius = "";
-        if(j["Radius"] == NULL){
-            radius ="Radius =  {6.371, 6.01}, "
-                    "Segments = 100,";
-        }
-
         glm::vec3 max(
             j["Plot XMAX"],
             j["Plot YMAX"],
@@ -355,8 +349,7 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
             "SpatialScale = " + std::to_string(spatialScale) + ", "
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
-            "Group = "+ std::to_string(data->group) + " ,"
-            + radius +
+            "Group = "+ std::to_string(data->group) +
             "}"
         "}";
         
