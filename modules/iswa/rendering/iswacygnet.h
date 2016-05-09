@@ -48,7 +48,7 @@
 
 
 namespace openspace{
-class ISWAGroup;
+class IswaGroup;
 
 struct Metadata {
     int id;
@@ -68,12 +68,12 @@ struct Metadata {
 
 
 
-class ISWACygnet : public Renderable, public std::enable_shared_from_this<ISWACygnet> {
-    friend class ISWAGroup;
+class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
+    friend class IswaGroup;
 
 public:
-    ISWACygnet(const ghoul::Dictionary& dictionary);
-    ~ISWACygnet();
+    IswaCygnet(const ghoul::Dictionary& dictionary);
+    ~IswaCygnet();
 
     virtual bool initialize() override;
     virtual bool deinitialize() override;
@@ -118,7 +118,7 @@ protected:
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
 
-    ISWAManager::CygnetType _type;
+    IswaManager::CygnetType _type;
 };
 
 }//namespace openspace

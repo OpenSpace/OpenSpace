@@ -32,10 +32,10 @@
 #include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
-class ISWAGroup;
+class IswaGroup;
 
 class DataPlane : public CygnetPlane {
-friend class ISWAGroup;
+friend class IswaGroup;
  public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();

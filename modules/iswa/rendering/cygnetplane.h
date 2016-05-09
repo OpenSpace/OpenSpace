@@ -30,7 +30,7 @@
 #include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace{
-class CygnetPlane : public ISWACygnet {
+class CygnetPlane : public IswaCygnet {
 public:
     CygnetPlane(const ghoul::Dictionary& dictionary);
     ~CygnetPlane();

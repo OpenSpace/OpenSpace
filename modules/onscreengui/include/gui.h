@@ -75,7 +75,7 @@ public:
     // GuiPropertyComponent _iSWAproperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
-    GuiISWAComponent _iswa;
+    GuiIswaComponent _iswa;
 
     bool _isEnabled;
 

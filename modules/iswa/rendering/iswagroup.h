@@ -36,16 +36,16 @@
 
 
 namespace openspace{
-class ISWACygnet;
+class IswaCygnet;
 
-class ISWAGroup : public properties::PropertyOwner{
+class IswaGroup : public properties::PropertyOwner{
 public:
-	ISWAGroup(int id);
-	~ISWAGroup();
-	void registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type);
-	void unregisterCygnet(ISWACygnet* cygnet);
+	IswaGroup(int id);
+	~IswaGroup();
+	void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
+	void unregisterCygnet(IswaCygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
-	bool checkType(ISWAManager::CygnetType type);
+	bool checkType(IswaManager::CygnetType type);
 	void clearGroup();
 private:
 	void registerProperties();
@@ -67,10 +67,10 @@ private:
  //    properties::BoolProperty _useHistogram;;
 
 	// int groupId;
-	// ISWACygnet cygnet;
+	// IswaCygnet cygnet;
 	int _id;
-	std::vector<ISWACygnet* > _cygnets;
-	ISWAManager::CygnetType _type;
+	std::vector<IswaCygnet* > _cygnets;
+	IswaManager::CygnetType _type;
 };
 
 } //namespace openspace

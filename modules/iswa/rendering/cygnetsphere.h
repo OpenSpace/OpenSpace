@@ -34,7 +34,7 @@ namespace planetgeometry {
 	class PlanetGeometry;
 }
 
-class CygnetSphere : public ISWACygnet {
+class CygnetSphere : public IswaCygnet {
 public:
     CygnetSphere(const ghoul::Dictionary& dictionary);
     ~CygnetSphere();

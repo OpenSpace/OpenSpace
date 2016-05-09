@@ -143,7 +143,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    ISWAManager::initialize();
+    IswaManager::initialize();
 #endif
 
 }
@@ -368,7 +368,7 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _scriptEngine->addLibrary(ISWAManager::luaLibrary());
+    _scriptEngine->addLibrary(IswaManager::luaLibrary());
 #endif
 
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL

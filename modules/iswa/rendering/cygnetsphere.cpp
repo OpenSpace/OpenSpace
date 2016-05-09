@@ -30,7 +30,7 @@
 namespace openspace{
 
 CygnetSphere::CygnetSphere(const ghoul::Dictionary& dictionary)
-    :ISWACygnet(dictionary)
+    :IswaCygnet(dictionary)
     ,_sphere(nullptr)
 {}
 

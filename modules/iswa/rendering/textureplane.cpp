@@ -48,7 +48,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     setName(name);
     registerProperties();
 
-    _type = ISWAManager::CygnetType::Texture;
+    _type = IswaManager::CygnetType::Texture;
 }
 
 
@@ -89,7 +89,7 @@ bool TexturePlane::updateTexture(){
     if(_futureObject.valid())
         return false;
 
-    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchImageCygnet(_data->id);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id);
 
     if(future.valid()){
         _futureObject = std::move(future);

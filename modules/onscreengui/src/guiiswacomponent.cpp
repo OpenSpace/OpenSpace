@@ -204,7 +204,7 @@ namespace {
 namespace openspace {
 namespace gui {
 
-void GuiISWAComponent::render() {
+void GuiIswaComponent::render() {
     bool gmdatavalue = gmdata;
     bool gmimagevalue = gmimage;
     bool iondatavalue = iondata;

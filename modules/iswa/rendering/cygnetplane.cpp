@@ -25,7 +25,7 @@
 namespace openspace{
 
 CygnetPlane::CygnetPlane(const ghoul::Dictionary& dictionary)
-    :ISWACygnet(dictionary)
+    :IswaCygnet(dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
 {}

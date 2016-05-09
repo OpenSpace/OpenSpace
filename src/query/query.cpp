@@ -30,9 +30,11 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/rendering/screenspacerenderable.h>
+ 
 #include <modules/iswa/rendering/iswagroup.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/rendering/iswacygnet.h>
 
 namespace openspace {
 
@@ -82,13 +84,13 @@ properties::Property* property(const std::string& uri) {
             properties::Property* property = ssr->property(remainingUri);
             return property;
         }
-
-        std::shared_ptr<ISWAGroup> group = ISWAManager::ref().iSWAGroup(nameUri);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+        std::shared_ptr<IswaGroup> group = IswaManager::ref().iswaGroup(nameUri);
         if(group){
             properties::Property* property = group->property(remainingUri);
             return property;
         }
-        
+#endif
         LERROR("Node or ScreenSpaceRenderable' " << nameUri << "' did not exist");
         return nullptr;
     }

@@ -44,12 +44,12 @@
 
 namespace {
     using json = nlohmann::json;
-    const std::string _loggerCat = "ISWAManager";
+    const std::string _loggerCat = "IswaManager";
 }
 
 namespace openspace{
 
-ISWAManager::ISWAManager()
+IswaManager::IswaManager()
 {
     _month["JAN"] = "01";
     _month["FEB"] = "02";
@@ -77,11 +77,11 @@ ISWAManager::ISWAManager()
                         };
 }
 
-ISWAManager::~ISWAManager(){
+IswaManager::~IswaManager(){
     _groups.clear();
 }
 
-void ISWAManager::addISWACygnet(std::string info){
+void IswaManager::addIswaCygnet(std::string info){
     std::string token;
     std::stringstream ss(info);
     getline(ss,token,',');
@@ -94,18 +94,18 @@ void ISWAManager::addISWACygnet(std::string info){
         if(!ss.eof()){
             getline(ss, token, ',');
             int group = std::stoi(token);
-            addISWACygnet(cygnetId, data, group);
+            addIswaCygnet(cygnetId, data, group);
             return;
         }  
 
-        addISWACygnet(cygnetId, data);
+        addIswaCygnet(cygnetId, data);
         return;
     }
 
-    addISWACygnet(cygnetId);
+    addIswaCygnet(cygnetId);
 }
 
-void ISWAManager::addISWACygnet(int id, std::string info, int group){
+void IswaManager::addIswaCygnet(int id, std::string info, int group){
     if(id > 0){
         createScreenSpace(id);
     }else if(id < 0){
@@ -167,13 +167,13 @@ void ISWAManager::addISWACygnet(int id, std::string info, int group){
     } 
 }
 
-void ISWAManager::deleteISWACygnet(std::string name){
+void IswaManager::deleteIswaCygnet(std::string name){
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
 }
 
-std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(int id, std::string& buffer){
+std::shared_ptr<DownloadManager::FileFuture> IswaManager::downloadImageToMemory(int id, std::string& buffer){
     return  DlManager.downloadToMemory(
-            iSWAurl(id, "image"),
+            iswaUrl(id, "image"),
             buffer,
             [](const DownloadManager::FileFuture& f){
                 if(f.isFinished){
@@ -185,9 +185,9 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadImageToMemory(
         );
 }
 
-std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(int id, std::string& buffer){
+std::shared_ptr<DownloadManager::FileFuture> IswaManager::downloadDataToMemory(int id, std::string& buffer){
     return DlManager.downloadToMemory(
-            iSWAurl(id, "data"),
+            iswaUrl(id, "data"),
             buffer,
             [](const DownloadManager::FileFuture& f){
                 if(f.isFinished){
@@ -199,9 +199,9 @@ std::shared_ptr<DownloadManager::FileFuture> ISWAManager::downloadDataToMemory(i
         );
 }
 
-std::future<DownloadManager::MemoryFile> ISWAManager::fetchImageCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
     return std::move( DlManager.fetchFile(
-            iSWAurl(id, "image"),
+            iswaUrl(id, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
             },
@@ -211,9 +211,9 @@ std::future<DownloadManager::MemoryFile> ISWAManager::fetchImageCygnet(int id){
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> ISWAManager::fetchDataCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
     return std::move( DlManager.fetchFile(
-            iSWAurl(id, "data"),
+            iswaUrl(id, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
             },
@@ -224,7 +224,7 @@ std::future<DownloadManager::MemoryFile> ISWAManager::fetchDataCygnet(int id){
 }
 
 
-std::string ISWAManager::iSWAurl(int id, std::string type){
+std::string IswaManager::iswaUrl(int id, std::string type){
     std::string url;
     if(id < 0){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
@@ -249,7 +249,7 @@ std::string ISWAManager::iSWAurl(int id, std::string type){
     return url;
 }
 
-std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
+std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
@@ -269,7 +269,7 @@ std::shared_ptr<MetadataFuture> ISWAManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-void ISWAManager::createScreenSpace(int id){
+void IswaManager::createScreenSpace(int id){
 
     std::string name = "iSWACygnet" + std::to_string(id);
     if(OsEng.renderEngine().screenSpaceRenderable(name)){
@@ -282,7 +282,7 @@ void ISWAManager::createScreenSpace(int id){
     }
 }
 
-void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){
+void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
@@ -306,7 +306,7 @@ void ISWAManager::createPlane(std::shared_ptr<MetadataFuture> data){
     }
 }
 
-std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data){
     if(data->json != ""){
         json j = json::parse(data->json);
 
@@ -365,7 +365,7 @@ std::string ISWAManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
-void ISWAManager::createKameleonPlane(std::string kwPath, int group){
+void IswaManager::createKameleonPlane(std::string kwPath, int group){
     kwPath = "${OPENSPACE_DATA}/" + kwPath;
     const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
 
@@ -381,7 +381,7 @@ void ISWAManager::createKameleonPlane(std::string kwPath, int group){
     }
 }
 
-std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
+std::string IswaManager::parseKWToLuaTable(std::string kwPath, int group){
     if(kwPath != ""){
         const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
         if(extension == "cdf"){
@@ -435,16 +435,16 @@ std::string ISWAManager::parseKWToLuaTable(std::string kwPath, int group){
 }
 
 
-void ISWAManager::registerGroup(int id){
-    _groups.insert(std::pair<int, std::shared_ptr<ISWAGroup>>(id, std::make_shared<ISWAGroup>(id)));
+void IswaManager::registerGroup(int id){
+    _groups.insert(std::pair<int, std::shared_ptr<IswaGroup>>(id, std::make_shared<IswaGroup>(id)));
 }
 
-void ISWAManager::unregisterGroup(int id){
+void IswaManager::unregisterGroup(int id){
     if(_groups.find(id) != _groups.end())
         _groups[id]->clearGroup();
 }
 
-void ISWAManager::registerToGroup(int id, CygnetType type, ISWACygnet* cygnet){
+void IswaManager::registerToGroup(int id, CygnetType type, IswaCygnet* cygnet){
     if(_groups.find(id) == _groups.end()){
         registerGroup(id);
     }
@@ -452,19 +452,19 @@ void ISWAManager::registerToGroup(int id, CygnetType type, ISWACygnet* cygnet){
     _groups[id]->registerCygnet(cygnet, type);
 }
 
-void ISWAManager::unregisterFromGroup(int id, ISWACygnet* cygnet){
+void IswaManager::unregisterFromGroup(int id, IswaCygnet* cygnet){
     if(_groups.find(id) != _groups.end()){
         _groups[id]->unregisterCygnet(cygnet);
     }
 }
 
-void ISWAManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
+void IswaManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
     if(_groups.find(id) != _groups.end()){
         _groups[id]->registerOptions(options);
     }
 }
 
-std::shared_ptr<ISWAGroup> ISWAManager::iSWAGroup(std::string name){
+std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
     for(auto group : _groups){
         if(group.second->name() == name){
             return group.second;
@@ -474,8 +474,7 @@ std::shared_ptr<ISWAGroup> ISWAManager::iSWAGroup(std::string name){
     return nullptr;
 }
 
-
-glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et){
+glm::dmat3 IswaManager::getTransform(std::string from, std::string to, double et){
     std::set<std::string> _diopoleFrames =    {"GSM", "SM", "MAG"};
 
     auto fromit = _diopoleFrames.find(from);
@@ -544,7 +543,7 @@ glm::dmat3 ISWAManager::getTransform(std::string from, std::string to, double et
     }
 }
 
-scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
+scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {
@@ -552,7 +551,7 @@ scripting::ScriptEngine::LuaLibrary ISWAManager::luaLibrary() {
                 "addCygnet",
                 &luascriptfunctions::iswa_addCygnet,
                 "string",
-                "Adds a ISWACygnet",
+                "Adds a IswaCygnet",
                 true
             },
             {

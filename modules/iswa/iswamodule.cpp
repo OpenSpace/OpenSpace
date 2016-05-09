@@ -38,11 +38,11 @@
 
 namespace openspace {
 
-    ISWAModule::ISWAModule()
+    IswaModule::IswaModule()
         : OpenSpaceModule("ISWA")
     {}
 
-    void ISWAModule::internalInitialize(){
+    void IswaModule::internalInitialize(){
         auto fRenderable = FactoryManager::ref().factory<Renderable>();
         ghoul_assert(fRenderable, "No renderable factory existed");
 

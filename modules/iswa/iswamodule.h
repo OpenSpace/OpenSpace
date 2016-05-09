@@ -29,9 +29,9 @@
 
  namespace openspace{
 
-class ISWAModule : public OpenSpaceModule {
+class IswaModule : public OpenSpaceModule {
 public:
-    ISWAModule();
+    IswaModule();
 
 protected:
     void internalInitialize() override;

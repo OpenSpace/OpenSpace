@@ -43,8 +43,8 @@
 
 
 namespace openspace {
-class ISWAGroup;
-class ISWACygnet; 
+class IswaGroup;
+class IswaCygnet; 
 
 
 struct MetadataFuture {
@@ -58,19 +58,19 @@ struct MetadataFuture {
 };
 
 
-class ISWAManager : public ghoul::Singleton<ISWAManager> {
-    friend class ghoul::Singleton<ISWAManager>;
+class IswaManager : public ghoul::Singleton<IswaManager> {
+    friend class ghoul::Singleton<IswaManager>;
 
 public:
     enum CygnetType {Texture, Data, Kameleon, NoType};
     enum CygnetGeometry {Plane, Sphere};
 
-    ISWAManager();
-    ~ISWAManager();
+    IswaManager();
+    ~IswaManager();
 
-    void addISWACygnet(std::string info);
-    void addISWACygnet(int id, std::string info = "Texture", int group = -1);
-    void deleteISWACygnet(std::string);
+    void addIswaCygnet(std::string info);
+    void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
+    void deleteIswaCygnet(std::string);
 
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
@@ -80,16 +80,16 @@ public:
 
     void registerGroup(int id);
     void unregisterGroup(int id);
-    void registerToGroup(int id, CygnetType type, ISWACygnet* cygnet);
-    void unregisterFromGroup(int id, ISWACygnet* cygnet);
+    void registerToGroup(int id, CygnetType type, IswaCygnet* cygnet);
+    void unregisterFromGroup(int id, IswaCygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
-    std::shared_ptr<ISWAGroup> iSWAGroup(std::string name);
+    std::shared_ptr<IswaGroup> iswaGroup(std::string name);
 
     glm::dmat3 getTransform(std::string from, std::string to, double et);
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    std::string iSWAurl(int id, std::string type = "image");
+    std::string iswaUrl(int id, std::string type = "image");
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 
@@ -104,7 +104,7 @@ private:
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
 
-    std::map<int, std::shared_ptr<ISWAGroup>> _groups;
+    std::map<int, std::shared_ptr<IswaGroup>> _groups;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;

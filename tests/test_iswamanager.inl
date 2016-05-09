@@ -35,16 +35,16 @@
 
 namespace openspace {
 
-class ISWAManagerTest : public testing::Test{
+class IswaManagerTest : public testing::Test{
 protected:
 
-	ISWAManagerTest()
+	IswaManagerTest()
 	{
-		ISWAManager::initialize();
+		IswaManager::initialize();
 	}
 
-	~ISWAManagerTest(){
-		ISWAManager::deinitialize();
+	~IswaManagerTest(){
+		IswaManager::deinitialize();
 	}
 
 
@@ -53,22 +53,22 @@ protected:
 	//std::shared_ptr<ISWAManager> iSWAManager;
 };
 
-TEST_F(ISWAManagerTest, initialize){
+TEST_F(IswaManagerTest, initialize){
 
-	ISWAManager::deinitialize();
+	IswaManager::deinitialize();
 
-	ASSERT_TRUE(!ISWAManager::isInitialized()) << "iSWAManager is initialized before initialize call";
+	ASSERT_TRUE(!IswaManager::isInitialized()) << "IswaManager is initialized before initialize call";
 
-	ISWAManager::initialize();
+	IswaManager::initialize();
 
-	ASSERT_TRUE(ISWAManager::isInitialized()) << "iSWAManager is not initialized after initialize call";
+	ASSERT_TRUE(IswaManager::isInitialized()) << "IswaManager is not initialized after initialize call";
 
-	ASSERT_NE(&ISWAManager::ref(), nullptr) << "iSWAManager ref() is not a nullptr";
+	ASSERT_NE(&IswaManager::ref(), nullptr) << "IswaManager ref() is not a nullptr";
 
-	EXPECT_EQ(&ISWAManager::ref(), &ISWAManager::ref()) << "iSWAManager ref() returns the same object twice";
+	EXPECT_EQ(&IswaManager::ref(), &IswaManager::ref()) << "IswaManager ref() returns the same object twice";
 }
 
-TEST_F(ISWAManagerTest, iSWAurl){
+TEST_F(IswaManagerTest, iswaUrl){
 
 	//OsEng.loadSpiceKernels();
 	//Time::ref().setTime(double(100000.0));

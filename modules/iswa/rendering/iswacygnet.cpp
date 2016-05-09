@@ -30,13 +30,13 @@
 
 namespace openspace{
 
-ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
+IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
     // , _texture(nullptr)
     //, _memorybuffer("")
-    ,_type(ISWAManager::CygnetType::NoType)
+    ,_type(IswaManager::CygnetType::NoType)
     //,_futureObject(nullptr)
     // ,_transferFunction(nullptr)
 {
@@ -96,14 +96,14 @@ ISWACygnet::ISWACygnet(const ghoul::Dictionary& dictionary)
     // std::cout << std::to_string(_data->min) << std::endl;
     // std::cout << std::to_string(_data->spatialScale) << std::endl;
 
-    _delete.onChange([this](){ISWAManager::ref().deleteISWACygnet(name());});
+    _delete.onChange([this](){IswaManager::ref().deleteIswaCygnet(name());});
 
     // _textures.push_back(nullptr);
     // _transferFunctions.push_back(nullptr);
 }
 
-ISWACygnet::~ISWACygnet(){}
-bool ISWACygnet::initialize(){
+IswaCygnet::~IswaCygnet(){}
+bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
     initializeTime();
@@ -112,14 +112,14 @@ bool ISWACygnet::initialize(){
     updateTexture();
 
     if(_data->groupId > 0)
-        ISWAManager::ref().registerToGroup(_data->groupId, _type, this);
+        IswaManager::ref().registerToGroup(_data->groupId, _type, this);
 
     // return isReady();
 }
 
-bool ISWACygnet::deinitialize(){
+bool IswaCygnet::deinitialize(){
     if(_data->groupId > 0)
-        ISWAManager::ref().unregisterFromGroup(_data->groupId, this);
+        IswaManager::ref().unregisterFromGroup(_data->groupId, this);
 
     unregisterProperties();
     destroyGeometry();
@@ -129,14 +129,14 @@ bool ISWACygnet::deinitialize(){
     return true;
 }
 
-bool ISWACygnet::isReady() const{
+bool IswaCygnet::isReady() const{
     bool ready = true;
     if (!_shader)
         ready &= false;
     return ready;
 }
 
-void ISWACygnet::render(const RenderData& data){
+void IswaCygnet::render(const RenderData& data){
     if(!readyToRender()) return;
     
     psc position = data.position;
@@ -169,12 +169,12 @@ void ISWACygnet::render(const RenderData& data){
     _shader->deactivate();
 }
 
-void ISWACygnet::update(const UpdateData& data){
+void IswaCygnet::update(const UpdateData& data){
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 
-     _stateMatrix = ISWAManager::ref().getTransform(_data->frame, "GALACTIC", _openSpaceTime);
+     _stateMatrix = IswaManager::ref().getTransform(_data->frame, "GALACTIC", _openSpaceTime);
     // glm::dmat3 spiceMatrix    = SpiceManager::ref().positionTransformMatrix("J2000", "GALACTIC", _openSpaceTime);
      // = spiceMatrix*kameleonMatrix;
 
@@ -197,7 +197,7 @@ void ISWACygnet::update(const UpdateData& data){
 }
 
 
-bool ISWACygnet::destroyShader(){
+bool IswaCygnet::destroyShader(){
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -205,16 +205,16 @@ bool ISWACygnet::destroyShader(){
     }
 }
 
-void ISWACygnet::registerProperties(){
+void IswaCygnet::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
     OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
-void ISWACygnet::unregisterProperties(){
+void IswaCygnet::unregisterProperties(){
     OsEng.gui()._iswa.unregisterProperties(name());
 }
 
-void ISWACygnet::initializeTime(){
+void IswaCygnet::initializeTime(){
     _openSpaceTime = Time::ref().currentTime();
     _lastUpdateOpenSpaceTime = _openSpaceTime;
 

@@ -25,12 +25,12 @@
 #include <modules/iswa/rendering/dataplane.h>
 
 namespace {
-    const std::string _loggerCat = "ISWAGroup";
+    const std::string _loggerCat = "IswaGroup";
 }
 
 namespace openspace {
 
-ISWAGroup::ISWAGroup(int id)
+IswaGroup::IswaGroup(int id)
     :_enabled("enabled", "Enabled", true)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
@@ -40,9 +40,9 @@ ISWAGroup::ISWAGroup(int id)
     ,_delete("delete", "Delete")
     ,_dataOptions("dataOptions", "Data Options")
     ,_id(id)
-    ,_type(ISWAManager::CygnetType::NoType)
+    ,_type(IswaManager::CygnetType::NoType)
 {
-    setName("ISWAGroup" + std::to_string(_id));
+    setName("IswaGroup" + std::to_string(_id));
 
     addProperty(_enabled);
 
@@ -56,11 +56,11 @@ ISWAGroup::ISWAGroup(int id)
     addProperty(_delete);
 }
 
-ISWAGroup::~ISWAGroup(){
+IswaGroup::~IswaGroup(){
     _cygnets.clear();
 }
 
-void ISWAGroup::registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type){
+void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type){
     if(_cygnets.empty()){
         _type = type;
         registerProperties();
@@ -72,7 +72,7 @@ void ISWAGroup::registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type)
     }
 
 
-    if(type == ISWAManager::CygnetType::Data){
+    if(type == IswaManager::CygnetType::Data){
         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
         
         dataplane->useLog(_useLog.value());
@@ -85,7 +85,7 @@ void ISWAGroup::registerCygnet(ISWACygnet* cygnet, ISWAManager::CygnetType type)
     _cygnets.push_back(cygnet);
 }
 
-void ISWAGroup::unregisterCygnet(ISWACygnet* cygnet){
+void IswaGroup::unregisterCygnet(IswaCygnet* cygnet){
     auto it = std::find(
         _cygnets.begin(),
         _cygnets.end(),
@@ -100,8 +100,8 @@ void ISWAGroup::unregisterCygnet(ISWACygnet* cygnet){
 }
 
 
-void ISWAGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    if(_type == ISWAManager::CygnetType::Data){
+void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
+    if(_type == IswaManager::CygnetType::Data){
         if(_dataOptions.options().empty()){
             for(auto option : options){
                 _dataOptions.addOption(option);
@@ -113,12 +113,12 @@ void ISWAGroup::registerOptions(const std::vector<properties::SelectionProperty:
     }
 }
 
-bool ISWAGroup::checkType(ISWAManager::CygnetType type){
-    if(_type == ISWAManager::CygnetType::NoType) return true;
+bool IswaGroup::checkType(IswaManager::CygnetType type){
+    if(_type == IswaManager::CygnetType::NoType) return true;
     return (_type == type);
 }
 
-void ISWAGroup::registerProperties(){
+void IswaGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
 
     _enabled.onChange([this]{
@@ -127,7 +127,7 @@ void ISWAGroup::registerProperties(){
     });
 
 
-    if(_type == ISWAManager::CygnetType::Data){
+    if(_type == IswaManager::CygnetType::Data){
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -171,19 +171,19 @@ void ISWAGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{
         clearGroup();
-        // ISWAManager::ref().unregisterGroup(_id);
+        // IswaManager::ref().unregisterGroup(_id);
     }); 
 }
 
-void ISWAGroup::unregisterProperties(){
+void IswaGroup::unregisterProperties(){
     _dataOptions.removeOptions();
     OsEng.gui()._iswa.unregisterProperties(name());
-    _type = ISWAManager::CygnetType::NoType;
+    _type = IswaManager::CygnetType::NoType;
 }
 
-void ISWAGroup::clearGroup(){
+void IswaGroup::clearGroup(){
     for(auto it = _cygnets.begin(); it != _cygnets.end();){
-            ISWAManager::ref().deleteISWACygnet((*it)->name());
+            IswaManager::ref().deleteIswaCygnet((*it)->name());
             it = _cygnets.erase(it);
     }
     unregisterProperties();

@@ -32,7 +32,7 @@
 namespace openspace {
 namespace gui {
 
-class GuiISWAComponent : public GuiPropertyComponent {
+class GuiIswaComponent : public GuiPropertyComponent {
 public:
     virtual void render() override;
 

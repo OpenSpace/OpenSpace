@@ -48,7 +48,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
 
     _downloadImage = true;
 
-    _url = ISWAManager::ref().iSWAurl(_cygnetId);
+    _url = IswaManager::ref().iswaUrl(_cygnetId);
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 }
@@ -62,7 +62,7 @@ void ScreenSpaceCygnet::update(){
                         (Time::ref().deltaTime() != 0);
 
     if(updateInterval != 0 && (Time::ref().timeJumped() || timeToUpdate )){
-        _url = ISWAManager::ref().iSWAurl(_cygnetId);
+        _url = IswaManager::ref().iswaUrl(_cygnetId);
         updateTexture();
         _lastUpdateRealTime = _realTime;
     }

@@ -28,13 +28,13 @@ namespace luascriptfunctions {
 
 int iswa_addCygnet(lua_State* L) {
     std::string s = luaL_checkstring(L, -1);
-    ISWAManager::ref().addISWACygnet(s);
+    IswaManager::ref().addIswaCygnet(s);
     return 0;
 }
 
 int iswa_removeGroup(lua_State* L){
 	int id = lua_tonumber(L, 1);
-	ISWAManager::ref().unregisterGroup(id);
+	IswaManager::ref().unregisterGroup(id);
 	return 0;
 }
 

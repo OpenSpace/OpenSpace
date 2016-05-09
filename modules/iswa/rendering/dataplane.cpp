@@ -86,7 +86,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-    _type = ISWAManager::CygnetType::Data;
+    _type = IswaManager::CygnetType::Data;
 
     setTransferFunctions(_transferFunctionsFile.value());
 }
@@ -154,7 +154,7 @@ bool DataPlane::updateTexture(){
     if(_futureObject.valid())
         return false;
 
-    std::future<DownloadManager::MemoryFile> future = ISWAManager::ref().fetchDataCygnet(_data->id);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
 
     if(future.valid()){
         _futureObject = std::move(future);
@@ -275,7 +275,7 @@ void DataPlane::readHeader(std::string& dataBuffer){
                     _dataOptions.setValue(std::vector<int>(1,0));
 
                     if(_data->groupId > 0)
-                        ISWAManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
+                        IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
                     
                 }
             }else{
