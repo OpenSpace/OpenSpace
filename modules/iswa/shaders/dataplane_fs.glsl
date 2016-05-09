@@ -54,12 +54,12 @@ Fragment getFragment() {
             v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
         }
         v /= numTextures;
-
+        
         vec4 color = texture(transferFunctions[0], vec2(v,0));
         float x = backgroundValues.x;
         float y = backgroundValues.y;
         if((v<(x+y)) && v>(x-y))
-            color = mix(transparent, color, abs(v-x));
+            color = mix(transparent, color, clamp(1,0,abs(v-x)));
 
         diffuse = color;
     }else{
