@@ -102,6 +102,7 @@ bool DataPlane::loadTexture() {
          if(dataFile.corrupted)
             return false;
 
+        _dataBuffer = "";
         _dataBuffer.append(dataFile.buffer, dataFile.size);
     }
 
@@ -342,7 +343,7 @@ std::vector<float*> DataPlane::readData(std::string& dataBuffer){
                 numValues++;
             }
         }
-
+        std::cout << "Actual size: " << numValues << " Expected: " << _dimensions.x*_dimensions.y   << std::endl;
         if(numValues != _dimensions.x*_dimensions.y){
             LWARNING("Number of values read and expected are not the same");
             return std::vector<float*>();
