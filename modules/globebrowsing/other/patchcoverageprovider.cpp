@@ -146,7 +146,7 @@ namespace openspace {
                 for (int j = numLevelsToLoop; j >= 0; j--)
                 {
                     // Try if the texture exists
-                    std::shared_ptr<Texture> tile = tileProvider->getTile(positiveTileIndex);
+                    std::shared_ptr<Texture> tile = tileProvider->getOrStartFetchingTile(positiveTileIndex);
                     if (tile == nullptr)
                     { // If it doesn't exist, go down a level
                         tileIndex.x /= 2;
@@ -165,7 +165,7 @@ namespace openspace {
                 if (patchCoverageToReturn.textureTransformPairs[linearIdx].first == nullptr)
                 {
                     patchCoverageToReturn.textureTransformPairs[linearIdx].first =
-                        tileProvider->getTemporaryTexture();
+                        tileProvider->getDefaultTexture();
                     patchCoverageToReturn.textureTransformPairs[linearIdx].second =
                         getUvTransformationPatchToTile(patch, tileIndex);
                 }

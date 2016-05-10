@@ -135,6 +135,26 @@ struct GeodeticTileIndex {
         return GeodeticTileIndex(x / 2, y / 2, level - 1);
     }
 
+    bool isWestChild() const {
+        return x % 2 == 0;
+    }
+
+    bool isEastChild() const {
+        return x % 2 == 1;
+    }
+
+    bool isNorthChild() const {
+        return y % 2 == 0;
+    }
+
+    bool isSouthChild() const {
+        return y % 2 == 1;
+    }
+
+    bool hasParent() const {
+        return level > 0;
+    }
+
     /**
         Gets the tile at a specified offset from this tile. 
         Accepts delta indices ranging from [-2^level, Infinity[

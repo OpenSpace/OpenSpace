@@ -108,9 +108,6 @@ namespace openspace {
         const GeodeticTileIndex& tileIndex)
     {
         using namespace glm;
-
-
-        GeodeticPatch newPatch = patch;
         
 
         // TODO : Model transform should be fetched as a matrix directly.
@@ -121,25 +118,24 @@ namespace openspace {
 
         // activate shader
         _programObjectGlobalRendering->activate();
-
-        // Get the textures that should be used for rendering
-        std::shared_ptr<ghoul::opengl::Texture> tile00;
+        
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
         auto tileProviderHeight = heightMapProviders.begin()->second;
-        tile00 = tileProviderHeight->getTile(tileIndex);
 
-        if (tile00 == nullptr) {
-            tile00 = tileProviderHeight->getTemporaryTexture();
-        }
+        // Get the textures that should be used for rendering
+        Tile heightTile = tileProviderHeight->getMostHiResTile(tileIndex);
+
         
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitHeight;
         texUnitHeight.activate();
-        tile00->bind();
+        heightTile.texture->bind();
         _programObjectGlobalRendering->setUniform("textureSamplerHeight", texUnitHeight);
-
+        _programObjectGlobalRendering->setUniform("heightSamplingScale", heightTile.uvScale);
+        _programObjectGlobalRendering->setUniform("heightSamplingOffset", heightTile.uvOffset);
+        
 
 
 
@@ -147,28 +143,23 @@ namespace openspace {
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         auto tileProviderColor = colorTextureProviders.begin()->second;
-        tile00 = tileProviderColor->getTile(tileIndex);
+        Tile colorTile = tileProviderColor->getMostHiResTile(tileIndex);
 
-        if (tile00 == nullptr) {
-            tile00 = tileProviderColor->getTemporaryTexture();
-        }
 
-        // Now we use the same shader as for clipmap rendering so this uv transform is needed
-        glm::mat3 uvTransformColor = glm::mat3(1);
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitColor;
         texUnitColor.activate();
-        tile00->bind();
+        colorTile.texture->bind();
         _programObjectGlobalRendering->setUniform("textureSamplerColor", texUnitColor);
+        _programObjectGlobalRendering->setUniform("colorSamplingScale", colorTile.uvScale);
+        _programObjectGlobalRendering->setUniform("colorSamplingOffset", colorTile.uvOffset);
 
 
-
-
-
-        Geodetic2 swCorner = newPatch.southWestCorner();
+        Geodetic2 swCorner = patch.southWestCorner();
+        auto patchSize = patch.size();
         _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(newPatch.size().toLonLatVec2()));
+        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
         glEnable(GL_DEPTH_TEST);

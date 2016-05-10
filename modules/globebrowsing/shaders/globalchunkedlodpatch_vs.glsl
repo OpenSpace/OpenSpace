@@ -31,6 +31,8 @@ uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
 uniform sampler2D textureSamplerHeight;
+uniform vec2 heightSamplingScale;
+uniform vec2 heightSamplingOffset;
 
 layout(location = 1) in vec2 in_UV;
 
@@ -53,7 +55,8 @@ void main()
 	fs_uv = in_UV;
 	PositionNormalPair pair = globalInterpolation();
 
-	float sampledHeight = texture(textureSamplerHeight, in_UV).r;
+	vec2 samplePos = heightSamplingScale*in_UV + heightSamplingOffset;
+	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
 	pair.position += pair.normal * sampledHeight * 1e1;
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);

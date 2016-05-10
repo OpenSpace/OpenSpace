@@ -55,17 +55,17 @@ namespace openspace {
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
-        _tempTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
+        _defaultTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
 
-        if (_tempTexture) {
+        if (_defaultTexture) {
             LDEBUG("Loaded texture from '" << fileName << "'");
-            _tempTexture->uploadTexture();
+            _defaultTexture->uploadTexture();
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _tempTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _tempTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+            _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         }
 
 
@@ -105,7 +105,44 @@ namespace openspace {
         }
     }
 
-    std::shared_ptr<Texture> TileProvider::getTile(GeodeticTileIndex tileIndex) {
+    Tile TileProvider::getMostHiResTile(GeodeticTileIndex tileIndex) {
+        std::shared_ptr<Texture> tex = nullptr;
+        glm::vec2 uvOffset(0, 0);
+        glm::vec2 uvScale(1, 1);
+        while (true) {
+            tex = getOrStartFetchingTile(tileIndex);
+
+            if (tex != nullptr) {
+                break;
+            }
+
+            if (!tileIndex.hasParent()) {
+                tex = getDefaultTexture();
+                break;
+            }
+
+            // If we have a parent, calculate the UV offset and scale from the tileIndex
+            else {
+                uvScale *= 0.5;
+                uvOffset *= 0.5;
+
+                if (tileIndex.isEastChild()) {
+                    uvOffset.x += 0.5;
+                }
+
+                // In OpenGL, positive y direction is up
+                if (tileIndex.isNorthChild()) {
+                    uvOffset.y += 0.5;
+                }
+
+                tileIndex = tileIndex.parent();
+            }
+        }
+        
+        return { tex, uvOffset, uvScale };
+    }
+
+    std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(GeodeticTileIndex tileIndex) {
         
         HashKey hashkey = tileIndex.hashKey();
         
@@ -125,8 +162,10 @@ namespace openspace {
         }
     }
 
-    std::shared_ptr<Texture> TileProvider::getTemporaryTexture() {
-        return _tempTexture;
+
+
+    std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
+        return _defaultTexture;
     }
 
     std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(

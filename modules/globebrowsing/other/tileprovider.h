@@ -44,8 +44,19 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-
     using namespace ghoul::opengl;
+
+
+
+
+    struct Tile {
+        std::shared_ptr<Texture> texture;
+        glm::vec2 uvOffset;
+        glm::vec2 uvScale;
+    };
+
+
+    
 
     /**
         Provides tiles through GDAL datasets which can be defined with xml files
@@ -53,14 +64,14 @@ namespace openspace {
     */
     class TileProvider {
     public:
-        TileProvider(
-            const std::string& fileName,
-            int tileCacheSize,
-            int minimumPixelsize);
+        TileProvider(const std::string& fileName, int tileCacheSize, int minimumPixelSize);
         ~TileProvider();
 
-        std::shared_ptr<Texture> getTile(GeodeticTileIndex tileIndex);
-        std::shared_ptr<Texture> getTemporaryTexture();
+        Tile getMostHiResTile(GeodeticTileIndex tileIndex);
+
+        std::shared_ptr<Texture> getOrStartFetchingTile(GeodeticTileIndex tileIndex);
+
+        std::shared_ptr<Texture> getDefaultTexture();
 
         void prerender();
 
@@ -98,7 +109,7 @@ namespace openspace {
 
         ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
 
-        std::shared_ptr<Texture> _tempTexture;
+        std::shared_ptr<Texture> _defaultTexture;
         int _minimumPixelSize;
     };
 

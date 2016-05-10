@@ -24,6 +24,8 @@
 
 // Colortexture coverage
 uniform sampler2D textureSamplerColor;
+uniform vec2 colorSamplingScale;
+uniform vec2 colorSamplingOffset;
 
 in vec4 vs_position;
 in vec3 fs_position;
@@ -46,8 +48,15 @@ vec4 borderOverlay(vec2 uv, vec3 borderColor, float borderSize){
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = texture(textureSamplerColor, fs_uv);
-	frag.color = 1*frag.color + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.01);
+	vec2 samplePos = colorSamplingScale*fs_uv + colorSamplingOffset;
+	frag.color = texture(textureSamplerColor, samplePos);
+
+	// Sample position overlay
+	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
+
+	// Border overlay
+	frag.color = frag.color + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
+
 	frag.depth = vs_position.w;
 
 	return frag;
