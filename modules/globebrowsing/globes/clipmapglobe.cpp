@@ -132,7 +132,7 @@ namespace openspace {
             Geodetic2 halfSize = _clipMapPyramid.getPatchSizeAtLevel(i) / 2;
             GeodeticPatch testPatch(center, halfSize);
             // Do frustrum culling
-            if (!_frustumCuller.isVisible(data, testPatch, _ellipsoid)) {
+            if (FrustumCuller::isVisible(data, testPatch, _ellipsoid)) {
                 break;
             }
         }

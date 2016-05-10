@@ -130,7 +130,7 @@ namespace openspace {
         
         glm::uvec3 dims(numPixels.x, numPixels.y, 1);
         UninitializedTextureTile::TextureFormat textrureFormat =
-            getTextureFormatFromRasterCount(nRasters);
+            getTextureFormat(nRasters, gdalType);
         GLuint glType = getGlDataTypeFromGdalDataType(gdalType);
         UninitializedTextureTile* uninitedTexPtr = new UninitializedTextureTile(
             imageDataYflipped,
@@ -182,31 +182,140 @@ namespace openspace {
     }
 
     template<class T>
-    UninitializedTextureTile::TextureFormat GdalDataConverter<T>::getTextureFormatFromRasterCount(
-        int rasterCount)
+    UninitializedTextureTile::TextureFormat GdalDataConverter<T>::getTextureFormat(
+        int rasterCount,
+        GDALDataType gdalType)
     {
         UninitializedTextureTile::TextureFormat format;
 
         switch (rasterCount)
         {
-        case 1:
+        case 1: // Red
             format.ghoulFormat = Texture::Format::Red;
-            format.glFormat = GL_RED;
+            switch (gdalType)
+            {
+            case GDT_Byte:
+                format.glFormat = GL_R8;
+                break;
+            case GDT_UInt16:
+                format.glFormat = GL_R16;
+                break;
+            case GDT_Int16:
+                format.glFormat = GL_R16;
+                break;
+            case GDT_UInt32:
+                format.glFormat = GL_R32UI;
+                break;
+            case GDT_Int32:
+                format.glFormat = GL_R32I;
+                break;
+            case GDT_Float32:
+                format.glFormat = GL_R32F;
+                break;
+                /*
+                case GDT_Float64:
+                format.glFormat = GL_RED; // No representation of 64 bit float?
+                break;
+                */
+            default:
+                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+            }
             break;
         case 2:
             format.ghoulFormat = Texture::Format::RG;
-            format.glFormat = GL_RG;
+            switch (gdalType)
+            {
+            case GDT_Byte:
+                format.glFormat = GL_RG8;
+                break;
+            case GDT_UInt16:
+                format.glFormat = GL_RG16;
+                break;
+            case GDT_Int16:
+                format.glFormat = GL_RG16;
+                break;
+            case GDT_UInt32:
+                format.glFormat = GL_RG32UI;
+                break;
+            case GDT_Int32:
+                format.glFormat = GL_RG32I;
+                break;
+            case GDT_Float32:
+                format.glFormat = GL_RG32F;
+                break;
+                /*
+                case GDT_Float64:
+                format.glFormat = GL_RED; // No representation of 64 bit float?
+                break;
+                */
+            default:
+                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+            }
             break;
         case 3:
             format.ghoulFormat = Texture::Format::RGB;
-            format.glFormat = GL_RGB;
+            switch (gdalType)
+            {
+            case GDT_Byte:
+                format.glFormat = GL_RGB8;
+                break;
+            case GDT_UInt16:
+                format.glFormat = GL_RGB16;
+                break;
+            case GDT_Int16:
+                format.glFormat = GL_RGB16;
+                break;
+            case GDT_UInt32:
+                format.glFormat = GL_RGB32UI;
+                break;
+            case GDT_Int32:
+                format.glFormat = GL_RGB32I;
+                break;
+            case GDT_Float32:
+                format.glFormat = GL_RGB32F;
+                break;
+                /*
+                case GDT_Float64:
+                format.glFormat = GL_RED; // No representation of 64 bit float?
+                break;
+                */
+            default:
+                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+            }
             break;
         case 4:
             format.ghoulFormat = Texture::Format::RGBA;
-            format.glFormat = GL_RGBA;
+            switch (gdalType)
+            {
+            case GDT_Byte:
+                format.glFormat = GL_RGBA8;
+                break;
+            case GDT_UInt16:
+                format.glFormat = GL_RGBA16;
+                break;
+            case GDT_Int16:
+                format.glFormat = GL_RGBA16;
+                break;
+            case GDT_UInt32:
+                format.glFormat = GL_RGBA32UI;
+                break;
+            case GDT_Int32:
+                format.glFormat = GL_RGBA32I;
+                break;
+            case GDT_Float32:
+                format.glFormat = GL_RGBA32F;
+                break;
+                /*
+                case GDT_Float64:
+                format.glFormat = GL_RED; // No representation of 64 bit float?
+                break;
+                */
+            default:
+                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+            }
             break;
         default:
-            //LERROR("Too many channels for OpenGL.");
+            LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
             break;
         }
         return format;

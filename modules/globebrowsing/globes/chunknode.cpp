@@ -30,7 +30,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <modules/globebrowsing/globes/chunklodglobe.h>
-#include <modules/globebrowsing/rendering/frustumculler.h>
+#include <modules/globebrowsing/rendering/culling.h>
 
 
 namespace {
@@ -141,15 +141,18 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
     const ChunkIndex& traverseData) {
     _isVisible = true;
     Vec3 globePosition = data.position.dvec3();
+    
     Vec3 patchPosition =
         globePosition +
         _owner.ellipsoid().geodetic2ToCartesian(_patch.center());
 
     Vec3 cameraPosition = data.camera.position().dvec3();
-    Vec3 cameraDirection = Vec3(data.camera.viewDirection());
+    //Vec3 cameraDirection = Vec3(data.camera.viewDirection());
     Vec3 cameraToChunk = patchPosition - cameraPosition;
 
+    Scalar minimumGlobeRadius = _owner.ellipsoid().minimumRadius();
 
+    /*
     // if camera points at same direction as latlon patch normal,
     // we see the back side and dont have to split it
     //Scalar cosNormalCameraDirection = glm::dot(patchNormal, cameraDirection);
@@ -177,11 +180,21 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
         _isVisible = false;
         return traverseData.level - 1;
     }
+    */
+    if (!HorizonCuller::isVisible(
+        data,
+        _patch,
+        _owner.ellipsoid(),
+        8700)) {
+        _isVisible = false;
+        return traverseData.level - 1;
+    }
+
 
     // Do frustrum culling
-    FrustumCuller& culler = _owner.getFrustumCuller();
+    //FrustumCuller& culler = _owner.getFrustumCuller();
 
-    if (!culler.isVisible(data, _patch, _owner.ellipsoid())) {
+    if (!FrustumCuller::isVisible(data, _patch, _owner.ellipsoid())) {
         _isVisible = false;
         return traverseData.level - 1;
     }

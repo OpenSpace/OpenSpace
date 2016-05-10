@@ -84,8 +84,9 @@ namespace openspace {
             GeodeticTileIndex tileIndex,
             int minNumPixelsRequired);
 
-        UninitializedTextureTile::TextureFormat getTextureFormatFromRasterCount(
-            int rasterCount);
+        UninitializedTextureTile::TextureFormat getTextureFormat(
+            int rasterCount,
+            GDALDataType gdalType);
         GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
 
         glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);

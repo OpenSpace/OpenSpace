@@ -43,7 +43,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
@@ -75,7 +75,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/frustumculler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp

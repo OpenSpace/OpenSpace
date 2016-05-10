@@ -65,7 +65,6 @@ namespace openspace {
             TriangleSoup::Normals::No));
 
         _patchRenderer.reset(new LatLonPatchRenderer(geometry, tileProviderManager));
-        _frustumCuller = std::shared_ptr<FrustumCuller>(new FrustumCuller());
     }
 
     ChunkLodGlobe::~ChunkLodGlobe() {
@@ -87,10 +86,6 @@ namespace openspace {
 
     LatLonPatchRenderer& ChunkLodGlobe::getPatchRenderer() {
         return *_patchRenderer;
-    }
-
-    FrustumCuller& ChunkLodGlobe::getFrustumCuller() {
-        return *_frustumCuller;
     }
 
     void ChunkLodGlobe::render(const RenderData& data){

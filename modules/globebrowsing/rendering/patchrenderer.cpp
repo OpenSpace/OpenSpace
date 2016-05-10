@@ -208,7 +208,7 @@ namespace openspace {
         const RenderData& data,
         const Ellipsoid& ellipsoid)
     {
-        if (max(patchSize.lat, patchSize.lon) > M_PI / 200) {
+        if (glm::max(patchSize.lat, patchSize.lon) > M_PI / 200) {
             renderPatchGlobally(patchSize, data, ellipsoid);
         }
         else {

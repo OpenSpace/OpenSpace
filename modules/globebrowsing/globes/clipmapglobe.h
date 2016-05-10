@@ -34,7 +34,7 @@
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/rendering/frustumculler.h>
+#include <modules/globebrowsing/rendering/culling.h>
 #include <modules/globebrowsing/globes/clipmappyramid.h>
 #include <modules/globebrowsing/other/TileProviderManager.h>
 
@@ -73,7 +73,6 @@ namespace openspace {
         std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
         
         ClipMapPyramid _clipMapPyramid;
-        FrustumCuller _frustumCuller;
         const Ellipsoid& _ellipsoid;
     };
 
