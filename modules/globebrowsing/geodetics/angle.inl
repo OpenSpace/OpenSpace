@@ -85,7 +85,7 @@ Angle<T> Angle<T>::fromDegrees(T degrees) {
 
 template <typename T>
 Angle<T> Angle<T>::fromRevolutions(T revs) {
-	return Angle<T>(asDegrees * 2 * PI);
+	return Angle<T>(revs * 2 * PI);
 }
 
 
