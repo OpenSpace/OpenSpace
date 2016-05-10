@@ -58,7 +58,8 @@ namespace openspace {
         , maxSplitDepth(22)
     {
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            10,10,
+            256,
+            256,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
