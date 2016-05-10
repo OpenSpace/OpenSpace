@@ -90,6 +90,9 @@ namespace openspace {
         static const GeodeticPatch LEFT_HEMISPHERE;
         static const GeodeticPatch RIGHT_HEMISPHERE;
 
+        static const ChunkIndex LEFT_HEMISPHERE_INDEX;
+        static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
+
         const Ellipsoid& _ellipsoid;
     };
 

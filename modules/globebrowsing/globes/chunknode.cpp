@@ -42,9 +42,10 @@ namespace openspace {
 int ChunkNode::instanceCount = 0;
 int ChunkNode::renderedPatches = 0;
 
-ChunkNode::ChunkNode(ChunkLodGlobe& owner, const GeodeticPatch& patch, ChunkNode* parent)
+ChunkNode::ChunkNode(ChunkLodGlobe& owner, const ChunkIndex& index, ChunkNode* parent)
 : _owner(owner)
-, _patch(patch)
+, _index(index)
+, _patch(index)
 , _parent(parent)
 , _isVisible(true)
 {
@@ -68,16 +69,16 @@ bool ChunkNode::isLeaf() const {
 }
 
 
-void ChunkNode::render(const RenderData& data, ChunkIndex traverseData) {
+void ChunkNode::render(const RenderData& data) {
     ghoul_assert(isRoot(), "this method should only be invoked on root");
     //LDEBUG("-------------");
-    internalUpdateChunkTree(data, traverseData);
-    internalRender(data, traverseData);
+    internalUpdateChunkTree(data);
+    internalRender(data);
 }
 
 
 // Returns true or false wether this node can be merge or not
-bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData) {
+bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
     using namespace glm;
     Geodetic2 center = _patch.center();
 
@@ -85,12 +86,12 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 
     if (isLeaf()) {
 
-        int desiredLevel = calculateDesiredLevelAndUpdateIsVisible(data, traverseData);
+        int desiredLevel = calculateDesiredLevelAndUpdateIsVisible(data, _index);
         desiredLevel = glm::clamp(desiredLevel, _owner.minSplitDepth, _owner.maxSplitDepth);
-        if (desiredLevel > traverseData.level) {
+        if (desiredLevel > _index.level) {
             split();
         }
-        else if(desiredLevel < traverseData.level){
+        else if(desiredLevel < _index.level){
             return true; // request a merge from parent
         }
         return false;
@@ -98,9 +99,8 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
     else {
         
         int requestedMergeMask = 0;
-        std::vector<ChunkIndex> childIndices = traverseData.childIndices();
         for (int i = 0; i < 4; ++i) {
-            if (_children[i]->internalUpdateChunkTree(data, childIndices[i])) {
+            if (_children[i]->internalUpdateChunkTree(data)) {
                 requestedMergeMask |= (1 << i);
             }
         }
@@ -110,27 +110,25 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
             merge();
 
             // re-run this method on this, now that this is a leaf node
-            return internalUpdateChunkTree(data, traverseData);
+            return internalUpdateChunkTree(data);
         }
         return false;
     }	
 }
 
 
-void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
+void ChunkNode::internalRender(const RenderData& data) {
     if (isLeaf()) {
         if (_isVisible) {
-
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-            patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), traverseData);
+            patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), _index);
             ChunkNode::renderedPatches++;
         }
     }
     else {
-        std::vector<ChunkIndex> childIndices = traverseData.childIndices();
         for (int i = 0; i < 4; ++i) {
-            _children[i]->internalRender(data, childIndices[i]);
+            _children[i]->internalRender(data);
         }
     }
 }
@@ -215,25 +213,11 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
 
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
-
-        // Defining short handles for center, halfSize and quarterSize
-        const Geodetic2& c = _patch.center();
-        const Geodetic2& hs = _patch.halfSize();
-        Geodetic2 qs = Geodetic2(0.5 * hs.lat, 0.5 * hs.lon);
-
-        // Subdivide bounds
-
-        GeodeticPatch nwBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon - qs.lon), qs);
-        GeodeticPatch neBounds = GeodeticPatch(Geodetic2(c.lat + qs.lat, c.lon + qs.lon), qs);
-        GeodeticPatch swBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon - qs.lon), qs);
-        GeodeticPatch seBounds = GeodeticPatch(Geodetic2(c.lat - qs.lat, c.lon + qs.lon), qs);
-
-        // Create new chunk nodes
-
-        _children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));
-        _children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, swBounds, this));
-        _children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, neBounds, this));
-        _children[Quad::SOUTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, seBounds, this));
+        auto childIndices = _index.childIndices();
+        for (size_t i = 0; i < childIndices.size(); i++) {
+            _children[i] = std::unique_ptr<ChunkNode>(
+                new ChunkNode(_owner, childIndices[i], this));
+        }
     }
 
     if (depth - 1 > 0) {

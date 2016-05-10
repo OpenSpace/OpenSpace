@@ -47,13 +47,16 @@ namespace openspace {
     const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
     const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
+    const ChunkIndex ChunkLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
+    const ChunkIndex ChunkLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
+
 
     ChunkLodGlobe::ChunkLodGlobe(
         const Ellipsoid& ellipsoid,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
-        , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE))
-        , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE))
+        , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE_INDEX))
+        , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE_INDEX))
         , minSplitDepth(2)
         , maxSplitDepth(22)
     {
@@ -93,11 +96,9 @@ namespace openspace {
         ChunkNode::renderedPatches = 0;        
 
 
-        ChunkIndex leftRootChunkIndex = { 0, 0, 1 };
-        _leftRoot->render(data, leftRootChunkIndex);
 
-        ChunkIndex rightRootChunkIndex = { 1, 0, 1 };
-        _rightRoot->render(data, rightRootChunkIndex);
+        _leftRoot->render(data);
+        _rightRoot->render(data);
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 

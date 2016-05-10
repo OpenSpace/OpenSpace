@@ -48,7 +48,7 @@ namespace openspace {
 
 class ChunkNode {
 public:
-    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
+    ChunkNode(ChunkLodGlobe&, const ChunkIndex&, ChunkNode* parent = nullptr);
     ~ChunkNode();
 
 
@@ -61,7 +61,7 @@ public:
     
     const ChunkNode& getChild(Quad quad) const;
 
-    void render(const RenderData& data, ChunkIndex);
+    void render(const RenderData& data);
 
     static int instanceCount;
     static int renderedPatches;
@@ -69,8 +69,8 @@ public:
 
 private:
 
-    void internalRender(const RenderData& data, ChunkIndex&);
-    bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
+    void internalRender(const RenderData& data);
+    bool internalUpdateChunkTree(const RenderData& data);
 
     /**
     Uses horizon culling, frustum culling and distance to camera to determine a
@@ -90,6 +90,7 @@ private:
     std::unique_ptr<ChunkNode> _children[4];    
     ChunkLodGlobe& _owner;
     GeodeticPatch _patch;
+    ChunkIndex _index;
     bool _isVisible;
 };
 
