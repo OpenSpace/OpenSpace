@@ -101,7 +101,7 @@ namespace openspace {
 
     }
 
-    GeodeticTileIndex TextureTileSet::getTileIndex(const GeodeticPatch& patch) {
+    ChunkIndex TextureTileSet::getChunkIndex(const GeodeticPatch& patch) {
         // Calculate the level of the index depanding on the size of the incoming patch.
         // The level is as big as possible (as far down as possible) but it can't be
         // too big since at maximum four tiles should be used to cover a patch
@@ -122,26 +122,26 @@ namespace openspace {
         //tileIndexXY.y = pow(2, level - 1) - tileIndexXY.y;
 
         // Create the tileindex
-        GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
-        return tileIndex;
+        ChunkIndex chunkIndex = { tileIndexXY.x, tileIndexXY.y, level };
+        return chunkIndex;
     }
 
     std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticPatch& patch) {
-        return getTile(getTileIndex(patch));
+        return getTile(getChunkIndex(patch));
     }
 
-    std::shared_ptr<Texture> TextureTileSet::getTile(const GeodeticTileIndex& tileIndex) {
+    std::shared_ptr<Texture> TextureTileSet::getTile(const ChunkIndex& chunkIndex) {
         return _testTexture;
     }
 
     GeodeticPatch TextureTileSet::getTilePositionAndScale(
-        const GeodeticTileIndex& tileIndex) {
+        const ChunkIndex& chunkIndex) {
         Geodetic2 tileSize = Geodetic2(
-            _sizeLevel0.lat / pow(2, tileIndex.level),
-            _sizeLevel0.lon / pow(2, tileIndex.level));
+            _sizeLevel0.lat / pow(2, chunkIndex.level),
+            _sizeLevel0.lon / pow(2, chunkIndex.level));
         Geodetic2 northWest = Geodetic2(
-            _offsetLevel0.lat + tileIndex.y * tileSize.lat,
-            _offsetLevel0.lon + tileIndex.x * tileSize.lon);
+            _offsetLevel0.lat + chunkIndex.y * tileSize.lat,
+            _offsetLevel0.lon + chunkIndex.x * tileSize.lon);
         
         return GeodeticPatch(
             Geodetic2(northWest.lat - tileSize.lat / 2, northWest.lon + tileSize.lon / 2),
@@ -150,9 +150,9 @@ namespace openspace {
 
     glm::mat3 TextureTileSet::getUvTransformationPatchToTile(
         GeodeticPatch patch,
-        const GeodeticTileIndex& tileIndex)
+        const ChunkIndex& chunkIndex)
     {
-        GeodeticPatch tile = getTilePositionAndScale(tileIndex);
+        GeodeticPatch tile = getTilePositionAndScale(chunkIndex);
         return getUvTransformationPatchToTile(patch, tile);
     }
 

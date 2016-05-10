@@ -53,12 +53,12 @@ namespace openspace {
             glm::uvec3 dims,
             TextureFormat format,
             GLuint glType,
-            const GeodeticTileIndex& ti)
+            const ChunkIndex& chunkIndex)
             : imageData(data)
             , dimensions(dims)
             , texFormat(format)
             , glType(glType)
-            , tileIndex(ti)
+            , chunkIndex(chunkIndex)
         {
 
         }
@@ -67,7 +67,7 @@ namespace openspace {
         glm::uvec3 dimensions;
         TextureFormat texFormat;
         GLuint glType;
-        const GeodeticTileIndex tileIndex;
+        const ChunkIndex chunkIndex;
     };
 
     template<class T>
@@ -80,7 +80,7 @@ namespace openspace {
 
         std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
             GDALDataset * dataSet,
-            GeodeticTileIndex tileIndex,
+            ChunkIndex chunkIndex,
             int tileLevelDifference);
 
         UninitializedTextureTile::TextureFormat getTextureFormat(

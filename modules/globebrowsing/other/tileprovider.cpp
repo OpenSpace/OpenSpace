@@ -102,13 +102,13 @@ namespace openspace {
             auto finishedJob = _tileLoadManager.popFinishedJob();
             std::shared_ptr<UninitializedTextureTile> uninitedTex =
                 finishedJob->product();
-            HashKey key = uninitedTex->tileIndex.hashKey();
+            HashKey key = uninitedTex->chunkIndex.hashKey();
             std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
             _tileCache.put(key, texture);
         }
     }
 
-    Tile TileProvider::getMostHiResTile(GeodeticTileIndex tileIndex) {
+    Tile TileProvider::getMostHiResTile(ChunkIndex chunkIndex) {
         std::shared_ptr<Texture> tex = nullptr;
         glm::vec2 uvOffset(0, 0);
         glm::vec2 uvScale(1, 1);
@@ -117,62 +117,62 @@ namespace openspace {
         // In that case, use the biggest one defined for the dataset.
         int maximumAllowedLevel =
             _gdalDataSet->GetRasterBand(1)->GetOverviewCount() - 1;
-        int levelInDataset = tileIndex.level + _tileLevelDifference;
+        int levelInDataset = chunkIndex.level + _tileLevelDifference;
         int timesToStepUp = levelInDataset - maximumAllowedLevel;
         for (int i = 0; i < timesToStepUp; i++)
         {
             uvScale *= 0.5;
             uvOffset *= 0.5;
 
-            if (tileIndex.isEastChild()) {
+            if (chunkIndex.isEastChild()) {
                 uvOffset.x += 0.5;
             }
 
             // In OpenGL, positive y direction is up
-            if (tileIndex.isNorthChild()) {
+            if (chunkIndex.isNorthChild()) {
                 uvOffset.y += 0.5;
             }
 
-            tileIndex = tileIndex.parent();
+            chunkIndex = chunkIndex.parent();
         }
         
         // We also need to check if the wanted texture is available. If not, go up a level
         while (true) {
-            tex = getOrStartFetchingTile(tileIndex);
+            tex = getOrStartFetchingTile(chunkIndex);
 
             if (tex != nullptr) {
                 break;
             }
 
-            if (!tileIndex.hasParent()) {
+            if (!chunkIndex.hasParent()) {
                 tex = getDefaultTexture();
                 break;
             }
 
-            // If we have a parent, calculate the UV offset and scale from the tileIndex
+            // If we have a parent, calculate the UV offset and scale from the chunkIndex
             else {
                 uvScale *= 0.5;
                 uvOffset *= 0.5;
 
-                if (tileIndex.isEastChild()) {
+                if (chunkIndex.isEastChild()) {
                     uvOffset.x += 0.5;
                 }
 
                 // In OpenGL, positive y direction is up
-                if (tileIndex.isNorthChild()) {
+                if (chunkIndex.isNorthChild()) {
                     uvOffset.y += 0.5;
                 }
 
-                tileIndex = tileIndex.parent();
+                chunkIndex = chunkIndex.parent();
             }
         }
         
         return { tex, uvOffset, uvScale };
     }
 
-    std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(GeodeticTileIndex tileIndex) {
+    std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
         
-        HashKey hashkey = tileIndex.hashKey();
+        HashKey hashkey = chunkIndex.hashKey();
         
         if (_tileCache.exist(hashkey)) {
             return _tileCache.get(hashkey);
@@ -180,7 +180,7 @@ namespace openspace {
         else {
             // enque load job
             std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-                new TextureTileLoadJob(this, tileIndex));
+                new TextureTileLoadJob(this, chunkIndex));
 
             _tileLoadManager.enqueueJob(job);
 
@@ -197,7 +197,7 @@ namespace openspace {
     }
 
     std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
-        const GeodeticTileIndex& tileIndex) {
+        const ChunkIndex& chunkIndex) {
         
         // We assume here that all rasterbands have the same data type
         GDALDataType gdalType = _gdalDataSet->GetRasterBand(1)->GetRasterDataType();
@@ -207,44 +207,46 @@ namespace openspace {
         case GDT_Byte:
             return _uByteConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_UInt16:
             return _uShortConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Int16:
             return _shortConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_UInt32:
             return _uIntConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Int32:
             return _intConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Float32:
             return _floatConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
+
             break;
         case GDT_Float64:
             return _doubleConverter.getUninitializedTextureTile(
                 _gdalDataSet,
-                tileIndex,
+                chunkIndex,
                 _tileLevelDifference);
+
             break;
         default:
             LERROR("GDAL data type unknown to OpenGL: " << gdalType);

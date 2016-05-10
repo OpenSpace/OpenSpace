@@ -56,7 +56,7 @@ namespace openspace {
 			Without the tile being smaller than the patch in lat-lon space.
 			The tile is at least as big as the patch.
 		*/
-		GeodeticTileIndex getTileIndex(const GeodeticPatch& patch);
+        ChunkIndex getChunkIndex(const GeodeticPatch& patch);
 
 		/**
 			Returns a texture that can be used for the specified patch
@@ -68,14 +68,14 @@ namespace openspace {
 			to right and top to bottom while the texture coordinates and the latlon
 			coordinates reaches from left to right and bottom to top.
 		*/
-		std::shared_ptr<Texture> getTile(const GeodeticTileIndex& tileIndex);
+		std::shared_ptr<Texture> getTile(const ChunkIndex& chunkIndex);
 
 		/**
 			A tile can be defined with a tile index or a LatLonPatch which defines
 			the position and the size of the tile.
 		*/
 		GeodeticPatch getTilePositionAndScale(
-			const GeodeticTileIndex& tileIndex);
+			const ChunkIndex& chunkIndex);
 
 		/**
 			A transformation (translation and scaling) from the texture space of a patch
@@ -83,7 +83,7 @@ namespace openspace {
 		*/
 		glm::mat3 getUvTransformationPatchToTile( 
 			GeodeticPatch patch,
-			const GeodeticTileIndex& tileIndex);
+			const ChunkIndex& chunkIndex);
 
 		/**
 			Overloaded function

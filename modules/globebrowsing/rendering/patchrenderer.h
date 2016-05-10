@@ -39,6 +39,8 @@
 #include <modules/globebrowsing/other/texturetileset.h>
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
+#include <modules/globebrowsing/globes/chunkindex.h>
+
 
 namespace ghoul {
 namespace opengl {
@@ -85,7 +87,7 @@ namespace openspace {
             const GeodeticPatch& patch, 
             const RenderData& data, 
             const Ellipsoid& ellipsoid,
-            const GeodeticTileIndex& ti);
+            const ChunkIndex& chunkIndex);
     private:
         shared_ptr<Grid> _grid;
     };

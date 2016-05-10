@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,43 +22,85 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Colortexture coverage
-uniform sampler2D textureSamplerColor;
-uniform vec2 colorSamplingScale;
-uniform vec2 colorSamplingOffset;
+#ifndef __CHUNK_INDEX_H__
+#define __CHUNK_INDEX_H__
 
-in vec4 vs_position;
-in vec3 fs_position;
-in vec2 fs_uv;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
-
-vec4 borderOverlay(vec2 uv, vec3 borderColor, float borderSize){
-
-	vec2 uvOffset = uv - vec2(0.5);
-	float thres = 0.5 - borderSize/2;
-	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-	vec3 color = isBorder ? borderColor : vec3(0);
-	return vec4(color, 0);
-}
+#include <glm/glm.hpp>
+#include <vector>
 
 
 
-Fragment getFragment() {
-	Fragment frag;
 
-	vec2 samplePos = colorSamplingScale*fs_uv + colorSamplingOffset;
-	frag.color = texture(textureSamplerColor, samplePos);
+namespace openspace {
+    
 
-	// Sample position overlay
-	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
+class Geodetic2;
 
-	// Border overlay
-	frag.color = frag.color + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
+enum Quad {
+    NORTH_WEST,
+    NORTH_EAST,
+    SOUTH_WEST,
+    SOUTH_EAST
+};
 
-	frag.depth = vs_position.w;
 
-	return frag;
-}
 
+using HashKey = unsigned long;
+
+
+struct ChunkIndex {
+
+
+    int x, y, level;
+    
+
+    ChunkIndex() : x(0), y(0), level(0) { }
+    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
+    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
+    ChunkIndex(const Geodetic2& point, int level);
+
+    std::vector<ChunkIndex> childIndices() const;
+
+    bool hasParent() const {
+        return level > 0;
+    }
+
+    ChunkIndex parent() const;
+
+    bool isWestChild() const {
+        return x % 2 == 0;
+    }
+
+    bool isEastChild() const {
+        return x % 2 == 1;
+    }
+
+    bool isNorthChild() const {
+        return y % 2 == 0;
+    }
+
+    bool isSouthChild() const {
+        return y % 2 == 1;
+    }
+
+
+    /**
+    Gets the tile at a specified offset from this tile.
+    Accepts delta indices ranging from [-2^level, Infinity[
+    */
+    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
+
+    HashKey hashKey() const;
+
+    bool operator==(const ChunkIndex& other) const;
+};
+
+
+std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
+
+
+} // namespace openspace
+
+
+
+#endif // __CHUNK_INDEX_H__

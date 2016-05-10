@@ -120,11 +120,10 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
 void ChunkNode::internalRender(const RenderData& data, ChunkIndex& traverseData) {
     if (isLeaf()) {
         if (_isVisible) {
-            GeodeticTileIndex ti = { traverseData.x, traverseData.y, traverseData.level };
 
             LatLonPatchRenderer& patchRenderer = _owner.getPatchRenderer();
 
-            patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), ti);
+            patchRenderer.renderPatch(_patch, data, _owner.ellipsoid(), traverseData);
             ChunkNode::renderedPatches++;
         }
     }
@@ -181,11 +180,13 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
         return traverseData.level - 1;
     }
     */
+
     if (!HorizonCuller::isVisible(
         data,
         _patch,
         _owner.ellipsoid(),
-        8700)) {
+        8700)) 
+    {
         _isVisible = false;
         return traverseData.level - 1;
     }

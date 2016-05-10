@@ -22,79 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
-
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <ostream>
-
 #include <modules/globebrowsing/globes/chunkindex.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
-
-// forward declaration
-namespace openspace {
-    class ChunkLodGlobe;
+namespace {
+    const std::string _loggerCat = "ChunkIndex";
 }
 
-
 namespace openspace {
 
+    /**
+    Creates the geodetic tile index for the Geodetic patch that covers the
+    point p at the specified level
+    */
+    ChunkIndex::ChunkIndex(const Geodetic2& point, int level)
+    : level(level) {
+        int numIndicesAtLevel = 1 << level;
+        double u = 0.5 + point.lon / (2 * M_PI);
+        double v = 0.25 - point.lat / (2 * M_PI);
+        double xIndexSpace = u * numIndicesAtLevel;
+        double yIndexSpace = v * numIndicesAtLevel;
+
+        x = floor(xIndexSpace);
+        y = floor(yIndexSpace);
+    }
 
 
-class ChunkNode {
-public:
-    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
-    ~ChunkNode();
+    std::vector<ChunkIndex> ChunkIndex::childIndices() const {
+        return{
+            { 2 * x + 0, 2 * y + 0, level + 1 },
+            { 2 * x + 1, 2 * y + 0, level + 1 },
+            { 2 * x + 0, 2 * y + 1, level + 1 },
+            { 2 * x + 1, 2 * y + 1, level + 1 },
+        };
+    }
 
+    ChunkIndex ChunkIndex::parent() const {
+        //ghoul_assert(level > 0, "tile at level 0 has no parent!");
+        return ChunkIndex(x / 2, y / 2, level - 1);
+    }
 
-    void split(int depth = 1);
-    void merge();
-
-    bool isRoot() const;
-    bool isLeaf() const;
-    
-    
-    const ChunkNode& getChild(Quad quad) const;
-
-    void render(const RenderData& data, ChunkIndex);
-
-    static int instanceCount;
-    static int renderedPatches;
-
-
-private:
-
-    void internalRender(const RenderData& data, ChunkIndex&);
-    bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
 
     /**
-    Uses horizon culling, frustum culling and distance to camera to determine a
-    desired level.
-    In the current implementation of the horizon culling and the distance to the
-    camera, the closer the ellipsoid is to a
-    sphere, the better this will make the splitting. Using the minimum radius to
-    be safe. This means that if the ellipsoid has high difference between radii,
-    splitting might accur even though it is not needed.
+    Gets the tile at a specified offset from this tile.
+    Accepts delta indices ranging from [-2^level, Infinity[
     */
-    int calculateDesiredLevelAndUpdateIsVisible(
-        const RenderData& data,
-        const ChunkIndex& traverseData);
-    
-    
-    ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
-    ChunkLodGlobe& _owner;
-    GeodeticPatch _patch;
-    bool _isVisible;
-};
+    ChunkIndex ChunkIndex::getRelatedTile(int deltaX, int deltaY) const {
+        int indicesAtThisLevel = 1 << level;
+        int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
+        int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
+        return ChunkIndex(newX, newY, level);
+    }
+
+    HashKey ChunkIndex::hashKey() const {
+        return x ^ (y << 16) ^ (level << 24);
+    }
+
+    bool ChunkIndex::operator==(const ChunkIndex& other) const {
+        return x == other.x && y == other.y && level == other.level;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const ChunkIndex& ci) {
+        os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
+        return os;
+    }
+
 
 } // namespace openspace
-
-
-
-#endif // __QUADTREE_H__
