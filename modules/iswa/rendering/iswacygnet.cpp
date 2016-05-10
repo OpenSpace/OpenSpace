@@ -27,6 +27,8 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
+#include <openspace/util/transformationmanager.h>
+
 
 namespace openspace{
 
@@ -175,7 +177,7 @@ void IswaCygnet::update(const UpdateData& data){
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 
-     _stateMatrix = IswaManager::ref().getTransform(_data->frame, "GALACTIC", _openSpaceTime);
+     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
     // glm::dmat3 spiceMatrix    = SpiceManager::ref().positionTransformMatrix("J2000", "GALACTIC", _openSpaceTime);
      // = spiceMatrix*kameleonMatrix;
 

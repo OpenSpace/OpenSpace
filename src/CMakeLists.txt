@@ -89,6 +89,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
 )
 
 set(OPENSPACE_HEADER
@@ -166,6 +167,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
 )
 
 # Place files into source groups

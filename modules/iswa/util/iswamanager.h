@@ -85,8 +85,6 @@ public:
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);
 
-    glm::dmat3 getTransform(std::string from, std::string to, double et);
-
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     std::string iswaUrl(int id, std::string type = "image");
