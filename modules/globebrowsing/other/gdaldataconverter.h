@@ -49,7 +49,6 @@ namespace openspace {
         };
 
         UninitializedTextureTile(
-
             void* data,
             glm::uvec3 dims,
             TextureFormat format,
@@ -82,7 +81,7 @@ namespace openspace {
         std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
             GDALDataset * dataSet,
             GeodeticTileIndex tileIndex,
-            int minNumPixelsRequired);
+            int tileLevelDifference);
 
         UninitializedTextureTile::TextureFormat getTextureFormat(
             int rasterCount,

@@ -47,7 +47,7 @@ namespace openspace {
     std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
         GDALDataset* dataSet,
         GeodeticTileIndex tileIndex,
-        int minNumPixelsRequired) 
+        int tileLevelDifference)
     {
         int nRasters = dataSet->GetRasterCount();
 
@@ -74,7 +74,8 @@ namespace openspace {
 
         // Calculate a suitable overview to choose from the GDAL dataset
         int minNumPixels0 = glm::min(numPixels0.x, numPixels0.y);
-        int ov = log2(minNumPixels0) - log2(minNumPixelsRequired + 1);
+        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
+        int ov = log2(minNumPixels0) - log2(sizeLevel0 + 1) - tileLevelDifference;
         ov = glm::clamp(ov, 0, numOverviews - 1);
 
         // Convert the interval [pixelStart0, pixelEnd0] to pixel space at 

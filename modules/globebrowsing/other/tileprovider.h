@@ -45,18 +45,17 @@
 
 namespace openspace {
     using namespace ghoul::opengl;
-
-
-
-
-    struct Tile {
-        std::shared_ptr<Texture> texture;
+    
+    struct TileTextureTransform
+    {
         glm::vec2 uvOffset;
         glm::vec2 uvScale;
     };
 
-
-    
+    struct Tile {
+        std::shared_ptr<Texture> texture;
+        TileTextureTransform transform;
+    };
 
     /**
         Provides tiles through GDAL datasets which can be defined with xml files
@@ -110,7 +109,7 @@ namespace openspace {
         ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
 
         std::shared_ptr<Texture> _defaultTexture;
-        int _minimumPixelSize;
+        int _tileLevelDifference;
     };
 
 }  // namespace openspace
