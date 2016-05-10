@@ -48,7 +48,7 @@ namespace openspace {
 
     }
 
-    GeodeticTileIndex PatchCoverageProvider::getTileIndex(const GeodeticPatch& patch) {
+    ChunkIndex PatchCoverageProvider::getChunkIndex(const GeodeticPatch& patch) {
         // Calculate the level of the index depending on the size of the incoming patch.
         // The level is as big as possible (as far down as possible) but it can't be
         // too big since at maximum four tiles should be used to cover a patch
@@ -63,24 +63,26 @@ namespace openspace {
         int nIndices = pow(2, level);
         Geodetic2 tileSize = _sizeLevel0 / nIndices;
         Geodetic2 nw = patch.northWestCorner();
-        glm::ivec2 tileIndexXY =
+        glm::ivec2 chunkIndexXY =
             glm::floor((nw.toLonLatVec2() - _offsetLevel0.toLonLatVec2()) / tileSize.toLonLatVec2());
 
         // Flip y since indices increase from top to bottom
-        tileIndexXY.y = nIndices - 1 - tileIndexXY.y;
+        chunkIndexXY.y = nIndices - 1 - chunkIndexXY.y;
 
         // Create the tileindex
-        GeodeticTileIndex tileIndex = { tileIndexXY.x, tileIndexXY.y, level };
-        return tileIndex;
+        ChunkIndex chunkIndex = { chunkIndexXY.x, chunkIndexXY.y, level };
+        return chunkIndex;
     }
 
     glm::mat3 PatchCoverageProvider::getUvTransformationPatchToTile(
         GeodeticPatch patch,
-        const GeodeticTileIndex& tileIndex)
+        const ChunkIndex& chunkIndex)
     {
-        GeodeticPatch tile(tileIndex);
-        return getUvTransformationPatchToTile(patch, tile);
+        GeodeticPatch otherPatch(chunkIndex);
+        return getUvTransformationPatchToTile(patch, otherPatch);
     }
+
+
 
     glm::mat3 PatchCoverageProvider::getUvTransformationPatchToTile(
         GeodeticPatch patch,
@@ -108,6 +110,8 @@ namespace openspace {
         return invTileScale * globalTranslation * patchScale;
     }
 
+
+
     PatchCoverage PatchCoverageProvider::getCoverage(
         GeodeticPatch patch,
         std::shared_ptr<TileProvider> tileProvider)
@@ -118,7 +122,7 @@ namespace openspace {
 
         Geodetic2 startPoint = patch.northWestCorner();
         int level = (int) patch.minimumTileLevel();
-        GeodeticTileIndex startIndex = GeodeticTileIndex(startPoint, level);
+        ChunkIndex startIndex = ChunkIndex(startPoint, level);
 
         for (int y = 0; y < numTilesInCoverageY; y++)
         {
@@ -127,38 +131,38 @@ namespace openspace {
                 int linearIdx = x + y * numTilesInCoverageX;
 
                 // May return negative indices
-                GeodeticTileIndex tileIndex = getTileIndex(patch);
-                // Offset tileIndex
-                tileIndex.x += x;
-                tileIndex.y += y;
+                ChunkIndex chunkIndex = getChunkIndex(patch);
+                // Offset chunkIndex
+                chunkIndex.x += x;
+                chunkIndex.y += y;
 
 
                 // If the tile index is negative or too big it needs to wrap around
-                int nIndices = pow(2, tileIndex.level);
-                GeodeticTileIndex positiveTileIndex = GeodeticTileIndex(tileIndex);
-                positiveTileIndex.x += (tileIndex.x < 0) ? nIndices : ((tileIndex.x > nIndices - 1) ? -nIndices : 0);
-                positiveTileIndex.y += (tileIndex.y < 0) ? nIndices : ((tileIndex.y > nIndices - 1) ? -nIndices : 0);
+                int nIndices = pow(2, chunkIndex.level);
+                ChunkIndex positiveChunkIndex = ChunkIndex(chunkIndex);
+                positiveChunkIndex.x += (chunkIndex.x < 0) ? nIndices : ((chunkIndex.x > nIndices - 1) ? -nIndices : 0);
+                positiveChunkIndex.y += (chunkIndex.y < 0) ? nIndices : ((chunkIndex.y > nIndices - 1) ? -nIndices : 0);
 
 
 
-                int numLevelsToLoop = tileIndex.level;
+                int numLevelsToLoop = chunkIndex.level;
                 // Start at the highest level and go down if the texture don't exist
                 for (int j = numLevelsToLoop; j >= 0; j--)
                 {
                     // Try if the texture exists
-                    std::shared_ptr<Texture> tile = tileProvider->getOrStartFetchingTile(positiveTileIndex);
+                    std::shared_ptr<Texture> tile = tileProvider->getOrStartFetchingTile(positiveChunkIndex);
                     if (tile == nullptr)
                     { // If it doesn't exist, go down a level
-                        tileIndex.x /= 2;
-                        tileIndex.y /= 2;
-                        tileIndex.level -= 1;
+                        chunkIndex.x /= 2;
+                        chunkIndex.y /= 2;
+                        chunkIndex.level -= 1;
                     }
                     else
                     { // A texture was found, put it in the data structure to return
                         patchCoverageToReturn.textureTransformPairs[linearIdx].first =
                             tile;
                         patchCoverageToReturn.textureTransformPairs[linearIdx].second =
-                            getUvTransformationPatchToTile(patch, tileIndex);
+                            getUvTransformationPatchToTile(patch, chunkIndex);
                     }
                 }
                 // If the texture still doesn't exist put a temporary texture
@@ -167,7 +171,7 @@ namespace openspace {
                     patchCoverageToReturn.textureTransformPairs[linearIdx].first =
                         tileProvider->getDefaultTexture();
                     patchCoverageToReturn.textureTransformPairs[linearIdx].second =
-                        getUvTransformationPatchToTile(patch, tileIndex);
+                        getUvTransformationPatchToTile(patch, chunkIndex);
                 }
             }
         }

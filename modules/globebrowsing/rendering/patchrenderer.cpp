@@ -105,7 +105,7 @@ namespace openspace {
         const GeodeticPatch& patch,
         const RenderData& data,
         const Ellipsoid& ellipsoid,
-        const GeodeticTileIndex& tileIndex)
+        const ChunkIndex& chunkIndex)
     {
         using namespace glm;
         
@@ -125,7 +125,7 @@ namespace openspace {
         auto tileProviderHeight = heightMapProviders.begin()->second;
 
         // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getMostHiResTile(tileIndex);
+        Tile heightTile = tileProviderHeight->getMostHiResTile(chunkIndex);
 
         
         // Bind and use the texture
@@ -143,7 +143,7 @@ namespace openspace {
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getMostHiResTile(tileIndex);
+        Tile colorTile = tileProviderColor->getMostHiResTile(chunkIndex);
 
 
         // Bind and use the texture

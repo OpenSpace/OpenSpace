@@ -67,9 +67,9 @@ namespace openspace {
         TileProvider(const std::string& fileName, int tileCacheSize, int minimumPixelSize);
         ~TileProvider();
 
-        Tile getMostHiResTile(GeodeticTileIndex tileIndex);
+        Tile getMostHiResTile(ChunkIndex chunkIndex);
 
-        std::shared_ptr<Texture> getOrStartFetchingTile(GeodeticTileIndex tileIndex);
+        std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
 
         std::shared_ptr<Texture> getDefaultTexture();
 
@@ -83,7 +83,7 @@ namespace openspace {
             Fetches all the needeed texture data from the GDAL dataset.
         */
         std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
-            const GeodeticTileIndex& tileIndex);
+            const ChunkIndex& chunkIndex);
         
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
@@ -120,16 +120,16 @@ namespace openspace {
     using namespace ghoul::opengl;
 
     struct TextureTileLoadJob : public Job<UninitializedTextureTile> {
-        TextureTileLoadJob(TileProvider * tileProvider, const GeodeticTileIndex& tileIndex)
+        TextureTileLoadJob(TileProvider * tileProvider, const ChunkIndex& chunkIndex)
             : _tileProvider(tileProvider)
-            , _tileIndex(tileIndex) {
+            , _chunkIndex(chunkIndex) {
 
         }
 
         virtual ~TextureTileLoadJob() { }
 
         virtual void execute() {
-            _uninitedTexture = _tileProvider->getUninitializedTextureTile(_tileIndex);
+            _uninitedTexture = _tileProvider->getUninitializedTextureTile(_chunkIndex);
         }
 
         virtual std::shared_ptr<UninitializedTextureTile> product() {
@@ -138,7 +138,7 @@ namespace openspace {
 
 
     private:
-        GeodeticTileIndex _tileIndex;
+        ChunkIndex _chunkIndex;
         TileProvider * _tileProvider;
         std::shared_ptr<UninitializedTextureTile> _uninitedTexture;
     };

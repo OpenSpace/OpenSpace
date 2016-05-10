@@ -58,8 +58,7 @@ namespace openspace {
         , maxSplitDepth(22)
     {
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            10,
-            10,
+            10,10,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
@@ -93,11 +92,11 @@ namespace openspace {
         ChunkNode::renderedPatches = 0;        
 
 
-        ChunkIndex leftRootTileIndex = { 0, 0, 1 };
-        _leftRoot->render(data, leftRootTileIndex);
+        ChunkIndex leftRootChunkIndex = { 0, 0, 1 };
+        _leftRoot->render(data, leftRootChunkIndex);
 
-        ChunkIndex rightRootTileIndex = { 1, 0, 1 };
-        _rightRoot->render(data, rightRootTileIndex);
+        ChunkIndex rightRootChunkIndex = { 1, 0, 1 };
+        _rightRoot->render(data, rightRootChunkIndex);
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 

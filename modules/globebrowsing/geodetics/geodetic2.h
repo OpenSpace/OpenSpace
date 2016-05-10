@@ -33,6 +33,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <modules/globebrowsing/globes/chunkindex.h>
+
 #include <ghoul/misc/assert.h>
 
 
@@ -82,96 +84,7 @@ struct Geodetic3 {
     Scalar height;
 };
 
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-//									TILE INDEX										//
-//////////////////////////////////////////////////////////////////////////////////////
-
-
-    
-using HashKey = unsigned long;
-
-
-struct GeodeticTileIndex {
-
-    int x, y, level;
-
-    GeodeticTileIndex()
-    : x(0), y(0), level(0) {
-
-    }
-
-    GeodeticTileIndex(int x, int y, int level) 
-    : x(x), y(y), level(level) {
-
-    }
-
-    GeodeticTileIndex(const GeodeticTileIndex& other)
-    : x(other.x), y(other.y), level(other.level) {
-
-    }
-
-    /**
-        Creates the geodetic tile index for the Geodetic patch that covers the 
-        point p at the specified level
-    */
-    GeodeticTileIndex(const Geodetic2& point, int level)
-        : level(level) {
-        int numIndicesAtLevel = 1 << level;
-        double u = 0.5 + point.lon / (2*M_PI);
-        double v = 0.25 - point.lat / (2*M_PI);
-        double xIndexSpace = u * numIndicesAtLevel;
-        double yIndexSpace = v * numIndicesAtLevel;
-
-        x = floor(xIndexSpace);
-        y = floor(yIndexSpace);
-    }
-
-    GeodeticTileIndex parent() const {
-        ghoul_assert(level > 0, "tile at level 0 has no parent!");
-        return GeodeticTileIndex(x / 2, y / 2, level - 1);
-    }
-
-    bool isWestChild() const {
-        return x % 2 == 0;
-    }
-
-    bool isEastChild() const {
-        return x % 2 == 1;
-    }
-
-    bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    bool isSouthChild() const {
-        return y % 2 == 1;
-    }
-
-    bool hasParent() const {
-        return level > 0;
-    }
-
-    /**
-        Gets the tile at a specified offset from this tile. 
-        Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    GeodeticTileIndex getRelatedTile(int deltaX, int deltaY) const {
-        int indicesAtThisLevel = 1 << level;
-        int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
-        int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
-        return GeodeticTileIndex(newX, newY, level);
-    }
-
-    HashKey hashKey() const;
-
-    bool operator==(const GeodeticTileIndex& other) const;
-};
-
-std::ostream& operator<<(std::ostream& os, const GeodeticTileIndex& ti);
+ 
 
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -191,7 +104,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch);
 
-    GeodeticPatch(const GeodeticTileIndex& tileIndex);
+    GeodeticPatch(const ChunkIndex& chunkIndex);
 
 
     void setCenter(const Geodetic2&);

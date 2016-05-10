@@ -22,79 +22,85 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
+#ifndef __CHUNK_INDEX_H__
+#define __CHUNK_INDEX_H__
 
 #include <glm/glm.hpp>
 #include <vector>
-#include <memory>
-#include <ostream>
-
-#include <modules/globebrowsing/globes/chunkindex.h>
-#include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
-
-// forward declaration
-namespace openspace {
-    class ChunkLodGlobe;
-}
 
 
 namespace openspace {
-
-
-
-class ChunkNode {
-public:
-    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
-    ~ChunkNode();
-
-
-    void split(int depth = 1);
-    void merge();
-
-    bool isRoot() const;
-    bool isLeaf() const;
     
+
+class Geodetic2;
+
+enum Quad {
+    NORTH_WEST,
+    NORTH_EAST,
+    SOUTH_WEST,
+    SOUTH_EAST
+};
+
+
+
+using HashKey = unsigned long;
+
+
+struct ChunkIndex {
+
+
+    int x, y, level;
     
-    const ChunkNode& getChild(Quad quad) const;
 
-    void render(const RenderData& data, ChunkIndex);
+    ChunkIndex() : x(0), y(0), level(0) { }
+    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
+    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
+    ChunkIndex(const Geodetic2& point, int level);
 
-    static int instanceCount;
-    static int renderedPatches;
+    std::vector<ChunkIndex> childIndices() const;
 
+    bool hasParent() const {
+        return level > 0;
+    }
 
-private:
+    ChunkIndex parent() const;
 
-    void internalRender(const RenderData& data, ChunkIndex&);
-    bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
+    bool isWestChild() const {
+        return x % 2 == 0;
+    }
+
+    bool isEastChild() const {
+        return x % 2 == 1;
+    }
+
+    bool isNorthChild() const {
+        return y % 2 == 0;
+    }
+
+    bool isSouthChild() const {
+        return y % 2 == 1;
+    }
+
 
     /**
-    Uses horizon culling, frustum culling and distance to camera to determine a
-    desired level.
-    In the current implementation of the horizon culling and the distance to the
-    camera, the closer the ellipsoid is to a
-    sphere, the better this will make the splitting. Using the minimum radius to
-    be safe. This means that if the ellipsoid has high difference between radii,
-    splitting might accur even though it is not needed.
+    Gets the tile at a specified offset from this tile.
+    Accepts delta indices ranging from [-2^level, Infinity[
     */
-    int calculateDesiredLevelAndUpdateIsVisible(
-        const RenderData& data,
-        const ChunkIndex& traverseData);
-    
-    
-    ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
-    ChunkLodGlobe& _owner;
-    GeodeticPatch _patch;
-    bool _isVisible;
+    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
+
+    HashKey hashKey() const;
+
+    bool operator==(const ChunkIndex& other) const;
 };
+
+
+std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
+
 
 } // namespace openspace
 
 
 
-#endif // __QUADTREE_H__
+#endif // __CHUNK_INDEX_H__

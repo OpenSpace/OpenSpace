@@ -27,6 +27,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <modules/globebrowsing/globes/chunkindex.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <ghoul/opengl/texture.h>
@@ -61,7 +62,7 @@ namespace openspace {
             Without the tile being smaller than the patch in lat-lon space.
             The tile is at least as big as the patch.
         */
-        GeodeticTileIndex getTileIndex(const GeodeticPatch& patch);
+        ChunkIndex getChunkIndex(const GeodeticPatch& patch);
 
         /**
             A transformation (translation and scaling) from the texture space of a patch
@@ -69,7 +70,7 @@ namespace openspace {
         */
         glm::mat3 getUvTransformationPatchToTile( 
             GeodeticPatch patch,
-            const GeodeticTileIndex& tileIndex);
+            const ChunkIndex& chunkIndex);
 
         /**
             Overloaded function

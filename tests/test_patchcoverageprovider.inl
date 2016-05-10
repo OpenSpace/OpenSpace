@@ -38,8 +38,8 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWithBigPatch) {
 
     // Allocate data
     GeodeticPatch patch(0,0,0,0);
-    GeodeticTileIndex ti;
-    GeodeticTileIndex tiExpected;
+    ChunkIndex ci;
+    ChunkIndex ciExpected;
 
     // Create a provider with 1 in depth
     PatchCoverageProvider provider(
@@ -53,10 +53,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = {0, 0, 1};
+    ci = provider.getTileIndex(patch);
+    ciExpected = {0, 0, 1};
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 
     // Patch positioned at the border of 1 in x index
     patch = GeodeticPatch(
@@ -64,10 +64,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize);
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 1, 0, 1 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 1, 0, 1 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 
     // Patch positioned at a little less than the border of 1 in x index
     patch = GeodeticPatch(
@@ -75,18 +75,18 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize);
 
                                         // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 0, 0, 1 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 0, 0, 1 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 }
 
 TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithBigPatch) {
 
     // Allocate data
     GeodeticPatch patch(0, 0, 0, 0);
-    GeodeticTileIndex ti;
-    GeodeticTileIndex tiExpected;
+    ChunkIndex ci;
+    ChunkIndex ciExpected;
 
     // Create a provider with 3 in depth
     // We still expect the same result since the patches are big
@@ -101,10 +101,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 0, 0, 1 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 0, 0, 1 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 
     // Patch positioned at the border of 1 in x index
     patch = GeodeticPatch(
@@ -112,10 +112,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize);
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 1, 0, 1 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 1, 0, 1 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 
     // Patch positioned at a little less than the border of 1 in x index
     patch = GeodeticPatch(
@@ -123,10 +123,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithBigPatch) {
         Geodetic2(M_PI / 2, M_PI / 2)); // Halfsize);
 
                                         // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 0, 0, 1 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 0, 0, 1 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 }
 
 
@@ -134,8 +134,8 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithSmallPatch) {
 
     // Allocate data
     GeodeticPatch patch(0, 0, 0, 0);
-    GeodeticTileIndex ti;
-    GeodeticTileIndex tiExpected;
+    ChunkIndex ci;
+    ChunkIndex ciExpected;
 
     // Create a provider with 3 in depth
     // We still expect the same result since the patches are big
@@ -150,10 +150,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithSmallPatch) {
         Geodetic2(M_PI / 8, M_PI / 8)); // Halfsize
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 3, 3, 3 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 3, 3, 3 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 
     // A small patch near edge case
     patch = GeodeticPatch(
@@ -161,8 +161,8 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithSmallPatch) {
         Geodetic2(M_PI / 8, M_PI / 8)); // Halfsize
 
     // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 5, 1, 3 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 5, 1, 3 };
 
     // A small patch near edge case other side
     patch = GeodeticPatch(
@@ -170,10 +170,10 @@ TEST_F(PatchCoverageProviderTest, getTileIndexHigherDepthWithSmallPatch) {
         Geodetic2(M_PI / 8, M_PI / 8)); // Halfsize
 
                                         // Get its index
-    ti = provider.getTileIndex(patch);
-    tiExpected = { 6, 2, 3 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { 6, 2, 3 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 }
 
 
@@ -181,8 +181,8 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWrapAround) {
 
     // Allocate data
     GeodeticPatch patch(0, 0, 0, 0);
-    GeodeticTileIndex ti;
-    GeodeticTileIndex tiExpected;
+    ChunkIndex ci;
+    ChunkIndex ciExpected;
 
     // Create a provider with 2 in depth
     // We still expect the same result since the patches are big
@@ -198,8 +198,8 @@ TEST_F(PatchCoverageProviderTest, getTileIndexWrapAround) {
 
     // Get its index
     // We want negative indices
-    ti = provider.getTileIndex(patch);
-    tiExpected = { -1, 1, 2 };
+    ci = provider.getTileIndex(patch);
+    ciExpected = { -1, 1, 2 };
 
-    ASSERT_EQ(tiExpected, ti);
+    ASSERT_EQ(ciExpected, ci);
 }

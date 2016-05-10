@@ -46,7 +46,7 @@ namespace openspace {
     template<class T>
     std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
         GDALDataset* dataSet,
-        GeodeticTileIndex tileIndex,
+        ChunkIndex chunkIndex,
         int minNumPixelsRequired) 
     {
         int nRasters = dataSet->GetRasterCount();
@@ -63,11 +63,11 @@ namespace openspace {
         //int xSize0 = firstBand->GetOverview(0)->GetXSize();
         //int ySize0 = firstBand->GetOverview(0)->GetYSize();
 
-        // Generate a patch from the tileIndex, extract the bounds which
+        // Generate a patch from the chunkIndex, extract the bounds which
         // are used to calculated where in the GDAL data set to read data. 
         // pixelStart0 and pixelEnd0 defines the interval in the pixel space 
         // at overview 0
-        GeodeticPatch patch = GeodeticPatch(tileIndex);
+        GeodeticPatch patch = GeodeticPatch(chunkIndex);
         glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.northWestCorner());
         glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.southEastCorner());
         glm::uvec2 numPixels0 = pixelEnd0 - pixelStart0;
@@ -114,7 +114,7 @@ namespace openspace {
                 0);                     // Line spacing
 
             if (err != CE_None) {
-                //LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
+                LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
             }
         }
         // GDAL reads image data top to bottom. We want the opposite.
@@ -137,7 +137,7 @@ namespace openspace {
             dims,
             textrureFormat,
             glType,
-            tileIndex);
+            chunkIndex);
         std::shared_ptr<UninitializedTextureTile> uninitedTex =
             std::shared_ptr<UninitializedTextureTile>(uninitedTexPtr);
         return uninitedTex;

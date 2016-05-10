@@ -32,6 +32,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
@@ -64,6 +65,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunklodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp

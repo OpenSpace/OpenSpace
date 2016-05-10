@@ -83,27 +83,6 @@ namespace openspace {
     }
 
 
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //									TILE INDEX										//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    HashKey GeodeticTileIndex::hashKey() const {
-        return x ^ (y << 16) ^ (level << 24);
-    }
-
-    bool GeodeticTileIndex::operator==(const GeodeticTileIndex& other) const {
-        return x == other.x && y == other.y && level == other.level;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const GeodeticTileIndex& ti)
-    {
-        os << "{ x = " << ti.x << ", y = " << ti.y << ", level = " << ti.level << " }";
-        return os;
-    }
-
     //////////////////////////////////////////////////////////////////////////////////////
     //							 	GEODETICPATCH										//
     //////////////////////////////////////////////////////////////////////////////////////
@@ -136,10 +115,10 @@ namespace openspace {
     }
 
 
-    GeodeticPatch::GeodeticPatch(const GeodeticTileIndex& tileIndex) {
-        Scalar deltaLat = (2 * M_PI) / ((double)(1 << tileIndex.level));
-        Scalar deltaLon = (2 * M_PI) / ((double)(1 << tileIndex.level));
-        Geodetic2 nwCorner(M_PI / 2 - deltaLat * tileIndex.y, -M_PI + deltaLon * tileIndex.x);
+    GeodeticPatch::GeodeticPatch(const ChunkIndex& chunkIndex) {
+        Scalar deltaLat = (2 * M_PI) / ((double)(1 << chunkIndex.level));
+        Scalar deltaLon = (2 * M_PI) / ((double)(1 << chunkIndex.level));
+        Geodetic2 nwCorner(M_PI / 2 - deltaLat * chunkIndex.y, -M_PI + deltaLon * chunkIndex.x);
         _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
         _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
     }
