@@ -93,7 +93,7 @@ namespace openspace {
             heightMapDictionary.getValue("FilePath", path);
             std::shared_ptr<TileProvider> heightMapProvider =
                 std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 512));
+                    path, 5000, 256));
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
 

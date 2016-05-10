@@ -204,7 +204,7 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
     Scalar distance = glm::length(cameraToChunk);
     _owner.minDistToCamera = fmin(_owner.minDistToCamera, distance);
 
-    Scalar scaleFactor = 100 * minimumGlobeRadius;
+    Scalar scaleFactor = 10 * minimumGlobeRadius;
     Scalar projectedScaleFactor = scaleFactor / distance;
     int desiredLevel = floor( log2(projectedScaleFactor) );
     return desiredLevel;

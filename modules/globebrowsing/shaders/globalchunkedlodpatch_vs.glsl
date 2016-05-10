@@ -57,7 +57,7 @@ void main()
 
 	vec2 samplePos = heightSamplingScale*in_UV + heightSamplingOffset;
 	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
-	pair.position += pair.normal * sampledHeight * 1e1;
+	pair.position += pair.normal * sampledHeight * pow(2,15);
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 
