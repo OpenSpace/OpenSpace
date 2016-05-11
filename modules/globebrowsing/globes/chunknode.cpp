@@ -96,7 +96,6 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data, ChunkIndex& trav
         return false;
     }
     else {
-        
         int requestedMergeMask = 0;
         std::vector<ChunkIndex> childIndices = traverseData.childIndices();
         for (int i = 0; i < 4; ++i) {
@@ -181,6 +180,11 @@ int ChunkNode::calculateDesiredLevelAndUpdateIsVisible(
     }
     */
 
+    if (traverseData == ChunkIndex(0, 0, 1))
+        int hej = 0;
+
+    LDEBUG("traverseData = " << traverseData);
+
     if (!HorizonCuller::isVisible(
         data,
         _patch,
@@ -231,8 +235,8 @@ void ChunkNode::split(int depth) {
         // Create new chunk nodes
 
         _children[Quad::NORTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, nwBounds, this));
-        _children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, swBounds, this));
         _children[Quad::NORTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, neBounds, this));
+        _children[Quad::SOUTH_WEST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, swBounds, this));
         _children[Quad::SOUTH_EAST] = std::unique_ptr<ChunkNode>(new ChunkNode(_owner, seBounds, this));
     }
 
