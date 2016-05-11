@@ -92,20 +92,39 @@ namespace openspace {
         , _grid(grid)
     {
         _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
-            "GlobalChunkedLodPatch",
+            "GlobalClipMapPatch",
             "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
             "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
         ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
 
+        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
+            "LocalClipMapPatch",
+            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
+            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
+        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
+
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
-
-
-    void ChunkRenderer::renderChunk(const Chunk& chunk, const Ellipsoid& ellipsoid, 
+    void ChunkRenderer::renderChunk(
+        const Chunk& chunk,
+        const Ellipsoid& ellipsoid, 
         const RenderData& data) 
-    
+    {
+        if (chunk.index().level < 10) {
+            renderChunkGlobally(chunk, ellipsoid, data);
+        }
+        else {
+            renderChunkLocally(chunk, ellipsoid, data);
+        }
+    }
+
+    void ChunkRenderer::renderChunkGlobally(
+        const Chunk& chunk,
+        const Ellipsoid& ellipsoid,
+        const RenderData& data)
     {
         using namespace glm;
 
@@ -172,6 +191,96 @@ namespace openspace {
     }
 
 
+    void ChunkRenderer::renderChunkLocally(
+        const Chunk& chunk,
+        const Ellipsoid& ellipsoid,
+        const RenderData& data)
+    {
+        using namespace glm;
+
+        // TODO : Model transform should be fetched as a matrix directly.
+        mat4 modelTransform = translate(mat4(1), data.position.vec3());
+        mat4 viewTransform = data.camera.combinedViewMatrix();
+        mat4 modelViewTransform = viewTransform * modelTransform;
+
+        // activate shader
+        _programObjectLocalRendering->activate();
+
+
+        // For now just pick the first one from height maps
+        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto tileProviderHeight = heightMapProviders.begin()->second;
+
+        // Get the textures that should be used for rendering
+        Tile heightTile = tileProviderHeight->getMostHiResTile(chunk.index());
+
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitHeight;
+        texUnitHeight.activate();
+        heightTile.texture->bind();
+        _programObjectLocalRendering->setUniform("textureSamplerHeight", texUnitHeight);
+        _programObjectLocalRendering->setUniform("heightSamplingScale", heightTile.transform.uvScale);
+        _programObjectLocalRendering->setUniform("heightSamplingOffset", heightTile.transform.uvOffset);
+
+        // Pick the first color texture
+        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto tileProviderColor = colorTextureProviders.begin()->second;
+        Tile colorTile = tileProviderColor->getMostHiResTile(chunk.index());
+
+
+        // Bind and use the texture
+        ghoul::opengl::TextureUnit texUnitColor;
+        texUnitColor.activate();
+        colorTile.texture->bind();
+        _programObjectLocalRendering->setUniform("textureSamplerColor", texUnitColor);
+        _programObjectLocalRendering->setUniform("colorSamplingScale", colorTile.transform.uvScale);
+        _programObjectLocalRendering->setUniform("colorSamplingOffset", colorTile.transform.uvOffset);
+
+
+        Geodetic2 sw = chunk.surfacePatch().southWestCorner();
+        Geodetic2 se = chunk.surfacePatch().southEastCorner();
+        Geodetic2 nw = chunk.surfacePatch().northWestCorner();
+        Geodetic2 ne = chunk.surfacePatch().northEastCorner();
+
+        // Get model space positions of the four control points
+        Vec3 patchSwModelSpace = ellipsoid.geodetic2ToCartesian(sw);
+        Vec3 patchSeModelSpace = ellipsoid.geodetic2ToCartesian(se);
+        Vec3 patchNwModelSpace = ellipsoid.geodetic2ToCartesian(nw);
+        Vec3 patchNeModelSpace = ellipsoid.geodetic2ToCartesian(ne);
+
+        // Transform all control points to camera space
+        Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
+        Vec3 patchSeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSeModelSpace, 1));
+        Vec3 patchNwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNwModelSpace, 1));
+        Vec3 patchNeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNeModelSpace, 1));
+
+        // Send control points to shader
+        _programObjectLocalRendering->setUniform("p00", vec3(patchSwCameraSpace));
+        _programObjectLocalRendering->setUniform("p10", vec3(patchSeCameraSpace));
+        _programObjectLocalRendering->setUniform("p01", vec3(patchNwCameraSpace));
+        _programObjectLocalRendering->setUniform("p11", vec3(patchNeCameraSpace));
+
+        vec3 patchNormalCameraSpace = normalize(
+            cross(patchSeCameraSpace - patchSwCameraSpace,
+                patchNwCameraSpace - patchSwCameraSpace));
+        _programObjectLocalRendering->setUniform(
+            "patchNormalCameraSpace",
+            patchNormalCameraSpace);
+
+        _programObjectLocalRendering->setUniform(
+            "projectionTransform",
+            data.camera.projectionMatrix());
+
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        // render
+        _grid->geometry().drawUsingActiveProgram();
+
+        // disable shader
+        _programObjectLocalRendering->deactivate();
+    }
     
     //////////////////////////////////////////////////////////////////////////////////////
     //								CLIPMAP PATCH RENDERER								//
