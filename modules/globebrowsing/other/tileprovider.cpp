@@ -97,6 +97,7 @@ namespace openspace {
         delete _gdalDataSet;
     }
 
+
     void TileProvider::prerender() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
@@ -107,6 +108,7 @@ namespace openspace {
             _tileCache.put(key, texture);
         }
     }
+
 
     Tile TileProvider::getMostHiResTile(ChunkIndex chunkIndex) {
         std::shared_ptr<Texture> tex = nullptr;

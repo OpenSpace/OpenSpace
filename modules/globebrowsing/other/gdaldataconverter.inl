@@ -48,7 +48,6 @@ namespace openspace {
         GDALDataset* dataSet,
         ChunkIndex chunkIndex,
         int tileLevelDifference)
-
     {
         int nRasters = dataSet->GetRasterCount();
 
@@ -61,8 +60,7 @@ namespace openspace {
 
         // Level = overviewCount - overview (default, levels may be overridden)
         int numOverviews = firstBand->GetOverviewCount();
-        //int xSize0 = firstBand->GetOverview(0)->GetXSize();
-        //int ySize0 = firstBand->GetOverview(0)->GetYSize();
+
 
         // Generate a patch from the chunkIndex, extract the bounds which
         // are used to calculated where in the GDAL data set to read data. 

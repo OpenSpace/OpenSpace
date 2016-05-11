@@ -48,14 +48,8 @@ namespace openspace {
         y = floor(yIndexSpace);
     }
 
-
-    std::vector<ChunkIndex> ChunkIndex::childIndices() const {
-        return{
-            { 2 * x + 0, 2 * y + 0, level + 1 },
-            { 2 * x + 1, 2 * y + 0, level + 1 },
-            { 2 * x + 0, 2 * y + 1, level + 1 },
-            { 2 * x + 1, 2 * y + 1, level + 1 },
-        };
+    ChunkIndex ChunkIndex::child(Quad q) const {
+        return ChunkIndex(2 * x + q % 2, 2 * y + q / 2, level + 1);
     }
 
     ChunkIndex ChunkIndex::parent() const {

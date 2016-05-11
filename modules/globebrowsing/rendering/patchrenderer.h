@@ -39,7 +39,8 @@
 #include <modules/globebrowsing/other/texturetileset.h>
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
-#include <modules/globebrowsing/globes/chunkindex.h>
+#include <modules/globebrowsing/globes/chunknode.h>
+
 
 
 namespace ghoul {
@@ -77,20 +78,19 @@ namespace openspace {
     //							PATCH RENDERER SUBCLASSES								//
     //////////////////////////////////////////////////////////////////////////////////////
 
-    class LatLonPatchRenderer : public PatchRenderer {
+    class ChunkRenderer : public PatchRenderer {
     public:
-        LatLonPatchRenderer(
-            shared_ptr<Grid> grid,
-            shared_ptr<TileProviderManager> tileProviderManager);
+        ChunkRenderer(shared_ptr<Grid> grid, 
+                      shared_ptr<TileProviderManager> tileProviderManager);
 
-        void renderPatch(
-            const GeodeticPatch& patch, 
-            const RenderData& data, 
-            const Ellipsoid& ellipsoid,
-            const ChunkIndex& chunkIndex);
+
+        void ChunkRenderer::renderChunk(const Chunk& chunk, const Ellipsoid& ellipsoid, const RenderData& data);
+
     private:
         shared_ptr<Grid> _grid;
     };
+
+
 
 
 

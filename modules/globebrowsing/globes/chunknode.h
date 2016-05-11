@@ -31,6 +31,7 @@
 #include <ostream>
 
 #include <modules/globebrowsing/globes/chunkindex.h>
+#include <modules/globebrowsing/globes/chunk.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 
@@ -46,9 +47,11 @@ namespace openspace {
 
 
 
+
+
 class ChunkNode {
 public:
-    ChunkNode(ChunkLodGlobe&, const GeodeticPatch&, ChunkNode* parent = nullptr);
+    ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
     ~ChunkNode();
 
 
@@ -61,7 +64,7 @@ public:
     
     const ChunkNode& getChild(Quad quad) const;
 
-    void render(const RenderData& data, ChunkIndex);
+    void render(const RenderData& data);
 
     static int instanceCount;
     static int renderedPatches;
@@ -69,28 +72,16 @@ public:
 
 private:
 
-    void internalRender(const RenderData& data, ChunkIndex&);
-    bool internalUpdateChunkTree(const RenderData& data, ChunkIndex& traverseData);
+    void internalRender(const RenderData& data);
+    bool internalUpdateChunkTree(const RenderData& data);
 
-    /**
-    Uses horizon culling, frustum culling and distance to camera to determine a
-    desired level.
-    In the current implementation of the horizon culling and the distance to the
-    camera, the closer the ellipsoid is to a
-    sphere, the better this will make the splitting. Using the minimum radius to
-    be safe. This means that if the ellipsoid has high difference between radii,
-    splitting might accur even though it is not needed.
-    */
-    int calculateDesiredLevelAndUpdateIsVisible(
-        const RenderData& data,
-        const ChunkIndex& traverseData);
     
+
     
     ChunkNode* _parent;
     std::unique_ptr<ChunkNode> _children[4];    
-    ChunkLodGlobe& _owner;
-    GeodeticPatch _patch;
-    bool _isVisible;
+
+    Chunk _chunk;
 };
 
 } // namespace openspace
