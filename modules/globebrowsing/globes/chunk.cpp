@@ -73,8 +73,6 @@ namespace openspace {
     }
 
     Chunk::Status Chunk::update(const RenderData& data) {
-        //Uses horizon culling, frustum culling and distance to camera to determine a
-        //desired level.
         //In the current implementation of the horizon culling and the distance to the
         //camera, the closer the ellipsoid is to a
         //sphere, the better this will make the splitting. Using the minimum radius to
@@ -82,30 +80,29 @@ namespace openspace {
         //splitting might accur even though it is not needed.
 
         _isVisible = true;
-        Vec3 globePosition = data.position.dvec3();
+
+        const Ellipsoid& ellipsoid = _owner->ellipsoid();
+        
+        // Do horizon culling
+        const int maxHeight = 8700; // should be read from gdal dataset or mod file
+        _isVisible = HorizonCuller::isVisible(data, _surfacePatch, ellipsoid, maxHeight);
+        if (!_isVisible) {
+            return WANT_MERGE;
+        }
+        
+
+        // Do frustum culling
+        _isVisible = FrustumCuller::isVisible(data, _surfacePatch, ellipsoid);
+        if (!_isVisible) {
+            return WANT_MERGE;
+        }
 
         auto center = _surfacePatch.center();
-        auto ellipsoid = _owner->ellipsoid();
+        Vec3 globePosition = data.position.dvec3();
         Vec3 patchPosition = globePosition + ellipsoid.geodetic2ToCartesian(center);
-
         Vec3 cameraPosition = data.camera.position().dvec3();
         Vec3 cameraToChunk = patchPosition - cameraPosition;
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
-
-
-        // Do horizon culling
-        const int maxHeight = 8700; // should be read from gdal dataset or mod file
-        if (!HorizonCuller::isVisible(data, _surfacePatch, ellipsoid, maxHeight)) {
-            _isVisible = false;
-            return WANT_MERGE;
-        }
-
-        // Do frustum culling
-        if (!FrustumCuller::isVisible(data, _surfacePatch, ellipsoid)) {
-            _isVisible = false;
-            return WANT_MERGE;
-        }
-
 
         // Calculate desired level based on distance
         Scalar distance = glm::length(cameraToChunk);

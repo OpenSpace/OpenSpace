@@ -61,8 +61,8 @@ namespace openspace {
         , maxSplitDepth(22)
     {
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            256,
-            256,
+            100,
+            100,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
@@ -107,6 +107,7 @@ namespace openspace {
 
         //LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
         //LDEBUG("RenderedPatches count: " << ChunkNode::renderedPatches);
+        //LDEBUG(ChunkNode::renderedPatches << " / " << ChunkNode::instanceCount << " chunks rendered");
     }
 
     void ChunkLodGlobe::update(const UpdateData& data) {

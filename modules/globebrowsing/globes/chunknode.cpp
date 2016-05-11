@@ -103,7 +103,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
             return internalUpdateChunkTree(data);
         }
         return false;
-    }	
+    }
 }
 
 

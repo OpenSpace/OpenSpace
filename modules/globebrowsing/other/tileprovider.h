@@ -129,6 +129,7 @@ namespace openspace {
 
         virtual void execute() {
             _uninitedTexture = _tileProvider->getUninitializedTextureTile(_chunkIndex);
+
         }
 
         virtual std::shared_ptr<UninitializedTextureTile> product() {
