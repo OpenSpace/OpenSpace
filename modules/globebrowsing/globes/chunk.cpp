@@ -73,34 +73,42 @@ namespace openspace {
     }
 
     Chunk::Status Chunk::update(const RenderData& data) {
+        Camera* savedCamera = _owner->getSavedCamera();
+        const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
+        RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
+
         //In the current implementation of the horizon culling and the distance to the
         //camera, the closer the ellipsoid is to a
         //sphere, the better this will make the splitting. Using the minimum radius to
         //be safe. This means that if the ellipsoid has high difference between radii,
         //splitting might accur even though it is not needed.
+        
+        
 
         _isVisible = true;
 
         const Ellipsoid& ellipsoid = _owner->ellipsoid();
+
+        
         
         // Do horizon culling
         const int maxHeight = 8700; // should be read from gdal dataset or mod file
-        _isVisible = HorizonCuller::isVisible(data, _surfacePatch, ellipsoid, maxHeight);
+        _isVisible = HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         if (!_isVisible) {
             return WANT_MERGE;
         }
         
 
         // Do frustum culling
-        _isVisible = FrustumCuller::isVisible(data, _surfacePatch, ellipsoid);
+        _isVisible = FrustumCuller::isVisible(myRenderData, _surfacePatch, ellipsoid);
         if (!_isVisible) {
             return WANT_MERGE;
         }
 
         auto center = _surfacePatch.center();
-        Vec3 globePosition = data.position.dvec3();
+        Vec3 globePosition = myRenderData.position.dvec3();
         Vec3 patchPosition = globePosition + ellipsoid.geodetic2ToCartesian(center);
-        Vec3 cameraPosition = data.camera.position().dvec3();
+        Vec3 cameraPosition = myRenderData.camera.position().dvec3();
         Vec3 cameraToChunk = patchPosition - cameraPosition;
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
 

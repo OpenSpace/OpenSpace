@@ -59,7 +59,9 @@ namespace openspace {
         , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
+        , _savedCamera(nullptr)
     {
+
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
             100,
             100,

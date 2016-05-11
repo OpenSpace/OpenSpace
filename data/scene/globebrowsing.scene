@@ -8,6 +8,7 @@ function preInitialization()
 
     openspace.time.setTime("2011 AUG 06 00:00:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
 end
 
 return {

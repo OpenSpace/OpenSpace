@@ -76,11 +76,14 @@ namespace openspace {
         const int minSplitDepth;
         const int maxSplitDepth;
 
-        RenderData* getSavedRenderData() const {
-            return _savedRenderData;
-        };
 
 
+        Camera* getSavedCamera() const { return _savedCamera; }
+        void setSaveCamera(Camera* c) { 
+            if (_savedCamera != nullptr) delete _savedCamera;
+            _savedCamera = c; 
+        }
+        
 
     private:
 
@@ -101,7 +104,8 @@ namespace openspace {
 
         const Ellipsoid& _ellipsoid;
 
-        RenderData* _savedRenderData;
+        Camera* _savedCamera;
+        
     };
 
 }  // namespace openspace
