@@ -55,8 +55,8 @@ namespace openspace {
         const Ellipsoid& ellipsoid,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
-        , _leftRoot(new ChunkNode(*this, LEFT_HEMISPHERE_INDEX))
-        , _rightRoot(new ChunkNode(*this, RIGHT_HEMISPHERE_INDEX))
+        , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
+        , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
     {
@@ -67,7 +67,7 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
 
-        _patchRenderer.reset(new LatLonPatchRenderer(geometry, tileProviderManager));
+        _patchRenderer.reset(new ChunkRenderer(geometry, tileProviderManager));
     }
 
     ChunkLodGlobe::~ChunkLodGlobe() {
@@ -87,7 +87,7 @@ namespace openspace {
         return ready;
     }
 
-    LatLonPatchRenderer& ChunkLodGlobe::getPatchRenderer() {
+    ChunkRenderer& ChunkLodGlobe::getPatchRenderer() const{
         return *_patchRenderer;
     }
 

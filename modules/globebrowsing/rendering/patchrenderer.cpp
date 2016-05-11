@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/patchrenderer.h>
 
+#include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 
 // open space includes
@@ -85,7 +85,7 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //								LATLON PATCH RENDERER								//
     //////////////////////////////////////////////////////////////////////////////////////
-    LatLonPatchRenderer::LatLonPatchRenderer(
+    ChunkRenderer::ChunkRenderer(
         shared_ptr<Grid> grid,
         shared_ptr<TileProviderManager> tileProviderManager)
         : PatchRenderer(tileProviderManager)
@@ -101,14 +101,13 @@ namespace openspace {
         _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
-    void LatLonPatchRenderer::renderPatch(
-        const GeodeticPatch& patch,
-        const RenderData& data,
-        const Ellipsoid& ellipsoid,
-        const ChunkIndex& chunkIndex)
+
+
+    void ChunkRenderer::renderChunk(const Chunk& chunk, const Ellipsoid& ellipsoid, 
+        const RenderData& data) 
+    
     {
         using namespace glm;
-        
 
         // TODO : Model transform should be fetched as a matrix directly.
         mat4 modelTransform = translate(mat4(1), data.position.vec3());
@@ -118,16 +117,16 @@ namespace openspace {
 
         // activate shader
         _programObjectGlobalRendering->activate();
-        
+
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
         auto tileProviderHeight = heightMapProviders.begin()->second;
 
         // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getMostHiResTile(chunkIndex);
+        Tile heightTile = tileProviderHeight->getMostHiResTile(chunk.index());
 
-        
+
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitHeight;
         texUnitHeight.activate();
@@ -135,15 +134,13 @@ namespace openspace {
         _programObjectGlobalRendering->setUniform("textureSamplerHeight", texUnitHeight);
         _programObjectGlobalRendering->setUniform("heightSamplingScale", heightTile.uvScale);
         _programObjectGlobalRendering->setUniform("heightSamplingOffset", heightTile.uvOffset);
-        
-
 
 
 
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getMostHiResTile(chunkIndex);
+        Tile colorTile = tileProviderColor->getMostHiResTile(chunk.index());
 
 
         // Bind and use the texture
@@ -155,8 +152,8 @@ namespace openspace {
         _programObjectGlobalRendering->setUniform("colorSamplingOffset", colorTile.uvOffset);
 
 
-        Geodetic2 swCorner = patch.southWestCorner();
-        auto patchSize = patch.size();
+        Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
+        auto patchSize = chunk.surfacePatch().size();
         _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
@@ -172,6 +169,8 @@ namespace openspace {
         // disable shader
         _programObjectGlobalRendering->deactivate();
     }
+
+
     
     //////////////////////////////////////////////////////////////////////////////////////
     //								CLIPMAP PATCH RENDERER								//

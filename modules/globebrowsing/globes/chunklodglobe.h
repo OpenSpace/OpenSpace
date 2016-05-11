@@ -59,7 +59,7 @@ namespace openspace {
             std::shared_ptr<TileProviderManager> tileProviderManager);
         ~ChunkLodGlobe();
 
-        LatLonPatchRenderer& getPatchRenderer();
+        ChunkRenderer& getPatchRenderer() const;
 
         bool initialize() override;
         bool deinitialize() override;
@@ -85,7 +85,7 @@ namespace openspace {
         std::unique_ptr<ChunkNode> _rightRoot;
 
         // the patch used for actual rendering
-        std::unique_ptr<LatLonPatchRenderer> _patchRenderer;
+        std::unique_ptr<ChunkRenderer> _patchRenderer;
 
         static const GeodeticPatch LEFT_HEMISPHERE;
         static const GeodeticPatch RIGHT_HEMISPHERE;

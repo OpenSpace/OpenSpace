@@ -22,70 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
+#ifndef __CHUNK_H__
+#define __CHUNK_H__
 
 #include <glm/glm.hpp>
 #include <vector>
 #include <memory>
 #include <ostream>
 
+#include <modules/globebrowsing/rendering/culling.h>
+
 #include <modules/globebrowsing/globes/chunkindex.h>
-#include <modules/globebrowsing/globes/chunk.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
 
 
-
-// forward declaration
 namespace openspace {
+
     class ChunkLodGlobe;
+
+
+    class Chunk {
+    public:
+
+        enum Status{
+            DO_NOTHING,
+            WANT_MERGE,
+            WANT_SPLIT,
+        };
+        
+        Chunk(ChunkLodGlobe* owner, const ChunkIndex& chunkIndex);
+
+        /// Updates chunk internally and returns a desired level
+        Status update(const RenderData& data);
+
+        const GeodeticPatch& surfacePatch() const;
+        ChunkLodGlobe* const owner() const;
+        const ChunkIndex index() const;
+        bool isVisible() const;
+
+        void setIndex(const ChunkIndex& index);
+        void setOwner(ChunkLodGlobe* newOwner);
+
+
+    private:
+        ChunkLodGlobe* _owner;
+        ChunkIndex _index;
+        bool _isVisible;
+        GeodeticPatch _surfacePatch;
+
+    };
+
 }
 
 
-namespace openspace {
 
-
-
-
-
-class ChunkNode {
-public:
-    ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
-    ~ChunkNode();
-
-
-    void split(int depth = 1);
-    void merge();
-
-    bool isRoot() const;
-    bool isLeaf() const;
-    
-    
-    const ChunkNode& getChild(Quad quad) const;
-
-    void render(const RenderData& data);
-
-    static int instanceCount;
-    static int renderedPatches;
-
-
-private:
-
-    void internalRender(const RenderData& data);
-    bool internalUpdateChunkTree(const RenderData& data);
-
-    
-
-    
-    ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
-
-    Chunk _chunk;
-};
-
-} // namespace openspace
-
-
-
-#endif // __QUADTREE_H__
+#endif // __CHUNK_H__
