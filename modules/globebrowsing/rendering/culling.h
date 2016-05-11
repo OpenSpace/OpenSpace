@@ -70,8 +70,7 @@ namespace openspace {
         */
         static bool isVisible(
             const RenderData& data,
-            const vec3& point,
-            const vec2& marginScreenSpace = vec2(0));
+            const vec3& point);
 
         /**
         Returns false if the patch element is guaranteed to be outside the view

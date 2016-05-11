@@ -47,8 +47,7 @@ namespace openspace {
 
     bool FrustumCuller::isVisible(
         const RenderData& data,
-        const vec3& point,
-        const glm::vec2& marginScreenSpace) {
+        const vec3& point) {
 
         mat4 modelTransform = translate(mat4(1), data.position.vec3());
         mat4 viewTransform = data.camera.combinedViewMatrix();
@@ -57,7 +56,7 @@ namespace openspace {
 
         vec2 pointScreenSpace =
             transformToScreenSpace(point, modelViewProjectionTransform);
-        return testPoint(pointScreenSpace, marginScreenSpace);
+        return testPoint(pointScreenSpace, vec2(0));
     }
 
     bool FrustumCuller::isVisible(
@@ -66,6 +65,10 @@ namespace openspace {
         const Ellipsoid& ellipsoid) {
         // An axis aligned bounding box based on the patch's minimum boudning sphere is
         // used for testnig
+
+        //mat4 viewTransform = glm::lookAt(vec3(6378137.0 + 1000, 0, 0), vec3(0, 5e6, 1e7), vec3(0, 0, 1)); //data.camera.combinedViewMatrix
+        //Vec3 cameraPosition = vec3(inverse(viewTransform) * vec4(0, 0, 0, 1));// data.camera.position().dvec3();
+
 
         // Calculate the MVP matrix
         mat4 modelTransform = translate(mat4(1), data.position.vec3());
@@ -76,18 +79,18 @@ namespace openspace {
         // Calculate the patch's center point in screen space
         vec4 patchCenterModelSpace =
             vec4(ellipsoid.geodetic2ToCartesian(patch.center()), 1);
-        vec4 patchCenterProjectionSpace =
+        vec4 patchCenterClippingSpace =
             modelViewProjectionTransform * patchCenterModelSpace;
         vec2 pointScreenSpace =
-            (1.0f / patchCenterProjectionSpace.w) * patchCenterProjectionSpace.xy();
+            (1.0f / patchCenterClippingSpace.w) * patchCenterClippingSpace.xy();
 
         // Calculate the screen space margin that represents an axis aligned bounding 
         // box based on the patch's minimum boudning sphere
         double boundingRadius = patch.minimalBoundingRadius(ellipsoid);
-        vec4 marginProjectionSpace =
+        vec4 marginClippingSpace =
             vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
         vec2 marginScreenSpace =
-            (1.0f / patchCenterProjectionSpace.w) * marginProjectionSpace.xy();
+            (1.0f / patchCenterClippingSpace.w) * marginClippingSpace.xy();
 
         // Test the bounding box by testing the center point and the corresponding margin
         return testPoint(pointScreenSpace, marginScreenSpace);
@@ -96,7 +99,6 @@ namespace openspace {
     bool FrustumCuller::testPoint(const glm::vec2& pointScreenSpace,
         const glm::vec2& marginScreenSpace)
     {
-
         const vec2& p = pointScreenSpace;
 
         vec2 cullBounds = vec2(1) + marginScreenSpace;

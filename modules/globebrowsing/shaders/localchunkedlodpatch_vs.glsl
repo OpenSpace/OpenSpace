@@ -22,43 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Colortexture coverage
-uniform sampler2D textureSamplerColor;
-uniform vec2 colorSamplingScale;
-uniform vec2 colorSamplingOffset;
 
-in vec4 vs_position;
-in vec3 fs_position;
-in vec2 fs_uv;
+#version __CONTEXT__
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform mat4 projectionTransform;
 
-vec4 borderOverlay(vec2 uv, vec3 borderColor, float borderSize){
+// Input points in camera space
+uniform vec3 p00;
+uniform vec3 p10;
+uniform vec3 p01;
+uniform vec3 p11;
 
-	vec2 uvOffset = uv - vec2(0.5);
-	float thres = 0.5 - borderSize/2;
-	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-	vec3 color = isBorder ? borderColor : vec3(0);
-	return vec4(color, 0);
+uniform vec3 patchNormalCameraSpace;
+
+uniform sampler2D textureSamplerHeight;
+uniform vec2 heightSamplingScale;
+uniform vec2 heightSamplingOffset;
+
+layout(location = 1) in vec2 in_uv;
+
+out vec2 fs_uv;
+out vec4 fs_position;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
+
+vec3 bilinearInterpolation(vec2 uv) {
+	// Bilinear interpolation
+	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
+	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
+	vec3 p = (1 - uv.y) * p0 + uv.y * p1;
+	return p;
 }
 
+void main()
+{
+	fs_uv = in_uv;
 
+	// Position in cameraspace
+	vec3 p = bilinearInterpolation(fs_uv);
+	
+	// Transform uv coordinates to texture space
+	vec2 samplePos = heightSamplingScale * in_uv + heightSamplingOffset;
 
-Fragment getFragment() {
-	Fragment frag;
+	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
 
-	vec2 samplePos = colorSamplingScale*fs_uv + colorSamplingOffset;
-	frag.color = texture(textureSamplerColor, samplePos);
+	// Translate the point along normal
+	p += patchNormalCameraSpace * sampledHeight * pow(2,15);
 
-	// Sample position overlay
-	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
+	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
 
-	// Border overlay
-	//frag.color = frag.color + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
-
-	frag.depth = vs_position.w;
-
-	return frag;
+	gl_Position = z_normalization(positionClippingSpace);
+	fs_position = gl_Position;
 }
-

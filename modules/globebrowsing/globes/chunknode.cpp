@@ -123,13 +123,8 @@ void ChunkNode::internalRender(const RenderData& data) {
     }
 }
 
-
-
-
-
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
-        
         for (size_t i = 0; i < 4; i++) {
             Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i));
             _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
