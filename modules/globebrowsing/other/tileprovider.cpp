@@ -51,7 +51,6 @@ namespace openspace {
         int minimumPixelSize)
     : _filePath(filePath)
     , _tileCache(tileCacheSize) // setting cache size
-    , _minimumPixelSize(minimumPixelSize)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -81,13 +80,17 @@ namespace openspace {
             hasInitializedGDAL = true;
         }
 
-        
-
         std::string absFilePath = absPath(filePath);
         _gdalDataSet = (GDALDataset *)GDALOpen(absFilePath.c_str(), GA_ReadOnly);
         //auto desc = _gdalDataSet->GetDescription();
         
         ghoul_assert(_gdalDataSet != nullptr, "Failed to load dataset: " << filePath);
+
+        GDALRasterBand* firstBand = _gdalDataSet->GetRasterBand(1);
+        int numOverviews = firstBand->GetOverviewCount();
+        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
+
+        _tileLevelDifference = log2(minimumPixelSize) - log2(sizeLevel0);
     }
 
     TileProvider::~TileProvider(){
@@ -109,6 +112,31 @@ namespace openspace {
         std::shared_ptr<Texture> tex = nullptr;
         glm::vec2 uvOffset(0, 0);
         glm::vec2 uvScale(1, 1);
+        
+        // Check if we are trying to get a texture for a very small patch.
+        // In that case, use the biggest one defined for the dataset.
+        int maximumAllowedLevel =
+            _gdalDataSet->GetRasterBand(1)->GetOverviewCount() - 1;
+        int levelInDataset = chunkIndex.level + _tileLevelDifference;
+        int timesToStepUp = levelInDataset - maximumAllowedLevel;
+        for (int i = 0; i < timesToStepUp; i++)
+        {
+            uvScale *= 0.5;
+            uvOffset *= 0.5;
+
+            if (chunkIndex.isEastChild()) {
+                uvOffset.x += 0.5;
+            }
+
+            // In OpenGL, positive y direction is up
+            if (chunkIndex.isNorthChild()) {
+                uvOffset.y += 0.5;
+            }
+
+            chunkIndex = chunkIndex.parent();
+        }
+        
+        // We also need to check if the wanted texture is available. If not, go up a level
         while (true) {
             tex = getOrStartFetchingTile(chunkIndex);
 
@@ -180,43 +208,45 @@ namespace openspace {
             return _uByteConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
             break;
         case GDT_UInt16:
             return _uShortConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
             break;
         case GDT_Int16:
             return _shortConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
             break;
         case GDT_UInt32:
             return _uIntConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
             break;
         case GDT_Int32:
             return _intConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
             break;
         case GDT_Float32:
             return _floatConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
+
             break;
         case GDT_Float64:
             return _doubleConverter.getUninitializedTextureTile(
                 _gdalDataSet,
                 chunkIndex,
-                _minimumPixelSize);
+                _tileLevelDifference);
+
             break;
         default:
             LERROR("GDAL data type unknown to OpenGL: " << gdalType);

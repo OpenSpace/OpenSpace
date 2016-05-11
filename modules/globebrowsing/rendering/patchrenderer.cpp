@@ -132,8 +132,9 @@ namespace openspace {
         texUnitHeight.activate();
         heightTile.texture->bind();
         _programObjectGlobalRendering->setUniform("textureSamplerHeight", texUnitHeight);
-        _programObjectGlobalRendering->setUniform("heightSamplingScale", heightTile.uvScale);
-        _programObjectGlobalRendering->setUniform("heightSamplingOffset", heightTile.uvOffset);
+
+        _programObjectGlobalRendering->setUniform("heightSamplingScale", heightTile.transform.uvScale);
+        _programObjectGlobalRendering->setUniform("heightSamplingOffset", heightTile.transform.uvOffset);
 
 
 
@@ -148,8 +149,8 @@ namespace openspace {
         texUnitColor.activate();
         colorTile.texture->bind();
         _programObjectGlobalRendering->setUniform("textureSamplerColor", texUnitColor);
-        _programObjectGlobalRendering->setUniform("colorSamplingScale", colorTile.uvScale);
-        _programObjectGlobalRendering->setUniform("colorSamplingOffset", colorTile.uvOffset);
+        _programObjectGlobalRendering->setUniform("colorSamplingScale", colorTile.transform.uvScale);
+        _programObjectGlobalRendering->setUniform("colorSamplingOffset", colorTile.transform.uvOffset);
 
 
         Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
