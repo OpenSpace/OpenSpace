@@ -36,7 +36,7 @@ namespace openspace {
 class Geodetic2;
 
 enum Quad {
-    NORTH_WEST,
+    NORTH_WEST = 0,
     NORTH_EAST,
     SOUTH_WEST,
     SOUTH_EAST
@@ -58,7 +58,6 @@ struct ChunkIndex {
     ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
     ChunkIndex(const Geodetic2& point, int level);
 
-    std::vector<ChunkIndex> childIndices() const;
 
     bool hasParent() const {
         return level > 0;
@@ -82,6 +81,7 @@ struct ChunkIndex {
         return y % 2 == 1;
     }
 
+    ChunkIndex child(Quad q) const;
 
     /**
     Gets the tile at a specified offset from this tile.

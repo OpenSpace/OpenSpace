@@ -110,7 +110,6 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
 void ChunkNode::internalRender(const RenderData& data) {
     if (isLeaf()) {
         if (_chunk.isVisible()) {
-            
             ChunkRenderer& patchRenderer = _chunk.owner()->getPatchRenderer();
             patchRenderer.renderChunk(_chunk, _chunk.owner()->ellipsoid(), data);
             //patchRenderer.renderPatch(_chunk.surfacePatch, data, _chunk.owner->ellipsoid(), _chunk.index);
@@ -130,10 +129,10 @@ void ChunkNode::internalRender(const RenderData& data) {
 
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
-        auto childIndices = _chunk.index().childIndices();
-        for (size_t i = 0; i < childIndices.size(); i++) {
-            _children[i] = std::unique_ptr<ChunkNode>(
-                new ChunkNode(Chunk(_chunk.owner(), childIndices[i]), this));
+        
+        for (size_t i = 0; i < 4; i++) {
+            Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i));
+            _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
         }
     }
 
