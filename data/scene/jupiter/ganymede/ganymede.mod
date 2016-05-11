@@ -1,20 +1,20 @@
 return {
-    -- Charon module
+    -- Ganymede module
     {   
-        Name = "Charon",
-        Parent = "PlutoBarycenter",
+        Name = "Ganymede",
+        Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-            Frame = "IAU_CHARON",
-            Body = "CHARON",
+            Frame = "IAU_GANYMEDE", -- should exist. 
+            Body = "JUPITER BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.035 , 5 },
+                Radius = { 2.631, 6},
                 Segments = 100
             },
             Textures = {
                 Type = "simple",
-                Color = "textures/gray.jpg",
+                Color = "textures/ganymede.jpg",
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc
@@ -24,40 +24,39 @@ return {
         },
         Ephemeris = {
             Type = "Spice",
-            Body = "CHARON",
+            Body = "GANYMEDE",
             Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
+            Observer = "JUPITER BARYCENTER",
             Kernels = {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
         },
         Rotation = {
             Type = "Spice",
-            Frame = "IAU_CHARON",
+            Frame = "IAU_JUPITER",
             Reference = "ECLIPJ2000"
         },
-        GuiName = "/Solar/Planets/Charon"
+        GuiName = "/Solar/Planets/Ganymede"
     },
-
-    -- CharonTrail module
+    -- GanymedeTrail module
     {   
-        Name = "CharonTrail",
-        Parent = "PlutoBarycenter",
+        Name = "GanymedeTrail",
+        Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderableTrail",
-            Body = "CHARON",
+            Body = "GANYMEDE",
             Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            RGB = {0.00,0.62,1.00},
-            TropicalOrbitPeriod = 120 ,
-            EarthOrbitRatio = 0.03,
-            DayLength = 1,
+            Observer = "JUPITER BARYCENTER",
+            RGB = { 0.4, 0.3, 0.3 },
+            TropicalOrbitPeriod =  60 ,
+            EarthOrbitRatio = 0.019,
+            DayLength = 9.9259,
             Textures = {
                 Type = "simple",
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/CharonTrail"
+        GuiName = "/Solar/GanymedeTrail"
     }
 }

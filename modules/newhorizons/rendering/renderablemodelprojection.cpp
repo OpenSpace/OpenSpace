@@ -301,8 +301,11 @@ bool RenderableModelProjection::deinitialize() {
 }
 
 void RenderableModelProjection::render(const RenderData& data) {
-    if (!_programObject) return;
-    if (!_textureProj) return;
+    if (!_programObject)
+        return;
+    if (!_textureProj)
+        return;
+
     _programObject->activate();
     _frameCount++;
 
@@ -413,8 +416,13 @@ void RenderableModelProjection::imageProjectGPU() {
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
-    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _destination, time);
+    try {
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
+        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _destination, time);
+    }
+    catch (const SpiceManager::SpiceException& e) {
+        return;
+    }
 
     _transform = glm::mat4(1);
 
