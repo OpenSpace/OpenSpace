@@ -38,12 +38,26 @@
 
 namespace openspace {
 
-    class LonLatPatch;
     using namespace glm;
+
+
 
 
     class FrustumCuller {
     public:
+
+        enum PointTestResult : int {
+            Inside = 0,
+            Above,
+            AboveRight,
+            Right,
+            BelowRight,
+            Below,
+            BelowLeft,
+            Left,
+            AboveLeft
+        };
+
 
         FrustumCuller();
         ~FrustumCuller();

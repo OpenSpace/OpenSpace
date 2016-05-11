@@ -49,11 +49,16 @@ namespace opengl {
 
 namespace openspace {
 
-class RenderableGlobe : public DistanceSwitch {
+class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe();
 
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 private:
@@ -66,6 +71,9 @@ private:
     //std::vector<std::string> _colorTextureKeys;
 
     std::shared_ptr<TileProviderManager> _tileProviderManager;
+
+
+    DistanceSwitch _distanceSwitch;
 };
 
 }  // namespace openspace

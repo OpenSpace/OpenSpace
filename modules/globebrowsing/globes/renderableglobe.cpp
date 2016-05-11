@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/globes/globemesh.h>
 #include <modules/globebrowsing/globes/clipmapglobe.h>
-#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -51,8 +51,7 @@ namespace openspace {
 
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : DistanceSwitch()
-        , _tileProviderManager(std::shared_ptr<TileProviderManager>(new TileProviderManager))
+        : _tileProviderManager(std::shared_ptr<TileProviderManager>(new TileProviderManager))
     {
         // Read the radii in to its own dictionary
         Vec3 radii;
@@ -99,17 +98,34 @@ namespace openspace {
 
         //addSwitchValue(std::shared_ptr<ClipMapGlobe>(
         //    new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
-        addSwitchValue(std::shared_ptr<ChunkLodGlobe>(
-            new ChunkLodGlobe(_ellipsoid, _tileProviderManager)), 1e9);
-        addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
+        _distanceSwitch.addSwitchValue(std::shared_ptr<ChunkedLodGlobe>(
+            new ChunkedLodGlobe(_ellipsoid, _tileProviderManager)), 1e9);
+        _distanceSwitch.addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
     }
 
     RenderableGlobe::~RenderableGlobe() {
+
+    }
+
+    bool RenderableGlobe::initialize() {
+        return _distanceSwitch.initialize();
+    }
+
+    bool RenderableGlobe::deinitialize() {
+        return _distanceSwitch.deinitialize();
+    }
+
+    bool RenderableGlobe::isReady() const {
+        return _distanceSwitch.isReady();
+    }
+
+    void RenderableGlobe::render(const RenderData& data) {
+        _distanceSwitch.render(data);
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
         _time = data.time;
-        DistanceSwitch::update(data);
+        _distanceSwitch.update(data);
     }
 
 }  // namespace openspace

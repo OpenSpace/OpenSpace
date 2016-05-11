@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <modules/globebrowsing/meshes/basicgrid.h>
 
@@ -44,14 +44,14 @@ namespace {
 
 namespace openspace {
 
-    const GeodeticPatch ChunkLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
-    const GeodeticPatch ChunkLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
+    const GeodeticPatch ChunkedLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
+    const GeodeticPatch ChunkedLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
 
-    const ChunkIndex ChunkLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
-    const ChunkIndex ChunkLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
+    const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
+    const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
 
 
-    ChunkLodGlobe::ChunkLodGlobe(
+    ChunkedLodGlobe::ChunkedLodGlobe(
         const Ellipsoid& ellipsoid,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
@@ -70,32 +70,30 @@ namespace openspace {
         _patchRenderer.reset(new ChunkRenderer(geometry, tileProviderManager));
     }
 
-    ChunkLodGlobe::~ChunkLodGlobe() {
+    ChunkedLodGlobe::~ChunkedLodGlobe() {
 
     }
 
-    bool ChunkLodGlobe::initialize() {
+    bool ChunkedLodGlobe::initialize() {
         return isReady();
     }
 
-    bool ChunkLodGlobe::deinitialize() {
+    bool ChunkedLodGlobe::deinitialize() {
         return true;
     }
 
-    bool ChunkLodGlobe::isReady() const {
+    bool ChunkedLodGlobe::isReady() const {
         bool ready = true;
         return ready;
     }
 
-    ChunkRenderer& ChunkLodGlobe::getPatchRenderer() const{
+    ChunkRenderer& ChunkedLodGlobe::getPatchRenderer() const{
         return *_patchRenderer;
     }
 
-    void ChunkLodGlobe::render(const RenderData& data){
+    void ChunkedLodGlobe::render(const RenderData& data){
         minDistToCamera = INFINITY;
         ChunkNode::renderedPatches = 0;        
-
-
 
         _leftRoot->render(data);
         _rightRoot->render(data);
@@ -110,11 +108,11 @@ namespace openspace {
         //LDEBUG(ChunkNode::renderedPatches << " / " << ChunkNode::instanceCount << " chunks rendered");
     }
 
-    void ChunkLodGlobe::update(const UpdateData& data) {
+    void ChunkedLodGlobe::update(const UpdateData& data) {
         _patchRenderer->update();
     }
 
-    const Ellipsoid& ChunkLodGlobe::ellipsoid() const
+    const Ellipsoid& ChunkedLodGlobe::ellipsoid() const
     {
         return _ellipsoid;
     }

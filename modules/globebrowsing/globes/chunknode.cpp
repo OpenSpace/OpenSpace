@@ -29,7 +29,7 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/openspaceengine.h>
 
-#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/culling.h>
 
 

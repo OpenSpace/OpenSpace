@@ -38,7 +38,7 @@
 
 namespace openspace {
 
-    class ChunkLodGlobe;
+    class ChunkedLodGlobe;
 
 
     class Chunk {
@@ -50,22 +50,22 @@ namespace openspace {
             WANT_SPLIT,
         };
         
-        Chunk(ChunkLodGlobe* owner, const ChunkIndex& chunkIndex);
+        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex);
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);
 
         const GeodeticPatch& surfacePatch() const;
-        ChunkLodGlobe* const owner() const;
+        ChunkedLodGlobe* const owner() const;
         const ChunkIndex index() const;
         bool isVisible() const;
 
         void setIndex(const ChunkIndex& index);
-        void setOwner(ChunkLodGlobe* newOwner);
+        void setOwner(ChunkedLodGlobe* newOwner);
 
 
     private:
-        ChunkLodGlobe* _owner;
+        ChunkedLodGlobe* _owner;
         ChunkIndex _index;
         bool _isVisible;
         GeodeticPatch _surfacePatch;

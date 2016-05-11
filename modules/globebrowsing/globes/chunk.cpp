@@ -28,7 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <modules/globebrowsing/globes/chunk.h>
-#include <modules/globebrowsing/globes/chunklodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 
 
@@ -38,7 +38,7 @@ namespace {
 
 namespace openspace {
 
-    Chunk::Chunk(ChunkLodGlobe* owner, const ChunkIndex& chunkIndex)
+    Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex)
         : _owner(owner)
         , _surfacePatch(chunkIndex)
         , _index(chunkIndex)
@@ -51,7 +51,7 @@ namespace openspace {
         return _surfacePatch;
     }
 
-    ChunkLodGlobe* const Chunk::owner() const {
+    ChunkedLodGlobe* const Chunk::owner() const {
         return _owner;
     }
 
@@ -68,7 +68,7 @@ namespace openspace {
         _surfacePatch = GeodeticPatch(index);
     }
 
-    void Chunk::setOwner(ChunkLodGlobe* newOwner) {
+    void Chunk::setOwner(ChunkedLodGlobe* newOwner) {
         _owner = newOwner;
     }
 
