@@ -24,48 +24,51 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_vs.hglsl"
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 radiiSquared;
 
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
-uniform sampler2D textureSamplerHeight;
-uniform vec2 heightSamplingScale;
-uniform vec2 heightSamplingOffset;
+uniform TextureTile heightTile;
 
-uniform float heightSamplingDepthScale;
-uniform float heightSamplingDepthOffset;
+layout(location = 1) in vec2 in_uv;
 
-layout(location = 1) in vec2 in_UV;
-
-out vec4 vs_position;
 out vec2 fs_uv;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
+out vec4 fs_position;
 
 PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
-	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_UV.y; // Lat
-	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_UV.x; // Lon
+	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
+	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_uv.x; // Lon
 	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
 	return positionPairModelSpace;
 }
 
 void main()
 {
-	fs_uv = in_UV;
 	PositionNormalPair pair = globalInterpolation();
 
-	vec2 samplePos = heightSamplingScale*in_UV + heightSamplingOffset;
-	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
-	if (sampledHeight < 0)
-		sampledHeight *= -10000000;
-	pair.position += pair.normal * (sampledHeight * heightSamplingDepthScale + heightSamplingDepthOffset);
+	vec2 samplePos =
+		heightTile.uvTransform.uvScale * in_uv +
+		heightTile.uvTransform.uvOffset;
+
+	float sampledHeight = texture(heightTile.textureSampler, samplePos).r;
+
+	pair.position +=
+		pair.normal *
+		(sampledHeight *
+			heightTile.depthTransform.depthScale +
+			heightTile.depthTransform.depthOffset);
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 
-	vs_position = z_normalization(position);
-	gl_Position = vs_position;
+	// Write output
+	fs_uv = in_uv;
+	fs_position = z_normalization(position);
+	gl_Position = fs_position;
 }

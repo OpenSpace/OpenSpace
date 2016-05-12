@@ -205,7 +205,7 @@ namespace openspace {
         return _defaultTexture;
     }
 
-    TileTextureDepthTransform TileProvider::depthTransform() {
+    TileDepthTransform TileProvider::depthTransform() {
         return _depthTransform;
     }
 

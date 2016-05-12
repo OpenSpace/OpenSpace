@@ -150,11 +150,14 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitHeight;
         texUnitHeight.activate();
         heightTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("textureSamplerHeight", texUnitHeight);
+        _programObjectGlobalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
 
-        _programObjectGlobalRendering->setUniform("heightSamplingScale", heightTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("heightSamplingOffset", heightTile.uvTransform.uvOffset);
+        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
+        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
 
+        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
+        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
+        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
 
 
         // Pick the first color texture
@@ -167,13 +170,9 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitColor;
         texUnitColor.activate();
         colorTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("textureSamplerColor", texUnitColor);
-        _programObjectGlobalRendering->setUniform("colorSamplingScale", colorTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("colorSamplingOffset", colorTile.uvTransform.uvOffset);
-
-        TileTextureDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectGlobalRendering->setUniform("heightSamplingDepthScale", depthTransformHeight.depthScale);
-        _programObjectGlobalRendering->setUniform("heightSamplingDepthOffset", depthTransformHeight.depthOffset);
+        _programObjectGlobalRendering->setUniform("colorTile.textureSampler", texUnitColor);
+        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
+        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
 
         Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
         auto patchSize = chunk.surfacePatch().size();
@@ -221,13 +220,13 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitHeight;
         texUnitHeight.activate();
         heightTile.texture->bind();
-        _programObjectLocalRendering->setUniform("textureSamplerHeight", texUnitHeight);
-        _programObjectLocalRendering->setUniform("heightSamplingScale", heightTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("heightSamplingOffset", heightTile.uvTransform.uvOffset);
+        _programObjectLocalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
+        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
+        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
         
-        TileTextureDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectLocalRendering->setUniform("heightSamplingDepthScale", depthTransformHeight.depthScale);
-        _programObjectLocalRendering->setUniform("heightSamplingDepthOffset", depthTransformHeight.depthOffset);
+        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
+        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
+        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
 
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
@@ -239,9 +238,9 @@ namespace openspace {
         ghoul::opengl::TextureUnit texUnitColor;
         texUnitColor.activate();
         colorTile.texture->bind();
-        _programObjectLocalRendering->setUniform("textureSamplerColor", texUnitColor);
-        _programObjectLocalRendering->setUniform("colorSamplingScale", colorTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("colorSamplingOffset", colorTile.uvTransform.uvOffset);
+        _programObjectLocalRendering->setUniform("colorTile.textureSampler", texUnitColor);
+        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
+        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
 
 
         Geodetic2 sw = chunk.surfacePatch().southWestCorner();
