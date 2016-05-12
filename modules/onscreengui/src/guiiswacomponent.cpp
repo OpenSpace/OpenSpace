@@ -39,11 +39,13 @@
 #include <ghoul/misc/assert.h>
 
 #include <ext/json/json.hpp>
+#include <fstream>
 
 #include "imgui.h"
 
 namespace {
     // const ImVec2 size = ImVec2(350, 200);
+    using json = nlohmann::json;
     const std::string _loggerCat = "iSWAComponent";
     const ImVec2 size = ImVec2(350, 500);
 
@@ -140,8 +142,8 @@ namespace {
     }
 
     void renderFloatProperty(Property* prop) {
-        FloatProperty* p = static_cast<FloatProperty*>(prop);
-        std::string name = p->guiName();
+        FloatProperty* p = static_cast<FloatProperty*>(prop)
+;        std::string name = p->guiName();
 
         FloatProperty::ValueType value = *p;
         ImGui::SliderFloat((name).c_str(), &value, p->minValue(), p->maxValue());
@@ -207,10 +209,33 @@ namespace openspace {
 namespace gui {
 
 void GuiIswaComponent::initialize(){
-    options.push_back({7,"Red Sun","This is a red sun", false});
-    options.push_back({6,"Yellow Sun","This is a yellow sun", false});
-    options.push_back({5,"Green Sun","This is a green sun", false});
-    options.push_back({4,"Blue Sun","This is a blue sun", false});
+    // options.push_back({7,"Red Sun","This is a red sun", false});
+    // options.push_back({6,"Yellow Sun","This is a yellow sun", false});
+    // options.push_back({5,"Green Sun","This is a green sun", false});
+    // options.push_back({4,"Blue Sun","This is a blue sun", false});
+
+
+    std::string jsonString;
+    std::string line;
+    std::ifstream jsonFile (absPath("${OPENSPACE_DATA}/exampleCygnets.json"));
+    if(jsonFile.is_open()){
+        getline (jsonFile,line);
+        json j = json::parse(line);
+        
+        json jCygnets = j["listOfPriorityCygnets"];
+        for(int i=0; i<jCygnets.size(); i++){
+            json jCygnet = jCygnets.at(i);
+            // std::cout << jCygnets.at(i) << std::endl;   
+            options.push_back({
+                jCygnet["cygnetID"],
+                jCygnet["cygnetName"],
+                jCygnet["cygnetDescription"],
+                false
+            });
+        }
+
+    }
+    jsonFile.close();
 }
 
 void GuiIswaComponent::render() {
@@ -271,7 +296,7 @@ void GuiIswaComponent::render() {
             ImGui::Checkbox(options[i].name.c_str(), &options[i].selected);
             ImGui::SameLine();
             if (ImGui::CollapsingHeader(("Description" + std::to_string(options[i].id)).c_str())) {
-                ImGui::Text(options[i].description.c_str());
+                ImGui::TextWrapped(options[i].description.c_str());
             }
 
             if(selected != options[i].selected){
