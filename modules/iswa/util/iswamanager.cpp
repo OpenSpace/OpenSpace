@@ -72,22 +72,15 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
-    // setName("IswaManager"); 
-    // addProperty(_iswaNames);
-    // OsEng.gui()._iswa.registerProperty(&_iswaNames);
-
-    // _iswaNames.addOption({7, std::string("Red Sun")});
-    // _iswaNames.addOption({6, std::string("Yellow Sun")});
-    // _iswaNames.addOption({5, std::string("Green Sun")});
-    // _iswaNames.addOption({4, std::string("Blue Sun")});
-
-    // _iswaNames.onChange([this]{
-    //     for(auto v : _iswaNames.value()){
-    //         std::cout << v << " ";
-    //     }
-    //     std::cout << std::endl;
-    //     // std::cout << std::to_string(_iswaNames.value()) << std::endl;
-    // });
+    DlManager.fetchFile(
+        "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+        [this](const DownloadManager::MemoryFile& file){
+            fillCygnetInfo(std::string(file.buffer));
+        },
+        [](const std::string& err){
+            LWARNING("Download to memory was aborted: " + err);
+        }
+    );
 
 }
 
@@ -186,8 +179,13 @@ void IswaManager::deleteIswaCygnet(std::string name){
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
 }
 
-void IswaManager::deleteScreenSpaceCygnet(std::string name){
-    std::string script = "openspace.unregisterScreenSpaceRenderable('" + name + "');";
+void IswaManager::deleteScreenSpaceCygnet(int id){
+    if(_cygnetInformation.find(id) == _cygnetInformation.end()){
+        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
+        return;
+    }
+
+    std::string script = "openspace.unregisterScreenSpaceRenderable('" + _cygnetInformation[id]->name + "');";
     OsEng.scriptEngine().queueScript(script);
 }
 
@@ -289,9 +287,16 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-void IswaManager::createScreenSpace(int id, std::string name, int updateInterval){
-    if(name == "")
-        name = "iSWACygnet" + std::to_string(id);
+void IswaManager::createScreenSpace(int id){
+    if(_cygnetInformation.find(id) == _cygnetInformation.end()){
+        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
+        return;
+    }
+
+    auto info = _cygnetInformation[id];
+    std::string name = info->name;
+    int updateInterval = info->updateInterval;
+    info->selected = true;
 
     if(OsEng.renderEngine().screenSpaceRenderable(name)){
         LERROR("A cygnet with the name \"" + name +"\" already exist");
@@ -491,6 +496,25 @@ std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
     return nullptr;
 }
 
+void IswaManager::fillCygnetInfo(std::string jsonString){
+    if(jsonString != ""){
+        json j = json::parse(jsonString);
+        
+        json jCygnets = j["listOfPriorityCygnets"];
+        for(int i=0; i<jCygnets.size(); i++){
+            json jCygnet = jCygnets.at(i);
+
+            CygnetInfo info = {
+                jCygnet["cygnetDisplayTitle"],
+                jCygnet["cygnetDescription"],
+                jCygnet["cygnetUpdateInterval"],
+                false
+            };
+            _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
+        }
+    }
+}
+
 scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
@@ -505,7 +529,7 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
-                "int, string",
+                "int",
                 "Adds a Screen Space Cygnets",
                 true
             },
@@ -519,7 +543,7 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
             {
                 "removeScreenSpaceCygnet",
                 &luascriptfunctions::iswa_removeScrenSpaceCygnet,
-                "string",
+                "int",
                 "Remove a Screen Space Cygnets",
                 true
             },

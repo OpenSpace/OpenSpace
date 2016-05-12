@@ -34,10 +34,10 @@ function postInitialization()
     --openspace.iswa.addCygnet("-1,Data,1");
     --openspace.iswa.addCygnet("-2,Data,1");
     --openspace.iswa.addCygnet("-3,Data,1");
+    
+    openspace.iswa.addScreenSpaceCygnet(7);
     --[[
-    openspace.registerScreenSpaceRenderable(
     {
-        Name = "iSWACygnet7", 
         Type = "ScreenSpaceCygnet",
         CygnetId = 7,
         Position = {0.0, 0.0},

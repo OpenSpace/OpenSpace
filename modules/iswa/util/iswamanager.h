@@ -47,6 +47,12 @@ namespace openspace {
 class IswaGroup;
 class IswaCygnet; 
 
+struct CygnetInfo {
+    std::string name;
+    std::string description;
+    int updateInterval;
+    bool selected;
+};
 
 struct MetadataFuture {
     int id;
@@ -72,7 +78,7 @@ public:
     void addIswaCygnet(std::string info);
     void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
     void deleteIswaCygnet(std::string);
-    void deleteScreenSpaceCygnet(std::string name);
+    void deleteScreenSpaceCygnet(int id);
 
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
@@ -90,7 +96,12 @@ public:
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     std::string iswaUrl(int id, std::string type = "image");
-    void createScreenSpace(int id, std::string name = "", int updateInterval =  0);
+    void createScreenSpace(int id);
+    
+    std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation(){
+        return _cygnetInformation;
+    }
+
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 
@@ -99,6 +110,8 @@ private:
 
     void createKameleonPlane(std::string kwPath, int group = -1); 
     std::string parseKWToLuaTable(std::string kwPath, int group);
+
+    void fillCygnetInfo(std::string jsonString);
 
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
@@ -109,6 +122,7 @@ private:
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
 
+    std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     // properties::SelectionProperty _iswaNames;
 };
 

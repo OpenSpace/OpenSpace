@@ -54,7 +54,6 @@ private:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
-    bool _updateRealWorldTime;
 };
 
  } // namespace openspace

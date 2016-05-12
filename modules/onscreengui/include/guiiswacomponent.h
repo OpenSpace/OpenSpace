@@ -31,28 +31,15 @@
 
 namespace openspace {
 namespace gui {
-struct Option {
-    int id;
-    std::string name;
-    std::string description;
-    int updateInterval;
-    bool selected;
-};
-
 
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
-    virtual void initialize() override;
     virtual void render() override;
 
 private:
-	void fillOptions(std::string jsonString);
-
-	bool gmdata;
-	bool gmimage;
-	bool iondata;
-
-	std::vector<Option> options;
+    bool gmdata;
+    bool gmimage;
+    bool iondata;
 };
 
 
