@@ -51,13 +51,13 @@ namespace ghoul {
 
 namespace openspace {
 
-    class ChunkLodGlobe : 
-        public Renderable, public std::enable_shared_from_this<ChunkLodGlobe>{
+    class ChunkedLodGlobe : 
+        public Renderable, public std::enable_shared_from_this<ChunkedLodGlobe>{
     public:
-        ChunkLodGlobe(
+        ChunkedLodGlobe(
             const Ellipsoid& ellipsoid,
             std::shared_ptr<TileProviderManager> tileProviderManager);
-        ~ChunkLodGlobe();
+        virtual ~ChunkedLodGlobe();
 
         ChunkRenderer& getPatchRenderer() const;
 
@@ -76,7 +76,16 @@ namespace openspace {
         const int minSplitDepth;
         const int maxSplitDepth;
 
-    private:		
+
+
+        Camera* getSavedCamera() const { return _savedCamera; }
+        void setSaveCamera(Camera* c) { 
+            if (_savedCamera != nullptr) delete _savedCamera;
+            _savedCamera = c; 
+        }
+        
+
+    private:
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
@@ -94,6 +103,9 @@ namespace openspace {
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
         const Ellipsoid& _ellipsoid;
+
+        Camera* _savedCamera;
+        
     };
 
 }  // namespace openspace

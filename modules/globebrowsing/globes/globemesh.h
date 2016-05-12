@@ -46,7 +46,7 @@ namespace openspace {
 	class GlobeMesh : public Renderable {
 	public:
 		GlobeMesh();
-		~GlobeMesh();
+		virtual ~GlobeMesh();
 
 		bool initialize() override;
 		bool deinitialize() override;

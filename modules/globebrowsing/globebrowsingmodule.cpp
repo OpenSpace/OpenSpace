@@ -64,7 +64,6 @@ void GlobeBrowsingModule::internalInitialize() {
 
 	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 	fRenderable->registerClass<GlobeMesh>("GlobeMesh");
-	fRenderable->registerClass<DistanceSwitch>("DistanceSwitch");
 }
 
 } // namespace openspace

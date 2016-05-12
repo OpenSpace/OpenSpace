@@ -36,8 +36,9 @@
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
+#include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
 
 namespace ghoul {
@@ -49,12 +50,18 @@ namespace opengl {
 
 namespace openspace {
 
-class RenderableGlobe : public DistanceSwitch {
+class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe();
 
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+
 
 private:
 
@@ -65,7 +72,13 @@ private:
     //std::vector<std::string> _heightMapKeys;
     //std::vector<std::string> _colorTextureKeys;
 
+
     std::shared_ptr<TileProviderManager> _tileProviderManager;
+    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    
+    properties::BoolProperty _saveOrThrowCamera;
+
+    DistanceSwitch _distanceSwitch;
 };
 
 }  // namespace openspace

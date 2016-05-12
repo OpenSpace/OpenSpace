@@ -98,7 +98,7 @@ namespace openspace {
 
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
 
-        const std::string _filePath;
+        const std::string _filePath; 
 
         static bool hasInitializedGDAL;
         GDALDataset* _gdalDataSet;

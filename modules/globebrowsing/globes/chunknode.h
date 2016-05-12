@@ -39,7 +39,7 @@
 
 // forward declaration
 namespace openspace {
-    class ChunkLodGlobe;
+    class ChunkedLodGlobe;
 }
 
 

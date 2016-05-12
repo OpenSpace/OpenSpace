@@ -41,21 +41,21 @@ namespace openspace {
 	Selects a specific Renderable to be used for rendering, based on distance to the 
 	camera
 */
-class DistanceSwitch : public Renderable {
+class DistanceSwitch {
 public:
 	DistanceSwitch();
 	virtual ~DistanceSwitch();
 
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+	bool initialize();
+	bool deinitialize();
+	bool isReady() const;
 
 	/**
 		Picks the first Renderable with the associated maxDistance greater than the 
 		current distance to the camera
 	*/
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	void render(const RenderData& data);
+	void update(const UpdateData& data);
 
 	/**
 		Adds a new renderable (first argument) which may be rendered only if the distance 
@@ -67,7 +67,7 @@ private:
 	
 
 	std::vector<std::shared_ptr<Renderable>> _renderables;
-	std::vector <double> _maxDistances;
+	std::vector<double> _maxDistances;
 
 };
 } // openspace
