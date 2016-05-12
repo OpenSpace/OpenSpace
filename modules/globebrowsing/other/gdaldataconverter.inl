@@ -100,15 +100,15 @@ namespace openspace {
             int xSize = rasterBand->GetXSize();
             int ySize = rasterBand->GetYSize();
 
-            CPLErr err = rasterBand->RasterIO( 
+            CPLErr err = rasterBand->RasterIO(
                 GF_Read,
                 pixelStart.x,           // Begin read x
                 pixelStart.y,           // Begin read y
-                numPixels.x,       // width to read x
-                numPixels.y,       // width to read y
+                numPixels.x,            // width to read x
+                numPixels.y,            // width to read y
                 imageData + i,          // Where to put data
-                numPixels.x,       // width to write x in destination
-                numPixels.y,       // width to write y in destination
+                numPixels.x,            // width to write x in destination
+                numPixels.y,            // width to write y in destination
                 gdalType,		        // Type
                 sizeof(T) * nRasters,	// Pixel spacing
                 0);                     // Line spacing
@@ -129,13 +129,13 @@ namespace openspace {
         delete[] imageData;
         
         glm::uvec3 dims(numPixels.x, numPixels.y, 1);
-        UninitializedTextureTile::TextureFormat textrureFormat =
+        UninitializedTextureTile::TextureFormat textureFormat =
             getTextureFormat(nRasters, gdalType);
         GLuint glType = getGlDataTypeFromGdalDataType(gdalType);
         UninitializedTextureTile* uninitedTexPtr = new UninitializedTextureTile(
             imageDataYflipped,
             dims,
-            textrureFormat,
+            textureFormat,
             glType,
             chunkIndex);
         std::shared_ptr<UninitializedTextureTile> uninitedTex =

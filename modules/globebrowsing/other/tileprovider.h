@@ -46,7 +46,13 @@
 namespace openspace {
     using namespace ghoul::opengl;
     
-    struct TileTextureTransform
+    struct TileTextureDepthTransform
+    {
+        float depthScale;
+        float depthOffset;
+    };
+
+    struct TileTextureUvTransform
     {
         glm::vec2 uvOffset;
         glm::vec2 uvScale;
@@ -54,7 +60,7 @@ namespace openspace {
 
     struct Tile {
         std::shared_ptr<Texture> texture;
-        TileTextureTransform transform;
+        TileTextureUvTransform uvTransform;
     };
 
     /**
@@ -69,8 +75,8 @@ namespace openspace {
         Tile getMostHiResTile(ChunkIndex chunkIndex);
 
         std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
-
         std::shared_ptr<Texture> getDefaultTexture();
+        TileTextureDepthTransform depthTransform();
 
         void prerender();
 
@@ -110,6 +116,7 @@ namespace openspace {
 
         std::shared_ptr<Texture> _defaultTexture;
         int _tileLevelDifference;
+        TileTextureDepthTransform _depthTransform;
     };
 
 }  // namespace openspace

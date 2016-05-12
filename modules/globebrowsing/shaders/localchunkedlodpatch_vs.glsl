@@ -39,6 +39,9 @@ uniform sampler2D textureSamplerHeight;
 uniform vec2 heightSamplingScale;
 uniform vec2 heightSamplingOffset;
 
+uniform float heightSamplingDepthScale;
+uniform float heightSamplingDepthOffset;
+
 layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
@@ -66,9 +69,9 @@ void main()
 	vec2 samplePos = heightSamplingScale * in_uv + heightSamplingOffset;
 
 	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
-
+	
 	// Translate the point along normal
-	p += patchNormalCameraSpace * sampledHeight * pow(2,15);
+	p += patchNormalCameraSpace * (sampledHeight * heightSamplingDepthScale + heightSamplingDepthOffset);
 
 	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
 

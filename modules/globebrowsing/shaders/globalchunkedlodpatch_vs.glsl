@@ -34,6 +34,9 @@ uniform sampler2D textureSamplerHeight;
 uniform vec2 heightSamplingScale;
 uniform vec2 heightSamplingOffset;
 
+uniform float heightSamplingDepthScale;
+uniform float heightSamplingDepthOffset;
+
 layout(location = 1) in vec2 in_UV;
 
 out vec4 vs_position;
@@ -57,7 +60,9 @@ void main()
 
 	vec2 samplePos = heightSamplingScale*in_UV + heightSamplingOffset;
 	float sampledHeight = texture(textureSamplerHeight, samplePos).r;
-	pair.position += pair.normal * sampledHeight * pow(2,15);
+	if (sampledHeight < 0)
+		sampledHeight *= -10000000;
+	pair.position += pair.normal * (sampledHeight * heightSamplingDepthScale + heightSamplingDepthOffset);
 
 	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 

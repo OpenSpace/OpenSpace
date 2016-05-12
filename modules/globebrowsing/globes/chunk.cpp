@@ -97,10 +97,11 @@ namespace openspace {
             return WANT_MERGE;
         }
 
-        auto center = _surfacePatch.center();
-        Vec3 globePosition = data.position.dvec3();
-        Vec3 patchPosition = globePosition + ellipsoid.geodetic2ToCartesian(center);
         Vec3 cameraPosition = data.camera.position().dvec3();
+        Geodetic2 pointOnPatch = _surfacePatch.closestPoint(
+                ellipsoid.cartesianToGeodetic2(cameraPosition));
+        Vec3 globePosition = data.position.dvec3();
+        Vec3 patchPosition = globePosition + ellipsoid.geodetic2ToCartesian(pointOnPatch);
         Vec3 cameraToChunk = patchPosition - cameraPosition;
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
 

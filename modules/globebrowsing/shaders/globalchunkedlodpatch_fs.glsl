@@ -50,6 +50,7 @@ Fragment getFragment() {
 
 	vec2 samplePos = colorSamplingScale*fs_uv + colorSamplingOffset;
 	frag.color = texture(textureSamplerColor, samplePos);
+	//frag.color.rgb *= 10;
 
 	// Sample position overlay
 	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
