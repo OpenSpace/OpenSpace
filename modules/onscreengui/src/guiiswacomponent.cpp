@@ -38,6 +38,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 
+#include <ext/json/json.hpp>
+
 #include "imgui.h"
 
 namespace {
@@ -204,6 +206,13 @@ namespace {
 namespace openspace {
 namespace gui {
 
+void GuiIswaComponent::initialize(){
+    options.push_back({7,"Red Sun","This is a red sun", false});
+    options.push_back({6,"Yellow Sun","This is a yellow sun", false});
+    options.push_back({5,"Green Sun","This is a green sun", false});
+    options.push_back({4,"Blue Sun","This is a blue sun", false});
+}
+
 void GuiIswaComponent::render() {
     bool gmdatavalue = gmdata;
     bool gmimagevalue = gmimage;
@@ -254,10 +263,27 @@ void GuiIswaComponent::render() {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(3);");
         }
     }
-    // bool gmdata = ImGui::Button("Create Global Magnetosphere from data");
-    // bool gmtext = ImGui::Button("Create Global Magnetosphere from images");
-    // bool iodata = ImGui::Button("Create Ionosphere from data");
-    // ImGui::ShowUserGuide();
+
+    if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {       
+        for (int i = 0; i < options.size(); ++i) {
+            // std::string name = options[i].name;
+            bool selected = options[i].selected;//std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+            ImGui::Checkbox(options[i].name.c_str(), &options[i].selected);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(("Description" + std::to_string(options[i].id)).c_str())) {
+                ImGui::Text(options[i].description.c_str());
+            }
+
+            if(selected != options[i].selected){
+                if(options[i].selected){
+                    std::string arguments = std::to_string(options[i].id) + ", '" + options[i].name + "'";
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("+arguments+");");
+                }else{
+                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet('"+options[i].name+"');");
+                }
+            }
+        }
+    }
 
 
     ImGui::Spacing();

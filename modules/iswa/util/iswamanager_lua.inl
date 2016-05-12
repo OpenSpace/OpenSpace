@@ -32,11 +32,33 @@ int iswa_addCygnet(lua_State* L) {
     return 0;
 }
 
+int iswa_addScreenSpaceCygnet(lua_State* L){
+	int id = lua_tonumber(L, 1);
+    std::string name = luaL_checkstring(L, 2);
+
+    std::cout << id << " " << name << std::endl;
+
+	IswaManager::ref().createScreenSpace(id,name);
+}
+
+int iswa_removeCygnet(lua_State* L){
+    std::string s = luaL_checkstring(L, -1);
+    IswaManager::ref().deleteIswaCygnet(s);
+    return 0;
+}
+
+int iswa_removeScrenSpaceCygnet(lua_State* L){
+    std::string s = luaL_checkstring(L, -1);
+    IswaManager::ref().deleteScreenSpaceCygnet(s);
+    return 0;
+}
+
 int iswa_removeGroup(lua_State* L){
 	int id = lua_tonumber(L, 1);
 	IswaManager::ref().unregisterGroup(id);
 	return 0;
 }
+
 
 }// namespace luascriptfunctions
 

@@ -37,6 +37,7 @@
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/properties/selectionproperty.h>
 
 // #include <modules/iswa/rendering/iswacygnet.h>
 // #include <modules/iswa/rendering/iswagroup.h>
@@ -58,7 +59,7 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager> {
+class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner {
     friend class ghoul::Singleton<IswaManager>;
 
 public:
@@ -71,6 +72,7 @@ public:
     void addIswaCygnet(std::string info);
     void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
     void deleteIswaCygnet(std::string);
+    void deleteScreenSpaceCygnet(std::string name);
 
     std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
     std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
@@ -88,10 +90,10 @@ public:
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     std::string iswaUrl(int id, std::string type = "image");
+    void createScreenSpace(int id, std::string name = "");
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 
-    void createScreenSpace(int id);
     void createPlane(std::shared_ptr<MetadataFuture> data);
     std::string parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data);
 
@@ -106,6 +108,8 @@ private:
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
+
+    // properties::SelectionProperty _iswaNames;
 };
 
 } //namespace openspace

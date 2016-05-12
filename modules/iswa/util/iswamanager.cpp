@@ -50,6 +50,7 @@ namespace {
 namespace openspace{
 
 IswaManager::IswaManager()
+// :_iswaNames("iswaNames", "iSWA Cygnets")
 {
     _month["JAN"] = "01";
     _month["FEB"] = "02";
@@ -70,6 +71,24 @@ IswaManager::IswaManager()
 
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
+
+    // setName("IswaManager"); 
+    // addProperty(_iswaNames);
+    // OsEng.gui()._iswa.registerProperty(&_iswaNames);
+
+    // _iswaNames.addOption({7, std::string("Red Sun")});
+    // _iswaNames.addOption({6, std::string("Yellow Sun")});
+    // _iswaNames.addOption({5, std::string("Green Sun")});
+    // _iswaNames.addOption({4, std::string("Blue Sun")});
+
+    // _iswaNames.onChange([this]{
+    //     for(auto v : _iswaNames.value()){
+    //         std::cout << v << " ";
+    //     }
+    //     std::cout << std::endl;
+    //     // std::cout << std::to_string(_iswaNames.value()) << std::endl;
+    // });
+
 }
 
 IswaManager::~IswaManager(){
@@ -162,8 +181,14 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
     } 
 }
 
+
 void IswaManager::deleteIswaCygnet(std::string name){
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
+}
+
+void IswaManager::deleteScreenSpaceCygnet(std::string name){
+    std::string script = "openspace.unregisterScreenSpaceRenderable('" + name + "');";
+    OsEng.scriptEngine().queueScript(script);
 }
 
 std::shared_ptr<DownloadManager::FileFuture> IswaManager::downloadImageToMemory(int id, std::string& buffer){
@@ -264,9 +289,10 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-void IswaManager::createScreenSpace(int id){
+void IswaManager::createScreenSpace(int id, std::string name){
+    if(name == "")
+        name = "iSWACygnet" + std::to_string(id);
 
-    std::string name = "iSWACygnet" + std::to_string(id);
     if(OsEng.renderEngine().screenSpaceRenderable(name)){
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return;
@@ -471,6 +497,27 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCygnet,
                 "string",
                 "Adds a IswaCygnet",
+                true
+            },
+            {
+                "addScreenSpaceCygnet",
+                &luascriptfunctions::iswa_addScreenSpaceCygnet,
+                "int, string",
+                "Adds a Screen Space Cygnets",
+                true
+            },
+            {
+                "removeCygnet",
+                &luascriptfunctions::iswa_removeCygnet,
+                "string",
+                "Remove a Cygnets",
+                true
+            },
+            {
+                "removeScreenSpaceCygnet",
+                &luascriptfunctions::iswa_removeScrenSpaceCygnet,
+                "string",
+                "Remove a Screen Space Cygnets",
                 true
             },
             {
