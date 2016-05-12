@@ -35,6 +35,7 @@ struct Option {
     int id;
     std::string name;
     std::string description;
+    int updateInterval;
     bool selected;
 };
 
@@ -45,6 +46,8 @@ public:
     virtual void render() override;
 
 private:
+	void fillOptions(std::string jsonString);
+
 	bool gmdata;
 	bool gmimage;
 	bool iondata;

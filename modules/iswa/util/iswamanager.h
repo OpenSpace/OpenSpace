@@ -90,7 +90,7 @@ public:
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
     std::string iswaUrl(int id, std::string type = "image");
-    void createScreenSpace(int id, std::string name = "");
+    void createScreenSpace(int id, std::string name = "", int updateInterval =  0);
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
 

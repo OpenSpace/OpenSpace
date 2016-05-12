@@ -43,28 +43,52 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
     
+    float interval;
+    dictionary.getValue("UpdateInterval", interval);
+    _updateTime = (int) interval;
     // setName("iSWACygnet" + std::to_string(_cygnetId));
-    addProperty(_updateInterval);
+    // addProperty(_updateInterval);
+
+    _updateRealWorldTime = (_updateTime == 0);
+    if(_updateRealWorldTime){
+        _minRealTimeUpdateInterval = 1000;
+    }else{
+        _minRealTimeUpdateInterval = 100;
+    }
 
     _downloadImage = true;
 
     _url = IswaManager::ref().iswaUrl(_cygnetId);
+        
+    _openSpaceTime = Time::ref().currentTime();
+    _lastUpdateOpenSpaceTime = _openSpaceTime;
+
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
+
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
 void ScreenSpaceCygnet::update(){
+    _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    int updateInterval = (int) (_updateInterval.value()*1000);
-    bool timeToUpdate = ((_realTime.count()-_lastUpdateRealTime.count()) > updateInterval) &&
-                        (Time::ref().deltaTime() != 0);
 
-    if(updateInterval != 0 && (Time::ref().timeJumped() || timeToUpdate )){
+    bool timeToUpdate;
+
+    if(_updateRealWorldTime){
+        timeToUpdate = (((_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval) &&
+                        Time::ref().deltaTime() != 0);
+    }else{
+        timeToUpdate =  (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    }
+
+    if((Time::ref().timeJumped() || timeToUpdate )){
         _url = IswaManager::ref().iswaUrl(_cygnetId);
         updateTexture();
         _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
     if(_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {

@@ -33,12 +33,13 @@ int iswa_addCygnet(lua_State* L) {
 }
 
 int iswa_addScreenSpaceCygnet(lua_State* L){
-	int id = lua_tonumber(L, 1);
+    int id = lua_tonumber(L, 1);
     std::string name = luaL_checkstring(L, 2);
+	int interval = lua_tonumber(L, 3);
 
-    std::cout << id << " " << name << std::endl;
+    std::cout << id << " " << name << " " << interval << std::endl;
 
-	IswaManager::ref().createScreenSpace(id,name);
+	IswaManager::ref().createScreenSpace(id,name, interval);
 }
 
 int iswa_removeCygnet(lua_State* L){

@@ -39,6 +39,8 @@
 #include <ghoul/misc/assert.h>
 
 #include <ext/json/json.hpp>
+#include <openspace/engine/downloadmanager.h>
+
 #include <fstream>
 
 #include "imgui.h"
@@ -209,33 +211,15 @@ namespace openspace {
 namespace gui {
 
 void GuiIswaComponent::initialize(){
-    // options.push_back({7,"Red Sun","This is a red sun", false});
-    // options.push_back({6,"Yellow Sun","This is a yellow sun", false});
-    // options.push_back({5,"Green Sun","This is a green sun", false});
-    // options.push_back({4,"Blue Sun","This is a blue sun", false});
-
-
-    std::string jsonString;
-    std::string line;
-    std::ifstream jsonFile (absPath("${OPENSPACE_DATA}/exampleCygnets.json"));
-    if(jsonFile.is_open()){
-        getline (jsonFile,line);
-        json j = json::parse(line);
-        
-        json jCygnets = j["listOfPriorityCygnets"];
-        for(int i=0; i<jCygnets.size(); i++){
-            json jCygnet = jCygnets.at(i);
-            // std::cout << jCygnets.at(i) << std::endl;   
-            options.push_back({
-                jCygnet["cygnetID"],
-                jCygnet["cygnetName"],
-                jCygnet["cygnetDescription"],
-                false
-            });
+    DlManager.fetchFile(
+        "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+        [this](const DownloadManager::MemoryFile& file){
+            fillOptions(std::string(file.buffer));
+        },
+        [](const std::string& err){
+            LWARNING("Download to memory was aborted: " + err);
         }
-
-    }
-    jsonFile.close();
+    );
 }
 
 void GuiIswaComponent::render() {
@@ -288,30 +272,6 @@ void GuiIswaComponent::render() {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(3);");
         }
     }
-
-    if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {       
-        for (int i = 0; i < options.size(); ++i) {
-            // std::string name = options[i].name;
-            bool selected = options[i].selected;//std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
-            ImGui::Checkbox(options[i].name.c_str(), &options[i].selected);
-            ImGui::SameLine();
-            if (ImGui::CollapsingHeader(("Description" + std::to_string(options[i].id)).c_str())) {
-                ImGui::TextWrapped(options[i].description.c_str());
-            }
-
-            if(selected != options[i].selected){
-                if(options[i].selected){
-                    std::string arguments = std::to_string(options[i].id) + ", '" + options[i].name + "'";
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("+arguments+");");
-                }else{
-                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet('"+options[i].name+"');");
-                }
-            }
-        }
-    }
-
-
-    ImGui::Spacing();
 
     for (const auto& p : _propertiesByOwner) {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
@@ -368,7 +328,50 @@ void GuiIswaComponent::render() {
             }
         }
     }
+
+
+    if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {       
+        for (int i = 0; i < options.size(); ++i) {
+            // std::string name = options[i].name;
+            bool selected = options[i].selected;//std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+            ImGui::Checkbox(options[i].name.c_str(), &options[i].selected);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader(("Description" + std::to_string(options[i].id)).c_str())) {
+                ImGui::TextWrapped(options[i].description.c_str());
+                ImGui::Spacing();
+            }
+
+            if(selected != options[i].selected){
+                if(options[i].selected){
+                    std::string arguments = std::to_string(options[i].id) + ", '" + options[i].name + "'," + std::to_string(options[i].updateInterval);
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("+arguments+");");
+                }else{
+                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet('"+options[i].name+"');");
+                }
+            }
+        }
+    }
+
     ImGui::End();
+}
+
+void GuiIswaComponent::fillOptions(std::string jsonString){
+    if(jsonString != ""){
+        json j = json::parse(jsonString);
+        
+        json jCygnets = j["listOfPriorityCygnets"];
+        for(int i=0; i<jCygnets.size(); i++){
+            json jCygnet = jCygnets.at(i);
+            // std::cout << jCygnets.at(i) << std::endl;   
+            options.push_back({
+                jCygnet["cygnetID"],
+                jCygnet["cygnetDisplayTitle"],
+                jCygnet["cygnetDescription"],
+                jCygnet["cygnetUpdateInterval"],
+                false
+            });
+        }
+    }
 }
 
 } // gui

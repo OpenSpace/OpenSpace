@@ -289,7 +289,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-void IswaManager::createScreenSpace(int id, std::string name){
+void IswaManager::createScreenSpace(int id, std::string name, int updateInterval){
     if(name == "")
         name = "iSWACygnet" + std::to_string(id);
 
@@ -297,7 +297,10 @@ void IswaManager::createScreenSpace(int id, std::string name){
         LERROR("A cygnet with the name \"" + name +"\" already exist");
         return;
     }else{
-        std::string luaTable = "{ Name = '" + name + "', Type='ScreenSpaceCygnet', CygnetId = "+std::to_string(id)+"}";
+        std::string luaTable ="{ Name = '" + name + "',"
+                                "Type='ScreenSpaceCygnet',"
+                                "CygnetId = "+std::to_string(id)+","
+                                "UpdateInterval = " +std::to_string(updateInterval)+"}";
         std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
     }
