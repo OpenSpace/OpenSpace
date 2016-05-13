@@ -39,9 +39,8 @@
 #include <modules/globebrowsing/other/texturetileset.h>
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
+#include <modules/globebrowsing/other/layeredtextureshaderprovider.h>
 #include <modules/globebrowsing/globes/chunknode.h>
-
-
 
 namespace ghoul {
 namespace opengl {
@@ -52,7 +51,6 @@ namespace opengl {
 
 namespace openspace {
 
-    class LonLatPatch;
     class TriangleSoup;
     
     using std::shared_ptr;
@@ -68,8 +66,6 @@ namespace openspace {
         void update();
 
     protected:
-        unique_ptr<ProgramObject> _programObjectGlobalRendering;
-        unique_ptr<ProgramObject> _programObjectLocalRendering;
         std::shared_ptr<TileProviderManager> _tileProviderManager;
     };
 
@@ -96,7 +92,10 @@ namespace openspace {
             const Chunk& chunk,
             const Ellipsoid& ellipsoid,
             const RenderData& data);
+        
         shared_ptr<Grid> _grid;
+        unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
+        unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
     };
 
 
@@ -108,6 +107,8 @@ namespace openspace {
         ClipMapPatchRenderer(
             shared_ptr<ClipMapGrid> grid,
             shared_ptr<TileProviderManager> tileProviderManager);
+
+        ~ClipMapPatchRenderer();
 
         void renderPatch(
             const Geodetic2& patchSize,
@@ -123,6 +124,9 @@ namespace openspace {
             const Geodetic2& patchSize,
             const RenderData& data,
             const Ellipsoid& ellipsoid);
+
+        unique_ptr<ProgramObject> _programObjectGlobalRendering;
+        unique_ptr<ProgramObject> _programObjectLocalRendering;
 
         PatchCoverageProvider _patchCoverageProvider;
         shared_ptr<ClipMapGrid> _grid;

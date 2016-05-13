@@ -26,8 +26,8 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-#define NUMLAYERS_COLORTEXTURE 1
-#define NUMLAYERS_HEIGHTMAP 1
+#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
+#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
 uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 
@@ -50,17 +50,12 @@ Fragment getFragment() {
 	for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
 	{
 		vec2 samplePos =
-		colorTiles[i].uvTransform.uvScale * fs_uv +
-		colorTiles[i].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[i].textureSampler, samplePos);
+		colorTile.uvTransform.uvScale * fs_uv +
+		colorTile.uvTransform.uvOffset;
+		vec4 colorSample = texture(colorTile.textureSampler, samplePos);
 		frag.color = blendOver(frag.color, colorSample);
 	}
-
-	//vec2 samplePos =
-	//	colorTile.uvTransform.uvScale * fs_uv +
-	//	colorTile.uvTransform.uvOffset;
-	//frag.color = texture(colorTile.textureSampler, samplePos);
-
+	
 	//frag.color.rgb *= 10;
 
 	// Sample position overlay

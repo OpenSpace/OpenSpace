@@ -29,6 +29,9 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 
+#define NUMLAYERS_COLORTEXTURE 1
+#define NUMLAYERS_HEIGHTMAP 1
+
 uniform mat4 projectionTransform;
 
 // Input points in camera space
@@ -38,7 +41,7 @@ uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 
-uniform TextureTile heightTile;
+uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 
 layout(location = 1) in vec2 in_uv;
 
@@ -58,18 +61,23 @@ void main()
 	// Position in cameraspace
 	vec3 p = bilinearInterpolation(in_uv);
 	
-	// Transform uv coordinates to texture space
-	vec2 samplePos =
-		heightTile.uvTransform.uvScale * in_uv +
-		heightTile.uvTransform.uvOffset;
+	float height = 0;
+	for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
+	{
+		vec2 samplePos =
+			heightTiles[i].uvTransform.uvScale * in_uv +
+			heightTiles[i].uvTransform.uvOffset;
 
-	float sampledHeight = texture(heightTile.textureSampler, samplePos).r;
+		float sampledValue = texture(heightTiles[i].textureSampler, samplePos).r;
+		
+		// TODO : Some kind of blending here. Now it just writes over
+		height = (sampledValue *
+			heightTiles[i].depthTransform.depthScale +
+			heightTiles[i].depthTransform.depthOffset);
+	}
 	
 	// Translate the point along normal
-	p += patchNormalCameraSpace *
-		(sampledHeight *
-			heightTile.depthTransform.depthScale +
-			heightTile.depthTransform.depthOffset);
+	p += patchNormalCameraSpace * height;
 
 	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
 	

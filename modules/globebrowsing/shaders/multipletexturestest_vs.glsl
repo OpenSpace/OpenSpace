@@ -22,55 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
 
-#define NUMLAYERS_COLORTEXTURE 1
-#define NUMLAYERS_HEIGHTMAP 1
+#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
+#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
-uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
+uniform mat4 modelViewProjectionTransform;
+uniform vec3 radiiSquared;
 
-in vec4 fs_position;
-in vec2 fs_uv;
+uniform vec2 minLatLon;
+uniform vec2 lonLatScalingFactor;
 
-vec4 blendOver(vec4 oldColor, vec4 newColor)
-{
-	vec4 toReturn;
-	toReturn.rgb =
-		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
-		(newColor.a + oldColor.a * (1 - newColor.a));
-	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
-	return toReturn;
+uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
+
+layout(location = 1) in vec2 in_uv;
+
+out vec2 fs_uv;
+out vec4 fs_position;
+
+PositionNormalPair globalInterpolation() {
+	vec2 lonLatInput;
+	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
+	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_uv.x; // Lon
+	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
+	return positionPairModelSpace;
 }
 
-Fragment getFragment() {
-	Fragment frag;
+void main()
+{
+	PositionNormalPair pair = globalInterpolation();
 
-	for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
+	float height = 0;
+	for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
 	{
 		vec2 samplePos =
-		colorTiles[i].uvTransform.uvScale * fs_uv +
-		colorTiles[i].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[i].textureSampler, samplePos);
-		frag.color = blendOver(frag.color, colorSample);
+			heightTiles[i].uvTransform.uvScale * in_uv +
+			heightTiles[i].uvTransform.uvOffset;
+
+		float sampledValue = texture(heightTiles[i].textureSampler, samplePos).r;
+		
+		// TODO : Some kind of blending here. Now it just writes over
+		height = (sampledValue *
+			heightTiles[i].depthTransform.depthScale +
+			heightTiles[i].depthTransform.depthOffset);
 	}
 
-	//vec2 samplePos =
-	//	colorTile.uvTransform.uvScale * fs_uv +
-	//	colorTile.uvTransform.uvOffset;
-	//frag.color = texture(colorTile.textureSampler, samplePos);
+	// Add the height in the direction of the normal
+	pair.position += pair.normal * height;
 
-	//frag.color.rgb *= 10;
+	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
 
-	// Sample position overlay
-	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
-
-	// Border overlay
-	//frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
-
-	frag.depth = fs_position.w;
-
-	return frag;
+	// Write output
+	fs_uv = in_uv;
+	fs_position = z_normalization(position);
+	gl_Position = fs_position;
 }
-
