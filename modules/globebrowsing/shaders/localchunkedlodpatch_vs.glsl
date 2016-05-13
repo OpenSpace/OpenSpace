@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"

@@ -97,6 +97,7 @@ namespace openspace {
         _preprocessingData = preprocessingData;
         ghoul::Dictionary shaderDictionary;
         
+
         // Different texture types can be height maps or color texture for example
         // These are used differently within the shaders.
         auto textureTypes = _preprocessingData.layeredTextureInfo;
@@ -111,6 +112,11 @@ namespace openspace {
             _vsPath,
             _fsPath);
         
+
+        // TODO : THIS CAN'T BE DONE SINCE SHADER PROGRAM NEEDS TO RESOLVE FRAGMENTS
+        // FIX. HOW CAN THE RENDERING MODE BE ABSTRACTED AWAY WHEN BUILDING USING
+        // DICTIONARIES?
+
         /*
         try {
             _programObject = ProgramObject::Build(
@@ -120,7 +126,6 @@ namespace openspace {
                 shaderDictionary);
         }
         catch (ghoul::RuntimeError& error) {
-
             LERROR(error.message);
         }
         */
