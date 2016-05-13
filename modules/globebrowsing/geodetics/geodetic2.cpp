@@ -139,7 +139,7 @@ namespace openspace {
         // A PART OF AN ELLIPSOID AND NOT A SPHERE!MUST CHECK IF THIS FUNCTION IS STILL
         // VALID.
         const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
-        return glm::length(ellipsoid.geodetic2ToCartesian(_center) - ellipsoid.geodetic2ToCartesian(cornerNearEquator));
+        return glm::length(ellipsoid.cartesianSurfacePosition(_center) - ellipsoid.cartesianSurfacePosition(cornerNearEquator));
     }
     /*
     Scalar GeodeticPatch::unitArea() const {
@@ -170,6 +170,15 @@ namespace openspace {
 
     Geodetic2 GeodeticPatch::size() const {
         return Geodetic2(2 * _halfSize.lat, 2 * _halfSize.lon);
+    }
+
+    Geodetic2 GeodeticPatch::getCorner(Quad q) const {
+        switch (q) {
+        case NORTH_WEST: return northWestCorner();
+        case NORTH_EAST: return northEastCorner();
+        case SOUTH_WEST: return southWestCorner();
+        case SOUTH_EAST: return southEastCorner();
+        }
     }
 
     Geodetic2 GeodeticPatch::northWestCorner() const{

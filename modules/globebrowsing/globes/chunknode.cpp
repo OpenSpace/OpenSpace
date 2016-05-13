@@ -126,7 +126,8 @@ void ChunkNode::internalRender(const RenderData& data) {
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < 4; i++) {
-            Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i));
+            
+            Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i), _chunk.owner()->initChunkVisible);
             _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
         }
     }
@@ -145,6 +146,7 @@ void ChunkNode::merge() {
         }
         _children[i] = nullptr;
     }
+    ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
 
 const ChunkNode& ChunkNode::getChild(Quad quad) const {

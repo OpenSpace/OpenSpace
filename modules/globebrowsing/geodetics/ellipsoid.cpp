@@ -66,13 +66,13 @@ namespace openspace {
     
 
 
-    Vec3 Ellipsoid::scaleToGeocentricSurface(const Vec3& p) const
+    Vec3 Ellipsoid::geocentricSurfaceProjection(const Vec3& p) const
     {
         Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
         return beta * p;
     }
 
-    Vec3 Ellipsoid::scaleToGeodeticSurface(const Vec3& p) const
+    Vec3 Ellipsoid::geodeticSurfaceProjection(const Vec3& p) const
     {
         Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
         Scalar n = glm::length(beta * p * _cached._oneOverRadiiSquared);
@@ -100,7 +100,7 @@ namespace openspace {
         return p / d;
     }
 
-    Vec3 Ellipsoid::geodeticSurfaceNormal(const Vec3& p) const
+    Vec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const
     {
         Vec3 normal = p * _cached._oneOverRadiiSquared;
         return glm::normalize(normal);
@@ -143,19 +143,19 @@ namespace openspace {
 
     Geodetic2 Ellipsoid::cartesianToGeodetic2(const Vec3& p) const
     {
-        Vec3 normal = geodeticSurfaceNormal(p);
+        Vec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
         return Geodetic2(
             asin(normal.z / length(normal)),	// Latitude
             atan2(normal.y, normal.x));			// Longitude
     }
 
-    Vec3 Ellipsoid::geodetic2ToCartesian(const Geodetic2& geodetic2) const
+    Vec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const
     {
         // Position on surface : height = 0
-        return geodetic3ToCartesian(Geodetic3({ geodetic2, 0 }));
+        return cartesianPosition(Geodetic3({ geodetic2, 0 }));
     }
 
-    Vec3 Ellipsoid::geodetic3ToCartesian(const Geodetic3& geodetic3) const
+    Vec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
     {
         Vec3 normal = geodeticSurfaceNormal(geodetic3.geodetic2);
         Vec3 k = _cached._radiiSquared * normal;

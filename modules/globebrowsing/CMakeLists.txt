@@ -46,6 +46,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
@@ -81,6 +82,7 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp

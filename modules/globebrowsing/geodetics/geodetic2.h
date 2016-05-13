@@ -125,6 +125,7 @@ public:
     */
     // Scalar unitArea() const;
 
+    Geodetic2 getCorner(Quad q) const;
 
     Geodetic2 northWestCorner() const;
     Geodetic2 northEastCorner() const;

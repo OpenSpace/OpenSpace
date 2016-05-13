@@ -22,70 +22,50 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEGLOBE_H__
-#define __RENDERABLEGLOBE_H__
+#ifndef __AABB_H__
+#define __AABB_H__
 
-#include <ghoul/logging/logmanager.h>
+#include <memory>
+#include <glm/glm.hpp>
 
 // open space includes
-#include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/tileprovidermanager.h>
-
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-}
-}
 
 
 namespace openspace {
 
-class RenderableGlobe : public Renderable {
-public:
-    RenderableGlobe(const ghoul::Dictionary& dictionary);
-    ~RenderableGlobe();
-
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-    properties::BoolProperty doFrustumCulling;
-    properties::BoolProperty doHorizonCulling;
-    properties::IntProperty numPosZthres;
-    properties::FloatProperty lodScaleFactor;
-    properties::BoolProperty initChunkVisible;
-private:
-
-    double _time;
-
-    Ellipsoid _ellipsoid;
-
-    //std::vector<std::string> _heightMapKeys;
-    //std::vector<std::string> _colorTextureKeys;
+    using namespace glm;
 
 
-    std::shared_ptr<TileProviderManager> _tileProviderManager;
-    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-    
-    properties::BoolProperty _saveOrThrowCamera;
+    struct AABB2 {
+        AABB2();
+        AABB2(const vec2& min, const vec2& max);
 
-    DistanceSwitch _distanceSwitch;
-};
+        void expand(const vec2& p);
+        vec2 center() const;
+        vec2 size() const;
+        bool intersects(const vec2& p) const;
+        bool intersects(const AABB2& o) const;
 
+        vec2 min;
+        vec2 max;
+    };
+
+
+    struct AABB3 {
+        AABB3();
+        AABB3(const vec3& min, const vec3& max);
+
+        void expand(const vec3 p);
+        vec3 center() const;
+        vec3 size() const;
+        bool intersects(const vec3& p) const;
+        bool intersects(const AABB3& o) const;
+
+        vec3 min;
+        vec3 max;
+    };
+   
 }  // namespace openspace
 
-#endif  // __RENDERABLEGLOBE_H__
+#endif  // __AABB_H__

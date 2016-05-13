@@ -38,11 +38,11 @@ namespace {
 
 namespace openspace {
 
-    Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex)
+    Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible)
         : _owner(owner)
         , _surfacePatch(chunkIndex)
         , _index(chunkIndex)
-        , _isVisible(true) 
+        , _isVisible(initVisible) 
     {
 
     }
@@ -90,33 +90,38 @@ namespace openspace {
         const Ellipsoid& ellipsoid = _owner->ellipsoid();
 
         
-        
-        // Do horizon culling
-        const int maxHeight = 8700; // should be read from gdal dataset or mod file
-        _isVisible = HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
-        if (!_isVisible) {
-            return WANT_MERGE;
-        }
-        
 
-        // Do frustum culling
-        _isVisible = FrustumCuller::isVisible(myRenderData, _surfacePatch, ellipsoid);
-        if (!_isVisible) {
-            return WANT_MERGE;
+        
+        
+        const int maxHeight = 8700; // should be read from gdal dataset or mod file
+
+
+        if (_owner->doFrustumCulling) {
+            _isVisible &= FrustumCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         }
+
+
+        if (_owner->doHorizonCulling) {
+            _isVisible &= HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
+        }
+
+
+
+
+        
 
         auto center = _surfacePatch.center();
         Vec3 globePosition = myRenderData.position.dvec3();
-        Vec3 patchPosition = globePosition + ellipsoid.geodetic2ToCartesian(center);
+        Vec3 patchPosition = globePosition + ellipsoid.cartesianSurfacePosition(center);
         Vec3 cameraPosition = myRenderData.camera.position().dvec3();
         Vec3 cameraToChunk = patchPosition - cameraPosition;
-        Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
+        
 
         // Calculate desired level based on distance
         Scalar distance = glm::length(cameraToChunk);
         _owner->minDistToCamera = fmin(_owner->minDistToCamera, distance);
 
-        Scalar scaleFactor = 10 * minimumGlobeRadius;
+        Scalar scaleFactor = _owner->lodScaleFactor * ellipsoid.minimumRadius();;
         Scalar projectedScaleFactor = scaleFactor / distance;
         int desiredLevel = floor(log2(projectedScaleFactor));
 

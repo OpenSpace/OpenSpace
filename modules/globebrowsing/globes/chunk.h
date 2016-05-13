@@ -50,7 +50,7 @@ namespace openspace {
             WANT_SPLIT,
         };
         
-        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex);
+        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);

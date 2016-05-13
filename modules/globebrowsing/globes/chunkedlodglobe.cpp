@@ -95,7 +95,7 @@ namespace openspace {
 
     void ChunkedLodGlobe::render(const RenderData& data){
         minDistToCamera = INFINITY;
-        ChunkNode::renderedPatches = 0;        
+        ChunkNode::renderedPatches = 0;
 
         _leftRoot->render(data);
         _rightRoot->render(data);

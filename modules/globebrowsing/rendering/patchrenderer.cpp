@@ -243,10 +243,10 @@ namespace openspace {
         Geodetic2 ne = chunk.surfacePatch().northEastCorner();
 
         // Get model space positions of the four control points
-        Vec3 patchSwModelSpace = ellipsoid.geodetic2ToCartesian(sw);
-        Vec3 patchSeModelSpace = ellipsoid.geodetic2ToCartesian(se);
-        Vec3 patchNwModelSpace = ellipsoid.geodetic2ToCartesian(nw);
-        Vec3 patchNeModelSpace = ellipsoid.geodetic2ToCartesian(ne);
+        Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);
+        Vec3 patchSeModelSpace = ellipsoid.cartesianSurfacePosition(se);
+        Vec3 patchNwModelSpace = ellipsoid.cartesianSurfacePosition(nw);
+        Vec3 patchNeModelSpace = ellipsoid.cartesianSurfacePosition(ne);
 
         // Transform all control points to camera space
         Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
@@ -530,10 +530,10 @@ namespace openspace {
         ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
 
         // Get global positions of the four control points
-        Vec3 patchSw = ellipsoid.geodetic2ToCartesian(newPatch.southWestCorner());
-        Vec3 patchSe = ellipsoid.geodetic2ToCartesian(newPatch.southEastCorner());
-        Vec3 patchNw = ellipsoid.geodetic2ToCartesian(newPatch.northWestCorner());
-        Vec3 patchNe = ellipsoid.geodetic2ToCartesian(newPatch.northEastCorner());
+        Vec3 patchSw = ellipsoid.cartesianSurfacePosition(newPatch.southWestCorner());
+        Vec3 patchSe = ellipsoid.cartesianSurfacePosition(newPatch.southEastCorner());
+        Vec3 patchNw = ellipsoid.cartesianSurfacePosition(newPatch.northWestCorner());
+        Vec3 patchNe = ellipsoid.cartesianSurfacePosition(newPatch.northEastCorner());
 
         // Transform all control points to camera space
         patchSw = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSw, 1));
