@@ -43,7 +43,7 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("_useHistogram", "Use Histogram", true)
+    ,_useHistogram("useHistogram", "Use Histogram", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
@@ -71,6 +71,14 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
     }
 
+    setTransferFunctions(_transferFunctionsFile.value());
+
+    _dataProcessor = std::make_shared<DataProcessor>(
+        _useLog.value(),
+        _useHistogram.value(),
+        _normValues
+    );
+
     _normValues.onChange([this](){
         // FOR TESTING (should be done on all onChange)
         // _avgBenchmarkTime = 0.0;
@@ -96,13 +104,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
     _type = IswaManager::CygnetType::Data;
 
-    setTransferFunctions(_transferFunctionsFile.value());
-
-    _dataProcessor = std::make_shared<DataProcessor>(
-        _useLog.value(),
-        _useHistogram.value(),
-        _normValues
-    );
 }
 
 DataPlane::~DataPlane(){}
@@ -183,7 +184,6 @@ bool DataPlane::loadTexture() {
 }
 
 bool DataPlane::updateTexture(){
-
     if(_futureObject.valid())
         return false;
 
@@ -201,8 +201,7 @@ bool DataPlane::readyToRender(){
     return (!_textures.empty());
 }
 
-void DataPlane::setUniformAndTextures(){
-    
+void DataPlane::setUniformAndTextures(){    
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = selectedOptions.size();
 
@@ -248,7 +247,6 @@ void DataPlane::setUniformAndTextures(){
         }
     }
 
-
     _shader->setUniform("numTextures", activeTextures);
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
@@ -275,8 +273,9 @@ void DataPlane::setTransferFunctions(std::string tfPath){
     if(tfFile.is_open()){
         while(getline(tfFile, line)){
             std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(absPath(line));
-            if(tf)
+            if(tf){
                 tfs.push_back(tf);
+            }
         }
     }
 

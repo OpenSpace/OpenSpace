@@ -67,7 +67,6 @@ struct Metadata {
 };
 
 
-
 class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
     friend class IswaGroup;
 
@@ -82,6 +81,14 @@ public:
     void update(const UpdateData& data) override;
 
 protected:
+    virtual void useLog(bool useLog){};
+    virtual void normValues(glm::vec2 normValues){};
+    virtual void useHistogram(bool useHistogram){};
+    virtual void dataOptions(std::vector<int> options){};
+    virtual void transferFunctionsFile(std::string tfPath){};
+    virtual void backgroundValues(glm::vec2 backgroundValues){};
+
+
     void enabled(bool enabled){_enabled.setValue(enabled);};
 
     void registerProperties();

@@ -26,15 +26,26 @@
 #define __DATASPHERE_H__
 
 #include <modules/iswa/rendering/cygnetsphere.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/selectionproperty.h>
+#include <modules/iswa/util/dataprocessor.h>
+
 
 namespace openspace{
 class PowerScaledSphere;
 class DataSphere : public CygnetSphere {
+friend class IswaGroup;
 public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
 protected:
+    virtual void useLog(bool useLog) override;
+    virtual void normValues(glm::vec2 normValues) override;
+    virtual void useHistogram(bool useHistogram) override;
+    virtual void dataOptions(std::vector<int> options) override;
+    virtual void transferFunctionsFile(std::string tfPath) override;
+    virtual void backgroundValues(glm::vec2 backgroundValues) override;
 
 private:
     virtual bool loadTexture() override; 
@@ -43,6 +54,19 @@ private:
     virtual bool readyToRender() override;
     virtual void setUniformAndTextures() override;
     virtual bool createShader() override;
+
+    void setTransferFunctions(std::string tfPath);
+
+    properties::SelectionProperty _dataOptions;
+    properties::StringProperty _transferFunctionsFile;
+    properties::Vec2Property _backgroundValues;
+
+    properties::Vec2Property _normValues;
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+
+    std::string _dataBuffer;
+    std::shared_ptr<DataProcessor> _dataProcessor; 
 };
 
 

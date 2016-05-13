@@ -69,7 +69,6 @@ private:
 
     float normalizeWithStandardScore(float value, float mean, float sd);
 
-
     glm::size3_t _dimensions;
     bool _useLog;
     bool _useHistogram;

@@ -136,33 +136,33 @@ void IswaGroup::registerProperties(){
 
         _useLog.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->useLog(_useLog.value());
+                cygnet->useLog(_useLog.value());
         });
 
         _useHistogram.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->useHistogram(_useHistogram.value());
+                cygnet->useHistogram(_useHistogram.value());
         });
 
         _normValues.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->normValues(_normValues.value());
+                cygnet->normValues(_normValues.value());
         });
 
         _backgroundValues.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->backgroundValues(_backgroundValues.value());
+                cygnet->backgroundValues(_backgroundValues.value());
         });
 
         _transferFunctionsFile.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->transferFunctionsFile(_transferFunctionsFile.value());
+                cygnet->transferFunctionsFile(_transferFunctionsFile.value());
         });
 
 
         _dataOptions.onChange([this]{
             for(auto cygnet : _cygnets)
-                static_cast<DataPlane*>(cygnet)->dataOptions(_dataOptions.value());
+                cygnet->dataOptions(_dataOptions.value());
         });
 
     }
