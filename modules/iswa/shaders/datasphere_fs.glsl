@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,15 +21,22 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-uniform vec4 campos;
-uniform vec4 objpos;
-
 uniform float time;
-uniform float transparency;
-uniform sampler2D texture1;
-in vec2 vs_st;
 
+// uniform sampler2D texture1;
+uniform sampler2D textures[6];
+uniform sampler2D transferFunctions[6];
+// uniform sampler2D tf;
+// uniform sampler2D tfs[6];
+
+uniform int numTextures;
+uniform int numTransferFunctions;
+uniform bool averageValues;
+uniform vec2 backgroundValues;
+
+// uniform float background;
+
+in vec2 vs_st;
 in vec4 vs_position;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -38,14 +45,37 @@ in vec4 vs_position;
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
-    vec4 diffuse = texture(texture1, vs_st);
+    vec4 transparent = vec4(0.0f);
+    vec4 diffuse = transparent;
+    float v = 0;
 
-    diffuse.w = transparency;
+    if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
+        for(int i=0; i<numTextures; i++){
+            v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+        }
+        v /= numTextures;
+        
+        vec4 color = texture(transferFunctions[0], vec2(v,0));
+        float x = backgroundValues.x;
+        float y = backgroundValues.y;
+        if((v<(x+y)) && v>(x-y))
+            color = mix(transparent, color, clamp(1,0,abs(v-x)));
+
+        diffuse = color;
+    }else{
+        for(int i=0; i<numTextures; i++){
+            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            vec4 color = texture(transferFunctions[i], vec2(v,0));
+            diffuse += color;
+        }
+    }
+
+    if (diffuse.a <= backgroundValues.y)
+        discard;
 
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;
-
     return frag;
-}
 
+}

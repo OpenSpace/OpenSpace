@@ -41,12 +41,12 @@ friend class IswaGroup;
      ~DataPlane();
 
  protected:
-    void useLog(bool useLog);
-    void normValues(glm::vec2 normValues);
-    void useHistogram(bool useHistogram);
-    void dataOptions(std::vector<int> options);
-    void transferFunctionsFile(std::string tfPath);
-    void backgroundValues(glm::vec2 backgroundValues);
+    virtual void useLog(bool useLog) override;
+    virtual void normValues(glm::vec2 normValues) override;
+    virtual void useHistogram(bool useHistogram) override;
+    virtual void dataOptions(std::vector<int> options) override;
+    virtual void transferFunctionsFile(std::string tfPath) override;
+    virtual void backgroundValues(glm::vec2 backgroundValues) override;
 
  private:
     virtual bool loadTexture() override;
