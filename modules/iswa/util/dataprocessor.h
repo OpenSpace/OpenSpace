@@ -22,56 +22,59 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DATAPLANE_H__
-#define __DATAPLANE_H__
+#ifndef __DATAPROCESSOR_H__
+#define __DATAPROCESSOR_H__
 
-#include <modules/iswa/rendering/cygnetplane.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/util/dataprocessor.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/texture.h>
+
 
 namespace openspace{
-class IswaGroup;
+class DataProcessor{
+    friend class IswaGroup;
+public:
+    DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValues);
+    ~DataProcessor();
 
-class DataPlane : public CygnetPlane {
-friend class IswaGroup;
- public:
-     DataPlane(const ghoul::Dictionary& dictionary);
-     ~DataPlane();
+    void useLog(bool useLog){
+        _useLog = useLog;
+    }
 
- protected:
-    void useLog(bool useLog);
-    void normValues(glm::vec2 normValues);
-    void useHistogram(bool useHistogram);
-    void dataOptions(std::vector<int> options);
-    void transferFunctionsFile(std::string tfPath);
-    void backgroundValues(glm::vec2 backgroundValues);
+    void useHistogram(bool useHistogram){
+        _useHistogram = useHistogram;
+    }
 
- private:
-    virtual bool loadTexture() override;
-    virtual bool updateTexture() override;
+    void normValues(glm::vec2 normValues){
+        _normValues = normValues;
+    }
 
-    virtual bool readyToRender() override;
-    virtual void setUniformAndTextures() override;
-    virtual bool createShader() override;
+    glm::size3_t dimensions(){
+        return _dimensions;
+    }
 
-    void setTransferFunctions(std::string tfPath);
-
-    properties::SelectionProperty _dataOptions;
-    properties::StringProperty _transferFunctionsFile;
-    properties::Vec2Property _backgroundValues;
-
-    properties::Vec2Property _normValues;
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
+    std::vector<std::string> readHeader(std::string& dataBuffer);
+    std::vector<float*> readData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
     
-    std::string _dataBuffer;
+private:
+    void processData(
+        float* outputData, // Where you want your processed data to go 
+        std::vector<float>& inputData, //data that needs processing 
+        float min, // min value of the input data
+        float max, // max valye of the input data
+        float sum // sum of the input data 
+    );
 
-    std::shared_ptr<DataProcessor> _dataProcessor; 
+    float normalizeWithStandardScore(float value, float mean, float sd);
 
- };
- 
- } // namespace openspace
 
-#endif //__DATAPLANE_H__
+    glm::size3_t _dimensions;
+    bool _useLog;
+    bool _useHistogram;
+    glm::vec2 _normValues;
+};
+
+} // namespace openspace
+#endif //__DATAPROCESSOR_H__

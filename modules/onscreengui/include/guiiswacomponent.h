@@ -37,9 +37,9 @@ public:
     virtual void render() override;
 
 private:
-	bool gmdata;
-	bool gmimage;
-	bool iondata;
+    bool gmdata;
+    bool gmimage;
+    bool iondata;
 };
 
 

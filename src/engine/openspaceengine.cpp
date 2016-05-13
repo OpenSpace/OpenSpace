@@ -144,11 +144,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    IswaManager::initialize();
-#endif
-
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -424,6 +419,10 @@ bool OpenSpaceEngine::initialize() {
 
     LINFO("Initializing GUI");
     _gui->initialize();
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    IswaManager::initialize();
+#endif
 
     LINFO("Finished initializing");
     return true;

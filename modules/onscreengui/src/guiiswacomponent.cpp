@@ -38,10 +38,18 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 
+#include <ext/json/json.hpp>
+#include <openspace/engine/downloadmanager.h>
+#include <modules/iswa/util/iswamanager.h>
+
+
+#include <fstream>
+
 #include "imgui.h"
 
 namespace {
     // const ImVec2 size = ImVec2(350, 200);
+    using json = nlohmann::json;
     const std::string _loggerCat = "iSWAComponent";
     const ImVec2 size = ImVec2(350, 500);
 
@@ -138,8 +146,8 @@ namespace {
     }
 
     void renderFloatProperty(Property* prop) {
-        FloatProperty* p = static_cast<FloatProperty*>(prop);
-        std::string name = p->guiName();
+        FloatProperty* p = static_cast<FloatProperty*>(prop)
+;        std::string name = p->guiName();
 
         FloatProperty::ValueType value = *p;
         ImGui::SliderFloat((name).c_str(), &value, p->minValue(), p->maxValue());
@@ -254,13 +262,6 @@ void GuiIswaComponent::render() {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(3);");
         }
     }
-    // bool gmdata = ImGui::Button("Create Global Magnetosphere from data");
-    // bool gmtext = ImGui::Button("Create Global Magnetosphere from images");
-    // bool iodata = ImGui::Button("Create Ionosphere from data");
-    // ImGui::ShowUserGuide();
-
-
-    ImGui::Spacing();
 
     for (const auto& p : _propertiesByOwner) {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
@@ -317,6 +318,37 @@ void GuiIswaComponent::render() {
             }
         }
     }
+
+
+    if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {
+
+        auto map = IswaManager::ref().cygnetInformation();
+        for(auto cygnetInfo : map){
+            int id = cygnetInfo.first;
+            auto info = cygnetInfo.second;
+
+            bool selected = info->selected;
+            ImGui::Checkbox(info->name.c_str(), &info->selected);
+            ImGui::SameLine();
+
+            if(ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())){
+                ImGui::TextWrapped(info->description.c_str());
+                ImGui::Spacing();
+            }
+
+            if(selected != info->selected){
+                if(info->selected){
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
+                        "{CygnetId = "+std::to_string(id)+" });");
+                }else{
+                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
+
+                }
+            }
+
+        }
+    }
+
     ImGui::End();
 }
 

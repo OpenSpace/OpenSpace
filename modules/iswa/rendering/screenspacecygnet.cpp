@@ -36,35 +36,49 @@ namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceImage(dictionary)
-    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
 {
     // hacky, have to first get as float and then cast to int.
     float cygnetid;
     dictionary.getValue("CygnetId", cygnetid);
     _cygnetId = (int)cygnetid;
     
-    // setName("iSWACygnet" + std::to_string(_cygnetId));
-    addProperty(_updateInterval);
+    float interval;
+    dictionary.getValue("UpdateInterval", interval);
+    _updateTime = (int) interval;
 
     _downloadImage = true;
-
     _url = IswaManager::ref().iswaUrl(_cygnetId);
+        
+    _openSpaceTime = Time::ref().currentTime();
+    _lastUpdateOpenSpaceTime = _openSpaceTime;
+
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
+     _minRealTimeUpdateInterval = 100;
+
+    _delete.onChange([this](){
+        OsEng.scriptEngine().queueScript(
+            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");"
+        );
+    });
+        // IswaManager::ref().deleteIswaCygnet(name());});
+
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
 
 void ScreenSpaceCygnet::update(){
+    _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    int updateInterval = (int) (_updateInterval.value()*1000);
-    bool timeToUpdate = ((_realTime.count()-_lastUpdateRealTime.count()) > updateInterval) &&
-                        (Time::ref().deltaTime() != 0);
 
-    if(updateInterval != 0 && (Time::ref().timeJumped() || timeToUpdate )){
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateTime &&
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+
+    if((Time::ref().timeJumped() || timeToUpdate )){
         _url = IswaManager::ref().iswaUrl(_cygnetId);
         updateTexture();
         _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
     if(_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {

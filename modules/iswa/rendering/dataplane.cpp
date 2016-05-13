@@ -22,7 +22,6 @@
 //  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 //  ****************************************************************************************/
 #include <modules/iswa/rendering/dataplane.h>
-#include <modules/multiresvolume/rendering/histogram.h>
 
 #include <fstream>
 #include <ghoul/io/texture/texturereader.h>
@@ -49,7 +48,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
-    // ,_colorbar(nullptr)
 {     
     std::string name;
     dictionary.getValue("Name", name);
@@ -77,9 +75,19 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         // FOR TESTING (should be done on all onChange)
         // _avgBenchmarkTime = 0.0;
         // _numOfBenchmarks = 0;
-        loadTexture();});
-    _useLog.onChange([this](){ loadTexture(); });
-    _useHistogram.onChange([this](){ loadTexture(); });
+        _dataProcessor->normValues(_normValues.value());
+        loadTexture();
+    });
+    _useLog.onChange([this](){
+        _dataProcessor->useLog(_useLog.value());
+        loadTexture();
+    });
+
+    _useHistogram.onChange([this](){
+        _dataProcessor->useHistogram(_useHistogram.value());
+        loadTexture();
+    });
+
     _dataOptions.onChange([this](){ loadTexture();} );
 
     _transferFunctionsFile.onChange([this](){
@@ -89,9 +97,22 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _type = IswaManager::CygnetType::Data;
 
     setTransferFunctions(_transferFunctionsFile.value());
+
+    _dataProcessor = std::make_shared<DataProcessor>(
+        _useLog.value(),
+        _useHistogram.value(),
+        _normValues
+    );
 }
 
 DataPlane::~DataPlane(){}
+
+void DataPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
+void DataPlane::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
+void DataPlane::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
+void DataPlane::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+void DataPlane::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+void DataPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool DataPlane::loadTexture() {
     
@@ -106,11 +127,23 @@ bool DataPlane::loadTexture() {
         _dataBuffer.append(dataFile.buffer, dataFile.size);
     }
 
+
     // if the buffer in the datafile is empty, do not proceed
     if(_dataBuffer.empty())
         return false;
 
-    std::vector<float*> data = readData(_dataBuffer);
+    if(!_dataOptions.options().size()){ // load options for value selection
+        std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
+        for(int i=0; i<options.size(); i++){
+            _dataOptions.addOption({i, name()+"_"+options[i]});
+            _textures.push_back(nullptr);
+        }
+        _dataOptions.setValue(std::vector<int>(1,0));
+        if(_data->groupId > 0)
+            IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
+    }
+
+    std::vector<float*> data = _dataProcessor->readData(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;
@@ -125,7 +158,7 @@ bool DataPlane::loadTexture() {
         if(!_textures[option]){
             std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                     values, 
-                                                                    _dimensions,
+                                                                    _dataProcessor->dimensions(),
                                                                     ghoul::opengl::Texture::Format::Red,
                                                                     GL_RED, 
                                                                     GL_FLOAT,
@@ -170,9 +203,6 @@ bool DataPlane::readyToRender(){
 
 void DataPlane::setUniformAndTextures(){
     
-    // _shader->setUniform("textures", 1, units[1]);
-    // _shader->setUniform("textures", 2, units[2]);
-    // }
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = selectedOptions.size();
 
@@ -236,203 +266,6 @@ bool DataPlane::createShader(){
     }
 }
 
-void DataPlane::readHeader(std::string& dataBuffer){
-    if(!dataBuffer.empty()){
-        std::stringstream memorystream(dataBuffer);
-        std::string line;
-
-        int numOptions = 0;
-        while(getline(memorystream,line)){
-            if(line.find("#") == 0){
-                if(line.find("# Output data:") == 0){
-
-                    line = line.substr(26);
-                    std::stringstream ss(line);
-
-                    std::string token;
-                    getline(ss, token, 'x');
-                    int x = std::stoi(token);
-
-                    getline(ss, token, '=');
-                    int y = std::stoi(token);
-
-                    _dimensions = glm::size3_t(x, y, 1);
-
-                    getline(memorystream, line);
-                    line = line.substr(1);
-
-                    ss = std::stringstream(line);
-                    std::string option;
-                    while(ss >> option){
-                        if(option != "x" && option != "y" && option != "z"){
-                            _dataOptions.addOption({numOptions, name()+"_"+option});
-                            numOptions++;
-                            _textures.push_back(nullptr);
-                        }
-                    }
-
-                    
-                    _dataOptions.setValue(std::vector<int>(1,0));
-
-                    if(_data->groupId > 0)
-                        IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
-                    
-                }
-            }else{
-                break;
-            }
-        }
-    }
-}
-
-std::vector<float*> DataPlane::readData(std::string& dataBuffer){
-    if(!dataBuffer.empty()){
-        if(!_dataOptions.options().size()) // load options for value selection
-            readHeader(dataBuffer);
-        
-        std::stringstream memorystream(dataBuffer);
-        std::string line;
-
-        std::vector<int> selectedOptions = _dataOptions.value();
-
-        int numSelected = selectedOptions.size();
-
-        std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
-        std::vector<float> max(numSelected, std::numeric_limits<float>::min());
-
-        std::vector<float> sum(numSelected, 0.0f);
-        std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
-
-        std::vector<float*> data(_dataOptions.options().size(), nullptr);
-        for(int option : selectedOptions){
-            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
-        }
-
-        int numValues = 0;
-        while(getline(memorystream, line)){
-            if(line.find("#") == 0){ //part of the header
-                continue;
-            }
-
-            std::stringstream ss(line); 
-            std::vector<float> value;
-            float v;
-            while(ss >> v){
-                value.push_back(v);
-            }
-
-            if(value.size()){
-                for(int i=0; i<numSelected; i++){
-
-                    float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
-
-                    if(_useLog.value()){
-                        int sign = (v>0)? 1:-1;
-                        if(v != 0){
-                            v = sign*log(fabs(v));
-                        }
-                    }
-
-                    optionValues[i].push_back(v); 
-
-                    min[i] = std::min(min[i], v);
-                    max[i] = std::max(max[i], v);
-
-                    sum[i] += v;
-                }
-                numValues++;
-            }
-        }
-
-        if(numValues != _dimensions.x*_dimensions.y){
-            LWARNING("Number of values read and expected are not the same");
-            return std::vector<float*>();
-        }
-        
-        // FOR TESTING
-        // ===========
-        // std::chrono::time_point<std::chrono::system_clock> start, end;
-        // start = std::chrono::system_clock::now();
-        // ===========
-
-        for(int i=0; i<numSelected; i++){
-            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
-        }
-        
-        // FOR TESTING
-        // ===========
-        // end = std::chrono::system_clock::now();
-        // _numOfBenchmarks++;
-        // std::chrono::duration<double> elapsed_seconds = end-start;
-        // _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
-        // std::cout << " readData():" << std::endl;
-        // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
-        // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
-        // ===========
-
-        return data;
-        
-    } 
-    else {
-    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
-        return std::vector<float*>();
-    }
-} 
-
-
-
-void DataPlane::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
-    
-    const int numValues = inputData.size(); 
-    Histogram histogram(min, max, 512); 
-    
-    //Calculate the mean
-    float mean = (1.0 / numValues) * sum;
-
-    //Calculate the Standard Deviation 
-    float var = 0;
-    for(auto dataValue : inputData){
-        var += pow(dataValue - mean, 2);
-    }
-    float standardDeviation = sqrt ( var / numValues );
-
-    // Histogram functionality
-    if(_useHistogram.value()){
-        for(auto dataValue : inputData){
-            histogram.add(dataValue, 1);
-        }
-        histogram.generateEqualizer();
-        standardDeviation = histogram.equalize(standardDeviation);
-        mean = histogram.equalize(mean);
-    }
-
-    // Normalize and equalize
-    for(int i=0; i < numValues; i++){
-        float v = inputData[i];
-        if(_useHistogram.value()){
-            v = histogram.equalize(v);
-        }
-        v = normalizeWithStandardScore(v, mean, standardDeviation); 
-        outputData[i] += v;
-    }
-    // Histogram equalized = histogram.equalize();
-    // histogram.print();
-    // equalized.print();
-    
-}
-
-float DataPlane::normalizeWithStandardScore(float value, float mean, float sd){
-    
-    float zScoreMin = _normValues.value().x;
-    float zScoreMax = _normValues.value().y;
-    float standardScore = ( value - mean ) / sd;
-    // Clamp intresting values
-    standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
-    //return and normalize
-    return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
-}
-
-
 void DataPlane::setTransferFunctions(std::string tfPath){
     std::string line;
     std::ifstream tfFile(absPath(tfPath));
@@ -453,12 +286,5 @@ void DataPlane::setTransferFunctions(std::string tfPath){
     }
 
 }
-
-
-
-
-
-
-
 
 }// namespace openspace

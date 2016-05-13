@@ -71,7 +71,6 @@ void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type)
         return;
     }
 
-
     if(type == IswaManager::CygnetType::Data){
         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
         
@@ -171,7 +170,6 @@ void IswaGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{
         clearGroup();
-        // IswaManager::ref().unregisterGroup(_id);
     }); 
 }
 
@@ -183,8 +181,8 @@ void IswaGroup::unregisterProperties(){
 
 void IswaGroup::clearGroup(){
     for(auto it = _cygnets.begin(); it != _cygnets.end();){
-            IswaManager::ref().deleteIswaCygnet((*it)->name());
-            it = _cygnets.erase(it);
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + (*it)->name() + "')");
+        it = _cygnets.erase(it);
     }
     unregisterProperties();
 }

@@ -42,12 +42,16 @@ public:
 
     virtual void update() override;
 
-
 private:
     int _cygnetId;
-    properties::FloatProperty _updateInterval;
+
+    int _updateTime;
+    double _openSpaceTime;
+    double _lastUpdateOpenSpaceTime;
+
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
+    int _minRealTimeUpdateInterval;
 };
 
  } // namespace openspace
