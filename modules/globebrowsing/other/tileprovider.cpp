@@ -91,6 +91,13 @@ namespace openspace {
         int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
 
         _tileLevelDifference = log2(minimumPixelSize) - log2(sizeLevel0);
+
+        GDALDataType gdalType = firstBand->GetRasterDataType();
+        double maximumValue = (gdalType == GDT_Float32 || gdalType == GDT_Float64) ?
+            1.0 : firstBand->GetMaximum();
+
+        _depthTransform.depthOffset = firstBand->GetOffset();
+        _depthTransform.depthScale = firstBand->GetScale() * maximumValue;
     }
 
     TileProvider::~TileProvider(){
@@ -169,7 +176,7 @@ namespace openspace {
             }
         }
         
-        return { tex, uvOffset, uvScale };
+        return{ tex, {uvOffset, uvScale } };
     }
 
     std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
@@ -197,6 +204,11 @@ namespace openspace {
     std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
         return _defaultTexture;
     }
+
+    TileDepthTransform TileProvider::depthTransform() {
+        return _depthTransform;
+    }
+
 
     std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
         const ChunkIndex& chunkIndex) {

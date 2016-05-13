@@ -22,42 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Colortexture coverage
-uniform sampler2D textureSamplerColor;
-uniform vec2 colorSamplingScale;
-uniform vec2 colorSamplingOffset;
-
-in vec4 vs_position;
-in vec3 fs_position;
-in vec2 fs_uv;
-
+#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-vec4 borderOverlay(vec2 uv, vec3 borderColor, float borderSize){
+uniform TextureTile colorTile;
 
-	vec2 uvOffset = uv - vec2(0.5);
-	float thres = 0.5 - borderSize/2;
-	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-	vec3 color = isBorder ? borderColor : vec3(0);
-	return vec4(color, 0);
-}
-
-
+in vec4 fs_position;
+in vec2 fs_uv;
 
 Fragment getFragment() {
 	Fragment frag;
 
-	vec2 samplePos = colorSamplingScale*fs_uv + colorSamplingOffset;
-	frag.color = texture(textureSamplerColor, samplePos);
+	vec2 samplePos =
+		colorTile.uvTransform.uvScale * fs_uv +
+		colorTile.uvTransform.uvOffset;
+	frag.color = texture(colorTile.textureSampler, samplePos);
+	
+	//frag.color.rgb *= 10;
 
 	// Sample position overlay
 	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
 
 	// Border overlay
-	frag.color = frag.color + borderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
+	frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
 
-	frag.depth = vs_position.w;
+	frag.depth = fs_position.w;
 
 	return frag;
 }

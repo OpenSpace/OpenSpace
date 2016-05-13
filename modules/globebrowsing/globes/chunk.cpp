@@ -106,14 +106,11 @@ namespace openspace {
         }
 
 
-
-
-        
-
-        auto center = _surfacePatch.center();
-        Vec3 globePosition = myRenderData.position.dvec3();
-        Vec3 patchPosition = globePosition + ellipsoid.cartesianSurfacePosition(center);
         Vec3 cameraPosition = myRenderData.camera.position().dvec3();
+        Geodetic2 pointOnPatch = _surfacePatch.closestPoint(
+                ellipsoid.cartesianToGeodetic2(cameraPosition));
+        Vec3 globePosition = myRenderData.position.dvec3();
+        Vec3 patchPosition = globePosition + ellipsoid.cartesianSurfacePosition(pointOnPatch);
         Vec3 cameraToChunk = patchPosition - cameraPosition;
         
 

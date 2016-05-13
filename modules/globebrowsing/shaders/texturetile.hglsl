@@ -22,59 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef TEXTURETILE_HGLSL
+#define TEXTURETILE_HGLSL
 
-#version __CONTEXT__
+struct TileDepthTransform {
+    float depthScale;
+    float depthOffset;
+};
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+struct TileUvTransform {
+    vec2 uvOffset;
+    vec2 uvScale;
+};
 
-uniform mat4 projectionTransform;
+struct TextureTile {
+	sampler2D textureSampler;
+	
+	TileDepthTransform depthTransform;
+	TileUvTransform uvTransform;
+};
 
-// Input points in camera space
-uniform vec3 p00;
-uniform vec3 p10;
-uniform vec3 p01;
-uniform vec3 p11;
-uniform vec3 patchNormalCameraSpace;
-
-uniform TextureTile heightTile;
-
-layout(location = 1) in vec2 in_uv;
-
-out vec2 fs_uv;
-out vec4 fs_position;
-
-vec3 bilinearInterpolation(vec2 uv) {
-	// Bilinear interpolation
-	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
-	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
-	vec3 p = (1 - uv.y) * p0 + uv.y * p1;
-	return p;
+vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+	vec2 uvOffset = uv - vec2(0.5);
+	float thres = 0.5 - borderSize/2;
+	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+	vec3 color = isBorder ? borderColor : vec3(0);
+	return vec4(color, 0);
 }
 
-void main()
-{
-	// Position in cameraspace
-	vec3 p = bilinearInterpolation(in_uv);
-	
-	// Transform uv coordinates to texture space
-	vec2 samplePos =
-		heightTile.uvTransform.uvScale * in_uv +
-		heightTile.uvTransform.uvOffset;
-
-	float sampledHeight = texture(heightTile.textureSampler, samplePos).r;
-	
-	// Translate the point along normal
-	p += patchNormalCameraSpace *
-		(sampledHeight *
-			heightTile.depthTransform.depthScale +
-			heightTile.depthTransform.depthOffset);
-
-	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
-	
-	// Write output
-	fs_uv = in_uv;
-	fs_position = z_normalization(positionClippingSpace);
-	gl_Position = fs_position;
-}
+#endif // TEXTURETILE_HGLSL
