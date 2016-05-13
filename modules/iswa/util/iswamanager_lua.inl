@@ -94,6 +94,9 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
         return 0;
     }
 
+    auto info = cygnetInformation[id];
+    info->selected = false;
+    
     std::string script = "openspace.unregisterScreenSpaceRenderable('" + cygnetInformation[id]->name + "');";
     OsEng.scriptEngine().queueScript(script);
     return 0;

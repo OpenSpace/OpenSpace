@@ -56,6 +56,13 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _lastUpdateRealTime = _realTime;
      _minRealTimeUpdateInterval = 100;
 
+    _delete.onChange([this](){
+        OsEng.scriptEngine().queueScript(
+            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");"
+        );
+    });
+        // IswaManager::ref().deleteIswaCygnet(name());});
+
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}

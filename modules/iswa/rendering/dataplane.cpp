@@ -271,7 +271,6 @@ void DataPlane::readHeader(std::string& dataBuffer){
                         }
                     }
 
-                    
                     _dataOptions.setValue(std::vector<int>(1,0));
 
                     if(_data->groupId > 0)
