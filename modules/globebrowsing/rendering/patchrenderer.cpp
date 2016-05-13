@@ -24,6 +24,7 @@
 
 
 #include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 
 // open space includes
@@ -35,6 +36,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+
 
 
 #define _USE_MATH_DEFINES
@@ -108,24 +110,16 @@ namespace openspace {
         _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
-    void ChunkRenderer::renderChunk(
-        const Chunk& chunk,
-        const Ellipsoid& ellipsoid, 
-        const RenderData& data) 
-    {
+    void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
         if (chunk.index().level < 9) {
-            renderChunkGlobally(chunk, ellipsoid, data);
+            renderChunkGlobally(chunk, data);
         }
         else {
-            renderChunkLocally(chunk, ellipsoid, data);
+            renderChunkLocally(chunk, data);
         }
     }
 
-    void ChunkRenderer::renderChunkGlobally(
-        const Chunk& chunk,
-        const Ellipsoid& ellipsoid,
-        const RenderData& data)
-    {
+    void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
         using namespace glm;
 
         // TODO : Model transform should be fetched as a matrix directly.
@@ -176,6 +170,7 @@ namespace openspace {
 
         Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
         auto patchSize = chunk.surfacePatch().size();
+        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
         _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
@@ -193,11 +188,7 @@ namespace openspace {
     }
 
 
-    void ChunkRenderer::renderChunkLocally(
-        const Chunk& chunk,
-        const Ellipsoid& ellipsoid,
-        const RenderData& data)
-    {
+    void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data){
         using namespace glm;
 
         // TODO : Model transform should be fetched as a matrix directly.
@@ -247,6 +238,8 @@ namespace openspace {
         Geodetic2 se = chunk.surfacePatch().southEastCorner();
         Geodetic2 nw = chunk.surfacePatch().northWestCorner();
         Geodetic2 ne = chunk.surfacePatch().northEastCorner();
+
+        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         // Get model space positions of the four control points
         Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);

@@ -90,8 +90,6 @@ namespace openspace {
         const Ellipsoid& ellipsoid = _owner->ellipsoid();
 
         
-
-        
         
         const int maxHeight = 8700; // should be read from gdal dataset or mod file
 
@@ -100,10 +98,11 @@ namespace openspace {
             _isVisible &= FrustumCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         }
 
-
         if (_owner->doHorizonCulling) {
             _isVisible &= HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         }
+
+        if (!_isVisible) return WANT_MERGE;
 
 
         Vec3 cameraPosition = myRenderData.camera.position().dvec3();

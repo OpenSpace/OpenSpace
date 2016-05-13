@@ -83,19 +83,13 @@ namespace openspace {
         ChunkRenderer(shared_ptr<Grid> grid, 
                       shared_ptr<TileProviderManager> tileProviderManager);
 
-        void ChunkRenderer::renderChunk(
-            const Chunk& chunk,
-            const Ellipsoid& ellipsoid,
-            const RenderData& data);
+        void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data);
+
     private:
         void ChunkRenderer::renderChunkGlobally(
-            const Chunk& chunk,
-            const Ellipsoid& ellipsoid,
-            const RenderData& data);
+            const Chunk& chunk, const RenderData& data);
         void ChunkRenderer::renderChunkLocally(
-            const Chunk& chunk,
-            const Ellipsoid& ellipsoid,
-            const RenderData& data);
+            const Chunk& chunk, const RenderData& data);
         shared_ptr<Grid> _grid;
     };
 

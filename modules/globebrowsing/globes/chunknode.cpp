@@ -96,10 +96,11 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
         }
 
         // check if all children requested merge
-        if (requestedMergeMask == 0xf) {
+        if (requestedMergeMask == 0xf && _chunk.update(data)) {
             merge();
 
-            // re-run this method on this, now that this is a leaf node
+            // re-run internalUpdateChunkTree on this, now that this is a leaf node
+            // OBS, this may currently cause a split() again ...
             return internalUpdateChunkTree(data);
         }
         return false;
@@ -111,8 +112,7 @@ void ChunkNode::internalRender(const RenderData& data) {
     if (isLeaf()) {
         if (_chunk.isVisible()) {
             ChunkRenderer& patchRenderer = _chunk.owner()->getPatchRenderer();
-            patchRenderer.renderChunk(_chunk, _chunk.owner()->ellipsoid(), data);
-            //patchRenderer.renderPatch(_chunk.surfacePatch, data, _chunk.owner->ellipsoid(), _chunk.index);
+            patchRenderer.renderChunk(_chunk, data);
             ChunkNode::renderedPatches++;
         }
     }
@@ -126,7 +126,6 @@ void ChunkNode::internalRender(const RenderData& data) {
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < 4; i++) {
-            
             Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i), _chunk.owner()->initChunkVisible);
             _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
         }
@@ -146,6 +145,7 @@ void ChunkNode::merge() {
         }
         _children[i] = nullptr;
     }
+    
     ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
 
