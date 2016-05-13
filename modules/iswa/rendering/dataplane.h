@@ -41,12 +41,12 @@ friend class IswaGroup;
      ~DataPlane();
 
  protected:
-    void useLog(bool useLog){ _useLog.setValue(useLog); };
-    void normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
-    void useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
-    void dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
-    void transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
-    void backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
+    void useLog(bool useLog);
+    void normValues(glm::vec2 normValues);
+    void useHistogram(bool useHistogram);
+    void dataOptions(std::vector<int> options);
+    void transferFunctionsFile(std::string tfPath);
+    void backgroundValues(glm::vec2 backgroundValues);
 
  private:
     virtual bool loadTexture() override;
@@ -60,18 +60,14 @@ friend class IswaGroup;
 
     properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;
-    properties::Vec2Property _normValues;
     properties::Vec2Property _backgroundValues;
+
+    properties::Vec2Property _normValues;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     
     std::string _dataBuffer;
     std::shared_ptr<DataProcessor> _dataProcessor; 
-    
-    //FOR TESTING
-    // double _avgBenchmarkTime=0.0;
-    // int _numOfBenchmarks = 0;
-    //===========
  };
  
  } // namespace openspace

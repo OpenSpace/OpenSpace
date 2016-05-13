@@ -107,6 +107,13 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 
 DataPlane::~DataPlane(){}
 
+void DataPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
+void DataPlane::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
+void DataPlane::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
+void DataPlane::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+void DataPlane::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+void DataPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
+
 bool DataPlane::loadTexture() {
     
     // if The future is done then get the new dataFile
