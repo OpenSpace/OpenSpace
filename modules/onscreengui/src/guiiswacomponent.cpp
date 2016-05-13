@@ -338,7 +338,8 @@ void GuiIswaComponent::render() {
 
             if(selected != info->selected){
                 if(info->selected){
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("+std::to_string(id)+");");
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
+                        "{CygnetId = "+std::to_string(id)+" });");
                 }else{
                     OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
 

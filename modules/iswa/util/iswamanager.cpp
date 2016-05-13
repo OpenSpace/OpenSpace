@@ -288,27 +288,9 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
 }
 
 void IswaManager::createScreenSpace(int id){
-    if(_cygnetInformation.find(id) == _cygnetInformation.end()){
-        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
-        return;
-    }
-
-    auto info = _cygnetInformation[id];
-    std::string name = info->name;
-    int updateInterval = info->updateInterval;
-    info->selected = true;
-
-    if(OsEng.renderEngine().screenSpaceRenderable(name)){
-        LERROR("A cygnet with the name \"" + name +"\" already exist");
-        return;
-    }else{
-        std::string luaTable ="{ Name = '" + name + "',"
-                                "Type='ScreenSpaceCygnet',"
-                                "CygnetId = "+std::to_string(id)+","
-                                "UpdateInterval = " +std::to_string(updateInterval)+"}";
-        std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
-    }
+    std::string script = "openspace.iswa.addScreenSpaceCygnet("
+        "{CygnetId =" + std::to_string(id) + "});";
+    OsEng.scriptEngine().queueScript(script);
 }
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
@@ -529,7 +511,7 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
-                "int",
+                "table",
                 "Adds a Screen Space Cygnets",
                 true
             },
