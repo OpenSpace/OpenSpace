@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
@@ -34,13 +35,13 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/colorbar.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
@@ -49,7 +50,6 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.cpp	
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/colorbar.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -59,8 +59,6 @@ set(SHADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/cygnetplane_vs.glsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_fs.glsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_vs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/colorbar_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/colorbar_vs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
