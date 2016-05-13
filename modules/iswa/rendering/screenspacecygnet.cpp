@@ -36,7 +36,6 @@ namespace openspace {
 
 ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     : ScreenSpaceImage(dictionary)
-    , _updateInterval("updateInterval", "Update Interval", 1.0, 0.0 , 10.0)
 {
     // hacky, have to first get as float and then cast to int.
     float cygnetid;

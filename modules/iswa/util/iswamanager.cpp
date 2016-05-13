@@ -49,9 +49,7 @@ namespace {
 
 namespace openspace{
 
-IswaManager::IswaManager()
-// :_iswaNames("iswaNames", "iSWA Cygnets")
-{
+IswaManager::IswaManager(){
     _month["JAN"] = "01";
     _month["FEB"] = "02";
     _month["MAR"] = "03";
@@ -81,11 +79,11 @@ IswaManager::IswaManager()
             LWARNING("Download to memory was aborted: " + err);
         }
     );
-
 }
 
 IswaManager::~IswaManager(){
     _groups.clear();
+    _cygnetInformation.clear();
 }
 
 void IswaManager::addIswaCygnet(std::string info){
@@ -148,9 +146,7 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
             metaFuture->json,
             metadataCallback
         );
-    }else{ 
-        //create kameleonplane
-        // createKameleonPlane(info);
+    }else{
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = -1;
         metaFuture->group = group;
@@ -171,50 +167,11 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
             metaFuture->json,
             metadataCallback
         );
-    } 
+    }
 }
-
 
 void IswaManager::deleteIswaCygnet(std::string name){
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
-}
-
-void IswaManager::deleteScreenSpaceCygnet(int id){
-    if(_cygnetInformation.find(id) == _cygnetInformation.end()){
-        LWARNING("Could not find Cygnet with id = " + std::to_string(id));
-        return;
-    }
-
-    std::string script = "openspace.unregisterScreenSpaceRenderable('" + _cygnetInformation[id]->name + "');";
-    OsEng.scriptEngine().queueScript(script);
-}
-
-std::shared_ptr<DownloadManager::FileFuture> IswaManager::downloadImageToMemory(int id, std::string& buffer){
-    return  DlManager.downloadToMemory(
-            iswaUrl(id, "image"),
-            buffer,
-            [](const DownloadManager::FileFuture& f){
-                if(f.isFinished){
-                    LDEBUG("Download to memory finished");
-                } else if (f.isAborted){
-                    LWARNING("Download to memory was aborted: " + f.errorMessage);
-                }
-            }
-        );
-}
-
-std::shared_ptr<DownloadManager::FileFuture> IswaManager::downloadDataToMemory(int id, std::string& buffer){
-    return DlManager.downloadToMemory(
-            iswaUrl(id, "data"),
-            buffer,
-            [](const DownloadManager::FileFuture& f){
-                if(f.isFinished){
-                    LDEBUG("Download to memory finished");
-                } else if (f.isAborted){
-                    LWARNING("Download to memory was aborted: " + f.errorMessage);
-                }
-            }
-        );
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -241,7 +198,6 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
         ) );   
 }
 
-
 std::string IswaManager::iswaUrl(int id, std::string type){
     std::string url;
     if(id < 0){
@@ -267,6 +223,44 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
+void IswaManager::registerToGroup(int id, CygnetType type, IswaCygnet* cygnet){
+    if(_groups.find(id) == _groups.end()){
+        _groups.insert(std::pair<int, std::shared_ptr<IswaGroup>>(id, std::make_shared<IswaGroup>(id)));
+    }
+
+    _groups[id]->registerCygnet(cygnet, type);
+}
+
+void IswaManager::unregisterFromGroup(int id, IswaCygnet* cygnet){
+    if(_groups.find(id) != _groups.end()){
+        _groups[id]->unregisterCygnet(cygnet);
+    }
+}
+
+void IswaManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
+    if(_groups.find(id) != _groups.end()){
+        _groups[id]->registerOptions(options);
+    }
+}
+
+std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
+    for(auto group : _groups){
+        if(group.second->name() == name){
+            return group.second;
+        }
+    }
+
+    return nullptr;
+}
+
+std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
+        return _cygnetInformation;
+}
+
+std::map<int, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
+    return _groups;
+}
+
 std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
@@ -285,36 +279,6 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
                 }
             );
     return metaFuture;
-}
-
-void IswaManager::createScreenSpace(int id){
-    std::string script = "openspace.iswa.addScreenSpaceCygnet("
-        "{CygnetId =" + std::to_string(id) + "});";
-    OsEng.scriptEngine().queueScript(script);
-}
-
-void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
-    // check if this plane already exist
-    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
-
-    if(data->group > 0){
-        auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
-            name += "_Group" + std::to_string(data->group);
-    }
-
-    data->name = name;
-
-    if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
-        LERROR("A node with name \"" + name +"\" already exist");
-        return;
-    }
-
-    std::string luaTable = parseJSONToLuaTable(data);
-    if(luaTable != ""){
-        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
-    }
 }
 
 std::string IswaManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data){
@@ -369,113 +333,34 @@ std::string IswaManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
-// void IswaManager::createKameleonPlane(std::string kwPath, int group){
-//     kwPath = "${OPENSPACE_DATA}/" + kwPath;
-//     const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
-
-//     if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
-//         std::string luaTable = parseKWToLuaTable(kwPath, group);
-//         if(!luaTable.empty()){
-//             std::cout << luaTable << std::endl;
-//             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-//             OsEng.scriptEngine().queueScript(script);
-//         }
-//     }else{
-//         LWARNING( kwPath + " is not a cdf file or can't be found.");
-//     }
-// }
-//
-// std::string IswaManager::parseKWToLuaTable(std::string kwPath, int group){
-//     if(kwPath != ""){
-//         const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
-//         if(extension == "cdf"){
-//             KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
-     
-//             std::string parent  = kw.getParent();
-//             std::string frame   = kw.getFrame();
-//             glm::vec3   min     = kw.getGridMin();
-//             glm::vec3   max     = kw.getGridMax();
-
-//             glm::vec4 spatialScale;
-//             std::string coordinateType;
-
-//             std::tuple < std::string, std::string, std::string > gridUnits = kw.getGridUnits();
-//             if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
-//                 spatialScale.x = 6.371f;
-//                 spatialScale.y = 6.371f;
-//                 spatialScale.z = 6.371f;
-//                 spatialScale.w = 6;
-
-//                 coordinateType = "Cartesian";
-//             }else{
-//                 spatialScale = glm::vec4(1.0);
-//                 spatialScale.w = 1; //-log10(1.0f/max.x);
-
-//                 coordinateType = "Polar";
-//             }
-//             std::string table = "{"
-//                 "Name = 'KameleonPlane0',"
-//                 "Parent = '" + parent + "', " 
-//                 "Renderable = {"    
-//                     "Type = 'KameleonPlane', "
-//                     "Id = 0 ,"
-//                     "Frame = '" + frame + "' , "
-//                     "GridMin = " + std::to_string(min) + ", "
-//                     "GridMax = " + std::to_string(max) + ", "
-//                     "SpatialScale = " + std::to_string(spatialScale) + ", "
-//                     "UpdateTime = 0, "
-//                     "kwPath = '" + kwPath + "' ," 
-//                     "axisCut = 'y' ,"
-//                     "CoordinateType = '" + coordinateType + "', "
-//                     "Group = "+ std::to_string(group) + " ,"
-//                     "}"
-//                 "}"
-//                 ;
-//             // std::cout << table << std::endl;    
-//             return table;
-//         }
-//     }
-//     return "";
-// }
-
-
-void IswaManager::registerGroup(int id){
-    _groups.insert(std::pair<int, std::shared_ptr<IswaGroup>>(id, std::make_shared<IswaGroup>(id)));
+void IswaManager::createScreenSpace(int id){
+    std::string script = "openspace.iswa.addScreenSpaceCygnet("
+        "{CygnetId =" + std::to_string(id) + "});";
+    OsEng.scriptEngine().queueScript(script);
 }
 
-void IswaManager::unregisterGroup(int id){
-    if(_groups.find(id) != _groups.end())
-        _groups[id]->clearGroup();
-}
+void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
+    // check if this plane already exist
+    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
-void IswaManager::registerToGroup(int id, CygnetType type, IswaCygnet* cygnet){
-    if(_groups.find(id) == _groups.end()){
-        registerGroup(id);
+    if(data->group > 0){
+        auto it = _groups.find(data->group);
+        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
+            name += "_Group" + std::to_string(data->group);
     }
 
-    _groups[id]->registerCygnet(cygnet, type);
-}
+    data->name = name;
 
-void IswaManager::unregisterFromGroup(int id, IswaCygnet* cygnet){
-    if(_groups.find(id) != _groups.end()){
-        _groups[id]->unregisterCygnet(cygnet);
-    }
-}
-
-void IswaManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
-    if(_groups.find(id) != _groups.end()){
-        _groups[id]->registerOptions(options);
-    }
-}
-
-std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
-    for(auto group : _groups){
-        if(group.second->name() == name){
-            return group.second;
-        }
+    if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
+        LERROR("A node with name \"" + name +"\" already exist");
+        return;
     }
 
-    return nullptr;
+    std::string luaTable = parseJSONToLuaTable(data);
+    if(luaTable != ""){
+        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+        OsEng.scriptEngine().queueScript(script);
+    }
 }
 
 void IswaManager::fillCygnetInfo(std::string jsonString){

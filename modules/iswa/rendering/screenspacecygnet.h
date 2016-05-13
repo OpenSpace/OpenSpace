@@ -42,10 +42,8 @@ public:
 
     virtual void update() override;
 
-
 private:
     int _cygnetId;
-    properties::FloatProperty _updateInterval;
 
     int _updateTime;
     double _openSpaceTime;

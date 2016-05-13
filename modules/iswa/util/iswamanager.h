@@ -78,38 +78,27 @@ public:
     void addIswaCygnet(std::string info);
     void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
     void deleteIswaCygnet(std::string);
-    void deleteScreenSpaceCygnet(int id);
-
-    std::shared_ptr<DownloadManager::FileFuture> downloadImageToMemory(int id, std::string& buffer);
-    std::shared_ptr<DownloadManager::FileFuture> downloadDataToMemory(int id, std::string& buffer);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
+    std::string iswaUrl(int id, std::string type = "image");
 
-    void registerGroup(int id);
-    void unregisterGroup(int id);
     void registerToGroup(int id, CygnetType type, IswaCygnet* cygnet);
     void unregisterFromGroup(int id, IswaCygnet* cygnet);
     void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);
+    
+    std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
+    std::map<int, std::shared_ptr<IswaGroup>>& groups();
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    std::string iswaUrl(int id, std::string type = "image");
-    void createScreenSpace(int id);
-    
-    std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation(){
-        return _cygnetInformation;
-    }
-
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-
-    void createPlane(std::shared_ptr<MetadataFuture> data);
     std::string parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data);
-
-    void createKameleonPlane(std::string kwPath, int group = -1); 
-    std::string parseKWToLuaTable(std::string kwPath, int group);
+    
+    void createScreenSpace(int id);
+    void createPlane(std::shared_ptr<MetadataFuture> data);
 
     void fillCygnetInfo(std::string jsonString);
 
@@ -117,13 +106,11 @@ private:
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
 
-    std::map<int, std::shared_ptr<IswaGroup>> _groups;
-
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
 
+    std::map<int, std::shared_ptr<IswaGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
-    // properties::SelectionProperty _iswaNames;
 };
 
 } //namespace openspace
