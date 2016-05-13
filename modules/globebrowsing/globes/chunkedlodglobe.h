@@ -85,6 +85,13 @@ namespace openspace {
         }
         
 
+        bool doHorizonCulling = true;
+        bool doFrustumCulling = true;
+        int numPosZthres;
+        float lodScaleFactor;
+        bool initChunkVisible;
+
+
     private:
 
         // Covers all negative longitudes

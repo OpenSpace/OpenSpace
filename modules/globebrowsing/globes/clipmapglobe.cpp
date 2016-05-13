@@ -110,7 +110,7 @@ namespace openspace {
     {
         Scalar minimumRadius = _ellipsoid.minimumRadius();
         Vec3 cameraPosition = data.camera.position().dvec3();
-        Vec3 cameraPositionOnSurface = _ellipsoid.scaleToGeodeticSurface(cameraPosition);
+        Vec3 cameraPositionOnSurface = _ellipsoid.geodeticSurfaceProjection(cameraPosition);
         Scalar h = glm::length(cameraPosition - cameraPositionOnSurface);
         Scalar cosAngleToHorizon = minimumRadius / (minimumRadius + h);
         Scalar angleToHorizon = glm::acos(cosAngleToHorizon);

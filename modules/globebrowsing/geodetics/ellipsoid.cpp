@@ -33,36 +33,16 @@ namespace {
 
 namespace openspace {
 
-    Ellipsoid::Ellipsoid()
-        : Ellipsoid(1,1,1)
-    {
+    Ellipsoid::Ellipsoid() : Ellipsoid(1,1,1) {
 
     }
 
-    Ellipsoid::Ellipsoid(Vec3 radii)
-        : _radii(radii)
-        , _cachedValues({
-        Vec3( // _radiiSquared
-            (_radii.x * _radii.x),
-            (_radii.y * _radii.y),
-            (_radii.z * _radii.z)),
-        Vec3( // _oneOverRadiiSquared
-            1.0 / (_radii.x * _radii.x),
-            1.0 / (_radii.y * _radii.y),
-            1.0 / (_radii.z * _radii.z)),
-        Vec3( // _radiiToTheFourth
-            _radii.x * _radii.x * _radii.x * _radii.x,
-            _radii.y * _radii.y * _radii.y * _radii.y,
-            _radii.z * _radii.z * _radii.z * _radii.z),
-        glm::min(_radii.x, glm::min(_radii.y, _radii.z))})
-    {
-
+    Ellipsoid::Ellipsoid(Vec3 radii) : _radii(radii) {
+        updateInternalCache();
     }
 
-    Ellipsoid::Ellipsoid(Scalar x, Scalar y, Scalar z)
-        : Ellipsoid(Vec3(x, y, z))
-    {
-
+    Ellipsoid::Ellipsoid(Scalar x, Scalar y, Scalar z) : _radii(x, y, z) {
+        updateInternalCache();
     }
 
     Ellipsoid::~Ellipsoid()
@@ -70,16 +50,32 @@ namespace openspace {
 
     }
 
-    Vec3 Ellipsoid::scaleToGeocentricSurface(const Vec3& p) const
+    void Ellipsoid::updateInternalCache() {
+        _cached._radiiSquared = Vec3(
+            (_radii.x * _radii.x),
+            (_radii.y * _radii.y),
+            (_radii.z * _radii.z));
+
+        _cached._oneOverRadiiSquared = Vec3(1) / _cached._radiiSquared;
+        _cached._radiiToTheFourth = _cached._radiiSquared * _cached._radiiSquared;
+
+        _cached._minimumRadius = glm::min(_radii.x, glm::min(_radii.y, _radii.z));
+        _cached._maximumRadius = glm::max(_radii.x, glm::max(_radii.y, _radii.z));
+    }
+
+    
+
+
+    Vec3 Ellipsoid::geocentricSurfaceProjection(const Vec3& p) const
     {
-        Scalar beta = 1.0 / sqrt(dot(p * p, _cachedValues._oneOverRadiiSquared));
+        Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
         return beta * p;
     }
 
-    Vec3 Ellipsoid::scaleToGeodeticSurface(const Vec3& p) const
+    Vec3 Ellipsoid::geodeticSurfaceProjection(const Vec3& p) const
     {
-        Scalar beta = 1.0 / sqrt(dot(p * p, _cachedValues._oneOverRadiiSquared));
-        Scalar n = glm::length(beta * p * _cachedValues._oneOverRadiiSquared);
+        Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
+        Scalar n = glm::length(beta * p * _cached._oneOverRadiiSquared);
         Scalar alpha = (1.0 - beta) * (glm::length(p) / n);
         
         Vec3 p2 = p * p;
@@ -92,21 +88,21 @@ namespace openspace {
         do {
             alpha -= (s / dSdA);
 
-            d = Vec3(1.0) + alpha * _cachedValues._oneOverRadiiSquared;
+            d = Vec3(1.0) + alpha * _cached._oneOverRadiiSquared;
             d2 = d * d;
             d3 = d * d2;
             
-            s = glm::dot(p2 / (_cachedValues._radiiSquared * d2), Vec3(1.0)) - 1.0;
+            s = glm::dot(p2 / (_cached._radiiSquared * d2), Vec3(1.0)) - 1.0;
 
-            dSdA = -2.0 * glm::dot(p2 / (_cachedValues._radiiToTheFourth * d3), Vec3(1.0));
+            dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), Vec3(1.0));
         }
         while (abs(s) > epsilon);
         return p / d;
     }
 
-    Vec3 Ellipsoid::geodeticSurfaceNormal(const Vec3& p) const
+    Vec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const
     {
-        Vec3 normal = p * _cachedValues._oneOverRadiiSquared;
+        Vec3 normal = p * _cached._oneOverRadiiSquared;
         return glm::normalize(normal);
     }
 
@@ -122,42 +118,47 @@ namespace openspace {
 
     Vec3 Ellipsoid::radiiSquared() const
     {
-        return _cachedValues._radiiSquared;
+        return _cached._radiiSquared;
     }
 
     Vec3 Ellipsoid::oneOverRadiiSquared() const
     {
-        return _cachedValues._oneOverRadiiSquared;
+        return _cached._oneOverRadiiSquared;
     }
 
     Vec3 Ellipsoid::radiiToTheFourth() const
     {
-        return _cachedValues._radiiToTheFourth;
+        return _cached._radiiToTheFourth;
     }
 
     Scalar Ellipsoid::minimumRadius() const
     {
-        return _cachedValues._minimumRadius;
+        return _cached._minimumRadius;
+    }
+
+    Scalar Ellipsoid::maximumRadius() const
+    {
+        return _cached._maximumRadius;
     }
 
     Geodetic2 Ellipsoid::cartesianToGeodetic2(const Vec3& p) const
     {
-        Vec3 normal = geodeticSurfaceNormal(p);
+        Vec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
         return Geodetic2(
             asin(normal.z / length(normal)),	// Latitude
             atan2(normal.y, normal.x));			// Longitude
     }
 
-    Vec3 Ellipsoid::geodetic2ToCartesian(const Geodetic2& geodetic2) const
+    Vec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const
     {
         // Position on surface : height = 0
-        return geodetic3ToCartesian(Geodetic3({ geodetic2, 0 }));
+        return cartesianPosition(Geodetic3({ geodetic2, 0 }));
     }
 
-    Vec3 Ellipsoid::geodetic3ToCartesian(const Geodetic3& geodetic3) const
+    Vec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const
     {
         Vec3 normal = geodeticSurfaceNormal(geodetic3.geodetic2);
-        Vec3 k = _cachedValues._radiiSquared * normal;
+        Vec3 k = _cached._radiiSquared * normal;
         Scalar gamma = sqrt(dot(k, normal));
         Vec3 rSurface = k / gamma;
         return rSurface + geodetic3.height * normal;

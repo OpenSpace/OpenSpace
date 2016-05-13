@@ -42,21 +42,17 @@ namespace openspace {
 
 
 
+    enum PointLocation {
+        AboveLeft = 0, Above, AboveRight, // 0, 1, 2
+        Left, Inside, Right,      // 3, 4, 5
+        BelowLeft, Below, BelowRight  // 6, 7, 8
+    };
+
 
     class FrustumCuller {
     public:
 
-        enum PointTestResult : int {
-            Inside = 0,
-            Above,
-            AboveRight,
-            Right,
-            BelowRight,
-            Below,
-            BelowLeft,
-            Left,
-            AboveLeft
-        };
+
 
 
         FrustumCuller();
@@ -72,6 +68,7 @@ namespace openspace {
             const RenderData& data,
             const vec3& point);
 
+
         /**
         Returns false if the patch element is guaranteed to be outside the view
         frustrum, and true is the patch element MAY be inside the view frustrum.
@@ -81,16 +78,26 @@ namespace openspace {
             const GeodeticPatch& patch,
             const Ellipsoid& ellipsoid);
 
+
+        static bool isVisible(
+            const RenderData& data,
+            const GeodeticPatch& patch,
+            const Ellipsoid& ellipsoid,
+            const Scalar maxHeight);
+
     private:
 
         /**
-        Returns true if the point in screen space is inside the view frustrum.
         The optional screen space margin vector is used to resize area defining
         what is considered to be inside the view frustrum.
         */
-        static bool testPoint(
+        static PointLocation testPoint(
             const glm::vec2& pointScreenSpace,
-            const glm::vec2& marginScreenSpace);
+            const glm::vec2& marginScreenSpace = vec2(0));
+
+        static bool testPoint(
+            const glm::vec3& pointScreenSpace,
+            const glm::vec3& marginScreenSpace = vec3(0));
 
 
         static glm::vec2 transformToScreenSpace(

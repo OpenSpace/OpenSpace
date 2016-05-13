@@ -62,7 +62,7 @@ public:
     \param p is a point in the cartesian coordinate system to be placed on the surface
     of the Ellipsoid
     */
-    Vec3 scaleToGeocentricSurface(const Vec3& p) const;
+    Vec3 geocentricSurfaceProjection(const Vec3& p) const;
 
 
     /**
@@ -71,31 +71,34 @@ public:
     \param p is a point in the cartesian coordinate system to be placed on the surface
     of the Ellipsoid
     */
-    Vec3 scaleToGeodeticSurface(const Vec3& p) const;
+    Vec3 geodeticSurfaceProjection(const Vec3& p) const;
 
-    Vec3 geodeticSurfaceNormal(const Vec3& p) const;
+    Vec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const;
     Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
     
     Vec3 radiiSquared() const;
     Vec3 oneOverRadiiSquared() const;
     Vec3 radiiToTheFourth() const;
+
     Scalar minimumRadius() const;
+    Scalar maximumRadius() const;
 
     Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
-    Vec3 geodetic2ToCartesian(const Geodetic2& geodetic2) const;
-    Vec3 geodetic3ToCartesian(const Geodetic3& geodetic3) const;
+    Vec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
+    Vec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
 private:
-    struct EllipsoidCache
-    {
+    struct EllipsoidCache {
         Vec3 _radiiSquared;
         Vec3 _oneOverRadiiSquared;
         Vec3 _radiiToTheFourth;
         Scalar _minimumRadius;
-    };
+        Scalar _maximumRadius;
+    } _cached;
+
+    void updateInternalCache();
 
     Vec3 _radii;
-    EllipsoidCache _cachedValues;
 };
 } // namespace openspace
 

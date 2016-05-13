@@ -22,70 +22,81 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __RENDERABLEGLOBE_H__
-#define __RENDERABLEGLOBE_H__
 
-#include <ghoul/logging/logmanager.h>
+#include <modules/globebrowsing/rendering/aabb.h>
 
-// open space includes
-#include <openspace/rendering/renderable.h>
+#include <string>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/tileprovidermanager.h>
-
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
+namespace {
+    const std::string _loggerCat = "AABB";
 }
-}
-
 
 namespace openspace {
 
-class RenderableGlobe : public Renderable {
-public:
-    RenderableGlobe(const ghoul::Dictionary& dictionary);
-    ~RenderableGlobe();
 
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
+    AABB2::AABB2() : min(1e35), max(-1e35) { }
+    AABB2::AABB2(const vec2& min, const vec2& max) : min(min), max(max) { }
 
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    void AABB2::expand(const vec2& p) {
+        min.x = glm::min(min.x, p.x);
+        min.y = glm::min(min.y, p.y);
+        max.x = glm::max(max.x, p.x);
+        max.y = glm::max(max.y, p.y);
+    }
 
-    properties::BoolProperty doFrustumCulling;
-    properties::BoolProperty doHorizonCulling;
-    properties::IntProperty numPosZthres;
-    properties::FloatProperty lodScaleFactor;
-    properties::BoolProperty initChunkVisible;
-private:
+    vec2 AABB2::center() const {
+        return 0.5f * (min + max);
+    }
 
-    double _time;
+    vec2 AABB2::size() const {
+        return max - min;
+    }
 
-    Ellipsoid _ellipsoid;
+    bool AABB2::intersects(const vec2& p) const {
+        return (min.x < p.x) && (p.x < max.x)
+            && (min.y < p.y) && (p.y < max.y);
+    }
 
-    //std::vector<std::string> _heightMapKeys;
-    //std::vector<std::string> _colorTextureKeys;
+    bool AABB2::intersects(const AABB2& o) const {
+        return (min.x < o.max.x) && (o.min.x < max.x)
+            && (min.y < o.max.y) && (o.min.y < max.y);
+    }
 
 
-    std::shared_ptr<TileProviderManager> _tileProviderManager;
-    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-    
-    properties::BoolProperty _saveOrThrowCamera;
 
-    DistanceSwitch _distanceSwitch;
-};
+
+
+    AABB3::AABB3() : min(1e35), max(-1e35) { }
+    AABB3::AABB3(const vec3& min, const vec3& max) : min(min), max(max) { }
+
+    void AABB3::expand(const vec3 p) {
+        min.x = glm::min(min.x, p.x);
+        min.y = glm::min(min.y, p.y);
+        min.z = glm::min(min.z, p.z);
+        max.x = glm::max(max.x, p.x);
+        max.y = glm::max(max.y, p.y);
+        max.z = glm::max(max.z, p.z);
+    }
+
+    vec3 AABB3::center() const {
+        return 0.5f * (min + max);
+    }
+
+    vec3 AABB3::size() const {
+        return max - min;
+    }
+
+    bool AABB3::intersects(const vec3& p) const {
+        return (min.x < p.x) && (p.x < max.x)
+            && (min.y < p.y) && (p.y < max.y)
+            && (min.z < p.z) && (p.z < max.z);
+    }
+
+    bool AABB3::intersects(const AABB3& o) const {
+        return (min.x < o.max.x) && (o.min.x < max.x)
+            && (min.y < o.max.y) && (o.min.y < max.y)
+            && (min.z < o.max.z) && (o.min.z < max.z);
+    }
+
 
 }  // namespace openspace
-
-#endif  // __RENDERABLEGLOBE_H__
