@@ -181,8 +181,8 @@ void IswaGroup::unregisterProperties(){
 
 void IswaGroup::clearGroup(){
     for(auto it = _cygnets.begin(); it != _cygnets.end();){
-            IswaManager::ref().deleteIswaCygnet((*it)->name());
-            it = _cygnets.erase(it);
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + (*it)->name() + "')");
+        it = _cygnets.erase(it);
     }
     unregisterProperties();
 }

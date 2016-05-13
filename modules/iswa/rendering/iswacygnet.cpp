@@ -98,10 +98,9 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     // std::cout << std::to_string(_data->min) << std::endl;
     // std::cout << std::to_string(_data->spatialScale) << std::endl;
 
-    _delete.onChange([this](){IswaManager::ref().deleteIswaCygnet(name());});
-
-    // _textures.push_back(nullptr);
-    // _transferFunctions.push_back(nullptr);
+    _delete.onChange([this](){
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
 }
 
 IswaCygnet::~IswaCygnet(){}

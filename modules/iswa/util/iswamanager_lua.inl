@@ -78,8 +78,9 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
 }
 
 int iswa_removeCygnet(lua_State* L){
-    std::string s = luaL_checkstring(L, -1);
-    IswaManager::ref().deleteIswaCygnet(s);
+    std::string name = luaL_checkstring(L, -1);
+    OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
+    // IswaManager::ref().deleteIswaCygnet(s);
     return 0;
 }
 
@@ -96,7 +97,7 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
 
     auto info = cygnetInformation[id];
     info->selected = false;
-    
+
     std::string script = "openspace.unregisterScreenSpaceRenderable('" + cygnetInformation[id]->name + "');";
     OsEng.scriptEngine().queueScript(script);
     return 0;

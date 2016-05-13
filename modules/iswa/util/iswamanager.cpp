@@ -31,6 +31,8 @@
 #include <modules/iswa/rendering/iswagroup.h>
 
 #include <fstream>
+#include <algorithm>
+
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/time.h>
@@ -168,10 +170,6 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
             metadataCallback
         );
     }
-}
-
-void IswaManager::deleteIswaCygnet(std::string name){
-    OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -371,8 +369,11 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
         for(int i=0; i<jCygnets.size(); i++){
             json jCygnet = jCygnets.at(i);
 
+            std::string name = jCygnet["cygnetDisplayTitle"];
+            std::replace(name.begin(), name.end(),'.', ',');
+
             CygnetInfo info = {
-                jCygnet["cygnetDisplayTitle"],
+                name,
                 jCygnet["cygnetDescription"],
                 jCygnet["cygnetUpdateInterval"],
                 false

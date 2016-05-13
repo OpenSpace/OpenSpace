@@ -77,7 +77,7 @@ public:
 
     void addIswaCygnet(std::string info);
     void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
-    void deleteIswaCygnet(std::string);
+    // void deleteIswaCygnet(std::string);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
