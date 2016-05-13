@@ -78,6 +78,7 @@ friend class IswaGroup;
     
     glm::size3_t _dimensions;
     std::string _dataBuffer;
+
     // std::shared_ptr<ColorBar> _colorbar;
     
     //FOR TESTING
