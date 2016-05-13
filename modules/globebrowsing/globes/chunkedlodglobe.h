@@ -87,7 +87,7 @@ namespace openspace {
 
         bool doHorizonCulling = true;
         bool doFrustumCulling = true;
-        int numPosZthres;
+        bool mergeInvisible;
         float lodScaleFactor;
         bool initChunkVisible;
 

@@ -65,7 +65,7 @@ public:
 
     properties::BoolProperty doFrustumCulling;
     properties::BoolProperty doHorizonCulling;
-    properties::IntProperty numPosZthres;
+    properties::BoolProperty mergeInvisible;
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
 private:

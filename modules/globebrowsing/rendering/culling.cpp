@@ -48,6 +48,9 @@ namespace openspace {
     }
 
 
+    const AABB3 viewFrustum = AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35));
+
+
     bool FrustumCuller::isVisible(
         const RenderData& data,
         const vec3& point) {
@@ -143,7 +146,7 @@ namespace openspace {
             bounds.expand(cornerScreenSpace);
         }
 
-        AABB3 viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
+        
         return bounds.intersects(viewFrustum);
         
         /*

@@ -58,6 +58,8 @@ namespace openspace {
         FrustumCuller();
         ~FrustumCuller();
 
+        static const AABB3 viewFrustum;
+
         /**
         Returns true if the point is inside the view frustrum defined in RenderData.
         The third argument marginScreenSpace is added to the default screen space

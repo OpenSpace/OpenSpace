@@ -45,7 +45,7 @@ Fragment getFragment() {
 	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
 
 	// Border overlay
-	frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
+	//frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
 
 	frag.depth = fs_position.w;
 
