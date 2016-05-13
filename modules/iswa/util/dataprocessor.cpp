@@ -132,9 +132,7 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
 
                     if(_useLog){
                         int sign = (v>0)? 1:-1;
-                        if(v != 0){
-                            v = sign*log(fabs(v));
-                        }
+                        v = sign*log(fabs(v) + 1);
                     }
 
                     optionValues[i].push_back(v); 
@@ -184,7 +182,6 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
 }
 
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
-        
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 
     
