@@ -52,6 +52,7 @@ namespace openspace {
         int nRasters = dataSet->GetRasterCount();
 
         ghoul_assert(nRasters > 0, "Bad dataset. Contains no rasterband.");
+        ghoul_assert(chunkIndex.level > 0, "Level of chunk index must be bigger than 0.");
 
         GDALRasterBand* firstBand = dataSet->GetRasterBand(1);
 
