@@ -48,9 +48,12 @@ namespace openspace {
     TileProvider::TileProvider(
         const std::string& filePath,
         int tileCacheSize,
-        int minimumPixelSize)
+        int minimumPixelSize,
+        int framesUntilRequestFlush)
     : _filePath(filePath)
     , _tileCache(tileCacheSize) // setting cache size
+    , _framesSinceLastRequestFlush(0)
+    , _framesUntilRequestFlush(framesUntilRequestFlush)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -101,11 +104,20 @@ namespace openspace {
     }
 
     TileProvider::~TileProvider(){
+        clearRequestQueue();
         delete _gdalDataSet;
     }
 
 
     void TileProvider::prerender() {
+        initTexturesFromLoadedData();
+
+        if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
+            clearRequestQueue();
+        }
+    }
+
+    void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
             std::shared_ptr<UninitializedTextureTile> uninitedTex =
@@ -114,6 +126,12 @@ namespace openspace {
             std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
             _tileCache.put(key, texture);
         }
+    }
+
+    void TileProvider::clearRequestQueue() {
+        _tileLoadManager.clearEnqueuedJobs();
+        _queuedTileRequests.clear();
+        _framesSinceLastRequestFlush = 0;
     }
 
 
@@ -187,14 +205,16 @@ namespace openspace {
             return _tileCache.get(hashkey);
         }
         else {
-            // enque load job
-            std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-                new TextureTileLoadJob(this, chunkIndex));
+            bool tileHasBeenQueued = _queuedTileRequests.find(hashkey) != _queuedTileRequests.end();
+            if (!tileHasBeenQueued) {
+                // enque load job
+                std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
+                    new TextureTileLoadJob(this, chunkIndex));
 
-            _tileLoadManager.enqueueJob(job);
+                _tileLoadManager.enqueueJob(job);
 
-            // map key to nullptr while tile is loaded
-            _tileCache.put(hashkey, nullptr);
+                _queuedTileRequests.insert(hashkey);                
+            }
             return nullptr;
         }
     }

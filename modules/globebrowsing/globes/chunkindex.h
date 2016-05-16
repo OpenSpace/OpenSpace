@@ -48,7 +48,7 @@ using HashKey = unsigned long;
 
 
 struct ChunkIndex {
-
+    
 
     int x, y, level;
     

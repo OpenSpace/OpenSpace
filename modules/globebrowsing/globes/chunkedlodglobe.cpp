@@ -97,6 +97,7 @@ namespace openspace {
         minDistToCamera = INFINITY;
         ChunkNode::renderedPatches = 0;
 
+
         _leftRoot->render(data);
         _rightRoot->render(data);
 
@@ -112,6 +113,7 @@ namespace openspace {
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _patchRenderer->update();
+        
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

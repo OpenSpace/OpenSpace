@@ -34,6 +34,8 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
+#include <modules/globebrowsing/rendering/aabb.h>
+
 
 
 namespace openspace {
@@ -51,9 +53,6 @@ namespace openspace {
 
     class FrustumCuller {
     public:
-
-
-
 
         FrustumCuller();
         ~FrustumCuller();

@@ -28,6 +28,7 @@
 #include "gdal_priv.h"
 
 #include <openspace/engine/downloadmanager.h>
+#include <set>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
@@ -69,7 +70,8 @@ namespace openspace {
     */
     class TileProvider {
     public:
-        TileProvider(const std::string& fileName, int tileCacheSize, int minimumPixelSize);
+        TileProvider(const std::string& fileName, int tileCacheSize, int minimumPixelSize,
+            int framesUntilRequestFlush);
         ~TileProvider();
 
         Tile getMostHiResTile(ChunkIndex chunkIndex);
@@ -84,6 +86,13 @@ namespace openspace {
 
         friend class TextureTileLoadJob;
 
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                                Helper functions                              //
+        //////////////////////////////////////////////////////////////////////////////////
+
+
         /**
             Fetches all the needeed texture data from the GDAL dataset.
         */
@@ -96,9 +105,26 @@ namespace openspace {
         std::shared_ptr<Texture> initializeTexture(
             std::shared_ptr<UninitializedTextureTile> uninitedTexture);
 
-        LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
 
-        const std::string _filePath; 
+        void clearRequestQueue();
+
+        void initTexturesFromLoadedData();
+
+
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                                Member variables                              //
+        //////////////////////////////////////////////////////////////////////////////////
+
+
+        LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
+        std::set<HashKey> _queuedTileRequests;
+
+        int _framesSinceLastRequestFlush;
+        int _framesUntilRequestFlush;
+
+        const std::string _filePath;
 
         static bool hasInitializedGDAL;
         GDALDataset* _gdalDataSet;
