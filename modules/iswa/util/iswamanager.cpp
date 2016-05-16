@@ -348,7 +348,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     std::string frame = j["standard_grid_target"];
     std::string coordinateType = j["grid_1_type"];
     std::string updateTime = j["output_time_interval"];
-    int radius = j["radius"];
+    float radius = j["radius"];
 
     glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
 

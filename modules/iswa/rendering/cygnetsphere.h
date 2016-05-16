@@ -45,6 +45,8 @@ private:
     virtual bool createGeometry() override;
     virtual bool destroyGeometry() override;
     virtual void renderGeometry() override;
+
+    float _radius; 
 };
 
 } //namespace openspace
