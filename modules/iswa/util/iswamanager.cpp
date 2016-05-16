@@ -36,7 +36,6 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/util/time.h>
-#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -438,21 +437,28 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
     if(jsonString != ""){
         json j = json::parse(jsonString);
         
-        json jCygnets = j["listOfPriorityCygnets"];
-        for(int i=0; i<jCygnets.size(); i++){
-            json jCygnet = jCygnets.at(i);
+        fillFromJSONArray(j["listOfPriorityCygnets"]);
+        fillFromJSONArray(j["listOfOKCygnets"]);
+        // fillFromJSONArray(j["listOfStaleCygnets"]);
+        // fillFromJSONArray(j["listOfInactiveCygnets"]);
+        
+    }
+}
 
-            std::string name = jCygnet["cygnetDisplayTitle"];
-            std::replace(name.begin(), name.end(),'.', ',');
+void IswaManager::fillFromJSONArray(json jsonList){
+    for(int i=0; i<jsonList.size(); i++){
+        json jCygnet = jsonList.at(i);
 
-            CygnetInfo info = {
-                name,
-                jCygnet["cygnetDescription"],
-                jCygnet["cygnetUpdateInterval"],
-                false
-            };
-            _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
-        }
+        std::string name = jCygnet["cygnetDisplayTitle"];
+        std::replace(name.begin(), name.end(),'.', ',');
+
+        CygnetInfo info = {
+            name,
+            jCygnet["cygnetDescription"],
+            jCygnet["cygnetUpdateInterval"],
+            false
+        };
+        _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
     }
 }
 
