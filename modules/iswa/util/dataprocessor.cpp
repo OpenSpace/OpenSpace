@@ -205,7 +205,6 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
 }
 
 std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions){
-    std::cout << "Reading JSON Data" << std::endl; 
     if(!dataBuffer.empty()){
         json j = json::parse(dataBuffer);
         json var = j["variables"];
@@ -231,14 +230,13 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
         std::vector<float*> data(options.size(), nullptr);
         int i = 0; 
         for(int option : selectedOptions){
-            std::cout << option << " " << options[option].description << std::endl; 
+
             data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
 
             std::stringstream memorystream(options[option].description);
             std::string optionName;
             getline(memorystream, optionName, '/');
             getline(memorystream, optionName, '/');
-            std::cout << optionName << std::endl;
 
             json valueArray = var[optionName];
             int ySize = valueArray.size();
@@ -247,7 +245,6 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
                 json values = valueArray.at(y);
                 for(int x=0; x<values.size(); x++){
                     float v = values.at(x);
-                    // std::cout << v << std::endl;
                     if(_useLog){
                         int sign = (v>0)? 1:-1;
                         if(v != 0){
@@ -272,81 +269,17 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
         }
         
         return data;
-        // int numValues = 0;
-        // while(getline(memorystream, line)){
-        //     if(line.find("#") == 0){ //part of the header
-        //         continue;
-        //     }
-
-        //     std::stringstream ss(line); 
-        //     std::vector<float> value;
-        //     float v;
-        //     while(ss >> v){
-        //         value.push_back(v);
-        //     }
-
-        //     if(value.size()){
-        //         for(int i=0; i<numSelected; i++){
-
-        //             float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
-
-        //             if(_useLog){
-        //                 int sign = (v>0)? 1:-1;
-        //                 if(v != 0){
-        //                     v = sign*log(fabs(v));
-        //                 }
-        //             }
-
-        //             optionValues[i].push_back(v); 
-
-        //             min[i] = std::min(min[i], v);
-        //             max[i] = std::max(max[i], v);
-
-        //             sum[i] += v;
-        //         }
-        //         numValues++;
-        //     }
-        // }
-        // // std::cout << "Actual size: " << numValues << " Expected: " << _dimensions.x*_dimensions.y   << std::endl;
-        // if(numValues != _dimensions.x*_dimensions.y){
-        //     LWARNING("Number of values read and expected are not the same");
-        //     return std::vector<float*>();
-        // }
-        
-        // // FOR TESTING
-        // // ===========
-        // // std::chrono::time_point<std::chrono::system_clock> start, end;
-        // // start = std::chrono::system_clock::now();
-        // // ===========
-
-        // for(int i=0; i<numSelected; i++){
-        //     processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
-        // }
-        
-        // FOR TESTING
-        // ===========
-        // end = std::chrono::system_clock::now();
-        // _numOfBenchmarks++;
-        // std::chrono::duration<double> elapsed_seconds = end-start;
-        // _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
-        // std::cout << " readData():" << std::endl;
-        // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
-        // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
-        // ===========
-
-        
     } 
     else {
     //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
         return std::vector<float*>();
     }
-    // return std::vector<float*>();
 }
 
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 
-    
+
     //Calculate the mean
     float mean = (1.0 / numValues) * sum;
 

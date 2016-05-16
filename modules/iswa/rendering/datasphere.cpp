@@ -181,7 +181,7 @@ bool DataSphere::updateTexture(){
         std::stringstream buffer;
         buffer << data.rdbuf();
         _dataBuffer = buffer.str();
-        std::cout << "data in buffer" << std::endl;
+
         // loadTexture();
         return true;
     }
