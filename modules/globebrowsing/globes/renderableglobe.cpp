@@ -59,7 +59,7 @@ namespace openspace {
         , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 10.0f, 0.0f, 100.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
-
+        , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
     {
         
         setName("RenderableGlobe");
@@ -70,9 +70,13 @@ namespace openspace {
         addProperty(mergeInvisible);
         addProperty(lodScaleFactor);
         addProperty(initChunkVisible);
+        addProperty(renderSmallChunksFirst);
                 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
+        renderSmallChunksFirst.setValue(true);
+
+
 
         // Read the radii in to its own dictionary
         Vec3 radii;

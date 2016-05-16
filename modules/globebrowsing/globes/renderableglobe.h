@@ -68,6 +68,7 @@ public:
     properties::BoolProperty mergeInvisible;
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
+    properties::BoolProperty renderSmallChunksFirst;
 private:
 
     double _time;

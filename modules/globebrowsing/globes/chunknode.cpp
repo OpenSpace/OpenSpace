@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globes/chunknode.h>
+#include <queue>
 
 #include <ghoul/misc/assert.h>
 
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/openspaceengine.h>
 
+#include <modules/globebrowsing/globes/chunknode.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/culling.h>
 
@@ -39,8 +40,8 @@ namespace {
 
 namespace openspace {
 
-int ChunkNode::instanceCount = 0;
-int ChunkNode::renderedPatches = 0;
+int ChunkNode::chunkNodeCount = 0;
+int ChunkNode::renderedChunks = 0;
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
 : _chunk(chunk)
@@ -50,11 +51,11 @@ ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
     _children[1] = nullptr;
     _children[2] = nullptr;
     _children[3] = nullptr;
-    instanceCount++;
+    chunkNodeCount++;
 }
 
 ChunkNode::~ChunkNode() {
-    instanceCount--;
+    chunkNodeCount--;
 }
 
 bool ChunkNode::isRoot() const {
@@ -66,16 +67,8 @@ bool ChunkNode::isLeaf() const {
 }
 
 
-void ChunkNode::render(const RenderData& data) {
-    ghoul_assert(isRoot(), "this method should only be invoked on root");
-    //LDEBUG("-------------");
-    internalUpdateChunkTree(data);
-    internalRender(data);
-}
-
-
 // Returns true or false wether this node can be merge or not
-bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
+bool ChunkNode::updateChunkTree(const RenderData& data) {
     //Geodetic2 center = _chunk.surfacePatch.center();
     //LDEBUG("x: " << patch.x << " y: " << patch.y << " level: " << patch.level << "  lat: " << center.lat << " lon: " << center.lon);
 
@@ -90,7 +83,7 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
         
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
-            if (_children[i]->internalUpdateChunkTree(data)) {
+            if (_children[i]->updateChunkTree(data)) {
                 requestedMergeMask |= (1 << i);
             }
         }
@@ -99,26 +92,54 @@ bool ChunkNode::internalUpdateChunkTree(const RenderData& data) {
         if (requestedMergeMask == 0xf && _chunk.update(data)) {
             merge();
 
-            // re-run internalUpdateChunkTree on this, now that this is a leaf node
+            // re-run updateChunkTree on this, now that this is a leaf node
             // OBS, this may currently cause a split() again ...
-            return internalUpdateChunkTree(data);
+            return updateChunkTree(data);
         }
         return false;
     }
 }
 
 
-void ChunkNode::internalRender(const RenderData& data) {
+void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
+    std::stack<ChunkNode*> S;
+    std::queue<ChunkNode*> Q;
+    Q.push(this);
+    while (Q.size() > 0) {
+        ChunkNode* node = Q.front(); 
+        Q.pop();
+        if (node->isLeaf()) {
+            if (node->_chunk.isVisible()) {
+                S.push(node);
+            }
+        }
+        else {
+            for (int i = 0; i < 4; ++i) {
+                Q.push(node->_children[i].get());
+            }
+        }
+    }
+    while (S.size() > 0) {
+        S.top()->renderThisChunk(data);        
+        S.pop();
+    }
+}
+
+void ChunkNode::renderThisChunk(const RenderData& data) {
+    ChunkRenderer& patchRenderer = _chunk.owner()->getPatchRenderer();
+    patchRenderer.renderChunk(_chunk, data);
+    ChunkNode::renderedChunks++;
+}
+
+void ChunkNode::renderDepthFirst(const RenderData& data) {
     if (isLeaf()) {
         if (_chunk.isVisible()) {
-            ChunkRenderer& patchRenderer = _chunk.owner()->getPatchRenderer();
-            patchRenderer.renderChunk(_chunk, data);
-            ChunkNode::renderedPatches++;
+            renderThisChunk(data);
         }
     }
     else {
         for (int i = 0; i < 4; ++i) {
-            _children[i]->internalRender(data);
+            _children[i]->renderDepthFirst(data);
         }
     }
 }

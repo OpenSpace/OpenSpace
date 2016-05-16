@@ -90,9 +90,12 @@ namespace openspace {
         bool mergeInvisible;
         float lodScaleFactor;
         bool initChunkVisible;
+        bool renderSmallChunksFirst = true;
 
 
     private:
+
+        void renderChunkTree(ChunkNode* node, const RenderData& data) const;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
