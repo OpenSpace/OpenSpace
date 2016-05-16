@@ -171,19 +171,11 @@ bool DataSphere::loadTexture(){
     }
 
     // _dataBuffer = "";
-    return false;
+    return texturesReady;
 }
 
 bool DataSphere::updateTexture(){
-    // if(_dataBuffer == ""){
-    //     std::ifstream data(absPath("${OPENSPACE_DATA}/ionosphere_variables.json"));
-    //     std::stringstream buffer;
-    //     buffer << data.rdbuf();
-    //     _dataBuffer = buffer.str();
 
-    //     // loadTexture();
-    //     return true;
-    // }
     if(_futureObject.valid())
         return false;
 
