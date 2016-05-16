@@ -57,6 +57,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovidermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/layeredtextureshaderprovider.h
 
 )
 
@@ -69,7 +70,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunk.cpp
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
@@ -92,6 +92,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovidermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/layeredtextureshaderprovider.cpp
    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

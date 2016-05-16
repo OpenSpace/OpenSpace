@@ -26,18 +26,40 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-uniform TextureTile colorTile;
+#define NUMLAYERS_COLORTEXTURE 1
+#define NUMLAYERS_HEIGHTMAP 1
+
+uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 
 in vec4 fs_position;
 in vec2 fs_uv;
 
+vec4 blendOver(vec4 oldColor, vec4 newColor)
+{
+	vec4 toReturn;
+	toReturn.rgb =
+		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
+		(newColor.a + oldColor.a * (1 - newColor.a));
+	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
+	return toReturn;
+}
+
 Fragment getFragment() {
 	Fragment frag;
 
-	vec2 samplePos =
-		colorTile.uvTransform.uvScale * fs_uv +
-		colorTile.uvTransform.uvOffset;
-	frag.color = texture(colorTile.textureSampler, samplePos);
+	//for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
+	//{
+		vec2 samplePos =
+		colorTiles[0].uvTransform.uvScale * fs_uv +
+		colorTiles[0].uvTransform.uvOffset;
+		vec4 colorSample = texture(colorTiles[0].textureSampler, samplePos);
+		frag.color = blendOver(frag.color, colorSample);
+	//}
+
+	//vec2 samplePos =
+	//	colorTile.uvTransform.uvScale * fs_uv +
+	//	colorTile.uvTransform.uvOffset;
+	//frag.color = texture(colorTile.textureSampler, samplePos);
 
 	//frag.color.rgb *= 10;
 

@@ -22,66 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#define NUMLAYERS_COLORTEXTURE 1
-#define NUMLAYERS_HEIGHTMAP 1
+#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
+#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
-uniform mat4 projectionTransform;
+uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 
-// Input points in camera space
-uniform vec3 p00;
-uniform vec3 p10;
-uniform vec3 p01;
-uniform vec3 p11;
-uniform vec3 patchNormalCameraSpace;
+in vec4 fs_position;
+in vec2 fs_uv;
 
-uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
-
-layout(location = 1) in vec2 in_uv;
-
-out vec2 fs_uv;
-out vec4 fs_position;
-
-vec3 bilinearInterpolation(vec2 uv) {
-	// Bilinear interpolation
-	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
-	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
-	vec3 p = (1 - uv.y) * p0 + uv.y * p1;
-	return p;
-}
-
-void main()
+vec4 blendOver(vec4 oldColor, vec4 newColor)
 {
-	// Position in cameraspace
-	vec3 p = bilinearInterpolation(in_uv);
-	
-	float height = 0;
-	//for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
-	//{
-		vec2 samplePos =
-			heightTiles[0].uvTransform.uvScale * in_uv +
-			heightTiles[0].uvTransform.uvOffset;
-
-		float sampledValue = texture(heightTiles[0].textureSampler, samplePos).r;
-		
-		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue *
-			heightTiles[0].depthTransform.depthScale +
-			heightTiles[0].depthTransform.depthOffset);
-	//}
-	
-	// Translate the point along normal
-	p += patchNormalCameraSpace * height;
-
-	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
-	
-	// Write output
-	fs_uv = in_uv;
-	fs_position = z_normalization(positionClippingSpace);
-	gl_Position = fs_position;
+	vec4 toReturn;
+	toReturn.rgb =
+		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
+		(newColor.a + oldColor.a * (1 - newColor.a));
+	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
+	return toReturn;
 }
+
+Fragment getFragment() {
+	Fragment frag;
+
+	for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
+	{
+		vec2 samplePos =
+		colorTile.uvTransform.uvScale * fs_uv +
+		colorTile.uvTransform.uvOffset;
+		vec4 colorSample = texture(colorTile.textureSampler, samplePos);
+		frag.color = blendOver(frag.color, colorSample);
+	}
+	
+	//frag.color.rgb *= 10;
+
+	// Sample position overlay
+	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
+
+	// Border overlay
+	//frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
+
+	frag.depth = fs_position.w;
+
+	return frag;
+}
+

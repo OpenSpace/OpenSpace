@@ -171,7 +171,7 @@ namespace openspace {
                 break;
             }
 
-            if (!chunkIndex.hasParent()) {
+            if (chunkIndex.level <= 1) {
                 tex = getDefaultTexture();
                 break;
             }

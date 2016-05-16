@@ -28,13 +28,16 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 
+#define NUMLAYERS_COLORTEXTURE 1
+#define NUMLAYERS_HEIGHTMAP 1
+
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 radiiSquared;
 
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
-uniform TextureTile heightTile;
+uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 
 layout(location = 1) in vec2 in_uv;
 
@@ -53,22 +56,28 @@ void main()
 {
 	PositionNormalPair pair = globalInterpolation();
 
-	vec2 samplePos =
-		heightTile.uvTransform.uvScale * in_uv +
-		heightTile.uvTransform.uvOffset;
+	float height = 0;
+	//for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
+	//{
+		vec2 samplePos =
+			heightTiles[0].uvTransform.uvScale * in_uv +
+			heightTiles[0].uvTransform.uvOffset;
 
-	float sampledHeight = texture(heightTile.textureSampler, samplePos).r;
+		float sampledValue = texture(heightTiles[0].textureSampler, samplePos).r;
+		
+		// TODO : Some kind of blending here. Now it just writes over
+		height = (sampledValue *
+			heightTiles[0].depthTransform.depthScale +
+			heightTiles[0].depthTransform.depthOffset);
+	//}
 
-	pair.position +=
-		pair.normal *
-		(sampledHeight *
-			heightTile.depthTransform.depthScale +
-			heightTile.depthTransform.depthOffset);
+	// Add the height in the direction of the normal
+	pair.position += pair.normal * height;
 
-	vec4 position = modelViewProjectionTransform * vec4(pair.position, 1);
+	vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
 
 	// Write output
 	fs_uv = in_uv;
-	fs_position = z_normalization(position);
+	fs_position = z_normalization(positionClippingSpace);
 	gl_Position = fs_position;
 }
