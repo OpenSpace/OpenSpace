@@ -38,12 +38,14 @@ Histogram::Histogram()
     : _minBin(0)
     , _maxBin(0)
     , _numBins(-1)
+    , _numValues(0)
     , _data(nullptr) {}
 
 Histogram::Histogram(float minBin, float maxBin, int numBins)
     : _minBin(minBin)
     , _maxBin(maxBin)
     , _numBins(numBins)
+    , _numValues(0)
     , _data(nullptr) {
 
     _data = new float[numBins];
@@ -56,12 +58,14 @@ Histogram::Histogram(float minBin, float maxBin, int numBins, float *data)
     : _minBin(minBin)
     , _maxBin(maxBin)
     , _numBins(numBins)
+    , _numValues(0)
     , _data(data) {}
 
 Histogram::Histogram(Histogram&& other) {
     _minBin = other._minBin;
     _maxBin = other._maxBin;
     _numBins = other._numBins;
+    _numValues = other._numValues;
     _data = other._data;
     other._data = nullptr;
 }
@@ -70,6 +74,7 @@ Histogram& Histogram::operator=(Histogram&& other) {
     _minBin = other._minBin;
     _maxBin = other._maxBin;
     _numBins = other._numBins;
+    _numValues = other._numValues;
     _data = other._data;
     other._data = nullptr;
     return *this;
@@ -111,6 +116,7 @@ bool Histogram::add(float bin, float value) {
     if (binIndex == _numBins) binIndex--;                           // [0, _numBins[
 
     _data[binIndex] += value;
+    _numValues++;
     return true;
 }
 
@@ -123,6 +129,7 @@ bool Histogram::add(const Histogram& histogram) {
             _data[i] += data[i];
 
         }
+        _numValues += histogram._numValues;
         return true;
     } else {
         LERROR("Dimension mismatch");
@@ -207,15 +214,72 @@ void Histogram::normalize() {
     }
 }
 
+/*
+ * Will create an internal array for histogram equalization.
+ * Old histogram value is the index of the array, and the new equalized
+ * value will be the value at the index.
+ */
+void Histogram::generateEqualizer(){
+    float previousCdf = 0.0f;
+    _equalizer = std::vector<float>(_numBins, 0.0f);
+    for(int i = 0; i < _numBins; i++){
+        
+        float probability = _data[i] / (float)_numValues; 
+        float cdf  = previousCdf + probability;
+        cdf = std::min(1.0f, cdf);
+        _equalizer[i] = cdf * (_numBins-1);
+        previousCdf = cdf;
+    }
+}
+
+/*
+ * Will return a equalized histogram
+ */
+Histogram Histogram::equalize(){
+    Histogram equalizedHistogram(_minBin, _maxBin, _numBins);
+
+    for(int i = 0; i < _numBins; i++){
+        equalizedHistogram._data[(int)_equalizer[i]] += _data[i];
+    }
+    equalizedHistogram._numValues = _numValues;
+    return std::move(equalizedHistogram);
+}
+
+/*
+ * Given a value within the domain of this histogram (_minBin < value < maxBin),
+ * this method will use its equalizer to return a histogram equalized result.
+ */
+float Histogram::equalize(float value){
+    if (value < _minBin || value > _maxBin) {
+        LWARNING("Equalized value is is not within domain of histogram: min: " + _minBin + " max: " + _maxBin + " val: " + value);
+    }
+    float normalizedValue = (value-_minBin)/(_maxBin-_minBin);
+    int bin = floor(normalizedValue * _numBins);
+    // If value == _maxBins then bin == _numBins, which is a invalid index.
+    bin = std::min(_numBins-1, bin);
+
+    return _equalizer[bin];
+}
+
+float Histogram::entropy(){
+    float entropy;
+    for(int i = 0; i < _numBins; i++){
+        if(_data[i] != 0)
+            entropy -= ((float)_data[i]/_numValues) * log2((float)_data[i]/_numValues);
+    }
+    return entropy;
+}
+
 void Histogram::print() const {
     std::cout << "number of bins: " << _numBins << std::endl
               << "range: " << _minBin << " - " << _maxBin << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
         float low = _minBin + float(i) / _numBins * (_maxBin - _minBin);
         float high = low + (_maxBin - _minBin) / float(_numBins);
-        std::cout << "[" << low << ", " << high << "[" << std::endl
+        std::cout << i << " [" << low << ", " << high << "]"
                   << "   " << _data[i] << std::endl;
     }
+    std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
 }

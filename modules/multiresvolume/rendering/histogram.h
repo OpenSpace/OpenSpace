@@ -56,6 +56,10 @@ public:
 
     void normalize();
     void print() const;
+    void generateEqualizer();
+    Histogram equalize();
+    float equalize (float);
+    float entropy();
 
 private:
     int _numBins;
@@ -63,6 +67,8 @@ private:
     float _maxBin;
 
     float* _data;
+    std::vector<float> _equalizer;
+    int _numValues;
 
 }; // class Histogram
 }  // namespace openspace

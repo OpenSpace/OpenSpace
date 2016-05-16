@@ -67,7 +67,9 @@ friend class IswaGroup;
     properties::BoolProperty _useHistogram;
     
     std::string _dataBuffer;
+
     std::shared_ptr<DataProcessor> _dataProcessor; 
+
  };
  
  } // namespace openspace

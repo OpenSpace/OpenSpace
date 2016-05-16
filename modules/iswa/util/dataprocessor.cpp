@@ -22,6 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessor.h>
+#include <modules/multiresvolume/rendering/histogram.h>
 
 #include <fstream>
 #include <ghoul/io/texture/texturereader.h>
@@ -154,9 +155,7 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
 
                     if(_useLog){
                         int sign = (v>0)? 1:-1;
-                        if(v != 0){
-                            v = sign*log(fabs(v));
-                        }
+                        v = sign*log(fabs(v) + 1);
                     }
 
                     optionValues[i].push_back(v); 
@@ -345,109 +344,41 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
 }
 
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
-    
-    // HISTOGRAM
-    // number of levels/bins/values
-    const int levels = 512;    
-    // Normal Histogram where "levels" is the number of steps/bins
-    std::vector<int> histogram = std::vector<int>(levels, 0);
-    // Maps the old levels to new ones. 
-    std::vector<float> newLevels = std::vector<float>(levels, 0.0f);
-    
     const int numValues = inputData.size(); 
-    
-    //FOR TESTING ONLY
-    //================
-    // float entropyBefore;
-    // float entropyAfter;
-    // std::vector<int> histogramAfter = std::vector<int>(levels, 0);
-    // auto calulateEntropy = [levels, numValues](std::vector<int> histogram){
-    //     float entropy;
-    //     for(auto frequency : histogram){
-    //         if(frequency != 0)
-    //             entropy -= ((float)frequency/numValues) * log2((float)frequency/numValues);
-    //     }
-    //     return entropy;
-    // };
-    //================
-    
-    // maps the data values to the histogram bin/index/level
-    auto mapToHistogram = [levels](float val, float varMin, float varMax) {
-        float probability = (val-varMin)/(varMax-varMin);
-        float mappedValue = probability * levels;
-        return glm::clamp(mappedValue, 0.0f, static_cast<float>(levels - 1));
-    };
-    
+    Histogram histogram(min, max, 512); 
     
     //Calculate the mean
     float mean = (1.0 / numValues) * sum;
-    //Calculate the Standard Deviation
-    float standardDeviation = sqrt (((pow(sum, 2.0)) - ((1.0/numValues) * (pow(sum,2.0)))) / (numValues - 1.0));
-    //calulate log mean
-    // logmean /= numValues;   
-    
-    //HISTOGRAM FUNCTIONALITY
-    //======================
+
+    //Calculate the Standard Deviation 
+    float var = 0;
+    for(auto dataValue : inputData){
+        var += pow(dataValue - mean, 2);
+    }
+    float standardDeviation = sqrt ( var / numValues );
+
+    // Histogram functionality
     if(_useHistogram){
-        for(int i = 0; i < numValues; i++){
-            float v = inputData[i];
-            float pixelVal = mapToHistogram(v, min, max);       
-            histogram[(int)pixelVal]++;
-            inputData[i] = pixelVal;
+        for(auto dataValue : inputData){
+            histogram.add(dataValue, 1);
         }
-        
-        // Map mean and standard deviation to histogram levels
-        mean = mapToHistogram(mean , min, max);
-        // logmean = mapToHistogram(logmean , min, max);
-        standardDeviation = mapToHistogram(standardDeviation, min, max);
-        min = 0.0f;
-        max = levels - 1.0f;
-        
-        //FOR TESTING
-        //entropyBefore = calulateEntropy(histogram);
-
-        //Calculate the cumulative distributtion function (CDF)
-        float previousCdf = 0.0f;
-        for(int i = 0; i < levels; i++){
-            
-            float probability = histogram[i] / (float)numValues; 
-            float cdf  = previousCdf + probability;
-            cdf = glm::clamp(cdf, 0.0f, 1.0f); //just in case
-            newLevels[i] = cdf * (levels-1);
-            previousCdf = cdf;
-        }
+        histogram.generateEqualizer();
+        standardDeviation = histogram.equalize(standardDeviation);
+        mean = histogram.equalize(mean);
     }
-    //======================
-    
-    for(int i=0; i< numValues; i++){
-        
+
+    // Normalize and equalize
+    for(int i=0; i < numValues; i++){
         float v = inputData[i];
-   
-        // if use histogram get the equalized values
         if(_useHistogram){
-            v = newLevels[(int)v];
-            
-            // FOR TESTING
-            //histogramAfter[(int)v]++;
-
-            // Map mean and standard deviation to new histogram levels
-            mean =  newLevels[(int) mean];
-            // logmean =  newLevels[(int) logmean];
-            standardDeviation = newLevels[(int) standardDeviation];
+            v = histogram.equalize(v);
         }
-        
-        v = normalizeWithStandardScore(v, mean, standardDeviation);         
+        v = normalizeWithStandardScore(v, mean, standardDeviation); 
         outputData[i] += v;
-
     }
-    
-    // FOR TESTING
-    // ===========
-    // entropyAfter = calulateEntropy(histogramAfter);
-    // std::cout << "Entropy Before: "<< entropyBefore << std::endl;
-    // std::cout << "Entropy After: "<< entropyAfter << std::endl;
-    // ===========
-    
+    // Histogram equalized = histogram.equalize();
+    // histogram.print();
+    // equalized.print();
 }
 
 float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd){

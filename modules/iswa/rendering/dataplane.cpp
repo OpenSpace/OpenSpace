@@ -263,7 +263,6 @@ bool DataPlane::createShader(){
     }
 }
 
-
 void DataPlane::setTransferFunctions(std::string tfPath){
     std::string line;
     std::ifstream tfFile(absPath(tfPath));
