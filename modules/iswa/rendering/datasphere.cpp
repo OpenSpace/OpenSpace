@@ -28,6 +28,11 @@
 #include <modules/base/rendering/planetgeometry.h>
 #include <fstream>
 
+
+namespace {
+    const std::string _loggerCat = "DataSphere";
+}
+
 namespace openspace {
 
 DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
@@ -212,7 +217,6 @@ bool DataSphere::readyToRender(){
 void DataSphere::setUniformAndTextures(){
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = selectedOptions.size();
-
     int activeTransferfunctions = _transferFunctions.size();
 
     ghoul::opengl::TextureUnit txUnits[10];
@@ -230,10 +234,15 @@ void DataSphere::setUniformAndTextures(){
         }
     }
 
+    if(activeTextures > 0){
+        if(selectedOptions.back()>=activeTransferfunctions)
+            activeTransferfunctions = 1;
+    }
+
     ghoul::opengl::TextureUnit tfUnits[10];
     j = 0;
 
-    if((activeTransferfunctions == 1) && (_textures.size() != _transferFunctions.size())){
+    if((activeTransferfunctions == 1)){
         tfUnits[0].activate();
         _transferFunctions[0]->bind();
         _shader->setUniform(
@@ -242,6 +251,12 @@ void DataSphere::setUniformAndTextures(){
         );
     }else{
         for(int option : selectedOptions){
+            // std::cout << option << std::endl;
+            // if(option >= activeTransferfunctions){
+            //     // LWARNING("No transfer function for this value.");
+            //     break;
+            // }
+
             if(_transferFunctions[option]){
                 tfUnits[j].activate();
                 _transferFunctions[option]->bind();
