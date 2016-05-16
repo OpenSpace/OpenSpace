@@ -4,21 +4,15 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        --[[
         Ephemeris = {
-            Type = "Kepler",
-            Inclination = 0.00041,
-            AscendingNode = 349.2,
-            Perihelion = 102.8517,
-            SemiMajorAxis = 1.00002,
-            DailyMotion = 0.9855796,     
-            Eccentricity = 0.0166967,
-            MeanLongitude = 328.40353
-        }
-        --]]
-        Ephemeris = {
-            Type = "Static"
-        }
+            Type = "Spice",
+            Body = "EARTH BARYCENTER",
+            Reference = "ECLIPJ2000",
+            Observer = "SUN",
+            Kernels = {
+                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        },
     },
     -- Earth module
     {   
@@ -27,16 +21,28 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",
-            Body = "EARTH",
+			Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
                 Segments = 100
             },
+            Shadow_Group = {
+                Source1 = {
+                    Name = "Sun",
+                    Radius = {696.3, 6}
+                },
+                --Source2 = { Name = "Monolith", Radius = {0.01, 6} },
+                Caster1 = { 
+                    Name = "Moon",
+                    Radius = {1.737, 6}
+                },
+                --Caster2 = { Name = "Independency Day Ship", Radius = {0.0, 0.0} }
+            },
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-                Night = "textures/earth_night.jpg",
+				Night = "textures/earth_night.jpg",
                 -- Depth = "textures/earth_depth.png"
             },
             Atmosphere = {
@@ -45,15 +51,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
+        
         GuiName = "/Solar/Planets/Earth"
     },
     -- EarthTrail module
@@ -82,7 +80,7 @@ return {
             Billboard = true,
             Texture = "textures/marker.png"
         },
-        Ephemeris = {
+		Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

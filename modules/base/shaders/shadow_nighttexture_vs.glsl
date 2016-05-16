@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,82 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#version __CONTEXT__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
+//layout(location = 3) in vec2 in_nightTex;
 
-#include <vector>
-#include <string>
 
-// ghoul includes
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
+out vec2 vs_st;
+out vec4 vs_normal;
+out vec4 vs_position;
+out vec4 vs_posWorld;
+out float s;
 
-namespace openspace {
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-namespace planetgeometry {
-class PlanetGeometry;
-}
+void main()
+{
+    // set variables
+    vs_st = in_st;
+    vs_position = in_position;
+    vec4 tmp = in_position;
 
-class RenderablePlanet : public Renderable {
-public:
-    // Shadow structure
-    typedef struct {
-        std::pair<std::string, float> source;
-        std::pair<std::string, float> caster;
-    } ShadowConf;
+    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
+    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 
-    struct ShadowRenderingStruct {
-        float xu, xp;
-        float rs, rc;
-        glm::vec3 sourceCasterVec;
-        glm::vec3 casterPositionVec;
-        bool isShadowing;
-    };
+    // The things is not in world coordinates, they are in
+    // regular view/eye coordinates.
+    vec4 position = pscTransform(tmp, ModelTransform);
+
+    vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
+    vec4 vP = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);
+    vec4 conv = vec4(vP.xyz * pow(10,vP.w), 1.0);
+    vs_posWorld = conv;
     
-public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
-
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-protected:
-    void loadTexture();
-
-private:
-    properties::StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
-    planetgeometry::PlanetGeometry* _geometry;
-    properties::BoolProperty _performShading;
-    properties::IntProperty _rotation;
-    float _alpha;
-    std::vector< ShadowConf > _shadowConfArray;
-    float _planetRadius;
-
-    glm::dmat3 _stateMatrix;
-    std::string _nightTexturePath;
-    std::string _frame;
-    std::string _target;
-    bool _hasNightTexture;
-    double _time;
-};
-
-}  // namespace openspace
-
-#endif  // __RENDERABLEPLANET_H__
+    vs_position = tmp;
+    // Now is transforming from view position to SGCT projection
+    // coordinates.
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
+}
