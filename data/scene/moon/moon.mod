@@ -12,6 +12,16 @@ return {
                 Radius = { 1.737, 6},
                 Segments = 100
             },
+            Shadow_Group = {
+                Source1 = {
+                    Name = "Sun",
+                    Radius = {696.3, 6}
+                },
+                Caster1 = { 
+                    Name = "Earth",
+                    Radius = {6.371, 6}
+                },
+            },
             Textures = {
                 Type = "simple",
                 Color = "textures/Moon16K.dds",

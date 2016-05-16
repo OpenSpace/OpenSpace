@@ -137,6 +137,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // Shadow data:
     ghoul::Dictionary shadowDictionary;
     success = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool disableShadows = false;
     if (success) {
         std::vector< std::pair<std::string, float > > sourceArray;
         unsigned int sourceCounter = 1;
@@ -151,58 +152,60 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                 ss << keyShadowSource << sourceCounter << ".Radius";
                 success = shadowDictionary.getValue(ss.str(), sourceRadius);
                 if (success) {
-                    sourceArray.push_back(std::pair< std::string, float>(sourceName, sourceRadius[0] * glm::pow(10, sourceRadius[1])));
+                    sourceArray.push_back(std::pair< std::string, float>(
+                        sourceName, sourceRadius[0] * glm::pow(10, sourceRadius[1])));
                 }
                 else {
-                    // TODO: handle not success
-                    ;
+                    LWARNING("No Radius value expecified for Shadow Source Name " 
+                        << sourceName << " from " << name 
+                        << " planet.\nDisabling shadows for this planet.");
+                    disableShadows = true;
+                    break;
                 }
             }
-            else {
-                // TODO: handle not success
-                ;
-            }
-
             sourceCounter++;
         }
 
-        success = true;
-        
-        std::vector< std::pair<std::string, float > > casterArray;
-        unsigned int casterCounter = 1;
-        while (success) {
-            std::string casterName;
-            std::stringstream ss;
-            ss << keyShadowCaster << casterCounter << ".Name";
-            success = shadowDictionary.getValue(ss.str(), casterName);            
-            if (success) {
-                glm::vec2 casterRadius;
-                ss.str(std::string());
-                ss << keyShadowCaster << casterCounter << ".Radius";
-                success = shadowDictionary.getValue(ss.str(), casterRadius);
+        if (!disableShadows && !sourceArray.empty()) {
+            success = true;
+            std::vector< std::pair<std::string, float > > casterArray;
+            unsigned int casterCounter = 1;
+            while (success) {
+                std::string casterName;
+                std::stringstream ss;
+                ss << keyShadowCaster << casterCounter << ".Name";
+                success = shadowDictionary.getValue(ss.str(), casterName);
                 if (success) {
-                    casterArray.push_back(std::pair< std::string, float>(casterName, casterRadius[0] * glm::pow(10, casterRadius[1])));
+                    glm::vec2 casterRadius;
+                    ss.str(std::string());
+                    ss << keyShadowCaster << casterCounter << ".Radius";
+                    success = shadowDictionary.getValue(ss.str(), casterRadius);
+                    if (success) {
+                        casterArray.push_back(std::pair< std::string, float>(
+                            casterName, casterRadius[0] * glm::pow(10, casterRadius[1])));
+                    }
+                    else {
+                        LWARNING("No Radius value expecified for Shadow Caster Name "
+                            << casterName << " from " << name
+                            << " planet.\nDisabling shadows for this planet.");
+                        disableShadows = true;
+                        break;
+                    }
                 }
-                else {
-                    // TODO: handle not success
-                    ;
-                }
-            }
-            else {
-                // TODO: handle not success
-                ;
+
+                casterCounter++;
             }
 
-            casterCounter++;
+            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
+                for (const auto & source : sourceArray)
+                    for (const auto & caster : casterArray) {
+                        ShadowConf sc;
+                        sc.source = source;
+                        sc.caster = caster;
+                        _shadowConfArray.push_back(sc);
+                    }
+            }
         }
-
-        for ( const auto & source : sourceArray )
-            for (const auto & caster : casterArray) {
-                ShadowConf sc;
-                sc.source = source;
-                sc.caster = caster;
-                _shadowConfArray.push_back(sc);
-            }
     }
 
 }
