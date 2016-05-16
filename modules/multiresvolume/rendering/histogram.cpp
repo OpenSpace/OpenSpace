@@ -251,7 +251,7 @@ Histogram Histogram::equalize(){
  */
 float Histogram::equalize(float value){
     if (value < _minBin || value > _maxBin) {
-        LWARNING("Equalized value is is not within domain of histogram: min: " + _minBin + " max: " + _maxBin + " val: " + value);
+        LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minBin) + " max: " + std::to_string(_maxBin) + " val: " + std::to_string(value));
     }
     float normalizedValue = (value-_minBin)/(_maxBin-_minBin);
     int bin = floor(normalizedValue * _numBins);
