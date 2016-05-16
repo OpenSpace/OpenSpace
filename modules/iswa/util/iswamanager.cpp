@@ -286,7 +286,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-std::string IswaManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data){
     if(data->json != ""){
         json j = json::parse(data->json);
 
@@ -344,10 +344,12 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
 
     json j = json::parse(data->json);
     j = j["metadata"];
-    std::string parent = "Earth";
-    std::string frame = j["coordinates"];
-    std::string coordinateType = "Spherical";
-    int updateTime = 240;
+    std::string parent = j["central_body"];
+    parent[0] = toupper(parent[0]);
+    std::string frame = j["standard_grid_target"];
+    std::string coordinateType = j["grid_1_type"];
+    std::string updateTime = j["output_time_interval"];
+    int radius = j["radius"];
 
     glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
 
@@ -372,7 +374,8 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
         "GridMax = " + std::to_string(max) + ", "
-        "UpdateTime = " + std::to_string(updateTime) + ", "
+        "UpdateTime = " + updateTime + ", "
+        "Radius = " + std::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = "+ std::to_string(data->group) +
         "}"
@@ -404,7 +407,7 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
         return;
     }
 
-    std::string luaTable = parseJSONToLuaTable(data);
+    std::string luaTable = jsonPlaneToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);

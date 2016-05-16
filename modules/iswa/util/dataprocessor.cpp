@@ -102,7 +102,7 @@ std::vector<std::string> DataProcessor::readJSONHeader(std::string& dataBuffer){
                 json lon = it.value();
                 json lat = lon.at(0);
 
-                _dimensions = glm::size3_t(lon.size(), lat.size(), 1);
+                _dimensions = glm::size3_t(lat.size(), lon.size(), 1);
             }
             if(option != "x" && option != "y" && option != "z"){
                 options.push_back(option);

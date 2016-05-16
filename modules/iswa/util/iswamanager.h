@@ -95,7 +95,7 @@ public:
 
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string parseJSONToLuaTable(std::shared_ptr<MetadataFuture> data);
+    std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
     std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data);
     
     void createScreenSpace(int id);
