@@ -119,15 +119,15 @@ void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
             }
         }
     }
+
     while (S.size() > 0) {
-        S.top()->renderThisChunk(data);        
+        S.top()->renderThisChunk(data);
         S.pop();
     }
 }
 
 void ChunkNode::renderThisChunk(const RenderData& data) {
-    ChunkRenderer& patchRenderer = _chunk.owner()->getPatchRenderer();
-    patchRenderer.renderChunk(_chunk, data);
+    _chunk.render(data);
     ChunkNode::renderedChunks++;
 }
 

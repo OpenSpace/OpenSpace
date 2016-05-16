@@ -172,7 +172,7 @@ namespace openspace {
         {
             auto tileProvider = it->second;
             // Get the texture that should be used for rendering
-            Tile tile = tileProvider->getMostHiResTile(chunk.index());
+            Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -206,7 +206,7 @@ namespace openspace {
         {
             auto tileProvider = it->second;
             // Get the texture that should be used for rendering
-            Tile tile = tileProvider->getMostHiResTile(chunk.index());
+            Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
 
             // The texture needs a unit to sample from
             texUnitColor.activate();
@@ -271,7 +271,7 @@ namespace openspace {
         //auto tileProviderHeight = heightMapProviders.begin()->second;
 
         // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getMostHiResTile(chunk.index());
+        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
 
 
         // Bind and use the texture
@@ -291,7 +291,7 @@ namespace openspace {
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getMostHiResTile(chunk.index());
+        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
 
 
         // Bind and use the texture
@@ -364,7 +364,7 @@ namespace openspace {
         {
             auto tileProvider = it->second;
             // Get the texture that should be used for rendering
-            Tile tile = tileProvider->getMostHiResTile(chunk.index());
+            Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -398,7 +398,7 @@ namespace openspace {
         {
             auto tileProvider = it->second;
             // Get the texture that should be used for rendering
-            Tile tile = tileProvider->getMostHiResTile(chunk.index());
+            Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
 
             // The texture needs a unit to sample from
             texUnitColor.activate();
@@ -502,7 +502,7 @@ namespace openspace {
         auto tileProviderHeight = heightMapProviders.begin()->second;
 
         // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getMostHiResTile(chunk.index());
+        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
 
         // Bind and use the texture
         ghoul::opengl::TextureUnit texUnitHeight;
@@ -519,7 +519,7 @@ namespace openspace {
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getMostHiResTile(chunk.index());
+        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
 
 
         // Bind and use the texture

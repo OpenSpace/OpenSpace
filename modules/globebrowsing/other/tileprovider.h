@@ -74,7 +74,7 @@ namespace openspace {
             int framesUntilRequestFlush);
         ~TileProvider();
 
-        Tile getMostHiResTile(ChunkIndex chunkIndex);
+        Tile getHighestResolutionTile(ChunkIndex chunkIndex);
 
         std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
         std::shared_ptr<Texture> getDefaultTexture();
@@ -91,7 +91,10 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                                Helper functions                              //
         //////////////////////////////////////////////////////////////////////////////////
+        Tile getOrEnqueueHighestResolutionTile(const ChunkIndex& ci, TileUvTransform& uvTransform);
 
+
+        void transformFromParent(const ChunkIndex& ci, TileUvTransform& uv) const;
 
         /**
             Fetches all the needeed texture data from the GDAL dataset.
@@ -105,6 +108,7 @@ namespace openspace {
         std::shared_ptr<Texture> initializeTexture(
             std::shared_ptr<UninitializedTextureTile> uninitedTexture);
 
+        bool enqueueTileRequest(const ChunkIndex& ci);
 
         void clearRequestQueue();
 
