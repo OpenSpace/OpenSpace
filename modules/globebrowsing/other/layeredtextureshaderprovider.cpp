@@ -27,7 +27,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 
-#include "ghoul\misc\dictionary.h"
+#include "ghoul/misc/dictionary.h"
 
 #include <string>
 

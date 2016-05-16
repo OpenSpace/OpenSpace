@@ -79,14 +79,15 @@ namespace openspace {
         ChunkRenderer(shared_ptr<Grid> grid, 
                       shared_ptr<TileProviderManager> tileProviderManager);
 
-        void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data);
+        void renderChunk(const Chunk& chunk, const RenderData& data);
 
     private:
-        void ChunkRenderer::renderChunkGlobally(
+        void renderChunkGlobally(
             const Chunk& chunk, const RenderData& data);
-        void ChunkRenderer::renderChunkLocally(
+        void renderChunkLocally(
             const Chunk& chunk, const RenderData& data);
-        shared_ptr<Grid> _grid;
+
+      shared_ptr<Grid> _grid;
         unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
         unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
     };

@@ -47,14 +47,14 @@ vec4 blendOver(vec4 oldColor, vec4 newColor)
 Fragment getFragment() {
 	Fragment frag;
 
-	for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
-	{
+	//for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
+	//{
 		vec2 samplePos =
-		colorTiles[i].uvTransform.uvScale * fs_uv +
-		colorTiles[i].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[i].textureSampler, samplePos);
+		colorTiles[0].uvTransform.uvScale * fs_uv +
+		colorTiles[0].uvTransform.uvOffset;
+		vec4 colorSample = texture(colorTiles[0].textureSampler, samplePos);
 		frag.color = blendOver(frag.color, colorSample);
-	}
+	//}
 
 	//vec2 samplePos =
 	//	colorTile.uvTransform.uvScale * fs_uv +

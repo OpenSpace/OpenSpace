@@ -57,19 +57,19 @@ void main()
 	PositionNormalPair pair = globalInterpolation();
 
 	float height = 0;
-	for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
-	{
+	//for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
+	//{
 		vec2 samplePos =
-			heightTiles[i].uvTransform.uvScale * in_uv +
-			heightTiles[i].uvTransform.uvOffset;
+			heightTiles[0].uvTransform.uvScale * in_uv +
+			heightTiles[0].uvTransform.uvOffset;
 
-		float sampledValue = texture(heightTiles[i].textureSampler, samplePos).r;
+		float sampledValue = texture(heightTiles[0].textureSampler, samplePos).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
 		height = (sampledValue *
-			heightTiles[i].depthTransform.depthScale +
-			heightTiles[i].depthTransform.depthOffset);
-	}
+			heightTiles[0].depthTransform.depthScale +
+			heightTiles[0].depthTransform.depthOffset);
+	//}
 
 	// Add the height in the direction of the normal
 	pair.position += pair.normal * height;

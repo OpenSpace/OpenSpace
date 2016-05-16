@@ -1,4 +1,4 @@
-/*****************************************************************************************
+  /*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
@@ -115,7 +115,7 @@ namespace openspace {
                 0);                     // Line spacing
 
             if (err != CE_None) {
-                LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
+              ;//LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
             }
         }
         // GDAL reads image data top to bottom. We want the opposite.
@@ -219,7 +219,7 @@ namespace openspace {
                 break;
                 */
             default:
-                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                ;//LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
             break;
         case 2:
@@ -250,7 +250,7 @@ namespace openspace {
                 break;
                 */
             default:
-                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                ;//LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
             break;
         case 3:
@@ -281,7 +281,7 @@ namespace openspace {
                 break;
                 */
             default:
-                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                ;//LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
             break;
         case 4:
@@ -312,11 +312,11 @@ namespace openspace {
                 break;
                 */
             default:
-                LERROR("GDAL data type unknown to OpenGL: " << gdalType);
+                ;//LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
             break;
         default:
-            LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
+            ;//LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
             break;
         }
         return format;
