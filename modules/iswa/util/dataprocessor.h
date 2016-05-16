@@ -57,6 +57,10 @@ public:
 
     std::vector<std::string> readHeader(std::string& dataBuffer);
     std::vector<float*> readData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+
+    std::vector<std::string> readJSONHeader(std::string& dataBuffer);
+    std::vector<float*> readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+
     
 private:
     void processData(

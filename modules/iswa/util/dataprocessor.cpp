@@ -35,9 +35,11 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/ext/json/json.hpp>
 
 namespace {
 	const std::string _loggerCat = "DataPlane";
+    using json = nlohmann::json;
 }
 
 namespace openspace {
@@ -83,6 +85,27 @@ std::vector<std::string> DataProcessor::readHeader(std::string& dataBuffer){
                 }
             }else{
                 break;
+            }
+        }
+    }
+    return options;
+}
+
+std::vector<std::string> DataProcessor::readJSONHeader(std::string& dataBuffer){
+    std::vector<std::string> options = std::vector<std::string>();
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+        for (json::iterator it = var.begin(); it != var.end(); ++it) {
+            std::string option = it.key();
+            if(option == "x"){
+                json lon = it.value();
+                json lat = lon.at(0);
+
+                _dimensions = glm::size3_t(lon.size(), lat.size(), 1);
+            }
+            if(option != "x" && option != "y" && option != "z"){
+                options.push_back(option);
             }
         }
     }
@@ -181,10 +204,82 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
     }
 }
 
+std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+
+
+        // if(!_dataOptions.options().size()) // load options for value selection
+        //     readHeader(dataBuffer);
+        
+        // std::stringstream memorystream(dataBuffer);
+        // std::string line;
+
+        std::vector<int> selectedOptions = dataOptions.value();
+        int numSelected = selectedOptions.size();
+
+        std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
+        std::vector<float> max(numSelected, std::numeric_limits<float>::min());
+
+        std::vector<float> sum(numSelected, 0.0f);
+        std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
+
+        auto options = dataOptions.options();        
+
+        std::vector<float*> data(options.size(), nullptr);
+        int i = 0; 
+        for(int option : selectedOptions){
+
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+
+            std::stringstream memorystream(options[option].description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+
+            json valueArray = var[optionName];
+            int ySize = valueArray.size();
+
+            for(int y=0; y<valueArray.size(); y++){
+                json values = valueArray.at(y);
+                for(int x=0; x<values.size(); x++){
+                    float v = values.at(x);
+                    if(_useLog){
+                        int sign = (v>0)? 1:-1;
+                        if(v != 0){
+                            v = sign*log(fabs(v));
+                        }
+                    }
+
+                    optionValues[i].push_back(v); 
+
+                    min[i] = std::min(min[i], v);
+                    max[i] = std::max(max[i], v);
+
+                    sum[i] += v;
+                }
+                // break; 
+            }
+            i++;
+        }
+
+        for(int i=0; i<numSelected; i++){
+            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
+        }
+        
+        return data;
+    } 
+    else {
+    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
+        return std::vector<float*>();
+    }
+}
+
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 
-    
+
     //Calculate the mean
     float mean = (1.0 / numValues) * sum;
 

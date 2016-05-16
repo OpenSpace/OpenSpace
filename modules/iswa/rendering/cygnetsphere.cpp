@@ -37,7 +37,7 @@ CygnetSphere::CygnetSphere(const ghoul::Dictionary& dictionary)
 CygnetSphere::~CygnetSphere(){}
 
 bool CygnetSphere::createGeometry(){
-    PowerScaledScalar radius =  PowerScaledScalar(3*6.371f, 6.0);
+    PowerScaledScalar radius =  PowerScaledScalar(6.371f, 6.01);
     int segments = 100;
     _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
     _sphere->initialize();

@@ -41,7 +41,7 @@
         _kameleonFrames =   { "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
                               "HEE", "HAE", "HEEQ"                                              //heliocentric
                             };
-        _dipoleFrames = {"GSM", "SM", "MAG"};
+        // _dipoleFrames = {"GSM", "MAG"};
     }
 
     TransformationManager::~TransformationManager(){
@@ -55,9 +55,9 @@
         auto fromit = _dipoleFrames.find(from);
         auto toit   = _dipoleFrames.find(to);
 
-        //diopole frame to J200 makes the frame rotate.
-        if(fromit != _dipoleFrames.end()) from = "GSE";
-        if(toit   != _dipoleFrames.end()) to   = "GSE";
+        // //diopole frame to J200 makes the frame rotate.
+        // if(fromit != _dipoleFrames.end()) from = "GSE";
+        // if(toit   != _dipoleFrames.end()) to   = "GSE";
 
         fromit = _kameleonFrames.find(from);
         toit   = _kameleonFrames.find(to);
