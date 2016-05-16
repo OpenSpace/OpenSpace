@@ -35,13 +35,13 @@ function postInitialization()
     --openspace.iswa.addCygnet("-2,Data,1");
     --openspace.iswa.addCygnet("-3,Data,1");
     
+    --[[
     openspace.iswa.addScreenSpaceCygnet(
     {
         CygnetId = 2,
         Position = {-0.8, 0.3},
         Scale = 0.2
     });
-    --[[
     {
         Type = "ScreenSpaceCygnet",
         CygnetId = 7,

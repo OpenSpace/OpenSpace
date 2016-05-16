@@ -51,7 +51,7 @@ Fragment getFragment() {
 
     if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
         for(int i=0; i<numTextures; i++){
-            v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            v += texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
         }
         v /= numTextures;
         
@@ -64,7 +64,7 @@ Fragment getFragment() {
         diffuse = color;
     }else{
         for(int i=0; i<numTextures; i++){
-            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
             vec4 color = texture(transferFunctions[i], vec2(v,0));
             diffuse += color;
         }
@@ -73,6 +73,7 @@ Fragment getFragment() {
     if (diffuse.a <= backgroundValues.y)
         discard;
 
+    // diffuse = vec4(vs_st.s, 0,0,1);
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;

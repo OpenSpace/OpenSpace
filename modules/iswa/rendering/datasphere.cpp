@@ -94,6 +94,8 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
 
 
     _type = IswaManager::CygnetType::Data;
+    _dataBuffer = "";
+    _data->frame = "SM";
 }
 
 DataSphere::~DataSphere(){}
@@ -108,15 +110,15 @@ void DataSphere::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues
 bool DataSphere::loadTexture(){
     
     // if The future is done then get the new dataFile
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-         DownloadManager::MemoryFile dataFile = _futureObject.get();
+    // if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+    //      DownloadManager::MemoryFile dataFile = _futureObject.get();
 
-         if(dataFile.corrupted)
-            return false;
+    //      if(dataFile.corrupted)
+    //         return false;
 
-        _dataBuffer = "";
-        _dataBuffer.append(dataFile.buffer, dataFile.size);
-    }
+    //     _dataBuffer = "";
+    //     _dataBuffer.append(dataFile.buffer, dataFile.size);
+    // }
 
 
     // if the buffer in the datafile is empty, do not proceed
@@ -124,9 +126,9 @@ bool DataSphere::loadTexture(){
         return false;
 
     if(!_dataOptions.options().size()){ // load options for value selection
-        std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
+        std::vector<std::string> options = _dataProcessor->readJSONHeader(_dataBuffer);
         for(int i=0; i<options.size(); i++){
-            _dataOptions.addOption({i, name()+"_"+options[i]});
+            _dataOptions.addOption({i, name()+"/"+options[i]});
             _textures.push_back(nullptr);
         }
         _dataOptions.setValue(std::vector<int>(1,0));
@@ -134,7 +136,7 @@ bool DataSphere::loadTexture(){
             IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
     }
 
-    std::vector<float*> data = _dataProcessor->readData(_dataBuffer, _dataOptions);
+    std::vector<float*> data = _dataProcessor->readJSONData(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;
@@ -169,19 +171,29 @@ bool DataSphere::loadTexture(){
         texturesReady = true;
     }
 
-    return texturesReady;
+    // _dataBuffer = "";
+    return false;
 }
 
 bool DataSphere::updateTexture(){
-    if(_futureObject.valid())
-        return false;
-
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
-
-    if(future.valid()){
-        _futureObject = std::move(future);
+    if(_dataBuffer == ""){
+        std::ifstream data(absPath("${OPENSPACE_DATA}/ionosphere_variables.json"));
+        std::stringstream buffer;
+        buffer << data.rdbuf();
+        _dataBuffer = buffer.str();
+        std::cout << "data in buffer" << std::endl;
+        // loadTexture();
         return true;
     }
+    // if(_futureObject.valid())
+    //     return false;
+
+    // std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
+
+    // if(future.valid()){
+    //     _futureObject = std::move(future);
+    //     return true;
+    // }
 
     return false;
 }

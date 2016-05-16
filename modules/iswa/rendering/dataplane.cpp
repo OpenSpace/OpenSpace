@@ -128,7 +128,6 @@ bool DataPlane::loadTexture() {
         _dataBuffer.append(dataFile.buffer, dataFile.size);
     }
 
-
     // if the buffer in the datafile is empty, do not proceed
     if(_dataBuffer.empty())
         return false;

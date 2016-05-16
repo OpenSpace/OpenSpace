@@ -34,9 +34,11 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/ext/json/json.hpp>
 
 namespace {
 	const std::string _loggerCat = "DataPlane";
+    using json = nlohmann::json;
 }
 
 namespace openspace {
@@ -82,6 +84,27 @@ std::vector<std::string> DataProcessor::readHeader(std::string& dataBuffer){
                 }
             }else{
                 break;
+            }
+        }
+    }
+    return options;
+}
+
+std::vector<std::string> DataProcessor::readJSONHeader(std::string& dataBuffer){
+    std::vector<std::string> options = std::vector<std::string>();
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+        for (json::iterator it = var.begin(); it != var.end(); ++it) {
+            std::string option = it.key();
+            if(option == "x"){
+                json lon = it.value();
+                json lat = lon.at(0);
+
+                _dimensions = glm::size3_t(lon.size(), lat.size(), 1);
+            }
+            if(option != "x" && option != "y" && option != "z"){
+                options.push_back(option);
             }
         }
     }
@@ -180,6 +203,145 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
     //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
         return std::vector<float*>();
     }
+}
+
+std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    std::cout << "Reading JSON Data" << std::endl; 
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+
+
+        // if(!_dataOptions.options().size()) // load options for value selection
+        //     readHeader(dataBuffer);
+        
+        // std::stringstream memorystream(dataBuffer);
+        // std::string line;
+
+        std::vector<int> selectedOptions = dataOptions.value();
+        int numSelected = selectedOptions.size();
+
+        std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
+        std::vector<float> max(numSelected, std::numeric_limits<float>::min());
+
+        std::vector<float> sum(numSelected, 0.0f);
+        std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
+
+        auto options = dataOptions.options();        
+
+        std::vector<float*> data(options.size(), nullptr);
+        int i = 0; 
+        for(int option : selectedOptions){
+            std::cout << option << " " << options[option].description << std::endl; 
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+
+            std::stringstream memorystream(options[option].description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+            std::cout << optionName << std::endl;
+
+            json valueArray = var[optionName];
+            int ySize = valueArray.size();
+
+            for(int y=0; y<valueArray.size(); y++){
+                json values = valueArray.at(y);
+                for(int x=0; x<values.size(); x++){
+                    float v = values.at(x);
+                    // std::cout << v << std::endl;
+                    if(_useLog){
+                        int sign = (v>0)? 1:-1;
+                        if(v != 0){
+                            v = sign*log(fabs(v));
+                        }
+                    }
+
+                    optionValues[i].push_back(v); 
+
+                    min[i] = std::min(min[i], v);
+                    max[i] = std::max(max[i], v);
+
+                    sum[i] += v;
+                }
+                // break; 
+            }
+            i++;
+        }
+
+        for(int i=0; i<numSelected; i++){
+            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
+        }
+        
+        return data;
+        // int numValues = 0;
+        // while(getline(memorystream, line)){
+        //     if(line.find("#") == 0){ //part of the header
+        //         continue;
+        //     }
+
+        //     std::stringstream ss(line); 
+        //     std::vector<float> value;
+        //     float v;
+        //     while(ss >> v){
+        //         value.push_back(v);
+        //     }
+
+        //     if(value.size()){
+        //         for(int i=0; i<numSelected; i++){
+
+        //             float v = value[selectedOptions[i]+3]; //+3 because "options" x, y and z.
+
+        //             if(_useLog){
+        //                 int sign = (v>0)? 1:-1;
+        //                 if(v != 0){
+        //                     v = sign*log(fabs(v));
+        //                 }
+        //             }
+
+        //             optionValues[i].push_back(v); 
+
+        //             min[i] = std::min(min[i], v);
+        //             max[i] = std::max(max[i], v);
+
+        //             sum[i] += v;
+        //         }
+        //         numValues++;
+        //     }
+        // }
+        // // std::cout << "Actual size: " << numValues << " Expected: " << _dimensions.x*_dimensions.y   << std::endl;
+        // if(numValues != _dimensions.x*_dimensions.y){
+        //     LWARNING("Number of values read and expected are not the same");
+        //     return std::vector<float*>();
+        // }
+        
+        // // FOR TESTING
+        // // ===========
+        // // std::chrono::time_point<std::chrono::system_clock> start, end;
+        // // start = std::chrono::system_clock::now();
+        // // ===========
+
+        // for(int i=0; i<numSelected; i++){
+        //     processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
+        // }
+        
+        // FOR TESTING
+        // ===========
+        // end = std::chrono::system_clock::now();
+        // _numOfBenchmarks++;
+        // std::chrono::duration<double> elapsed_seconds = end-start;
+        // _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
+        // std::cout << " readData():" << std::endl;
+        // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
+        // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
+        // ===========
+
+        
+    } 
+    else {
+    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
+        return std::vector<float*>();
+    }
+    // return std::vector<float*>();
 }
 
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
