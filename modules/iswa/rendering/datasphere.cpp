@@ -100,7 +100,7 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
 
     _type = IswaManager::CygnetType::Data;
     _dataBuffer = "";
-    _data->frame = "SM";
+    //_data->frame = "SM";
 }
 
 DataSphere::~DataSphere(){}
@@ -115,16 +115,15 @@ void DataSphere::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues
 bool DataSphere::loadTexture(){
     
     // if The future is done then get the new dataFile
-    // if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-    //      DownloadManager::MemoryFile dataFile = _futureObject.get();
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+         DownloadManager::MemoryFile dataFile = _futureObject.get();
 
-    //      if(dataFile.corrupted)
-    //         return false;
+         if(dataFile.corrupted)
+            return false;
 
-    //     _dataBuffer = "";
-    //     _dataBuffer.append(dataFile.buffer, dataFile.size);
-    // }
-
+        _dataBuffer = "";
+        _dataBuffer.append(dataFile.buffer, dataFile.size);
+    }
 
     // if the buffer in the datafile is empty, do not proceed
     if(_dataBuffer.empty())
@@ -177,28 +176,20 @@ bool DataSphere::loadTexture(){
     }
 
     // _dataBuffer = "";
-    return false;
+    return texturesReady;
 }
 
 bool DataSphere::updateTexture(){
-    if(_dataBuffer == ""){
-        std::ifstream data(absPath("${OPENSPACE_DATA}/ionosphere_variables.json"));
-        std::stringstream buffer;
-        buffer << data.rdbuf();
-        _dataBuffer = buffer.str();
 
-        // loadTexture();
+    if(_futureObject.valid())
+        return false;
+
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
+
+    if(future.valid()){
+        _futureObject = std::move(future);
         return true;
     }
-    // if(_futureObject.valid())
-    //     return false;
-
-    // std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
-
-    // if(future.valid()){
-    //     _futureObject = std::move(future);
-    //     return true;
-    // }
 
     return false;
 }

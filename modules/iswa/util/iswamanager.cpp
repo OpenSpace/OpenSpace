@@ -124,7 +124,6 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
             metaFuture->geom  = CygnetGeometry::Plane;
         } else if (info  == _type[CygnetType::Data]) {
             metaFuture->type = CygnetType::Data;
-            metaFuture->geom  = CygnetGeometry::Plane;
         } else {
             LERROR("\""+ info + "\" is not a valid type");
             return;
@@ -132,14 +131,22 @@ void IswaManager::addIswaCygnet(int id, std::string info, int group){
 
         auto metadataCallback = 
         [this, metaFuture](const DownloadManager::FileFuture& f){
-                if(f.isFinished){
-                    metaFuture->isFinished;
+            if(f.isFinished){
+                metaFuture->isFinished;
+                json j = json::parse(metaFuture->json);
+                if(j["Coordinate Type"].is_null()){
+                    metaFuture->geom = CygnetGeometry::Sphere;
+                    createSphere(metaFuture);
+                } else if (j["Coordinate Type"] == "Cartesian"){
+                    metaFuture->geom = CygnetGeometry::Plane;
                     createPlane(metaFuture);
-                    LDEBUG("Download to memory finished");
-                } else if (f.isAborted){
-                    LWARNING("Download to memory was aborted: " + f.errorMessage);
                 }
-            };
+                //createPlane(metaFuture);
+                LDEBUG("Download to memory finished");
+            } else if (f.isAborted){
+                LWARNING("Download to memory was aborted: " + f.errorMessage);
+            }
+        };
 
         // Download metadata
         DlManager.downloadToMemory(
@@ -331,6 +338,49 @@ std::string IswaManager::parseJSONToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
+std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data){
+    if(data->json == "")
+        return "";
+
+    json j = json::parse(data->json);
+    j = j["metadata"];
+    std::string parent = "Earth";
+    std::string frame = j["coordinates"];
+    std::string coordinateType = "Spherical";
+    int updateTime = 240;
+
+    glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
+
+    glm::vec3 max(
+        j["x"]["actual_max"],
+        j["y"]["actual_max"],
+        j["z"]["actual_max"]
+    );
+
+    glm::vec3 min(
+        j["x"]["actual_min"],
+        j["y"]["actual_min"],
+        j["z"]["actual_min"]
+    );
+
+    std::string table = "{"
+    "Name = '" + data->name +"' , "
+    "Parent = '" + parent + "', "
+    "Renderable = {"    
+        "Type = '" + _type[data->type] + _geom[data->geom] + "', "
+        "Id = " + std::to_string(data->id) + ", "
+        "Frame = '" + frame + "' , "
+        "GridMin = " + std::to_string(min) + ", "
+        "GridMax = " + std::to_string(max) + ", "
+        "UpdateTime = " + std::to_string(updateTime) + ", "
+        "CoordinateType = '" + coordinateType + "', "
+        "Group = "+ std::to_string(data->group) +
+        "}"
+    "}";
+    
+    return table;
+}
+
 void IswaManager::createScreenSpace(int id){
     std::string script = "openspace.iswa.addScreenSpaceCygnet("
         "{CygnetId =" + std::to_string(id) + "});";
@@ -355,6 +405,29 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     }
 
     std::string luaTable = parseJSONToLuaTable(data);
+    if(luaTable != ""){
+        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+        OsEng.scriptEngine().queueScript(script);
+    }
+}
+
+void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
+    // check if this sphere already exist
+    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
+
+    if(data->group > 0){
+        auto it = _groups.find(data->group);
+        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
+            name += "_Group" + std::to_string(data->group);
+    }
+
+    data->name = name;
+
+    if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
+        LERROR("A node with name \"" + name +"\" already exist");
+        return;
+    }
+    std::string luaTable = jsonSphereToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
