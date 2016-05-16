@@ -30,7 +30,7 @@
 #include <openspace/properties/selectionproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
-
+#include <set>
 
 namespace openspace{
 class DataProcessor{
@@ -77,6 +77,8 @@ private:
     bool _useLog;
     bool _useHistogram;
     glm::vec2 _normValues;
+
+    std::set<std::string> _coordinateVariables;
 };
 
 } // namespace openspace

@@ -47,7 +47,9 @@ DataProcessor::DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValue
     :_useLog(useLog)
     ,_useHistogram(useHistogram)
     ,_normValues(normValues)
-{};
+{
+    _coordinateVariables = {"x", "y", "z", "phi", "theta"};
+};
 DataProcessor::~DataProcessor(){};
 
 std::vector<std::string> DataProcessor::readHeader(std::string& dataBuffer){
@@ -78,7 +80,7 @@ std::vector<std::string> DataProcessor::readHeader(std::string& dataBuffer){
                     ss = std::stringstream(line);
                     std::string option;
                     while(ss >> option){
-                        if(option != "x" && option != "y" && option != "z"){
+                        if(_coordinateVariables.find(option) == _coordinateVariables.end()){
                             options.push_back(option);
                         }
                     }
@@ -104,7 +106,7 @@ std::vector<std::string> DataProcessor::readJSONHeader(std::string& dataBuffer){
 
                 _dimensions = glm::size3_t(lat.size(), lon.size(), 1);
             }
-            if(option != "x" && option != "y" && option != "z"){
+            if(_coordinateVariables.find(option) == _coordinateVariables.end()){
                 options.push_back(option);
             }
         }

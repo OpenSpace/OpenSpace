@@ -38,6 +38,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
+#include <modules/iswa/ext/json/json.hpp>
 
 // #include <modules/iswa/rendering/iswacygnet.h>
 // #include <modules/iswa/rendering/iswagroup.h>
@@ -103,6 +104,7 @@ private:
     void createSphere(std::shared_ptr<MetadataFuture> data);
 
     void fillCygnetInfo(std::string jsonString);
+    void fillFromJSONArray(nlohmann::json jsonList);
 
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
