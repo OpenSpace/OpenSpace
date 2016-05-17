@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,59 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LOCALERRORHISTOGRAMMANAGER_H__
-#define __LOCALERRORHISTOGRAMMANAGER_H__
+#ifndef __RENDERABLEDEBUGPLANE_H__
+#define __RENDERABLEDEBUGPLANE_H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/util/histogram.h>
-#include <map>
+#include <openspace/rendering/renderable.h>
 
-#include <ghoul/glm.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/updatestructures.h>
+
+namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
+    struct LinePoint;
 
-class LocalErrorHistogramManager {
+class RenderableDebugPlane: public Renderable {
+
+    enum class Origin {
+        LowerLeft, LowerRight, UpperLeft, UpperRight, Center
+    };
+
 public:
-    LocalErrorHistogramManager(TSP* tsp);
-    ~LocalErrorHistogramManager();
+    RenderableDebugPlane(const ghoul::Dictionary& dictionary);
+    ~RenderableDebugPlane();
 
-    bool buildHistograms(int numBins);
-    const Histogram* getSpatialHistogram(unsigned int brickIndex) const;
-    const Histogram* getTemporalHistogram(unsigned int brickIndex) const;
+    bool initialize() override;
+    bool deinitialize() override;
 
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
 private:
-    TSP* _tsp;
-    std::ifstream* _file;
+    void createPlane();
 
-    std::vector<Histogram> _spatialHistograms;
-    std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
+    properties::IntProperty _texture;
+    properties::BoolProperty _billboard;
+    properties::Vec2Property _size;
 
-    std::map<unsigned int, std::vector<float>> _voxelCache;
+    Origin _origin;
+    std::string _nodeName;
 
-    bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
-    bool buildFromBstChild(unsigned int bstOffset, unsigned int octreeOffset);
+    bool _planeIsDirty;
 
-    std::vector<float> readValues(unsigned int brickIndex) const;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    int parentOffset(int offset, int base) const;
-
-    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
-    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(glm::vec3 coords) const;
-    unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(glm::ivec3 coords) const;
-
-    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
 };
 
 } // namespace openspace
 
-#endif // __LOCALERRORHISTOGRAMMANAGER_H__
+#endif // __RENDERABLEDEBUGPLANE_H__

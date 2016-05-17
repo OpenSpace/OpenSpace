@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/multiresvolume/rendering/histogram.h>
+#include <openspace/util/histogram.h>
 
 #include <ghoul/logging/logmanager.h>
 

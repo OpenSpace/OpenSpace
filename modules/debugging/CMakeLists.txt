@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2016                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -25,42 +25,21 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickcover.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselection.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.cpp    
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
-    "MultiresVolume"
-    multiresvolume_module
-    ${HEADER_FILES} ${SOURCE_FILES}
+    "Debugging"
+    debugging_module
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

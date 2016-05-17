@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,59 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LOCALERRORHISTOGRAMMANAGER_H__
-#define __LOCALERRORHISTOGRAMMANAGER_H__
+#include <modules/debugging/debuggingmodule.h>
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/util/histogram.h>
-#include <map>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-#include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+
+#include <modules/debugging/rendering/renderabledebugplane.h>
 
 namespace openspace {
 
-class LocalErrorHistogramManager {
-public:
-    LocalErrorHistogramManager(TSP* tsp);
-    ~LocalErrorHistogramManager();
+DebuggingModule::DebuggingModule()
+    : OpenSpaceModule("Debugging")
+{}
 
-    bool buildHistograms(int numBins);
-    const Histogram* getSpatialHistogram(unsigned int brickIndex) const;
-    const Histogram* getTemporalHistogram(unsigned int brickIndex) const;
+void DebuggingModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
 
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
 
-private:
-    TSP* _tsp;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _spatialHistograms;
-    std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
-
-    std::map<unsigned int, std::vector<float>> _voxelCache;
-
-    bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
-    bool buildFromBstChild(unsigned int bstOffset, unsigned int octreeOffset);
-
-    std::vector<float> readValues(unsigned int brickIndex) const;
-
-    int parentOffset(int offset, int base) const;
-
-    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
-    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(glm::vec3 coords) const;
-    unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(glm::ivec3 coords) const;
-
-    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
-};
+}
 
 } // namespace openspace
-
-#endif // __LOCALERRORHISTOGRAMMANAGER_H__

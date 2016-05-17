@@ -8,7 +8,13 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2015-07-14T10:00:00.00")
+    -- openspace.time.setTime("2015-07-08T15:57:45.00")
+    -- openspace.time.setTime("2015-07-12T07:41:00.00")
+    -- openspace.time.setTime("2015-07-12T15:43:00.00")
+    -- openspace.time.setTime("2015-07-12T22:19:20.00")
+    -- openspace.time.setTime("2015-07-13T20:59:00.00")
+    -- openspace.time.setTime("2015-07-14T02:41:55.00")
+    openspace.time.setTime("2015-07-14T10:05:00.00")
     openspace.time.setDeltaTime(0)
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end

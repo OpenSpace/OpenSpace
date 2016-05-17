@@ -22,8 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+// @TODO: Clean up this class and make it not copy much code from RenderablePlane ---abock
+
+#include <modules/debugging/rendering/renderabledebugplane.h>
+
+
 #include <openspace/engine/configurationmanager.h>
-#include <modules/base/rendering/renderableplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -38,28 +42,18 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderablePlane";
-
-    const std::string keyFieldlines = "Fieldlines";
-    const std::string keyFilename = "File";
-    const std::string keyHints = "Hints";
-    const std::string keyShaders = "Shaders";
-    const std::string keyVertexShader = "VertexShader";
-    const std::string keyFragmentShader = "FragmentShader";
+    const std::string _loggerCat = "RenderablePlaneTexture";
 }
 
 namespace openspace {
 
-RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
+RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _texturePath("texture", "Texture")
+    , _texture("texture", "Texture", -1, -1, 255)
     , _billboard("billboard", "Billboard", false)
-    , _projectionListener("projectionListener", "DisplayProjections", false)
     , _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
     , _origin(Origin::Center)
     , _shader(nullptr)
-    , _textureIsDirty(false)
-    , _texture(nullptr)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
@@ -95,48 +89,28 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     if (dictionary.getValue("Billboard", billboard)) {
         _billboard = billboard;
     }
-    if (dictionary.hasKey("ProjectionListener")){
-        bool projectionListener = false;
-        if (dictionary.getValue("ProjectionListener", projectionListener)) {
-            _projectionListener = projectionListener;
-        }
-    }
 
-
-    std::string texturePath = "";
-    bool success = dictionary.getValue("Texture", texturePath);
-    if (success) {
-        _texturePath = absPath(texturePath);
-        _textureFile = new ghoul::filesystem::File(_texturePath);
-    }
+    addProperty(_texture);
 
     addProperty(_billboard);
-    addProperty(_texturePath);
-    _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
-    _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 
     addProperty(_size);
-    //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
     _size.onChange([this](){ _planeIsDirty = true; });
 
     setBoundingSphere(_size.value());
 }
 
-RenderablePlane::~RenderablePlane() {
-    delete _textureFile;
-    _textureFile = nullptr;
+RenderableDebugPlane::~RenderableDebugPlane() {
 }
 
-bool RenderablePlane::isReady() const {
+bool RenderableDebugPlane::isReady() const {
     bool ready = true;
     if (!_shader)
-        ready &= false;
-    if(!_texture)
         ready &= false;
     return ready;
 }
 
-bool RenderablePlane::initialize() {
+bool RenderableDebugPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -153,27 +127,16 @@ bool RenderablePlane::initialize() {
             return false;
     }
 
-    loadTexture();
 
     return isReady();
 }
 
-bool RenderablePlane::deinitialize() {
+bool RenderableDebugPlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
-
-    if (!_projectionListener){
-        // its parents job to kill texture
-        // iff projectionlistener 
-        _texture = nullptr;
-    }
-
-    delete _textureFile;
-    _textureFile = nullptr;
-
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
@@ -184,25 +147,13 @@ bool RenderablePlane::deinitialize() {
     return true;
 }
 
-void RenderablePlane::render(const RenderData& data) {
+void RenderableDebugPlane::render(const RenderData& data) {
     glm::mat4 transform = glm::mat4(1.0);
     if (_billboard)
         transform = glm::inverse(data.camera.viewRotationMatrix());
 
     // Activate shader
     _shader->activate();
-    if (_projectionListener){
-        //get parent node-texture and set with correct dimensions  
-        SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
-        if (textureNode != nullptr){
-            RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-            _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());
-            float h = _texture->height();
-            float w = _texture->width();
-            float scale = h / w;
-            transform = glm::scale(transform, glm::vec3(1.f, scale, 1.f));
-        }
-    }
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", transform);
@@ -210,7 +161,7 @@ void RenderablePlane::render(const RenderData& data) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _texture->bind();
+    glBindTexture(GL_TEXTURE_2D, _texture);
     _shader->setUniform("texture1", unit);
 
     glBindVertexArray(_quad);
@@ -219,39 +170,15 @@ void RenderablePlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderablePlane::update(const UpdateData& data) {
+void RenderableDebugPlane::update(const UpdateData& data) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 
     if (_planeIsDirty)
         createPlane();
-
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
 }
 
-void RenderablePlane::loadTexture() {
-    if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-        if (texture) {
-            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
-            texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-            _texture = std::move(texture);
-
-            delete _textureFile;
-            _textureFile = new ghoul::filesystem::File(_texturePath);
-            _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
-        }
-    }
-}
-
-void RenderablePlane::createPlane() {
+void RenderableDebugPlane::createPlane() {
     // ============================
     //         GEOMETRY (quad)
     // ============================

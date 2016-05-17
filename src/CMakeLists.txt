@@ -87,6 +87,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
@@ -168,6 +169,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
 )
 
 # Place files into source groups

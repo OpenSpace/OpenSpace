@@ -192,8 +192,8 @@ bool RenderableModelProjection::initialize() {
     if (_programObject == nullptr) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _programObject = renderEngine.buildRenderProgram("ModelShader",
-            "${MODULES}/newhorizons/shaders/modelShader_vs.glsl",
-            "${MODULES}/newhorizons/shaders/modelShader_fs.glsl");
+            "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
+            "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
 
         if (!_programObject)
             return false;
@@ -202,8 +202,8 @@ bool RenderableModelProjection::initialize() {
 
     if (_fboProgramObject == nullptr) {
         _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
-            "${MODULES}/newhorizons/shaders/projectionPass_vs.glsl",
-            "${MODULES}/newhorizons/shaders/projectionPass_fs.glsl");
+            "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
+            "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
         if (!_fboProgramObject)
             return false;
     }
@@ -336,7 +336,9 @@ void RenderableModelProjection::render(const RenderData& data) {
     _viewProjection = data.camera.viewProjectionMatrix();
     _programObject->setUniform("ViewProjection", _viewProjection);
     _programObject->setUniform("ModelTransform", _transform);
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    setPscUniforms(*_programObject, data.camera, data.position);
+
+    _geometry->setUniforms(*_programObject);
     
     textureBind();
     _geometry->render();
