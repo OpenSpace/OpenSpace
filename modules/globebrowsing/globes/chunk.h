@@ -44,7 +44,7 @@ namespace openspace {
     class Chunk {
     public:
 
-        enum Status{
+        enum class Status{
             DO_NOTHING,
             WANT_MERGE,
             WANT_SPLIT,
