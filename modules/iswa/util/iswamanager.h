@@ -77,7 +77,6 @@ public:
     ~IswaManager();
 
     void addIswaCygnet(int id, std::string type = "Texture", std::string group = "");
-    // void deleteIswaCygnet(std::string);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);

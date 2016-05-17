@@ -22,36 +22,42 @@
 // * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 // ***************************************************************************************
 
-// #ifndef __KAMELEONPLANE_H__
-// #define __KAMELEONPLANE_H__
+#ifndef __KAMELEONPLANE_H__
+#define __KAMELEONPLANE_H__
 
-// #include <modules/iswa/rendering/cygnetplane.h>
-// #include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/iswa/rendering/cygnetplane.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 
-//  namespace openspace{
+ namespace openspace{
  
-//  class KameleonPlane : public CygnetPlane {
-//  public:
-//  	KameleonPlane(const ghoul::Dictionary& dictionary);
-//  	~KameleonPlane();
+ class KameleonPlane : public CygnetPlane {
+ public:
+ 	KameleonPlane(const ghoul::Dictionary& dictionary);
+ 	~KameleonPlane();
 
-//  	virtual bool initialize() override;
-//     virtual bool deinitialize() override;
+ private:
+ 	virtual bool loadTexture() override;
+ 	virtual bool updateTexture() override;
+
+ 	virtual bool readyToRender() override;
+    virtual void setUniformAndTextures() override;
+    virtual bool createShader() override;
+
+    void setTransferFunctions(std::string tfPath);
+
+	static int id();
+
+	properties::StringProperty _transferFunctionsFile;
+    properties::Vec2Property _backgroundValues;
+
+	std::shared_ptr<KameleonWrapper> _kw;
+	std::string _kwPath;
+
+	glm::size3_t _dimensions;
+	float* _dataSlice;
+	std::string _var;
+ };
  
-//  private:
-//  	virtual bool loadTexture() override;
-//  	virtual bool updateTexture() override;
-//  	virtual void setUniforms() override;
+ } // namespace openspace
 
-// 	static int id();
-
-// 	std::shared_ptr<KameleonWrapper> _kw;
-// 	std::string _kwPath;
-// 	glm::size3_t _dimensions;
-// 	float* _dataSlice;
-// 	std::string _var;
-//  };
- 
-//  } // namespace openspace
-
-// #endif //__KAMELEONPLANE_H__
+#endif //__KAMELEONPLANE_H__
