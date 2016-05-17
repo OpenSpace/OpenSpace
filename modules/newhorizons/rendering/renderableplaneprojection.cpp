@@ -276,6 +276,13 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
         projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 4 = 1
         projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0, // Lower right 5
         projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper left 6 = 2
+        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
+        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
+        //projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
+        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
+        //projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
+        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
+
     };
     //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
     //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
