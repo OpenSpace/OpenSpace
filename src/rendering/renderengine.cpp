@@ -1263,8 +1263,10 @@ void RenderEngine::renderInformation() {
                     hh.c_str(), mm.c_str(), ss.c_str()
                     );
 
-
-                std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
+#if 0
+// Why is it (2) in the original? ---abock
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
                 std::string space;
                 glm::vec4 color;
                 size_t isize = incidentTargets.second.size();
@@ -1285,6 +1287,7 @@ void RenderEngine::renderInformation() {
                     for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
                         space += " ";
                 }
+#endif
                 penPosition.y -= _fontInfo->height();
 
                 std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
