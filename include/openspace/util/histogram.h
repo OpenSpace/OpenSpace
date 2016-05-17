@@ -33,19 +33,29 @@ class Histogram {
 
 public:
     Histogram();
-    Histogram(float minBin, float maxBin, int numBins);
-    Histogram(float minBin, float maxBin, int numBins, float *data);
+    Histogram(float minValue, float maxValue, int numBins);
+    Histogram(float minValue, float maxValue, int numBins, float *data);
     Histogram(Histogram&& other);
     ~Histogram();
 
     Histogram& operator=(Histogram&& other);
 
     int numBins() const;
-    float minBin() const;
-    float maxBin() const;
+    float minValue() const;
+    float maxValue() const;
     bool isValid() const;
 
-    bool add(float bin, float value);
+    /**
+     * Enter value into the histogram. The add method takes the given
+     * value, works out which bin this corresponds to, and increments
+     * this bin by 'repeat'.
+     * 
+     * @param value The Value to insert into the histogram
+     * @param repeat How many times you want to insert it
+     * 
+     * @return Returns true if succesful insertion, otherwise return false
+     */
+    bool add(float value, float repeat = 1.0f);
     bool add(const Histogram& histogram);
     bool addRectangle(float lowBin, float highBin, float value);
 
@@ -63,8 +73,8 @@ public:
 
 private:
     int _numBins;
-    float _minBin;
-    float _maxBin;
+    float _minValue;
+    float _maxValue;
 
     float* _data;
     std::vector<float> _equalizer;
