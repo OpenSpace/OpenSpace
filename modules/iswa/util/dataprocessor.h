@@ -61,6 +61,7 @@ public:
     std::vector<std::string> readJSONHeader(std::string& dataBuffer);
     std::vector<float*> readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
 
+    glm::vec2 filterValues();
     
 private:
     void processData(
@@ -77,6 +78,7 @@ private:
     bool _useLog;
     bool _useHistogram;
     glm::vec2 _normValues;
+    glm::vec2 _filterValues;
 
     std::set<std::string> _coordinateVariables;
 };

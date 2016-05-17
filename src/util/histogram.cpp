@@ -116,6 +116,7 @@ bool Histogram::add(float value, float repeat) {
 
     _data[binIndex] += repeat;
     _numValues += repeat;
+
     return true;
 }
 
@@ -279,6 +280,27 @@ void Histogram::print() const {
                   << "   " << _data[i] << std::endl;
     }
     std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
+}
+
+float Histogram::highestBinValue(bool equalized){
+    int highestBin = 0;
+    for(int i=0; i<_numBins; i++){
+        if(_data[i] > _data[highestBin])
+            highestBin = i;
+    }
+
+    float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
+    float high = low + (_maxValue - _minValue) / float(_numBins);
+
+    if(!equalized){
+        return (high+low)/2.0;
+    }else{
+        return equalize((high+low)/2.0);
+    }
+}
+
+float Histogram::binWidth(){
+    return (_maxValue-_minValue)/_numBins;
 }
 
 }

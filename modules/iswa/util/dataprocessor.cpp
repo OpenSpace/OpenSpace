@@ -47,6 +47,7 @@ DataProcessor::DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValue
     :_useLog(useLog)
     ,_useHistogram(useHistogram)
     ,_normValues(normValues)
+    ,_filterValues(glm::vec2(0))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 };
@@ -311,6 +312,14 @@ void DataProcessor::processData(float* outputData, std::vector<float>& inputData
         v = normalizeWithStandardScore(v, mean, standardDeviation); 
         outputData[i] += v;
     }
+
+    if(_useHistogram){
+        float val = histogram.highestBinValue(_useHistogram);
+        val = normalizeWithStandardScore(val, mean, standardDeviation);
+        float width = normalizeWithStandardScore(1, mean, standardDeviation);
+        _filterValues = glm::vec2( val, width);
+    }
+
     // Histogram equalized = histogram.equalize();
     // histogram.print();
     // equalized.print();
@@ -326,4 +335,9 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
     //return and normalize
     return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
 }
+
+glm::vec2 DataProcessor::filterValues(){
+    return _filterValues;
+}
+
 }

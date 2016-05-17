@@ -27,8 +27,23 @@ namespace openspace {
 namespace luascriptfunctions {
 
 int iswa_addCygnet(lua_State* L) {
-    std::string s = luaL_checkstring(L, -1);
-    IswaManager::ref().addIswaCygnet(s);
+    int nArguments = lua_gettop(L);
+
+    int id = -1;
+    std::string type = "Texture";
+    std::string group = "";
+
+    if(nArguments > 0)
+        id = lua_tonumber(L, 1);
+
+    if(nArguments > 1)
+        type = luaL_checkstring(L, 2);
+
+    if(nArguments > 2)
+        group = luaL_checkstring(L, 3);
+    
+    IswaManager::ref().addIswaCygnet(id, type, group);
+
     return 0;
 }
 

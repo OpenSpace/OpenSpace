@@ -87,29 +87,6 @@ IswaManager::~IswaManager(){
     _cygnetInformation.clear();
 }
 
-void IswaManager::addIswaCygnet(std::string info){
-    std::string token;
-    std::stringstream ss(info);
-    getline(ss,token,',');
-    int cygnetId = std::stoi(token);
-    
-    if(!ss.eof()){
-        getline(ss,token,',');
-        std::string data = token;
-        
-        if(!ss.eof()){
-            getline(ss, token, ',');
-            addIswaCygnet(cygnetId, data, token);
-            return;
-        }  
-
-        addIswaCygnet(cygnetId, data);
-        return;
-    }
-
-    addIswaCygnet(cygnetId);
-}
-
 void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
     if(id > 0){
 
