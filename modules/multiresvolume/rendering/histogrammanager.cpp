@@ -28,7 +28,7 @@
 #include <cassert>
 
 #include <modules/multiresvolume/rendering/histogrammanager.h>
-#include <modules/multiresvolume/rendering/histogram.h>
+#include <openspace/util/histogram.h>
 
 namespace {
     const std::string _loggerCat = "HistogramManager";

@@ -28,7 +28,7 @@
 #include <cmath>
 
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
-#include <modules/multiresvolume/rendering/histogram.h>
+#include <openspace/util/histogram.h>
 
 #include <openspace/util/progressbar.h>
 
