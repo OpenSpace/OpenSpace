@@ -22,42 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+#ifndef BLENDING_HGLSL
+#define BLENDING_HGLSL
 
-#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
-#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
-
-uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
-
-in vec4 fs_position;
-in vec2 fs_uv;
-
-Fragment getFragment() {
-	Fragment frag;
-
-	#for i in 0..#{numLayersColor}
-	{
-		vec2 samplePos =
-			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
-			colorTiles[#{i}].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[#{i}].textureSampler, samplePos);
-		frag.color = blendAdd(frag.color, colorSample);
-	}
-	#endfor
-	
-	//frag.color.rgb *= 10;
-
-	// Sample position overlay
-	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
-
-	// Border overlay
-	//frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
-
-	frag.depth = fs_position.w;
-
-	return frag;
+vec4 blendOver(vec4 oldColor, vec4 newColor)
+{
+	vec4 toReturn;
+	toReturn.rgb =
+		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
+		(newColor.a + oldColor.a * (1 - newColor.a));
+	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
+	return toReturn;
 }
 
+vec4 blendMultiply(vec4 oldColor, vec4 newColor)
+{
+	return oldColor * newColor;
+}
+
+vec4 blendAdd(vec4 oldColor, vec4 newColor)
+{
+	return oldColor + newColor;
+}
+
+
+#endif
