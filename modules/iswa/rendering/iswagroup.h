@@ -40,7 +40,7 @@ class IswaCygnet;
 
 class IswaGroup : public properties::PropertyOwner{
 public:
-	IswaGroup(int id);
+	IswaGroup(std::string name);
 	~IswaGroup();
 	void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
 	void unregisterCygnet(IswaCygnet* cygnet);

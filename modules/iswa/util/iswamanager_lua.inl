@@ -104,12 +104,12 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
 }
 
 int iswa_removeGroup(lua_State* L){
-	int id = lua_tonumber(L, 1);
+    std::string name = luaL_checkstring(L, -1);
 	// IswaManager::ref().unregisterGroup(id);
 
     auto groups = IswaManager::ref().groups(); 
-    if(groups.find(id) != groups.end())
-        groups[id]->clearGroup();
+    if(groups.find(name) != groups.end())
+        groups[name]->clearGroup();
 
 	return 0;
 }

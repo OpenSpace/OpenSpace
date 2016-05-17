@@ -52,8 +52,8 @@ class IswaGroup;
 
 struct Metadata {
     int id;
-    int groupId;
     int updateTime;
+    std::string groupName;
     std::string path;
     std::string parent;
     std::string frame;

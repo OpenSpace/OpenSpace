@@ -57,7 +57,7 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    if(_data->groupId < 0){
+    if(_data->groupName.empty()){
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -136,8 +136,8 @@ bool DataSphere::loadTexture(){
             _textures.push_back(nullptr);
         }
         _dataOptions.setValue(std::vector<int>(1,0));
-        if(_data->groupId > 0)
-            IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
+        if(!_data->groupName.empty())
+            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
     }
 
     std::vector<float*> data = _dataProcessor->readJSONData(_dataBuffer, _dataOptions);

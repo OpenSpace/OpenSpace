@@ -235,31 +235,31 @@ void GuiIswaComponent::render() {
 
     if(gmdata != gmdatavalue){
         if(gmdata){
-            std::string x = "openspace.iswa.addCygnet('-1,Data,1');";
-            std::string y = "openspace.iswa.addCygnet('-2,Data,1');";
-            std::string z = "openspace.iswa.addCygnet('-3,Data,1');";
+            std::string x = "openspace.iswa.addCygnet('-1,Data,GMData');";
+            std::string y = "openspace.iswa.addCygnet('-2,Data,GMData');";
+            std::string z = "openspace.iswa.addCygnet('-3,Data,GMData');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(1);");
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
         }
     }
 
     if(gmimage != gmimagevalue){
         if(gmimage){
-            std::string x = "openspace.iswa.addCygnet('-1,Texture,2');";
-            std::string y = "openspace.iswa.addCygnet('-2,Texture,2');";
-            std::string z = "openspace.iswa.addCygnet('-3,Texture,2');";
+            std::string x = "openspace.iswa.addCygnet('-1,Texture,GMImage');";
+            std::string y = "openspace.iswa.addCygnet('-2,Texture,GMImage');";
+            std::string z = "openspace.iswa.addCygnet('-3,Texture,GMImage');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(2);");
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMImage');");
         }
     }
 
     if(iondata != iondatavalue){
         if(iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('0,Data,3');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('-4,Data,Ionosphere');");
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup(3);");
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }
     }
 
