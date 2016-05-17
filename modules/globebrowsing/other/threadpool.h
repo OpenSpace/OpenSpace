@@ -22,57 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "gtest/gtest.h"
+#ifndef __THREAD_POOL_H__
+#define __THREAD_POOL_H__
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <glm/glm.hpp>
+#include <memory>
+#include <ostream>
+#include <thread>
+#include <queue>
+#include <atomic>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-#include <test_threadpool.inl>
+#include <modules/globebrowsing/other/concurrentqueue.h>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
-//#include <test_patchcoverageprovider.inl>
+#include <ghoul/misc/assert.h>
 
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+namespace openspace {
+    
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
+    class ThreadPool;
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    class Worker {
+    public: 
+        Worker(ThreadPool& pool);
+        void operator()();
+    private:
+        ThreadPool& pool;
+    };
 
-	testing::InitGoogleTest(&argc, argv);
+    class ThreadPool {
+    public:
+        ThreadPool(size_t numThreads);
+        ~ThreadPool();
 
-	int returnVal = RUN_ALL_TESTS();
+        void enqueue(std::function<void()> f);
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+    private:
+        friend class Worker;
 
-	return returnVal;
-}
+        std::vector<std::thread> workers;
+
+        std::deque<std::function<void()>> tasks;
+
+        std::mutex queue_mutex;
+        std::condition_variable condition;
+
+        bool stop;
+    };
+
+
+} // namespace openspace
+
+
+
+#endif // __THREAD_POOL_H__

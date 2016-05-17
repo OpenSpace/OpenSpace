@@ -24,55 +24,36 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-#include <test_threadpool.inl>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
-//#include <test_patchcoverageprovider.inl>
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+class ThreadPoolTest : public testing::Test {};
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
-}
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+using namespace openspace;
+using namespace std::chrono_literals;
 
-	testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+TEST_F(ThreadPoolTest, Basic) {
+    ThreadPool pool(5);
 
-	return returnVal;
+    int val = 0;
+    
+    for (int i = 0; i < 10; ++i) {
+        pool.enqueue([&val, i]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100 + 10*i));
+            val++;
+        });
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    EXPECT_EQ(10, val) << "10 tasks taking 100 to 190 ms on 5 threads should take less than 1000 ms";
 }
