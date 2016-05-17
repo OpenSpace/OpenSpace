@@ -118,7 +118,7 @@ bool DataSphere::loadTexture(){
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
          DownloadManager::MemoryFile dataFile = _futureObject.get();
 
-         if(dataFile.corrupted)
+        if(dataFile.corrupted)
             return false;
 
         _dataBuffer = "";

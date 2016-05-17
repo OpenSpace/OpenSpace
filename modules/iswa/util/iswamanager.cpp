@@ -444,18 +444,18 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
         for(auto list : lists){
             json jsonList = j[list];
             for(int i=0; i<jsonList.size(); i++){
-            json jCygnet = jsonList.at(i);
+                json jCygnet = jsonList.at(i);
 
-            std::string name = jCygnet["cygnetDisplayTitle"];
-            std::replace(name.begin(), name.end(),'.', ',');
+                std::string name = jCygnet["cygnetDisplayTitle"];
+                std::replace(name.begin(), name.end(),'.', ',');
 
-            CygnetInfo info = {
-                name,
-                jCygnet["cygnetDescription"],
-                jCygnet["cygnetUpdateInterval"],
-                false
-            };
-            _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
+                CygnetInfo info = {
+                    name,
+                    jCygnet["cygnetDescription"],
+                    jCygnet["cygnetUpdateInterval"],
+                    false
+                };
+                _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
             }
         }        
     }
