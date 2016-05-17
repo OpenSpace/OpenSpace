@@ -102,8 +102,9 @@ namespace openspace {
             _isVisible &= HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         }
 
-        if(!_isVisible && owner()->mergeInvisible)
-            return WANT_MERGE;
+        if (!_isVisible && owner()->mergeInvisible) {
+            return Status::WANT_MERGE;
+        }
 
 
         Vec3 cameraPosition = myRenderData.camera.position().dvec3();
@@ -125,9 +126,9 @@ namespace openspace {
         // clamp level
         desiredLevel = glm::clamp(desiredLevel, _owner->minSplitDepth, _owner->maxSplitDepth);
 
-        if (desiredLevel < _index.level) return WANT_MERGE;
-        else if (_index.level < desiredLevel) return WANT_SPLIT;
-        else return DO_NOTHING;
+        if (desiredLevel < _index.level) return Status::WANT_MERGE;
+        else if (_index.level < desiredLevel) return Status::WANT_SPLIT;
+        else return Status::DO_NOTHING;
     }
 
     void Chunk::render(const RenderData& data) const {

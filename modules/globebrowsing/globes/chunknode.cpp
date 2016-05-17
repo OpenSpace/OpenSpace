@@ -74,13 +74,12 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
 
     if (isLeaf()) {
         Chunk::Status status = _chunk.update(data);
-        if (status == Chunk::WANT_SPLIT) {
+        if (status == Chunk::Status::WANT_SPLIT) {
             split();
         }
-        return status == Chunk::WANT_MERGE;
+        return status == Chunk::Status::WANT_MERGE;
     }
     else {
-        
         char requestedMergeMask = 0;
         for (int i = 0; i < 4; ++i) {
             if (_children[i]->updateChunkTree(data)) {
@@ -88,14 +87,13 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
             }
         }
 
-        // check if all children requested merge
-        if (requestedMergeMask == 0xf && _chunk.update(data)) {
-            merge();
+        bool allChildrenWantsMerge = requestedMergeMask == 0xf;
+        bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WANT_SPLIT;
 
-            // re-run updateChunkTree on this, now that this is a leaf node
-            // OBS, this may currently cause a split() again ...
-            return updateChunkTree(data);
+        if (allChildrenWantsMerge && !thisChunkWantsSplit) {
+            merge();
         }
+
         return false;
     }
 }
