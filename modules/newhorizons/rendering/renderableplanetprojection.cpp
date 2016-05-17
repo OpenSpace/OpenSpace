@@ -89,7 +89,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _colorTexturePath("planetTexture", "RGB Texture")
     , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
-    , _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
+    //, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _programObject(nullptr)
@@ -166,7 +166,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
     addPropertySubOwner(_geometry);
     addProperty(_rotation);
-    addProperty(_fadeProjection);
+    //addProperty(_fadeProjection);
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
 
@@ -366,7 +366,7 @@ void RenderablePlanetProjection::imageProjectGPU() {
     unitFbo2.activate();
     _textureOriginal->bind();
     _fboProgramObject->setUniform("texture2", unitFbo2);
-    _fboProgramObject->setUniform("projectionFading", _fadeProjection);
+    //_fboProgramObject->setUniform("projectionFading", _fadeProjection);
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
@@ -510,11 +510,11 @@ void RenderablePlanetProjection::project(){
 }
 
 void RenderablePlanetProjection::clearAllProjections() {
-    float tmp = _fadeProjection;
-    _fadeProjection = 1.f;
+    //float tmp = _fadeProjection;
+    //_fadeProjection = 1.f;
     _projectionTexturePath = _clearingImage;
     imageProjectGPU();
-    _fadeProjection = tmp;
+    //_fadeProjection = tmp;
     _clearAllProjections = false;
 }
 

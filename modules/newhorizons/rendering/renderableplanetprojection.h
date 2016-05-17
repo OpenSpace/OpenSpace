@@ -91,7 +91,7 @@ private:
     properties::StringProperty  _colorTexturePath;
     properties::StringProperty  _projectionTexturePath;
     properties::IntProperty _rotation;
-    properties::FloatProperty _fadeProjection;
+    //properties::FloatProperty _fadeProjection;
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
 
