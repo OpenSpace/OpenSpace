@@ -3,11 +3,9 @@
         <ServerUrl>http://services.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer/tile/${z}/${y}/${x}</ServerUrl>
     </Service>
     <DataWindow>
-
         <TileLevel>15</TileLevel>
         <TileCountX>2</TileCountX>
         <TileCountY>1</TileCountY>
-        
         <YOrigin>top</YOrigin>
     </DataWindow>
     <Projection>EPSG:4326</Projection>

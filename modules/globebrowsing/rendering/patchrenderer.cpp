@@ -72,12 +72,12 @@ namespace openspace {
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
         for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
         {
-            iter->second->prerender();
+            iter->get()->prerender();
         }
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
         for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
         {
-            iter->second->prerender();
+            iter->get()->prerender();
         }
     }
 
@@ -174,7 +174,7 @@ namespace openspace {
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
             texUnitHeight.push_back(ghoul::opengl::TextureUnit());
-            auto tileProvider = it->second;
+            auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             TileDepthTransform depthTransform = tileProvider->depthTransform();
@@ -209,7 +209,7 @@ namespace openspace {
         i = 0;
         for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
         {
-            auto tileProvider = it->second;
+            auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
 
@@ -372,7 +372,7 @@ namespace openspace {
         int i = 0;
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
-            auto tileProvider = it->second;
+            auto tileProvider = it->get();
 
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
@@ -407,7 +407,7 @@ namespace openspace {
         i = 0;
         for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
         {
-            auto tileProvider = it->second;
+            auto tileProvider = it->get();
 
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
@@ -685,7 +685,7 @@ namespace openspace {
         
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders.begin()->second;
+        auto tileProviderHeight = heightMapProviders[0];
         PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
         // Bind and use the texture
@@ -740,7 +740,7 @@ namespace openspace {
 
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
+        auto tileProviderColor = colorTextureProviders[0];
         PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
 
         // Bind and use the texture
@@ -872,7 +872,7 @@ namespace openspace {
 
         // For now just pick the first one from height maps
         auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders.begin()->second;
+        auto tileProviderHeight = heightMapProviders[0];
         PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
         // Bind and use the texture
@@ -928,7 +928,7 @@ namespace openspace {
 
         // Pick the first color texture
         auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
+        auto tileProviderColor = colorTextureProviders[0];
         PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
 
         // Bind and use the texture
