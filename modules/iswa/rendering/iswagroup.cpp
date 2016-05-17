@@ -30,7 +30,7 @@ namespace {
 
 namespace openspace {
 
-IswaGroup::IswaGroup(int id)
+IswaGroup::IswaGroup(std::string  name)
     :_enabled("enabled", "Enabled", true)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
@@ -39,10 +39,10 @@ IswaGroup::IswaGroup(int id)
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_delete("delete", "Delete")
     ,_dataOptions("dataOptions", "Data Options")
-    ,_id(id)
+    // ,_id(id)
     ,_type(IswaManager::CygnetType::NoType)
 {
-    setName("IswaGroup" + std::to_string(_id));
+    setName(name);
 
     addProperty(_enabled);
 

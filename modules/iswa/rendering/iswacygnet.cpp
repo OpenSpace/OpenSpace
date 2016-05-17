@@ -85,11 +85,10 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 
     addProperty(_delete);
 
-    float groupId = -1;
     // if(dictionary.hasValue<float>("Group")){
-        dictionary.getValue("Group", groupId);
+    dictionary.getValue("Group", _data->groupName);
     // }
-    _data->groupId = groupId;
+    // _data->groupId = groupId;
     // std::cout << _data->id << std::endl;
     // std::cout << _data->frame << std::endl;
     // std::cout << std::to_string(_data->offset) << std::endl;
@@ -112,16 +111,16 @@ bool IswaCygnet::initialize(){
     createShader();
     updateTexture();
 
-    if(_data->groupId > 0)
-        IswaManager::ref().registerToGroup(_data->groupId, _type, this);
+    if(!_data->groupName.empty())
+        IswaManager::ref().registerToGroup(_data->groupName, _type, this);
 
     // return isReady();
 	return true;
 }
 
 bool IswaCygnet::deinitialize(){
-    if(_data->groupId > 0)
-        IswaManager::ref().unregisterFromGroup(_data->groupId, this);
+    if(!_data->groupName.empty())
+        IswaManager::ref().unregisterFromGroup(_data->groupName, this);
 
     unregisterProperties();
     destroyGeometry();

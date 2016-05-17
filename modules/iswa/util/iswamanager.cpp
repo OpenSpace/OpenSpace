@@ -99,8 +99,7 @@ void IswaManager::addIswaCygnet(std::string info){
         
         if(!ss.eof()){
             getline(ss, token, ',');
-            int group = std::stoi(token);
-            addIswaCygnet(cygnetId, data, group);
+            addIswaCygnet(cygnetId, data, token);
             return;
         }  
 
@@ -111,7 +110,7 @@ void IswaManager::addIswaCygnet(std::string info){
     addIswaCygnet(cygnetId);
 }
 
-void IswaManager::addIswaCygnet(int id, std::string info, int group){
+void IswaManager::addIswaCygnet(int id, std::string info, std::string group){
     if(id > 0){
         createScreenSpace(id);
     }else if(id < 0){
@@ -227,31 +226,34 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
-void IswaManager::registerToGroup(int id, CygnetType type, IswaCygnet* cygnet){
-    if(_groups.find(id) == _groups.end()){
-        _groups.insert(std::pair<int, std::shared_ptr<IswaGroup>>(id, std::make_shared<IswaGroup>(id)));
+void IswaManager::registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet){
+    if(_groups.find(name) == _groups.end()){
+        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(name, std::make_shared<IswaGroup>(name)));
     }
 
-    _groups[id]->registerCygnet(cygnet, type);
+    _groups[name]->registerCygnet(cygnet, type);
 }
 
-void IswaManager::unregisterFromGroup(int id, IswaCygnet* cygnet){
-    if(_groups.find(id) != _groups.end()){
-        _groups[id]->unregisterCygnet(cygnet);
+void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
+    if(_groups.find(name) != _groups.end()){
+        _groups[name]->unregisterCygnet(cygnet);
     }
 }
 
-void IswaManager::registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options){
-    if(_groups.find(id) != _groups.end()){
-        _groups[id]->registerOptions(options);
+void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
+    if(_groups.find(name) != _groups.end()){
+        _groups[name]->registerOptions(options);
     }
 }
 
 std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
-    for(auto group : _groups){
-        if(group.second->name() == name){
-            return group.second;
-        }
+    // for(auto group : _groups){
+    //     if(group.second->name() == name){
+    //         return group.second;
+    //     }
+    // }
+    if(_groups.find(name) != _groups.end()){
+        return _groups[name];
     }
 
     return nullptr;
@@ -261,7 +263,7 @@ std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
         return _cygnetInformation;
 }
 
-std::map<int, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
+std::map<std::string, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
     return _groups;
 }
 
@@ -328,7 +330,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "SpatialScale = " + std::to_string(spatialScale) + ", "
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
-            "Group = "+ std::to_string(data->group) +
+            "Group = '"+ data->group + "',"
             "}"
         "}";
         
@@ -376,7 +378,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "UpdateTime = " + updateTime + ", "
         "Radius = " + std::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
-        "Group = "+ std::to_string(data->group) +
+        "Group = '"+ data->group + "',"
         "}"
     "}";
     
@@ -393,10 +395,10 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
-    if(data->group > 0){
+    if(!data->group.empty()){
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
-            name += "_Group" + std::to_string(data->group);
+            name += "_" + data->group;
     }
 
     data->name = name;
@@ -417,10 +419,10 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     // check if this sphere already exist
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
-    if(data->group > 0){
+    if(!data->group.empty()){
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
-            name += "_Group" + std::to_string(data->group);
+            name += "_" + data->group;
     }
 
     data->name = name;

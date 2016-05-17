@@ -57,7 +57,7 @@ struct CygnetInfo {
 
 struct MetadataFuture {
     int id;
-    int group;
+    std::string group;
     std::string name;
     std::string json;
     int type;
@@ -77,20 +77,20 @@ public:
     ~IswaManager();
 
     void addIswaCygnet(std::string info);
-    void addIswaCygnet(int id, std::string info = "Texture", int group = -1);
+    void addIswaCygnet(int id, std::string info = "Texture", std::string group = "");
     // void deleteIswaCygnet(std::string);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
     std::string iswaUrl(int id, std::string type = "image");
 
-    void registerToGroup(int id, CygnetType type, IswaCygnet* cygnet);
-    void unregisterFromGroup(int id, IswaCygnet* cygnet);
-    void registerOptionsToGroup(int id, const std::vector<properties::SelectionProperty::Option>& options);
+    void registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet);
+    void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
+    void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);
     
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
-    std::map<int, std::shared_ptr<IswaGroup>>& groups();
+    std::map<std::string, std::shared_ptr<IswaGroup>>& groups();
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
@@ -112,7 +112,7 @@ private:
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
 
-    std::map<int, std::shared_ptr<IswaGroup>> _groups;
+    std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
 };
 

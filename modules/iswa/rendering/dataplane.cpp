@@ -62,7 +62,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    if(_data->groupId < 0){
+    if(_data->groupName.empty()){
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -135,12 +135,12 @@ bool DataPlane::loadTexture() {
     if(!_dataOptions.options().size()){ // load options for value selection
         std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
         for(int i=0; i<options.size(); i++){
-            _dataOptions.addOption({i, name()+"_"+options[i]});
+            _dataOptions.addOption({i, name()+"/"+options[i]});
             _textures.push_back(nullptr);
         }
         _dataOptions.setValue(std::vector<int>(1,0));
-        if(_data->groupId > 0)
-            IswaManager::ref().registerOptionsToGroup(_data->groupId, _dataOptions.options());
+        if(!_data->groupName.empty())
+            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
     }
 
     std::vector<float*> data = _dataProcessor->readData(_dataBuffer, _dataOptions);
