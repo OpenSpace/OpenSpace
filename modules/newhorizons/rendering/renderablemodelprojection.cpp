@@ -403,6 +403,8 @@ void RenderableModelProjection::imageProjectGPU() {
     _fboProgramObject->setUniform("_scaling", _camScaling);
     _fboProgramObject->setUniform("boresight", _boresight);
 
+    _geometry->setUniforms(*_fboProgramObject);
+
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geometryIndeces.size()), GL_UNSIGNED_INT, 0);
