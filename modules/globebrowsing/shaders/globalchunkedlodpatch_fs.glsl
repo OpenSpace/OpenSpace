@@ -44,10 +44,10 @@ Fragment getFragment() {
 			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
 			colorTiles[#{i}].uvTransform.uvOffset;
 		vec4 colorSample = texture(colorTiles[#{i}].textureSampler, samplePos);
-		frag.color = blendAdd(frag.color, colorSample);
+		frag.color = blendOver(frag.color, colorSample);
 	}
 	#endfor
-	
+
 	//frag.color.rgb *= 10;
 
 	// Sample position overlay

@@ -10,30 +10,18 @@ return {
                 ColorTextures = {
                     --[[
                     {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/GIBS_Aqua_MODIS_true.xml",
-                    },
-                    
-                    {
-                        Name = "MODIS Terra tileset",
-                        FilePath = "map_service_configs/TERRA_CR_B143_2016-04-12.wms",
-                    },
-                    
-
-                    {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/TERRAIN.wms",
+                        Name = "ESRI Imagery World 2D",
+                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                     },
                     --]]
                     {
-                        Name = "Test",
-                        FilePath = "map_service_configs/test.wms",
+                        Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
+                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
                     },
                     {
-                        Name = "Terrain tileset color",
-                        FilePath = "map_service_configs/TERRAIN.wms",
+                        Name = "Coastlines",
+                        FilePath = "map_service_configs/Coastlines.xml",
                     },
-
                 },
                 HeightMaps = {
                     {

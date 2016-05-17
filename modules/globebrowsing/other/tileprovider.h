@@ -121,7 +121,6 @@ namespace openspace {
         //                                Member variables                              //
         //////////////////////////////////////////////////////////////////////////////////
 
-
         LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
         std::set<HashKey> _queuedTileRequests;
 

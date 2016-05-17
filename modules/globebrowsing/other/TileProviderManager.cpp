@@ -43,18 +43,17 @@ namespace openspace {
         std::string name,
         std::shared_ptr<TileProvider> tileProvider)
     {
-        _heightMapProviders.insert(
-            std::pair<std::string, std::shared_ptr<TileProvider> >(name, tileProvider));
+        _heightMapProviders.push_back(tileProvider);
     }
 
     void TileProviderManager::addColorTexture(
         std::string name,
         std::shared_ptr<TileProvider> tileProvider)
     {
-        _colorTextureProviders.insert(
-            std::pair<std::string, std::shared_ptr<TileProvider> >(name, tileProvider));
-    }
+        _colorTextureProviders.push_back(tileProvider);
 
+    }
+    /*
     std::shared_ptr<TileProvider> TileProviderManager::getHeightMap(std::string name)
     {
         return _heightMapProviders[name];
@@ -64,15 +63,15 @@ namespace openspace {
     {
         return _colorTextureProviders[name];
     }
+    */
 
-
-    const std::map<std::string, std::shared_ptr<TileProvider> >&
+    const std::vector<std::shared_ptr<TileProvider> >&
         TileProviderManager::heightMapProviders()
     {
         return _heightMapProviders;
     }
 
-    const std::map<std::string, std::shared_ptr<TileProvider> >&
+    const std::vector<std::shared_ptr<TileProvider> >&
         TileProviderManager::colorTextureProviders()
     {
         return _colorTextureProviders;
