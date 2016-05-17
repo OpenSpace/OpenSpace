@@ -27,6 +27,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <stack>
 #include <memory>
 #include <ostream>
 
@@ -64,19 +65,17 @@ public:
     
     const ChunkNode& getChild(Quad quad) const;
 
-    void render(const RenderData& data);
+    void renderDepthFirst(const RenderData& data);
 
-    static int instanceCount;
-    static int renderedPatches;
+    void renderReversedBreadthFirst(const RenderData& data);
+    void renderThisChunk(const RenderData& data);
+    bool updateChunkTree(const RenderData& data);
+
+    static int chunkNodeCount;
+    static int renderedChunks;
 
 
 private:
-
-    void internalRender(const RenderData& data);
-    bool internalUpdateChunkTree(const RenderData& data);
-
-    
-
     
     ChunkNode* _parent;
     std::unique_ptr<ChunkNode> _children[4];    

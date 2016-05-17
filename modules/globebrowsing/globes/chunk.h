@@ -54,6 +54,7 @@ namespace openspace {
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);
+        void render(const RenderData& data) const;
 
         const GeodeticPatch& surfacePatch() const;
         ChunkedLodGlobe* const owner() const;

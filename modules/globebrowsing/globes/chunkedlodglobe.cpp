@@ -95,23 +95,35 @@ namespace openspace {
 
     void ChunkedLodGlobe::render(const RenderData& data){
         minDistToCamera = INFINITY;
-        ChunkNode::renderedPatches = 0;
+        ChunkNode::renderedChunks = 0;
 
-        _leftRoot->render(data);
-        _rightRoot->render(data);
+        renderChunkTree(_leftRoot.get(), data);
+        renderChunkTree(_rightRoot.get(), data);
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 
         Vec3 cameraPos = data.camera.position().dvec3();
         //LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
 
-        //LDEBUG("ChunkNode count: " << ChunkNode::instanceCount);
-        //LDEBUG("RenderedPatches count: " << ChunkNode::renderedPatches);
-        //LDEBUG(ChunkNode::renderedPatches << " / " << ChunkNode::instanceCount << " chunks rendered");
+        //LDEBUG("ChunkNode count: " << ChunkNode::chunkNodeCount);
+        //LDEBUG("RenderedPatches count: " << ChunkNode::renderedChunks);
+        //LDEBUG(ChunkNode::renderedChunks << " / " << ChunkNode::chunkNodeCount << " chunks rendered");
+    }
+
+    void ChunkedLodGlobe::renderChunkTree(ChunkNode* node, const RenderData& data) const {
+        node->updateChunkTree(data);
+        if (renderSmallChunksFirst) {
+            node->renderReversedBreadthFirst(data);
+        }
+        else {
+            node->renderDepthFirst(data);
+        }
+        
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _patchRenderer->update();
+        
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

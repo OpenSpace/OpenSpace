@@ -56,10 +56,10 @@ namespace openspace {
         , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , doFrustumCulling(properties::BoolProperty("doFrustumCulling", "doFrustumCulling"))
         , doHorizonCulling(properties::BoolProperty("doHorizonCulling", "doHorizonCulling"))
-        , numPosZthres(properties::IntProperty("numPosZthres", "numPosZthres", 0, 0, 9))
+        , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 10.0f, 0.0f, 100.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
-
+        , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
     {
         
         setName("RenderableGlobe");
@@ -67,12 +67,16 @@ namespace openspace {
         addProperty(_saveOrThrowCamera);
         addProperty(doFrustumCulling);
         addProperty(doHorizonCulling);
-        addProperty(numPosZthres);
+        addProperty(mergeInvisible);
         addProperty(lodScaleFactor);
         addProperty(initChunkVisible);
+        addProperty(renderSmallChunksFirst);
                 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
+        renderSmallChunksFirst.setValue(true);
+
+
 
         // Read the radii in to its own dictionary
         Vec3 radii;
@@ -96,7 +100,7 @@ namespace openspace {
             colorTextureDictionary.getValue("FilePath", path);
             std::shared_ptr<TileProvider> colorTextureProvider =
                 std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 512));
+                    path, 5000, 1024, 60));
             _tileProviderManager->addColorTexture(name, colorTextureProvider);
         }
 
@@ -113,7 +117,7 @@ namespace openspace {
             heightMapDictionary.getValue("FilePath", path);
             std::shared_ptr<TileProvider> heightMapProvider =
                 std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 128));
+                    path, 5000, 256, 60));
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
 
@@ -158,7 +162,7 @@ namespace openspace {
         }
         _chunkedLodGlobe->doFrustumCulling = doFrustumCulling.value();
         _chunkedLodGlobe->doHorizonCulling = doHorizonCulling.value();
-        _chunkedLodGlobe->numPosZthres = numPosZthres.value();
+        _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor= lodScaleFactor.value();
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
         _distanceSwitch.render(data);

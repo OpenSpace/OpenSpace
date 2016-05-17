@@ -22,84 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_H__
-#define __CHUNK_INDEX_H__
+#ifndef __THREAD_POOL_H__
+#define __THREAD_POOL_H__
 
 #include <glm/glm.hpp>
-#include <vector>
+#include <memory>
+#include <ostream>
+#include <thread>
+#include <queue>
+#include <atomic>
+
+#include <modules/globebrowsing/other/concurrentqueue.h>
+
+#include <ghoul/misc/assert.h>
 
 
+
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
     
 
-class Geodetic2;
+    class ThreadPool;
 
-enum Quad {
-    NORTH_WEST = 0,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
-};
+    class Worker {
+    public: 
+        Worker(ThreadPool& pool);
+        void operator()();
+    private:
+        ThreadPool& pool;
+    };
 
+    class ThreadPool {
+    public:
+        ThreadPool(size_t numThreads);
+        ~ThreadPool();
 
+        void enqueue(std::function<void()> f);
 
-using HashKey = unsigned long;
+    private:
+        friend class Worker;
 
+        std::vector<std::thread> workers;
 
-struct ChunkIndex {
-    
+        std::deque<std::function<void()>> tasks;
 
-    int x, y, level;
-    
+        std::mutex queue_mutex;
+        std::condition_variable condition;
 
-    ChunkIndex() : x(0), y(0), level(0) { }
-    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
-    ChunkIndex(const Geodetic2& point, int level);
-
-
-    bool hasParent() const {
-        return level > 0;
-    }
-
-    ChunkIndex parent() const;
-
-    bool isWestChild() const {
-        return x % 2 == 0;
-    }
-
-    bool isEastChild() const {
-        return x % 2 == 1;
-    }
-
-    bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    bool isSouthChild() const {
-        return y % 2 == 1;
-    }
-
-    ChunkIndex child(Quad q) const;
-
-    /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
-
-    HashKey hashKey() const;
-
-    bool operator==(const ChunkIndex& other) const;
-};
-
-
-std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
+        bool stop;
+    };
 
 
 } // namespace openspace
 
 
 
-#endif // __CHUNK_INDEX_H__
+#endif // __THREAD_POOL_H__

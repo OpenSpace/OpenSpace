@@ -24,28 +24,36 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/other/twmstileprovider.h>
-#include <thread>
+#include <modules/globebrowsing/other/threadpool.h>
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <glm/glm.hpp>
 
-class TWMSTileProviderTest : public testing::Test {};
+
+
+
+class ThreadPoolTest : public testing::Test {};
+
 
 using namespace openspace;
+using namespace std::chrono_literals;
 
-TEST_F(TWMSTileProviderTest, Simple) {
 
-	
-	TileProvider* tileProvider = new TileProvider();
 
-	GeodeticTileIndex tileIndex = { 0, 0, 0 };
-	tileProvider->getTile(tileIndex);
+TEST_F(ThreadPoolTest, Basic) {
+    ThreadPool pool(5);
 
-	using namespace std::chrono_literals;
-	std::this_thread::sleep_for(2s);
+    int val = 0;
+    
+    for (int i = 0; i < 10; ++i) {
+        pool.enqueue([&val, i]() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100 + 10*i));
+            val++;
+        });
+    }
 
-	std::cout << "exiting" << std::endl;
-	
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    EXPECT_EQ(10, val) << "10 tasks taking 100 to 190 ms on 5 threads should take less than 1000 ms";
 }

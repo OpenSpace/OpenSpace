@@ -102,7 +102,8 @@ namespace openspace {
             _isVisible &= HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
         }
 
-        if (!_isVisible) return WANT_MERGE;
+        if(!_isVisible && owner()->mergeInvisible)
+            return WANT_MERGE;
 
 
         Vec3 cameraPosition = myRenderData.camera.position().dvec3();
@@ -129,7 +130,9 @@ namespace openspace {
         else return DO_NOTHING;
     }
 
-
+    void Chunk::render(const RenderData& data) const {
+        _owner->getPatchRenderer().renderChunk(*this, data);
+    }
     
 
 } // namespace openspace

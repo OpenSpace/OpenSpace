@@ -48,9 +48,12 @@ namespace openspace {
     TileProvider::TileProvider(
         const std::string& filePath,
         int tileCacheSize,
-        int minimumPixelSize)
+        int minimumPixelSize,
+        int framesUntilRequestFlush)
     : _filePath(filePath)
     , _tileCache(tileCacheSize) // setting cache size
+    , _framesSinceLastRequestFlush(0)
+    , _framesUntilRequestFlush(framesUntilRequestFlush)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -101,11 +104,20 @@ namespace openspace {
     }
 
     TileProvider::~TileProvider(){
+        clearRequestQueue();
         delete _gdalDataSet;
     }
 
 
     void TileProvider::prerender() {
+        initTexturesFromLoadedData();
+
+        if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
+            clearRequestQueue();
+        }
+    }
+
+    void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
             std::shared_ptr<UninitializedTextureTile> uninitedTex =
@@ -116,87 +128,93 @@ namespace openspace {
         }
     }
 
+    void TileProvider::clearRequestQueue() {
+        _tileLoadManager.clearEnqueuedJobs();
+        _queuedTileRequests.clear();
+        _framesSinceLastRequestFlush = 0;
+    }
 
-    Tile TileProvider::getMostHiResTile(ChunkIndex chunkIndex) {
-        std::shared_ptr<Texture> tex = nullptr;
-        glm::vec2 uvOffset(0, 0);
-        glm::vec2 uvScale(1, 1);
-        
-        // Check if we are trying to get a texture for a very small patch.
-        // In that case, use the biggest one defined for the dataset.
-        int maximumAllowedLevel =
-            _gdalDataSet->GetRasterBand(1)->GetOverviewCount() - 1;
-        int levelInDataset = chunkIndex.level + _tileLevelDifference;
-        int timesToStepUp = levelInDataset - maximumAllowedLevel;
-        for (int i = 0; i < timesToStepUp; i++)
-        {
-            uvScale *= 0.5;
-            uvOffset *= 0.5;
 
-            if (chunkIndex.isEastChild()) {
-                uvOffset.x += 0.5;
-            }
+    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex) {
+        TileUvTransform uvTransform;
+        uvTransform.uvOffset = glm::vec2(0, 0);
+        uvTransform.uvScale = glm::vec2(1, 1);
 
-            // In OpenGL, positive y direction is up
-            if (chunkIndex.isNorthChild()) {
-                uvOffset.y += 0.5;
-            }
-
+        int numOverviews = _gdalDataSet->GetRasterBand(1)->GetOverviewCount();
+        int maximumLevel = numOverviews - 1 - _tileLevelDifference;
+        while(chunkIndex.level > maximumLevel){
+            transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
         
-        // We also need to check if the wanted texture is available. If not, go up a level
-        while (true) {
-            tex = getOrStartFetchingTile(chunkIndex);
-
-            if (tex != nullptr) {
-                break;
-            }
-
-            if (chunkIndex.level <= 1) {
-                tex = getDefaultTexture();
-                break;
-            }
-
-            // If we have a parent, calculate the UV offset and scale from the chunkIndex
-            else {
-                uvScale *= 0.5;
-                uvOffset *= 0.5;
-
-                if (chunkIndex.isEastChild()) {
-                    uvOffset.x += 0.5;
-                }
-
-                // In OpenGL, positive y direction is up
-                if (chunkIndex.isNorthChild()) {
-                    uvOffset.y += 0.5;
-                }
-
-                chunkIndex = chunkIndex.parent();
-            }
-        }
-        
-        return{ tex, {uvOffset, uvScale } };
+        return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
+    Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
+        TileUvTransform& uvTransform) 
+    {
+        HashKey key = chunkIndex.hashKey();
+        if (_tileCache.exist(key)) {
+            return { _tileCache.get(key), uvTransform };
+        }
+        else if (chunkIndex.level <= 1) {
+            return { getDefaultTexture(), uvTransform };
+        }
+        else {
+            // We don't have the tile for the requested level
+            // --> check if the parent has a tile we can use
+            transformFromParent(chunkIndex, uvTransform);
+            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform);
+
+            // As we didn't have this tile, push it to the request queue
+            // post order enqueueing tiles --> enqueue tiles at low levels first
+            enqueueTileRequest(chunkIndex);
+
+            return tile;
+        }
+    }
+
+
+
+    void TileProvider::transformFromParent(const ChunkIndex& chunkIndex, TileUvTransform& uv) const {
+        uv.uvOffset *= 0.5;
+        uv.uvScale *= 0.5;
+
+        if (chunkIndex.isEastChild()) {
+            uv.uvOffset.x += 0.5;
+        }
+
+        // In OpenGL, positive y direction is up
+        if (chunkIndex.isNorthChild()) {
+            uv.uvOffset.y += 0.5;
+        }
+    }
+
+
     std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
-        
         HashKey hashkey = chunkIndex.hashKey();
-        
         if (_tileCache.exist(hashkey)) {
             return _tileCache.get(hashkey);
         }
         else {
+            enqueueTileRequest(chunkIndex);
+            return nullptr;
+        }
+    }
+
+    bool TileProvider::enqueueTileRequest(const ChunkIndex& chunkIndex) {
+        HashKey key = chunkIndex.hashKey();
+        bool tileHasBeenQueued = _queuedTileRequests.find(key) != _queuedTileRequests.end();
+        if (!tileHasBeenQueued) {
             // enque load job
             std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
                 new TextureTileLoadJob(this, chunkIndex));
 
             _tileLoadManager.enqueueJob(job);
 
-            // map key to nullptr while tile is loaded
-            _tileCache.put(hashkey, nullptr);
-            return nullptr;
+            _queuedTileRequests.insert(key);
         }
+        return !tileHasBeenQueued;
     }
 
 

@@ -24,7 +24,6 @@
 
 
 #include <modules/globebrowsing/rendering/culling.h>
-#include <modules/globebrowsing/rendering/aabb.h>
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 
@@ -46,6 +45,9 @@ namespace openspace {
     FrustumCuller::~FrustumCuller() {
 
     }
+
+
+    const AABB3 FrustumCuller::viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
 
 
     bool FrustumCuller::isVisible(
@@ -143,8 +145,8 @@ namespace openspace {
             bounds.expand(cornerScreenSpace);
         }
 
-        AABB3 viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
-        return bounds.intersects(viewFrustum);
+        
+        return bounds.intersects(FrustumCuller::viewFrustum);
         
         /*
         vec2 center = bounds.center();

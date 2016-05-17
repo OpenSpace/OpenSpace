@@ -22,84 +22,99 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_H__
-#define __CHUNK_INDEX_H__
+
 
 #include <glm/glm.hpp>
-#include <vector>
+#include <memory>
+#include <ostream>
+#include <thread>
+#include <queue>
+#include <atomic>
+
+#include <modules/globebrowsing/other/concurrentqueue.h>
+#include <modules/globebrowsing/other/threadpool.h>
+
+#include <ghoul/misc/assert.h>
+#include <iostream>
 
 
 
 namespace openspace {
+
+    Worker::Worker(ThreadPool& pool)
+        : pool(pool)
+    {
+
+    }
+
+    void Worker::operator()() {
+        std::function<void()> task;
+        while (true) {
+
+            // acquire lock
+            {
+                std::unique_lock<std::mutex> lock(pool.queue_mutex);
+
+                // look for a work item
+                while (!pool.stop && pool.tasks.empty()) {
+                    // if there are none wait for notification
+                    pool.condition.wait(lock);
+                }
+
+                if (pool.stop) { // exit if the pool is stopped
+                    return;
+                }
+
+                // get the task from the queue
+                task = pool.tasks.front();
+                pool.tasks.pop_front();
+
+            }// release lock
+
+            // execute the task
+            task();
+        }
+
+        
+    }
+
+
+
+
+
+    ThreadPool::ThreadPool(size_t numThreads)
+        : stop(false)
+    {
+        for (size_t i = 0; i < numThreads; ++i) {
+            workers.push_back(std::thread(Worker(*this)));
+        }
+    }
+
+    // the destructor joins all threads
+    ThreadPool::~ThreadPool() {
+        // stop all threads
+        stop = true;
+        condition.notify_all();
+
+        // join them
+        for (size_t i = 0; i < workers.size(); ++i) {
+            workers[i].join();
+        }
+    }
     
 
-class Geodetic2;
+    // add new work item to the pool
+    void ThreadPool::enqueue(std::function<void()> f) {
+        { // acquire lock
+            std::unique_lock<std::mutex> lock(queue_mutex);
 
-enum Quad {
-    NORTH_WEST = 0,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
-};
+            // add the task
+            tasks.push_back(f);
+        } // release lock
 
-
-
-using HashKey = unsigned long;
-
-
-struct ChunkIndex {
-    
-
-    int x, y, level;
-    
-
-    ChunkIndex() : x(0), y(0), level(0) { }
-    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
-    ChunkIndex(const Geodetic2& point, int level);
-
-
-    bool hasParent() const {
-        return level > 0;
+          // wake up one thread
+        std::cout << "Notify one thread" << std::endl;
+        condition.notify_one();
     }
-
-    ChunkIndex parent() const;
-
-    bool isWestChild() const {
-        return x % 2 == 0;
-    }
-
-    bool isEastChild() const {
-        return x % 2 == 1;
-    }
-
-    bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    bool isSouthChild() const {
-        return y % 2 == 1;
-    }
-
-    ChunkIndex child(Quad q) const;
-
-    /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
-
-    HashKey hashKey() const;
-
-    bool operator==(const ChunkIndex& other) const;
-};
-
-
-std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
-
 
 } // namespace openspace
-
-
-
-#endif // __CHUNK_INDEX_H__

@@ -83,6 +83,12 @@ namespace openspace {
             }
         }
 
+        void clearEnqueuedJobs() {
+            while (_incomingJobs.size()) {
+                _incomingJobs.pop();
+            }
+        }
+
         std::shared_ptr<Job<P>> popFinishedJob() {
             ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
             return _finishedJobs.pop();
