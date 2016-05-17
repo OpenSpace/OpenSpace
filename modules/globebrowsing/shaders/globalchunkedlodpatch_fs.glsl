@@ -23,38 +23,30 @@
  ****************************************************************************************/
 
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-#define NUMLAYERS_COLORTEXTURE 1
-#define NUMLAYERS_HEIGHTMAP 1
+#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
+#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
 uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 
 in vec4 fs_position;
 in vec2 fs_uv;
 
-vec4 blendOver(vec4 oldColor, vec4 newColor)
-{
-	vec4 toReturn;
-	toReturn.rgb =
-		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
-		(newColor.a + oldColor.a * (1 - newColor.a));
-	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
-	return toReturn;
-}
-
 Fragment getFragment() {
 	Fragment frag;
 
-	//for (int i = 0; i < NUMLAYERS_COLORTEXTURE; ++i)
-	//{
-		vec2 samplePos =
-		colorTiles[0].uvTransform.uvScale * fs_uv +
-		colorTiles[0].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[0].textureSampler, samplePos);
-		frag.color = blendOver(frag.color, colorSample);
-	//}
+	vec2 samplePos[NUMLAYERS_COLORTEXTURE];
+	vec4 colorSample[NUMLAYERS_COLORTEXTURE];
+	#for i in 0..#{numLayersColor}
+		samplePos[#{i}] =
+			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
+			colorTiles[#{i}].uvTransform.uvOffset;
+		colorSample[#{i}] = texture(colorTiles[#{i}].textureSampler, samplePos[#{i}]);
+		frag.color = blendAdd(frag.color, colorSample[#{i}]);
+	#endfor
 	
 	//frag.color.rgb *= 10;
 

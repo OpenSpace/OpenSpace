@@ -162,26 +162,31 @@ namespace openspace {
         // Activate the shader program
         programObject->activate();
 
-        ghoul::opengl::TextureUnit texUnitHeight;
-        ghoul::opengl::TextureUnit texUnitColor;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+
+        texUnitHeight.resize(numHeightMapProviders);
+        texUnitColor.resize(numColorTextureProviders);
 
 
         // Go through all the height map providers
         int i = 0;
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
+            texUnitHeight.push_back(ghoul::opengl::TextureUnit());
             auto tileProvider = it->second;
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getMostHiResTile(chunk.index());
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
-            texUnitHeight.activate();
+            texUnitHeight[i].activate();
+            int hej = 0;
             tile.texture->bind();
 
             std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
             // Send uniforms for the tile to the shader
-            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitHeight);
+            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitHeight[i]);
 
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvScale",
@@ -209,12 +214,12 @@ namespace openspace {
             Tile tile = tileProvider->getMostHiResTile(chunk.index());
 
             // The texture needs a unit to sample from
-            texUnitColor.activate();
+            texUnitColor[i].activate();
             tile.texture->bind();
 
             std::string indexedTileKey = "colorTiles[" + std::to_string(i) + "]";
             // Send uniforms for the tile to the shader
-            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitColor);
+            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitColor[i]);
 
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvScale",
@@ -355,25 +360,31 @@ namespace openspace {
         // Activate the shader program
         programObject->activate();
 
-        ghoul::opengl::TextureUnit texUnitHeight;
-        ghoul::opengl::TextureUnit texUnitColor;
+
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+
+        texUnitHeight.resize(numHeightMapProviders);
+        texUnitColor.resize(numColorTextureProviders);
+
 
         // Go through all the height map providers
         int i = 0;
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
             auto tileProvider = it->second;
+
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getMostHiResTile(chunk.index());
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
-            texUnitHeight.activate();
+            texUnitHeight[i].activate();
             tile.texture->bind();
 
             std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
             // Send uniforms for the tile to the shader
-            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitHeight);
+            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitHeight[i]);
 
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvScale",
@@ -397,16 +408,17 @@ namespace openspace {
         for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
         {
             auto tileProvider = it->second;
+
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getMostHiResTile(chunk.index());
 
             // The texture needs a unit to sample from
-            texUnitColor.activate();
+            texUnitColor[i].activate();
             tile.texture->bind();
 
             std::string indexedTileKey = "colorTiles[" + std::to_string(i) + "]";
             // Send uniforms for the tile to the shader
-            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitColor);
+            programObject->setUniform(indexedTileKey + ".textureSampler", texUnitColor[i]);
 
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvScale",

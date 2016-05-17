@@ -28,8 +28,8 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 
-#define NUMLAYERS_COLORTEXTURE 1
-#define NUMLAYERS_HEIGHTMAP 1
+#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
+#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 radiiSquared;
@@ -59,17 +59,20 @@ void main()
 	float height = 0;
 	//for (int i = 0; i < NUMLAYERS_HEIGHTMAP; ++i)
 	//{
-		vec2 samplePos =
-			heightTiles[0].uvTransform.uvScale * in_uv +
-			heightTiles[0].uvTransform.uvOffset;
+	float sampledValue[NUMLAYERS_HEIGHTMAP];
+	vec2 samplePos[NUMLAYERS_HEIGHTMAP];
+	#for i in 0..#{numLayersHeight}
+		samplePos[#{i}] =
+			heightTiles[#{i}].uvTransform.uvScale * in_uv +
+			heightTiles[#{i}].uvTransform.uvOffset;
 
-		float sampledValue = texture(heightTiles[0].textureSampler, samplePos).r;
+		sampledValue[#{i}] = texture(heightTiles[#{i}].textureSampler, samplePos[#{i}]).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue *
-			heightTiles[0].depthTransform.depthScale +
-			heightTiles[0].depthTransform.depthOffset);
-	//}
+		height = (sampledValue[#{i}] *
+			heightTiles[#{i}].depthTransform.depthScale +
+			heightTiles[#{i}].depthTransform.depthOffset);
+	#endfor
 
 	// Add the height in the direction of the normal
 	pair.position += pair.normal * height;

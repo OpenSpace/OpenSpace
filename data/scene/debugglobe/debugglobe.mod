@@ -29,6 +29,10 @@ return {
                         Name = "Test",
                         FilePath = "map_service_configs/test.wms",
                     },
+                    {
+                        Name = "Terrain tileset color",
+                        FilePath = "map_service_configs/TERRAIN.wms",
+                    },
 
                 },
                 HeightMaps = {

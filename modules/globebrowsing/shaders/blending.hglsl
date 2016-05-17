@@ -22,68 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef BLENDING_HGLSL
+#define BLENDING_HGLSL
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
-
-#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
-#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
-
-uniform mat4 projectionTransform;
-
-// Input points in camera space
-uniform vec3 p00;
-uniform vec3 p10;
-uniform vec3 p01;
-uniform vec3 p11;
-uniform vec3 patchNormalCameraSpace;
-
-uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
-
-layout(location = 1) in vec2 in_uv;
-
-out vec2 fs_uv;
-out vec4 fs_position;
-
-vec3 bilinearInterpolation(vec2 uv) {
-	// Bilinear interpolation
-	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
-	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
-	vec3 p = (1 - uv.y) * p0 + uv.y * p1;
-	return p;
-}
-
-void main()
+vec4 blendOver(vec4 oldColor, vec4 newColor)
 {
-	// Position in cameraspace
-	vec3 p = bilinearInterpolation(in_uv);
-	
-	float height = 0;
-	
-	vec2 samplePos[NUMLAYERS_HEIGHTMAP];
-	float sampledValue[NUMLAYERS_HEIGHTMAP];
-	#for i in 0..#{numLayersHeight}
-		samplePos[#{i}] =
-			heightTiles[#{i}].uvTransform.uvScale * in_uv +
-			heightTiles[#{i}].uvTransform.uvOffset;
-
-		sampledValue[#{i}] = texture(heightTiles[#{i}].textureSampler, samplePos[#{i}]).r;
-		
-		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue[#{i}] *
-			heightTiles[#{i}].depthTransform.depthScale +
-			heightTiles[#{i}].depthTransform.depthOffset);
-	#endfor
-	
-	// Translate the point along normal
-	p += patchNormalCameraSpace * height;
-
-	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
-	
-	// Write output
-	fs_uv = in_uv;
-	fs_position = z_normalization(positionClippingSpace);
-	gl_Position = fs_position;
+	vec4 toReturn;
+	toReturn.rgb =
+		(newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) /
+		(newColor.a + oldColor.a * (1 - newColor.a));
+	toReturn.a = newColor.a + oldColor.a * (1 - newColor.a);
+	return toReturn;
 }
+
+vec4 blendMultiply(vec4 oldColor, vec4 newColor)
+{
+	return oldColor * newColor;
+}
+
+vec4 blendAdd(vec4 oldColor, vec4 newColor)
+{
+	return oldColor + newColor;
+}
+
+
+#endif

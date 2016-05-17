@@ -110,25 +110,9 @@ namespace openspace {
         _programObject = OsEng.renderEngine().buildRenderProgram(
             _shaderName,
             _vsPath,
-            _fsPath);
-        
+            _fsPath,
+            shaderDictionary);
 
-        // TODO : THIS CAN'T BE DONE SINCE SHADER PROGRAM NEEDS TO RESOLVE FRAGMENTS
-        // FIX. HOW CAN THE RENDERING MODE BE ABSTRACTED AWAY WHEN BUILDING USING
-        // DICTIONARIES?
-
-        /*
-        try {
-            _programObject = ProgramObject::Build(
-                _shaderName,
-                _vsPath,
-                _fsPath,
-                shaderDictionary);
-        }
-        catch (ghoul::RuntimeError& error) {
-            LERROR(error.message);
-        }
-        */
         ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
         using IgnoreError = ProgramObject::IgnoreError;
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
