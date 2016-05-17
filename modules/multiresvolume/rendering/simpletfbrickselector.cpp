@@ -25,7 +25,7 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/histogrammanager.h>
-#include <modules/multiresvolume/rendering/histogram.h>
+#include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
 #include <algorithm>
 #include <cassert>

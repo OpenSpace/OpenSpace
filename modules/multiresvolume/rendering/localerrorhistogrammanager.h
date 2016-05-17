@@ -27,7 +27,7 @@
 
 #include <fstream>
 #include <modules/multiresvolume/rendering/tsp.h>
-#include <modules/multiresvolume/rendering/histogram.h>
+#include <openspace/util/histogram.h>
 #include <map>
 
 #include <ghoul/glm.h>
