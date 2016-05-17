@@ -82,6 +82,7 @@ public:
 
     Scalar minimumRadius() const;
     Scalar maximumRadius() const;
+    Scalar averageRadius() const;
 
     Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
     Vec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
@@ -94,6 +95,7 @@ private:
         Vec3 _radiiToTheFourth;
         Scalar _minimumRadius;
         Scalar _maximumRadius;
+        Scalar _medianRadius;
     } _cached;
 
     void updateInternalCache();

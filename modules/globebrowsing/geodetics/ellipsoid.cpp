@@ -26,6 +26,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <algorithm>
 
 namespace {
     const std::string _loggerCat = "Ellipsoid";
@@ -45,8 +46,7 @@ namespace openspace {
         updateInternalCache();
     }
 
-    Ellipsoid::~Ellipsoid()
-    {
+    Ellipsoid::~Ellipsoid(){
 
     }
 
@@ -58,22 +58,23 @@ namespace openspace {
 
         _cached._oneOverRadiiSquared = Vec3(1) / _cached._radiiSquared;
         _cached._radiiToTheFourth = _cached._radiiSquared * _cached._radiiSquared;
-
-        _cached._minimumRadius = glm::min(_radii.x, glm::min(_radii.y, _radii.z));
-        _cached._maximumRadius = glm::max(_radii.x, glm::max(_radii.y, _radii.z));
+        
+        std::vector<Scalar> radii = { _radii.x, _radii.y, _radii.z };
+        std::sort(radii.begin(), radii.end());
+        _cached._minimumRadius = radii[0];
+        _cached._medianRadius = radii[1];
+        _cached._maximumRadius = radii[2];
     }
 
     
 
 
-    Vec3 Ellipsoid::geocentricSurfaceProjection(const Vec3& p) const
-    {
+    Vec3 Ellipsoid::geocentricSurfaceProjection(const Vec3& p) const {
         Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
         return beta * p;
     }
 
-    Vec3 Ellipsoid::geodeticSurfaceProjection(const Vec3& p) const
-    {
+    Vec3 Ellipsoid::geodeticSurfaceProjection(const Vec3& p) const {
         Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
         Scalar n = glm::length(beta * p * _cached._oneOverRadiiSquared);
         Scalar alpha = (1.0 - beta) * (glm::length(p) / n);
@@ -100,14 +101,12 @@ namespace openspace {
         return p / d;
     }
 
-    Vec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const
-    {
+    Vec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const {
         Vec3 normal = p * _cached._oneOverRadiiSquared;
         return glm::normalize(normal);
     }
 
-    Vec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const
-    {
+    Vec3 Ellipsoid::geodeticSurfaceNormal(Geodetic2 geodetic2) const {
         Scalar cosLat = glm::cos(geodetic2.lat);
         //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
         return Vec3(
@@ -116,29 +115,28 @@ namespace openspace {
             sin(geodetic2.lat));
     }
 
-    Vec3 Ellipsoid::radiiSquared() const
-    {
+    Vec3 Ellipsoid::radiiSquared() const {
         return _cached._radiiSquared;
     }
 
-    Vec3 Ellipsoid::oneOverRadiiSquared() const
-    {
+    Vec3 Ellipsoid::oneOverRadiiSquared() const {
         return _cached._oneOverRadiiSquared;
     }
 
-    Vec3 Ellipsoid::radiiToTheFourth() const
-    {
+    Vec3 Ellipsoid::radiiToTheFourth() const {
         return _cached._radiiToTheFourth;
     }
 
-    Scalar Ellipsoid::minimumRadius() const
-    {
+    Scalar Ellipsoid::minimumRadius() const {
         return _cached._minimumRadius;
     }
 
-    Scalar Ellipsoid::maximumRadius() const
-    {
+    Scalar Ellipsoid::maximumRadius() const {
         return _cached._maximumRadius;
+    }
+
+    Scalar Ellipsoid::averageRadius() const {
+        return (_radii.x + _radii.y + _radii.z) / 3.0;
     }
 
     Geodetic2 Ellipsoid::cartesianToGeodetic2(const Vec3& p) const

@@ -245,14 +245,27 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz();
 	glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
 
+    //get "old" focus position 
+        
+    psc camPos = _camera->position();
+    psc focusPos = _camera->focusPosition();
+    float distToFocusNodeCenter = (focusPos - camPos).length().lengthf();
+    float focusNodeBounds = _focusNode ? _focusNode->boundingSphere().lengthf() : 0.f;
+
+    float speedFactor = distToFocusNodeCenter - 0.098*focusNodeBounds;
+        
+    float rotationSpeed = glm::min(0.00001f * speedFactor, 100.0f);
+    float zoomSpeed = glm::min(0.0000001f * speedFactor, 1.0f);
+    float rollSpeed = 100.0f;
+    
+
 	glm::mat4 transform;
-	transform = glm::rotate(glm::radians(dx * 100.f), cameraUp) * transform;
-	transform = glm::rotate(glm::radians(dy * 100.f), cameraRight) * transform;
-	transform = glm::rotate(glm::radians(dz * 100.f), _camera->viewDirection()) * transform;
+	transform = glm::rotate(glm::radians(dx * rotationSpeed), cameraUp) * transform;
+	transform = glm::rotate(glm::radians(dy * rotationSpeed), cameraRight) * transform;
+	transform = glm::rotate(glm::radians(dz * rollSpeed), _camera->viewDirection()) * transform;
 
 	
-	//get "old" focus position 
-	psc focus = _camera->focusPosition();
+	
 	
 	//// get camera position 
 	//psc relative = _camera->position();
@@ -261,7 +274,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	psc relative = _camera->unsynchedPosition();
 
 	//get relative vector
-	psc relative_focus_coordinate = relative - focus;
+	psc relative_focus_coordinate = relative - focusPos;
 	//rotate relative vector
 	relative_focus_coordinate = glm::inverse(transform) * relative_focus_coordinate.vec4();
 	
@@ -274,12 +287,12 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 	//new camera position
 	relative = origin + relative_focus_coordinate; 	
 
-	float bounds = _focusNode ? _focusNode->boundingSphere().lengthf() : 0.f;
 
-	psc target = relative + relative_focus_coordinate * dist;
+	psc target = relative + relative_focus_coordinate * dist * zoomSpeed;
+
 	//don't fly into objects
-	if ((target - origin).length() < bounds){
-		target = relative;
+	if ((target - origin).length() < focusNodeBounds){
+		//target = relative;
 	}
 
 	unlockControls();

@@ -76,12 +76,17 @@ namespace openspace {
         doHorizonCulling.setValue(true);
         renderSmallChunksFirst.setValue(true);
 
+        
 
 
         // Read the radii in to its own dictionary
         Vec3 radii;
         dictionary.getValue(keyRadii, radii);
         _ellipsoid = Ellipsoid(radii);
+
+        
+        setBoundingSphere(pss(_ellipsoid.averageRadius(), 1.0));
+        
 
         ghoul::Dictionary texturesDictionary;
         dictionary.getValue(keyTextures, texturesDictionary);
