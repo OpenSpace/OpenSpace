@@ -111,70 +111,64 @@ void IswaManager::addIswaCygnet(std::string info){
     addIswaCygnet(cygnetId);
 }
 
-void IswaManager::addIswaCygnet(int id, std::string info, int group){
+void IswaManager::addIswaCygnet(int id, std::string type, int group){
+  
     if(id > 0){
+
         createScreenSpace(id);
+
     }else if(id < 0){
+
+        // create metadata object and assign group and id
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = id;
         metaFuture->group = group;
-        if(info == _type[CygnetType::Texture]){
+
+        // Assign type of cygnet Texture/Data
+        if(type == _type[CygnetType::Texture]){
             metaFuture->type = CygnetType::Texture;
-            metaFuture->geom  = CygnetGeometry::Plane;
-        } else if (info  == _type[CygnetType::Data]) {
+        } else if (type  == _type[CygnetType::Data]) {
             metaFuture->type = CygnetType::Data;
         } else {
-            LERROR("\""+ info + "\" is not a valid type");
+            LERROR("\""+ type + "\" is not a valid type");
             return;
         }
 
+        // This callback determines what geometry should be used and creates the right cygbet
         auto metadataCallback = 
-        [this, metaFuture](const DownloadManager::FileFuture& f){
-            if(f.isFinished){
-                metaFuture->isFinished;
-                json j = json::parse(metaFuture->json);
-                if(j["Coordinate Type"].is_null()){
-                    metaFuture->geom = CygnetGeometry::Sphere;
-                    createSphere(metaFuture);
-                } else if (j["Coordinate Type"] == "Cartesian"){
-                    metaFuture->geom = CygnetGeometry::Plane;
-                    createPlane(metaFuture);
-                }
-                //createPlane(metaFuture);
-                LDEBUG("Download to memory finished");
-            } else if (f.isAborted){
-                LWARNING("Download to memory was aborted: " + f.errorMessage);
+        [this, metaFuture](const DownloadManager::MemoryFile& file){
+            //Create a string from downloaded file
+            std::string res;
+            res.append(file.buffer, file.size);
+            //add it to the metafuture object
+            metaFuture->json = res;
+
+            //convert to json
+            json j = json::parse(res);
+
+            // Check what kind of geometry here
+            if(j["Coordinate Type"].is_null()){
+                metaFuture->geom = CygnetGeometry::Sphere;
+                createSphere(metaFuture);
+            } else if (j["Coordinate Type"] == "Cartesian"){
+                metaFuture->geom = CygnetGeometry::Plane;
+                createPlane(metaFuture);
             }
+            LDEBUG("Download to memory finished");
         };
 
         // Download metadata
-        DlManager.downloadToMemory(
+        DlManager.fetchFile(
             "http://128.183.168.116:3000/" + std::to_string(-id),
             // "http://10.0.0.76:3000/" + std::to_string(-id),
-            metaFuture->json,
-            metadataCallback
+            metadataCallback,
+            [id](const std::string& err){
+                LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
+            }
         );
     }else{
-        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-        metaFuture->id = -1;
-        metaFuture->group = group;
-        metaFuture->type = CygnetType::Data;
-        metaFuture->geom  = CygnetGeometry::Sphere;
-
-        auto metadataCallback = 
-        [this, metaFuture](const DownloadManager::FileFuture& f){
-            LDEBUG("Download to memory finished");
-            metaFuture->isFinished = true;
-            createPlane(metaFuture);
-        };
-
-        // Download metadata
-        DlManager.downloadToMemory(
-            "http://128.183.168.116:3000/" + std::to_string(1),
-            // "http://10.0.0.76:3000/" + std::to_string(-id),
-            metaFuture->json,
-            metadataCallback
-        );
+        // Kameleonplane?
+        LERROR("No cygnet with id 0");
     }
 }
 
@@ -338,8 +332,10 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
 }
 
 std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data){
-    if(data->json == "")
+    if(data->json == ""){
+        LWARNING("jsonSphereToLuaTable: no content in metadata json");
         return "";
+    }
 
     json j = json::parse(data->json);
     j = j["metadata"];
