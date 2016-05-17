@@ -38,14 +38,14 @@ in vec2 fs_uv;
 Fragment getFragment() {
 	Fragment frag;
 
-	vec2 samplePos[NUMLAYERS_COLORTEXTURE];
-	vec4 colorSample[NUMLAYERS_COLORTEXTURE];
 	#for i in 0..#{numLayersColor}
-		samplePos[#{i}] =
+	{
+		vec2 samplePos =
 			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
 			colorTiles[#{i}].uvTransform.uvOffset;
-		colorSample[#{i}] = texture(colorTiles[#{i}].textureSampler, samplePos[#{i}]);
-		frag.color = blendOver(frag.color, colorSample[#{i}]);
+		vec4 colorSample = texture(colorTiles[#{i}].textureSampler, samplePos);
+		frag.color = blendOver(frag.color, colorSample);
+	}
 	#endfor
 
 	//vec2 samplePos =

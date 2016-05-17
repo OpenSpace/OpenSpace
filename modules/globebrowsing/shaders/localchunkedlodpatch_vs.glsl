@@ -62,19 +62,19 @@ void main()
 	
 	float height = 0;
 	
-	vec2 samplePos[NUMLAYERS_HEIGHTMAP];
-	float sampledValue[NUMLAYERS_HEIGHTMAP];
 	#for i in 0..#{numLayersHeight}
-		samplePos[#{i}] =
+	{
+		vec2 samplePos =
 			heightTiles[#{i}].uvTransform.uvScale * in_uv +
 			heightTiles[#{i}].uvTransform.uvOffset;
 
-		sampledValue[#{i}] = texture(heightTiles[#{i}].textureSampler, samplePos[#{i}]).r;
+		float sampledValue = texture(heightTiles[#{i}].textureSampler, samplePos).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue[#{i}] *
+		height = (sampledValue *
 			heightTiles[#{i}].depthTransform.depthScale +
 			heightTiles[#{i}].depthTransform.depthOffset);
+	}
 	#endfor
 	
 	// Translate the point along normal
