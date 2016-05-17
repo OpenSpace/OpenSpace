@@ -440,28 +440,27 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
     if(jsonString != ""){
         json j = json::parse(jsonString);
         
-        fillFromJSONArray(j["listOfPriorityCygnets"]);
-        fillFromJSONArray(j["listOfOKCygnets"]);
-        // fillFromJSONArray(j["listOfStaleCygnets"]);
-        // fillFromJSONArray(j["listOfInactiveCygnets"]);
-        
-    }
-}
+        std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
+                                        // ,"listOfStaleCygnets", "listOfInactiveCygnets",
+                                        };
 
-void IswaManager::fillFromJSONArray(json jsonList){
-    for(int i=0; i<jsonList.size(); i++){
-        json jCygnet = jsonList.at(i);
+        for(auto list : lists){
+            json jsonList = j[list];
+            for(int i=0; i<jsonList.size(); i++){
+            json jCygnet = jsonList.at(i);
 
-        std::string name = jCygnet["cygnetDisplayTitle"];
-        std::replace(name.begin(), name.end(),'.', ',');
+            std::string name = jCygnet["cygnetDisplayTitle"];
+            std::replace(name.begin(), name.end(),'.', ',');
 
-        CygnetInfo info = {
-            name,
-            jCygnet["cygnetDescription"],
-            jCygnet["cygnetUpdateInterval"],
-            false
-        };
-        _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
+            CygnetInfo info = {
+                name,
+                jCygnet["cygnetDescription"],
+                jCygnet["cygnetUpdateInterval"],
+                false
+            };
+            _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
+            }
+        }        
     }
 }
 
