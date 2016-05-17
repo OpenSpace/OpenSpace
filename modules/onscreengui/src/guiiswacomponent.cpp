@@ -231,13 +231,13 @@ void GuiIswaComponent::render() {
     ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
     if(ImGui::SmallButton("Add Cygnet"))
-        OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
+        OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
 
     if(gmdata != gmdatavalue){
         if(gmdata){
-            std::string x = "openspace.iswa.addCygnet('-1,Data,GMData');";
-            std::string y = "openspace.iswa.addCygnet('-2,Data,GMData');";
-            std::string z = "openspace.iswa.addCygnet('-3,Data,GMData');";
+            std::string x = "openspace.iswa.addCygnet(-1,'Data','GMData');";
+            std::string y = "openspace.iswa.addCygnet(-2,'Data','GMData');";
+            std::string z = "openspace.iswa.addCygnet(-3,'Data','GMData');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
@@ -246,9 +246,9 @@ void GuiIswaComponent::render() {
 
     if(gmimage != gmimagevalue){
         if(gmimage){
-            std::string x = "openspace.iswa.addCygnet('-1,Texture,GMImage');";
-            std::string y = "openspace.iswa.addCygnet('-2,Texture,GMImage');";
-            std::string z = "openspace.iswa.addCygnet('-3,Texture,GMImage');";
+            std::string x = "openspace.iswa.addCygnet(-1,'Texture','GMImage');";
+            std::string y = "openspace.iswa.addCygnet(-2,'Texture','GMImage');";
+            std::string z = "openspace.iswa.addCygnet(-3,'Texture','GMImage');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMImage');");
@@ -257,7 +257,7 @@ void GuiIswaComponent::render() {
 
     if(iondata != iondatavalue){
         if(iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('-4,Data,Ionosphere');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-4,'Data','Ionosphere');");
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }

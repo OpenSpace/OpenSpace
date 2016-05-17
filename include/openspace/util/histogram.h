@@ -71,10 +71,14 @@ public:
     float equalize (float);
     float entropy();
 
+    float highestBinValue(bool equalized);
+    float binWidth();
+
 private:
     int _numBins;
     float _minValue;
     float _maxValue;
+
 
     float* _data;
     std::vector<float> _equalizer;

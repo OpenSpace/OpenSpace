@@ -87,43 +87,20 @@ IswaManager::~IswaManager(){
     _cygnetInformation.clear();
 }
 
-void IswaManager::addIswaCygnet(std::string info){
-    std::string token;
-    std::stringstream ss(info);
-    getline(ss,token,',');
-    int cygnetId = std::stoi(token);
-    
-    if(!ss.eof()){
-        getline(ss,token,',');
-        std::string data = token;
-        
-        if(!ss.eof()){
-            getline(ss, token, ',');
-            addIswaCygnet(cygnetId, data, token);
-            return;
-        }  
-
-        addIswaCygnet(cygnetId, data);
-        return;
-    }
-
-    addIswaCygnet(cygnetId);
-}
-
-void IswaManager::addIswaCygnet(int id, std::string info, std::string group){
+void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
     if(id > 0){
         createScreenSpace(id);
     }else if(id < 0){
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = id;
         metaFuture->group = group;
-        if(info == _type[CygnetType::Texture]){
+        if(type == _type[CygnetType::Texture]){
             metaFuture->type = CygnetType::Texture;
             metaFuture->geom  = CygnetGeometry::Plane;
-        } else if (info  == _type[CygnetType::Data]) {
+        } else if (type  == _type[CygnetType::Data]) {
             metaFuture->type = CygnetType::Data;
         } else {
-            LERROR("\""+ info + "\" is not a valid type");
+            LERROR("\""+ type + "\" is not a valid type");
             return;
         }
 

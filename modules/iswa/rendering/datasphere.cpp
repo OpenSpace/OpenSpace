@@ -145,6 +145,11 @@ bool DataSphere::loadTexture(){
     if(data.empty())
         return false;
 
+
+    // auto v = _dataProcessor->filterValues();
+    // std::cout << std::to_string(v) << std::endl;
+    _backgroundValues.setValue(_dataProcessor->filterValues());
+
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
 
