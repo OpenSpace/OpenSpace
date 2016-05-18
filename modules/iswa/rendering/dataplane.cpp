@@ -116,7 +116,7 @@ void DataPlane::transferFunctionsFile(std::string tfPath){ _transferFunctionsFil
 void DataPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool DataPlane::loadTexture() {
-    
+
     // if The future is done then get the new dataFile
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
          DownloadManager::MemoryFile dataFile = _futureObject.get();
@@ -294,7 +294,6 @@ void DataPlane::setTransferFunctions(std::string tfPath){
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
-
 }
 
 }// namespace openspace

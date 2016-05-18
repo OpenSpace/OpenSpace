@@ -36,11 +36,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
-    // , _texture(nullptr)
-    //, _memorybuffer("")
     ,_type(IswaManager::CygnetType::NoType)
-    //,_futureObject(nullptr)
-    // ,_transferFunction(nullptr)
 {
     _data = std::make_shared<Metadata>();
 
@@ -114,7 +110,6 @@ bool IswaCygnet::initialize(){
     if(!_data->groupName.empty())
         IswaManager::ref().registerToGroup(_data->groupName, _type, this);
 
-    // return isReady();
 	return true;
 }
 
@@ -125,7 +120,6 @@ bool IswaCygnet::deinitialize(){
     unregisterProperties();
     destroyGeometry();
     destroyShader();
-    //_memorybuffer = "";
 
     return true;
 }
@@ -173,14 +167,11 @@ void IswaCygnet::render(const RenderData& data){
 void IswaCygnet::update(const UpdateData& data){
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-
-
      _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
-    // glm::dmat3 spiceMatrix    = SpiceManager::ref().positionTransformMatrix("J2000", "GALACTIC", _openSpaceTime);
-     // = spiceMatrix*kameleonMatrix;
 
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+
     if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
         updateTexture();
 

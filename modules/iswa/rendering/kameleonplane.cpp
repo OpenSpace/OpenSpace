@@ -39,56 +39,50 @@
 
 
 namespace {
-	const std::string _loggerCat = "KameleonPlane";
+    const std::string _loggerCat = "KameleonPlane";
 }
 
 namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
-	:CygnetPlane(dictionary)
-	,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
+    :CygnetPlane(dictionary)
+    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
-{		
-	std::string name;
+{       
+    std::string name;
     dictionary.getValue("Name", name);
     setName(name);
 
-	registerProperties();
+    registerProperties();
 
+    addProperty(_backgroundValues);
+    addProperty(_transferFunctionsFile);
 
-	dictionary.getValue("kwPath", _kwPath);
+    setTransferFunctions(_transferFunctionsFile.value());
 
-	std::string axis;
-	dictionary.getValue("axisCut", axis);
+    dictionary.getValue("kwPath", _kwPath);
 
-	if(axis == "x"){
-		_data->scale.x = 0;
-	}else if(axis == "y"){
-		_data->scale.y = 0;
-	}else{
-		_data->scale.z = 0;
-	}
-	_kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-		KameleonWrapper::Model model = _kw->model();
-	if(	model == KameleonWrapper::Model::BATSRUS)
-		_var = "p";
-	else
-		_var = "rho";
+    std::string axis;
+    dictionary.getValue("axisCut", axis);
 
-	_dimensions = glm::size3_t(500,500,1);
-	float zSlice = 0.5f;
-	_dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
+    if(axis == "x"){
+        _data->scale.x = 0;
+    }else if(axis == "y"){
+        _data->scale.y = 0;
+    }else{
+        _data->scale.z = 0;
+    }
 }
 
 KameleonPlane::~KameleonPlane(){}
 
 
 // bool KameleonPlane::initialize(){
-// 	_textures.push_back(nullptr);
+//  _textures.push_back(nullptr);
 
-// 	std::cout << "initialize kameleonplane" << std::endl;
-// 	// std::string kwPath;
-// 	// dictionary.getValue("KW", _kw);
+//  std::cout << "initialize kameleonplane" << std::endl;
+//  // std::string kwPath;
+//  // dictionary.getValue("KW", _kw);
 
 //     createPlane();
 
@@ -114,44 +108,58 @@ KameleonPlane::~KameleonPlane(){}
 //     unregisterProperties();
 //     destroyPlane();
 //     destroyShader();
-	
-// 	_kw = nullptr;
-// 	_memorybuffer = "";
-	
-// 	return true;
+    
+//  _kw = nullptr;
+//  _memorybuffer = "";
+    
+//  return true;
 // }
 
 
 bool KameleonPlane::loadTexture() {
-		std::cout << "load kameleonplane texture" << std::endl;
-		ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-		ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-		std::unique_ptr<ghoul::opengl::Texture> texture = 
-			std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+        std::cout << "load kameleonplane texture" << std::endl;
+        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+        std::unique_ptr<ghoul::opengl::Texture> texture = 
+        std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 
-		if (!texture)
-			return false;
-			// LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+        if (!texture){
+            std::cout << "Could not create texture" << std::endl;
+            return false;
+        }
+            // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
 
-		texture->uploadTexture();
+        texture->uploadTexture();
 
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-		texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
        _textures[0] = std::move(texture);
-		
-		return true;	
+        
+        return true;    
 }
 
 bool KameleonPlane::updateTexture(){
-	if(!_textures[0]){
-		loadTexture();
-	}
-	return true;
+    if(!_textures[0]){
+
+        _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
+        KameleonWrapper::Model model = _kw->model();
+        if( model == KameleonWrapper::Model::BATSRUS)
+            _var = "p";
+        else
+            _var = "rho";
+
+        _dimensions = glm::size3_t(500,500,1);
+        float zSlice = 0.5f;
+        _dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
+
+        loadTexture();
+    }
+    return true;
 }
 
 bool KameleonPlane::readyToRender(){
-    return (_textures[0] != nullptr);
+    return (_textures[0] != nullptr && !_transferFunctions.empty());
 }
 
 void KameleonPlane::setUniformAndTextures(){
@@ -166,7 +174,7 @@ void KameleonPlane::setUniformAndTextures(){
     tfUnits[0].activate();
     _transferFunctions[0]->bind();
     _shader->setUniform(
-       	"transferFunctions[0]",
+        "transferFunctions[0]",
         tfUnits[0]
     );
 

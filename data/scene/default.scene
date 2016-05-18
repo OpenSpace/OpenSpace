@@ -30,7 +30,8 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    openspace.iswa.addCygnet(-4,"Data");
+    openspace.iswa.addCygnet(0);
+    --openspace.iswa.addCygnet(-4,"Data");
     --openspace.iswa.addCygnet(-1,"Data","GM");
     --openspace.iswa.addCygnet(-2,"Data","GM");
     --openspace.iswa.addCygnet(-3,"Data","GM");

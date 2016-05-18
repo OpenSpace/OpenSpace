@@ -143,7 +143,13 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         );
     }else{
         // Kameleonplane?
-        LERROR("No cygnet with id 0");
+        // LERROR("No cygnet with id 0");
+        std::string kwPath = "BATSRUS.cdf";
+        if(type == "x" || type == "y" || type == "z")
+            createKameleonPlane(kwPath, type, group);
+        else
+            createKameleonPlane(kwPath, "z", group);
+
     }
 }
 
@@ -309,6 +315,61 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
+std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, std::string group){
+    if(kwPath != ""){
+        const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+        if(extension == "cdf"){
+            KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
+     
+            std::string parent  = kw.getParent();
+            std::string frame   = kw.getFrame();
+            glm::vec3   min     = kw.getGridMin();
+            glm::vec3   max     = kw.getGridMax();
+
+            glm::vec4 spatialScale;
+            std::string coordinateType;
+
+            std::tuple < std::string, std::string, std::string > gridUnits = kw.getGridUnits();
+            if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
+                spatialScale.x = 6.371f;
+                spatialScale.y = 6.371f;
+                spatialScale.z = 6.371f;
+                spatialScale.w = 6;
+
+                coordinateType = "Cartesian";
+            }else{
+                spatialScale = glm::vec4(1.0);
+                spatialScale.w = 1; //-log10(1.0f/max.x);
+                coordinateType = "Polar";
+            }
+
+            std::cout << cut << std::endl;
+
+            std::string table = "{"
+                "Name = 'KameleonPlane',"
+                "Parent = '" + parent + "', " 
+                "Renderable = {"    
+                    "Type = 'KameleonPlane', "
+                    "Id = 0 ,"
+                    "Frame = '" + frame + "' , "
+                    "GridMin = " + std::to_string(min) + ", "
+                    "GridMax = " + std::to_string(max) + ", "
+                    "SpatialScale = " + std::to_string(spatialScale) + ", "
+                    "UpdateTime = 0, "
+                    "kwPath = '" + kwPath + "' ," 
+                    "axisCut = '"+cut+"',"
+                    "CoordinateType = '" + coordinateType + "', "
+                    "Group = '"+ group + "',"
+                    "}"
+                "}"
+                ;
+            // std::cout << table << std::endl;    
+            return table;
+        }
+    }
+    return "";
+}
+
 std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data){
     if(data->json == ""){
         LWARNING("jsonSphereToLuaTable: no content in metadata json");
@@ -407,6 +468,22 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
+    }
+}
+
+void IswaManager::createKameleonPlane(std::string kwPath, std::string cut, std::string group){
+    kwPath = "${OPENSPACE_DATA}/" + kwPath;
+    const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+
+    if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
+        std::string luaTable = parseKWToLuaTable(kwPath, cut, group);
+        if(!luaTable.empty()){
+            // std::cout << luaTable << std::endl;
+            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+            OsEng.scriptEngine().queueScript(script);
+        }
+    }else{
+        LWARNING( kwPath + " is not a cdf file or can't be found.");
     }
 }
 

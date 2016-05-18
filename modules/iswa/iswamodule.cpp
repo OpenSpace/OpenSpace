@@ -48,7 +48,7 @@ namespace openspace {
 
         fRenderable->registerClass<TexturePlane>("TexturePlane");
         fRenderable->registerClass<DataPlane>("DataPlane");
-        // fRenderable->registerClass<KameleonPlane>("KameleonPlane");
+        fRenderable->registerClass<KameleonPlane>("KameleonPlane");
         fRenderable->registerClass<DataSphere>("DataSphere");
 
         auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
