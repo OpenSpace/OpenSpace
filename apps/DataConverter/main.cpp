@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#include <iostream>
+#include <string>
+#include <glm/glm.hpp>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturereaderdevil.h>
+#include <ghoul/io/texture/texturereaderfreeimage.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/ghoul.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/util/progressbar.h>
 
-#include <modules/volume/rendering/renderablevolumegl.h>
+#include <apps/DataConverter/milkywayconversiontask.h>
 
-namespace openspace {
+int main(int argc, char** argv) {
+    using namespace openspace;
+    using namespace dataconverter;
 
-VolumeModule::VolumeModule() 
-    : OpenSpaceModule("Volume")
-{}
+    ghoul::initialize();
 
-void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-}
+    #ifdef GHOUL_USE_DEVIL
+        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+    #endif // GHOUL_USE_DEVIL
+    #ifdef GHOUL_USE_FREEIMAGE
+        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+    #endif // GHOUL_USE_FREEIMAGE
 
-} // namespace openspace
+    openspace::ProgressBar pb(100);
+    std::function<void(float)> onProgress = [&](float progress) {
+        pb.print(progress * 100);
+    };
+
+    // TODO: Make the converter configurable using either
+    // config files (json, lua dictionaries),
+    // lua scripts,
+    // or at the very least: a command line interface.
+ 
+    MilkyWayConversionTask mwConversionTask(
+        "F:/milky-way/cam2_main.",
+        ".exr",
+        1385,
+        512,
+        "F:/milky-way/mw_512_512_64.rawvolume", 
+        glm::vec3(512, 512, 64));
+    
+    mwConversionTask.perform(onProgress);
+
+    std::cout << "Done." << std::endl;
+
+    std::cin.get();
+    return 0;
+};

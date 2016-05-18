@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#ifndef __LRUCACHE_H__
+#define __LRUCACHE_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
-#include <modules/volume/rendering/renderablevolumegl.h>
+#include <glm/glm.hpp>
+#include <list>
+#include <iterator>
 
 namespace openspace {
+    
+template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
+class LruCache {
+    typedef KeyType K;
+public:
+    LruCache(size_t capacity) {
+        _capacity = capacity;
+    };
+    bool has(const KeyType& key) {
+        return (_cache.find(key) != _cache.end());
+    };
+    void set(const KeyType& key, ValueType value) {
+        auto prev = _cache.find(key);
+        if (prev != _cache.end()) {
+            prev->second.first = value;
+            std::list<KeyType>::iterator trackerIter = prev->second.second;
+            _tracker.splice(_tracker.end(),
+                _tracker,
+                trackerIter);
+        }
+        else {
+            insert(key, value);
+        }
+    };
+    ValueType& use(const KeyType& key) {
+        auto iter = _cache.find(key);
+        std::list<KeyType>::iterator trackerIter = iter->second.second;
+        _tracker.splice(_tracker.end(),
+            _tracker,
+            trackerIter);
+        return iter->second.first;
+    };
+    ValueType& get(const KeyType& key) {
+        auto iter = _cache.find(key);
+        return iter->second.first;
+    };
+    void evict() {
+        _cache.erase(_cache.find(_tracker.front()));
+        _tracker.pop_front();
+    };
+    size_t capacity() {
+        return _capacity;
+    };
+private:
+    void insert(const KeyType& key, const ValueType& value) {
+        if (_cache.size() == _capacity) {
+            evict();
+        }
+        auto iter = _tracker.insert(_tracker.end(), key);
+        _cache[key] = std::make_pair(value, iter);
+    };
+    ContainerType<KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>> _cache;
+    std::list<KeyType> _tracker;
+    size_t _capacity;
+};
 
-VolumeModule::VolumeModule() 
-    : OpenSpaceModule("Volume")
-{}
-
-void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
 }
 
-} // namespace openspace
+#endif
