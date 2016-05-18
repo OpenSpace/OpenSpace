@@ -42,7 +42,9 @@ return {
                 -- Color = "textures/pluto_large.jpg",
                 -- Color = "textures/white.png",
                 Project = "textures/3.jpg",
-                Sequencing = "true",
+                -- Height = "textures/pmap-Mpan1-MpanCA-sthenc22-rl-5_ZMfs-destriped-cyl_lowres.jpg",
+                -- NormalMap = "textures/normal_map.png",
+                Sequencing = "true"
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc

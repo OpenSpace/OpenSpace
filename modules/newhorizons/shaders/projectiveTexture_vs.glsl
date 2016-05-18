@@ -24,12 +24,7 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
-//texture projection matrix
-
-uniform mat4 ProjectorMatrix;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 //in vec3 in_position;
@@ -42,10 +37,22 @@ out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out float s;
-
-
 out vec4 ProjTexCoord;
-#include "PowerScaling/powerScaling_vs.hglsl"
+
+out vec4 test;
+
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
+
+//texture projection matrix
+
+uniform mat4 ProjectorMatrix;
+
+uniform bool _hasHeightMap;
+uniform float _heightExaggeration;
+uniform sampler2D heightTex;
+
+
 void main(){
     // Radius = 0.71492 *10^8; 
     // set variables
@@ -64,7 +71,17 @@ void main(){
     vec4 raw_pos = psc_to_meter(in_position, scaling);
     ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 
+    if (_hasHeightMap) {
+        float height = texture(heightTex, in_st).r;
+        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        float displacementFactor = height * _heightExaggeration * 2000;
+        position.xyz = position.xyz + displacementDirection * displacementFactor;
+
+        // test = vec4(vec3(displacementFactor), 1.0);
+    }
+
     position = ViewProjection * position;
+
 
     gl_Position =  z_normalization(position);
 }

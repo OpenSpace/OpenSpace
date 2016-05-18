@@ -35,7 +35,6 @@ layout(location = 2) in vec3 in_normal;
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
-out float s;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
@@ -54,19 +53,19 @@ void main()
 
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    // vs_normal = vec4(in_normal, 0.0);
     
     vec4 position = pscTransform(tmp, ModelTransform);
     vs_position = tmp;
-    position = ViewProjection * position;
 
     if (_hasHeightMap) {
-        // Get the height of the height value
         float height = texture(heightTex, in_st).r;
-        // Displace the position along the position vector (being the normal) by that height * the
-        // exaggeration factor
-        position.xyz = position.xyz + height * normalize(position.xyz) * _heightExaggeration;
+        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        float displacementFactor = height * _heightExaggeration;
+        position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
-
+// 
+    position = ViewProjection * position;
 
     gl_Position =  z_normalization(position);
 }

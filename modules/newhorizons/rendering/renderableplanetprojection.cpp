@@ -87,19 +87,27 @@ namespace openspace {
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("planetTexture", "RGB Texture")
+    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _normalMapTexturePath("normalMap", "Normalmap Texture")
     , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
     //, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
+    , _enableNormalMapping("enableNormalMapping", "Enable Normal Mapping", true)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _texture(nullptr)
     , _textureOriginal(nullptr)
     , _textureProj(nullptr)
     , _textureWhiteSquare(nullptr)
+    , _heightMapTexture(nullptr)
+    , _normalMapTexture(nullptr)
     , _geometry(nullptr)
     , _capture(false)
+    , _hasHeightMap(false)
+    , _hasNormalMap(false)
     , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
     std::string name;
@@ -164,6 +172,21 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (success){
         _projectionTexturePath = absPath(texturePath);
     }
+
+    std::string heightMapPath = "";
+    success = dictionary.getValue("Textures.Height", heightMapPath);
+    if (success) {
+        _heightMapTexturePath = absPath(heightMapPath);
+        _hasHeightMap = true;
+    }
+
+    std::string normalMapPath = "";
+    success = dictionary.getValue("Textures.NormalMap", normalMapPath);
+    if (success) {
+        _normalMapTexturePath = absPath(normalMapPath);
+        _hasNormalMap = true;
+    }
+
     addPropertySubOwner(_geometry);
     addProperty(_rotation);
     //addProperty(_fadeProjection);
@@ -173,8 +196,18 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
+    addProperty(_heightMapTexturePath);
+    _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
+    addProperty(_normalMapTexturePath);
+    _normalMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
     addProperty(_projectionTexturePath);
     _projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
+
+    addProperty(_heightExaggeration);
+    addProperty(_enableNormalMapping);
 
     SequenceParser* parser;
 
@@ -467,13 +500,27 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
 
 void RenderablePlanetProjection::textureBind() {
-    ghoul::opengl::TextureUnit unit[2];
+    ghoul::opengl::TextureUnit unit[4];
     unit[0].activate();
     _texture->bind();
     _programObject->setUniform("texture1", unit[0]);
     unit[1].activate();
     _textureWhiteSquare->bind();
     _programObject->setUniform("texture2", unit[1]);
+
+    if (_hasHeightMap) {
+        unit[2].activate();
+        _heightMapTexture->bind();
+        _programObject->setUniform("heightTex", unit[2]);
+    }
+
+    if (_hasNormalMap) {
+        unit[3].activate();
+        _normalMapTexture->bind();
+        _programObject->setUniform("normalTex", unit[3]);
+    }
+
+
 }
 
 void RenderablePlanetProjection::project(){
@@ -548,6 +595,11 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform" , _transform);
     _programObject->setUniform("boresight"    , _boresight);
+
+    _programObject->setUniform("_hasHeightMap", _hasHeightMap);
+    _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+    _programObject->setUniform("_enableNormalMapping", _enableNormalMapping && _hasNormalMap);
+
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
     textureBind();
@@ -636,5 +688,24 @@ void RenderablePlanetProjection::loadTexture() {
             _textureWhiteSquare->setFilter(Texture::FilterMode::Linear);
         }
     }
+
+    _heightMapTexture = nullptr;
+    if (_heightMapTexturePath.value() != "") {
+        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
+        if (_heightMapTexture) {
+            _heightMapTexture->uploadTexture();
+            _heightMapTexture->setFilter(Texture::FilterMode::Linear);
+        }
+    }
+
+    _normalMapTexture = nullptr;
+    if (_normalMapTexturePath.value() != "") {
+        _normalMapTexture = ghoul::io::TextureReader::ref().loadTexture(_normalMapTexturePath);
+        if (_normalMapTexture) {
+            _normalMapTexture->uploadTexture();
+            _normalMapTexture->setFilter(Texture::FilterMode::Linear);
+        }
+    }
+
 }
 }  // namespace openspace

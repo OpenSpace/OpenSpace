@@ -30,12 +30,18 @@ uniform vec4 objpos;
 uniform float  time;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+// uniform sampler2D heightTex;
+uniform sampler2D normalTex;
+
+uniform bool _enableNormalMapping;
 
 in vec2 vs_st;
 in vec4 vs_normal;
 in vec4 vs_position;
 
 in vec4 ProjTexCoord;
+
+in vec4 test;
 uniform vec3 boresight;
 uniform vec3 sun_pos;
 
@@ -46,12 +52,21 @@ Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
     vec4 diffuse = texture(texture1, vs_st);
+    // vec4 diffuse = texture(heightTex, vs_st);
 
     // directional lighting
     vec3 origin = vec3(0.0);
     vec4 spec = vec4(0.0);
     
+    // vec3 n = normalize(texture(normalTex, vs_st).xyz);
+
     vec3 n = normalize(vs_normal.xyz);
+    // n = vec3(0);
+    // vec3 n = vec3(0);
+
+    if (_enableNormalMapping) {
+        n = n + normalize(texture(normalTex, vs_st).xyz);
+    }
     //vec3 e = normalize(camdir);
     vec3 l_pos = sun_pos; // sun.
     vec3 l_dir = normalize(l_pos-objpos.xyz);
@@ -90,6 +105,8 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = diffuse;
+// frag.color = vec4(n, 1.0);
+    // frag.color = test;
     frag.depth = depth;
     //frag.color = vec4(vs_st, 0.0, 1.0);
     return frag;
