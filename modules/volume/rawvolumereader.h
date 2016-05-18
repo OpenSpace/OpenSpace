@@ -26,7 +26,6 @@
 #define __RAWVOLUMEREADER_H__
 
 #include <functional>
-#include <apps/DataConverter/volume.h>
 #include <modules/volume/rawvolume.h>
 
 namespace openspace {
