@@ -22,27 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIISWACOMPONENT_H__
-#define __GUIISWACOMPONENT_H__
+#ifndef __RENDERPROPERTIES_H__
+#define __RENDERPROPERTIES_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
-
-namespace openspace {
-namespace gui {
-
-class GuiIswaComponent : public GuiPropertyComponent {
-public:
-    virtual void render() override;
-
-private:
-    bool gmdata;
-    bool gmimage;
-    bool iondata;
-};
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/property.h>
 
 
-} // namespace gui
-} // namespace openspace
+using namespace openspace::properties;
 
-#endif // __GUIISWACOMPONENT_H__
+void executeScript(const std::string& id, const std::string& value);
+void renderBoolProperty(Property* prop);
+void renderOptionProperty(Property* prop);
+void renderSelectionProperty(Property* prop);
+void renderStringProperty(Property* prop);
+void renderIntProperty(Property* prop);
+void renderFloatProperty(Property* prop);
+void renderVec2Property(Property* prop);
+void renderVec3Property(Property* prop);
+void renderVec4Property(Property* prop);
+void renderTriggerProperty(Property* prop);
+
+#endif __RENDERPROPERTIES_H__
