@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/other/texturetileset.h>
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/gdaldataconverter.h>
+#include <modules/globebrowsing/other/texturedataprovider.h>
 
 #include <ghoul/opengl/texturemanager.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -67,7 +67,7 @@ namespace openspace {
         poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
 
         assert(poDataset != nullptr, "Unable to read dataset" << testFile);
-        GdalDataConverter conv;
+        TextureDataProvider conv;
 
         GeodeticTileIndex ti(0, 0, 0);
         

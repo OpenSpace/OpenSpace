@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 
-#include <modules/globebrowsing/other/gdaldataconverter.h>
+#include <modules/globebrowsing/other/texturedataprovider.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
@@ -31,20 +31,22 @@
 namespace openspace {
 
     template<class T>
-    GdalDataConverter<T>::GdalDataConverter()
+    TextureDataProvider<T>::TextureDataProvider()
     {
 
     }
 
     template<class T>
-    GdalDataConverter<T>::~GdalDataConverter()
+    TextureDataProvider<T>::~TextureDataProvider()
     {
 
     }
 
 
+
+
     template<class T>
-    std::shared_ptr<UninitializedTextureTile> GdalDataConverter<T>::getUninitializedTextureTile(
+    std::shared_ptr<TextureData> TextureDataProvider<T>::getTextureData(
         GDALDataset* dataSet,
         ChunkIndex chunkIndex,
         int tileLevelDifference)
@@ -94,6 +96,9 @@ namespace openspace {
         // GDAL reads image data top to bottom
         T* imageData = new T[numPixels.x * numPixels.y * nRasters];
 
+        int pixelSpacing = sizeof(T) * nRasters;
+        int lineSpacing = pixelSpacing * numPixels.x;
+
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < nRasters; i++) {
             GDALRasterBand* rasterBand = dataSet->GetRasterBand(i + 1)->GetOverview(ov);
@@ -101,6 +106,7 @@ namespace openspace {
             int xSize = rasterBand->GetXSize();
             int ySize = rasterBand->GetYSize();
 
+            
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
                 pixelStart.x,           // Begin read x
@@ -111,8 +117,8 @@ namespace openspace {
                 numPixels.x,            // width to write x in destination
                 numPixels.y,            // width to write y in destination
                 gdalType,		        // Type
-                sizeof(T) * nRasters,	// Pixel spacing
-                0);                     // Line spacing
+                pixelSpacing,	        // Pixel spacing
+                lineSpacing);           // Line spacing
 
             if (err != CE_None) {
               ;//LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
@@ -130,22 +136,22 @@ namespace openspace {
         delete[] imageData;
         
         glm::uvec3 dims(numPixels.x, numPixels.y, 1);
-        UninitializedTextureTile::TextureFormat textureFormat =
+        TextureData::TextureFormat textureFormat =
             getTextureFormat(nRasters, gdalType);
         GLuint glType = getGlDataTypeFromGdalDataType(gdalType);
-        UninitializedTextureTile* uninitedTexPtr = new UninitializedTextureTile(
+        TextureData* uninitedTexPtr = new TextureData(
             imageDataYflipped,
             dims,
             textureFormat,
             glType,
             chunkIndex);
-        std::shared_ptr<UninitializedTextureTile> uninitedTex =
-            std::shared_ptr<UninitializedTextureTile>(uninitedTexPtr);
+        std::shared_ptr<TextureData> uninitedTex =
+            std::shared_ptr<TextureData>(uninitedTexPtr);
         return uninitedTex;
     }
 
     template<class T>
-    glm::uvec2 GdalDataConverter<T>::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
+    glm::uvec2 TextureDataProvider<T>::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
         double padfTransform[6];
         CPLErr err = dataSet->GetGeoTransform(padfTransform);
 
@@ -183,11 +189,11 @@ namespace openspace {
     }
 
     template<class T>
-    UninitializedTextureTile::TextureFormat GdalDataConverter<T>::getTextureFormat(
+    TextureData::TextureFormat TextureDataProvider<T>::getTextureFormat(
         int rasterCount,
         GDALDataType gdalType)
     {
-        UninitializedTextureTile::TextureFormat format;
+        TextureData::TextureFormat format;
 
         switch (rasterCount)
         {
@@ -323,7 +329,7 @@ namespace openspace {
     }
 
     template<class T>
-    GLuint GdalDataConverter<T>::getGlDataTypeFromGdalDataType(GDALDataType gdalType)
+    GLuint TextureDataProvider<T>::getGlDataTypeFromGdalDataType(GDALDataType gdalType)
     {
         switch (gdalType)
         {
@@ -354,4 +360,33 @@ namespace openspace {
         }
     }
 
+
+    template<class T>
+    void TextureDataProvider<T>::async::request(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference) {
+
+    }
+
+    template<class T>
+    void TextureDataProvider<T>::async::updateRequests() {
+
+    }
+
+    template<class T>
+    bool TextureDataProvider<T>::async::hasTextureTileData() const {
+
+    }
+
+    template<class T>
+    std::shared_ptr<TextureData> TextureDataProvider<T>::async::nextTextureTile() {
+        return nullptr;
+    }
+
+    
+        /*
+    void asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
+    void updateAsyncRequests();
+    std::shared_ptr<TextureData> nextTextureTile();
+
+        */
+            
 }  // namespace openspace

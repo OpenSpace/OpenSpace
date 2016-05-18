@@ -31,6 +31,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
 #include "gdal_priv.h"
 
@@ -40,7 +41,7 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
-    struct UninitializedTextureTile {
+    struct TextureData {
 
         struct TextureFormat
         {
@@ -48,12 +49,8 @@ namespace openspace {
             GLuint glFormat;
         };
 
-        UninitializedTextureTile(
-            void* data,
-            glm::uvec3 dims,
-            TextureFormat format,
-            GLuint glType,
-            const ChunkIndex& chunkIndex)
+        TextureData(void* data, glm::uvec3 dims, TextureFormat format,
+            GLuint glType, const ChunkIndex& chunkIndex)
             : imageData(data)
             , dimensions(dims)
             , texFormat(format)
@@ -70,32 +67,71 @@ namespace openspace {
         const ChunkIndex chunkIndex;
     };
 
+
     template<class T>
-    class GdalDataConverter
+    class TextureDataProvider
     {
     public:
 
-        GdalDataConverter();
-        ~GdalDataConverter();
+        TextureDataProvider();
+        ~TextureDataProvider();
 
-        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
-            GDALDataset * dataSet,
-            ChunkIndex chunkIndex,
-            int tileLevelDifference);
 
-        UninitializedTextureTile::TextureFormat getTextureFormat(
-            int rasterCount,
-            GDALDataType gdalType);
-        GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
+        std::shared_ptr<TextureData> getTextureData(
+            GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
+
+
+
+        struct async {
+        public:
+            void request(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
+            void updateRequests();
+            bool hasTextureTileData() const;
+            std::shared_ptr<TextureData> nextTextureTile();
+
+        private:
+            std::queue<std::shared_ptr<TextureData>> loadedTextureTiles;
+            std::set<GDALAsyncReader*> asyncReaders;
+        };
+
+
+
+    private:
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                          HELPER STRUCTS                                      //
+        //////////////////////////////////////////////////////////////////////////////////
+
+
+        struct GdalRequestParams {
+            glm::uvec2 pixelStart;
+            glm::uvec2 numPixels;
+            GDALDataType dataType;
+            int pixelSpacing;
+            int lineSpacing;
+        };
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                          HELPER FUNCTIONS                                    //
+        //////////////////////////////////////////////////////////////////////////////////
+
 
         glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
-    };
+        GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
 
+
+        TextureData::TextureFormat getTextureFormat(
+            int rasterCount,
+            GDALDataType gdalType);
+
+
+    };
 } // namespace openspace
 
+#include <modules/globebrowsing/other/texturedataprovider.inl>
 
 
-#include <modules/globebrowsing/other/gdaldataconverter.inl>
 
 #endif  // __GDALDATACONVERTER_H__

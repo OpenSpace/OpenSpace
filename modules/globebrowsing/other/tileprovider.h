@@ -38,7 +38,7 @@
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/lrucache.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/other/gdaldataconverter.h>
+#include <modules/globebrowsing/other/texturedataprovider.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //									TILE PROVIDER									    //
@@ -99,14 +99,14 @@ namespace openspace {
         /**
             Fetches all the needeed texture data from the GDAL dataset.
         */
-        std::shared_ptr<UninitializedTextureTile> getUninitializedTextureTile(
+        std::shared_ptr<TextureData> getTextureData(
             const ChunkIndex& chunkIndex);
         
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
         std::shared_ptr<Texture> initializeTexture(
-            std::shared_ptr<UninitializedTextureTile> uninitedTexture);
+            std::shared_ptr<TextureData> uninitedTexture);
 
         bool enqueueTileRequest(const ChunkIndex& ci);
 
@@ -133,15 +133,15 @@ namespace openspace {
         GDALDataset* _gdalDataSet;
 
         // Converters are needed for all different data types since they are templated.
-        GdalDataConverter<GLubyte>  _uByteConverter;
-        GdalDataConverter<GLushort> _uShortConverter;
-        GdalDataConverter<GLshort>  _shortConverter;
-        GdalDataConverter<GLuint>   _uIntConverter;
-        GdalDataConverter<GLint>    _intConverter;
-        GdalDataConverter<GLfloat>  _floatConverter;
-        GdalDataConverter<GLdouble> _doubleConverter;
+        TextureDataProvider<GLubyte>  _uByteTextureTileDataProvider;
+        TextureDataProvider<GLushort> _uShortTextureDataProvider;
+        TextureDataProvider<GLshort>  _shortTextureDataProvider;
+        TextureDataProvider<GLuint>   _uIntTextureDataProvider;
+        TextureDataProvider<GLint>    _intTextureDataProvider;
+        TextureDataProvider<GLfloat>  _floatTextureDataProvider;
+        TextureDataProvider<GLdouble> _doubleTextureDataProvider;
 
-        ConcurrentJobManager<UninitializedTextureTile> _tileLoadManager;
+        ConcurrentJobManager<TextureData> _tileLoadManager;
 
         std::shared_ptr<Texture> _defaultTexture;
         int _tileLevelDifference;
@@ -150,11 +150,19 @@ namespace openspace {
 
 }  // namespace openspace
 
+
+
+
+
+
+
+
+
 namespace openspace {
 
     using namespace ghoul::opengl;
 
-    struct TextureTileLoadJob : public Job<UninitializedTextureTile> {
+    struct TextureTileLoadJob : public Job<TextureData> {
         TextureTileLoadJob(TileProvider * tileProvider, const ChunkIndex& chunkIndex)
             : _tileProvider(tileProvider)
             , _chunkIndex(chunkIndex) {
@@ -164,11 +172,11 @@ namespace openspace {
         virtual ~TextureTileLoadJob() { }
 
         virtual void execute() {
-            _uninitedTexture = _tileProvider->getUninitializedTextureTile(_chunkIndex);
+            _uninitedTexture = _tileProvider->getTextureData(_chunkIndex);
 
         }
 
-        virtual std::shared_ptr<UninitializedTextureTile> product() {
+        virtual std::shared_ptr<TextureData> product() {
             return _uninitedTexture;
         }
 
@@ -176,7 +184,7 @@ namespace openspace {
     private:
         ChunkIndex _chunkIndex;
         TileProvider * _tileProvider;
-        std::shared_ptr<UninitializedTextureTile> _uninitedTexture;
+        std::shared_ptr<TextureData> _uninitedTexture;
     };
 }
 

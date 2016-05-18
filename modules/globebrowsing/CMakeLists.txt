@@ -52,7 +52,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
@@ -89,7 +89,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/gdaldataconverter.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp

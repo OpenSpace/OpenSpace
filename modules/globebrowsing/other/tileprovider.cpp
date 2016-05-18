@@ -101,6 +101,9 @@ namespace openspace {
 
         _depthTransform.depthOffset = firstBand->GetOffset();
         _depthTransform.depthScale = firstBand->GetScale() * maximumValue;
+
+
+        
     }
 
     TileProvider::~TileProvider(){
@@ -120,7 +123,7 @@ namespace openspace {
     void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
-            std::shared_ptr<UninitializedTextureTile> uninitedTex =
+            std::shared_ptr<TextureData> uninitedTex =
                 finishedJob->product();
             HashKey key = uninitedTex->chunkIndex.hashKey();
             std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
@@ -228,7 +231,7 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
+    std::shared_ptr<TextureData> TileProvider::getTextureData(
         const ChunkIndex& chunkIndex) {
         
         // We assume here that all rasterbands have the same data type
@@ -237,44 +240,44 @@ namespace openspace {
         switch (gdalType)
         {
         case GDT_Byte:
-            return _uByteConverter.getUninitializedTextureTile(
+            return _uByteTextureTileDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_UInt16:
-            return _uShortConverter.getUninitializedTextureTile(
+            return _uShortTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Int16:
-            return _shortConverter.getUninitializedTextureTile(
+            return _shortTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_UInt32:
-            return _uIntConverter.getUninitializedTextureTile(
+            return _uIntTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Int32:
-            return _intConverter.getUninitializedTextureTile(
+            return _intTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
             break;
         case GDT_Float32:
-            return _floatConverter.getUninitializedTextureTile(
+            return _floatTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
 
             break;
         case GDT_Float64:
-            return _doubleConverter.getUninitializedTextureTile(
+            return _doubleTextureDataProvider.getTextureData(
                 _gdalDataSet,
                 chunkIndex,
                 _tileLevelDifference);
@@ -287,7 +290,7 @@ namespace openspace {
     }
 
     std::shared_ptr<Texture> TileProvider::initializeTexture(
-        std::shared_ptr<UninitializedTextureTile> uninitedTexture) {
+        std::shared_ptr<TextureData> uninitedTexture) {
         Texture* tex = new Texture(
             uninitedTexture->imageData,
             uninitedTexture->dimensions,
@@ -299,7 +302,6 @@ namespace openspace {
 
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
-
         texture->uploadTexture();
         return texture;
     }
