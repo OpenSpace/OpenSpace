@@ -279,6 +279,7 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
     }
 }
 
+
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 

@@ -153,11 +153,11 @@ bool KameleonPlane::loadTexture() {
     std::vector<int> selectedOptions = _dataOptions.value();
     auto options = _dataOptions.options();
 
-    for(int selected : selectedOptions){
-        if(_dataSlices[selected]){
-            if(!_textures[selected]){
+    for(int option : selectedOptions){
+        if(_dataSlices[option]){
+            if(!_textures[option]){
                 std::unique_ptr<ghoul::opengl::Texture> texture = 
-                    std::make_unique<ghoul::opengl::Texture>(_dataSlices[selected], _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+                    std::make_unique<ghoul::opengl::Texture>(_dataSlices[option], _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
 
                 if (!texture){
                     std::cout << "Could not create texture" << std::endl;
@@ -166,7 +166,7 @@ bool KameleonPlane::loadTexture() {
 
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-               _textures[selected] = std::move(texture);
+               _textures[option] = std::move(texture);
             }else{
                 // _textures[selected]->setPixelData(values);
                 // _textures[selected]->uploadTexture();
@@ -183,31 +183,17 @@ bool KameleonPlane::updateTexture(){
     }
 
     if(!_dataOptions.options().size()){
-        std::vector<std::string> options = _kw->getVariables();
-        int numOptions = 0;
-
-        for(std::string option : options){
-            if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
-                _dataOptions.addOption({numOptions, option});
-                _dataSlices.push_back(nullptr);
-                _textures.push_back(nullptr);
-                numOptions++;
-            }
-        }
-        _dataOptions.setValue(std::vector<int>(1,0));
-
-        if(!_data->groupName.empty())
-            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+        fillOptions();
     }
 
     std::vector<int> selectedOptions = _dataOptions.value();
     auto options = _dataOptions.options();
     float zSlice = 0.5f;
 
-    for(int selected : selectedOptions){
-        if(!_dataSlices[selected]){
-            std::cout << options[selected].description << std::endl;
-            _dataSlices[selected] = _kw->getUniformSliceValues(options[selected].description, _dimensions, zSlice);
+    for(int option : selectedOptions){
+        if(!_dataSlices[option]){
+            std::cout << options[option].description << std::endl;
+            _dataSlices[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, zSlice);
         }
     }
 
@@ -312,7 +298,24 @@ void KameleonPlane::setTransferFunctions(std::string tfPath){
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
+}
 
+void KameleonPlane::fillOptions(){
+    std::vector<std::string> options = _kw->getVariables();
+    int numOptions = 0;
+
+    for(std::string option : options){
+        if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
+            _dataOptions.addOption({numOptions, option});
+            _dataSlices.push_back(nullptr);
+            _textures.push_back(nullptr);
+            numOptions++;
+        }
+    }
+    _dataOptions.setValue(std::vector<int>(1,0));
+
+    if(!_data->groupName.empty())
+        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }
 
 }// namespace openspace

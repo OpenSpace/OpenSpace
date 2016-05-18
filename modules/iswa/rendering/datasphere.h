@@ -56,6 +56,7 @@ private:
     virtual bool createShader() override;
 
     void setTransferFunctions(std::string tfPath);
+    void fillOptions();
 
     properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;

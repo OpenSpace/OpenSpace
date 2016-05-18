@@ -47,6 +47,7 @@
     virtual bool createShader() override;
 
     void setTransferFunctions(std::string tfPath);
+    void fillOptions();
 
 	static int id();
 
