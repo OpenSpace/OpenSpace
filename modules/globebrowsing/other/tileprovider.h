@@ -133,13 +133,8 @@ namespace openspace {
         GDALDataset* _gdalDataSet;
 
         // Converters are needed for all different data types since they are templated.
-        TextureDataProvider<GLubyte>  _uByteTextureTileDataProvider;
-        TextureDataProvider<GLushort> _uShortTextureDataProvider;
-        TextureDataProvider<GLshort>  _shortTextureDataProvider;
-        TextureDataProvider<GLuint>   _uIntTextureDataProvider;
-        TextureDataProvider<GLint>    _intTextureDataProvider;
-        TextureDataProvider<GLfloat>  _floatTextureDataProvider;
-        TextureDataProvider<GLdouble> _doubleTextureDataProvider;
+        TextureDataProvider  _uByteTextureTileDataProvider;
+
 
         ConcurrentJobManager<TextureData> _tileLoadManager;
 

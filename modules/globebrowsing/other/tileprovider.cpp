@@ -237,56 +237,13 @@ namespace openspace {
         // We assume here that all rasterbands have the same data type
         GDALDataType gdalType = _gdalDataSet->GetRasterBand(1)->GetRasterDataType();
 
-        switch (gdalType)
-        {
-        case GDT_Byte:
-            return _uByteTextureTileDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_UInt16:
-            return _uShortTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Int16:
-            return _shortTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_UInt32:
-            return _uIntTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Int32:
-            return _intTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Float32:
-            return _floatTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
 
-            break;
-        case GDT_Float64:
-            return _doubleTextureDataProvider.getTextureData(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
 
-            break;
-        default:
-            LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-        }
-        return nullptr;
+        //auto provider = TextureDataProviderFactory::get(gdalType);
+        //return provider->getTextureData(_gdalDataSet, chunkIndex, _tileLevelDifference);
+
+        return _uByteTextureTileDataProvider.getTextureData(
+            _gdalDataSet, chunkIndex, _tileLevelDifference);
     }
 
     std::shared_ptr<Texture> TileProvider::initializeTexture(

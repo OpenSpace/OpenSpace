@@ -22,12 +22,11 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __GDALDATACONVERTER_H__
-#define __GDALDATACONVERTER_H__
+#ifndef __TEXTURE_DATA_PROVIDER_H__
+#define __TEXTURE_DATA_PROVIDER_H__
 
 //#include <modules/globebrowsing/other/tileprovider.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
@@ -36,6 +35,9 @@
 #include "gdal_priv.h"
 
 #include <memory>
+#include <set>
+#include <queue>
+
 
 
 namespace openspace {
@@ -43,11 +45,12 @@ namespace openspace {
 
     struct TextureData {
 
-        struct TextureFormat
-        {
+        struct TextureFormat {
             Texture::Format ghoulFormat;
             GLuint glFormat;
         };
+
+
 
         TextureData(void* data, glm::uvec3 dims, TextureFormat format,
             GLuint glType, const ChunkIndex& chunkIndex)
@@ -68,9 +71,12 @@ namespace openspace {
     };
 
 
-    template<class T>
-    class TextureDataProvider
-    {
+
+
+
+
+
+    class TextureDataProvider {
     public:
 
         TextureDataProvider();
@@ -81,22 +87,17 @@ namespace openspace {
             GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
 
 
-
-        struct async {
-        public:
-            void request(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
-            void updateRequests();
-            bool hasTextureTileData() const;
-            std::shared_ptr<TextureData> nextTextureTile();
-
-        private:
-            std::queue<std::shared_ptr<TextureData>> loadedTextureTiles;
-            std::set<GDALAsyncReader*> asyncReaders;
-        };
-
-
+        void asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
+        void updateAsyncRequests();
+        bool hasTextureTileData() const;
+        std::shared_ptr<TextureData> nextTextureTile();
 
     private:
+
+        std::queue<std::shared_ptr<TextureData>> loadedTextureTiles;
+        std::set<GDALAsyncReader*> asyncReaders;
+
+
 
         //////////////////////////////////////////////////////////////////////////////////
         //                          HELPER STRUCTS                                      //
@@ -107,6 +108,7 @@ namespace openspace {
             glm::uvec2 pixelStart;
             glm::uvec2 numPixels;
             GDALDataType dataType;
+            int numRasters;
             int pixelSpacing;
             int lineSpacing;
         };
@@ -121,17 +123,18 @@ namespace openspace {
 
         GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
 
+        TextureData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
-        TextureData::TextureFormat getTextureFormat(
-            int rasterCount,
-            GDALDataType gdalType);
-
+        size_t numberOfBytes(GDALDataType gdalType) const;
 
     };
+
+
+
 } // namespace openspace
 
-#include <modules/globebrowsing/other/texturedataprovider.inl>
 
 
 
-#endif  // __GDALDATACONVERTER_H__
+
+#endif  // __TEXTURE_DATA_PROVIDER_H__

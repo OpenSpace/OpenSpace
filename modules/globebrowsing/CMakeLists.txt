@@ -89,7 +89,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
