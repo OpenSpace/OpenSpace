@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#ifndef __RAWVOLUMEREADER_H__
+#define __RAWVOLUMEREADER_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
-#include <modules/volume/rendering/renderablevolumegl.h>
+#include <functional>
+#include <modules/volume/rawvolume.h>
 
 namespace openspace {
 
-VolumeModule::VolumeModule() 
-    : OpenSpaceModule("Volume")
-{}
+template <typename Voxel>
+class RawVolumeReader {
+public:
+    typedef Voxel VoxelType;
+    RawVolumeReader(const std::string& path, const glm::ivec3& dimensions);
+    glm::ivec3 dimensions() const;
+    std::string path() const;
+    void setPath(const std::string& path);
+    void setDimensions(const glm::ivec3& dimensions);
+    //VoxelType get(const glm::ivec3& coordinates) const; // TODO: Implement this
+    //VoxelType get(const size_t index) const; // TODO: Implement this
+    std::unique_ptr<RawVolume<VoxelType>> read();
+private:
+    size_t coordsToIndex(const glm::ivec3& cartesian) const;
+    glm::ivec3 indexToCoords(size_t linear) const;
+    glm::ivec3 _dimensions;
+    std::string _path;
+};
 
-void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
 }
 
-} // namespace openspace
+#include "rawvolumereader.inl"
+
+#endif // __RAWVOLUMEREADER_H__
