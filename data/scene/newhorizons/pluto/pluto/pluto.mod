@@ -42,8 +42,8 @@ return {
                 -- Color = "textures/pluto_large.jpg",
                 -- Color = "textures/white.png",
                 Project = "textures/3.jpg",
-                -- Height = "textures/pmap-Mpan1-MpanCA-sthenc22-rl-5_ZMfs-destriped-cyl_lowres.jpg",
-                -- NormalMap = "textures/normal_map.png",
+                -- Height = "textures/pluto_shenk_heightmap.jpg",
+                -- NormalMap = "textures/pluto_shenk_normalmap.png",
                 Sequencing = "true"
             },
             Atmosphere = {
