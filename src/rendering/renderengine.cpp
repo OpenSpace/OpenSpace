@@ -1164,7 +1164,9 @@ void RenderEngine::renderInformation() {
             );
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-        if (openspace::ImageSequencer::ref().isReady()) {
+
+        bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+        if (openspace::ImageSequencer::ref().isReady() && hasNewHorizons) {
             penPosition.y -= 25.f;
 
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
