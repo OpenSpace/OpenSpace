@@ -34,6 +34,7 @@ uniform int shadows;
 uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D nightTex;
+uniform sampler2D heightTex;
 
 in vec2 vs_st;
 in vec2 vs_nightTex;

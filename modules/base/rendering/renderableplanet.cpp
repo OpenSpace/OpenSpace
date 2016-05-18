@@ -58,15 +58,19 @@ namespace openspace {
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
+    , _nightTexturePath("nightTexture", "Night Texture")
+    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _nightTexture(nullptr)
+    , _heightMapTexture(nullptr)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
     , _rotation("rotation", "Rotation", 0, 0, 360)
     , _alpha(1.f)
-    , _nightTexturePath("")
     , _hasNightTexture(false)
+    , _hasHeightTexture(false)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -100,16 +104,30 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     std::string nightTexturePath = "";
     dictionary.getValue("Textures.Night", nightTexturePath);
-    
     if (nightTexturePath != ""){
         _hasNightTexture = true;
         _nightTexturePath = absPath(nightTexturePath);
+    }
+
+    std::string heightMapTexturePath = "";
+    dictionary.getValue("Textures.Height", heightMapTexturePath);
+    if (heightMapTexturePath != "") {
+        _hasHeightTexture = true;
+        _heightMapTexturePath = absPath(heightMapTexturePath);
     }
 
     addPropertySubOwner(_geometry);
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    addProperty(_nightTexturePath);
+    _nightTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    addProperty(_heightMapTexturePath);
+    _heightMapTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+
+    addProperty(_heightExaggeration);
 
     if (dictionary.hasKeyAndValue<bool>(keyShading)) {
         bool shading;
@@ -142,11 +160,13 @@ bool RenderablePlanet::initialize() {
             "pscstandard",
             "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
             "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
-        if (!_programObject) return false;
+        if (!_programObject)
+            return false;
 
     }
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     loadTexture();
     _geometry->initialize(this);
@@ -218,18 +238,30 @@ void RenderablePlanet::render(const RenderData& data)
     
     _programObject->setUniform("_performShading", _performShading);
 
+    _programObject->setUniform("_hasHeightMap", _hasHeightTexture);
+    _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+
     // Bind texture
     ghoul::opengl::TextureUnit dayUnit;
+    ghoul::opengl::TextureUnit nightUnit;
+    ghoul::opengl::TextureUnit heightUnit;
+
+
     dayUnit.activate();
     _texture->bind();
     _programObject->setUniform("texture1", dayUnit);
 
     // Bind possible night texture
     if (_hasNightTexture) {
-        ghoul::opengl::TextureUnit nightUnit;
         nightUnit.activate();
         _nightTexture->bind();
         _programObject->setUniform("nightTex", nightUnit);
+    }
+
+    if (_hasHeightTexture) {
+        heightUnit.activate();
+        _heightMapTexture->bind();
+        _programObject->setUniform("heightTex", heightUnit);
     }
 
     glEnable(GL_CULL_FACE);
@@ -264,12 +296,25 @@ void RenderablePlanet::loadTexture() {
     }
     if (_hasNightTexture) {
         _nightTexture = nullptr;
-        if (_nightTexturePath != "") {
+        if (_nightTexturePath.value() != "") {
             _nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
                 _nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+                //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+            }
+        }
+    }
+
+    if (_hasHeightTexture) {
+        _heightMapTexture = nullptr;
+        if (_heightMapTexturePath.value() != "") {
+            _heightMapTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_heightMapTexturePath)));
+            if (_heightMapTexture) {
+                LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
+                _heightMapTexture->uploadTexture();
+                _heightMapTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
                 //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             }
         }
