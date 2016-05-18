@@ -198,6 +198,7 @@ bool RenderableModelProjection::initialize() {
             "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
             "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
 
+
         if (!_programObject)
             return false;
     }
@@ -207,6 +208,7 @@ bool RenderableModelProjection::initialize() {
         _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
             "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
             "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
+        _fboProgramObject->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
         if (!_fboProgramObject)
             return false;
     }
@@ -408,7 +410,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
 }
 
 void RenderableModelProjection::imageProjectGPU() {
-        
+    glDisable(GL_DEPTH_TEST);
+
     // keep handle to the current bound FBO
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -446,12 +449,13 @@ void RenderableModelProjection::imageProjectGPU() {
     glBindVertexArray(0);
     
     _fboProgramObject->deactivate();
-    glDisable(GL_BLEND);
+    //glDisable(GL_BLEND);
     //bind back to default
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
         m_viewport[2], m_viewport[3]);
             
+    glEnable(GL_DEPTH_TEST);
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {

@@ -103,7 +103,7 @@ return {
                 Color = "textures/glare.png"
             },  
             StartTime = "2014 AUG 01 12:00:00",
-            EndTime = "2015 MAY 26 12:00:00"
+            EndTime = "2016 MAY 26 12:00:00"
         },
         GuiName = "RosettaCometTrail"
     },
