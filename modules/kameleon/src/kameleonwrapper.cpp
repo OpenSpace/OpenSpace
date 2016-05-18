@@ -1029,4 +1029,18 @@ std::string KameleonWrapper::getFrame(){
     }
 }
 
+std::vector<std::string> KameleonWrapper::getVariables(){
+    std::vector<std::string> variableNames;
+
+    int numVariables = _model->getNumberOfVariables();
+
+    for(int i=0; i<numVariables; i++){
+        // std::cout << _model->getVariableName(i) << " ";
+        // std::cout << _model->getVariableName(i) << std::endl;
+        variableNames.push_back(_model->getVariableName(i));;
+    }
+    return variableNames;
+
+}
+
 } // namespace openspace

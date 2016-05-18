@@ -27,6 +27,9 @@
 
 #include <modules/iswa/rendering/cygnetplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/iswa/util/dataprocessor.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/selectionproperty.h>
 
  namespace openspace{
  
@@ -47,8 +50,13 @@
 
 	static int id();
 
-	properties::StringProperty _transferFunctionsFile;
+    properties::SelectionProperty _dataOptions;
+    properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _backgroundValues;
+
+    properties::Vec2Property _normValues;
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
 
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
@@ -56,6 +64,10 @@
 	glm::size3_t _dimensions;
 	float* _dataSlice;
 	std::string _var;
+
+	std::vector<float*> _dataSlices;
+    std::shared_ptr<DataProcessor> _dataProcessor; 
+
  };
  
  } // namespace openspace

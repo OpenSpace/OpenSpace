@@ -138,6 +138,7 @@ public:
     GridType gridType();
     std::string getParent();
     std::string getFrame();
+    std::vector<std::string> getVariables();
 
 private:
     typedef std::vector<glm::vec3> TraceLine;

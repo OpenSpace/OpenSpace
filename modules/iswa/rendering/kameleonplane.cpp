@@ -46,8 +46,12 @@ namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
+    ,_useLog("useLog","Use Logarithm", false)
+    ,_useHistogram("useHistogram", "Use Histogram", true)
+    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
+    ,_dataOptions("dataOptions", "Data Options")
 {       
     std::string name;
     dictionary.getValue("Name", name);
@@ -55,10 +59,31 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
     registerProperties();
 
+    addProperty(_useLog);
+    addProperty(_useHistogram);
+    addProperty(_normValues);
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
+    addProperty(_dataOptions);
+
+    if(_data->groupName.empty()){
+        OsEng.gui()._iswa.registerProperty(&_useLog);
+        OsEng.gui()._iswa.registerProperty(&_useHistogram);
+        OsEng.gui()._iswa.registerProperty(&_normValues);
+        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iswa.registerProperty(&_dataOptions);
+    }
 
     setTransferFunctions(_transferFunctionsFile.value());
+
+    _dataProcessor = std::make_shared<DataProcessor>(
+        _useLog.value(),
+        _useHistogram.value(),
+        _normValues
+    );
+
+    _dataOptions.onChange([this](){updateTexture();});
 
     dictionary.getValue("kwPath", _kwPath);
 
@@ -72,9 +97,13 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     }else{
         _data->scale.z = 0;
     }
+
+    _dimensions = glm::size3_t(500,500,1);
 }
 
-KameleonPlane::~KameleonPlane(){}
+KameleonPlane::~KameleonPlane(){
+    _kw = nullptr;
+}
 
 
 // bool KameleonPlane::initialize(){
@@ -99,7 +128,7 @@ KameleonPlane::~KameleonPlane(){}
 
 
 
-//     loadTexture();
+//     loadTexture();P
 
 //     return isReady();
 // }
@@ -116,45 +145,74 @@ KameleonPlane::~KameleonPlane(){}
 // }
 
 
-bool KameleonPlane::loadTexture() {
-        std::cout << "load kameleonplane texture" << std::endl;
-        ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-        ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-        std::unique_ptr<ghoul::opengl::Texture> texture = 
-        std::make_unique<ghoul::opengl::Texture>(_dataSlice, _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+bool KameleonPlane::loadTexture() {    
+    std::cout << "load kameleonplane texture" << std::endl;
+    ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
+    ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
-        if (!texture){
-            std::cout << "Could not create texture" << std::endl;
-            return false;
+    std::vector<int> selectedOptions = _dataOptions.value();
+    auto options = _dataOptions.options();
+
+    for(int selected : selectedOptions){
+        if(_dataSlices[selected]){
+            if(!_textures[selected]){
+                std::unique_ptr<ghoul::opengl::Texture> texture = 
+                    std::make_unique<ghoul::opengl::Texture>(_dataSlices[selected], _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+
+                if (!texture){
+                    std::cout << "Could not create texture" << std::endl;
+                    return false;
+                }
+
+                texture->uploadTexture();
+                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+               _textures[selected] = std::move(texture);
+            }else{
+                // _textures[selected]->setPixelData(values);
+                // _textures[selected]->uploadTexture();
+            }
         }
-            // LDEBUG("Loaded texture from '" << absPath(_path) << "'");
+    }
 
-        texture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-       _textures[0] = std::move(texture);
-        
-        return true;    
+    return true;    
 }
 
 bool KameleonPlane::updateTexture(){
-    if(!_textures[0]){
-
+    if(!_kw){
         _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-        KameleonWrapper::Model model = _kw->model();
-        if( model == KameleonWrapper::Model::BATSRUS)
-            _var = "p";
-        else
-            _var = "rho";
-
-        _dimensions = glm::size3_t(500,500,1);
-        float zSlice = 0.5f;
-        _dataSlice = _kw->getUniformSliceValues(std::string(_var), _dimensions, zSlice);
-
-        loadTexture();
     }
+
+    if(!_dataOptions.options().size()){
+        std::vector<std::string> options = _kw->getVariables();
+        int numOptions = 0;
+
+        for(std::string option : options){
+            if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
+                _dataOptions.addOption({numOptions, option});
+                _dataSlices.push_back(nullptr);
+                _textures.push_back(nullptr);
+                numOptions++;
+            }
+        }
+        _dataOptions.setValue(std::vector<int>(1,0));
+
+        if(!_data->groupName.empty())
+            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+    }
+
+    std::vector<int> selectedOptions = _dataOptions.value();
+    auto options = _dataOptions.options();
+    float zSlice = 0.5f;
+
+    for(int selected : selectedOptions){
+        if(!_dataSlices[selected]){
+            std::cout << options[selected].description << std::endl;
+            _dataSlices[selected] = _kw->getUniformSliceValues(options[selected].description, _dimensions, zSlice);
+        }
+    }
+
+    loadTexture();
+
     return true;
 }
 
@@ -163,23 +221,63 @@ bool KameleonPlane::readyToRender(){
 }
 
 void KameleonPlane::setUniformAndTextures(){
-    ghoul::opengl::TextureUnit unit;
+    std::vector<int> selectedOptions = _dataOptions.value();
+    int activeTextures = selectedOptions.size();
+    int activeTransferfunctions = _transferFunctions.size();
 
     ghoul::opengl::TextureUnit txUnits[10];
-    txUnits[0].activate();
-    _textures[0]->bind();
-    _shader->setUniform("textures[0]", txUnits[0]);
+    int j = 0;
+    for(int option : selectedOptions){
+        if(_textures[option]){
+            txUnits[j].activate();
+            _textures[option]->bind();
+            _shader->setUniform(
+                "textures[" + std::to_string(j) + "]",
+                txUnits[j]
+            );
+
+            j++;
+        }
+    }
+
+    if(activeTextures > 0){
+        if(selectedOptions.back()>=activeTransferfunctions)
+            activeTransferfunctions = 1;
+    }
 
     ghoul::opengl::TextureUnit tfUnits[10];
-    tfUnits[0].activate();
-    _transferFunctions[0]->bind();
-    _shader->setUniform(
-        "transferFunctions[0]",
-        tfUnits[0]
-    );
+    j = 0;
 
-    _shader->setUniform("numTextures", 1);
-    _shader->setUniform("numTransferFunctions", 1);
+    if((activeTransferfunctions == 1)){
+        tfUnits[0].activate();
+        _transferFunctions[0]->bind();
+        _shader->setUniform(
+            "transferFunctions[0]",
+            tfUnits[0]
+        );
+    }else{
+        for(int option : selectedOptions){
+            // std::cout << option << std::endl;
+            // if(option >= activeTransferfunctions){
+            //     // LWARNING("No transfer function for this value.");
+            //     break;
+            // }
+
+            if(_transferFunctions[option]){
+                tfUnits[j].activate();
+                _transferFunctions[option]->bind();
+                _shader->setUniform(
+                "transferFunctions[" + std::to_string(j) + "]",
+                tfUnits[j]
+                );
+
+                j++;
+            }
+        }
+    }
+
+    _shader->setUniform("numTextures", activeTextures);
+    _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
 }
 

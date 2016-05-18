@@ -343,8 +343,6 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
                 coordinateType = "Polar";
             }
 
-            std::cout << cut << std::endl;
-
             std::string table = "{"
                 "Name = 'KameleonPlane',"
                 "Parent = '" + parent + "', " 
