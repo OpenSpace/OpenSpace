@@ -300,6 +300,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&file);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+            // Will fail when response status is 400 or above
+            curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             
             CURLcode res = curl_easy_perform(curl);
             if(res == CURLE_OK){
