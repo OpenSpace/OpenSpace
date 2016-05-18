@@ -39,8 +39,6 @@ out vec4 vs_position;
 out float s;
 out vec4 ProjTexCoord;
 
-out vec4 test;
-
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
@@ -53,7 +51,7 @@ uniform float _heightExaggeration;
 uniform sampler2D heightTex;
 
 
-void main(){
+void main() {
     // Radius = 0.71492 *10^8; 
     // set variables
     vs_st = in_st;
@@ -73,11 +71,9 @@ void main(){
 
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
-        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        vec3 displacementDirection = (normalize(raw_pos.xzy));
         float displacementFactor = height * _heightExaggeration * 2000;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
-
-        // test = vec4(vec3(displacementFactor), 1.0);
     }
 
     position = ViewProjection * position;

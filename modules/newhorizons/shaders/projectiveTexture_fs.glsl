@@ -27,10 +27,10 @@ uniform vec4 objpos;
 //uniform vec3 camdir; // add this for specular
   
 
-uniform float  time;
+uniform float time;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
-// uniform sampler2D heightTex;
+uniform sampler2D heightTex;
 uniform sampler2D normalTex;
 
 uniform bool _enableNormalMapping;
@@ -41,7 +41,6 @@ in vec4 vs_position;
 
 in vec4 ProjTexCoord;
 
-in vec4 test;
 uniform vec3 boresight;
 uniform vec3 sun_pos;
 
@@ -105,6 +104,10 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = diffuse;
+// frag.color = vec4(normalize(vs_position.xyz), 1.0);
+    
+    // frag.color =  vec4(vec3(texture(heightTex, vs_st).r), 1.0);
+    // frag.color = texture(heightTex, vs_st);
 // frag.color = vec4(n, 1.0);
     // frag.color = test;
     frag.depth = depth;

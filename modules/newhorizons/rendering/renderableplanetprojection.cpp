@@ -693,6 +693,7 @@ void RenderablePlanetProjection::loadTexture() {
     if (_heightMapTexturePath.value() != "") {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
         if (_heightMapTexture) {
+            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_heightMapTexture);
             _heightMapTexture->uploadTexture();
             _heightMapTexture->setFilter(Texture::FilterMode::Linear);
         }
