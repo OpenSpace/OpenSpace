@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#ifndef __VOLUMEUTILS_H__
+#define __VOLUMEUTILS_H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
-#include <modules/volume/rendering/renderablevolumegl.h>
+#include <glm/glm.hpp>
 
 namespace openspace {
+namespace volumeutils {
 
-VolumeModule::VolumeModule() 
-    : OpenSpaceModule("Volume")
-{}
+size_t coordsToIndex(const glm::vec3& coords, const glm::ivec3& dimensions);
+glm::vec3 indexToCoords(size_t index, const glm::ivec3& dimensions);
 
-void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+}
 }
 
-} // namespace openspace
+#endif // __VOLUMEUTILS__
