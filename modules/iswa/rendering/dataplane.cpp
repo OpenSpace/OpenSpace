@@ -86,6 +86,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         _dataProcessor->normValues(_normValues.value());
         loadTexture();
     });
+    
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
         loadTexture();

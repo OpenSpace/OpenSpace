@@ -85,6 +85,27 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
     _dataOptions.onChange([this](){updateTexture();});
 
+    _normValues.onChange([this](){
+        _dataProcessor->normValues(_normValues.value());
+        loadTexture();
+    });
+
+    _useLog.onChange([this](){
+        _dataProcessor->useLog(_useLog.value());
+        loadTexture();
+    });
+
+    _useHistogram.onChange([this](){
+        _dataProcessor->useHistogram(_useHistogram.value());
+        loadTexture();
+    });
+
+    _transferFunctionsFile.onChange([this](){
+        setTransferFunctions(_transferFunctionsFile.value());
+    });
+
+    _type = IswaManager::CygnetType::Data;
+    
     dictionary.getValue("kwPath", _kwPath);
 
     std::string axis;
@@ -150,31 +171,44 @@ bool KameleonPlane::loadTexture() {
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
+    std::vector<float*> data = _dataProcessor->processKameleonData(_dataSlices, _dimensions, _dataOptions);
+
+    if(data.empty())
+        return false;
+
+    _backgroundValues.setValue(_dataProcessor->filterValues());
+    
+    bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
-    auto options = _dataOptions.options();
 
-    for(int option : selectedOptions){
-        if(_dataSlices[option]){
-            if(!_textures[option]){
-                std::unique_ptr<ghoul::opengl::Texture> texture = 
-                    std::make_unique<ghoul::opengl::Texture>(_dataSlices[option], _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+    for(int option: selectedOptions){
+        float* values = data[option];
+        if(!values) continue;
 
-                if (!texture){
-                    std::cout << "Could not create texture" << std::endl;
-                    return false;
-                }
+        if(!_textures[option]){
+            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                    values, 
+                                                                    _dimensions,
+                                                                    ghoul::opengl::Texture::Format::Red,
+                                                                    GL_RED, 
+                                                                    GL_FLOAT,
+                                                                    ghoul::opengl::Texture::FilterMode::Linear,
+                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                                );
 
+            if(texture){
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-               _textures[option] = std::move(texture);
-            }else{
-                // _textures[selected]->setPixelData(values);
-                // _textures[selected]->uploadTexture();
+                _textures[option] = std::move(texture);
             }
+        }else{
+            _textures[option]->setPixelData(values);
+            _textures[option]->uploadTexture();
         }
+        texturesReady = true;
     }
 
-    return true;    
+    return texturesReady;  
 }
 
 bool KameleonPlane::updateTexture(){
