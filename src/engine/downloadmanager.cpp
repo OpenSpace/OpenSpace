@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/thread.h>
 
 #include <chrono>
 #include <fstream>
@@ -274,13 +275,14 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     if (_useMultithreadedDownload) {
         std::thread t = std::thread(downloadFunction);
         
-#ifdef WIN32
-        std::thread::native_handle_type h = t.native_handle();
-        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
-#else
-        // TODO: Implement thread priority ---abock
-#endif
+        ghoul::thread::setPriority(t, ghoul::thread::ThreadPriority::Lowest);
+//#ifdef WIN32
+//        std::thread::native_handle_type h = t.native_handle();
+//        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
+//        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
+//#else
+//        // TODO: Implement thread priority ---abock
+//#endif
         
         t.detach();
     }

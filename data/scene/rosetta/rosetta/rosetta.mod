@@ -92,11 +92,9 @@ return {
             Body = "ROSETTA",
             Frame = "GALACTIC",
             Observer = "CHURYUMOV-GERASIMENKO",
-            -- 3 Dummy values for compilation:
             TropicalOrbitPeriod = 20000.0,
             EarthOrbitRatio = 2,
             DayLength = 25,
-            -- End of Dummy values
             RGB = { 0.9, 0.2, 0.9 },
             Textures = {
                 Type = "simple",
