@@ -77,6 +77,7 @@ public:
     ~IswaManager();
 
     void addIswaCygnet(int id, std::string type = "Texture", std::string group = "");
+    void createFieldline(std::string name, std::string cdfPath, std::string seedPath);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
