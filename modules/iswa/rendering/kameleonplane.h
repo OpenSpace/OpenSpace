@@ -62,7 +62,8 @@
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
 
-	glm::size3_t _dimensions;
+    glm::size3_t _dimensions;
+	glm::size3_t _textureDimensions;
 	float* _dataSlice;
 	std::string _var;
 

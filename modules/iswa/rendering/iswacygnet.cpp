@@ -79,6 +79,9 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _data->scale = scale;
     _data->offset = offset;
 
+    std::cout << std::to_string(_data->scale) << std::endl;
+    std::cout << std::to_string(_data->offset) << std::endl;
+
     addProperty(_delete);
 
     // if(dictionary.hasValue<float>("Group")){

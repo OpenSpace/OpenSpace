@@ -356,13 +356,13 @@ float* KameleonWrapper::getUniformSampledValues(
 float* KameleonWrapper::getUniformSliceValues(    
     const std::string& var, 
     const glm::size3_t& outDimensions,
-    const float& zSlice)
+    const float& slice)
 {
     assert(_model && _interpolator);
-    assert(outDimensions.x > 0 && outDimensions.y > 0);
+    assert(outDimensions.x > 0 && outDimensions.y > 0 && outDimensions.z > 0);
     LINFO("Loading variable " << var << " from CDF data with a uniform sampling");
 
-    unsigned int size = static_cast<unsigned int>(outDimensions.x*outDimensions.y);
+    unsigned int size = static_cast<unsigned int>(outDimensions.x*outDimensions.y*outDimensions.z);
     float* data = new float[size];
     double* doubleData = new double[size];
 
@@ -373,6 +373,15 @@ float* KameleonWrapper::getUniformSliceValues(
     
     double stepX = (_xMax-_xMin)/(static_cast<double>(outDimensions.x));
     double stepY = (_yMax-_yMin)/(static_cast<double>(outDimensions.y));
+    double stepZ = (_zMax-_zMin)/(static_cast<double>(outDimensions.z));
+
+    bool xSlice = (outDimensions.x <= 1);
+    bool ySlice = (outDimensions.y <= 1);
+    bool zSlice = (outDimensions.z <= 1);
+
+    double xDim = (!xSlice)? outDimensions.x-1 : 1.0;
+    double yDim = (!ySlice)? outDimensions.y-1 : 1.0;
+    double zDim = (!zSlice)? outDimensions.z-1 : 1.0;
 
     LDEBUG(var << "Min: " << varMin);
     LDEBUG(var << "Max: " << varMax);
@@ -384,87 +393,92 @@ float* KameleonWrapper::getUniformSliceValues(
 
     for (int x = 0; x < outDimensions.x; ++x) {
         for (int y = 0; y < outDimensions.y; ++y) {
-            
-            double value = 0;
-            unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x);
-            if(_gridType == GridType::Spherical) {
-                    // int z = zSlice; 
-                    // Put r in the [0..sqrt(3)] range
-                    double rNorm = sqrt(3.0)*(double)x/(double)(outDimensions.x-1);
-                    
-                    // Put theta in the [0..PI] range
-                    double thetaNorm = M_PI*(double)zSlice; ///(double)(outDimensions.y-1);
-                    
-                    // Put phi in the [0..2PI] range
-                    double phiNorm = 2.0*M_PI*(double)y/(double)(outDimensions.y-1);
-                    
-                    // Go to physical coordinates before sampling
-                    double rPh = _xMin + rNorm*(_xMax-_xMin);
-                    double thetaPh = thetaNorm;
-                    // phi range needs to be mapped to the slightly different model
-                    // range to avoid gaps in the data Subtract a small term to
-                    // avoid rounding errors when comparing to phiMax.
-                    double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
-                    
-                    // See if sample point is inside domain
-                    if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
-                        thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
-                        if (phiPh > _zMax) {
-                            LWARNING("Warning: There might be a gap in the data");
-                        }
-                        // Leave values at zero if outside domain
-                    } else { // if inside
+            for(int z = 0; z < outDimensions.z; ++z){
+
+                float xi = (!xSlice)? x : slice;
+                float yi = (!ySlice)? y : slice;
+                float zi = (!zSlice)? z : slice;
+
+                double value = 0;
+                unsigned int index = static_cast<unsigned int>(x + y*outDimensions.x + z*outDimensions.x*outDimensions.y);
+                if(_gridType == GridType::Spherical) {
+                        // int z = zSlice; 
+                        // Put r in the [0..sqrt(3)] range
+                        double rNorm = sqrt(3.0)*(double)xi/(double)(xDim);
                         
-                        // ENLIL CDF specific hacks!
-                        // Convert from meters to AU for interpolator
-                        rPh /= ccmc::constants::AU_in_meters;
-                        // Convert from colatitude [0, pi] rad to latitude [-90, 90] degrees
-                        thetaPh = -thetaPh*180.f/M_PI+90.f;
-                        // Convert from [0, 2pi] rad to [0, 360] degrees
-                        phiPh = phiPh*180.f/M_PI;
-                        // Sample
-                        value = _interpolator->interpolate(
-                            var, 
-                            static_cast<float>(rPh), 
-                            static_cast<float>(phiPh), 
-                            static_cast<float>(thetaPh));
-                        // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
+                        // Put theta in the [0..PI] range
+                        double thetaNorm = M_PI*(double)yi/(double)(yDim);
+                        
+                        // Put phi in the [0..2PI] range
+                        double phiNorm = 2.0*M_PI*(double)zi/(double)(zDim);
+                        
+                        // Go to physical coordinates before sampling
+                        double rPh = _xMin + rNorm*(_xMax-_xMin);
+                        double thetaPh = thetaNorm;
+                        // phi range needs to be mapped to the slightly different model
+                        // range to avoid gaps in the data Subtract a small term to
+                        // avoid rounding errors when comparing to phiMax.
+                        double phiPh = _zMin + phiNorm/(2.0*M_PI)*(_zMax-_zMin-0.000001);
+                        
+                        // See if sample point is inside domain
+                        if (rPh < _xMin || rPh > _xMax || thetaPh < _yMin ||
+                            thetaPh > _yMax || phiPh < _zMin || phiPh > _zMax) {
+                            if (phiPh > _zMax) {
+                                LWARNING("Warning: There might be a gap in the data");
+                            }
+                            // Leave values at zero if outside domain
+                        } else { // if inside
+                            
+                            // ENLIL CDF specific hacks!
+                            // Convert from meters to AU for interpolator
+                            rPh /= ccmc::constants::AU_in_meters;
+                            // Convert from colatitude [0, pi] rad to latitude [-90, 90] degrees
+                            thetaPh = -thetaPh*180.f/M_PI+90.f;
+                            // Convert from [0, 2pi] rad to [0, 360] degrees
+                            phiPh = phiPh*180.f/M_PI;
+                            // Sample
+                            value = _interpolator->interpolate(
+                                var, 
+                                static_cast<float>(rPh), 
+                                static_cast<float>(phiPh), 
+                                static_cast<float>(thetaPh));
+                            // value = _interpolator->interpolate(var, rPh, phiPh, thetaPh);
+                        }
+         
+                }else{
+                    double xPos = _xMin + stepX*xi;
+                    double yPos = _yMin + stepY*yi;
+                    double zPos = _zMin + stepZ*zi;
+
+                    // std::cout << zPos << ", " << zpos << std::endl;
+                    // Should y and z be flipped?
+                    value = _interpolator->interpolate(
+                        var,
+                        static_cast<float>(xPos),
+                        static_cast<float>(zPos),
+                        static_cast<float>(yPos));
+
+                }
+
+                if(value != missingValue){
+                    doubleData[index] = value;
+                    data[index] = value;
+                    if(value > maxValue){
+                        maxValue = value;
                     }
-     
-            }else{
-                
-
-                double xPos = _xMin + stepX*x;
-                double yPos = _yMin + stepY*y;
-                double zPos = (_zMin + (_zMax-_zMin)*zSlice);
-
-                // Should y and z be flipped?
-                value = _interpolator->interpolate(
-                    var,
-                    static_cast<float>(xPos),
-                    static_cast<float>(zPos),
-                    static_cast<float>(yPos));
-
-            }
-
-            if(value != missingValue){
-                doubleData[index] = value;
-
-                if(value > maxValue){
-                    maxValue = value;
+                    if(value < minValue){
+                        minValue = value;
+                    }
+                }else{
+                    // std::cout << "value missing" << std::endl;
+                    doubleData[index] = 0;
                 }
-                if(value < minValue){
-                    minValue = value;
-                }
-            }else{
-                // std::cout << "value missing" << std::endl;
-                doubleData[index] = 0;
             }
         }
     }
     for(size_t i = 0; i < size; ++i) {
-        double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
-        data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
+        // double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
+        // data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
         // data[i] = 1;
         // std::cout << minValue << ", " << maxValue << ", " << doubleData[i] << ", " << normalizedVal << ", " << data[i] << std::endl;
     }

@@ -344,7 +344,7 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
             }
 
             std::string table = "{"
-                "Name = 'KameleonPlane',"
+                "Name = 'KameleonPlane_"+cut+"',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "

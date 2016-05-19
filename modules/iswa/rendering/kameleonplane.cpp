@@ -105,21 +105,33 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     });
 
     _type = IswaManager::CygnetType::Data;
-    
+
     dictionary.getValue("kwPath", _kwPath);
 
     std::string axis;
     dictionary.getValue("axisCut", axis);
 
+    _dimensions = glm::size3_t(150);
+
     if(axis == "x"){
         _data->scale.x = 0;
+        _dimensions.x = 1;
+        _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
+        _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
+
     }else if(axis == "y"){
         _data->scale.y = 0;
+        _dimensions.y = 1;
+        _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
+
     }else{
         _data->scale.z = 0;
+        _dimensions.z = 1;
+        _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
     }
-
-    _dimensions = glm::size3_t(500,500,1);
+    std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
 }
 
 KameleonPlane::~KameleonPlane(){
@@ -167,7 +179,6 @@ KameleonPlane::~KameleonPlane(){
 
 
 bool KameleonPlane::loadTexture() {    
-    std::cout << "load kameleonplane texture" << std::endl;
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
@@ -188,7 +199,7 @@ bool KameleonPlane::loadTexture() {
         if(!_textures[option]){
             std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                     values, 
-                                                                    _dimensions,
+                                                                    _textureDimensions,
                                                                     ghoul::opengl::Texture::Format::Red,
                                                                     GL_RED, 
                                                                     GL_FLOAT,
