@@ -123,7 +123,7 @@ namespace openspace {
     void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
             auto finishedJob = _tileLoadManager.popFinishedJob();
-            std::shared_ptr<TextureData> uninitedTex =
+            std::shared_ptr<RawTileData> uninitedTex =
                 finishedJob->product();
             HashKey key = uninitedTex->chunkIndex.hashKey();
             std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
@@ -231,7 +231,7 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<TextureData> TileProvider::getTextureData(
+    std::shared_ptr<RawTileData> TileProvider::getTextureData(
         const ChunkIndex& chunkIndex) {
         
         // We assume here that all rasterbands have the same data type
@@ -247,7 +247,7 @@ namespace openspace {
     }
 
     std::shared_ptr<Texture> TileProvider::initializeTexture(
-        std::shared_ptr<TextureData> uninitedTexture) {
+        std::shared_ptr<RawTileData> uninitedTexture) {
         Texture* tex = new Texture(
             uninitedTexture->imageData,
             uninitedTexture->dimensions,

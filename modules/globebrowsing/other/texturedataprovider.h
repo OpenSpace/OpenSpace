@@ -43,7 +43,7 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
-    struct TextureData {
+    struct RawTileData {
 
         struct TextureFormat {
             Texture::Format ghoulFormat;
@@ -52,7 +52,7 @@ namespace openspace {
 
 
 
-        TextureData(void* data, glm::uvec3 dims, TextureFormat format,
+        RawTileData(void* data, glm::uvec3 dims, TextureFormat format,
             GLuint glType, const ChunkIndex& chunkIndex)
             : imageData(data)
             , dimensions(dims)
@@ -83,18 +83,18 @@ namespace openspace {
         ~TextureDataProvider();
 
 
-        std::shared_ptr<TextureData> getTextureData(
+        std::shared_ptr<RawTileData> getTextureData(
             GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
 
 
         void asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
         void updateAsyncRequests();
         bool hasTextureTileData() const;
-        std::shared_ptr<TextureData> nextTextureTile();
+        std::shared_ptr<RawTileData> nextTextureTile();
 
     private:
 
-        std::queue<std::shared_ptr<TextureData>> loadedTextureTiles;
+        std::queue<std::shared_ptr<RawTileData>> loadedTextureTiles;
         std::set<GDALAsyncReader*> asyncReaders;
 
 
@@ -104,14 +104,34 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
 
-        struct GdalRequestParams {
+        struct GdalDataRegion {
+
+            GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex,
+                int tileLevelDifference);
+
+            const ChunkIndex& chunkIndex;
+
             glm::uvec2 pixelStart;
+            glm::uvec2 pixelEnd;
             glm::uvec2 numPixels;
-            GDALDataType dataType;
-            int numRasters;
-            int pixelSpacing;
-            int lineSpacing;
+
+            size_t numRasters;
+
+            int overview;
+
         };
+
+        struct DataLayout {
+            DataLayout(GDALDataset* dataSet, const GdalDataRegion& region);
+
+            GDALDataType gdalType;
+            size_t bytesPerPixel;
+            size_t pixelSpacing;
+            size_t lineSpacing;
+            size_t totalNumBytes;
+
+        };
+
 
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -119,13 +139,18 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
 
-        glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
+        
 
-        GLuint getGlDataTypeFromGdalDataType(GDALDataType gdalType);
+        static glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
-        TextureData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+        static GLuint getOpenGLDataType(GDALDataType gdalType);
 
-        size_t numberOfBytes(GDALDataType gdalType) const;
+        static RawTileData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+
+        static size_t numberOfBytes(GDALDataType gdalType);
+
+        static std::shared_ptr<RawTileData> createRawTileData(const GdalDataRegion& region,
+            const DataLayout& dataLayout, char* imageData);
 
     };
 
