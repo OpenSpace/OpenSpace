@@ -231,25 +231,11 @@ void RenderableTrail::update(const UpdateData& data) {
     
     psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
     
-    static int NVALUES = 0;
-    if (nValues > NVALUES) {
-        LINFO(nValues);
-        NVALUES = nValues;
-    }
-
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
     if (nValues != 0) {
-        // If we have new values to create, we do that here. nValues should always be
-        // close to 1
-
-        // But you never know
-        //nValues = std::min(nValues, int(_vertexArray.size() - 1));
-        //LINFO(nValues);
         std::vector<TrailVBOLayout> tmp(nValues);
-        //std::vector<TrailVBOLayout> tmp = _vertexArray;
-
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
             if (start > et)
