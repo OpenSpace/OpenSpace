@@ -35,6 +35,7 @@
 
 
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
@@ -97,7 +98,15 @@ void ABufferRenderer::initialize() {
     glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
     glGenBuffers(1, &_fragmentBuffer);
     glGenTextures(1, &_fragmentTexture);
-    
+
+    glGenTextures(1, &_mainColorTexture);
+    glGenTextures(1, &_mainDepthTexture);
+    glGenFramebuffers(1, &_mainFramebuffer);
+
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+
+      
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -111,6 +120,18 @@ void ABufferRenderer::initialize() {
     updateRendererData();
     updateRaycastData();
     updateResolveDictionary();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Main framebuffer is not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
 
     try {
         _resolveProgram = ghoul::opengl::ProgramObject::Build("ABuffer Resolve",
@@ -201,6 +222,13 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     if (_scene == nullptr) return;
     if (_camera == nullptr) return;
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // Reset
     clear();
     glEnable(GL_DEPTH_TEST);
@@ -217,6 +245,9 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     RenderData data{ *_camera, psc(), doPerformanceMeasurements };
     RendererTasks tasks;
     _scene->render(data, tasks);
+
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
 
     // Step 2: Perform raycasting tasks requested by the scene
@@ -238,6 +269,16 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
 
     // Step 3: Resolve the buffer
     _resolveProgram->activate();
+    ghoul::opengl::TextureUnit mainColorTextureUnit;
+    mainColorTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+
+    ghoul::opengl::TextureUnit mainDepthTextureUnit;
+    mainDepthTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+
+    _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+    _resolveProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
     // 3a: Perform the pre-raycast step for all raycaster tasks.
     for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
@@ -293,6 +334,7 @@ void ABufferRenderer::clear() {
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
     glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
+
 }
 
 void ABufferRenderer::updateResolution() {
@@ -319,6 +361,26 @@ void ABufferRenderer::updateResolution() {
     glBindTexture(GL_TEXTURE_BUFFER, 0);
 
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+
+    int nSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        nSamples,
+        GL_RGBA,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        true);
+
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        nSamples,
+        GL_DEPTH_COMPONENT32F,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        true);
 
     
     _dirtyResolution = false;

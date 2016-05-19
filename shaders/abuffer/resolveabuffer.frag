@@ -35,6 +35,8 @@ layout (location = 0) out vec4 finalColor;
 
 uniform float blackoutFactor;
 uniform int nAaSamples;
+uniform sampler2DMS mainColorTexture;
+uniform sampler2DMS mainDepthTexture;
 
 #define RAYCASTING_ENABLED #{raycastingEnabled}
 #define N_RAYCASTERS #{nRaycasters}
@@ -85,6 +87,18 @@ uint countSamples(uint mask) {
         + ((mask >> 6) & 1)
         + ((mask >> 7) & 1);
 }
+
+uint depthFilterFragments(uint nFrags, float depthThreshold) {
+    uint j = 0;
+    for (uint i = 0; i < nFrags; i++) {
+        if (_depth_(fragments[i]) < depthThreshold) {
+            fragments[j] = fragments[i];
+            j++;
+        }
+    }
+    return j;
+}
+
 
 uint reduceFragments(uint nFrags) {
     uint outputIndex = 0;
@@ -216,14 +230,33 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
 #endif // RAYCASTING_ENABLED
 
 void main() {
+    //vec4 opaqueColor = vec4(0.0);
     finalColor = vec4(0.0);
+    float maxOpaqueDepth = 0;
+
+    vec4 opaqueColor = vec4(0.0);
+    
+    for (int i = 0; i < nAaSamples; i++) {
+         float depth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
+         //         finalColor += color;
+         if (depth > maxOpaqueDepth) {
+             maxOpaqueDepth = depth;
+
+         }
+             opaqueColor += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);         
+         //finalColor.r += depth;
+         //finalColor += vec4(0.120);
+     }
+
+    opaqueColor /= nAaSamples;
 
     uint nOriginalFrags = loadFragments();
     uint raycasterMask = 0;
 
-    sortFragments(nOriginalFrags);
+    uint nFilteredFrags = depthFilterFragments(nOriginalFrags, maxOpaqueDepth);
+    sortFragments(nFilteredFrags);
 
-    uint nFrags = reduceFragments(nOriginalFrags);
+    uint nFrags = reduceFragments(nFilteredFrags);
 #if RAYCASTING_ENABLED
     retrieveRaycasterData(nFrags);
 #endif
@@ -261,10 +294,18 @@ void main() {
         }
 #endif
     }
-
+    
+    normalBlend(finalColor, opaqueColor);
+    
     // finalColor is expressed with premultiplied alpha
     finalColor.rgb *= blackoutFactor;
 
+
+    
     // Render everything on a black background
     finalColor.a = 1.0;
+
+
+    //finalColor.rgb = vec3(float(nFrags) * 0.25);
+
 }
