@@ -23,7 +23,7 @@ return {
                 Destination = "GALACTIC"
             },
             Projection = {
-                Sequence   = "rosettaimages",
+                Sequence   = "rosettaimages2",
                 SequenceType = "image-sequence",
                 Observer   = "ROSETTA",
                 Target     = "CHURYUMOV-GERASIMENKO",
@@ -78,28 +78,40 @@ return {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
                 -- SPK  
                 --long term orbits loaded first
+                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORL_DL_009_02____P__00268.BSP',
+                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORL_DL_009_02____P__00268.BSP',
+                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORL_DL_009_02____P__00268.BSP',
+
                 '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORL_DL_006_01____H__00156.BSP',
                 '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORL_DL_006_01____H__00156.BSP',
                 '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORL_DL_006_01____H__00156.BSP',
                 
                 --Jan 2014 - May 2015 (version match with 00162 ck files)
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORB_DV_211_01_______00288.BSP",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORB_DV_211_01_______00288.BSP",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORB_DV_211_01_______00288.BSP",
                 "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORB_DV_097_01_______00162.BSP",
                 "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORB_DV_097_01_______00162.BSP",
                 "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORB_DV_097_01_______00162.BSP",
 
                 --SCLK
-                "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SCLK/ROS_160425_STEP.TSC",
                 
                 -- FK
 
-                "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_CHURYUMOV_V01.TF",
-                "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_CHURYUMOV_V01.TF",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_V26.TF",
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
                 -- CK
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/RATT_DV_211_01_01____00288.BC",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/CATT_DV_211_01_______00288.BC",
                 '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
                 "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
 
                 -- PCK
-                "${OPENSPACE_DATA}/spice/RosettaKernels/PCK/ROS_CGS_RSOC_V03.TPC",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/PCK/ROS_CGS_RSOC_V03.TPC",
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/PCK/ROS_CGS_RSOC_V03.TPC",
                 
 
             }
