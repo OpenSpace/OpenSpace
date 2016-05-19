@@ -61,6 +61,8 @@ public:
     std::vector<std::string> readJSONHeader(std::string& dataBuffer);
     std::vector<float*> readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
 
+    std::vector<float*> processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions);
+
     glm::vec2 filterValues();
     
 private:

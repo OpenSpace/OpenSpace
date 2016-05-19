@@ -279,6 +279,52 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
     }
 }
 
+std::vector<float*> DataProcessor::processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
+    std::vector<int> selectedOptions = dataOptions.value();
+    int numSelected = selectedOptions.size();
+
+    std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
+    std::vector<float> max(numSelected, std::numeric_limits<float>::min());
+
+    std::vector<float> sum(numSelected, 0.0f);
+    std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
+
+    auto options = dataOptions.options();        
+
+    std::vector<float*> data(options.size(), nullptr);
+    int numValues = dimensions.x*dimensions.y*dimensions.z;
+    int i = 0; 
+
+    for(int option : selectedOptions){
+        data[option] = new float[numValues]{0.0f};
+
+        for(int j=0; j<numValues; j++){
+            float v = kdata[option][j];
+
+            if(_useLog){
+                int sign = (v>0)? 1:-1;
+                if(v != 0){
+                    v = sign*log(fabs(v));
+                }
+            }
+
+            optionValues[i].push_back(v); 
+
+            min[i] = std::min(min[i], v);
+            max[i] = std::max(max[i], v);
+
+            sum[i] += v;
+        }
+        i++;
+    }
+
+    for(int i=0; i<numSelected; i++){
+            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
+    }
+        
+    return data;
+}
+
 void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 

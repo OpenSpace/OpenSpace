@@ -88,10 +88,34 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         _normValues
     );
 
-    std::string fieldlineIndexFile;
-    dictionary.getValue("kwPath", _kwPath);
-    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
+    _dataOptions.onChange([this](){updateTexture();});
 
+    _normValues.onChange([this](){
+        _dataProcessor->normValues(_normValues.value());
+        loadTexture();
+    });
+
+    _useLog.onChange([this](){
+        _dataProcessor->useLog(_useLog.value());
+        loadTexture();
+    });
+
+    _useHistogram.onChange([this](){
+        _dataProcessor->useHistogram(_useHistogram.value());
+        loadTexture();
+    });
+
+    _transferFunctionsFile.onChange([this](){
+        setTransferFunctions(_transferFunctionsFile.value());
+    });
+
+    _type = IswaManager::CygnetType::Data;
+    
+
+    dictionary.getValue("kwPath", _kwPath);
+    
+    std::string fieldlineIndexFile;
+    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
     readFieldlinePaths(absPath(fieldlineIndexFile));
 
     _dataOptions.onChange([this](){updateTexture();});
@@ -159,31 +183,44 @@ bool KameleonPlane::loadTexture() {
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
+    std::vector<float*> data = _dataProcessor->processKameleonData(_dataSlices, _dimensions, _dataOptions);
+
+    if(data.empty())
+        return false;
+
+    _backgroundValues.setValue(_dataProcessor->filterValues());
+    
+    bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
-    auto options = _dataOptions.options();
 
-    for(int selected : selectedOptions){
-        if(_dataSlices[selected]){
-            if(!_textures[selected]){
-                std::unique_ptr<ghoul::opengl::Texture> texture = 
-                    std::make_unique<ghoul::opengl::Texture>(_dataSlices[selected], _dimensions, ghoul::opengl::Texture::Format::Red, GL_RED, GL_FLOAT, filtermode, wrappingmode);
+    for(int option: selectedOptions){
+        float* values = data[option];
+        if(!values) continue;
 
-                if (!texture){
-                    std::cout << "Could not create texture" << std::endl;
-                    return false;
-                }
+        if(!_textures[option]){
+            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
+                                                                    values, 
+                                                                    _dimensions,
+                                                                    ghoul::opengl::Texture::Format::Red,
+                                                                    GL_RED, 
+                                                                    GL_FLOAT,
+                                                                    ghoul::opengl::Texture::FilterMode::Linear,
+                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                                                                );
 
+            if(texture){
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-               _textures[selected] = std::move(texture);
-            }else{
-                // _textures[selected]->setPixelData(values);
-                // _textures[selected]->uploadTexture();
+                _textures[option] = std::move(texture);
             }
+        }else{
+            _textures[option]->setPixelData(values);
+            _textures[option]->uploadTexture();
         }
+        texturesReady = true;
     }
 
-    return true;    
+    return texturesReady;  
 }
 
 bool KameleonPlane::updateTexture(){
@@ -192,31 +229,17 @@ bool KameleonPlane::updateTexture(){
     }
 
     if(!_dataOptions.options().size()){
-        std::vector<std::string> options = _kw->getVariables();
-        int numOptions = 0;
-
-        for(std::string option : options){
-            if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
-                _dataOptions.addOption({numOptions, option});
-                _dataSlices.push_back(nullptr);
-                _textures.push_back(nullptr);
-                numOptions++;
-            }
-        }
-        _dataOptions.setValue(std::vector<int>(1,0));
-
-        if(!_data->groupName.empty())
-            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+        fillOptions();
     }
 
     std::vector<int> selectedOptions = _dataOptions.value();
     auto options = _dataOptions.options();
     float zSlice = 0.5f;
 
-    for(int selected : selectedOptions){
-        if(!_dataSlices[selected]){
-            std::cout << options[selected].description << std::endl;
-            _dataSlices[selected] = _kw->getUniformSliceValues(options[selected].description, _dimensions, zSlice);
+    for(int option : selectedOptions){
+        if(!_dataSlices[option]){
+            std::cout << options[option].description << std::endl;
+            _dataSlices[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, zSlice);
         }
     }
 
@@ -321,7 +344,24 @@ void KameleonPlane::setTransferFunctions(std::string tfPath){
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
+}
 
+void KameleonPlane::fillOptions(){
+    std::vector<std::string> options = _kw->getVariables();
+    int numOptions = 0;
+
+    for(std::string option : options){
+        if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
+            _dataOptions.addOption({numOptions, option});
+            _dataSlices.push_back(nullptr);
+            _textures.push_back(nullptr);
+            numOptions++;
+        }
+    }
+    _dataOptions.setValue(std::vector<int>(1,0));
+
+    if(!_data->groupName.empty())
+        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }
 
 void KameleonPlane::updateFieldlineSeeds(){

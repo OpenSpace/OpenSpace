@@ -130,14 +130,7 @@ bool DataSphere::loadTexture(){
         return false;
 
     if(!_dataOptions.options().size()){ // load options for value selection
-        std::vector<std::string> options = _dataProcessor->readJSONHeader(_dataBuffer);
-        for(int i=0; i<options.size(); i++){
-            _dataOptions.addOption({i, name()+"/"+options[i]});
-            _textures.push_back(nullptr);
-        }
-        _dataOptions.setValue(std::vector<int>(1,0));
-        if(!_data->groupName.empty())
-            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+        fillOptions();
     }
 
     std::vector<float*> data = _dataProcessor->readJSONData(_dataBuffer, _dataOptions);
@@ -305,7 +298,17 @@ void DataSphere::setTransferFunctions(std::string tfPath){
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
+}
 
+void DataSphere::fillOptions(){
+    std::vector<std::string> options = _dataProcessor->readJSONHeader(_dataBuffer);
+    for(int i=0; i<options.size(); i++){
+        _dataOptions.addOption({i, name()+"/"+options[i]});
+        _textures.push_back(nullptr);
+    }
+    _dataOptions.setValue(std::vector<int>(1,0));
+    if(!_data->groupName.empty())
+        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }
 
 } //namespace openspace

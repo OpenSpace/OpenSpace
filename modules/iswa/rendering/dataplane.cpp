@@ -86,6 +86,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         _dataProcessor->normValues(_normValues.value());
         loadTexture();
     });
+    
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
         loadTexture();
@@ -133,14 +134,7 @@ bool DataPlane::loadTexture() {
         return false;
 
     if(!_dataOptions.options().size()){ // load options for value selection
-        std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
-        for(int i=0; i<options.size(); i++){
-            _dataOptions.addOption({i, name()+"/"+options[i]});
-            _textures.push_back(nullptr);
-        }
-        _dataOptions.setValue(std::vector<int>(1,0));
-        if(!_data->groupName.empty())
-            IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+        fillOptions();
     }
 
     std::vector<float*> data = _dataProcessor->readData(_dataBuffer, _dataOptions);
@@ -294,6 +288,17 @@ void DataPlane::setTransferFunctions(std::string tfPath){
         _transferFunctions.clear();
         _transferFunctions = tfs;
     }
+}
+
+void DataPlane::fillOptions(){
+    std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
+    for(int i=0; i<options.size(); i++){
+        _dataOptions.addOption({i, name()+"/"+options[i]});
+        _textures.push_back(nullptr);
+    }
+    _dataOptions.setValue(std::vector<int>(1,0));
+    if(!_data->groupName.empty())
+        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }
 
 }// namespace openspace

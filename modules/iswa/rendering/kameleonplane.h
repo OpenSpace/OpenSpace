@@ -49,6 +49,7 @@
     void updateFieldlineSeeds();
 
     void setTransferFunctions(std::string tfPath);
+    void fillOptions();
 
 	static int id();
 
