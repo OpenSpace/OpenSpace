@@ -645,11 +645,10 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
 void RenderablePlanetProjection::loadProjectionTexture() {
     _textureProj = nullptr;
-    if (_colorTexturePath.value() != "") {
+    if (_projectionTexturePath.value() != "") {
         _textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
         if (_textureProj) {
-            if (_textureProj->format() == ghoul::opengl::Texture::Format::Red)
-                _textureProj->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
+            ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *_textureProj);
             _textureProj->uploadTexture(); 
             // TODO: AnisotropicMipMap crashes on ATI cards ---abock
             //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
