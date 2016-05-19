@@ -95,9 +95,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "Renderable does not have a name"
     );
-
+    
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
+    setName(name);
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
@@ -145,6 +146,13 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     _seedPointSourceFile.onChange(dirtySeedpoints);
     addProperty(_seedPointSourceFile);
+
+    // OsEng.gui()._property.registerProperty(&_enabled);
+    // OsEng.gui()._property.registerProperty(&_stepSize);
+    // OsEng.gui()._property.registerProperty(&_classification);
+    // OsEng.gui()._property.registerProperty(&_fieldlineColor);
+    // OsEng.gui()._property.registerProperty(&_seedPointSource);
+    // OsEng.gui()._property.registerProperty(&_seedPointSourceFile);
 }
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
@@ -219,6 +227,13 @@ bool RenderableFieldlines::deinitialize() {
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
     return true;
 }
 

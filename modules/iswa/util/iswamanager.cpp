@@ -149,7 +149,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
             createKameleonPlane(kwPath, type, group);
         else
             createKameleonPlane(kwPath, "z", group);
-
     }
 }
 
@@ -358,6 +357,7 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ group + "',"
+                    "fieldlineSeedsIndexFile = '${OPENSPACE_DATA}/scene/iswa/cdf/fieldlines.json'"
                     "}"
                 "}"
                 ;
@@ -482,6 +482,40 @@ void IswaManager::createKameleonPlane(std::string kwPath, std::string cut, std::
         }
     }else{
         LWARNING( kwPath + " is not a cdf file or can't be found.");
+    }
+}
+
+void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath){
+    const std::string& extension = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
+
+    if(FileSys.fileExists(absPath(cdfPath)) && extension == "cdf"){
+        std::string luaTable = "{"
+            "Name = '" + name + "',"
+            "Parent = 'Earth',"
+            "Renderable = {"
+                "Type = 'RenderableFieldlines',"
+                "VectorField = {"
+                    "Type = 'VolumeKameleon',"
+                    "File = '" + cdfPath + "',"
+                    "Model = 'BATSRUS',"
+                    "Variables = {'bx', 'by', 'bz'}"
+                "},"
+                "Fieldlines = {"
+                    "Stepsize = 1,"
+                    "Classification = true"
+                "},"
+                "SeedPoints = {"
+                    "Type = 'File',"
+                    "File = '" + seedPath + "'"
+                "}"
+            "}"
+        "}";
+        if(!luaTable.empty()){
+            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+            OsEng.scriptEngine().queueScript(script);
+        }
+    }else{
+        LWARNING( cdfPath + " is not a cdf file or can't be found.");
     }
 }
 

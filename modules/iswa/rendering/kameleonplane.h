@@ -45,12 +45,15 @@
  	virtual bool readyToRender() override;
     virtual void setUniformAndTextures() override;
     virtual bool createShader() override;
+    void readFieldlinePaths(std::string indexFile);
+    void updateFieldlineSeeds();
 
     void setTransferFunctions(std::string tfPath);
 
 	static int id();
 
     properties::SelectionProperty _dataOptions;
+    properties::SelectionProperty _fieldlines;
     properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _backgroundValues;
 
@@ -66,8 +69,14 @@
 	std::string _var;
 
 	std::vector<float*> _dataSlices;
-    std::shared_ptr<DataProcessor> _dataProcessor; 
-
+    std::shared_ptr<DataProcessor> _dataProcessor;
+    
+    /**
+     * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple 
+     * containing information that is needed to either add or remove a fieldline from the scenegraph.
+     * this is the name, path to seedpoints file and a boolean to determine if it is active or inactive.
+     */
+    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
  };
  
  } // namespace openspace

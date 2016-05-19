@@ -36,9 +36,11 @@
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <fstream>
+#include <modules/iswa/ext/json/json.hpp>
 
 
 namespace {
+    using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
 }
 
@@ -52,6 +54,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
+    ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
 {       
     std::string name;
     dictionary.getValue("Name", name);
@@ -65,6 +68,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
+    addProperty(_fieldlines);
 
     if(_data->groupName.empty()){
         OsEng.gui()._iswa.registerProperty(&_useLog);
@@ -73,6 +77,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        OsEng.gui()._iswa.registerProperty(&_fieldlines);
     }
 
     setTransferFunctions(_transferFunctionsFile.value());
@@ -83,9 +88,14 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         _normValues
     );
 
-    _dataOptions.onChange([this](){updateTexture();});
-
+    std::string fieldlineIndexFile;
     dictionary.getValue("kwPath", _kwPath);
+    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
+
+    readFieldlinePaths(absPath(fieldlineIndexFile));
+
+    _dataOptions.onChange([this](){updateTexture();});
+    _fieldlines.onChange([this](){ updateFieldlineSeeds();} );
 
     std::string axis;
     dictionary.getValue("axisCut", axis);
@@ -146,7 +156,6 @@ KameleonPlane::~KameleonPlane(){
 
 
 bool KameleonPlane::loadTexture() {    
-    std::cout << "load kameleonplane texture" << std::endl;
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
@@ -313,6 +322,51 @@ void KameleonPlane::setTransferFunctions(std::string tfPath){
         _transferFunctions = tfs;
     }
 
+}
+
+void KameleonPlane::updateFieldlineSeeds(){
+    std::vector<int> selectedOptions = _fieldlines.value();
+
+    // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
+    for (auto& seedPath: _fieldlineState) {
+        // if this option was turned off
+        if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
+            LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
+            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
+            std::get<2>(seedPath.second) = false;
+        // if this option was turned on
+        } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
+            LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
+            IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kwPath, std::get<1>(seedPath.second));
+            std::get<2>(seedPath.second) = true;
+        }
+    }
+}
+
+void KameleonPlane::readFieldlinePaths(std::string indexFile){
+    LINFO("Reading seed points paths from file '" << indexFile << "'");
+
+    // Read the index file from disk
+    std::ifstream seedFile(indexFile);
+    if (!seedFile.good())
+        LERROR("Could not open seed points file '" << indexFile << "'");
+    else {
+        std::string line;
+        std::string fileContent;
+        while (std::getline(seedFile, line)) {
+            fileContent += line;
+        }
+
+        //Parse and add each fieldline as an selection
+        json fieldlines = json::parse(fileContent);
+        int i = 0;
+        for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            _fieldlines.addOption({i, it.key()});
+            _fieldlineState[i] = std::make_tuple(it.key(), it.value(), false);
+            i++;
+        }
+        // _fieldlines.setValue(std::vector<int>(1,0));
+    }
 }
 
 }// namespace openspace

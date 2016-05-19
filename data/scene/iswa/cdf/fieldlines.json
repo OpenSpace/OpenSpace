@@ -1,0 +1,7 @@
+{
+	"Separatrix Seeds": "${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt",
+	"Closed Seeds": "${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_closed_seeds_all.txt",
+	"Open North Seeds": "${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_north_all.txt",
+	"Open South Seeds": "${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_south_all.txt",
+	"Solar Wind Seeds": "${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt"
+}
