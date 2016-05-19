@@ -55,6 +55,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
+    ,_resolution("resolution", "Resolutionx100", 2, 1, 5)
 {       
     std::string name;
     dictionary.getValue("Name", name);
@@ -67,6 +68,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_normValues);
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
+    addProperty(_resolution);
     addProperty(_dataOptions);
     addProperty(_fieldlines);
 
@@ -76,6 +78,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iswa.registerProperty(&_resolution);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
         OsEng.gui()._iswa.registerProperty(&_fieldlines);
     }
@@ -87,8 +90,6 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         _useHistogram.value(),
         _normValues
     );
-
-    _dataOptions.onChange([this](){updateTexture();});
 
     _normValues.onChange([this](){
         _dataProcessor->normValues(_normValues.value());
@@ -109,6 +110,10 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
+    _resolution.onChange([this](){
+        updateTexture();
+    });
+
     _type = IswaManager::CygnetType::Data;
 
     dictionary.getValue("kwPath", _kwPath);
@@ -117,33 +122,30 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
     readFieldlinePaths(absPath(fieldlineIndexFile));
 
-    _dataOptions.onChange([this](){updateTexture();});
     _fieldlines.onChange([this](){ updateFieldlineSeeds();} );
 
     std::string axis;
     dictionary.getValue("axisCut", axis);
 
-    _dimensions = glm::size3_t(150);
-
     if(axis == "x"){
         _data->scale.x = 0;
-        _dimensions.x = 1;
-        _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
-        _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
+        // _dimensions.x = 1;
+        // _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
+        // _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
 
     }else if(axis == "y"){
         _data->scale.y = 0;
-        _dimensions.y = 1;
-        _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
-        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
+        // _dimensions.y = 1;
+        // _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
+        // _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
 
     }else{
         _data->scale.z = 0;
-        _dimensions.z = 1;
-        _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
-        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
+        // _dimensions.z = 1;
+        // _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
+        // _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
     }
-    std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
+    // std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
 }
 
 KameleonPlane::~KameleonPlane(){
@@ -190,9 +192,23 @@ KameleonPlane::~KameleonPlane(){
 // }
 
 
-bool KameleonPlane::loadTexture() {    
+bool KameleonPlane::loadTexture() {
+    std::cout << "loadTexture" << std::endl;
+
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
+
+    std::vector<int> selectedOptions = _dataOptions.value();
+    auto options = _dataOptions.options();
+    float zSlice = 0.5f;
+
+    for(int option : selectedOptions){
+        if(!_dataSlices[option]){
+            std::cout << options[option].description << std::endl;
+            _dataSlices[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, zSlice);
+        }
+    }
+
 
     std::vector<float*> data = _dataProcessor->processKameleonData(_dataSlices, _dimensions, _dataOptions);
 
@@ -202,7 +218,6 @@ bool KameleonPlane::loadTexture() {
     _backgroundValues.setValue(_dataProcessor->filterValues());
     
     bool texturesReady = false;
-    std::vector<int> selectedOptions = _dataOptions.value();
 
     for(int option: selectedOptions){
         float* values = data[option];
@@ -235,6 +250,7 @@ bool KameleonPlane::loadTexture() {
 }
 
 bool KameleonPlane::updateTexture(){
+
     if(!_kw){
         _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
     }
@@ -243,15 +259,34 @@ bool KameleonPlane::updateTexture(){
         fillOptions();
     }
 
-    std::vector<int> selectedOptions = _dataOptions.value();
-    auto options = _dataOptions.options();
-    float zSlice = 0.5f;
+    _dimensions = glm::size3_t(_resolution.value()*100);
+    if(_data->scale.x == 0){
+        _dimensions.x = 1;
+        _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
+        _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
 
-    for(int option : selectedOptions){
-        if(!_dataSlices[option]){
-            std::cout << options[option].description << std::endl;
-            _dataSlices[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, zSlice);
+    }else if(_data->scale.y == 0){
+        _dimensions.y = 1;
+        _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
+
+    }else{
+        _dimensions.z = 1;
+        _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
+    }
+    std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
+
+    for(int i=0; i<_dataSlices.size(); ++i){
+        float* slice = _dataSlices[i];
+        if(slice){
+            _dataSlices[i] = nullptr;
+            delete slice;
         }
+    }
+
+    for(int i=0; i<_textures.size(); ++i){
+        _textures[i] = std::move(nullptr);
     }
 
     loadTexture();
@@ -260,7 +295,7 @@ bool KameleonPlane::updateTexture(){
 }
 
 bool KameleonPlane::readyToRender(){
-    return (_textures[0] != nullptr && !_transferFunctions.empty());
+    return (!_textures.empty() && !_transferFunctions.empty());
 }
 
 void KameleonPlane::setUniformAndTextures(){
@@ -370,7 +405,7 @@ void KameleonPlane::fillOptions(){
         }
     }
     _dataOptions.setValue(std::vector<int>(1,0));
-
+    _dataOptions.onChange([this](){loadTexture();});
     if(!_data->groupName.empty())
         IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }

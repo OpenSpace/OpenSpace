@@ -53,6 +53,7 @@
 
 	static int id();
 
+    properties::IntProperty _resolution;
     properties::SelectionProperty _dataOptions;
     properties::SelectionProperty _fieldlines;
     properties::StringProperty _transferFunctionsFile;
