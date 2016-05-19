@@ -347,10 +347,6 @@ void RenderEngine::postSynchronizationPreDraw() {
         ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
     }
 
-    // converts the quaternion used to rotation matrices
-    if (_mainCamera)
-        _mainCamera->compileViewRotationMatrix();
-
     // update and evaluate the scene starting from the root node
     _sceneGraph->update({
         Time::ref().currentTime(),

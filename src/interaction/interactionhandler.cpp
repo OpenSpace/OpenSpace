@@ -160,9 +160,9 @@ void InteractionHandler::update(double deltaTime) {
     
     _keyframeMutex.unlock();
     
-    if(hasKeys){
+    if (hasKeys) {
         _camera->setPosition(pos);
-        _camera->setViewRotationMatrix(glm::mat4_cast(q));
+        _camera->setRotation(q);
     }
 
         

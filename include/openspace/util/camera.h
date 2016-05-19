@@ -90,11 +90,6 @@ public:
     float sinMaxFov() const;
     const glm::mat4& viewRotationMatrix() const;
 
-
-    // TEMPORARY
-    void setViewRotationMatrix(glm::mat4 m);
-    void compileViewRotationMatrix();
-
     //@TODO this should simply be called viewMatrix!
     //Rename after removing deprecated methods
     const glm::mat4& combinedViewMatrix() const;

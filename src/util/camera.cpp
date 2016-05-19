@@ -125,29 +125,6 @@ const glm::mat4& Camera::viewRotationMatrix() const {
 	return _viewRotationMatrix.synced;
 }
 
-void Camera::setViewRotationMatrix(glm::mat4 m) {
-    /*
-    std::lock_guard<std::mutex> _lock(_mutex);
-    _localViewRotationMatrix = m;
-    */
-}
-
-void Camera::compileViewRotationMatrix()
-{
-    /*
-    std::lock_guard<std::mutex> _lock(_mutex);
-    // convert from quaternion to rotation matrix using glm
-    //_viewRotationMatrix = glm::mat4_cast(_viewRotation);
-
-    // the camera matrix needs to be rotated inverse to the world
-    // _viewDirection = glm::rotate(glm::inverse(_viewRotation), _cameraDirection);
-    //_viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz;
-    _viewDirection = (glm::inverse(_localViewRotationMatrix) * glm::vec4(_cameraDirection, 0.f)).xyz();
-    _viewDirection = glm::normalize(_viewDirection);
-    */
-}
-
-
 const glm::mat4& Camera::combinedViewMatrix() const {
 	glm::vec3 cameraPosition = position().vec3();
 	glm::mat4 viewTransform = glm::inverse(glm::translate(glm::mat4(1.0), cameraPosition));
