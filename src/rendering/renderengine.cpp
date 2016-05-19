@@ -283,7 +283,7 @@ bool RenderEngine::initializeGL() {
 
         
         //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
-     _mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+     //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
         //_mainCamera->setLookUpVector(glm::normalize(upVector));
         _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
@@ -377,9 +377,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 }
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-    _mainCamera->setViewMatrix(viewMatrix);
-    _mainCamera->setProjectionMatrix(projectionMatrix);
-
+    _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
+    _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     if (!(OsEng.isMaster() && _disableMasterRendering)) {
         _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
