@@ -67,6 +67,7 @@
 	static int id();
 
     properties::IntProperty _resolution;
+    properties::FloatProperty _slice;
     properties::SelectionProperty _dataOptions;
     properties::SelectionProperty _fieldlines;
     properties::StringProperty _transferFunctionsFile;
@@ -86,7 +87,7 @@
 
 	std::vector<float*> _dataSlices;
     std::shared_ptr<DataProcessor> _dataProcessor;
-    
+    float _scale;
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple 
      * containing information that is needed to either add or remove a fieldline from the scenegraph.
