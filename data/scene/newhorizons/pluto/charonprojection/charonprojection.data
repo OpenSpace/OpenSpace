@@ -1,5 +1,0 @@
-return {
-    FileRequest = {
-        { Identifier = "charon_textures", Destination = "textures", Version = 1 }
-    },
-}

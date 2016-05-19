@@ -57,7 +57,7 @@ void main() {
   projected.y /= projected.w;
   //invert gl coordinates
   projected.x = 1 - projected.x;
-  projected.y = 1 - projected.y; 
+  // projected.y = 1 - projected.y; 
   
   if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
         color = texture(projectTexture, projected.xy);

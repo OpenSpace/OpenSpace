@@ -24,11 +24,9 @@
 
 // open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-//#include <modules/newhorizons/rendering/planetgeometryprojection.h>
 
 #include <modules/base/rendering/planetgeometry.h>
 
-//#include <openspace/renderingo 
 
 #include <openspace/engine/configurationmanager.h>
 
@@ -89,19 +87,27 @@ namespace openspace {
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("planetTexture", "RGB Texture")
+    , _heightMapTexturePath("heightMap", "Heightmap Texture")
+    , _normalMapTexturePath("normalMap", "Normalmap Texture")
     , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
-    , _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
+    //, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
+    , _enableNormalMapping("enableNormalMapping", "Enable Normal Mapping", true)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _texture(nullptr)
     , _textureOriginal(nullptr)
     , _textureProj(nullptr)
     , _textureWhiteSquare(nullptr)
+    , _heightMapTexture(nullptr)
+    , _normalMapTexture(nullptr)
     , _geometry(nullptr)
     , _capture(false)
+    , _hasHeightMap(false)
+    , _hasNormalMap(false)
     , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
     std::string name;
@@ -166,17 +172,42 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (success){
         _projectionTexturePath = absPath(texturePath);
     }
+
+    std::string heightMapPath = "";
+    success = dictionary.getValue("Textures.Height", heightMapPath);
+    if (success) {
+        _heightMapTexturePath = absPath(heightMapPath);
+        _hasHeightMap = true;
+    }
+
+    std::string normalMapPath = "";
+    success = dictionary.getValue("Textures.NormalMap", normalMapPath);
+    if (success) {
+        _normalMapTexturePath = absPath(normalMapPath);
+        _hasNormalMap = true;
+    }
+
     addPropertySubOwner(_geometry);
     addProperty(_rotation);
-    addProperty(_fadeProjection);
+    //addProperty(_fadeProjection);
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
 
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
+    addProperty(_heightMapTexturePath);
+    _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
+    addProperty(_normalMapTexturePath);
+    _normalMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+
     addProperty(_projectionTexturePath);
     _projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
+
+    addProperty(_heightExaggeration);
+    addProperty(_enableNormalMapping);
 
     SequenceParser* parser;
 
@@ -247,16 +278,18 @@ bool RenderablePlanetProjection::initialize() {
 
         RenderEngine& renderEngine = OsEng.renderEngine();
         _programObject = renderEngine.buildRenderProgram("projectiveProgram",
-            "${MODULES}/newhorizons/shaders/projectiveTexture_vs.glsl",
-            "${MODULES}/newhorizons/shaders/projectiveTexture_fs.glsl");
+            "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_vs.glsl",
+            "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_fs.glsl"
+        );
 
         if (!_programObject)
             return false;
     }
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
-                                      "${MODULES}/newhorizons/shaders/fboPass_vs.glsl",
-                                      "${MODULES}/newhorizons/shaders/fboPass_fs.glsl");
+        "${MODULE_NEWHORIZONS}/shaders/fboPass_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/fboPass_fs.glsl"
+    );
     
     loadTexture();
     loadProjectionTexture();
@@ -273,7 +306,7 @@ bool RenderablePlanetProjection::initialize() {
     return completeSuccess;
 }
 
-bool RenderablePlanetProjection::auxiliaryRendertarget(){
+bool RenderablePlanetProjection::auxiliaryRendertarget() {
     bool completeSuccess = true;
     if (!_texture) return false;
 
@@ -318,7 +351,7 @@ bool RenderablePlanetProjection::auxiliaryRendertarget(){
     return completeSuccess;
 }
 
-bool RenderablePlanetProjection::deinitialize(){
+bool RenderablePlanetProjection::deinitialize() {
     _texture = nullptr;
     _textureProj = nullptr;
     _textureOriginal = nullptr;
@@ -338,8 +371,7 @@ bool RenderablePlanetProjection::isReady() const {
     return _geometry && _programObject && _texture && _textureWhiteSquare;
 }
 
-void RenderablePlanetProjection::imageProjectGPU(){
-
+void RenderablePlanetProjection::imageProjectGPU() {
     glDisable(GL_DEPTH_TEST);
 
     // keep handle to the current bound FBO
@@ -367,7 +399,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     unitFbo2.activate();
     _textureOriginal->bind();
     _fboProgramObject->setUniform("texture2", unitFbo2);
-    _fboProgramObject->setUniform("projectionFading", _fadeProjection);
+    //_fboProgramObject->setUniform("projectionFading", _fadeProjection);
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
@@ -404,7 +436,7 @@ void RenderablePlanetProjection::imageProjectGPU(){
     glEnable(GL_DEPTH_TEST);
 }
 
-glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up){
+glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up) {
     //rotate boresight into correct alignment
     _boresight = _instrumentMatrix*aim;
     glm::vec3 uptmp(_instrumentMatrix*glm::dvec3(up));
@@ -427,7 +459,7 @@ glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc
     return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
 }
 
-void RenderablePlanetProjection::attitudeParameters(double time){
+void RenderablePlanetProjection::attitudeParameters(double time) {
     // precomputations for shader
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
@@ -468,13 +500,27 @@ void RenderablePlanetProjection::attitudeParameters(double time){
 
 
 void RenderablePlanetProjection::textureBind() {
-    ghoul::opengl::TextureUnit unit[2];
+    ghoul::opengl::TextureUnit unit[4];
     unit[0].activate();
     _texture->bind();
     _programObject->setUniform("texture1", unit[0]);
     unit[1].activate();
     _textureWhiteSquare->bind();
     _programObject->setUniform("texture2", unit[1]);
+
+    if (_hasHeightMap) {
+        unit[2].activate();
+        _heightMapTexture->bind();
+        _programObject->setUniform("heightTex", unit[2]);
+    }
+
+    if (_hasNormalMap) {
+        unit[3].activate();
+        _normalMapTexture->bind();
+        _programObject->setUniform("normalTex", unit[3]);
+    }
+
+
 }
 
 void RenderablePlanetProjection::project(){
@@ -500,7 +546,7 @@ void RenderablePlanetProjection::project(){
 
     //---- Old method --- // 
     // @mm
-    for (auto const &img : _imageTimes){
+    for (const Image& img : _imageTimes) {
             RenderablePlanetProjection::attitudeParameters(img.startTime);
             if (_projectionTexturePath.value() != img.path){
                 _projectionTexturePath = img.path; // path to current images
@@ -510,21 +556,23 @@ void RenderablePlanetProjection::project(){
     _capture = false;
 }
 
-void RenderablePlanetProjection::clearAllProjections(){
-    float tmp = _fadeProjection;
-    _fadeProjection = 1.f;
+void RenderablePlanetProjection::clearAllProjections() {
+    //float tmp = _fadeProjection;
+    //_fadeProjection = 1.f;
     _projectionTexturePath = _clearingImage;
     imageProjectGPU();
-    _fadeProjection = tmp;
+    //_fadeProjection = tmp;
     _clearAllProjections = false;
 }
 
-
-void RenderablePlanetProjection::render(const RenderData& data){
-    if (!_programObject) return;
-    if (!_textureProj) return;
+void RenderablePlanetProjection::render(const RenderData& data) {
+    if (!_programObject)
+        return;
+    if (!_textureProj)
+        return;
     
-    if (_clearAllProjections) clearAllProjections();
+    if (_clearAllProjections)
+        clearAllProjections();
 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVector();
@@ -536,7 +584,7 @@ void RenderablePlanetProjection::render(const RenderData& data){
 
     double  lt;
     glm::dvec3 p =
-    openspace::SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
+        SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // Main renderpass
@@ -547,6 +595,11 @@ void RenderablePlanetProjection::render(const RenderData& data){
     _programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform" , _transform);
     _programObject->setUniform("boresight"    , _boresight);
+
+    _programObject->setUniform("_hasHeightMap", _hasHeightMap);
+    _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+    _programObject->setUniform("_enableNormalMapping", _enableNormalMapping && _hasNormalMap);
+
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
     textureBind();
@@ -557,12 +610,14 @@ void RenderablePlanetProjection::render(const RenderData& data){
     _programObject->deactivate();
 }
 
-void RenderablePlanetProjection::update(const UpdateData& data){
+void RenderablePlanetProjection::update(const UpdateData& data) {
+    //if (data.isTimeJump) {
     if (_time >= Time::ref().currentTime()) {
         // if jump back in time -> empty queue.  
         imageQueue = std::queue<Image>();
     }
 
+    //_time = data.time;
     _time = Time::ref().currentTime();
     _capture = false;
 
@@ -633,5 +688,25 @@ void RenderablePlanetProjection::loadTexture() {
             _textureWhiteSquare->setFilter(Texture::FilterMode::Linear);
         }
     }
+
+    _heightMapTexture = nullptr;
+    if (_heightMapTexturePath.value() != "") {
+        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
+        if (_heightMapTexture) {
+            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_heightMapTexture);
+            _heightMapTexture->uploadTexture();
+            _heightMapTexture->setFilter(Texture::FilterMode::Linear);
+        }
+    }
+
+    _normalMapTexture = nullptr;
+    if (_normalMapTexturePath.value() != "") {
+        _normalMapTexture = ghoul::io::TextureReader::ref().loadTexture(_normalMapTexturePath);
+        if (_normalMapTexture) {
+            _normalMapTexture->uploadTexture();
+            _normalMapTexture->setFilter(Texture::FilterMode::Linear);
+        }
+    }
+
 }
 }  // namespace openspace

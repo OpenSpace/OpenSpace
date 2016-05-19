@@ -188,7 +188,7 @@ bool RenderEngine::initialize() {
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
-    _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
+    _mainCamera->setPosition(psc(0.5f, 0.f, 1.499823f, 11.f));
 
     OsEng.interactionHandler().setCamera(_mainCamera);
     if (_renderer) {
@@ -1159,33 +1159,38 @@ void RenderEngine::renderInformation() {
             );
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+        bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+
         if (openspace::ImageSequencer::ref().isReady()) {
             penPosition.y -= 25.f;
 
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
-            try {
-                double lt;
-                glm::dvec3 p =
-                    SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
-                psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-                float a, b, c;
-                glm::dvec3 radii;
-                SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-                a = radii.x;
-                b = radii.y;
-                c = radii.z;
-                float radius = (a + b) / 2.f;
-                float distToSurf = glm::length(nhPos.vec3()) - radius;
+            if (hasNewHorizons) {
+                try {
+                    double lt;
+                    glm::dvec3 p =
+                        SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+                    float a, b, c;
+                    glm::dvec3 radii;
+                    SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                    a = radii.x;
+                    b = radii.y;
+                    c = radii.z;
+                    float radius = (a + b) / 2.f;
+                    float distToSurf = glm::length(nhPos.vec3()) - radius;
 
-                RenderFont(*_fontInfo,
-                    penPosition,
-                    "Distance to Pluto: % .1f (KM)",
-                    distToSurf
+                    RenderFont(*_fontInfo,
+                               penPosition,
+                               "Distance to Pluto: % .1f (KM)",
+                               distToSurf
                     );
-                penPosition.y -= _fontInfo->height();
+                    penPosition.y -= _fontInfo->height();
+                }
+                catch (...) {
+                }
             }
-            catch (...) {}
 
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
             float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
@@ -1258,8 +1263,10 @@ void RenderEngine::renderInformation() {
                     hh.c_str(), mm.c_str(), ss.c_str()
                     );
 
-
-                std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
+#if 0
+// Why is it (2) in the original? ---abock
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
                 std::string space;
                 glm::vec4 color;
                 size_t isize = incidentTargets.second.size();
@@ -1280,6 +1287,7 @@ void RenderEngine::renderInformation() {
                     for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
                         space += " ";
                 }
+#endif
                 penPosition.y -= _fontInfo->height();
 
                 std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();

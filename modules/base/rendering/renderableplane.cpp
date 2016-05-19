@@ -257,7 +257,7 @@ void RenderablePlane::createPlane() {
     // ============================
     const GLfloat size = _size.value()[0];
     const GLfloat w = _size.value()[1];
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+    const GLfloat vertex_data[] = {
         //      x      y     z     w     s     t
         -size, -size, 0.f, w, 0.f, 0.f,
         size, size, 0.f, w, 1.f, 1.f,

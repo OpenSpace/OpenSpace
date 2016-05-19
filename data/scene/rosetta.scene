@@ -6,8 +6,9 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2011 JUL 28 12:00:00")
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    openspace.time.setTime("2014 AUG 21 18:00:00")
+    -- openspace.time.setTime("2015 SEP 10 19:39:00")
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_rosetta.lua'))
 end
 
 function postInitialization()
@@ -20,9 +21,6 @@ function postInitialization()
     openspace.setPropertyValue("Sun.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", true)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
-    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
@@ -47,11 +45,9 @@ return {
         "saturn",
         "uranus",
         "neptune",
-        -- "pluto",
         "stars",
         "milkyway",
         "rosetta",
-        "67P",
     }
 }
 

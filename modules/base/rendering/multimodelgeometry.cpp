@@ -28,6 +28,8 @@
 #include "ghoul/io/model/modelreadermultiformat.h"
 #include "ghoul/opengl/vertexbufferobject.h"
 
+#include <openspace/util/powerscaledcoordinate.h>
+
 namespace {
     const std::string _loggerCat = "MultiModelGeometry";
 }
@@ -65,9 +67,16 @@ namespace openspace {
                 _vertices.reserve(vertices.size());
                 for (const auto & v : vertices)
                 {
+                    psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+                        v.location[0],
+                        v.location[1],
+                        v.location[2]
+                    );
+
                     Vertex vv;
-                    memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-                    vv.location[3] = 0.0;
+                    //memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
+                    memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
+                    //vv.location[3] = 1.0;
                     memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
                     memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
                     _vertices.push_back(vv);

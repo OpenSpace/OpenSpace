@@ -1,0 +1,69 @@
+UseAccurateNewHorizonsKernels = false
+
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    -- openspace.time.setTime("2015-07-08T15:57:45.00")
+    -- openspace.time.setTime("2015-07-12T07:41:00.00")
+    -- openspace.time.setTime("2015-07-12T15:43:00.00")
+    -- openspace.time.setTime("2015-07-12T22:19:20.00")
+    -- openspace.time.setTime("2015-07-13T20:59:00.00")
+    -- openspace.time.setTime("2015-07-14T02:41:55.00")
+    openspace.time.setTime("2015-07-14T10:05:00.00")
+    openspace.time.setDeltaTime(0)
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.printInfo("Done setting default values")
+end
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "NewHorizons",
+        Position = {1, 0, 0, 5},
+    },
+    Modules = {
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "mars",
+        "saturn",
+        "uranus",
+        "neptune",
+        "newhorizons/pluto",
+        "newhorizons/jupiter",
+        "stars",
+        -- "stars-denver",
+        "milkyway",
+        -- "milkyway-eso",
+        "imageplane",
+        "newhorizons/newhorizons",
+        "newhorizons/newhorizonsfov",
+    }
+}
+

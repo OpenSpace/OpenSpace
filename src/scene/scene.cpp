@@ -207,7 +207,12 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // update the position of all nodes
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
-        node->update({ Time::ref().currentTime() });
+        try {
+            node->update({ Time::ref().currentTime() });
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
     }
 
     for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
