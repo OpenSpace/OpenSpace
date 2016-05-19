@@ -45,7 +45,20 @@
  	virtual bool readyToRender() override;
     virtual void setUniformAndTextures() override;
     virtual bool createShader() override;
+
+    /**
+     * Given a path to the json index of seedpoints file, this 
+     * method reads, parses and adds them as checkbox options
+     * in the _fieldlines SelectionProperty
+     * 
+     * @param indexFile Path to json index file
+     */
     void readFieldlinePaths(std::string indexFile);
+
+    /**
+     * Updates the _fieldlineState map to match the _fieldlines 
+     * SelectionProperty and creates or removes fieldlines in the scene.
+     */
     void updateFieldlineSeeds();
 
     void setTransferFunctions(std::string tfPath);

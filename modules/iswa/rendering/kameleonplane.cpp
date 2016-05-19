@@ -443,15 +443,18 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
             fileContent += line;
         }
 
-        //Parse and add each fieldline as an selection
-        json fieldlines = json::parse(fileContent);
-        int i = 0;
-        for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-            _fieldlines.addOption({i, it.key()});
-            _fieldlineState[i] = std::make_tuple(it.key(), it.value(), false);
-            i++;
+        try{
+            //Parse and add each fieldline as an selection
+            json fieldlines = json::parse(fileContent);
+            int i = 0;
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+                _fieldlines.addOption({i, it.key()});
+                _fieldlineState[i] = std::make_tuple(it.key(), it.value(), false);
+                i++;
+            }
+        } catch(const std::exception& e) {
+            LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
         }
-        // _fieldlines.setValue(std::vector<int>(1,0));
     }
 }
 
