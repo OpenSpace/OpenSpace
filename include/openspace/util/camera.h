@@ -73,14 +73,14 @@ namespace openspace {
         void rotate(Quat rotation);
 
         // Accessors
-        const psc& position() const;
-        const psc& unsynchedPosition() const;
-        const psc& focusPosition() const;
-        const glm::vec3 viewDirectionWorldSpace() const;
-        const glm::vec3 lookUpVectorCameraSpace() const;
+        psc position() const;
+        psc unsynchedPosition() const;
+        psc focusPosition() const;
+        glm::vec3 viewDirectionWorldSpace() const;
+        glm::vec3 lookUpVectorCameraSpace() const;
         const glm::vec2& scaling() const;
-        const glm::mat4 viewRotationMatrix() const;
-        const glm::quat rotationQuaternion() const;
+        glm::mat4 viewRotationMatrix() const;
+        glm::quat rotationQuaternion() const;
         float maxFov() const;
         float sinMaxFov() const;
         
@@ -159,9 +159,9 @@ namespace openspace {
         // State of the camera
         SyncData<Quat> _rotation;
         SyncData<glm::vec2> _scaling;
-        SyncData<psc> _position;
+        SyncData<Vec3> _position;
 
-        psc _focusPosition;
+        Vec3 _focusPosition;
 
         float _maxFov;
 

@@ -39,8 +39,8 @@ namespace openspace {
         , _focusPosition()
     {
         _scaling.local = glm::vec2(1.f, 0.f);
-        _position.local = psc();
-        Vec3 eulerAngles(0.0f, 0.0f, 0.0f);
+        _position.local = Vec3(0, 0, 0);
+        Vec3 eulerAngles(0, 0, 0);
         _rotation.local = Quat(eulerAngles);
     }
 
@@ -62,12 +62,12 @@ namespace openspace {
 
     void Camera::setPosition(psc pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _position.local = std::move(pos);
+        _position.local = pos.dvec3();
     }
 
     void Camera::setFocusPosition(psc pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _focusPosition = pos;
+        _focusPosition = pos.dvec3();
     }
 
     void Camera::setRotation(Quat rotation) {
@@ -101,19 +101,19 @@ namespace openspace {
     //							CAMERA ACCESSORS (GETTERS)								//
     //////////////////////////////////////////////////////////////////////////////////////
 
-    const psc& Camera::position() const {
-        return _position.synced;
+    psc Camera::position() const {
+        return psc(_position.synced);
     }
 
-    const psc& Camera::unsynchedPosition() const {
-        return _position.local;
+    psc Camera::unsynchedPosition() const {
+        return psc(_position.local);
     }
 
-    const psc& Camera::focusPosition() const {
-        return _focusPosition;
+    psc Camera::focusPosition() const {
+        return psc(_focusPosition);
     }
 
-    const glm::vec3 Camera::viewDirectionWorldSpace() const {
+    glm::vec3 Camera::viewDirectionWorldSpace() const {
         if (_cachedViewDirection.isDirty) {
             _cachedViewDirection.datum =
                 glm::inverse(_rotation.local) * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
@@ -122,7 +122,7 @@ namespace openspace {
         return _cachedViewDirection.datum;
     }
     
-    const glm::vec3 Camera::lookUpVectorCameraSpace() const {
+    glm::vec3 Camera::lookUpVectorCameraSpace() const {
         return _LOOKUP_VECTOR_CAMERA_SPACE;
     }
     
@@ -141,14 +141,14 @@ namespace openspace {
         return _cachedSinMaxFov.datum;
     }
 
-    const glm::mat4 Camera::viewRotationMatrix() const {
+    glm::mat4 Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
             _cachedViewRotationMatrix.datum = glm::mat4_cast(_rotation.local);
         }
         return _cachedViewRotationMatrix.datum;
     }
 
-    const glm::quat Camera::rotationQuaternion() const {
+    glm::quat Camera::rotationQuaternion() const {
         return _rotation.synced;
     }
 
