@@ -63,17 +63,19 @@ namespace openspace {
             for caching.
         */
         template<typename T>
-        struct CachedDatum
+        struct Cached
         {
-            CachedDatum() { isDirty = true; }
+            Cached() { isDirty = true; }
             T datum;
             bool isDirty;
         };
 
-        // For testing double vs float precision
-        typedef glm::dquat Quat;
-        typedef glm::dmat4 Mat4;
-        typedef glm::dvec3 Vec3;
+        // now working with float precision. To be changed to double later.
+        // The reason double does not work yet is because of the setUniform function
+        // in ghoul::opengl
+        typedef glm::quat Quat;
+        typedef glm::mat4 Mat4;
+        typedef glm::vec3 Vec3;
 
         // Static constants
         static const Vec3 _VIEW_DIRECTION_CAMERA_SPACE;
@@ -99,18 +101,18 @@ namespace openspace {
         const Vec3& unsynchedPositionVec3() const;
         const Vec3& focusPositionVec3() const;
         // Should return const refs
-        glm::vec3 viewDirectionWorldSpace() const;
-        glm::vec3 lookUpVectorCameraSpace() const;
+        const Vec3& viewDirectionWorldSpace() const;
+        const Vec3& lookUpVectorCameraSpace() const;
         const glm::vec2& scaling() const;
-        glm::mat4 viewRotationMatrix() const;
-        glm::quat rotationQuaternion() const;
+        const Mat4& viewRotationMatrix() const;
+        const Quat& rotationQuaternion() const;
         float maxFov() const;
         float sinMaxFov() const;
         
         // @TODO this should simply be called viewMatrix!
         // Or it needs to be changed so that it actually is combined. Right now it is
         // only the view matrix that is the same for all SGCT cameras.
-        glm::mat4 combinedViewMatrix() const;
+        const Mat4& combinedViewMatrix() const;
 
         // Synchronization
         void postSynchronizationPreDraw();
@@ -145,7 +147,7 @@ namespace openspace {
             glm::mat4 _projectionMatrix;
 
             // Cache
-            mutable CachedDatum<glm::mat4> _cachedViewProjectionMatrix;
+            mutable Cached<glm::mat4> _cachedViewProjectionMatrix;
             mutable std::mutex _mutex;
         } sgctInternal;
 
@@ -193,14 +195,15 @@ namespace openspace {
         SyncData<Quat> _rotation;
         SyncData<glm::vec2> _scaling;
 
+        // _focusPosition to be removed
         Vec3 _focusPosition;
         float _maxFov;
 
         // Cached data
-        mutable CachedDatum<Vec3> _cachedViewDirection;
-        mutable CachedDatum<Mat4> _cachedViewRotationMatrix;
-        mutable CachedDatum<Mat4> _cachedCombinedViewMatrix;
-        mutable CachedDatum<float> _cachedSinMaxFov;
+        mutable Cached<Vec3> _cachedViewDirection;
+        mutable Cached<Mat4> _cachedViewRotationMatrix;
+        mutable Cached<Mat4> _cachedCombinedViewMatrix;
+        mutable Cached<float> _cachedSinMaxFov;
 
         mutable std::mutex _mutex;
     };
