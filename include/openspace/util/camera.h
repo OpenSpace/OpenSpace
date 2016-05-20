@@ -39,16 +39,37 @@
 #include <glm/gtc/quaternion.hpp>
 
 namespace openspace {
-
-    template<typename T>
-    struct CachedDatum
-    {
-        CachedDatum() { isDirty = true; }
-        T datum;
-        bool isDirty;
-    };
-
+    /**
+        This class still needs some more love. Suggested improvements:
+        - Remove psc from the camera class interface.
+        - Accessors should return constant references to double precision class members.
+        - Remove the scaling variable (What is it used for?)
+        - Remove the maxFov and sinMaxfov variables. Redundant since the fov is embedded
+        within the perspective projection matrix.
+        - Remove focusposition, part of the integration with the scale graph. The
+        "focus position" should not be needed since we assume the camera is always
+        positioned relative to its origin. When orbiting another object (not in origin),
+        the focus position should probably be handled outside the camera class
+        (interaction handler) since it does not affect the state of the camera
+        (only how it interacts).
+        - The class might need some more reasonable accessors depending on use cases.
+        (up vector world space?)
+        - Make clear which function returns a combined view matrix (things that are
+        dependent on the separate sgct nodes).
+    */
     class Camera {
+        /**
+            Used to explicitly show which variables within the Camera class that are used
+            for caching.
+        */
+        template<typename T>
+        struct CachedDatum
+        {
+            CachedDatum() { isDirty = true; }
+            T datum;
+            bool isDirty;
+        };
+
         // For testing double vs float precision
         typedef glm::dquat Quat;
         typedef glm::dmat4 Mat4;
@@ -63,8 +84,8 @@ namespace openspace {
         ~Camera();
 
         // Mutators
-        void setPosition(psc pos);
-        void setFocusPosition(psc pos);
+        void setPositionVec3(Vec3 pos);
+        void setFocusPositionVec3(Vec3 pos);
         void setRotation(Quat rotation);
         void setScaling(glm::vec2 scaling);
         void setMaxFov(float fov);
@@ -73,9 +94,11 @@ namespace openspace {
         void rotate(Quat rotation);
 
         // Accessors
-        psc position() const;
-        psc unsynchedPosition() const;
-        psc focusPosition() const;
+        // Remove Vec3 from the name when psc is gone
+        const Vec3& positionVec3() const;
+        const Vec3& unsynchedPositionVec3() const;
+        const Vec3& focusPositionVec3() const;
+        // Should return const refs
         glm::vec3 viewDirectionWorldSpace() const;
         glm::vec3 lookUpVectorCameraSpace() const;
         const glm::vec2& scaling() const;
@@ -84,20 +107,10 @@ namespace openspace {
         float maxFov() const;
         float sinMaxFov() const;
         
-        //@TODO this should simply be called viewMatrix!
-        //Rename after removing deprecated methods
+        // @TODO this should simply be called viewMatrix!
+        // Or it needs to be changed so that it actually is combined. Right now it is
+        // only the view matrix that is the same for all SGCT cameras.
         glm::mat4 combinedViewMatrix() const;
-
-        // DEPRECATED ACCESSORS (GETTERS)
-        // @TODO use Camera::SgctInternal interface instead
-        [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
-        const glm::mat4& viewMatrix() const;
-
-        [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
-        const glm::mat4& projectionMatrix() const;
-
-        [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
-        const glm::mat4& viewProjectionMatrix() const;
 
         // Synchronization
         void postSynchronizationPreDraw();
@@ -135,6 +148,25 @@ namespace openspace {
             mutable CachedDatum<glm::mat4> _cachedViewProjectionMatrix;
             mutable std::mutex _mutex;
         } sgctInternal;
+
+        // Deprecated
+        [[deprecated("Replaced by Camera::setPositionVec3()")]]
+        void setPosition(psc pos);
+        [[deprecated("Replaced by Camera::setFocusPositionVec3()")]]
+        void setFocusPosition(psc pos);
+        [[deprecated("Replaced by Camera::positionVec3()")]]
+        psc position() const;
+        [[deprecated("Replaced by Camera::unsynchedPositionVec3()")]]
+        psc unsynchedPosition() const;
+        [[deprecated("Replaced by Camera::focusPositionVec3()")]]
+        psc focusPosition() const;
+        // @TODO use Camera::SgctInternal interface instead
+        [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
+        const glm::mat4& viewMatrix() const;
+        [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
+        const glm::mat4& projectionMatrix() const;
+        [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
+        const glm::mat4& viewProjectionMatrix() const;
     private:
         /**
             Class encapsulating data that needs to be synched between SGCT nodes.
@@ -162,7 +194,6 @@ namespace openspace {
         SyncData<Vec3> _position;
 
         Vec3 _focusPosition;
-
         float _maxFov;
 
         // Cached data

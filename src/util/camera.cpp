@@ -31,6 +31,10 @@
 
 namespace openspace {
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    //								        CAMERA	                                    //
+    //////////////////////////////////////////////////////////////////////////////////////
+
     const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, -1);
     const Camera::Vec3 Camera::_LOOKUP_VECTOR_CAMERA_SPACE = Camera::Vec3(0, 1, 0);
 
@@ -56,18 +60,15 @@ namespace openspace {
 
     Camera::~Camera() { }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //							CAMERA MUTATORS (SETTERS)								//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    void Camera::setPosition(psc pos) {
+    // Mutators
+    void Camera::setPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _position.local = pos.dvec3();
+        _position.local = pos;
     }
 
-    void Camera::setFocusPosition(psc pos) {
+    void Camera::setFocusPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _focusPosition = pos.dvec3();
+        _focusPosition = pos;
     }
 
     void Camera::setRotation(Quat rotation) {
@@ -88,29 +89,23 @@ namespace openspace {
         _cachedSinMaxFov.isDirty = true;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //								CAMERA RELATICVE MUTATORS							//
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    // Relative mutators
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _rotation.local = _rotation.local * rotation;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //							CAMERA ACCESSORS (GETTERS)								//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    psc Camera::position() const {
-        return psc(_position.synced);
+    // Accessors
+    const Camera::Vec3& Camera::positionVec3() const{
+        return _position.synced;
     }
 
-    psc Camera::unsynchedPosition() const {
-        return psc(_position.local);
+    const Camera::Vec3& Camera::unsynchedPositionVec3() const{
+        return _position.local;
     }
 
-    psc Camera::focusPosition() const {
-        return psc(_focusPosition);
+    const Camera::Vec3& Camera::focusPositionVec3() const{
+        return _focusPosition;
     }
 
     glm::vec3 Camera::viewDirectionWorldSpace() const {
@@ -162,27 +157,8 @@ namespace openspace {
         }
         return _cachedCombinedViewMatrix.datum;
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //						DEPRECATED CAMERA ACCESSORS (GETTERS)						//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    const glm::mat4& Camera::viewMatrix() const {
-        return sgctInternal.viewMatrix();
-    }
-
-    const glm::mat4& Camera::projectionMatrix() const {
-        return sgctInternal.projectionMatrix();
-    }
-
-    const glm::mat4& Camera::viewProjectionMatrix() const {
-        return sgctInternal.viewProjectionMatrix();
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //								CAMERA SYNCHRONIZATION								//
-    //////////////////////////////////////////////////////////////////////////////////////
-
+    
+    // Synchronization
     void Camera::serialize(SyncBuffer* syncBuffer) {
         std::lock_guard<std::mutex> _lock(_mutex);
 
@@ -218,7 +194,7 @@ namespace openspace {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //								SGCT NODE DEPENTENT 								//
+    //								    SGCT INTERNAL	                                //
     //////////////////////////////////////////////////////////////////////////////////////
     Camera::SgctInternal::SgctInternal()
         : _viewMatrix()
@@ -256,4 +232,38 @@ namespace openspace {
         return _cachedViewProjectionMatrix.datum;
     }
 
+    // Deprecated
+    void Camera::setPosition(psc pos) {
+        std::lock_guard<std::mutex> _lock(_mutex);
+        _position.local = pos.dvec3();
+    }
+
+    void Camera::setFocusPosition(psc pos) {
+        std::lock_guard<std::mutex> _lock(_mutex);
+        _focusPosition = pos.dvec3();
+    }
+
+    psc Camera::position() const {
+        return psc(_position.synced);
+    }
+
+    psc Camera::unsynchedPosition() const {
+        return psc(_position.local);
+    }
+
+    psc Camera::focusPosition() const {
+        return psc(_focusPosition);
+    }
+
+    const glm::mat4& Camera::viewMatrix() const {
+        return sgctInternal.viewMatrix();
+    }
+
+    const glm::mat4& Camera::projectionMatrix() const {
+        return sgctInternal.projectionMatrix();
+    }
+
+    const glm::mat4& Camera::viewProjectionMatrix() const {
+        return sgctInternal.viewProjectionMatrix();
+    }
 } // namespace openspace
