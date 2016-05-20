@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __LRUCACHE_H__
+#define __LRUCACHE_H__
 
-uniform sampler2D projectTexture;
-uniform sampler2D currentTexture;
+#include <glm/glm.hpp>
+#include <list>
+#include <iterator>
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
-uniform vec3 boresight;
+namespace openspace {
+    
+template <typename ValueType>
+class LinearLruCache {
+public:
+    LinearLruCache(size_t capacity, size_t nIndices)
+        : _tracker()
+        , _cache(nIndices, std::make_pair(nullptr, _tracker.end()))
+        , _capacity(capacity) {};
 
-
-in vec4 vs_position;
-in vec4 ProjTexCoord;
-in vec2 vs_uv;
-in vec4 vs_normal;
-
-out vec4 color;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-bool inRange(float x, float a, float b) {
-    return (x >= a && x <= b);
-} 
-
-void main() {
-  vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
-
-  vec3 n = normalize(vs_normal.xyz);
-  vec4 projected = ProjTexCoord;
-
-  //normalize
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  //invert gl coordinates
-  projected.x = 1 - projected.x;
-  // projected.y = 1 - projected.y; 
-  
-  if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-        color = texture(projectTexture, projected.xy);
-  } else {
-        color = texture(currentTexture, uv);
-  }
+    bool has(size_t key) {
+        return _cache[key].first != nullptr;
+    };
+    void set(size_t key, ValueType value) {
+        auto prev = _cache[key];
+        if (prev.first != nullptr) {
+            prev.first = value;
+            std::list<size_t>::iterator trackerIter = prev.second;
+            _tracker.splice(_tracker.end(),
+                _tracker,
+                trackerIter);
+        }
+        else {
+            insert(key, value);
+        }
+    };
+    ValueType& use(size_t key) {
+        auto pair = _cache[key];
+        std::list<size_t>::iterator trackerIter = pair.second;
+        _tracker.splice(_tracker.end(),
+            _tracker,
+            trackerIter);
+        return pair.first;
+    };
+    ValueType& get(size_t key) {
+        return _cache[key].first;
+    };
+    void evict() {
+        _cache[_tracker.front()] = make_pair(nullptr, _tracker.end());
+        _tracker.pop_front();
+    };
+    size_t capacity() {
+        return _capacity;
+    };
+private:
+    void insert(size_t key, const ValueType& value) {
+        if (_tracker.size() == _capacity) {
+            evict();
+        }
+        auto iter = _tracker.insert(_tracker.end(), key);
+        _cache[key] = std::make_pair(value, iter);
+    };
+    std::list<size_t> _tracker;
+    std::vector<std::pair<ValueType, typename std::list<size_t>::iterator>> _cache;
+    size_t _capacity;
+};
 
 }
+
+#endif

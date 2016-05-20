@@ -231,19 +231,11 @@ void RenderableTrail::update(const UpdateData& data) {
     
     psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
     
-
     pscPos[3] += 3; // KM to M
     _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
 
     if (nValues != 0) {
-        // If we have new values to create, we do that here. nValues should always be
-        // close to 1
-
-        // But you never know
-        nValues = std::min(nValues, int(_vertexArray.size() - 1));
-        //LINFO(nValues);
-        std::vector<TrailVBOLayout> tmp = _vertexArray;
-
+        std::vector<TrailVBOLayout> tmp(nValues);
         for (int i = nValues; i > 0; --i) {
             double et = _oldTime + i * _increment;
             if (start > et)
@@ -254,11 +246,13 @@ void RenderableTrail::update(const UpdateData& data) {
             SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, et, lightTime);
             pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
             pscPos[3] += 3;
-            _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
+            tmp[nValues - i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
         }
 
-        for (size_t i = 0; i < tmp.size() - (nValues + 1); ++i)
-            _vertexArray[nValues + 1 + i] = tmp[i + 1];
+        size_t size = _vertexArray.size();
+        _vertexArray.insert(_vertexArray.begin() + 1, tmp.begin(), tmp.end());
+        _vertexArray.resize(size);
+
         _oldTime += nValues * _increment;
     }
 

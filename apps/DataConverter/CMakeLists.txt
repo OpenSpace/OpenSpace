@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2016                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -22,32 +22,24 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+set(APPLICATION_NAME DataConverter)
+set(APPLICATION_LINK_TO_OPENSPACE ON)
 
-set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.h  
-    ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h    
-    ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.h    
-)
-source_group("Header Files" FILES ${HEADER_FILES})
+include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+
+set(application_path ${OPENSPACE_APPS_DIR}/DataConverter)
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl  
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl    
-    ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp
+  ${application_path}/main.cpp
+  ${application_path}/milkywayconversiontask.cpp  
 )
-source_group("Source Files" FILES ${SOURCE_FILES})
+set(HEADER_FILES
+  ${application_path}/conversiontask.h
+  ${application_path}/milkywayconversiontask.h  
+)
 
-create_new_module(
-    "Volume"
-    volume_module
-    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
+    ${SOURCE_FILES}
+    ${HEADER_FILES}
 )
+

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,47 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __VOLUMEUTILS_H__
+#define __VOLUMEUTILS_H__
 
-uniform sampler2D projectTexture;
-uniform sampler2D currentTexture;
+#include <glm/glm.hpp>
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
-uniform vec3 boresight;
+namespace openspace {
+namespace volumeutils {
 
-
-in vec4 vs_position;
-in vec4 ProjTexCoord;
-in vec2 vs_uv;
-in vec4 vs_normal;
-
-out vec4 color;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-bool inRange(float x, float a, float b) {
-    return (x >= a && x <= b);
-} 
-
-void main() {
-  vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
-
-  vec3 n = normalize(vs_normal.xyz);
-  vec4 projected = ProjTexCoord;
-
-  //normalize
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  //invert gl coordinates
-  projected.x = 1 - projected.x;
-  // projected.y = 1 - projected.y; 
-  
-  if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-        color = texture(projectTexture, projected.xy);
-  } else {
-        color = texture(currentTexture, uv);
-  }
+size_t coordsToIndex(const glm::vec3& coords, const glm::ivec3& dimensions);
+glm::vec3 indexToCoords(size_t index, const glm::ivec3& dimensions);
 
 }
+}
+
+#endif // __VOLUMEUTILS__
