@@ -158,17 +158,25 @@ void DataProcessor::addValues(std::string& dataBuffer, properties::SelectionProp
         }
 
         for(int i=0; i<numOptions; i++){
+            if(!_histograms[i]){
+                _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+            }else{
+                _histograms[i]->changeRange(_min[i], _max[i]);
+            }
+            int numValues = values[i].size();
             float mean = (1.0/numValues)*sum[i];
+        
             float var = 0;
             for(int j=0; j<numValues; j++){
                 var += pow(values[i][j] - mean, 2);
+                _histograms[i]->add(values[i][j], 1);
             }
             float sd = sqrt(var / numValues);
 
             _sum[i] += sum[i];
             _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
             _numValues[i] += numValues;
-            std::cout << i << " " << _numValues[i] << " " << _sum[i] << " " << _sd[i] << std::endl;
+            _histograms[i]->generateEqualizer();
         }
     }
 }
@@ -306,7 +314,33 @@ std::vector<float*> DataProcessor::readData2(std::string& dataBuffer, properties
             LWARNING("Number of values read and expected are not the same");
             return std::vector<float*>();
         }
+
+
+        _filterValues = glm::vec2(0.0f);
+        if(!_histograms.empty()){
+            for(int option : selectedOptions){
+                std::shared_ptr<Histogram> histogram = _histograms[option];
+                float mean = (1.0 / _numValues[option]) * _sum[option];
+                float sd = _sd[option];
+
+                float filterMid = histogram->highestBinValue(_useHistogram);
+                float filterWidth = mean+histogram->binWidth()/2.0;
+
+                if(_useHistogram) {
+                    sd = histogram->equalize(sd);
+                    mean = histogram->equalize(mean);
+                    filterWidth = mean+0.5;
+                }
+
+                filterMid = normalizeWithStandardScore(filterMid, mean, sd);
+                filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, sd));
+                _filterValues += glm::vec2(filterMid, filterWidth);
+            }
+        }
         
+        _filterValues.x /= numSelected;
+        _filterValues.y /= numSelected;
+
         return data;
 
     }else{
@@ -424,20 +458,50 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
                 }
             }
         }
+       //  //    for(int i=0; i<numOptions; i++){
+       //  //     if(!_histograms[i]){
+       //  //         _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+       //  //     }else{
+       //  //         //_histogram[option]->changeRange();
+       //  //     }
+       //  //      int numValues = values[i].size();
+       //  //     float mean = (1.0/numValues)*sum[i];
 
-        for(int i=0; i<numOptions; i++){
+       //  //     float var = 0;
+       //  //     for(int j=0; j<numValues; j++){
+       //  //         var += pow(values[i][j] - mean, 2);
+       //  //         _histograms[i]->add(values[i][j], 1);
+       //  //     }
+       //  //     float sd = sqrt(var / numValues);
+
+       //  //     _sum[i] += sum[i];
+       //  //     _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+       //  //     _numValues[i] += numValues;
+       //  //     _histograms[i]->generateEqualizer();
+       //  // }
+
+
+       for(int i=0; i<numOptions; i++){
+            if(!_histograms[i]){
+                _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+            }else{
+                _histograms[i]->changeRange(_min[i], _max[i]);
+            }
             int numValues = values[i].size();
             float mean = (1.0/numValues)*sum[i];
-
+        
             float var = 0;
             for(int j=0; j<numValues; j++){
                 var += pow(values[i][j] - mean, 2);
+                _histograms[i]->add(values[i][j], 1);
             }
+
             float sd = sqrt(var / numValues);
 
             _sum[i] += sum[i];
             _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
             _numValues[i] += numValues;
+            _histograms[i]->generateEqualizer();
         }
     }
 }
@@ -456,6 +520,9 @@ std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, proper
         auto options = dataOptions.options();        
 
         std::vector<float*> data(options.size(), nullptr);
+
+        _filterValues = glm::vec2(0.0f);
+
         for(int option : selectedOptions){
 
             data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
@@ -477,12 +544,34 @@ std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, proper
 
                 }
             }
+
+            if(!_histograms.empty()){
+                float mean = (1.0 / _numValues[option]) * _sum[option];
+                float sd = _sd[option];
+
+                std::shared_ptr<Histogram> histogram = _histograms[option];
+                float filterMid = histogram->highestBinValue(_useHistogram);
+                float filterWidth = mean+histogram->binWidth()/2.0;
+
+                if(_useHistogram) {
+                    sd = histogram->equalize(sd);
+                    mean = histogram->equalize(mean);
+                    filterWidth = mean+0.5;
+                }
+
+                filterMid = normalizeWithStandardScore(filterMid, mean, sd);
+                filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, sd));
+                _filterValues += glm::vec2(filterMid, filterWidth);
+            }
         }
+
+        _filterValues.x /= numSelected;
+        _filterValues.y /= numSelected;
         
         return data;
     } 
     else {
-    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
+        // LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
         return std::vector<float*>();
     }
 }
@@ -507,16 +596,40 @@ void DataProcessor::addValuesFromKameleonData(float* kdata, glm::size3_t dimensi
         sum += v;
     }
 
-    float mean = (1.0 / numValues) * sum;
-    float var = 0;
-    for(int i=0; i<numValues; i++){
-        var += pow(kdata[i] - mean, 2);
+    int i = option;
+    // for(int i=0; i<numOptions; i++){
+    if(!_histograms[i]){
+        _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+    }else{
+        _histograms[i]->changeRange(_min[i], _max[i]);
     }
-    float sd = sqrt ( var / numValues );
+    // int numValues = values[i].size();
+    float mean = (1.0/numValues)*sum;
 
-    _sum[option] += sum;
-    _sd[option] = sqrt(pow(_sd[option],2)+ pow(sd,2));
-    _numValues[option] += numValues;
+    float var = 0;
+    for(int j=0; j<numValues; j++){
+        var += pow(kdata[j] - mean, 2);
+        _histograms[i]->add(kdata[j], 1);
+    }
+    float sd = sqrt(var / numValues);
+
+    _sum[i] += sum;
+    _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+    _numValues[i] += numValues;
+    _histograms[i]->generateEqualizer();
+    // }
+
+
+    // float mean = (1.0 / numValues) * sum;
+    // float var = 0;
+    // for(int i=0; i<numValues; i++){
+    //     var += pow(kdata[i] - mean, 2);
+    // }
+    // float sd = sqrt ( var / numValues );
+
+    // _sum[option] += sum;
+    // _sd[option] = sqrt(pow(_sd[option],2)+ pow(sd,2));
+    // _numValues[option] += numValues;
 }
 
 std::vector<float*> DataProcessor::processKameleonData2(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
@@ -527,14 +640,36 @@ std::vector<float*> DataProcessor::processKameleonData2(std::vector<float*> kdat
     std::vector<float*> data(dataOptions.options().size(), nullptr);
     int numValues = dimensions.x*dimensions.y*dimensions.z;
 
+    _filterValues = glm::vec2(0.0f);
+
     for(int option : selectedOptions){
         data[option] = new float[numValues]{0.0f};
+
+        float mean = (1.0 / _numValues[option]) * _sum[option];
+        float sd = _sd[option];
 
         for(int i=0; i<numValues; i++){
             float v = kdata[option][i];
             data[option][i] = processDataPoint(v, option);
         }
+
+        std::shared_ptr<Histogram> histogram = _histograms[option];
+        float filterMid = histogram->highestBinValue(_useHistogram);
+        float filterWidth = mean+histogram->binWidth()/2.0;
+
+        if(_useHistogram) {
+            sd = histogram->equalize(sd);
+            mean = histogram->equalize(mean);
+            filterWidth = mean+0.5;
+        }
+
+        filterMid = normalizeWithStandardScore(filterMid, mean, sd);
+        filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, sd));
+        _filterValues += glm::vec2(filterMid, filterWidth);
     }
+
+    _filterValues.x /= numSelected;
+    _filterValues.y /= numSelected;
 
     return data;
 }
@@ -669,9 +804,19 @@ void DataProcessor::processData(float* outputData, std::vector<float>& inputData
 
 float DataProcessor::processDataPoint(float value, int option){
     if(_numValues.empty()) return 0.0f;
-
+    std::shared_ptr<Histogram> histogram = _histograms[option];
     float mean = (1.0 / _numValues[option]) * _sum[option];
-    float v = normalizeWithStandardScore(value, mean, _sd[option]);
+    float sd = _sd[option];
+
+    if(_useHistogram){
+        // std::cout << sd << " " << 
+        sd = histogram->equalize(sd);
+        mean = histogram->equalize(mean);
+        value = histogram->equalize(value);
+    }
+
+
+    float v = normalizeWithStandardScore(value, mean, sd);
     return v;
 }
 

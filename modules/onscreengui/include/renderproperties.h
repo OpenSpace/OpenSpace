@@ -32,15 +32,15 @@
 using namespace openspace::properties;
 
 void executeScript(const std::string& id, const std::string& value);
-void renderBoolProperty(Property* prop);
-void renderOptionProperty(Property* prop);
-void renderSelectionProperty(Property* prop);
-void renderStringProperty(Property* prop);
-void renderIntProperty(Property* prop);
-void renderFloatProperty(Property* prop);
-void renderVec2Property(Property* prop);
-void renderVec3Property(Property* prop);
-void renderVec4Property(Property* prop);
-void renderTriggerProperty(Property* prop);
+void renderBoolProperty(Property* prop, const std::string& ownerName);
+void renderOptionProperty(Property* prop, const std::string& ownerName);
+void renderSelectionProperty(Property* prop, const std::string& ownerName);
+void renderStringProperty(Property* prop, const std::string& ownerName);
+void renderIntProperty(Property* prop, const std::string& ownerName);
+void renderFloatProperty(Property* prop, const std::string& ownerName);
+void renderVec2Property(Property* prop, const std::string& ownerName);
+void renderVec3Property(Property* prop, const std::string& ownerName);
+void renderVec4Property(Property* prop, const std::string& ownerName);
+void renderTriggerProperty(Property* prop, const std::string& ownerName);
 
 #endif __RENDERPROPERTIES_H__

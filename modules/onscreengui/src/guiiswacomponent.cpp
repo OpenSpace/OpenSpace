@@ -112,52 +112,52 @@ void GuiIswaComponent::render() {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
             for (properties::Property* prop : p.second) {
                 if (_boolProperties.find(prop) != _boolProperties.end()) {
-                    renderBoolProperty(prop);
+                    renderBoolProperty(prop, p.first);
                     continue;
                 }
 
                 if (_intProperties.find(prop) != _intProperties.end()) {
-                    renderIntProperty(prop);
+                    renderIntProperty(prop, p.first);
                     continue;
                 }
 
                 if (_floatProperties.find(prop) != _floatProperties.end()) {
-                    renderFloatProperty(prop);
+                    renderFloatProperty(prop, p.first);
                     continue;
                 }
 
                 if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-                    renderVec2Property(prop);
+                    renderVec2Property(prop, p.first);
                     continue;
                 }
 
                 if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-                    renderVec3Property(prop);
+                    renderVec3Property(prop, p.first);
                     continue;
                 }
 
                 if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-                    renderVec4Property(prop);
+                    renderVec4Property(prop, p.first);
                     continue;
                 }
 
                 if (_optionProperties.find(prop) != _optionProperties.end()) {
-                    renderOptionProperty(prop);
+                    renderOptionProperty(prop, p.first);
                     continue;
                 }
 
                 if (_triggerProperties.find(prop) != _triggerProperties.end()) {
-                    renderTriggerProperty(prop);
+                    renderTriggerProperty(prop, p.first);
                     continue;
                 }
 
                 if (_selectionProperties.find(prop) != _selectionProperties.end()) {
-                    renderSelectionProperty(prop);
+                    renderSelectionProperty(prop, p.first);
                     continue;
                 }
 
                 if (_stringProperties.find(prop) != _stringProperties.end()) {
-                    renderStringProperty(prop);
+                    renderStringProperty(prop, p.first);
                     continue;
                 }
             }

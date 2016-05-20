@@ -50,7 +50,7 @@ namespace openspace {
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Use Histogram", true)
+    ,_useHistogram("useHistogram", "Use Histogram", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
@@ -95,17 +95,17 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
         _data->scale.x = 0;
         _data->offset.x = 0;
 
-        _slice.setValue((_data->offset.x - _data->gridMin.x)/_scale);
+        _slice.setValue(0.8);
     }else if(axis == "y"){
         _scale = _data->scale.y;
         _data->scale.y = 0;
-        _data->offset.y = 0;
+        // _data->offset.y = 0;
 
         _slice.setValue((_data->offset.y -_data->gridMin.y)/_scale);
     }else{
         _scale = _data->scale.z;
         _data->scale.z = 0;
-        _data->offset.z = 0;
+        // _data->offset.z = 0;
 
         _slice.setValue((_data->offset.z - _data->gridMin.z)/_scale);
     }
@@ -188,8 +188,6 @@ void KameleonPlane::transferFunctionsFile(std::string tfPath){ _transferFunction
 void KameleonPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool KameleonPlane::loadTexture() {
-    std::cout << "loadTexture()" << std::endl;
-
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
@@ -206,7 +204,7 @@ bool KameleonPlane::loadTexture() {
             getline(memorystream, optionName, '/');
             // std::cout << options[option].description << std::endl;
             _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
-            _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
+            // _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
         }
     }
 
@@ -215,8 +213,10 @@ bool KameleonPlane::loadTexture() {
     if(data.empty())
         return false;
 
-    // _backgroundValues.setValue(_dataProcessor->filterValues());
+    _backgroundValues.setValue(_dataProcessor->filterValues());
     
+    // std::cout << std::to_string(_backgroundValues.value()) << std::endl;
+
     bool texturesReady = false;
 
     for(int option: selectedOptions){
@@ -255,10 +255,6 @@ bool KameleonPlane::updateTexture(){
         _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
     }
 
-    if(!_dataOptions.options().size()){
-        fillOptions();
-    }
-
     _dimensions = glm::size3_t(_resolution.value()*100);
     if(_data->scale.x == 0){
         _dimensions.x = 1;
@@ -280,6 +276,23 @@ bool KameleonPlane::updateTexture(){
 
         _data->offset.z = _data->gridMin.z+_slice.value()*_scale;
     }
+
+    if(!_dataOptions.options().size()){
+        fillOptions();
+        
+        auto options = _dataOptions.options();
+        for(auto option : options){
+            std::stringstream memorystream(option.description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+            float* data = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
+            _dataProcessor->addValuesFromKameleonData(data, _dimensions, options.size(), option.value);
+
+        }
+    }
+
+
     // std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
     // std::cout << "Offset: " << std::to_string(_data->offset) << std::endl;
     // std::cout << _slice << std::endl; 
