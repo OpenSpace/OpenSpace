@@ -29,7 +29,6 @@
 #include <ostream>
 #include <thread>
 #include <queue>
-#include <atomic>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
