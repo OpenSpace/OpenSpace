@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#version __CONTEXT__
 
-out vec4 _out_color_;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
+in vec3 inPosition;
+in vec3 inColor;
 
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
+out vec3 vsPosition;
+out vec3 vsColor;
 
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
 
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
-    }
+void main() { 
+    vec4 p = vec4(inPosition, 0.0);
+
+    vec4 tmp = p;
+    vec4 position = pscTransform(tmp, mat4(1.0));
+    vsPosition = position.xyz;    
+    position = projection * view * model * position;
+    gl_Position =  z_normalization(position);
+
+    
+    //float distThreshold = 0.0001;
+
+    //gl_PointSize = min(1.0, position.z);
+    gl_PointSize = 1.0;
+    vsColor = inColor;
 }

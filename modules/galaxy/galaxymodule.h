@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#ifndef __GALAXYMODULE_H__
+#define __GALAXYMODULE_H__
 
-out vec4 _out_color_;
+#include <openspace/util/openspacemodule.h>
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
+namespace openspace {
 
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
+class GalaxyModule : public OpenSpaceModule {
+public:
+    GalaxyModule();
+    void internalInitialize() override;
+};
 
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
+} // namespace openspace
 
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
-
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
-    }
-}
+#endif // __GALAXYMODULE_H__

@@ -100,7 +100,7 @@ uint depthFilterFragments(uint nFrags, float depthThreshold) {
 }
 
 
-uint reduceFragments(uint nFrags) {
+uint mergeFragments(uint nFrags) {
     uint outputIndex = 0;
     for (uint inputIndex = 0; inputIndex < nFrags; inputIndex++, outputIndex++) {
 
@@ -170,7 +170,7 @@ void retrieveRaycasterData(uint nFrags) {
 /**
  * Perform raycasting
  */
-void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
+void raycast(float raycastDepth, uint raycasterMask, inout vec3 accumulatedColor, inout vec3 accumulatedAlpha) {
     float nextStepSize = raycastDepth;
     float currentStepSize = 0.0;
     float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
@@ -186,7 +186,12 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
 
     float currentDepth = 0.0;
 
-    for (int steps = 0; finalColor.a < ALPHA_LIMIT && steps < RAYCAST_MAX_STEPS; ++steps) {
+    for (int steps = 0;
+         (accumulatedAlpha.x < ALPHA_LIMIT ||
+          accumulatedAlpha.y < ALPHA_LIMIT ||
+          accumulatedAlpha.z < ALPHA_LIMIT) &&
+         steps < RAYCAST_MAX_STEPS;
+         ++steps) {
         bool exceededDepth = currentDepth + nextStepSize * jitterFactor > raycastDepth;
         bool shortStepSize = nextStepSize < raycastDepth / 10000000000.0;
 
@@ -210,15 +215,22 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
 
             float maxStepSizeLocal;
 
-            vec4 raycasterContribution = sample#{raycaster.id}(jitteredPosition, data.direction, finalColor, maxStepSizeLocal);
+            sample#{raycaster.id}(jitteredPosition,
+                                  data.direction,
+                                  accumulatedColor,
+                                  accumulatedAlpha,
+                                  maxStepSizeLocal);
+            
             float sampleDistance = jitteredStepSizeLocal + data.previousJitterDistance;
             uint blend = raycasterData[#{raycaster.id}].blend;
 
+            /*
             if (blend == BLEND_MODE_NORMAL) {
                 normalBlendStep(finalColor, raycasterContribution, sampleDistance);
             } else if (blend == BLEND_MODE_ADDITIVE) {
                 additiveBlendStep(finalColor, raycasterContribution, sampleDistance);
-            }
+                }*/
+            //finalColor = raycasterContribution;
 
             raycasterData[#{raycaster.id}].previousJitterDistance = stepSizeLocal - jitteredStepSizeLocal;
             float maxStepSize = maxStepSizeLocal/data.scale;
@@ -230,33 +242,32 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec4 finalColor) {
 #endif // RAYCASTING_ENABLED
 
 void main() {
-    //vec4 opaqueColor = vec4(0.0);
-    finalColor = vec4(0.0);
-    float maxOpaqueDepth = 0;
+    // TODO: disable multisampling for main fbo.
+    float fboDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
+    vec4 fboRgba = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);
 
-    vec4 opaqueColor = vec4(0.0);
-    
-    for (int i = 0; i < nAaSamples; i++) {
-         float depth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
-         //         finalColor += color;
-         if (depth > maxOpaqueDepth) {
-             maxOpaqueDepth = depth;
-
-         }
-             opaqueColor += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);         
-         //finalColor.r += depth;
-         //finalColor += vec4(0.120);
-     }
-
-    opaqueColor /= nAaSamples;
+    // RGB color values, premultiplied with alpha channels.
+    vec3 accumulatedColor = vec3(0.0); 
+    // One alpha channel per color channel to allow for
+    // absorption of different wavelengths.
+    // Always within the interval [0, 1]
+    vec3 accumulatedAlpha = vec3(0.0); 
 
     uint nOriginalFrags = loadFragments();
     uint raycasterMask = 0;
 
-    uint nFilteredFrags = depthFilterFragments(nOriginalFrags, maxOpaqueDepth);
+    uint nFilteredFrags = nOriginalFrags;
+
+    // discard all fragments in abuffer with higher depth value than the fbo
+    depthFilterFragments(nOriginalFrags, fboDepth);
+
+    // sort remaining fragments from front to back
     sortFragments(nFilteredFrags);
 
-    uint nFrags = reduceFragments(nFilteredFrags);
+    // merge fragments whose sample masks don't intersect
+    // to get the correct alpha for fragments on borders between triangles
+    uint nFrags = mergeFragments(nFilteredFrags);
+    
 #if RAYCASTING_ENABLED
     retrieveRaycasterData(nFrags);
 #endif
@@ -270,9 +281,12 @@ void main() {
         if (type == 0) { // geometry fragment
             vec4 color = _color_(frag);
             if (blend == BLEND_MODE_NORMAL) {
-                normalBlend(finalColor, color);
+                accumulatedColor += (1 - accumulatedAlpha) * color.rgb;
+                accumulatedAlpha += (1 - accumulatedAlpha) * color.aaa;                
+                //normalBlend(finalColor, color);
             } else if (blend == BLEND_MODE_ADDITIVE) {
-                additiveBlend(finalColor, color);
+                accumulatedColor += (1 - accumulatedAlpha) * color.rgb;
+                //additiveBlend(finalColor, color);
             }
         }
 #if RAYCASTING_ENABLED
@@ -290,22 +304,19 @@ void main() {
         if (i + 1 < nFrags && raycasterMask != 0) {
             float startDepth = _depth_(fragments[i]);
             float endDepth = _depth_(fragments[i + 1]);
-            raycast(endDepth - startDepth, raycasterMask, finalColor);
+            raycast(endDepth - startDepth, raycasterMask, accumulatedColor, accumulatedAlpha);
         }
 #endif
     }
     
-    normalBlend(finalColor, opaqueColor);
+    // Always blend in fbo content behind a buffer data.
+    accumulatedColor += (1 - accumulatedAlpha) * fboRgba.rgb;
+    //accumulatedAlpha += (1 - accumulatedAlpha) * fboRgba.aaa;                
     
-    // finalColor is expressed with premultiplied alpha
-    finalColor.rgb *= blackoutFactor;
-
-
     
-    // Render everything on a black background
-    finalColor.a = 1.0;
+    finalColor = vec4(accumulatedColor.rgb * blackoutFactor, 1.0);
+    
 
-
-    //finalColor.rgb = vec3(float(nFrags) * 0.25);
-
+    // Gamma correction.
+    finalColor.rgb = pow(finalColor.rgb, vec3(1.0 / 2.2));//  sqrt(finalColor.rgb);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#ifndef __GALAXYRAYCASTER_H__
+#define __GALAXYRAYCASTER_H__
 
-out vec4 _out_color_;
+#include <ghoul/glm.h>
+#include <string>
+#include <vector>
+#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/blockplaneintersectiongeometry.h>
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
-
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
-
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
-
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+        class TextureUnit;
+        class ProgramObject;
     }
 }
+
+namespace openspace {
+
+class RenderData;
+class RaycastData;
+
+class GalaxyRaycaster : public VolumeRaycaster {
+public:
+
+    GalaxyRaycaster(ghoul::opengl::Texture& texture);
+
+    virtual ~GalaxyRaycaster();
+    void initialize();
+    void deinitialize();
+    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+
+    std::string getBoundsVsPath() const override;
+    std::string getBoundsFsPath() const override;
+    std::string getRaycastPath() const override;
+    std::string getHelperPath() const override;
+
+    void setAspect(const glm::vec3& aspect);
+    void setModelTransform(glm::mat4 transform);
+    void setTime(double time);
+    void setStepSize(float stepSize);
+private:
+    BoxGeometry _boundingBox;
+    float _stepSize;
+    glm::mat4 _modelTransform;
+    glm::vec3 _aspect;
+    double _time;
+    ghoul::opengl::Texture& _texture;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+
+}; // GalaxyRaycaster
+
+} // openspace
+
+#endif  // __GALAXYRRAYCASTER_H__

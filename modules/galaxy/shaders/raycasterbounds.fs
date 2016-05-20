@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+in vec3 vPosition;
+in vec4 worldPosition;
+
+uniform uint blendMode;
+
+#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
 
-out vec4 _out_color_;
+Fragment getFragment() {
+	vec4 fragColor = vec4((vPosition+0.5), 1.0);
+	vec4 position = worldPosition;
+	float depth = pscDepth(position);
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
-
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
-
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
-
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
-    }
+    Fragment frag;
+    frag.color = fragColor;
+    frag.depth = depth;
+    frag.blend = blendMode;
+    return frag;
 }

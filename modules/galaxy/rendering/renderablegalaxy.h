@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,38 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include <#{fragmentPath}>
-#include "abufferfragment.glsl"
-#include "abufferresources.glsl"
+#ifndef __RENDERABLEGALAXY_H__
+#define __RENDERABLEGALAXY_H__
 
-out vec4 _out_color_;
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/rendering/renderable.h>
+#include <modules/galaxy/rendering/galaxyraycaster.h>
+#include <modules/volume/rawvolume.h>
 
-void main() {
-    Fragment frag = getFragment();
-    int sampleMask = gl_SampleMaskIn[0];
+namespace openspace {
 
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
-        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-        if (newHead >= #{rendererData.maxTotalFragments}) {
-            discard; // ABuffer is full!
-        }
-        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
+struct RenderData;
+    
+class RenderableGalaxy : public Renderable {
+public:
+    RenderableGalaxy(const ghoul::Dictionary& dictionary);
+    ~RenderableGalaxy();
+    
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
 
-        ABufferFragment aBufferFrag;
-        _color_(aBufferFrag, frag.color);
-        _depth_(aBufferFrag, frag.depth);
-        _blend_(aBufferFrag, frag.blend);
+private:
+    properties::Vec3Property _scaling;
+    properties::IntProperty _scalingExponent;
+    properties::FloatProperty _stepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
 
-        _type_(aBufferFrag, 0); // 0 = geometry type
-        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-        _next_(aBufferFrag, prevHead);
+    std::string _volumeFilename;
+    glm::ivec3 _volumeDimensions;
+    std::string _pointsFilename;
 
-        storeFragment(newHead, aBufferFrag);
-        discard;
-    } else {
-        _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
-    }
+    std::unique_ptr<GalaxyRaycaster> _raycaster;
+    std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::vec3 _aspect;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
+    size_t _nPoints;
+    GLuint _pointsVao;
+    GLuint _positionVbo;
+    GLuint _colorVbo;
+};
 }
+
+#endif // __RENDERABLEGALAXY_H__
