@@ -189,9 +189,9 @@ namespace openspace {
         };
 
         // State of the camera
+        SyncData<Vec3> _position;
         SyncData<Quat> _rotation;
         SyncData<glm::vec2> _scaling;
-        SyncData<Vec3> _position;
 
         Vec3 _focusPosition;
         float _maxFov;
