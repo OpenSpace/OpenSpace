@@ -94,8 +94,8 @@ namespace openspace {
 
     private:
 
-        std::queue<std::shared_ptr<RawTileData>> loadedTextureTiles;
-        std::set<GDALAsyncReader*> asyncReaders;
+
+
 
 
 
@@ -104,12 +104,14 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
 
+
+
         struct GdalDataRegion {
 
             GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex,
                 int tileLevelDifference);
 
-            const ChunkIndex& chunkIndex;
+            const ChunkIndex chunkIndex;
 
             glm::uvec2 pixelStart;
             glm::uvec2 pixelEnd;
@@ -125,17 +127,32 @@ namespace openspace {
             DataLayout(GDALDataset* dataSet, const GdalDataRegion& region);
 
             GDALDataType gdalType;
+            size_t bytesPerDatum;
             size_t bytesPerPixel;
-            size_t pixelSpacing;
-            size_t lineSpacing;
+            size_t bytesPerLine;
             size_t totalNumBytes;
 
         };
 
 
+        struct GdalAsyncRequest {
+            GDALDataset* dataSet;
+            GDALAsyncReader* asyncReader;
+            const GdalDataRegion region;
+            const DataLayout dataLayout;
+            const char* imageData;
+        };
+
+        struct GdalAsyncRequestCompare {
+            bool operator() (const GdalAsyncRequest& lhs, const GdalAsyncRequest& rhs) const {
+                return lhs.region.chunkIndex.hashKey() < rhs.region.chunkIndex.hashKey();
+            }
+        };
+
+
 
         //////////////////////////////////////////////////////////////////////////////////
-        //                          HELPER FUNCTIONS                                    //
+        //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -150,7 +167,16 @@ namespace openspace {
         static size_t numberOfBytes(GDALDataType gdalType);
 
         static std::shared_ptr<RawTileData> createRawTileData(const GdalDataRegion& region,
-            const DataLayout& dataLayout, char* imageData);
+            const DataLayout& dataLayout, const char* imageData);
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                              MEMBER VARIABLES                                //
+        //////////////////////////////////////////////////////////////////////////////////
+
+
+        std::queue<std::shared_ptr<RawTileData>> loadedTextureTiles;
+        std::set<GdalAsyncRequest, GdalAsyncRequestCompare> asyncRequests;
 
     };
 

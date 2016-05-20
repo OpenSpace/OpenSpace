@@ -82,6 +82,9 @@ namespace openspace {
 
         void prerender();
 
+        
+
+
     private:
 
         friend class TextureTileLoadJob;
@@ -105,7 +108,7 @@ namespace openspace {
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
-        std::shared_ptr<Texture> initializeTexture(
+        void initializeAndAddToCache(
             std::shared_ptr<RawTileData> uninitedTexture);
 
         bool enqueueTileRequest(const ChunkIndex& ci);
@@ -113,6 +116,8 @@ namespace openspace {
         void clearRequestQueue();
 
         void initTexturesFromLoadedData();
+
+
 
 
 
@@ -132,16 +137,18 @@ namespace openspace {
         static bool hasInitializedGDAL;
         GDALDataset* _gdalDataSet;
 
-        // Converters are needed for all different data types since they are templated.
-        TextureDataProvider  _uByteTextureTileDataProvider;
-
+        TextureDataProvider _rawTextureTileDataProvider;
 
         ConcurrentJobManager<RawTileData> _tileLoadManager;
 
         std::shared_ptr<Texture> _defaultTexture;
         int _tileLevelDifference;
         TileDepthTransform _depthTransform;
+
     };
+
+    
+
 
 }  // namespace openspace
 

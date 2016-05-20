@@ -29,6 +29,10 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
+namespace {
+    const std::string _loggerCat = "TextureDataProvider";
+}
+
 
 
 namespace openspace {
@@ -44,9 +48,7 @@ namespace openspace {
 
     std::shared_ptr<RawTileData> TextureDataProvider::getTextureData(GDALDataset* dataSet,
         ChunkIndex chunkIndex, int tileLevelDifference)
-    {
-        ghoul_assert(chunkIndex.level > 0, "Level of chunk index must be bigger than 0.");
-                
+    {               
         GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
         DataLayout dataLayout(dataSet, region);
         char* imageData = new char[dataLayout.totalNumBytes];
@@ -55,7 +57,7 @@ namespace openspace {
         for (size_t i = 0; i < region.numRasters; i++) {
             GDALRasterBand* rasterBand = dataSet->GetRasterBand(i + 1)->GetOverview(region.overview);
 
-            char* dataDestination = imageData + (i * dataLayout.bytesPerPixel);
+            char* dataDestination = imageData + (i * dataLayout.bytesPerDatum);
             
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
@@ -67,8 +69,8 @@ namespace openspace {
                 region.numPixels.x,            // width to write x in destination
                 region.numPixels.y,            // width to write y in destination
                 dataLayout.gdalType,		   // Type
-                dataLayout.pixelSpacing,	   // Pixel spacing
-                dataLayout.lineSpacing);       // Line spacing
+                dataLayout.bytesPerPixel,	   // Pixel spacing
+                dataLayout.bytesPerLine);      // Line spacing
 
             if (err != CE_None) {
               ;//LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
@@ -78,15 +80,94 @@ namespace openspace {
         return createRawTileData(region, dataLayout, imageData);
     }
 
+
+    void TextureDataProvider::asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference) {
+        GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
+        DataLayout dataLayout(dataSet, region);
+
+        char* imageData = new char[dataLayout.totalNumBytes];
+
+        int* rasterBandSelection = nullptr; // default to { 1, 2, ... , region.numRasters } 
+        GDALAsyncReader * asyncReader = dataSet->BeginAsyncReader(
+            region.pixelStart.x,           // nXOff
+            region.pixelStart.y,           // nYOff
+            region.numPixels.x,            // nXSize
+            region.numPixels.y,            // nYSize
+            imageData,                     // pBuf
+            region.numPixels.x,            // nBufXSize
+            region.numPixels.y,            // nBufYSize
+            dataLayout.gdalType,		   // eBufType
+            region.numRasters,             // nBandCount
+            rasterBandSelection,           // panBandMap
+            dataLayout.bytesPerDatum,	   // nPixelSpace
+            dataLayout.bytesPerLine,       // nLineSpace
+            dataLayout.bytesPerPixel,      // nBandSpace
+            nullptr                        // papszOptions
+            );
+        
+        ghoul_assert(asyncReader != nullptr, "Async reader is null");
+
+        GdalAsyncRequest request = { dataSet, asyncReader, region, dataLayout, imageData };
+
+        asyncRequests.insert(request);
+        
+    }
+
+
+    void TextureDataProvider::updateAsyncRequests() {
+        double updateWaitTime = -1.0;
+        int nBufXOff, nBufYOff, nBufXSize, nBufYSize;
+
+        auto it = asyncRequests.begin();
+        auto end = asyncRequests.end();
+        
+        while (it != end) {
+             GDALAsyncStatusType status = it->asyncReader->GetNextUpdatedRegion(
+                updateWaitTime, &nBufXOff, &nBufYOff, &nBufXSize, &nBufYSize);
+
+
+            if (status == GDALAsyncStatusType::GARIO_ERROR) {
+                LERROR("Async IO error for chunk " << it->region.chunkIndex);
+                it->dataSet->EndAsyncReader(it->asyncReader);
+                it = asyncRequests.erase(it);
+            }
+            else if (status == GDALAsyncStatusType::GARIO_COMPLETE) {
+                auto rawTileData = createRawTileData(it->region, it->dataLayout, it->imageData);
+                loadedTextureTiles.push(rawTileData);
+                it->dataSet->EndAsyncReader(it->asyncReader);
+                it = asyncRequests.erase(it);
+            }
+            else {
+                it++;
+            }
+        }
+    }
+
+
+    bool TextureDataProvider::hasTextureTileData() const {
+        return loadedTextureTiles.size() > 0;
+    }
+
+
+    std::shared_ptr<RawTileData> TextureDataProvider::nextTextureTile() {
+        auto tile = loadedTextureTiles.front();
+        loadedTextureTiles.pop();
+        return tile;
+    }
+
+
+
+
+
     std::shared_ptr<RawTileData> TextureDataProvider::createRawTileData(const GdalDataRegion& region,
-        const DataLayout& dataLayout, char* imageData)
+        const DataLayout& dataLayout, const char* imageData)
     {
         // GDAL reads image data top to bottom. We want the opposite.
         char* imageDataYflipped = new char[dataLayout.totalNumBytes];
         for (size_t y = 0; y < region.numPixels.y; y++) {
-            for (size_t x = 0; x < dataLayout.lineSpacing; x++) {
-                imageDataYflipped[x + y * dataLayout.lineSpacing] =
-                    imageData[x + (region.numPixels.y - 1 - y) * dataLayout.lineSpacing];
+            for (size_t x = 0; x < dataLayout.bytesPerLine; x++) {
+                imageDataYflipped[x + y * dataLayout.bytesPerLine] =
+                    imageData[x + (region.numPixels.y - 1 - y) * dataLayout.bytesPerLine];
             }
         }
 
@@ -229,25 +310,6 @@ namespace openspace {
 
 
 
-    void TextureDataProvider::asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference) {
-
-    }
-
-
-    void TextureDataProvider::updateAsyncRequests() {
-
-    }
-
-
-    bool TextureDataProvider::hasTextureTileData() const {
-        return false;
-    }
-
-
-    std::shared_ptr<RawTileData> TextureDataProvider::nextTextureTile() {
-        return nullptr;
-    }
-
 
 
 
@@ -314,10 +376,10 @@ namespace openspace {
     TextureDataProvider::DataLayout::DataLayout(GDALDataset* dataSet, const GdalDataRegion& region) {
         // Assume all raster bands have the same data type
         gdalType = dataSet->GetRasterBand(1)->GetRasterDataType();
-        bytesPerPixel = numberOfBytes(gdalType);
-        pixelSpacing = bytesPerPixel * region.numRasters;
-        lineSpacing = pixelSpacing * region.numPixels.x;
-        totalNumBytes = lineSpacing * region.numPixels.y;
+        bytesPerDatum = numberOfBytes(gdalType);
+        bytesPerPixel = bytesPerDatum * region.numRasters;
+        bytesPerLine = bytesPerPixel * region.numPixels.x;
+        totalNumBytes = bytesPerLine * region.numPixels.y;
     }
 
 

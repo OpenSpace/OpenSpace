@@ -45,6 +45,8 @@ namespace openspace {
 
     bool TileProvider::hasInitializedGDAL = false;
 
+
+
     TileProvider::TileProvider(
         const std::string& filePath,
         int tileCacheSize,
@@ -113,6 +115,7 @@ namespace openspace {
 
 
     void TileProvider::prerender() {
+        _rawTextureTileDataProvider.updateAsyncRequests();
         initTexturesFromLoadedData();
 
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
@@ -122,12 +125,13 @@ namespace openspace {
 
     void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
-            auto finishedJob = _tileLoadManager.popFinishedJob();
-            std::shared_ptr<RawTileData> uninitedTex =
-                finishedJob->product();
-            HashKey key = uninitedTex->chunkIndex.hashKey();
-            std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
-            _tileCache.put(key, texture);
+            auto rawTextureTile = _tileLoadManager.popFinishedJob()->product();
+            initializeAndAddToCache(rawTextureTile);
+        }
+
+        while (_rawTextureTileDataProvider.hasTextureTileData()) {
+            auto rawTextureTile = _rawTextureTileDataProvider.nextTextureTile();
+            initializeAndAddToCache(rawTextureTile);
         }
     }
 
@@ -209,11 +213,19 @@ namespace openspace {
         HashKey key = chunkIndex.hashKey();
         bool tileHasBeenQueued = _queuedTileRequests.find(key) != _queuedTileRequests.end();
         if (!tileHasBeenQueued) {
-            // enque load job
-            std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-                new TextureTileLoadJob(this, chunkIndex));
+            
+            bool requestDataAsync = false;
+            if (requestDataAsync) {
+                _rawTextureTileDataProvider.asyncRequest(_gdalDataSet, chunkIndex, _tileLevelDifference);
+            }
+            else {
 
-            _tileLoadManager.enqueueJob(job);
+                // enque load job
+                std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
+                    new TextureTileLoadJob(this, chunkIndex));
+
+                _tileLoadManager.enqueueJob(job);
+            }
 
             _queuedTileRequests.insert(key);
         }
@@ -242,25 +254,27 @@ namespace openspace {
         //auto provider = TextureDataProviderFactory::get(gdalType);
         //return provider->getTextureData(_gdalDataSet, chunkIndex, _tileLevelDifference);
 
-        return _uByteTextureTileDataProvider.getTextureData(
+        return _rawTextureTileDataProvider.getTextureData(
             _gdalDataSet, chunkIndex, _tileLevelDifference);
     }
 
-    std::shared_ptr<Texture> TileProvider::initializeTexture(
-        std::shared_ptr<RawTileData> uninitedTexture) {
+    void TileProvider::initializeAndAddToCache(
+        std::shared_ptr<RawTileData> rawTileData) {
+        HashKey key = rawTileData->chunkIndex.hashKey();
         Texture* tex = new Texture(
-            uninitedTexture->imageData,
-            uninitedTexture->dimensions,
-            uninitedTexture->texFormat.ghoulFormat,
-            uninitedTexture->texFormat.glFormat,
-            uninitedTexture->glType,
+            rawTileData->imageData,
+            rawTileData->dimensions,
+            rawTileData->texFormat.ghoulFormat,
+            rawTileData->texFormat.glFormat,
+            rawTileData->glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
 
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
         texture->uploadTexture();
-        return texture;
+        
+        _tileCache.put(key, texture);
     }
 
 

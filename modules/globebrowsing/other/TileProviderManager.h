@@ -26,15 +26,16 @@
 #define __TILE_PROVIDER_MANAGER_H__
 
 #include "modules/globebrowsing/other/tileprovider.h"
+#include <modules/globebrowsing/other/threadpool.h>
 
 #include <memory>
 #include <vector>
 #include <string>
 
+
 namespace openspace {
 
-    class TileProviderManager
-    {
+    class TileProviderManager {
     public:
         TileProviderManager();
         ~TileProviderManager();
@@ -47,6 +48,7 @@ namespace openspace {
         */
         const std::vector<std::shared_ptr<TileProvider> >& heightMapProviders();
         const std::vector<std::shared_ptr<TileProvider> >& colorTextureProviders();
+
     private:
         std::vector<std::shared_ptr<TileProvider> > _heightMapProviders;
         std::vector<std::shared_ptr<TileProvider> > _colorTextureProviders;
