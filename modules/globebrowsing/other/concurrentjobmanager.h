@@ -65,7 +65,6 @@ namespace openspace {
     class ConcurrentJobManager{
     public:
         ConcurrentJobManager()
-        : _hasWorkingThread(false)
         {
 
         }
@@ -76,17 +75,14 @@ namespace openspace {
 
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
-            _incomingJobs.push(job);
-            if (!_hasWorkingThread) {
-                _hasWorkingThread = true; // Can only be set to true by the main thread
-                executeJobsInSeparateThread();
-            }
+            TileProvider::threadPool.enqueue([this, job]() {
+                job->execute();
+                _finishedJobs.push(job);
+            });
         }
 
         void clearEnqueuedJobs() {
-            while (_incomingJobs.size()) {
-                _incomingJobs.pop();
-            }
+            TileProvider::threadPool.clearTasks();
         }
 
         std::shared_ptr<Job<P>> popFinishedJob() {
@@ -102,32 +98,7 @@ namespace openspace {
     
     private:
 
-
-        void executeJobsInSeparateThread() {
-            // Create new thread and run workerThreadMainTask on that thread
-            std::thread t(&ConcurrentJobManager::workerThreadMainTask, this);
-            t.detach();
-        }
-        
-        void workerThreadMainTask() {
-            while (_incomingJobs.size() > 0) {
-                auto job = _incomingJobs.pop();                
-
-                job->execute();
-
-                _finishedJobs.push(job);
-            }
-
-            _hasWorkingThread = false; // Can only be set to false by worker thread
-        }
-
-        ConcurrentQueue<std::shared_ptr<Job<P>>> _incomingJobs;
         ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-
-        // Using this atomic bool is probably not optimal - Should probably
-        // use a conditional variable instead
-        std::atomic<bool> _hasWorkingThread;
-        std::atomic<int> _numActiveThreads;
 
     };
 

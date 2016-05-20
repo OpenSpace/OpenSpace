@@ -59,6 +59,7 @@ namespace openspace {
         ~ThreadPool();
 
         void enqueue(std::function<void()> f);
+        void clearTasks();
 
     private:
         friend class Worker;

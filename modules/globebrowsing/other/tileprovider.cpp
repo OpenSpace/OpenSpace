@@ -45,6 +45,7 @@ namespace openspace {
 
     bool TileProvider::hasInitializedGDAL = false;
 
+    ThreadPool TileProvider::threadPool(10);
 
 
     TileProvider::TileProvider(

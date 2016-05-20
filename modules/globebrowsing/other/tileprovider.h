@@ -82,7 +82,7 @@ namespace openspace {
 
         void prerender();
 
-        
+        static ThreadPool threadPool;
 
 
     private:
