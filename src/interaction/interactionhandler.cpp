@@ -43,6 +43,9 @@ namespace {
 namespace openspace {
 namespace interaction {
 
+#ifdef USE_OLD_INTERACTIONHANDLER
+
+
 InteractionHandler::InteractionHandler()
     : properties::PropertyOwner()
     , _camera(nullptr)
@@ -586,6 +589,148 @@ void InteractionHandler::clearKeyframes(){
     _keyframes.clear();
     _keyframeMutex.unlock();
 }
+
+#endif // USE_OLD_INTERACTIONHANDLER
+
+InteractionHandler::InteractionHandler()
+{
+
+}
+
+InteractionHandler::~InteractionHandler()
+{
+
+}
+
+void InteractionHandler::setKeyboardController(KeyboardController* controller)
+{
+
+}
+
+void InteractionHandler::setMouseController(MouseController* controller)
+{
+
+}
+
+void InteractionHandler::addController(Controller* controller) {
+
+}
+
+void InteractionHandler::lockControls() {
+
+}
+
+void InteractionHandler::unlockControls() {
+
+}
+
+void InteractionHandler::update(double deltaTime) {
+
+}
+
+void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+
+}
+
+const SceneGraphNode* const InteractionHandler::focusNode() const {
+    return nullptr;
+}
+
+void InteractionHandler::setCamera(Camera* camera) {
+
+}
+const Camera* const InteractionHandler::camera() const {
+    return nullptr;
+}
+
+void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
+
+}
+
+void InteractionHandler::mousePositionCallback(double x, double y) {
+
+}
+
+void InteractionHandler::mouseScrollWheelCallback(double pos) {
+
+}
+
+void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz, const float &dist) {
+
+}
+
+void InteractionHandler::orbitDelta(const glm::quat& rotation)
+{
+
+}
+
+void InteractionHandler::rotateDelta(const glm::quat& rotation)
+{
+
+}
+
+void InteractionHandler::distanceDelta(const PowerScaledScalar& distance, size_t iterations)
+{
+
+}
+
+void InteractionHandler::lookAt(const glm::quat& rotation)
+{
+}
+
+void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+
+}
+
+void InteractionHandler::resetKeyBindings() {
+
+}
+
+void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua) {
+
+}
+
+scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+    return{};
+}
+
+void InteractionHandler::setRotation(const glm::quat& rotation)
+{
+}
+
+double InteractionHandler::deltaTime() const {
+    return 0;
+}
+
+void InteractionHandler::setInteractionSensitivity(float sensitivity) {
+}
+
+float InteractionHandler::interactionSensitivity() const {
+    return 0;
+}
+
+void InteractionHandler::setInvertRoll(bool invert) {
+}
+
+bool InteractionHandler::invertRoll() const {
+    return false;
+}
+
+void InteractionHandler::setInvertRotation(bool invert) {
+}
+
+bool InteractionHandler::invertRotation() const {
+    return false;
+}
+
+void InteractionHandler::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
+
+}
+
+void InteractionHandler::clearKeyframes() {
+
+}
+
 
 } // namespace interaction
 } // namespace openspace

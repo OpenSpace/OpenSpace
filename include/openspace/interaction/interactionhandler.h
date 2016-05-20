@@ -41,6 +41,8 @@ class SceneGraphNode;
 
 namespace interaction {
 
+#ifdef USE_OLD_INTERACTIONHANDLER
+
 class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
@@ -135,6 +137,72 @@ private:
     double _currentKeyframeTime;
     std::mutex _keyframeMutex;
 };
+
+#endif // FALSE
+
+class InteractionHandler : public properties::PropertyOwner
+{
+public:
+    InteractionHandler();
+    ~InteractionHandler();
+
+    // Mutators
+    void setKeyboardController(KeyboardController* controller);
+    void setMouseController(MouseController* controller);
+    void setFocusNode(SceneGraphNode* node);
+    void setCamera(Camera* camera);
+
+    void setInteractionSensitivity(float sensitivity);
+    void setInvertRoll(bool invert);
+    void setInvertRotation(bool invert);
+    void resetKeyBindings();
+
+    void addController(Controller* controller);
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
+
+    void lockControls();
+    void unlockControls();
+
+    void update(double deltaTime);
+
+    // Accessors
+    const SceneGraphNode* const focusNode() const;
+    const Camera* const camera() const;
+    double deltaTime() const;
+    float interactionSensitivity() const;
+    bool invertRoll() const;
+    bool invertRotation() const;
+
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * interaction. The functions contained are
+    * - openspace::luascriptfunctions::setOrigin
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
+
+    // Interaction functions
+    void orbitDelta(const glm::quat& rotation);
+    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
+    void rotateDelta(const glm::quat& rotation);
+    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
+    void lookAt(const glm::quat& rotation);
+    void setRotation(const glm::quat& rotation);
+
+private:
+
+};
+
 
 } // namespace interaction
 } // namespace openspace
