@@ -152,17 +152,12 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
 
-    void setInteractionSensitivity(float sensitivity);
-    void setInvertRoll(bool invert);
-    void setInvertRotation(bool invert);
     void resetKeyBindings();
 
-    void addController(Controller* controller);
     void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
     void clearKeyframes();
 
     void bindKey(Key key, KeyModifier modifier, std::string lua);
-
     void lockControls();
     void unlockControls();
 
@@ -172,9 +167,6 @@ public:
     const SceneGraphNode* const focusNode() const;
     const Camera* const camera() const;
     double deltaTime() const;
-    float interactionSensitivity() const;
-    bool invertRoll() const;
-    bool invertRotation() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -191,18 +183,9 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    // Interaction functions
-    void orbitDelta(const glm::quat& rotation);
-    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
-    void rotateDelta(const glm::quat& rotation);
-    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
-    void lookAt(const glm::quat& rotation);
-    void setRotation(const glm::quat& rotation);
-
 private:
 
 };
-
 
 } // namespace interaction
 } // namespace openspace
