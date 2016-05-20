@@ -41,6 +41,7 @@
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
 namespace ghoul {
 namespace opengl {

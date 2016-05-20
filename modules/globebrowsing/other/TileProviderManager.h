@@ -40,6 +40,8 @@ namespace openspace {
         TileProviderManager();
         ~TileProviderManager();
 
+        static ThreadPool tileRequestThreadPool;
+
         void addHeightMap(std::string name, std::shared_ptr<TileProvider> tileProvider);
         void addColorTexture(std::string name, std::shared_ptr<TileProvider> tileProvider);
         /*

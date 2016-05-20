@@ -33,6 +33,7 @@
 #include <atomic>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
 #include <ghoul/misc/assert.h>
 
@@ -64,7 +65,7 @@ namespace openspace {
     template<typename P>
     class ConcurrentJobManager{
     public:
-        ConcurrentJobManager()
+        ConcurrentJobManager(ThreadPool& pool) : threadPool(pool)
         {
 
         }
@@ -75,14 +76,14 @@ namespace openspace {
 
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
-            TileProvider::threadPool.enqueue([this, job]() {
+            threadPool.enqueue([this, job]() {
                 job->execute();
                 _finishedJobs.push(job);
             });
         }
 
         void clearEnqueuedJobs() {
-            TileProvider::threadPool.clearTasks();
+            threadPool.clearTasks();
         }
 
         std::shared_ptr<Job<P>> popFinishedJob() {
@@ -99,7 +100,7 @@ namespace openspace {
     private:
 
         ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-
+        ThreadPool& threadPool;
     };
 
 

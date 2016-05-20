@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/tileprovider.h>
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 
 #include <openspace/engine/downloadmanager.h>
 
@@ -57,6 +58,7 @@ namespace openspace {
     , _tileCache(tileCacheSize) // setting cache size
     , _framesSinceLastRequestFlush(0)
     , _framesUntilRequestFlush(framesUntilRequestFlush)
+    , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
