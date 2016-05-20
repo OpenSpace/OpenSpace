@@ -108,7 +108,7 @@ namespace openspace {
         return _focusPosition;
     }
 
-    glm::vec3 Camera::viewDirectionWorldSpace() const {
+    const Camera::Vec3& Camera::viewDirectionWorldSpace() const {
         if (_cachedViewDirection.isDirty) {
             _cachedViewDirection.datum =
                 glm::inverse(_rotation.local) * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
@@ -117,7 +117,7 @@ namespace openspace {
         return _cachedViewDirection.datum;
     }
     
-    glm::vec3 Camera::lookUpVectorCameraSpace() const {
+    const Camera::Vec3& Camera::lookUpVectorCameraSpace() const {
         return _LOOKUP_VECTOR_CAMERA_SPACE;
     }
     
@@ -136,18 +136,18 @@ namespace openspace {
         return _cachedSinMaxFov.datum;
     }
 
-    glm::mat4 Camera::viewRotationMatrix() const {
+    const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
             _cachedViewRotationMatrix.datum = glm::mat4_cast(_rotation.local);
         }
         return _cachedViewRotationMatrix.datum;
     }
 
-    glm::quat Camera::rotationQuaternion() const {
+    const Camera::Quat& Camera::rotationQuaternion() const {
         return _rotation.synced;
     }
 
-    glm::mat4 Camera::combinedViewMatrix() const {
+    const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
             glm::vec3 cameraPosition = position().vec3();
             glm::mat4 cameraTranslation =
