@@ -55,7 +55,7 @@ namespace openspace {
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
-    , _stepSize("stepSize", "Step Size", 0.002, 0.001, 0.05)
+    , _stepSize("stepSize", "Step Size", 0.001, 0.0005, 0.05)
     , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
     , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) {
@@ -251,8 +251,6 @@ void RenderableGalaxy::update(const UpdateData& data) {
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _pointsProgram->activate();
     setPscUniforms(*_pointsProgram.get(), data.camera, data.position);

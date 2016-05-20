@@ -259,7 +259,7 @@ void main() {
     uint nFilteredFrags = nOriginalFrags;
 
     // discard all fragments in abuffer with higher depth value than the fbo
-    depthFilterFragments(nOriginalFrags, fboDepth);
+    nFilteredFrags = depthFilterFragments(nOriginalFrags, fboDepth);
 
     // sort remaining fragments from front to back
     sortFragments(nFilteredFrags);
@@ -281,7 +281,7 @@ void main() {
         if (type == 0) { // geometry fragment
             vec4 color = _color_(frag);
             if (blend == BLEND_MODE_NORMAL) {
-                accumulatedColor += (1 - accumulatedAlpha) * color.rgb;
+                accumulatedColor += (1 - accumulatedAlpha) * color.rgb * color.a;
                 accumulatedAlpha += (1 - accumulatedAlpha) * color.aaa;                
                 //normalBlend(finalColor, color);
             } else if (blend == BLEND_MODE_ADDITIVE) {
