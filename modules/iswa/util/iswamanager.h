@@ -25,6 +25,7 @@
 #define __ISWAMANAGER_H__
 
 #include <ghoul/designpattern/singleton.h>
+#include <ghoul/designpattern/event.h>
 
 #include <memory>
 #include <map>
@@ -93,6 +94,10 @@ public:
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
+    ghoul::Event<std::string, int>& iswaEvent(){
+        return _iswaEvent;
+    }
+
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
@@ -115,6 +120,9 @@ private:
 
     std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
+
+    ghoul::Event<std::string, int> _iswaEvent;
+
 };
 
 } //namespace openspace

@@ -112,7 +112,7 @@ bool Histogram::add(float value, float repeat) {
     }
 
     float normalizedValue = (value - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
-    int binIndex = std::min( floor(normalizedValue * _numBins), _numBins - 1.0 ); // [0, _numBins - 1]
+    int binIndex = std::min( (float)floor(normalizedValue * _numBins), _numBins - 1.0f ); // [0, _numBins - 1]
 
     _data[binIndex] += repeat;
     _numValues += repeat;

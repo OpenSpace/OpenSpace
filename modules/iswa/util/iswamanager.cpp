@@ -50,7 +50,9 @@ namespace {
 
 namespace openspace{
 
-IswaManager::IswaManager(){
+IswaManager::IswaManager()
+    : _iswaEvent()
+{
     _month["JAN"] = "01";
     _month["FEB"] = "02";
     _month["MAR"] = "03";
