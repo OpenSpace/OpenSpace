@@ -285,7 +285,7 @@ bool RenderEngine::initializeGL() {
         //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
      //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
         //_mainCamera->setLookUpVector(glm::normalize(upVector));
-        _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
+        //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
         // set the initial fov to be 0.0 which means everything will be culled
         //float maxFov = 0.0f;

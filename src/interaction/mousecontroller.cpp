@@ -57,7 +57,7 @@ glm::vec3 MouseController::mapToTrackball(glm::vec2 mousePos) {
 
 glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
     //Get x,y,z axis vectors of current camera view
-    glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
+    glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVectorCameraSpace());
     psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();
     glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
     glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));

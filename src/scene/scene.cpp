@@ -299,9 +299,9 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
     // Check crash for when fn == nullptr
 
-    glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
+    glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), glm::vec3(c->lookUpVectorCameraSpace()));
 
-    c->setRotation(la);
+    c->setRotation(glm::quat_cast(la));
     c->setPosition(cameraPosition);
     c->setScaling(cameraScaling);
 

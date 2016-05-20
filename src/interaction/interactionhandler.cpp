@@ -183,7 +183,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
     psc focusPos = node->worldPosition();
     psc camToFocus = focusPos - _camera->position();
     glm::vec3 viewDir = glm::normalize(camToFocus.vec3());
-    glm::vec3 cameraView = glm::normalize(_camera->viewDirection());
+    glm::vec3 cameraView = glm::normalize(_camera->viewDirectionWorldSpace());
     //set new focus position
     _camera->setFocusPosition(node->worldPosition());
     float dot = glm::dot(viewDir, cameraView);
@@ -242,13 +242,13 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
 
     lockControls();
     
-    glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVector(), 0))).xyz();
-    glm::vec3 cameraRight = glm::cross(_camera->viewDirection(), cameraUp);
+    glm::vec3 cameraUp = glm::normalize((glm::inverse(_camera->viewRotationMatrix()) * glm::vec4(_camera->lookUpVectorCameraSpace(), 0))).xyz();
+    glm::vec3 cameraRight = glm::cross(glm::vec3(_camera->viewDirectionWorldSpace()), cameraUp);
 
     glm::mat4 transform;
     transform = glm::rotate(glm::radians(dx * 100.f), cameraUp) * transform;
     transform = glm::rotate(glm::radians(dy * 100.f), cameraRight) * transform;
-    transform = glm::rotate(glm::radians(dz * 100.f), _camera->viewDirection()) * transform;
+    transform = glm::rotate(glm::radians(dz * 100.f), glm::vec3(_camera->viewDirectionWorldSpace())) * transform;
 
     
     //get "old" focus position 
@@ -328,7 +328,7 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
     //relative_origin_coordinate = relative_origin_coordinate.vec4() * glm::inverse(rotation);
     relative_origin_coordinate = glm::inverse(rotation) * relative_origin_coordinate.vec4();
     relative = relative_origin_coordinate + origin;
-    glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, _camera->lookUpVector()));
+    glm::mat4 la = glm::lookAt(_camera->position().vec3(), origin.vec3(), glm::rotate(rotation, glm::vec3(_camera->lookUpVectorCameraSpace())));
     
     unlockControls();
     
@@ -337,7 +337,7 @@ void InteractionHandler::orbitDelta(const glm::quat& rotation)
     //camera_->setRotation(glm::mat4_cast(rotation));
 
     
-    _camera->setRotation(la);
+    _camera->setRotation(glm::quat_cast(la));
     //camera_->setLookUpVector();
 
     

@@ -40,169 +40,139 @@
 
 namespace openspace {
 
-class Camera {
-public:
-    Camera();
-    Camera(const Camera& o)
-        : sgctInternal(o.sgctInternal)
-        , _viewDirectionInCameraSpace(o._viewDirectionInCameraSpace)
-        , _focusPosition(o._focusPosition)
-        , _viewDirection(o._viewDirection)
-        , _lookUp(o._lookUp) 
-        , _viewRotationMatrix(o._viewRotationMatrix)
-        , _scaling(o._scaling)
-        , _position(o._position)
-        , _maxFov(o._maxFov)
-        , _sinMaxFov(o._sinMaxFov)
-    { }
+    template<typename T>
+    struct CachedDatum
+    {
+        CachedDatum() { isDirty = true; }
+        T datum;
+        bool isDirty;
+    };
 
-    ~Camera();
+    class Camera {
+        // For testing double vs float precision
+        typedef glm::dquat Quat;
+        typedef glm::dmat4 Mat4;
+        typedef glm::dvec3 Vec3;
 
-
-
-    // MUTATORS (SETTERS)
-
-    void setPosition(psc pos);
-    void setFocusPosition(psc pos);
-    void setRotation(glm::quat rotation);
-    void setLookUpVector(glm::vec3 lookUp);
-    void setScaling(glm::vec2 scaling);
-    void setMaxFov(float fov);
-
-
-
-    // RELATIVE MUTATORS
-
-    void rotate(const glm::quat& rotation);
-
-
-
-
-    // ACCESSORS (GETTERS)
-
-    const psc& position() const;
-    const psc& unsynchedPosition() const;
-    const psc& focusPosition() const;
-    const glm::vec3& viewDirection() const;
-    const glm::vec3& lookUpVector() const;
-    const glm::vec2& scaling() const;
-    float maxFov() const;
-    float sinMaxFov() const;
-    const glm::mat4& viewRotationMatrix() const;
-
-    //@TODO this should simply be called viewMatrix!
-    //Rename after removing deprecated methods
-    const glm::mat4& combinedViewMatrix() const;
-    
-
-
-
-
-    // DEPRECATED ACCESSORS (GETTERS)
-    // @TODO use Camera::SgctInternal interface instead
-
-    [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
-    const glm::mat4& viewMatrix() const;
-
-    [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
-    const glm::mat4& projectionMatrix() const;
-
-    [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
-    const glm::mat4& viewProjectionMatrix() const;
-
-
-
-
-    // SYNCHRONIZATION
-
-    void postSynchronizationPreDraw();
-    void preSynchronization();
-    void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer);
-
-
-
-    // Handles SGCT's internal matrices. Also caches a calculated viewProjection matrix.
-    class SgctInternal {
-        friend class Camera;
-
+        // Static constants
+        static const Vec3 _VIEW_DIRECTION_CAMERA_SPACE;
+        static const Vec3 _LOOKUP_VECTOR_CAMERA_SPACE;
     public:
+        Camera();
+        Camera(const Camera& o);
+        ~Camera();
 
+        // Mutators
+        void setPosition(psc pos);
+        void setFocusPosition(psc pos);
+        void setRotation(Quat rotation);
+        void setScaling(glm::vec2 scaling);
+        void setMaxFov(float fov);
+
+        // Relative mutators
+        void rotate(Quat rotation);
+
+        // Accessors
+        const psc& position() const;
+        const psc& unsynchedPosition() const;
+        const psc& focusPosition() const;
+        const glm::vec3 viewDirectionWorldSpace() const;
+        const glm::vec3 lookUpVectorCameraSpace() const;
+        const glm::vec2& scaling() const;
+        const glm::mat4 viewRotationMatrix() const;
+        const glm::quat rotationQuaternion() const;
+        float maxFov() const;
+        float sinMaxFov() const;
         
+        //@TODO this should simply be called viewMatrix!
+        //Rename after removing deprecated methods
+        glm::mat4 combinedViewMatrix() const;
 
-        void setViewMatrix(glm::mat4 viewMatrix);
-        void setProjectionMatrix(glm::mat4 projectionMatrix);
-
+        // DEPRECATED ACCESSORS (GETTERS)
+        // @TODO use Camera::SgctInternal interface instead
+        [[deprecated("Replaced by Camera::SgctInternal::viewMatrix()")]]
         const glm::mat4& viewMatrix() const;
+
+        [[deprecated("Replaced by Camera::SgctInternal::projectionMatrix()")]]
         const glm::mat4& projectionMatrix() const;
+
+        [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
         const glm::mat4& viewProjectionMatrix() const;
 
+        // Synchronization
+        void postSynchronizationPreDraw();
+        void preSynchronization();
+        void serialize(SyncBuffer* syncBuffer);
+        void deserialize(SyncBuffer* syncBuffer);
+
+        /**
+            Handles SGCT's internal matrices. Also caches a calculated viewProjection
+            matrix. This is the data that is different for different cameras within
+            SGCT.
+        */
+        class SgctInternal {
+            friend class Camera;
+        public:
+            void setViewMatrix(glm::mat4 viewMatrix);
+            void setProjectionMatrix(glm::mat4 projectionMatrix);
+
+            const glm::mat4& viewMatrix() const;
+            const glm::mat4& projectionMatrix() const;
+            const glm::mat4& viewProjectionMatrix() const;
+        private:
+            SgctInternal();
+            SgctInternal(const SgctInternal& o)
+                : _viewMatrix(o._viewMatrix)
+                , _projectionMatrix(o._projectionMatrix)
+                , _cachedViewProjectionMatrix(o._cachedViewProjectionMatrix)
+            {}
+
+            // State
+            glm::mat4 _viewMatrix;
+            glm::mat4 _projectionMatrix;
+
+            // Cache
+            mutable CachedDatum<glm::mat4> _cachedViewProjectionMatrix;
+            mutable std::mutex _mutex;
+        } sgctInternal;
     private:
-        SgctInternal();
-        SgctInternal(const SgctInternal& o)
-            : _viewMatrix(o._viewMatrix)
-            , _projectionMatrix(o._projectionMatrix)
-            , _dirtyViewProjectionMatrix(o._dirtyViewProjectionMatrix)
-            , _viewProjectionMatrix(o._viewProjectionMatrix)
-        {}
-            
+        /**
+            Class encapsulating data that needs to be synched between SGCT nodes.
+            Are all three variables (i.e. local, shared, synced) really neccessary? /EB
+        */
+        template <typename T>
+        struct SyncData {
+            SyncData() {}
+            SyncData(const SyncData& d)
+                : local(d.local), shared(d.shared), synced(d.synced) {}
 
-        glm::mat4 _viewMatrix;
-        glm::mat4 _projectionMatrix;
+            void serialize(SyncBuffer* syncBuffer) { syncBuffer->encode(shared); }
+            void deserialize(SyncBuffer* syncBuffer) { syncBuffer->decode(shared); }
+            void postSynchronizationPreDraw() { synced = shared; }
+            void preSynchronization() { shared = local; }
 
-        mutable bool _dirtyViewProjectionMatrix;
-        mutable glm::mat4 _viewProjectionMatrix;
+            T local;
+            T shared;
+            T synced;
+        };
+
+        // State of the camera
+        SyncData<Quat> _rotation;
+        SyncData<glm::vec2> _scaling;
+        SyncData<psc> _position;
+
+        psc _focusPosition;
+
+        float _maxFov;
+
+        // Cached data
+        mutable CachedDatum<Vec3> _cachedViewDirection;
+        mutable CachedDatum<Mat4> _cachedViewRotationMatrix;
+        mutable CachedDatum<Mat4> _cachedCombinedViewMatrix;
+        mutable CachedDatum<float> _cachedSinMaxFov;
+
         mutable std::mutex _mutex;
-
-    } sgctInternal;
-
-
-private:
-
-    // Defines what direction in local camera space the camera is looking in. 
-    const glm::vec3 _viewDirectionInCameraSpace;
-
-
-    psc _focusPosition;
-    glm::vec3 _viewDirection;
-    glm::vec3 _lookUp;
-    
-
-    // Class encapsulating the synced data. Are all three variables 
-    // (i.e. local, shared, synced) really neccessary? /EB
-    template <typename T>
-    struct SyncData {
-
-        SyncData() {}
-
-        // copy constructor
-        SyncData(const SyncData& d) 
-            : local(d.local), shared(d.shared), synced(d.synced) {}
-
-        void serialize(SyncBuffer* syncBuffer) { syncBuffer->encode(shared); }
-        void deserialize(SyncBuffer* syncBuffer) { syncBuffer->decode(shared); }
-        void postSynchronizationPreDraw() { synced = shared; }
-        void preSynchronization() { shared = local; }
-
-        T local;
-        T shared;
-        T synced;
     };
-    
-
-    SyncData<glm::mat4> _viewRotationMatrix;
-    SyncData<glm::vec2> _scaling;
-    SyncData<psc> _position;
-
-
-    float _maxFov;
-    float _sinMaxFov;
-    
-
-    mutable std::mutex _mutex;
-
-};
-
 } // namespace openspace
 
 #endif // __CAMERA_H__
