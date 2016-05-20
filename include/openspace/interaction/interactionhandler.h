@@ -44,58 +44,36 @@ namespace interaction {
 class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
-
     ~InteractionHandler();
 
+    // Mutators
     void setKeyboardController(KeyboardController* controller);
     void setMouseController(MouseController* controller);
+    void setFocusNode(SceneGraphNode* node);
+    void setCamera(Camera* camera);
+    void setInteractionSensitivity(float sensitivity);
+    void resetKeyBindings();
+    void setInvertRoll(bool invert);
+    void setInvertRotation(bool invert);
+
     void addController(Controller* controller);
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
 
     void lockControls();
     void unlockControls();
 
     void update(double deltaTime);
-
-    void setFocusNode(SceneGraphNode* node);
+    
+    // Accessors
     const SceneGraphNode* const focusNode() const;
-    void setCamera(Camera* camera);
     const Camera* const camera() const;
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
-
     double deltaTime() const;
-
-    void orbitDelta(const glm::quat& rotation);
-
-    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
-
-    //void distance(const float &d);
-
-    void rotateDelta(const glm::quat& rotation);
-
-    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
-
-    void lookAt(const glm::quat& rotation);
-
-    void setRotation(const glm::quat& rotation);
-
-    void resetKeyBindings();
-    void bindKey(Key key, KeyModifier modifier, std::string lua);
-
-    void setInteractionSensitivity(float sensitivity);
     float interactionSensitivity() const;
-
-    void setInvertRoll(bool invert);
     bool invertRoll() const;
-
-    void setInvertRotation(bool invert);
     bool invertRotation() const;
-
-    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
-    void clearKeyframes();
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -106,28 +84,45 @@ public:
     */
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-private:
-    friend class Controller;
 
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
+
+    // Interaction functions
+    void orbitDelta(const glm::quat& rotation);
+    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
+    void rotateDelta(const glm::quat& rotation);
+    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
+    void lookAt(const glm::quat& rotation);
+    void setRotation(const glm::quat& rotation);
+
+private:
+    // Remove copy and move constructors
     InteractionHandler(const InteractionHandler&) = delete;
     InteractionHandler& operator=(const InteractionHandler&) = delete;
     InteractionHandler(InteractionHandler&&) = delete;
     InteractionHandler& operator=(InteractionHandler&&) = delete;
 
-    Camera* _camera;
-    SceneGraphNode* _focusNode;
-
-    double _deltaTime;
-    std::mutex _mutex;
-
-    bool _validKeyLua;
-
-    std::multimap<KeyWithModifier, std::string > _keyLua;
-
+    // Settings
     float _controllerSensitivity;
     bool _invertRoll;
     bool _invertRotation;
 
+    // Pointers to entities to affect
+    Camera* _camera;
+    SceneGraphNode* _focusNode;
+
+    // Cached data
+    double _deltaTime;
+    std::mutex _mutex;
+
+    //bool _validKeyLua;
+    std::multimap<KeyWithModifier, std::string > _keyLua;
+
+    
     KeyboardController* _keyboardController;
     MouseController* _mouseController;
     std::vector<Controller*> _controllers;

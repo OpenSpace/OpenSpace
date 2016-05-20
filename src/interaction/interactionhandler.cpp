@@ -48,7 +48,7 @@ InteractionHandler::InteractionHandler()
     , _camera(nullptr)
     , _focusNode(nullptr)
     , _deltaTime(0.0)
-    , _validKeyLua(false)
+    //, _validKeyLua(false)
     , _controllerSensitivity(1.f)
     , _invertRoll(true)
     , _invertRotation(false)
@@ -442,21 +442,21 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
         }
 
         // iterate over key bindings
-        _validKeyLua = true;
+        //_validKeyLua = true;
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
             //OsEng.scriptEngine()->runScript(it->second);
             OsEng.scriptEngine().queueScript(it->second);
-            if (!_validKeyLua) {
-                break;
-            }
+            //if (!_validKeyLua) {
+            //    break;
+            //}
         }
     }
 }
 
 void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
-    _validKeyLua = false;
+    //_validKeyLua = false;
 }
 
 void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua) {
