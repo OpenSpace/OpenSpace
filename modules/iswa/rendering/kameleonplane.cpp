@@ -178,6 +178,7 @@ bool KameleonPlane::initialize(){
     });
 
     updateTexture();
+	return true;
 }
 
 void KameleonPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
