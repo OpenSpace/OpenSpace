@@ -83,7 +83,7 @@ public:
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
     std::string iswaUrl(int id, std::string type = "image");
 
-    void registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet);
+    std::shared_ptr<IswaGroup> registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet);
     void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
     void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);

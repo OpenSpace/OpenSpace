@@ -48,6 +48,7 @@ DataProcessor::DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValue
     ,_useHistogram(useHistogram)
     ,_normValues(normValues)
     ,_filterValues(glm::vec2(0))
+    ,_numValues(0)
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 };
@@ -115,11 +116,67 @@ std::vector<std::string> DataProcessor::readJSONHeader(std::string& dataBuffer){
     return options;
 }
 
+void DataProcessor::addValues(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    int numOptions = dataOptions.options().size();
+    
+    if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
+    if(_sd.empty()) _sd = std::vector<float>(numOptions, 0.0f);
+    if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
+    if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+
+    if(!dataBuffer.empty()){
+
+        std::stringstream memorystream(dataBuffer);
+        std::string line;
+        std::vector<float> sum(numOptions, 0.0f);
+        std::vector<std::vector<float>> values(numOptions, std::vector<float>());
+
+        int numValues = 0;
+        while(getline(memorystream, line)){
+            if(line.find("#") == 0) continue;
+
+            std::stringstream ss(line); 
+            std::vector<float> value;
+            float v;
+            while(ss >> v){
+                value.push_back(v);
+            }
+
+            if(value.size()){
+                for(int i=0; i<numOptions; i++){
+                    float v = value[i+3];
+
+                    values[i].push_back(v); 
+                    _min[i] = std::min(_min[i], v);
+                    _max[i] = std::max(_max[i], v);
+                    sum[i] += v;
+                }
+                numValues++;
+            }
+        }
+
+        for(int i=0; i<numOptions; i++){
+            float mean = (1.0/numValues)*sum[i];
+            float var = 0;
+            for(int j=0; j<numValues; j++){
+                var += pow(values[i][j] - mean, 2);
+            }
+            float sd = sqrt(var / numValues);
+
+            _sum[i] += sum[i];
+            _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+            _numValues[i] += numValues;
+            std::cout << i << " " << _numValues[i] << " " << _sum[i] << " " << _sd[i] << std::endl;
+        }
+    }
+}
+
+
+
 std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties::SelectionProperty dataOptions){
     if(!dataBuffer.empty()){
-        // if(!_dataOptions.options().size()) // load options for value selection
-        //     readHeader(dataBuffer);
-        
         std::stringstream memorystream(dataBuffer);
         std::string line;
 
@@ -207,17 +264,60 @@ std::vector<float*> DataProcessor::readData(std::string& dataBuffer, properties:
     }
 }
 
+
+std::vector<float*> DataProcessor::readData2(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    if(!dataBuffer.empty()){
+        std::stringstream memorystream(dataBuffer);
+        std::string line;
+
+        std::vector<int> selectedOptions = dataOptions.value();
+        int numSelected = selectedOptions.size();
+
+        std::vector<std::vector<float>> values(selectedOptions.size(), std::vector<float>());
+        std::vector<float*> data(dataOptions.options().size(), nullptr);
+
+        for(int option : selectedOptions){
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+        }
+
+        int numValues = 0;
+        while(getline(memorystream, line)){
+            if(line.find("#") == 0){ //part of the header
+                continue;
+            }
+
+            std::stringstream ss(line); 
+            std::vector<float> value;
+            float v;
+            while(ss >> v){
+                value.push_back(v);
+            }
+
+            if(value.size()){
+                for(int option : selectedOptions){
+                    float v = value[option+3]; //+3 because "options" x, y and z.
+                    data[option][numValues] = processDataPoint(v, option);
+                }
+            }
+            numValues++;
+        }
+
+        if(numValues != _dimensions.x*_dimensions.y){
+            LWARNING("Number of values read and expected are not the same");
+            return std::vector<float*>();
+        }
+        
+        return data;
+
+    }else{
+        return std::vector<float*>();
+    }
+}
+
 std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions){
     if(!dataBuffer.empty()){
         json j = json::parse(dataBuffer);
         json var = j["variables"];
-
-
-        // if(!_dataOptions.options().size()) // load options for value selection
-        //     readHeader(dataBuffer);
-        
-        // std::stringstream memorystream(dataBuffer);
-        // std::string line;
 
         std::vector<int> selectedOptions = dataOptions.value();
         int numSelected = selectedOptions.size();
@@ -262,7 +362,6 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
 
                     sum[i] += v;
                 }
-                // break; 
             }
             i++;
         }
@@ -279,23 +378,210 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
     }
 }
 
-std::vector<float*> DataProcessor::processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
+void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    int numOptions = dataOptions.options().size();
+    
+    if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
+    if(_sd.empty()) _sd = std::vector<float>(numOptions, 0.0f);
+    if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
+    if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+
+
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+
+        std::vector<int> selectedOptions = dataOptions.value();
+        int numSelected = selectedOptions.size();
+        std::vector<float> sum(numOptions, 0.0f);
+
+        std::vector<std::vector<float>> values(numOptions, std::vector<float>());
+        auto options = dataOptions.options();        
+        std::vector<float*> data(options.size(), nullptr);
+        int i = 0;
+
+        for(int i=0; i<numOptions; i++){
+            std::stringstream memorystream(options[i].description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+
+            json valueArray = var[optionName];
+            int ySize = valueArray.size();
+
+            for(int y=0; y<valueArray.size(); y++){
+                json value = valueArray.at(y);
+                for(int x=0; x<value.size(); x++){
+
+                    float v = value.at(x);
+                    values[i].push_back(v);
+
+                    _min[i] = std::min(_min[i],v);
+                    _max[i] = std::min(_max[i],v);
+                    sum[i] += v;
+                }
+            }
+        }
+
+        for(int i=0; i<numOptions; i++){
+            int numValues = values[i].size();
+            float mean = (1.0/numValues)*sum[i];
+
+            float var = 0;
+            for(int j=0; j<numValues; j++){
+                var += pow(values[i][j] - mean, 2);
+            }
+            float sd = sqrt(var / numValues);
+
+            _sum[i] += sum[i];
+            _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+            _numValues[i] += numValues;
+        }
+    }
+}
+
+
+std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, properties::SelectionProperty dataOptions){
+    if(!dataBuffer.empty()){
+        json j = json::parse(dataBuffer);
+        json var = j["variables"];
+
+        std::vector<int> selectedOptions = dataOptions.value();
+        int numSelected = selectedOptions.size();
+
+        std::vector<float> sum(numSelected, 0.0f);
+        std::vector<std::vector<float>> values(numSelected, std::vector<float>());
+        auto options = dataOptions.options();        
+
+        std::vector<float*> data(options.size(), nullptr);
+        for(int option : selectedOptions){
+
+            data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+
+            std::stringstream memorystream(options[option].description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+
+            json yArray = var[optionName];
+            for(int y=0; y<yArray.size(); y++){
+                json xArray = yArray.at(y);
+                for(int x=0; x<xArray.size(); x++){
+
+                    int i = x + y*xArray.size();
+                    // std::cout << _dimensions.x*_dimensions.y << " " << i << std::endl;
+                    float v = xArray.at(x);
+                    data[option][i] = processDataPoint(v, option);
+
+                }
+            }
+        }
+        
+        return data;
+    } 
+    else {
+    //     LWARNING("Nothing in memory buffer, are you connected to the information super highway?");
+        return std::vector<float*>();
+    }
+}
+
+
+void DataProcessor::addValuesFromKameleonData(float* kdata, glm::size3_t dimensions, int numOptions, int option){
+    if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    if(_sum.empty()) _sum= std::vector<float>(numOptions, 0.0f);
+    if(_sd.empty()) _sd= std::vector<float>(numOptions, 0.0f);
+    if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
+    if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+
+
+    int numValues = dimensions.x*dimensions.y*dimensions.z;
+    float sum = 0;
+
+    for(int i=0; i<numValues; i++){
+        float v = kdata[i];
+        _min[option] = std::min(_min[option],v);
+        _max[option] = std::max(_max[option],v);
+        sum += v;
+    }
+
+    float mean = (1.0 / numValues) * sum;
+    float var = 0;
+    for(int i=0; i<numValues; i++){
+        var += pow(kdata[i] - mean, 2);
+    }
+    float sd = sqrt ( var / numValues );
+
+    _sum[option] += sum;
+    _sd[option] = sqrt(pow(_sd[option],2)+ pow(sd,2));
+    _numValues[option] += numValues;
+}
+
+std::vector<float*> DataProcessor::processKameleonData2(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
     std::vector<int> selectedOptions = dataOptions.value();
     int numSelected = selectedOptions.size();
 
-    std::vector<float> min(numSelected, std::numeric_limits<float>::max()); 
+    std::vector<std::vector<float>> values(selectedOptions.size(), std::vector<float>());
+    std::vector<float*> data(dataOptions.options().size(), nullptr);
+    int numValues = dimensions.x*dimensions.y*dimensions.z;
+
+    for(int option : selectedOptions){
+        data[option] = new float[numValues]{0.0f};
+
+        for(int i=0; i<numValues; i++){
+            float v = kdata[option][i];
+            data[option][i] = processDataPoint(v, option);
+        }
+    }
+
+    return data;
+}
+
+std::vector<float*> DataProcessor::processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
+    std::vector<int> selectedOptions = dataOptions.value();
+    int numSelected = selectedOptions.size();
+    auto options = dataOptions.options();        
+    int numOptions = options.size();
+
+    if(_min.empty()){
+        _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    }
+
+    if(_max.empty()){
+        _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    }
+
+    if(_sum.empty()){
+        _sum= std::vector<float>(numOptions, 0.0f);
+    }
+
+    if(_sd.empty()){
+        _sd= std::vector<float>(numOptions, 0.0f);
+    }
+
+    if(_histograms.empty()){
+        _histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+    }
+
+
+    std::vector<float> min(numSelected, std::numeric_limits<float>::max());
     std::vector<float> max(numSelected, std::numeric_limits<float>::min());
 
     std::vector<float> sum(numSelected, 0.0f);
     std::vector<std::vector<float>> optionValues(numSelected, std::vector<float>());
 
-    auto options = dataOptions.options();        
 
     std::vector<float*> data(options.size(), nullptr);
     int numValues = dimensions.x*dimensions.y*dimensions.z;
     int i = 0; 
 
     for(int option : selectedOptions){
+        bool calculateMin = (_min[option] == std::numeric_limits<float>::max());
+        bool calculateMax = (_max[option] == std::numeric_limits<float>::min());
+        bool claculateSum = (_sum[option] == 0.0f);
+
         data[option] = new float[numValues]{0.0f};
 
         for(int j=0; j<numValues; j++){
@@ -314,18 +600,28 @@ std::vector<float*> DataProcessor::processKameleonData(std::vector<float*> kdata
             max[i] = std::max(max[i], v);
 
             sum[i] += v;
+
+            if(calculateMin)
+                _min[option] = std::min(_min[option],v);
+            if(calculateMax)
+                _max[option] = std::max(_max[option],v);
+            if(claculateSum)
+                _sum[option] += v;
         }
         i++;
+        // if(calculateMin)
+        //     std::cout << _min[option] << std::endl;
     }
 
     for(int i=0; i<numSelected; i++){
-            processData(data[ selectedOptions[i] ], optionValues[i], min[i], max[i], sum[i]);
+        int selected = selectedOptions[i];
+        processData(data[ selected ], optionValues[i], _min[selected], _max[selected], _sum[selected], selected);
     }
         
     return data;
 }
 
-void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum){
+void DataProcessor::processData(float* outputData, std::vector<float>& inputData, float min, float max,float sum, int selected){
     const int numValues = inputData.size(); 
     Histogram histogram(min, max, 512); 
 
@@ -371,6 +667,14 @@ void DataProcessor::processData(float* outputData, std::vector<float>& inputData
     // equalized.print();
 }
 
+float DataProcessor::processDataPoint(float value, int option){
+    if(_numValues.empty()) return 0.0f;
+
+    float mean = (1.0 / _numValues[option]) * _sum[option];
+    float v = normalizeWithStandardScore(value, mean, _sd[option]);
+    return v;
+}
+
 float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd){
     
     float zScoreMin = _normValues.x;
@@ -384,6 +688,14 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
 
 glm::vec2 DataProcessor::filterValues(){
     return _filterValues;
+}
+
+void DataProcessor::clear(){
+    _min.clear();
+    _max.clear();
+    _sum.clear();
+    _sd.clear();
+    _histograms.clear();
 }
 
 }

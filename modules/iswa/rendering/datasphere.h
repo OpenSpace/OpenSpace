@@ -39,6 +39,8 @@ public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
+     bool initialize() override;
+    
 protected:
     virtual void useLog(bool useLog) override;
     virtual void normValues(glm::vec2 normValues) override;

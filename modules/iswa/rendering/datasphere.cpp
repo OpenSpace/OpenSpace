@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/base/rendering/planetgeometry.h>
 #include <fstream>
+#include <modules/iswa/rendering/iswagroup.h>
 
 
 namespace {
@@ -57,30 +58,37 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    if(_data->groupName.empty()){
+    _type = IswaManager::CygnetType::Data;
+}
+
+DataSphere::~DataSphere(){}
+
+bool DataSphere::initialize(){
+    IswaCygnet::initialize();
+
+    if(_group){
+        _dataProcessor = _group->dataProcessor();
+    }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        _dataProcessor = std::make_shared<DataProcessor>(
+            _useLog.value(),
+            _useHistogram.value(),
+            _normValues
+        );
     }
 
     setTransferFunctions(_transferFunctionsFile.value());
 
-    _dataProcessor = std::make_shared<DataProcessor>(
-        _useLog.value(),
-        _useHistogram.value(),
-        _normValues
-    );
-
     _normValues.onChange([this](){
-        // FOR TESTING (should be done on all onChange)
-        // _avgBenchmarkTime = 0.0;
-        // _numOfBenchmarks = 0;
         _dataProcessor->normValues(_normValues.value());
         loadTexture();
     });
+    
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
         loadTexture();
@@ -97,13 +105,8 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-
-    _type = IswaManager::CygnetType::Data;
-    _dataBuffer = "";
-    //_data->frame = "SM";
+    return true;
 }
-
-DataSphere::~DataSphere(){}
 
 void DataSphere::useLog(bool useLog){ _useLog.setValue(useLog); };
 void DataSphere::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
@@ -131,9 +134,10 @@ bool DataSphere::loadTexture(){
 
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
+        _dataProcessor->addValuesFromJSON(_dataBuffer, _dataOptions);
     }
 
-    std::vector<float*> data = _dataProcessor->readJSONData(_dataBuffer, _dataOptions);
+    std::vector<float*> data = _dataProcessor->readJSONData2(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;

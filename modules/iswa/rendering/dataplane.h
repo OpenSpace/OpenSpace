@@ -40,6 +40,8 @@ friend class IswaGroup;
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
 
+     bool initialize() override;
+
  protected:
     virtual void useLog(bool useLog) override;
     virtual void normValues(glm::vec2 normValues) override;

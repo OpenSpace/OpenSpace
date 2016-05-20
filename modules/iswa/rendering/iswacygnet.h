@@ -125,6 +125,8 @@ protected:
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
 
+    std::shared_ptr<IswaGroup> _group;
+
     IswaManager::CygnetType _type;
 };
 
