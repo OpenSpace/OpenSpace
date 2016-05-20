@@ -39,6 +39,7 @@ in vec2 vs_st;
 in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
+in vec4 test;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -68,7 +69,7 @@ Fragment getFragment() {
         vec4 ambient = vec4(0.0,0.0,0.0,transparency);
         
         vec4 daytex = max(intensity * diffuse, ambient);
-        vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);    
+        vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);
         
         diffuse = (daytex*2 + mixtex)/3;
     }

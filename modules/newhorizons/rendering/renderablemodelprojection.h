@@ -30,6 +30,7 @@
 #include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/labelparser.h>
 
+#include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 #include <modules/base/rendering/modelgeometry.h>
@@ -69,9 +70,11 @@ namespace openspace {
 
         void textureBind();
         void project();
+        void clearAllProjections();
 
         properties::StringProperty _colorTexturePath;
         properties::BoolProperty _performProjection;
+        properties::BoolProperty _clearAllProjections;
 
         properties::IntProperty _rotationX;
         properties::IntProperty _rotationY;
@@ -136,6 +139,8 @@ namespace openspace {
         double _time;
 
         bool _capture;
+        
+        std::string _clearingImage;
 
         psc _sunPosition;
 

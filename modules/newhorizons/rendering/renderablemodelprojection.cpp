@@ -82,14 +82,16 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     , _fboProgramObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
-    , _textureOriginal(nullptr)
+    //, _textureOriginal(nullptr)
     , _textureProj(nullptr)
     , _textureWhiteSquare(nullptr)
     , _alpha(1.f)
     , _performShading("performShading", "Perform Shading", true)
     , _performProjection("performProjection", "Perform Projections", true)
+    , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _frameCount(0)
     , _programIsDirty(false)
+    , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png")) 
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -149,6 +151,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 
     addProperty(_performShading);
     addProperty(_performProjection);
+    addProperty(_clearAllProjections);
     addProperty(_rotationX);
     addProperty(_rotationY);
     addProperty(_rotationZ);
@@ -195,6 +198,7 @@ bool RenderableModelProjection::initialize() {
             "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
             "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
 
+
         if (!_programObject)
             return false;
     }
@@ -204,6 +208,7 @@ bool RenderableModelProjection::initialize() {
         _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
             "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
             "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
+        _fboProgramObject->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
         if (!_fboProgramObject)
             return false;
     }
@@ -213,7 +218,7 @@ bool RenderableModelProjection::initialize() {
     loadProjectionTexture();
 
     completeSuccess &= (_texture != nullptr);
-    completeSuccess &= (_textureOriginal != nullptr);
+    //completeSuccess &= (_textureOriginal != nullptr);
     completeSuccess &= (_textureProj != nullptr);
     completeSuccess &= (_textureWhiteSquare != nullptr);
 
@@ -286,7 +291,7 @@ bool RenderableModelProjection::deinitialize() {
     _geometry = nullptr;
     _texture = nullptr;
     _textureProj = nullptr;
-    _textureOriginal = nullptr;
+    //_textureOriginal = nullptr;
     _textureWhiteSquare = nullptr;
 
     glDeleteBuffers(1, &_vbo);
@@ -300,11 +305,43 @@ bool RenderableModelProjection::deinitialize() {
     return true;
 }
 
+void RenderableModelProjection::clearAllProjections() {
+    _texture = nullptr;
+    if (_colorTexturePath.value() != "") {
+        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        if (_texture) {
+            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+            _texture->uploadTexture();
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        }
+    }
+
+    GLint defaultFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
+    // check FBO status
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    // switch back to window-system-provided framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
+
+    //float tmp = _fadeProjection;
+    //_fadeProjection = 1.f;
+    //_projectionTexturePath = _clearingImage;
+    //imageProjectGPU();
+    //_fadeProjection = tmp;
+    _clearAllProjections = false;
+}
+
 void RenderableModelProjection::render(const RenderData& data) {
     if (!_programObject)
         return;
     if (!_textureProj)
         return;
+
+    if (_clearAllProjections)
+        clearAllProjections();
 
     _programObject->activate();
     _frameCount++;
@@ -373,7 +410,8 @@ void RenderableModelProjection::update(const UpdateData& data) {
 }
 
 void RenderableModelProjection::imageProjectGPU() {
-        
+    glDisable(GL_DEPTH_TEST);
+
     // keep handle to the current bound FBO
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -403,18 +441,21 @@ void RenderableModelProjection::imageProjectGPU() {
     _fboProgramObject->setUniform("_scaling", _camScaling);
     _fboProgramObject->setUniform("boresight", _boresight);
 
+    _geometry->setUniforms(*_fboProgramObject);
+
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geometryIndeces.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     
     _fboProgramObject->deactivate();
-    glDisable(GL_BLEND);
+    //glDisable(GL_BLEND);
     //bind back to default
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
         m_viewport[2], m_viewport[3]);
             
+    glEnable(GL_DEPTH_TEST);
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
@@ -495,8 +536,9 @@ void RenderableModelProjection::textureBind() {
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
-        std::thread t1(&RenderableModelProjection::attitudeParameters, this, img.startTime);
-        t1.join();
+        //std::thread t1(&RenderableModelProjection::attitudeParameters, this, img.startTime);
+        //t1.join();
+        attitudeParameters(img.startTime);
         _projectionTexturePath = img.path;
         imageProjectGPU(); //fbopass
     }
@@ -513,15 +555,15 @@ void RenderableModelProjection::loadTexture() {
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-    _textureOriginal = nullptr;
-    if (_colorTexturePath.value() != "") {
-        _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
-        if (_textureOriginal) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-            _textureOriginal->uploadTexture();
-            _textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-    }
+    //_textureOriginal = nullptr;
+    //if (_colorTexturePath.value() != "") {
+    //    _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+    //    if (_textureOriginal) {
+    //        LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
+    //        _textureOriginal->uploadTexture();
+    //        _textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    //    }
+    //}
     _textureWhiteSquare = nullptr;
     if (_defaultProjImage != "") {
         _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage)));

@@ -89,9 +89,12 @@ private:
     std::map<std::string, Decoder*> _fileTranslation;
 
     properties::StringProperty  _colorTexturePath;
+    properties::StringProperty _heightMapTexturePath;
+    properties::StringProperty _normalMapTexturePath;
+
     properties::StringProperty  _projectionTexturePath;
     properties::IntProperty _rotation;
-    properties::FloatProperty _fadeProjection;
+    //properties::FloatProperty _fadeProjection;
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
 
@@ -102,6 +105,12 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
     std::unique_ptr<ghoul::opengl::Texture> _textureProj;
     std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
+    std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _normalMapTexture;
+
+    properties::FloatProperty _heightExaggeration;
+    properties::BoolProperty _enableNormalMapping;
+
     planetgeometry::PlanetGeometry* _geometry;
     
     glm::vec2  _camScaling;
@@ -151,6 +160,9 @@ private:
     GLuint _fboID;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
+
+    bool _hasHeightMap;
+    bool _hasNormalMap;
 
     std::queue<Image> imageQueue;
 };

@@ -22,47 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <iostream>
+#include <string>
+#include <glm/glm.hpp>
 
-uniform sampler2D projectTexture;
-uniform sampler2D currentTexture;
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturereaderdevil.h>
+#include <ghoul/io/texture/texturereaderfreeimage.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/ghoul.h>
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
-uniform vec3 boresight;
+#include <openspace/util/progressbar.h>
 
+#include <apps/DataConverter/milkywayconversiontask.h>
 
-in vec4 vs_position;
-in vec4 ProjTexCoord;
-in vec2 vs_uv;
-in vec4 vs_normal;
+int main(int argc, char** argv) {
+    using namespace openspace;
+    using namespace dataconverter;
 
-out vec4 color;
+    ghoul::initialize();
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    #ifdef GHOUL_USE_DEVIL
+        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+    #endif // GHOUL_USE_DEVIL
+    #ifdef GHOUL_USE_FREEIMAGE
+        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+    #endif // GHOUL_USE_FREEIMAGE
 
-bool inRange(float x, float a, float b) {
-    return (x >= a && x <= b);
-} 
+    openspace::ProgressBar pb(100);
+    std::function<void(float)> onProgress = [&](float progress) {
+        pb.print(progress * 100);
+    };
 
-void main() {
-  vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
+    // TODO: Make the converter configurable using either
+    // config files (json, lua dictionaries),
+    // lua scripts,
+    // or at the very least: a command line interface.
+ 
+    MilkyWayConversionTask mwConversionTask(
+        "F:/milky-way/cam2_main.",
+        ".exr",
+        1385,
+        512,
+        "F:/milky-way/mw_512_512_64.rawvolume", 
+        glm::vec3(512, 512, 64));
+    
+    mwConversionTask.perform(onProgress);
 
-  vec3 n = normalize(vs_normal.xyz);
-  vec4 projected = ProjTexCoord;
+    std::cout << "Done." << std::endl;
 
-  //normalize
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  //invert gl coordinates
-  projected.x = 1 - projected.x;
-  // projected.y = 1 - projected.y; 
-  
-  if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-        color = texture(projectTexture, projected.xy);
-  } else {
-        color = texture(currentTexture, uv);
-  }
-
-}
+    std::cin.get();
+    return 0;
+};
