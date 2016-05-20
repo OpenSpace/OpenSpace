@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <fstream>
 #include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/rendering/iswagroup.h>
 
 
 namespace {
@@ -55,7 +56,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_resolution("resolution", "Resolutionx100", 2, 1, 5)
+    ,_resolution("resolution", "Resolutionx100", 1, 1, 5)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
     std::string name;
@@ -74,25 +75,79 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_dataOptions);
     addProperty(_fieldlines);
 
-    if(_data->groupName.empty()){
+
+    _type = IswaManager::CygnetType::Data;
+
+    dictionary.getValue("kwPath", _kwPath);
+    
+    std::string fieldlineIndexFile;
+    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
+    readFieldlinePaths(absPath(fieldlineIndexFile));
+
+    _fieldlines.onChange([this](){ updateFieldlineSeeds();} );
+
+    std::string axis;
+    dictionary.getValue("axisCut", axis);
+
+    OsEng.gui()._iswa.registerProperty(&_slice);
+    if(axis == "x"){
+        _scale = _data->scale.x;
+        _data->scale.x = 0;
+        _data->offset.x = 0;
+
+        _slice.setValue((_data->offset.x - _data->gridMin.x)/_scale);
+    }else if(axis == "y"){
+        _scale = _data->scale.y;
+        _data->scale.y = 0;
+        _data->offset.y = 0;
+
+        _slice.setValue((_data->offset.y -_data->gridMin.y)/_scale);
+    }else{
+        _scale = _data->scale.z;
+        _data->scale.z = 0;
+        _data->offset.z = 0;
+
+        _slice.setValue((_data->offset.z - _data->gridMin.z)/_scale);
+    }
+}
+
+KameleonPlane::~KameleonPlane(){
+    _kw = nullptr;
+}
+
+bool KameleonPlane::initialize(){
+    _textures.push_back(nullptr);
+    
+    if(!_data->groupName.empty()){
+        _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
+        std::cout << "Register group " << (_group != nullptr) << std::endl;
+    }
+    
+    initializeTime();
+    createGeometry();
+    createShader();
+
+
+    if(_group){
+        _dataProcessor = _group->dataProcessor();
+    }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_resolution);
-        OsEng.gui()._iswa.registerProperty(&_slice);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
         OsEng.gui()._iswa.registerProperty(&_fieldlines);
+    
+        _dataProcessor = std::make_shared<DataProcessor>(
+            _useLog.value(),
+            _useHistogram.value(),
+            _normValues
+        );
     }
-
+    
     setTransferFunctions(_transferFunctionsFile.value());
-
-    _dataProcessor = std::make_shared<DataProcessor>(
-        _useLog.value(),
-        _useHistogram.value(),
-        _normValues
-    );
 
     _normValues.onChange([this](){
         _dataProcessor->normValues(_normValues.value());
@@ -114,52 +169,28 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     });
 
     _resolution.onChange([this](){
+        _dataProcessor->clear();
         updateTexture();
     });
-
-    _type = IswaManager::CygnetType::Data;
-
-    dictionary.getValue("kwPath", _kwPath);
-    
-    std::string fieldlineIndexFile;
-    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
-    readFieldlinePaths(absPath(fieldlineIndexFile));
-
-    _fieldlines.onChange([this](){ updateFieldlineSeeds();} );
-
-    std::string axis;
-    dictionary.getValue("axisCut", axis);
-
-    if(axis == "x"){
-        _scale = _data->scale.x;
-        _data->scale.x = 0;
-        _data->offset.x = 0;
-        
-        _slice.setValue((_data->offset.x - _data->gridMin.x)/_scale);
-    }else if(axis == "y"){
-        _scale = _data->scale.y;
-        _data->scale.y = 0;
-        _data->offset.y = 0;
-
-        _slice.setValue((_data->offset.y -_data->gridMin.y)/_scale);
-    }else{
-        _scale = _data->scale.z;
-        _data->scale.z = 0;
-        _data->offset.z = 0;
-
-        _slice.setValue((_data->offset.z - _data->gridMin.z)/_scale);
-    }
 
     _slice.onChange([this](){
         updateTexture();
     });
+
+    updateTexture();
+	return true;
 }
 
-KameleonPlane::~KameleonPlane(){
-    _kw = nullptr;
-}
+void KameleonPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
+void KameleonPlane::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
+void KameleonPlane::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
+void KameleonPlane::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+void KameleonPlane::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+void KameleonPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool KameleonPlane::loadTexture() {
+    std::cout << "loadTexture()" << std::endl;
+
     ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
     ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
 
@@ -169,13 +200,18 @@ bool KameleonPlane::loadTexture() {
 
     for(int option : selectedOptions){
         if(!_dataSlices[option]){
-            std::cout << options[option].description << std::endl;
-            _dataSlices[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, _slice.value());
+
+            std::stringstream memorystream(options[option].description);
+            std::string optionName;
+            getline(memorystream, optionName, '/');
+            getline(memorystream, optionName, '/');
+            // std::cout << options[option].description << std::endl;
+            _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
+            _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
         }
     }
 
-
-    std::vector<float*> data = _dataProcessor->processKameleonData(_dataSlices, _dimensions, _dataOptions);
+    std::vector<float*> data = _dataProcessor->processKameleonData2(_dataSlices, _dimensions, _dataOptions);
 
     if(data.empty())
         return false;
@@ -260,8 +296,6 @@ bool KameleonPlane::updateTexture(){
     for(int i=0; i<_textures.size(); ++i){
         _textures[i] = std::move(nullptr);
     }
-
-
 
     loadTexture();
 
@@ -366,16 +400,16 @@ void KameleonPlane::fillOptions(){
 
     for(std::string option : options){
         if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
-            _dataOptions.addOption({numOptions, option});
+            _dataOptions.addOption({numOptions, name()+"/"+option});
             _dataSlices.push_back(nullptr);
             _textures.push_back(nullptr);
             numOptions++;
         }
     }
     _dataOptions.setValue(std::vector<int>(1,0));
-    _dataOptions.onChange([this](){loadTexture();});
-    if(!_data->groupName.empty())
+    if(_group)
         IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+    _dataOptions.onChange([this](){loadTexture();});
 }
 
 void KameleonPlane::updateFieldlineSeeds(){

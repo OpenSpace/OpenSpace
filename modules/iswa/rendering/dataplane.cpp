@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <modules/iswa/rendering/iswagroup.h>
 
 namespace {
     const std::string _loggerCat = "DataPlane";
@@ -48,6 +49,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
+    ,_dataProcessor(nullptr)
 {     
     std::string name;
     dictionary.getValue("Name", name);
@@ -62,27 +64,35 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    if(_data->groupName.empty()){
+    _type = IswaManager::CygnetType::Data;
+
+}
+
+DataPlane::~DataPlane(){}
+
+bool DataPlane::initialize(){
+    IswaCygnet::initialize();
+
+    if(_group){
+        std::cout << "add to group" << std::endl;
+        _dataProcessor = _group->dataProcessor();
+    }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        _dataProcessor = std::make_shared<DataProcessor>(
+            _useLog.value(),
+            _useHistogram.value(),
+            _normValues
+        );
     }
 
     setTransferFunctions(_transferFunctionsFile.value());
 
-    _dataProcessor = std::make_shared<DataProcessor>(
-        _useLog.value(),
-        _useHistogram.value(),
-        _normValues
-    );
-
     _normValues.onChange([this](){
-        // FOR TESTING (should be done on all onChange)
-        // _avgBenchmarkTime = 0.0;
-        // _numOfBenchmarks = 0;
         _dataProcessor->normValues(_normValues.value());
         loadTexture();
     });
@@ -103,11 +113,8 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-    _type = IswaManager::CygnetType::Data;
-
+    return true;
 }
-
-DataPlane::~DataPlane(){}
 
 void DataPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
 void DataPlane::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
@@ -135,14 +142,15 @@ bool DataPlane::loadTexture() {
 
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
+        _dataProcessor->addValues(_dataBuffer, _dataOptions);
     }
 
-    std::vector<float*> data = _dataProcessor->readData(_dataBuffer, _dataOptions);
+    std::vector<float*> data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;
 
-    _backgroundValues.setValue(_dataProcessor->filterValues());
+    // _backgroundValues.setValue(_dataProcessor->filterValues());
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
@@ -297,7 +305,7 @@ void DataPlane::fillOptions(){
         _textures.push_back(nullptr);
     }
     _dataOptions.setValue(std::vector<int>(1,0));
-    if(!_data->groupName.empty())
+    if(_group)
         IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
 }
 

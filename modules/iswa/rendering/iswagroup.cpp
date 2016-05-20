@@ -41,6 +41,7 @@ IswaGroup::IswaGroup(std::string  name)
     ,_dataOptions("dataOptions", "Data Options")
     // ,_id(id)
     ,_type(IswaManager::CygnetType::NoType)
+    // ,_dataProcessor(nullptr)
 {
     setName(name);
 
@@ -54,6 +55,12 @@ IswaGroup::IswaGroup(std::string  name)
     addProperty(_dataOptions);
 
     addProperty(_delete);
+
+    _dataProcessor = std::make_shared<DataProcessor>(
+            _useLog.value(),
+            _useHistogram.value(),
+            _normValues
+    );
 }
 
 IswaGroup::~IswaGroup(){
@@ -103,7 +110,13 @@ void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty:
     if(_type == IswaManager::CygnetType::Data){
         if(_dataOptions.options().empty()){
             for(auto option : options){
-                _dataOptions.addOption(option);
+
+                std::stringstream memorystream(option.description);
+                std::string optionName;
+                getline(memorystream, optionName, '/');
+                getline(memorystream, optionName, '/');
+
+                _dataOptions.addOption({option.value, name()+"/"+optionName});
             }
             _dataOptions.setValue(std::vector<int>(1,0));
         }
@@ -185,6 +198,10 @@ void IswaGroup::clearGroup(){
         it = _cygnets.erase(it);
     }
     unregisterProperties();
+}
+
+std::shared_ptr<DataProcessor> IswaGroup::dataProcessor(){
+    return _dataProcessor;
 }
 
 } //namespace openspace

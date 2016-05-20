@@ -33,6 +33,7 @@
 // #include <modules/iswa/rendering/iswacygnet.h>
 #include <openspace/properties/triggerproperty.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/util/dataprocessor.h>
 
 
 namespace openspace{
@@ -47,6 +48,15 @@ public:
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
 	bool checkType(IswaManager::CygnetType type);
 	void clearGroup();
+
+	std::shared_ptr<DataProcessor> dataProcessor();
+
+	// bool useLog(){return _useLog.value();};
+ //    glm::vec2 normValues(){return _normValues.value();};
+ //    bool useHistogram(){return _useHistogram.value();};
+ //    std::vector<int> dataOptions(){return _dataOptions.value();};
+ //    std::string transferFunctionsFile(){return _transferFunctionsFile.value();};
+ //    glm::vec2 backgroundValues(){return _backgroundValues.value();};
 private:
 	void registerProperties();
 	void unregisterProperties();
@@ -69,6 +79,8 @@ private:
 	// int groupId;
 	// IswaCygnet cygnet;
 	int _id;
+
+    std::shared_ptr<DataProcessor> _dataProcessor;
 	std::vector<IswaCygnet* > _cygnets;
 	IswaManager::CygnetType _type;
 };

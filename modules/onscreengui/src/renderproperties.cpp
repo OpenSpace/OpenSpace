@@ -75,7 +75,7 @@ void renderOptionProperty(Property* prop) {
 void renderSelectionProperty(Property* prop) {
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
     std::string name = p->guiName();
-
+    
     if (ImGui::CollapsingHeader((name).c_str())) {
         const std::vector<SelectionProperty::Option>& options = p->options();
         std::vector<int> newSelectedIndices;

@@ -201,12 +201,13 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
-void IswaManager::registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet){
+std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet){
     if(_groups.find(name) == _groups.end()){
         _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(name, std::make_shared<IswaGroup>(name)));
     }
 
     _groups[name]->registerCygnet(cygnet, type);
+    return _groups[name];
 }
 
 void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
@@ -343,7 +344,7 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
             }
 
             std::string table = "{"
-                "Name = 'KameleonPlane_"+cut+"',"
+                "Name = 'KameleonPlane-"+cut+"',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "

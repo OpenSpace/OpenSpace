@@ -37,6 +37,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
     ,_type(IswaManager::CygnetType::NoType)
+    ,_group(nullptr)
 {
     _data = std::make_shared<Metadata>();
 
@@ -101,19 +102,23 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _delete.onChange([this](){
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
     });
+
 }
 
 IswaCygnet::~IswaCygnet(){}
 bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
+    if(!_data->groupName.empty()){
+        _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
+        std::cout << "Register group " << (_group != nullptr) << std::endl;
+    }
+    
     initializeTime();
     createGeometry();
     createShader();
     updateTexture();
 
-    if(!_data->groupName.empty())
-        IswaManager::ref().registerToGroup(_data->groupName, _type, this);
 
 	return true;
 }

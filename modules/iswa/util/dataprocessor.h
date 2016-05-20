@@ -31,6 +31,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
 #include <set>
+#include <openspace/util/histogram.h>
 
 namespace openspace{
 class DataProcessor{
@@ -57,22 +58,32 @@ public:
 
     std::vector<std::string> readHeader(std::string& dataBuffer);
     std::vector<float*> readData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+    std::vector<float*> readData2(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+    void addValues(std::string& dataBuffer, properties::SelectionProperty dataOptions);
 
     std::vector<std::string> readJSONHeader(std::string& dataBuffer);
     std::vector<float*> readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+    std::vector<float*> readJSONData2(std::string& dataBuffer, properties::SelectionProperty dataOptions);
+    void addValuesFromJSON(std::string& dataBuffer, properties::SelectionProperty dataOptions);
 
     std::vector<float*> processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions);
+    std::vector<float*> processKameleonData2(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions);
+    void addValuesFromKameleonData(float* kdata, glm::size3_t dimensions, int numOptions, int option);
+
+    void clear();
 
     glm::vec2 filterValues();
-    
 private:
     void processData(
         float* outputData, // Where you want your processed data to go 
         std::vector<float>& inputData, //data that needs processing 
         float min, // min value of the input data
         float max, // max valye of the input data
-        float sum // sum of the input data 
+        float sum, // sum of the input data 
+        int selected = 0
     );
+
+    float processDataPoint(float value, int option);
 
     float normalizeWithStandardScore(float value, float mean, float sd);
 
@@ -82,6 +93,13 @@ private:
     glm::vec2 _normValues;
     glm::vec2 _filterValues;
 
+    std::vector<float> _min; 
+    std::vector<float> _max;
+    std::vector<float> _sum;
+    std::vector<float> _sd;
+    std::vector<float> _numValues;
+    std::vector<std::shared_ptr<Histogram>> _histograms;
+    // int _numValues;
     std::set<std::string> _coordinateVariables;
 };
 
