@@ -844,6 +844,7 @@ void DataProcessor::clear(){
     _sum.clear();
     _sd.clear();
     _histograms.clear();
+    _numValues.clear();
 }
 
 }

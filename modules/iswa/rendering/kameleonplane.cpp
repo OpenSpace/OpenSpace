@@ -131,7 +131,6 @@ bool KameleonPlane::initialize(){
     createGeometry();
     createShader();
 
-
     if(_group){
         _dataProcessor = _group->dataProcessor();
     }else{
@@ -173,7 +172,9 @@ bool KameleonPlane::initialize(){
     });
 
     _resolution.onChange([this](){
-
+        for(int i=0; i<_textures.size(); i++){
+            _textures[i] = std::move(nullptr);
+        }
         _dataProcessor->clear();
         updateTexture();
     });
@@ -183,7 +184,6 @@ bool KameleonPlane::initialize(){
     });
 
     fillOptions();
-
 
     updateTexture();
 
