@@ -112,7 +112,6 @@ bool IswaCygnet::initialize(){
     
     if(!_data->groupName.empty()){
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
-        std::cout << "Register group " << (_group != nullptr) << std::endl;
     }
     
     initializeTime();

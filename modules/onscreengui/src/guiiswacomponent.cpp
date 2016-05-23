@@ -42,6 +42,7 @@
 #include <ext/json/json.hpp>
 #include <openspace/engine/downloadmanager.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <ghoul/filesystem/filesystem>
 
 
 #include <fstream>
@@ -61,6 +62,7 @@ void GuiIswaComponent::render() {
     bool gmdatavalue = gmdata;
     bool gmimagevalue = gmimage;
     bool iondatavalue = iondata;
+    bool kameleonvalue = kameleon;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
     ImGui::Text("Global Magnetosphere");
@@ -70,6 +72,9 @@ void GuiIswaComponent::render() {
     ImGui::Text("Ionosphere");
     ImGui::Checkbox("Ion From Data", &iondata);
 
+    ImGui::Text("Kameleon");
+    ImGui::Checkbox("BATSRUS.cdf", &kameleon);
+
     ImGui::Spacing();
     static const int addCygnetBufferSize = 256;
     static char addCygnetBuffer[addCygnetBufferSize];
@@ -77,6 +82,41 @@ void GuiIswaComponent::render() {
 
     if(ImGui::SmallButton("Add Cygnet"))
         OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
+
+    static const int cdfListSize = 256;
+    static char cdfList[cdfListSize];
+
+    std::string startPath = absPath("${OPENSPACE_DATA}/cdflist.txt");
+    std::copy(startPath.begin(), startPath.end(),cdfList);
+
+    ImGui::InputText("cdf list", cdfList, cdfListSize);
+    if(ImGui::SmallButton("Add Cdf files")){
+        _cdfOption = -1;
+        if(FileSys.fileExists(cdfList)){
+            std::string list = std::string(cdfList);
+
+            std::string line;
+            std::string basePath = list.substr(0, list.find_last_of("/\\"));
+
+            std::ifstream cdfListFile(list);
+            int i = 0;
+            if(cdfListFile.is_open()){
+                while(getline(cdfListFile, line)){
+                    std::string path = line.substr(0, line.find_first_of(" "));
+                    std::string date = line.substr(line.find_first_of(" ")+1);
+                    
+
+                    _cdfOptions.push_back({i, basePath+"/"+path, date});
+                    i++;
+                }
+            }
+
+        }else{
+            LWARNING( std::string(cdfList) + " is not a cdf file or can't be found.");
+        }
+
+
+    }
 
     if(gmdata != gmdatavalue){
         if(gmdata){
@@ -105,6 +145,41 @@ void GuiIswaComponent::render() {
             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-4,'Data','Ionosphere');");
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
+        }
+    }
+
+    if(kameleon != kameleonvalue){
+        if(kameleon){
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','z','BATSRUS');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','y','BATSRUS');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','x','BATSRUS');");
+        }else{
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('BATSRUS');");
+        }
+    }
+
+    if(ImGui::CollapsingHeader("Cdf files")){
+        int cdfOptionValue = _cdfOption;
+
+        for(auto radioOption : _cdfOptions){
+            std::string path = radioOption.path;
+            std::string cdfName = path.substr(path.find_last_of("/\\")+1);
+            ImGui::RadioButton(cdfName.c_str(), &_cdfOption, radioOption.value);
+            // ImGui::Text(cdfName.c_str());
+        }
+
+        if(_cdfOption != cdfOptionValue){
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Kameleon');");
+
+            std::string path = _cdfOptions[_cdfOption].path;
+            std::string date = _cdfOptions[_cdfOption].date;
+
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','z','Kameleon');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','y','Kameleon');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','x','Kameleon');");
+    
+            OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
+            OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
         }
     }
 

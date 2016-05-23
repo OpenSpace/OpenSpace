@@ -146,7 +146,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
     }else{
         // Kameleonplane?
         // LERROR("No cygnet with id 0");
-        std::string kwPath = "BATSRUS.cdf";
+        std::string kwPath = "${OPENSPACE_DATA}/BATSRUS.cdf";
         if(type == "x" || type == "y" || type == "z")
             createKameleonPlane(kwPath, type, group);
         else
@@ -473,7 +473,6 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 }
 
 void IswaManager::createKameleonPlane(std::string kwPath, std::string cut, std::string group){
-    kwPath = "${OPENSPACE_DATA}/" + kwPath;
     const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
 
     if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
@@ -484,7 +483,7 @@ void IswaManager::createKameleonPlane(std::string kwPath, std::string cut, std::
             OsEng.scriptEngine().queueScript(script);
         }
     }else{
-        LWARNING( kwPath + " is not a cdf file or can't be found.");
+        LWARNING( absPath(kwPath) + " is not a cdf file or can't be found.");
     }
 }
 
@@ -557,15 +556,22 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
             {
                 "addCygnet",
                 &luascriptfunctions::iswa_addCygnet,
-                "string",
+                "int, string, string",
                 "Adds a IswaCygnet",
                 true
             },
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
-                "table",
+                "int, string, string",
                 "Adds a Screen Space Cygnets",
+                true
+            },
+            {
+                "addKameleonPlane",
+                &luascriptfunctions::iswa_addKameleonPlane,
+                "string, string, string",
+                "Adds a KmaeleonPlane from cdf file.",
                 true
             },
             {

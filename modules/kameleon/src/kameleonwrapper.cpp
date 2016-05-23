@@ -33,6 +33,7 @@
 #include <ccmc/Interpolator.h>
 #include <ccmc/BATSRUS.h>
 #include <ccmc/ENLIL.h>
+#include <ccmc/CCMCTime.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -1054,7 +1055,6 @@ std::vector<std::string> KameleonWrapper::getVariables(){
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;
-
 }
 
 } // namespace openspace

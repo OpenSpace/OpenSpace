@@ -89,7 +89,9 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     std::string axis;
     dictionary.getValue("axisCut", axis);
 
+    OsEng.gui()._iswa.registerProperty(&_fieldlines);
     OsEng.gui()._iswa.registerProperty(&_slice);
+
     if(axis == "x"){
         _scale = _data->scale.x;
         _data->scale.x = 0;
@@ -117,14 +119,12 @@ KameleonPlane::~KameleonPlane(){
 
 bool KameleonPlane::initialize(){
     _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-    
     // IswaCygnet::initialize();
     _textures.push_back(nullptr);
     
 
     if(!_data->groupName.empty()){
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
-        std::cout << "Register group " << (_group != nullptr) << std::endl;
     }
     
     initializeTime();
@@ -141,7 +141,6 @@ bool KameleonPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_resolution);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
-        OsEng.gui()._iswa.registerProperty(&_fieldlines);
     
         _dataProcessor = std::make_shared<DataProcessor>(
             _useLog.value(),

@@ -98,6 +98,7 @@ public:
         return _iswaEvent;
     }
 
+    void createKameleonPlane(std::string kwPath, std::string cut="z", std::string group="");
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
@@ -107,7 +108,6 @@ private:
     void createScreenSpace(int id);
     void createPlane(std::shared_ptr<MetadataFuture> data);
     void createSphere(std::shared_ptr<MetadataFuture> data);
-    void createKameleonPlane(std::string kwPath, std::string cut="z", std::string group="");
 
     void fillCygnetInfo(std::string jsonString);
 

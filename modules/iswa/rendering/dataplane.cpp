@@ -74,7 +74,6 @@ bool DataPlane::initialize(){
     IswaCygnet::initialize();
 
     if(_group){
-        std::cout << "add to group" << std::endl;
         _dataProcessor = _group->dataProcessor();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
