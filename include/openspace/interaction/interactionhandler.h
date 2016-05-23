@@ -140,6 +140,31 @@ private:
 
 #endif // FALSE
 
+class InteractionMode
+{
+public:
+    InteractionMode();
+    ~InteractionMode();
+
+    virtual void update(double deltaTime) = 0;
+protected:
+    std::shared_ptr<KeyboardController> _keyboardController;
+    std::shared_ptr<MouseController> _mouseController;
+    std::shared_ptr<SceneGraphNode> _focusNode;
+    std::shared_ptr<Camera> _camera;
+};
+
+class OrbitalInteractionMode : public InteractionMode
+{
+public:
+    OrbitalInteractionMode();
+    ~OrbitalInteractionMode();
+
+    virtual void update(double deltaTime);
+private:
+};
+
+
 class InteractionHandler : public properties::PropertyOwner
 {
 public:
@@ -184,7 +209,14 @@ public:
     void mouseScrollWheelCallback(double pos);
 
 private:
+    std::shared_ptr<KeyboardController> _keyboardController;
+    std::shared_ptr<MouseController> _mouseController;
+    std::shared_ptr<SceneGraphNode> _focusNode;
+    std::shared_ptr<Camera> _camera;
 
+    std::shared_ptr<InteractionMode> _interactor;
+
+    double _deltaTime;
 };
 
 } // namespace interaction

@@ -592,6 +592,39 @@ void InteractionHandler::clearKeyframes(){
 
 #endif // USE_OLD_INTERACTIONHANDLER
 
+
+InteractionMode::InteractionMode()
+{
+
+}
+
+InteractionMode::~InteractionMode()
+{
+
+}
+
+
+
+
+OrbitalInteractionMode::OrbitalInteractionMode()
+{
+
+}
+
+OrbitalInteractionMode::~OrbitalInteractionMode()
+{
+
+}
+
+void OrbitalInteractionMode::update(double deltaTime)
+{
+
+}
+
+
+
+
+
 InteractionHandler::InteractionHandler()
 {
 
@@ -630,7 +663,7 @@ void InteractionHandler::unlockControls() {
 }
 
 void InteractionHandler::update(double deltaTime) {
-
+    _deltaTime = deltaTime;
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
