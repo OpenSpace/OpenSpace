@@ -64,7 +64,6 @@ namespace openspace {
 
     bool TileProvider::hasInitializedGDAL = false;
 
-    ThreadPool TileProvider::threadPool(1);
 
 
     TileProvider::TileProvider(
@@ -216,14 +215,23 @@ namespace openspace {
 
     bool TileProvider::enqueueTileRequest(const ChunkIndex& chunkIndex) {
         HashKey key = chunkIndex.hashKey();
-        bool tileHasBeenQueued = _queuedTileRequests.find(key) != _queuedTileRequests.end();
-        if (!tileHasBeenQueued) {
-            std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-                new TextureTileLoadJob(this, chunkIndex));
-            _tileLoadManager.enqueueJob(job);
-            _queuedTileRequests.insert(key);
+        auto it = _queuedTileRequests.begin();
+        auto end = _queuedTileRequests.end();
+        for (; it != end; it++) {
+            const ChunkIndex& otherChunk = it->second;
+            if (chunkIndex.level == otherChunk.level && 
+                chunkIndex.manhattan(otherChunk) < 1) {
+                return false;
+            }
         }
-        return !tileHasBeenQueued;
+
+        
+        std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
+            new TextureTileLoadJob(this, chunkIndex));
+        _tileLoadManager.enqueueJob(job);
+        _queuedTileRequests[key] = chunkIndex;
+        
+        return true;
     }
 
 

@@ -79,16 +79,13 @@ namespace openspace {
         }
 
         std::shared_ptr<RawTileData> tileData = nullptr;
-        //if (worstError <= CE_Warning) {
         tileData = createRawTileData(region, dataLayout, imageData);
-        //}
 
         std::shared_ptr<TileIOResult> result(new TileIOResult);
         result->error = worstError;
         result->rawTileData = tileData;
 
         return result;
-        //return tileData;
     }
 
     /*

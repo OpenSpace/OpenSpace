@@ -89,6 +89,8 @@ struct ChunkIndex {
     */
     ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
 
+    int manhattan(const ChunkIndex& other) const;
+
     HashKey hashKey() const;
 
     bool operator==(const ChunkIndex& other) const;

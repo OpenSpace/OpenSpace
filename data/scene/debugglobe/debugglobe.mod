@@ -13,11 +13,12 @@ return {
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                     },
                     
+
+                    --[[
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
                     },
-                    --[[
                     {
                         Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"

@@ -140,7 +140,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         LRUCache<HashKey, MetaTexture> _tileCache;
-        std::set<HashKey> _queuedTileRequests;
+        std::unordered_map<HashKey, ChunkIndex> _queuedTileRequests;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;
