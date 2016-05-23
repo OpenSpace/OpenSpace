@@ -116,8 +116,12 @@ KameleonPlane::~KameleonPlane(){
 }
 
 bool KameleonPlane::initialize(){
+    _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
+    
+    // IswaCygnet::initialize();
     _textures.push_back(nullptr);
     
+
     if(!_data->groupName.empty()){
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
         std::cout << "Register group " << (_group != nullptr) << std::endl;
@@ -169,6 +173,7 @@ bool KameleonPlane::initialize(){
     });
 
     _resolution.onChange([this](){
+
         _dataProcessor->clear();
         updateTexture();
     });
@@ -177,7 +182,11 @@ bool KameleonPlane::initialize(){
         updateTexture();
     });
 
+    fillOptions();
+
+
     updateTexture();
+
 	return true;
 }
 
@@ -189,13 +198,9 @@ void KameleonPlane::transferFunctionsFile(std::string tfPath){ _transferFunction
 void KameleonPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool KameleonPlane::loadTexture() {
-    ghoul::opengl::Texture::FilterMode filtermode = ghoul::opengl::Texture::FilterMode::Linear;
-    ghoul::opengl::Texture::WrappingMode wrappingmode = ghoul::opengl::Texture::WrappingMode::ClampToEdge;
-
     std::vector<int> selectedOptions = _dataOptions.value();
     auto options = _dataOptions.options();
-    float zSlice = 0.5f;
-
+    
     for(int option : selectedOptions){
         if(!_dataSlices[option]){
 
@@ -205,7 +210,8 @@ bool KameleonPlane::loadTexture() {
             getline(memorystream, optionName, '/');
             // std::cout << options[option].description << std::endl;
             _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
-            // _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
+            if(!_textures[option])
+                _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
         }
     }
 
@@ -216,10 +222,7 @@ bool KameleonPlane::loadTexture() {
 
     _backgroundValues.setValue(_dataProcessor->filterValues());
     
-    // std::cout << std::to_string(_backgroundValues.value()) << std::endl;
-
     bool texturesReady = false;
-
     for(int option: selectedOptions){
         float* values = data[option];
         if(!values) continue;
@@ -251,11 +254,6 @@ bool KameleonPlane::loadTexture() {
 }
 
 bool KameleonPlane::updateTexture(){
-
-    if(!_kw){
-        _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-    }
-
     _dimensions = glm::size3_t(_resolution.value()*100);
     if(_data->scale.x == 0){
         _dimensions.x = 1;
@@ -278,26 +276,6 @@ bool KameleonPlane::updateTexture(){
         _data->offset.z = _data->gridMin.z+_slice.value()*_scale;
     }
 
-    if(!_dataOptions.options().size()){
-        fillOptions();
-        
-        auto options = _dataOptions.options();
-        for(auto option : options){
-            std::stringstream memorystream(option.description);
-            std::string optionName;
-            getline(memorystream, optionName, '/');
-            getline(memorystream, optionName, '/');
-            float* data = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
-            _dataProcessor->addValuesFromKameleonData(data, _dimensions, options.size(), option.value);
-
-        }
-    }
-
-
-    // std::cout << "Dimensions: " << _dimensions.x << " " << _dimensions.y << " " << _dimensions.z << std::endl;
-    // std::cout << "Offset: " << std::to_string(_data->offset) << std::endl;
-    // std::cout << _slice << std::endl; 
-
     for(int i=0; i<_dataSlices.size(); ++i){
         float* slice = _dataSlices[i];
         if(slice){
@@ -306,14 +284,11 @@ bool KameleonPlane::updateTexture(){
         }
     }
 
-    for(int i=0; i<_textures.size(); ++i){
-        _textures[i] = std::move(nullptr);
-    }
-
-    loadTexture();
+    _textureDirty = true;
 
     return true;
 }
+
 
 bool KameleonPlane::readyToRender(){
     return (!_textures.empty() && !_transferFunctions.empty());

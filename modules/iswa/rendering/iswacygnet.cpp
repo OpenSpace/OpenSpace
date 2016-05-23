@@ -38,6 +38,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     ,_type(IswaManager::CygnetType::NoType)
     ,_group(nullptr)
+    ,_textureDirty(false)
 {
     _data = std::make_shared<Metadata>();
 
@@ -119,7 +120,6 @@ bool IswaCygnet::initialize(){
     createShader();
     updateTexture();
 
-
 	return true;
 }
 
@@ -190,8 +190,10 @@ void IswaCygnet::update(const UpdateData& data){
     }
 
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
-        loadTexture();
+        _textureDirty = true;
     }
+    
+    if(_textureDirty) loadTexture();
 
     if(!_transferFunctions.empty())
         for(auto tf : _transferFunctions)
