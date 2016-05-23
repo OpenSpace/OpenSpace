@@ -46,12 +46,14 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<RawTileData> TextureDataProvider::getTextureData(GDALDataset* dataSet,
+    std::shared_ptr<TileIOResult> TextureDataProvider::getTextureData(GDALDataset* dataSet,
         ChunkIndex chunkIndex, int tileLevelDifference)
     {               
         GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
         DataLayout dataLayout(dataSet, region);
         char* imageData = new char[dataLayout.totalNumBytes];
+
+        CPLErr worstError = CPLErr::CE_None;
 
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < region.numRasters; i++) {
@@ -72,15 +74,24 @@ namespace openspace {
                 dataLayout.bytesPerPixel,	   // Pixel spacing
                 dataLayout.bytesPerLine);      // Line spacing
 
-            if (err != CE_None) {
-              ;//LERROR("There was a IO error (" << err << ") for: " << dataSet->GetDescription());
-            }
+            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+            worstError = std::max(worstError, err);
         }
 
-        return createRawTileData(region, dataLayout, imageData);
+        std::shared_ptr<RawTileData> tileData = nullptr;
+        //if (worstError <= CE_Warning) {
+        tileData = createRawTileData(region, dataLayout, imageData);
+        //}
+
+        std::shared_ptr<TileIOResult> result(new TileIOResult);
+        result->error = worstError;
+        result->rawTileData = tileData;
+
+        return result;
+        //return tileData;
     }
 
-
+    /*
     void TextureDataProvider::asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference) {
         GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
         DataLayout dataLayout(dataSet, region);
@@ -154,6 +165,7 @@ namespace openspace {
         loadedTextureTiles.pop();
         return tile;
     }
+    */
 
 
 
@@ -162,6 +174,9 @@ namespace openspace {
     std::shared_ptr<RawTileData> TextureDataProvider::createRawTileData(const GdalDataRegion& region,
         const DataLayout& dataLayout, const char* imageData)
     {
+        
+        //if(cplError == CPLErr::CE_Fatal)
+
         // GDAL reads image data top to bottom. We want the opposite.
         char* imageDataYflipped = new char[dataLayout.totalNumBytes];
         for (size_t y = 0; y < region.numPixels.y; y++) {

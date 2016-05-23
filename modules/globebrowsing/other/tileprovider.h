@@ -46,12 +46,17 @@
 
 namespace openspace {
     using namespace ghoul::opengl;
+
     
-    struct TileDepthTransform
-    {
+    struct TileDepthTransform {
+        TileDepthTransform();
+        TileDepthTransform(GDALDataset* dataset);
+
         float depthScale;
         float depthOffset;
     };
+
+
 
     struct TileUvTransform
     {
@@ -59,10 +64,19 @@ namespace openspace {
         glm::vec2 uvScale;
     };
 
+
+
     struct Tile {
         std::shared_ptr<Texture> texture;
         TileUvTransform uvTransform;
     };
+
+
+    struct MetaTexture {
+        std::shared_ptr<Texture> texture;
+        CPLErr ioError;
+    };
+
 
     /**
         Provides tiles through GDAL datasets which can be defined with xml files
@@ -102,14 +116,14 @@ namespace openspace {
         /**
             Fetches all the needeed texture data from the GDAL dataset.
         */
-        std::shared_ptr<RawTileData> getTextureData(
+        std::shared_ptr<TileIOResult> syncDownloadData(
             const ChunkIndex& chunkIndex);
         
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
         void initializeAndAddToCache(
-            std::shared_ptr<RawTileData> uninitedTexture);
+            std::shared_ptr<TileIOResult> uninitedTexture);
 
         bool enqueueTileRequest(const ChunkIndex& ci);
 
@@ -125,7 +139,7 @@ namespace openspace {
         //                                Member variables                              //
         //////////////////////////////////////////////////////////////////////////////////
 
-        LRUCache<HashKey, std::shared_ptr<Texture>> _tileCache;
+        LRUCache<HashKey, MetaTexture> _tileCache;
         std::set<HashKey> _queuedTileRequests;
 
         int _framesSinceLastRequestFlush;
@@ -138,7 +152,7 @@ namespace openspace {
 
         TextureDataProvider _rawTextureTileDataProvider;
 
-        ConcurrentJobManager<RawTileData> _tileLoadManager;
+        ConcurrentJobManager<TileIOResult> _tileLoadManager;
 
         std::shared_ptr<Texture> _defaultTexture;
         int _tileLevelDifference;
@@ -163,7 +177,7 @@ namespace openspace {
 
     using namespace ghoul::opengl;
 
-    struct TextureTileLoadJob : public Job<RawTileData> {
+    struct TextureTileLoadJob : public Job<TileIOResult> {
         TextureTileLoadJob(TileProvider * tileProvider, const ChunkIndex& chunkIndex)
             : _tileProvider(tileProvider)
             , _chunkIndex(chunkIndex) {
@@ -173,11 +187,10 @@ namespace openspace {
         virtual ~TextureTileLoadJob() { }
 
         virtual void execute() {
-            _uninitedTexture = _tileProvider->getTextureData(_chunkIndex);
-
+            _uninitedTexture = _tileProvider->syncDownloadData(_chunkIndex);
         }
 
-        virtual std::shared_ptr<RawTileData> product() {
+        virtual std::shared_ptr<TileIOResult> product() {
             return _uninitedTexture;
         }
 
@@ -185,7 +198,7 @@ namespace openspace {
     private:
         ChunkIndex _chunkIndex;
         TileProvider * _tileProvider;
-        std::shared_ptr<RawTileData> _uninitedTexture;
+        std::shared_ptr<TileIOResult> _uninitedTexture;
     };
 }
 

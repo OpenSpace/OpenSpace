@@ -43,6 +43,7 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
+
     struct RawTileData {
 
         struct TextureFormat {
@@ -67,10 +68,15 @@ namespace openspace {
         glm::uvec3 dimensions;
         TextureFormat texFormat;
         GLuint glType;
-        const ChunkIndex chunkIndex;
+        ChunkIndex chunkIndex;
     };
 
 
+
+    struct TileIOResult {
+        CPLErr error;
+        std::shared_ptr<RawTileData> rawTileData;
+    };
 
 
 
@@ -83,14 +89,15 @@ namespace openspace {
         ~TextureDataProvider();
 
 
-        std::shared_ptr<RawTileData> getTextureData(
+        std::shared_ptr<TileIOResult> getTextureData(
             GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
 
-
+        /*
         void asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
         void updateAsyncRequests();
         bool hasTextureTileData() const;
         std::shared_ptr<RawTileData> nextTextureTile();
+        */
 
     private:
 

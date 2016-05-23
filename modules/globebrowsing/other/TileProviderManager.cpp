@@ -31,7 +31,7 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(1);
+    ThreadPool TileProviderManager::tileRequestThreadPool(5);
 
     TileProviderManager::TileProviderManager()
     {
