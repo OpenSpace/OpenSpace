@@ -453,38 +453,39 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
                     values[i].push_back(v);
 
                     _min[i] = std::min(_min[i],v);
-                    _max[i] = std::min(_max[i],v);
+                    _max[i] = std::max(_max[i],v);
                     sum[i] += v;
                 }
             }
         }
-       //  //    for(int i=0; i<numOptions; i++){
-       //  //     if(!_histograms[i]){
-       //  //         _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
-       //  //     }else{
-       //  //         //_histogram[option]->changeRange();
-       //  //     }
-       //  //      int numValues = values[i].size();
-       //  //     float mean = (1.0/numValues)*sum[i];
+    //    //  //    for(int i=0; i<numOptions; i++){
+    //    //  //     if(!_histograms[i]){
+    //    //  //         _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+    //    //  //     }else{
+    //    //  //         //_histogram[option]->changeRange();
+    //    //  //     }
+    //    //  //      int numValues = values[i].size();
+    //    //  //     float mean = (1.0/numValues)*sum[i];
 
-       //  //     float var = 0;
-       //  //     for(int j=0; j<numValues; j++){
-       //  //         var += pow(values[i][j] - mean, 2);
-       //  //         _histograms[i]->add(values[i][j], 1);
-       //  //     }
-       //  //     float sd = sqrt(var / numValues);
+    //    //  //     float var = 0;
+    //    //  //     for(int j=0; j<numValues; j++){
+    //    //  //         var += pow(values[i][j] - mean, 2);
+    //    //  //         _histograms[i]->add(values[i][j], 1);
+    //    //  //     }
+    //    //  //     float sd = sqrt(var / numValues);
 
-       //  //     _sum[i] += sum[i];
-       //  //     _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
-       //  //     _numValues[i] += numValues;
-       //  //     _histograms[i]->generateEqualizer();
-       //  // }
+    //    //  //     _sum[i] += sum[i];
+    //    //  //     _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+    //    //  //     _numValues[i] += numValues;
+    //    //  //     _histograms[i]->generateEqualizer();
+    //    //  // }
 
 
        for(int i=0; i<numOptions; i++){
             if(!_histograms[i]){
                 _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
             }else{
+                std::cout << i << std::endl;
                 _histograms[i]->changeRange(_min[i], _max[i]);
             }
             int numValues = values[i].size();
@@ -551,12 +552,12 @@ std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, proper
 
                 std::shared_ptr<Histogram> histogram = _histograms[option];
                 float filterMid = histogram->highestBinValue(_useHistogram);
-                float filterWidth = mean+histogram->binWidth()/2.0;
+                float filterWidth = mean+histogram->binWidth();
 
                 if(_useHistogram) {
                     sd = histogram->equalize(sd);
                     mean = histogram->equalize(mean);
-                    filterWidth = mean+0.5;
+                    filterWidth = mean+1.0;
                 }
 
                 filterMid = normalizeWithStandardScore(filterMid, mean, sd);
@@ -630,6 +631,7 @@ void DataProcessor::addValuesFromKameleonData(float* kdata, glm::size3_t dimensi
     // _sum[option] += sum;
     // _sd[option] = sqrt(pow(_sd[option],2)+ pow(sd,2));
     // _numValues[option] += numValues;
+    std::cout << _numValues[i] << std::endl; 
 }
 
 std::vector<float*> DataProcessor::processKameleonData2(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions){
@@ -830,6 +832,7 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
     //return and normalize
     return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
 }
+
 
 glm::vec2 DataProcessor::filterValues(){
     return _filterValues;
