@@ -309,6 +309,7 @@ void DataPlane::setUniformAndTextures(){
     _shader->setUniform("numTextures", activeTextures);
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
+    _shader->setUniform("transparency", _alpha.value());
 }
 
 bool DataPlane::createShader(){

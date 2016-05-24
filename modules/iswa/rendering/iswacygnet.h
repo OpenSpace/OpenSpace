@@ -107,6 +107,7 @@ protected:
     virtual void setUniformAndTextures() = 0;
     virtual bool createShader() = 0;
 
+    properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

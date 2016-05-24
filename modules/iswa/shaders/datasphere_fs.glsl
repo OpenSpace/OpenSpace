@@ -33,6 +33,7 @@ uniform int numTextures;
 uniform int numTransferFunctions;
 uniform bool averageValues;
 uniform vec2 backgroundValues;
+uniform float transparency;
 
 // uniform float background;
 
@@ -73,6 +74,8 @@ Fragment getFragment() {
     if (diffuse.a <= backgroundValues.y)
         discard;
 
+    diffuse.a *= transparency;
+    
     // diffuse = vec4(vs_st.s, 0,0,1);
     Fragment frag;
     frag.color = diffuse;

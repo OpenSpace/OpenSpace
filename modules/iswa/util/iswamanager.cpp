@@ -369,7 +369,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
             }
 
             std::string table = "{"
-                "Name = '"+info.name+"-"+cut+"_"+info.group+"',"
+                "Name = '" +info.group+"_"+info.name+"-"+cut+"',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "
@@ -455,7 +455,7 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     if(!data->group.empty()){
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
-            name += "_" + data->group;
+            name = data->group +"_"+ name;
     }
 
     data->name = name;
@@ -479,7 +479,7 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     if(!data->group.empty()){
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
-            name += "_" + data->group;
+            name = data->group +"_"+name;
     }
 
     data->name = name;

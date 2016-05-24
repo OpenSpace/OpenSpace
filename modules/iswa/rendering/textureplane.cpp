@@ -111,6 +111,7 @@ void TexturePlane::setUniformAndTextures(){
     unit.activate();
     _textures[0]->bind();
     _shader->setUniform("texture1", unit);
+    _shader->setUniform("transparency", _alpha.value());
 }
 
 

@@ -24,6 +24,7 @@
 
 uniform float time;
 uniform sampler2D texture1;
+uniform float transparency;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -49,6 +50,8 @@ Fragment getFragment() {
     if (tot >= 0.5 || tot <= 0.05)
         discard;
 
+    diffuse.a *= transparency;
+    
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;

@@ -35,6 +35,7 @@ namespace openspace{
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
+    ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     , _shader(nullptr)
     ,_type(IswaManager::CygnetType::NoType)
     ,_groupEvent()
@@ -87,6 +88,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     // std::cout << std::to_string(_data->scale) << std::endl;
     // std::cout << std::to_string(_data->offset) << std::endl;
 
+    addProperty(_alpha);
     addProperty(_delete);
 
     // if(dictionary.hasValue<float>("Group")){
@@ -100,11 +102,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     // std::cout << std::to_string(_data->max) << std::endl;
     // std::cout << std::to_string(_data->min) << std::endl;
     // std::cout << std::to_string(_data->spatialScale) << std::endl;
-
-    _delete.onChange([this](){
-        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
-    });
-
+    // OsEng.gui()._iswa.registerProperty(&_enabled);
 }
 
 IswaCygnet::~IswaCygnet(){}
@@ -114,8 +112,15 @@ bool IswaCygnet::initialize(){
     if(!_data->groupName.empty()){
         _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
-        std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
-        std::cout << "Register group: " << (_group != nullptr) << std::endl;
+        // std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
+        // std::cout << "Register group: " << (_group != nullptr) << std::endl;
+    }else{
+        OsEng.gui()._iswa.registerProperty(&_alpha);
+        OsEng.gui()._iswa.registerProperty(&_delete);
+
+        _delete.onChange([this](){
+            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+        });
     }
     
     initializeTime();
@@ -217,7 +222,7 @@ bool IswaCygnet::destroyShader(){
 
 void IswaCygnet::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
-    OsEng.gui()._iswa.registerProperty(&_delete);
+    // OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
 void IswaCygnet::unregisterProperties(){
