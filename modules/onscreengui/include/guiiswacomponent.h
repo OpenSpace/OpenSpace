@@ -47,7 +47,6 @@ private:
     bool gmimage;
     bool iondata;
 
-    int _cdfOption;
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };
