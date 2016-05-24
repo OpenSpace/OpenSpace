@@ -41,6 +41,7 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     ,_dataOptions("dataOptions", "Data Options")
     // ,_id(id)
     ,_type(type)
+    ,_registered(false)
     // ,_dataProcessor(nullptr)
 {
     setName(name);
@@ -94,6 +95,9 @@ IswaGroup::~IswaGroup(){
 // }
 
 void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
+    if(!_registered)
+        registerProperties();
+
     if(_type == IswaManager::CygnetType::Data){
         if(_dataOptions.options().empty()){
             for(auto option : options){
@@ -168,11 +172,13 @@ void IswaGroup::registerProperties(){
     _delete.onChange([this]{
         clearGroup();
     }); 
+    _registered = true;  
 }
 
 void IswaGroup::unregisterProperties(){
     // _dataOptions.removeOptions();
     OsEng.gui()._iswa.unregisterProperties(name());
+    _registered = false;
     // _type = IswaManager::CygnetType::NoType;
 }
 

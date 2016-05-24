@@ -84,6 +84,7 @@ private:
     std::shared_ptr<DataProcessor> _dataProcessor;
 	//std::vector<IswaCygnet* > _cygnets;
 	IswaManager::CygnetType _type;
+	bool _registered;
 };
 
 } //namespace openspace

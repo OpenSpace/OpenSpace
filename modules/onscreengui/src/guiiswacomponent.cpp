@@ -133,17 +133,15 @@ void GuiIswaComponent::render() {
 
                 int cdfOption = _cdfOptionsMap[groupName];
                 if(cdfOptionValue != cdfOption){
-                    // std::cout << cdfOptionValue << ", " << cdfOption << std::endl;
-                   if(cdfOptionValue > 0){
+                   if(cdfOptionValue >= 0){
                         groupName = cdfs[cdfOptionValue].group;
-                        // std::cout  << groupName << std::endl;
+                        std::cout << groupName << std::endl;
                         OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
                     }
 
                     std::string path  = cdfs[cdfOption].path;
                     std::string date  = cdfs[cdfOption].date;
                     groupName = cdfs[cdfOption].group;
-                    // std::cout << path << ", " << date << ", " << groupName << std::endl;
                     OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
                     OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
                     OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
