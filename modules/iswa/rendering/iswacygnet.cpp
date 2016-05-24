@@ -113,18 +113,7 @@ bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
     if(!_data->groupName.empty()){
-        _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
-        _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
-
-        //Subscribe to enable propert and delete
-        _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
-            LDEBUG(name() + " Event enabledChanged");
-            _enabled.setValue(dict.value<bool>("enabled"));
-        });
-        _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event clearGroup");
-            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
-        });
+        initializeGroup();
     }else{
         OsEng.gui()._iswa.registerProperty(&_alpha);
         OsEng.gui()._iswa.registerProperty(&_delete);
@@ -248,6 +237,21 @@ void IswaCygnet::initializeTime(){
     _lastUpdateRealTime = _realTime;
 
     _minRealTimeUpdateInterval = 100;
+}
+
+void IswaCygnet::initializeGroup(){
+    _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
+    _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
+
+    //Subscribe to enable propert and delete
+    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event enabledChanged");
+        _enabled.setValue(dict.value<bool>("enabled"));
+    });
+    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event clearGroup");
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
 }
 
 }//namespace openspac
