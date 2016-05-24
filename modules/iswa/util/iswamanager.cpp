@@ -143,15 +143,24 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
             }
         );
-    }else{
-        // Kameleonplane?
-        // LERROR("No cygnet with id 0");
-        std::string kwPath = "${OPENSPACE_DATA}/BATSRUS.cdf";
-        if(type == "x" || type == "y" || type == "z")
-            createKameleonPlane(kwPath, type, group);
-        else
-            createKameleonPlane(kwPath, "z", group);
     }
+    // else{
+    //     // Kameleonplane?
+    //     // LERROR("No cygnet with id 0");
+    //     std::string kwPath = "${OPENSPACE_DATA}/BATSRUS.cdf";
+    //     if(type == "x" || type == "y" || type == "z")
+    //         createKameleonPlane(kwPath, type, group);
+    //     else
+    //         createKameleonPlane(kwPath, "z", group);
+    // }
+}
+
+void IswaManager::addKameleonCdf(std::string group, int pos){
+    // auto info = _cdfInformation[group][pos];
+    // std::cout << group << " " << pos << std::endl;
+    createKameleonPlane(_cdfInformation[group][pos], "z");
+    createKameleonPlane(_cdfInformation[group][pos], "y");
+    createKameleonPlane(_cdfInformation[group][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -225,11 +234,6 @@ void IswaManager::registerOptionsToGroup(std::string name, const std::vector<pro
 }
 
 std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
-    // for(auto group : _groups){
-    //     if(group.second->name() == name){
-    //         return group.second;
-    //     }
-    // }
     if(_groups.find(name) != _groups.end()){
         return _groups[name];
     }
@@ -243,6 +247,10 @@ std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
 
 std::map<std::string, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
     return _groups;
+}
+
+std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation(){
+    return _cdfInformation;
 }
 
 std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
@@ -317,11 +325,11 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
-std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, std::string group){
-    if(kwPath != ""){
-        const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
+    if(info.path != ""){
+        const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
         if(extension == "cdf"){
-            KameleonWrapper kw = KameleonWrapper(absPath(kwPath));
+            KameleonWrapper kw = KameleonWrapper(absPath(info.path));
      
             std::string parent  = kw.getParent();
             std::string frame   = kw.getFrame();
@@ -346,7 +354,7 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
             }
 
             std::string table = "{"
-                "Name = 'KameleonPlane-"+cut+"',"
+                "Name = '"+info.name+"-"+cut+"_"+info.group+"',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "
@@ -356,11 +364,11 @@ std::string IswaManager::parseKWToLuaTable(std::string kwPath, std::string cut, 
                     "GridMax = " + std::to_string(max) + ", "
                     "SpatialScale = " + std::to_string(spatialScale) + ", "
                     "UpdateTime = 0, "
-                    "kwPath = '" + kwPath + "' ," 
+                    "kwPath = '" + info.path + "' ," 
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
-                    "Group = '"+ group + "',"
-                    "fieldlineSeedsIndexFile = '${OPENSPACE_DATA}/scene/iswa/cdf/fieldlines.json'"
+                    "Group = '"+ info.group + "',"
+                    "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
                 ;
@@ -472,18 +480,20 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     }
 }
 
-void IswaManager::createKameleonPlane(std::string kwPath, std::string cut, std::string group){
-    const std::string& extension = ghoul::filesystem::File(absPath(kwPath)).fileExtension();
+void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
+    std::cout << info.name << " " << cut << std::endl; 
 
-    if(FileSys.fileExists(absPath(kwPath)) && extension == "cdf"){
-        std::string luaTable = parseKWToLuaTable(kwPath, cut, group);
+    const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
+
+    if(FileSys.fileExists(absPath(info.path)) && extension == "cdf"){
+        std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
-            // std::cout << luaTable << std::endl;
+    //         // std::cout << luaTable << std::endl;
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             OsEng.scriptEngine().queueScript(script);
         }
     }else{
-        LWARNING( absPath(kwPath) + " is not a cdf file or can't be found.");
+        LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
     }
 }
 
@@ -549,6 +559,46 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
     }
 }
 
+void IswaManager::addCdfFiles(std::string path){
+    path = absPath(path);
+    if(FileSys.fileExists(path)){
+
+        std::string basePath = path.substr(0, path.find_last_of("/\\"));
+        std::ifstream jsonFile(path);
+        
+        if (jsonFile.is_open()){
+            json cdfGroups = json::parse(jsonFile);
+            for(int i=0; i<cdfGroups.size(); i++){
+                json cdfGroup = cdfGroups.at(i);
+
+                std::string groupName = cdfGroup["group"];
+                std::string fieldlineSeedsIndexFile = cdfGroup["fieldlinefile"];
+                
+                if(_cdfInformation.find(groupName) != _cdfInformation.end()){
+                    LWARNING("CdfGroup with name" + groupName + " already exists.");
+                    return;
+                }
+
+                _cdfInformation[groupName] = std::vector<CdfInfo>();
+
+                json cdfs = cdfGroup["cdfs"];
+                for(int j=0; j<cdfs.size(); j++){
+                    json cdf = cdfs.at(j);
+
+                    std::string name = cdf["name"];
+                    std::string path = cdf["path"];
+                    std::string date = cdf["date"];
+            
+                    _cdfInformation[groupName].push_back({name, basePath+"/"+path, groupName, date, fieldlineSeedsIndexFile});
+                }
+
+            }
+        }
+    }else{
+        LWARNING( path + " is not a cdf file or can't be found.");
+    }
+}
+
 scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
@@ -568,10 +618,24 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 true
             },
             {
-                "addKameleonPlane",
-                &luascriptfunctions::iswa_addKameleonPlane,
-                "string, string, string",
-                "Adds a KmaeleonPlane from cdf file.",
+                "addKameleonPlanes",
+                &luascriptfunctions::iswa_addKameleonPlanes,
+                "string, int",
+                "Adds KameleonPlanes from cdf file.",
+                true
+            },
+            // {
+            //     "addKameleonPlane",
+            //     &luascriptfunctions::iswa_addKameleonPlane,
+            //     "string, string, string",
+            //     "Adds a KameleonPlane from cdf file.",
+            //     true
+            // },
+            {
+                "addCdfFiles",
+                &luascriptfunctions::iswa_addCdfFiles,
+                "string",
+                "Adds a cdf files to choose from.",
                 true
             },
             {

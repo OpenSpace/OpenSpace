@@ -49,6 +49,14 @@ namespace openspace {
 class IswaGroup;
 class IswaCygnet; 
 
+struct CdfInfo {
+    std::string name;
+    std::string path;
+    std::string group;
+    std::string date;
+    std::string fieldlineSeedsIndexFile;
+};
+
 struct CygnetInfo {
     std::string name;
     std::string description;
@@ -78,6 +86,7 @@ public:
     ~IswaManager();
 
     void addIswaCygnet(int id, std::string type = "Texture", std::string group = "");
+    void addKameleonCdf(std::string group, int pos);
     void createFieldline(std::string name, std::string cdfPath, std::string seedPath);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
@@ -91,6 +100,8 @@ public:
     
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
     std::map<std::string, std::shared_ptr<IswaGroup>>& groups();
+    // std::vector<CdfInfo>& cdfInformation();
+    std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
@@ -98,16 +109,17 @@ public:
         return _iswaEvent;
     }
 
-    void createKameleonPlane(std::string kwPath, std::string cut="z", std::string group="");
+    void addCdfFiles(std::string path);
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
     std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data);
-    std::string parseKWToLuaTable(std::string kwPath, std::string cut="z", std::string group="");
+    std::string parseKWToLuaTable(CdfInfo info, std::string cut="z");
     
     void createScreenSpace(int id);
     void createPlane(std::shared_ptr<MetadataFuture> data);
     void createSphere(std::shared_ptr<MetadataFuture> data);
+    void createKameleonPlane(CdfInfo info, std::string cut);
 
     void fillCygnetInfo(std::string jsonString);
 
@@ -120,6 +132,8 @@ private:
 
     std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
+    // std::vector<CdfInfo> _cdfInformation;
+    std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
 
     ghoul::Event<std::string, int> _iswaEvent;
 

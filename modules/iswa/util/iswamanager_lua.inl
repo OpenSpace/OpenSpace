@@ -92,25 +92,25 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
     return 0;
 }
 
-int iswa_addKameleonPlane(lua_State* L){
-    int nArguments = lua_gettop(L);
+// int iswa_addKameleonPlane(lua_State* L){
+//     int nArguments = lua_gettop(L);
 
-    std::string kwPath = "";
-    std::string type = "x";
-    std::string group = "";
+//     std::string kwPath = "";
+//     std::string type = "x";
+//     std::string group = "";
 
-    if(nArguments > 0)
-        kwPath = luaL_checkstring(L, 1);
+//     if(nArguments > 0)
+//         kwPath = luaL_checkstring(L, 1);
 
-    if(nArguments > 1)
-        type = luaL_checkstring(L, 2);
+//     if(nArguments > 1)
+//         type = luaL_checkstring(L, 2);
 
-    if(nArguments > 2)
-        group = luaL_checkstring(L, 3);
+//     if(nArguments > 2)
+//         group = luaL_checkstring(L, 3);
 
-    IswaManager::ref().createKameleonPlane(kwPath, type, group);
-    return 0;
-}
+//     IswaManager::ref().createKameleonPlane(kwPath, type, group);
+//     return 0;
+// }
 
 int iswa_removeCygnet(lua_State* L){
     std::string name = luaL_checkstring(L, -1);
@@ -149,6 +149,20 @@ int iswa_removeGroup(lua_State* L){
 	return 0;
 }
 
+int iswa_addCdfFiles(lua_State* L){
+    std::string path = luaL_checkstring(L, 1);
+    IswaManager::ref().addCdfFiles(path);
+
+    return 0;
+}
+
+int iswa_addKameleonPlanes(lua_State* L){
+    std::string group = luaL_checkstring(L, 1);
+    int pos = lua_tonumber(L, 2);
+    IswaManager::ref().addKameleonCdf(group, pos);
+    // auto cdfInfo = 
+    return 0;
+}
 
 }// namespace luascriptfunctions
 

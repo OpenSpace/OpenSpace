@@ -57,12 +57,15 @@ namespace {
 
 namespace openspace {
 namespace gui {
+GuiIswaComponent::GuiIswaComponent()
+    :GuiPropertyComponent()
+    ,_cdfOption(-1)
+{}
 
 void GuiIswaComponent::render() {
     bool gmdatavalue = gmdata;
     bool gmimagevalue = gmimage;
     bool iondatavalue = iondata;
-    bool kameleonvalue = kameleon;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
     ImGui::Text("Global Magnetosphere");
@@ -72,8 +75,6 @@ void GuiIswaComponent::render() {
     ImGui::Text("Ionosphere");
     ImGui::Checkbox("Ion From Data", &iondata);
 
-    ImGui::Text("Kameleon");
-    ImGui::Checkbox("BATSRUS.cdf", &kameleon);
 
     ImGui::Spacing();
     static const int addCygnetBufferSize = 256;
@@ -82,41 +83,6 @@ void GuiIswaComponent::render() {
 
     if(ImGui::SmallButton("Add Cygnet"))
         OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
-
-    static const int cdfListSize = 256;
-    static char cdfList[cdfListSize];
-
-    std::string startPath = absPath("${OPENSPACE_DATA}/cdflist.txt");
-    std::copy(startPath.begin(), startPath.end(),cdfList);
-
-    ImGui::InputText("cdf list", cdfList, cdfListSize);
-    if(ImGui::SmallButton("Add Cdf files")){
-        _cdfOption = -1;
-        if(FileSys.fileExists(cdfList)){
-            std::string list = std::string(cdfList);
-
-            std::string line;
-            std::string basePath = list.substr(0, list.find_last_of("/\\"));
-
-            std::ifstream cdfListFile(list);
-            int i = 0;
-            if(cdfListFile.is_open()){
-                while(getline(cdfListFile, line)){
-                    std::string path = line.substr(0, line.find_first_of(" "));
-                    std::string date = line.substr(line.find_first_of(" ")+1);
-                    
-
-                    _cdfOptions.push_back({i, basePath+"/"+path, date});
-                    i++;
-                }
-            }
-
-        }else{
-            LWARNING( std::string(cdfList) + " is not a cdf file or can't be found.");
-        }
-
-
-    }
 
     if(gmdata != gmdatavalue){
         if(gmdata){
@@ -148,38 +114,41 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(kameleon != kameleonvalue){
-        if(kameleon){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','z','BATSRUS');");
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','y','BATSRUS');");
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('${OPENSPACE_DATA}/BATSRUS.cdf','x','BATSRUS');");
-        }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('BATSRUS');");
-        }
-    }
-
     if(ImGui::CollapsingHeader("Cdf files")){
-        int cdfOptionValue = _cdfOption;
+        auto cdfInfo = IswaManager::ref().cdfInformation();
 
-        for(auto radioOption : _cdfOptions){
-            std::string path = radioOption.path;
-            std::string cdfName = path.substr(path.find_last_of("/\\")+1);
-            ImGui::RadioButton(cdfName.c_str(), &_cdfOption, radioOption.value);
-            // ImGui::Text(cdfName.c_str());
-        }
+        for(auto group : cdfInfo){
+            std::string groupName = group.first;
+            if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
+                _cdfOptionsMap[groupName] = -1;
+            }
 
-        if(_cdfOption != cdfOptionValue){
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Kameleon');");
+            if(ImGui::CollapsingHeader(groupName.c_str())){
+                int cdfOptionValue = _cdfOptionsMap[groupName];
+                auto cdfs = group.second;
 
-            std::string path = _cdfOptions[_cdfOption].path;
-            std::string date = _cdfOptions[_cdfOption].date;
+                for(int i=0; i<cdfs.size(); i++){
+                    ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
+                }
 
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','z','Kameleon');");
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','y','Kameleon');");
-            OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlane('"+path+"','x','Kameleon');");
-    
-            OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
-            OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
+                int cdfOption = _cdfOptionsMap[groupName];
+                if(cdfOptionValue != cdfOption){
+                    // std::cout << cdfOptionValue << ", " << cdfOption << std::endl;
+                   if(cdfOptionValue > 0){
+                        groupName = cdfs[cdfOptionValue].group;
+                        // std::cout  << groupName << std::endl;
+                        OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
+                    }
+
+                    std::string path  = cdfs[cdfOption].path;
+                    std::string date  = cdfs[cdfOption].date;
+                    groupName = cdfs[cdfOption].group;
+                    // std::cout << path << ", " << date << ", " << groupName << std::endl;
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
+                    OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
+                    OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
+                }
+            }
         }
     }
 

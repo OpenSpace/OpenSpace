@@ -33,7 +33,7 @@ namespace openspace {
 IswaGroup::IswaGroup(std::string  name)
     :_enabled("enabled", "Enabled", true)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("_useHistogram", "Use Histogram", true)
+    ,_useHistogram("_useHistogram", "Use Histogram", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")

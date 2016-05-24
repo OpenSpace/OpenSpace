@@ -39,16 +39,17 @@ struct RadioOption {
 
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
+    GuiIswaComponent();
     virtual void render() override;
 
 private:
     bool gmdata;
     bool gmimage;
     bool iondata;
-    bool kameleon;
 
-    std::vector<RadioOption> _cdfOptions;
     int _cdfOption;
+    std::vector<int> _cdfOptions;
+    std::map<std::string, int> _cdfOptionsMap;
 };
 
 
