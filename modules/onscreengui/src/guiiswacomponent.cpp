@@ -60,6 +60,9 @@ namespace gui {
 GuiIswaComponent::GuiIswaComponent()
     :GuiPropertyComponent()
     ,_cdfOption(-1)
+    ,gmdata(false)
+    ,gmimage(false)
+    ,iondata(false)
 {}
 
 void GuiIswaComponent::render() {

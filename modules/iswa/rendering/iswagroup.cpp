@@ -184,6 +184,7 @@ void IswaGroup::unregisterProperties(){
 
 void IswaGroup::clearGroup(){
     _groupEvent->publish("clearGroup", ghoul::Dictionary());
+    LDEBUG("Group " + name() + " published clearGroup");
     unregisterProperties();
 }
 

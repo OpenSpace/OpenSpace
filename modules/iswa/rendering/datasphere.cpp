@@ -105,15 +105,66 @@ bool DataSphere::initialize(){
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
+    _transferFunctionsFile.onChange([this](){
+        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
+        setTransferFunctions(_transferFunctionsFile.value());
+    });
+
+    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event enabledChanged");
+        _enabled.setValue(dict.value<bool>("enabled"));
+    });
+
+
+    _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event useLogChanged");
+        _useLog.setValue(dict.value<bool>("useLog"));
+    });
+
+    _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event normValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("normValues", values);
+        if(success){
+            _normValues.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event useHistogramChanged");
+        _useHistogram.setValue(dict.value<bool>("useHistogram"));
+    });
+
+    _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event dataOptionsChanged");
+        std::shared_ptr<std::vector<int> > values;
+        bool success = dict.getValue("dataOptions", values);
+        if(success){
+            _dataOptions.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event transferFunctionsChanged");
+        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
+    });
+
+    _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event backgroundValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("backgroundValues", values);
+        if(success){
+            _backgroundValues.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event clearGroup");
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
+
     return true;
 }
-
-// void DataSphere::useLog(bool useLog){ _useLog.setValue(useLog); };
-// void DataSphere::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
-// void DataSphere::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
-// void DataSphere::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
-// void DataSphere::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
-// void DataSphere::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool DataSphere::loadTexture(){
     

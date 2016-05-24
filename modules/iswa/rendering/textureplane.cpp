@@ -49,14 +49,35 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     _type = IswaManager::CygnetType::Texture;
+
 }
 
 
 TexturePlane::~TexturePlane(){}
 
+bool TexturePlane::initialize(){
+    IswaCygnet::initialize();
+    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event enabledChanged");
+        _enabled.setValue(dict.value<bool>("enabled"));
+    });
+    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event clearGroup");
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
+    return true;
+}
+
 bool TexturePlane::loadTexture() {
 
-    DownloadManager::MemoryFile imageFile = _futureObject.get();
+    // if The future is done then get the new imageFile
+    DownloadManager::MemoryFile imageFile;
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+        imageFile = _futureObject.get();
+
+    } else {
+        return false;
+    }
 
     if(imageFile.corrupted)
         return false;
