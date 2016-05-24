@@ -196,6 +196,10 @@ public:
     virtual void update(double deltaTime);
 private:
     glm::dvec2 _previousMousePosition;
+    //glm::dvec2 _mouseVelocity;
+
+    glm::dquat _localCameraRotation;
+    glm::dquat _globalCameraRotation;
 };
 
 

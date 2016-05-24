@@ -34,6 +34,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
+#include <glm/gtx/quaternion.hpp>
+
 namespace {
     const std::string _loggerCat = "InteractionHandler";
 }
@@ -674,6 +676,8 @@ bool InputState::isMouseButtonPressed(MouseButton mouseButton)
 
 InteractionMode::InteractionMode(std::shared_ptr<InputState> inputState)
     : _inputState(inputState)
+    , _focusNode(nullptr)
+    , _camera(nullptr)
 {
 
 }
@@ -710,61 +714,65 @@ void OrbitalInteractionMode::update(double deltaTime)
     glm::dvec2 mousePosition = _inputState->getMousePosition();
     glm::dvec2 mousePositionDelta =
         _previousMousePosition - mousePosition;
-    glm::dvec2 mouseVelocity = mousePositionDelta * deltaTime;
+    glm::dvec2 mouseVelocity = mousePositionDelta * deltaTime * 0.01;
 
     bool button1Pressed = _inputState->isMouseButtonPressed(MouseButton::Button1);
+    bool button2Pressed = _inputState->isMouseButtonPressed(MouseButton::Button2);
+    bool button3Pressed = _inputState->isMouseButtonPressed(MouseButton::Button3);
     bool keyCtrlPressed = _inputState->isKeyPressed(
         std::pair<Key, KeyModifier>(Key::LeftControl, KeyModifier::Control));
 
-    if (button1Pressed)
+    if(_focusNode)
     {
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
         glm::dvec3 camPos = _camera->positionVec3();
-        glm::dquat rotation = _camera->rotationQuaternion();
-
-        glm::dquat newRotation = rotation;
+        glm::dvec3 posDiff = camPos - centerPos;
         glm::dvec3 newPosition = camPos;
 
-        glm::dquat lookAtQuat = rotation;;
+        if (button1Pressed) {
+            if (keyCtrlPressed) { // Do local rotation
+                glm::dvec3 eulerAngles(mouseVelocity.y, 0, 0);
+                glm::dquat rotationDiff = glm::dquat(eulerAngles);
 
-        if (keyCtrlPressed)
-        {
-            // Do local rotation
-            glm::dvec3 eulerAngles(mouseVelocity.y, mouseVelocity.x, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+                _localCameraRotation = _localCameraRotation * rotationDiff;
+            }
+            else if (glm::length(mouseVelocity) > 0) { // Do global rotation
+                glm::dvec3 eulerAngles(-mouseVelocity.y, -mouseVelocity.x, 0);
+                glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
-            newRotation = rotationDiff * rotation;
-        }
-        else if (glm::length(mouseVelocity) > 0) {
+                glm::dquat newRotationCamspace =
+                    _globalCameraRotation * rotationDiffCamSpace;
+                glm::dquat rotationDiffWorldSpace =
+                    newRotationCamspace * glm::inverse(_globalCameraRotation);
             
-            // Do global rotation
-            glm::dvec3 eulerAngles(-mouseVelocity.y, -mouseVelocity.x, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+                glm::dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
 
-            newRotation = rotation * rotationDiff;
-            rotationDiff = newRotation * glm::inverse(rotation);
-            newRotation = rotationDiff * rotation;
+                newPosition = camPos + rotationDiffVec3;
 
-            glm::dvec3 posDiff = camPos - centerPos;
-            glm::dvec3 rotationDiffVec3 = posDiff * rotationDiff - posDiff;
-
-            newPosition = camPos + rotationDiffVec3;
-
-            ghoul_assert(glm::vec3(centerPos - newPosition) != glm::vec3(0.0f, 0.0f, 0.0f), "Hej");
-
-            glm::vec3 lookUp = _camera->lookUpVectorWorldSpace();
-
-            glm::mat4 lookAtMat = glm::lookAt(glm::vec3(0,0,0), glm::normalize(glm::vec3(centerPos - newPosition)), lookUp);
-            lookAtQuat = glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
-            
+                glm::dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+                glm::dmat4 lookAtMat = glm::lookAt(
+                    glm::dvec3(0,0,0),
+                    glm::normalize(centerPos - newPosition),
+                    lookUp);
+                _globalCameraRotation =
+                    glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+            }
         }
-
-        _camera->setRotation(lookAtQuat);
+        if (button2Pressed) { // Move position
+            newPosition += - posDiff * mouseVelocity.y * 0.1;
+        }
+        if (button3Pressed) { // Do roll
+            glm::dquat cameraRollRotation =
+                glm::angleAxis(mouseVelocity.x, glm::normalize(posDiff));
+            _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
+        }
+        _camera->setRotation(_globalCameraRotation * _localCameraRotation);
         _camera->setPositionVec3(newPosition);
     }
-
     // Update new state
-    _previousMousePosition = mousePosition;
+    if (!button1Pressed && !button2Pressed && !button3Pressed) {
+        _previousMousePosition = mousePosition + (_previousMousePosition - mousePosition) * 0.8;
+    }
 }
 
 
