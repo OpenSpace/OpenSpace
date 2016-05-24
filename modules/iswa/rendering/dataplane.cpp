@@ -154,7 +154,6 @@ bool DataPlane::initialize(){
     _dataOptions.onChange([this](){ loadTexture();} );
 
     _transferFunctionsFile.onChange([this](){
-        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
         setTransferFunctions(_transferFunctionsFile.value());
     });
 

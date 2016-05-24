@@ -151,11 +151,6 @@ bool DataSphere::initialize(){
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-    _transferFunctionsFile.onChange([this](){
-        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
-        setTransferFunctions(_transferFunctionsFile.value());
-    });
-
     return true;
 }
 

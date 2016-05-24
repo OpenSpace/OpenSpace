@@ -66,33 +66,7 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     registerProperties();
 }
 
-IswaGroup::~IswaGroup(){
-    //_cygnets.clear();
-}
-
-// void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type){
-//     if(_cygnets.empty()){
-//         _type = type;
-//         registerProperties();
-//     }
-
-//     if(type != _type){
-//         LWARNING("Can't register cygnet with a different type from the group");
-//         return;
-//     }
-
-//     if(type == IswaManager::CygnetType::Data){
-//         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
-        
-//         dataplane->useLog(_useLog.value());
-//         dataplane->useHistogram(_useHistogram.value());
-//         dataplane->normValues(_normValues.value());
-//         dataplane->backgroundValues(_backgroundValues.value());
-//         dataplane->transferFunctionsFile(_transferFunctionsFile.value());
-//         dataplane->dataOptions(_dataOptions.value());
-//     }
-//     _cygnets.push_back(cygnet);
-// }
+IswaGroup::~IswaGroup(){}
 
 void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
     if(!_registered)

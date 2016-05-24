@@ -123,13 +123,20 @@ bool KameleonPlane::initialize(){
     _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
     // IswaCygnet::initialize();
     _textures.push_back(nullptr);
-    
 
     if(!_data->groupName.empty()){
         _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
-        std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
-        std::cout << "Register group " << (_group != nullptr) << std::endl;
+
+        //Subscribe to enable propert and delete
+        _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+            LDEBUG(name() + " Event enabledChanged");
+            _enabled.setValue(dict.value<bool>("enabled"));
+        });
+        _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event clearGroup");
+            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+        });
     }
     
     initializeTime();
@@ -138,7 +145,7 @@ bool KameleonPlane::initialize(){
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
-        
+
         _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
             LDEBUG(name() + " Event useLogChanged");
             _useLog.setValue(dict.value<bool>("useLog"));
@@ -228,11 +235,6 @@ bool KameleonPlane::initialize(){
 
     _slice.onChange([this](){
         updateTexture();
-    });
-
-    _transferFunctionsFile.onChange([this](){
-        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
-        setTransferFunctions(_transferFunctionsFile.value());
     });
 
     fillOptions();
