@@ -25,6 +25,7 @@
 #ifndef __ISWAGROUP_H__
 #define __ISWAGROUP_H__
 
+#include <ghoul/designpattern/event.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/vectorproperty.h>
@@ -41,14 +42,14 @@ class IswaCygnet;
 
 class IswaGroup : public properties::PropertyOwner{
 public:
-	IswaGroup(std::string name);
+	IswaGroup(std::string name, IswaManager::CygnetType type);
 	~IswaGroup();
-	void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
-	void unregisterCygnet(IswaCygnet* cygnet);
+	//void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
+	//void unregisterCygnet(IswaCygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
-	bool checkType(IswaManager::CygnetType type);
+	bool isType(IswaManager::CygnetType type);
 	void clearGroup();
-
+	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(){ return _groupEvent; };
 	std::shared_ptr<DataProcessor> dataProcessor();
 
 	// bool useLog(){return _useLog.value();};
@@ -79,9 +80,9 @@ private:
 	// int groupId;
 	// IswaCygnet cygnet;
 	int _id;
-
+	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
-	std::vector<IswaCygnet* > _cygnets;
+	//std::vector<IswaCygnet* > _cygnets;
 	IswaManager::CygnetType _type;
 };
 

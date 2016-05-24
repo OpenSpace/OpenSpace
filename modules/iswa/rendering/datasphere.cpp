@@ -108,12 +108,12 @@ bool DataSphere::initialize(){
     return true;
 }
 
-void DataSphere::useLog(bool useLog){ _useLog.setValue(useLog); };
-void DataSphere::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
-void DataSphere::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
-void DataSphere::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
-void DataSphere::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
-void DataSphere::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
+// void DataSphere::useLog(bool useLog){ _useLog.setValue(useLog); };
+// void DataSphere::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
+// void DataSphere::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
+// void DataSphere::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
+// void DataSphere::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
+// void DataSphere::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool DataSphere::loadTexture(){
     

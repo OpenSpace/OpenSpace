@@ -42,12 +42,12 @@ public:
      bool initialize() override;
     
 protected:
-    virtual void useLog(bool useLog) override;
-    virtual void normValues(glm::vec2 normValues) override;
-    virtual void useHistogram(bool useHistogram) override;
-    virtual void dataOptions(std::vector<int> options) override;
-    virtual void transferFunctionsFile(std::string tfPath) override;
-    virtual void backgroundValues(glm::vec2 backgroundValues) override;
+    // virtual void useLog(bool useLog) override;
+    // virtual void normValues(glm::vec2 normValues) override;
+    // virtual void useHistogram(bool useHistogram) override;
+    // virtual void dataOptions(std::vector<int> options) override;
+    // virtual void transferFunctionsFile(std::string tfPath) override;
+    // virtual void backgroundValues(glm::vec2 backgroundValues) override;
 
 private:
     virtual bool loadTexture() override; 

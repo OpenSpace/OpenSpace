@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <chrono>
+#include <ghoul/designpattern/event.h>
 #include <openspace/properties/propertyowner.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/scalarproperty.h>
@@ -81,12 +82,12 @@ public:
     void update(const UpdateData& data) override;
 
 protected:
-    virtual void useLog(bool useLog){};
-    virtual void normValues(glm::vec2 normValues){};
-    virtual void useHistogram(bool useHistogram){};
-    virtual void dataOptions(std::vector<int> options){};
-    virtual void transferFunctionsFile(std::string tfPath){};
-    virtual void backgroundValues(glm::vec2 backgroundValues){};
+    // virtual void useLog(bool useLog){};
+    // virtual void normValues(glm::vec2 normValues){};
+    // virtual void useHistogram(bool useHistogram){};
+    // virtual void dataOptions(std::vector<int> options){};
+    // virtual void transferFunctionsFile(std::string tfPath){};
+    // virtual void backgroundValues(glm::vec2 backgroundValues){};
 
 
     void enabled(bool enabled){_enabled.setValue(enabled);};
@@ -124,6 +125,8 @@ protected:
 
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
+
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
 
     std::shared_ptr<IswaGroup> _group;
 
