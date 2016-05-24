@@ -84,7 +84,8 @@ public:
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
     std::string iswaUrl(int id, std::string type = "image");
 
-    std::shared_ptr<IswaGroup> registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet);
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(std::string name, CygnetType type);
+    std::shared_ptr<IswaGroup> registerToGroup(std::string name, CygnetType type);
     void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
     void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);
@@ -94,7 +95,7 @@ public:
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    ghoul::Event<std::string, int>& iswaEvent(){
+    ghoul::Event<>& iswaEvent(){
         return _iswaEvent;
     }
 
@@ -121,7 +122,7 @@ private:
     std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
 
-    ghoul::Event<std::string, int> _iswaEvent;
+    ghoul::Event<> _iswaEvent;
 
 };
 

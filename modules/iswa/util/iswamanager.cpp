@@ -203,20 +203,35 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
-std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string name, CygnetType type, IswaCygnet* cygnet){
-    if(_groups.find(name) == _groups.end()){
-        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(name, std::make_shared<IswaGroup>(name)));
+std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaManager::groupEvent(std::string groupName, CygnetType type){
+
+    // Do some type checking and get the groupEvent
+    if(_groups.find(groupName) == _groups.end()){
+        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+    } else if(!_groups[groupName]->isType(type)){
+        LWARNING("Can't subscribe to Events from groups with diffent type");
+        return nullptr;
     }
 
-    _groups[name]->registerCygnet(cygnet, type);
-    return _groups[name];
+    return _groups[groupName]->groupEvent();
 }
 
-void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
-    if(_groups.find(name) != _groups.end()){
-        _groups[name]->unregisterCygnet(cygnet);
+std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string groupName, CygnetType type){
+    if(_groups.find(groupName) == _groups.end()){
+        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+    } else if(!_groups[groupName]->isType(type)){
+        LWARNING("Can't subscribe to Events from groups with diffent type");
+        return nullptr;
     }
+
+    return _groups[groupName];
 }
+
+// void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
+//     if(_groups.find(name) != _groups.end()){
+//         _groups[name]->unregisterCygnet(cygnet);
+//     }
+// }
 
 void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
     if(_groups.find(name) != _groups.end()){
@@ -431,7 +446,7 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
 
     if(!data->group.empty()){
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
             name += "_" + data->group;
     }
 
@@ -455,7 +470,7 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 
     if(!data->group.empty()){
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->checkType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
             name += "_" + data->group;
     }
 

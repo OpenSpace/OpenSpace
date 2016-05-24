@@ -37,6 +37,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _delete("delete", "Delete")
     , _shader(nullptr)
     ,_type(IswaManager::CygnetType::NoType)
+    ,_groupEvent()
     ,_group(nullptr)
 {
     _data = std::make_shared<Metadata>();
@@ -110,8 +111,10 @@ bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
     if(!_data->groupName.empty()){
-        _group = IswaManager::ref().registerToGroup(_data->groupName, _type, this);
-        std::cout << "Register group " << (_group != nullptr) << std::endl;
+        _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
+        _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
+        std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
+        std::cout << "Register group: " << (_group != nullptr) << std::endl;
     }
     
     initializeTime();
@@ -124,8 +127,10 @@ bool IswaCygnet::initialize(){
 }
 
 bool IswaCygnet::deinitialize(){
-    if(!_data->groupName.empty())
-        IswaManager::ref().unregisterFromGroup(_data->groupName, this);
+     if(!_data->groupName.empty())
+        _groupEvent->unsubscribe(name());
+    //     IswaManager::ref().unregisterFromGroup(_data->groupName, this);
+
 
     unregisterProperties();
     destroyGeometry();

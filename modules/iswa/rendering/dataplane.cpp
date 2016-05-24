@@ -74,7 +74,6 @@ bool DataPlane::initialize(){
     IswaCygnet::initialize();
 
     if(_group){
-        std::cout << "add to group" << std::endl;
         _dataProcessor = _group->dataProcessor();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
@@ -110,28 +109,65 @@ bool DataPlane::initialize(){
     _dataOptions.onChange([this](){ loadTexture();} );
 
     _transferFunctionsFile.onChange([this](){
+        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-    // IswaManager::ref().eventHandler().subscribe(name(), "ValueChanged", [](std::string message, int v){
-    //     std::cout << message << v << std::endl;
-    // });
+    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event enabledChanged");
+        _enabled.setValue(dict.value<bool>("enabled"));
+    });
 
-    // IswaManager::ref().eventHandler().publish("ValueChanged", "High", 5);
 
-    // IswaManager::ref().eventHandler().unsubscribe(name());
+    _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event useLogChanged");
+        _useLog.setValue(dict.value<bool>("useLog"));
+    });
 
-    // IswaManager::ref().eventHandler().publish("ValueChanged", "High", 5);
+    _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event normValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("normValues", values);
+        if(success){
+            _normValues.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event useHistogramChanged");
+        _useHistogram.setValue(dict.value<bool>("useHistogram"));
+    });
+
+    _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event dataOptionsChanged");
+        std::shared_ptr<std::vector<int> > values;
+        bool success = dict.getValue("dataOptions", values);
+        if(success){
+            _dataOptions.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event transferFunctionsChanged");
+        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
+    });
+
+    _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event backgroundValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("backgroundValues", values);
+        if(success){
+            _backgroundValues.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event clearGroup");
+        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
 
     return true;
 }
-
-void DataPlane::useLog(bool useLog){ _useLog.setValue(useLog); };
-void DataPlane::normValues(glm::vec2 normValues){  _normValues.setValue(normValues); };
-void DataPlane::useHistogram(bool useHistogram){ _useHistogram.setValue(useHistogram); };
-void DataPlane::dataOptions(std::vector<int> options){ _dataOptions.setValue(options); };
-void DataPlane::transferFunctionsFile(std::string tfPath){ _transferFunctionsFile.setValue(tfPath); };
-void DataPlane::backgroundValues(glm::vec2 backgroundValues){ _backgroundValues.setValue(backgroundValues); };
 
 bool DataPlane::loadTexture() {
 

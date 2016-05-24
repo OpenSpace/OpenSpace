@@ -30,7 +30,7 @@ namespace {
 
 namespace openspace {
 
-IswaGroup::IswaGroup(std::string  name)
+IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     :_enabled("enabled", "Enabled", true)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("_useHistogram", "Use Histogram", true)
@@ -40,7 +40,7 @@ IswaGroup::IswaGroup(std::string  name)
     ,_delete("delete", "Delete")
     ,_dataOptions("dataOptions", "Data Options")
     // ,_id(id)
-    ,_type(IswaManager::CygnetType::NoType)
+    ,_type(type)
     // ,_dataProcessor(nullptr)
 {
     setName(name);
@@ -61,50 +61,37 @@ IswaGroup::IswaGroup(std::string  name)
             _useHistogram.value(),
             _normValues
     );
+    _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
+    registerProperties();
 }
 
 IswaGroup::~IswaGroup(){
-    _cygnets.clear();
+    //_cygnets.clear();
 }
 
-void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type){
-    if(_cygnets.empty()){
-        _type = type;
-        registerProperties();
-    }
+// void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type){
+//     if(_cygnets.empty()){
+//         _type = type;
+//         registerProperties();
+//     }
 
-    if(type != _type){
-        LWARNING("Can't register cygnet with a different type from the group");
-        return;
-    }
+//     if(type != _type){
+//         LWARNING("Can't register cygnet with a different type from the group");
+//         return;
+//     }
 
-    if(type == IswaManager::CygnetType::Data){
-        DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
+//     if(type == IswaManager::CygnetType::Data){
+//         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
         
-        dataplane->useLog(_useLog.value());
-        dataplane->useHistogram(_useHistogram.value());
-        dataplane->normValues(_normValues.value());
-        dataplane->backgroundValues(_backgroundValues.value());
-        dataplane->transferFunctionsFile(_transferFunctionsFile.value());
-        dataplane->dataOptions(_dataOptions.value());
-    }
-    _cygnets.push_back(cygnet);
-}
-
-void IswaGroup::unregisterCygnet(IswaCygnet* cygnet){
-    auto it = std::find(
-        _cygnets.begin(),
-        _cygnets.end(),
-        cygnet
-        );
-
-    if(it != _cygnets.end())
-        _cygnets.erase(it);
-
-    if(_cygnets.empty())
-        unregisterProperties();
-}
-
+//         dataplane->useLog(_useLog.value());
+//         dataplane->useHistogram(_useHistogram.value());
+//         dataplane->normValues(_normValues.value());
+//         dataplane->backgroundValues(_backgroundValues.value());
+//         dataplane->transferFunctionsFile(_transferFunctionsFile.value());
+//         dataplane->dataOptions(_dataOptions.value());
+//     }
+//     _cygnets.push_back(cygnet);
+// }
 
 void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
     if(_type == IswaManager::CygnetType::Data){
@@ -120,12 +107,10 @@ void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty:
             }
             _dataOptions.setValue(std::vector<int>(1,0));
         }
-        for(auto cygnet : _cygnets)
-            static_cast<DataPlane*>(cygnet)->dataOptions(_dataOptions.value());
     }
 }
 
-bool IswaGroup::checkType(IswaManager::CygnetType type){
+bool IswaGroup::isType(IswaManager::CygnetType type){
     if(_type == IswaManager::CygnetType::NoType) return true;
     return (_type == type);
 }
@@ -134,8 +119,8 @@ void IswaGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
 
     _enabled.onChange([this]{
-        for(auto cygnet : _cygnets)
-            cygnet->enabled(_enabled.value());
+        LDEBUG("Group " + name() + " published enabledChanged");
+        _groupEvent->publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled.value()}}));
     });
 
 
@@ -148,36 +133,35 @@ void IswaGroup::registerProperties(){
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
 
         _useLog.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->useLog(_useLog.value());
+            LDEBUG("Group " + name() + " published useLogChanged");
+            _groupEvent->publish("useLogChanged", ghoul::Dictionary({{"useLog", _useLog.value()}}));
         });
 
         _useHistogram.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->useHistogram(_useHistogram.value());
+            LDEBUG("Group " + name() + " published useHistogramChanged");
+            _groupEvent->publish("useHistogramChanged", ghoul::Dictionary({{"useHistogram", _useHistogram.value()}}));
         });
 
         _normValues.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->normValues(_normValues.value());
+            LDEBUG("Group " + name() + " published normValuesChanged");
+            _groupEvent->publish("normValuesChanged", ghoul::Dictionary({{"normValues", std::make_shared<glm::vec2>(_normValues.value())}}));
         });
 
         _backgroundValues.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->backgroundValues(_backgroundValues.value());
+            LDEBUG("Group " + name() + " published backgroundValuesChanged");
+            _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", std::make_shared<glm::vec2>(_backgroundValues.value())}}));
         });
 
         _transferFunctionsFile.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->transferFunctionsFile(_transferFunctionsFile.value());
+            LDEBUG("Group " + name() + " published transferFunctionsChanged");
+            _groupEvent->publish("transferFunctionsChanged", ghoul::Dictionary({{"transferFunctions", _transferFunctionsFile.value()}}));
         });
 
 
         _dataOptions.onChange([this]{
-            for(auto cygnet : _cygnets)
-                cygnet->dataOptions(_dataOptions.value());
+            LDEBUG("Group " + name() + " published dataOptionsChanged");
+            _groupEvent->publish("dataOptionsChanged", ghoul::Dictionary({{"dataOptions", std::make_shared<std::vector<int> >(_dataOptions.value())}}));
         });
-
     }
 
     OsEng.gui()._iswa.registerProperty(&_delete);
@@ -193,10 +177,7 @@ void IswaGroup::unregisterProperties(){
 }
 
 void IswaGroup::clearGroup(){
-    for(auto it = _cygnets.begin(); it != _cygnets.end();){
-        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + (*it)->name() + "')");
-        it = _cygnets.erase(it);
-    }
+    _groupEvent->publish("clearGroup", ghoul::Dictionary());
     unregisterProperties();
 }
 
