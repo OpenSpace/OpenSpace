@@ -138,7 +138,7 @@ bool KameleonPlane::initialize(){
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
-        
+
         _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
             LDEBUG(name() + " Event useLogChanged");
             _useLog.setValue(dict.value<bool>("useLog"));
@@ -228,11 +228,6 @@ bool KameleonPlane::initialize(){
 
     _slice.onChange([this](){
         updateTexture();
-    });
-
-    _transferFunctionsFile.onChange([this](){
-        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
-        setTransferFunctions(_transferFunctionsFile.value());
     });
 
     fillOptions();
