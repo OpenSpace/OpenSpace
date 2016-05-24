@@ -592,8 +592,88 @@ void InteractionHandler::clearKeyframes(){
 
 #endif // USE_OLD_INTERACTIONHANDLER
 
+InputState::InputState() {
 
-InteractionMode::InteractionMode()
+}
+
+InputState::~InputState() {
+
+}
+
+void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+    if (action == KeyAction::Press)
+    {
+        _keysDown.push_back(std::pair<Key, KeyModifier>(key, modifier));
+    }
+    else if (action == KeyAction::Release)
+    {
+        // Remove all key pressings for 'key'
+        _keysDown.remove_if([key](std::pair<Key, KeyModifier> keyModPair)
+        { return keyModPair.first == key; });
+    }
+}
+
+void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
+    if (action == MouseAction::Press)
+    {
+        _mouseButtonsDown.push_back(button);
+    }
+    else if (action == MouseAction::Release)
+    {
+        // Remove all key pressings for 'button'
+        _mouseButtonsDown.remove_if([button](MouseButton buttonInList)
+        { return button == buttonInList; });
+    }
+}
+
+void InputState::mousePositionCallback(double mouseX, double mouseY) {
+    _mousePosition = glm::dvec2(mouseX, mouseY);
+}
+
+void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
+    _mouseScrollDelta = mouseScrollDelta;
+}
+
+// Accessors
+const std::list<std::pair<Key, KeyModifier> >& InputState::getPressedKeys() {
+    return _keysDown;
+}
+
+const std::list<MouseButton>& InputState::getPressedMouseButtons() {
+    return _mouseButtonsDown;
+}
+
+glm::dvec2 InputState::getMousePosition() {
+    return _mousePosition;
+}
+
+double InputState::getMouseScrollDelta() {
+    return _mouseScrollDelta;
+}
+
+bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair)
+{
+    for (auto it = _keysDown.begin(); it != _keysDown.end(); it++) {
+        if (*it == keyModPair) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool InputState::isMouseButtonPressed(MouseButton mouseButton)
+{
+    for (auto it = _mouseButtonsDown.begin(); it != _mouseButtonsDown.end(); it++) {
+        if (*it == mouseButton) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+InteractionMode::InteractionMode(std::shared_ptr<InputState> inputState)
+    : _inputState(inputState)
 {
 
 }
@@ -603,10 +683,19 @@ InteractionMode::~InteractionMode()
 
 }
 
+// Mutators
+void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
+    _focusNode = focusNode;
+}
+
+void InteractionMode::setCamera(Camera* camera) {
+    _camera = camera;
+}
 
 
 
-OrbitalInteractionMode::OrbitalInteractionMode()
+OrbitalInteractionMode::OrbitalInteractionMode(std::shared_ptr<InputState> inputState)
+    : InteractionMode(inputState)
 {
 
 }
@@ -618,7 +707,64 @@ OrbitalInteractionMode::~OrbitalInteractionMode()
 
 void OrbitalInteractionMode::update(double deltaTime)
 {
+    glm::dvec2 mousePosition = _inputState->getMousePosition();
+    glm::dvec2 mousePositionDelta =
+        _previousMousePosition - mousePosition;
+    glm::dvec2 mouseVelocity = mousePositionDelta * deltaTime;
 
+    bool button1Pressed = _inputState->isMouseButtonPressed(MouseButton::Button1);
+    bool keyCtrlPressed = _inputState->isKeyPressed(
+        std::pair<Key, KeyModifier>(Key::LeftControl, KeyModifier::Control));
+
+    if (button1Pressed)
+    {
+        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        glm::dvec3 camPos = _camera->positionVec3();
+        glm::dquat rotation = _camera->rotationQuaternion();
+
+        glm::dquat newRotation = rotation;
+        glm::dvec3 newPosition = camPos;
+
+        glm::dquat lookAtQuat = rotation;;
+
+        if (keyCtrlPressed)
+        {
+            // Do local rotation
+            glm::dvec3 eulerAngles(mouseVelocity.y, mouseVelocity.x, 0);
+            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+
+            newRotation = rotationDiff * rotation;
+        }
+        else if (glm::length(mouseVelocity) > 0) {
+            
+            // Do global rotation
+            glm::dvec3 eulerAngles(-mouseVelocity.y, -mouseVelocity.x, 0);
+            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+
+            newRotation = rotation * rotationDiff;
+            rotationDiff = newRotation * glm::inverse(rotation);
+            newRotation = rotationDiff * rotation;
+
+            glm::dvec3 posDiff = camPos - centerPos;
+            glm::dvec3 rotationDiffVec3 = posDiff * rotationDiff - posDiff;
+
+            newPosition = camPos + rotationDiffVec3;
+
+            ghoul_assert(glm::vec3(centerPos - newPosition) != glm::vec3(0.0f, 0.0f, 0.0f), "Hej");
+
+            glm::vec3 lookUp = _camera->lookUpVectorWorldSpace();
+
+            glm::mat4 lookAtMat = glm::lookAt(glm::vec3(0,0,0), glm::normalize(glm::vec3(centerPos - newPosition)), lookUp);
+            lookAtQuat = glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+            
+        }
+
+        _camera->setRotation(lookAtQuat);
+        _camera->setPositionVec3(newPosition);
+    }
+
+    // Update new state
+    _previousMousePosition = mousePosition;
 }
 
 
@@ -627,7 +773,9 @@ void OrbitalInteractionMode::update(double deltaTime)
 
 InteractionHandler::InteractionHandler()
 {
-
+    _inputState = std::shared_ptr<InputState>(new InputState());
+    _interactor = std::shared_ptr<InteractionMode>(
+        new OrbitalInteractionMode(_inputState));
 }
 
 InteractionHandler::~InteractionHandler()
@@ -636,22 +784,20 @@ InteractionHandler::~InteractionHandler()
 }
 
 // Mutators
-void InteractionHandler::setKeyboardController(KeyboardController* controller)
-{
-
+void InteractionHandler::setKeyboardController(KeyboardController* controller) {
+    //_interactor->setKeyboardController(controller);
 }
 
-void InteractionHandler::setMouseController(MouseController* controller)
-{
-
+void InteractionHandler::setMouseController(MouseController* controller) {
+    //_interactor->setMouseController(controller);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
-
+    _interactor->setFocusNode(node);
 }
 
 void InteractionHandler::setCamera(Camera* camera) {
-
+    _interactor->setCamera(camera);
 }
 
 void InteractionHandler::lockControls() {
@@ -663,7 +809,7 @@ void InteractionHandler::unlockControls() {
 }
 
 void InteractionHandler::update(double deltaTime) {
-    _deltaTime = deltaTime;
+    _interactor->update(deltaTime);
 }
 
 const SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -675,19 +821,19 @@ const Camera* const InteractionHandler::camera() const {
 }
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-
+    _inputState->mouseButtonCallback(button, action);
 }
 
 void InteractionHandler::mousePositionCallback(double x, double y) {
-
+    _inputState->mousePositionCallback(x, y);
 }
 
 void InteractionHandler::mouseScrollWheelCallback(double pos) {
-
+    _inputState->mouseScrollWheelCallback(pos);
 }
 
 void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
-
+    _inputState->keyboardCallback(key, modifier, action);
 }
 
 void InteractionHandler::resetKeyBindings() {
@@ -700,10 +846,6 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
 
 scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
     return{};
-}
-
-double InteractionHandler::deltaTime() const {
-    return 0;
 }
 
 void InteractionHandler::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {

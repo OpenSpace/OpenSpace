@@ -117,12 +117,13 @@ int clearKeys(lua_State* L) {
 * Get current frame time
 */
 int dt(lua_State* L) {
+    /*
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
     lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
-    return 1;
+    */return 1;
 }
 
 /**

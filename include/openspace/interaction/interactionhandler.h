@@ -140,28 +140,62 @@ private:
 
 #endif // FALSE
 
+
+class InputState
+{
+public:
+    InputState();
+    ~InputState();
+
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double mouseX, double mouseY);
+    void mouseScrollWheelCallback(double mouseScrollDelta);
+
+    // Accessors
+    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys();
+    const std::list<MouseButton>& getPressedMouseButtons();
+    glm::dvec2 getMousePosition();
+    double getMouseScrollDelta();
+
+    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair);
+    bool isMouseButtonPressed(MouseButton mouseButton);
+private:
+    std::list<std::pair<Key, KeyModifier> > _keysDown;
+    std::list<MouseButton> _mouseButtonsDown;
+    glm::dvec2 _mousePosition;
+    double _mouseScrollDelta;
+};
+
+
+
 class InteractionMode
 {
 public:
-    InteractionMode();
+    InteractionMode(std::shared_ptr<InputState> inputState);
     ~InteractionMode();
+
+    // Mutators
+    void setFocusNode(SceneGraphNode* focusNode);
+    void setCamera(Camera* camera);
 
     virtual void update(double deltaTime) = 0;
 protected:
-    std::shared_ptr<KeyboardController> _keyboardController;
-    std::shared_ptr<MouseController> _mouseController;
-    std::shared_ptr<SceneGraphNode> _focusNode;
-    std::shared_ptr<Camera> _camera;
+    std::shared_ptr<InputState> _inputState;
+    SceneGraphNode* _focusNode;
+    Camera* _camera;
 };
 
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
-    OrbitalInteractionMode();
+    OrbitalInteractionMode(std::shared_ptr<InputState> inputState);
     ~OrbitalInteractionMode();
 
     virtual void update(double deltaTime);
 private:
+    glm::dvec2 _previousMousePosition;
 };
 
 
@@ -191,7 +225,7 @@ public:
     // Accessors
     const SceneGraphNode* const focusNode() const;
     const Camera* const camera() const;
-    double deltaTime() const;
+    //double deltaTime() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -209,14 +243,8 @@ public:
     void mouseScrollWheelCallback(double pos);
 
 private:
-    std::shared_ptr<KeyboardController> _keyboardController;
-    std::shared_ptr<MouseController> _mouseController;
-    std::shared_ptr<SceneGraphNode> _focusNode;
-    std::shared_ptr<Camera> _camera;
-
     std::shared_ptr<InteractionMode> _interactor;
-
-    double _deltaTime;
+    std::shared_ptr<InputState> _inputState;
 };
 
 } // namespace interaction

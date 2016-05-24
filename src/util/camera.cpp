@@ -92,7 +92,7 @@ namespace openspace {
     // Relative mutators
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _rotation.local = _rotation.local * rotation;
+        _rotation.local = rotation * _rotation.local;
     }
 
     // Accessors
@@ -111,7 +111,7 @@ namespace openspace {
     const Camera::Vec3& Camera::viewDirectionWorldSpace() const {
         if (_cachedViewDirection.isDirty) {
             _cachedViewDirection.datum =
-                glm::inverse(_rotation.local) * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
+                _rotation.synced * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
             _cachedViewDirection.datum = glm::normalize(_cachedViewDirection.datum);
         }
         return _cachedViewDirection.datum;
@@ -119,6 +119,10 @@ namespace openspace {
     
     const Camera::Vec3& Camera::lookUpVectorCameraSpace() const {
         return _LOOKUP_VECTOR_CAMERA_SPACE;
+    }
+
+    const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
+        return glm::normalize(_rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE));
     }
     
     const glm::vec2& Camera::scaling() const {
@@ -138,7 +142,7 @@ namespace openspace {
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
-            _cachedViewRotationMatrix.datum = glm::mat4_cast(_rotation.local);
+            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse(_rotation.synced));
         }
         return _cachedViewRotationMatrix.datum;
     }

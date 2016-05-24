@@ -103,6 +103,7 @@ namespace openspace {
         // Should return const refs
         const Vec3& viewDirectionWorldSpace() const;
         const Vec3& lookUpVectorCameraSpace() const;
+        const Vec3& lookUpVectorWorldSpace() const;
         const glm::vec2& scaling() const;
         const Mat4& viewRotationMatrix() const;
         const Quat& rotationQuaternion() const;

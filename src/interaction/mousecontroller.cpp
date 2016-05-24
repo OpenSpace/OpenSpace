@@ -89,7 +89,7 @@ void MouseController::trackballRotate(int x, int y) {
     if (curTrackballPos != _lastTrackballPos) {
         // calculate rotation angle (in radians)
         float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-        rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
+        //rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
 
         // Map trackballpos to camera
         //        glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
