@@ -92,6 +92,26 @@ int iswa_addScreenSpaceCygnet(lua_State* L){
     return 0;
 }
 
+int iswa_addKameleonPlane(lua_State* L){
+    int nArguments = lua_gettop(L);
+
+    std::string kwPath = "";
+    std::string type = "x";
+    std::string group = "";
+
+    if(nArguments > 0)
+        kwPath = luaL_checkstring(L, 1);
+
+    if(nArguments > 1)
+        type = luaL_checkstring(L, 2);
+
+    if(nArguments > 2)
+        group = luaL_checkstring(L, 3);
+
+    IswaManager::ref().createKameleonPlane(kwPath, type, group);
+    return 0;
+}
+
 int iswa_removeCygnet(lua_State* L){
     std::string name = luaL_checkstring(L, -1);
     OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name + "')");

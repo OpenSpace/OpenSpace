@@ -120,6 +120,30 @@ bool Histogram::add(float value, float repeat) {
     return true;
 }
 
+void Histogram::changeRange(float minValue, float maxValue){\
+    if(minValue > _minValue && maxValue < _maxValue) return;
+
+    float* oldData = _data;
+    float oldMin = _minValue;
+    float oldMax = _maxValue;
+
+    float* newData = new float[_numBins]{0.0};
+    for(int i=0; i<_numBins; i++){
+        float unNormalizedValue = i*(oldMax-oldMin)+oldMin;
+        float normalizedValue = (unNormalizedValue - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
+        int binIndex = std::min( floor(normalizedValue * _numBins), _numBins - 1.0 ); // [0, _numBins - 1]
+
+        newData[binIndex] = oldData[i];
+    }
+
+    _data = newData;
+    delete oldData;
+
+    _minValue = minValue;
+    _maxValue = maxValue;
+
+}
+
 bool Histogram::add(const Histogram& histogram) {
     if (_minValue == histogram.minValue() && _maxValue == histogram.maxValue() && _numBins == histogram.numBins()) {
 
@@ -250,14 +274,15 @@ Histogram Histogram::equalize(){
  * this method will use its equalizer to return a histogram equalized result.
  */
 float Histogram::equalize(float value){
-    if (value < _minValue || value > _maxValue) {
-        LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
-    }
+    // if (value < _minValue || value > _maxValue) {
+    //     LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
+    // }
     float normalizedValue = (value-_minValue)/(_maxValue-_minValue);
     int bin = floor(normalizedValue * _numBins);
     // If value == _maxValues then bin == _numBins, which is a invalid index.
     bin = std::min(_numBins-1, bin);
-
+    bin = std::max(0 , bin);
+    
     return _equalizer[bin];
 }
 

@@ -84,7 +84,7 @@ Fragment getFragment() {
     
     // diffuse = texture(tf, vec2(1-vs_st.s, 0));
     // diffuse = texture(tf, texture(texture1, vec2(vs_st.s,1-vs_st.t)).r);
-
+    if(numTextures == 0) diffuse = transparent;
     if (diffuse.a <= backgroundValues.y)
         discard;
 

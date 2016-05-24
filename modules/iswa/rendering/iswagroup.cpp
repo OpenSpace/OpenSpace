@@ -171,9 +171,9 @@ void IswaGroup::registerProperties(){
 }
 
 void IswaGroup::unregisterProperties(){
-    _dataOptions.removeOptions();
+    // _dataOptions.removeOptions();
     OsEng.gui()._iswa.unregisterProperties(name());
-    _type = IswaManager::CygnetType::NoType;
+    // _type = IswaManager::CygnetType::NoType;
 }
 
 void IswaGroup::clearGroup(){

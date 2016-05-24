@@ -74,6 +74,8 @@ public:
     float highestBinValue(bool equalized);
     float binWidth();
 
+    void changeRange(float minValue, float maxValue);
+
 private:
     int _numBins;
     float _minValue;

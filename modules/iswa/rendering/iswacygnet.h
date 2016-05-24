@@ -131,6 +131,7 @@ protected:
     std::shared_ptr<IswaGroup> _group;
 
     IswaManager::CygnetType _type;
+    bool _textureDirty;
 };
 
 }//namespace openspace

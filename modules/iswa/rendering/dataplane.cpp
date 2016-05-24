@@ -196,7 +196,7 @@ bool DataPlane::loadTexture() {
     if(data.empty())
         return false;
 
-    // _backgroundValues.setValue(_dataProcessor->filterValues());
+    _backgroundValues.setValue(_dataProcessor->filterValues());
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
