@@ -711,10 +711,11 @@ OrbitalInteractionMode::~OrbitalInteractionMode()
 
 void OrbitalInteractionMode::update(double deltaTime)
 {
+
     glm::dvec2 mousePosition = _inputState->getMousePosition();
-    glm::dvec2 mousePositionDelta =
-        _previousMousePosition - mousePosition;
-    glm::dvec2 mouseVelocity = mousePositionDelta * deltaTime * 0.01;
+
+
+
 
     bool button1Pressed = _inputState->isMouseButtonPressed(MouseButton::Button1);
     bool button2Pressed = _inputState->isMouseButtonPressed(MouseButton::Button2);
@@ -730,49 +731,100 @@ void OrbitalInteractionMode::update(double deltaTime)
         glm::dvec3 newPosition = camPos;
 
         if (button1Pressed) {
-            if (keyCtrlPressed) { // Do local rotation
-                glm::dvec3 eulerAngles(mouseVelocity.y, 0, 0);
-                glm::dquat rotationDiff = glm::dquat(eulerAngles);
-
-                _localCameraRotation = _localCameraRotation * rotationDiff;
-            }
-            else if (glm::length(mouseVelocity) > 0) { // Do global rotation
-                glm::dvec3 eulerAngles(-mouseVelocity.y, -mouseVelocity.x, 0);
-                glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
-
-                glm::dquat newRotationCamspace =
-                    _globalCameraRotation * rotationDiffCamSpace;
-                glm::dquat rotationDiffWorldSpace =
-                    newRotationCamspace * glm::inverse(_globalCameraRotation);
             
-                glm::dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
-
-                newPosition = camPos + rotationDiffVec3;
-
-                glm::dvec3 lookUp = _camera->lookUpVectorWorldSpace();
-                glm::dmat4 lookAtMat = glm::lookAt(
-                    glm::dvec3(0,0,0),
-                    glm::normalize(centerPos - newPosition),
-                    lookUp);
-                _globalCameraRotation =
-                    glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+            if (keyCtrlPressed) { // Do local rotation
+                glm::dvec2 mousePositionDelta =
+                    _previousMousePositionLocalRotation - mousePosition;
+                _mouseVelocityTargetLocalRotation = mousePositionDelta * deltaTime * 0.01;
+            }
+            else{ // Do global rotation
+                glm::dvec2 mousePositionDelta =
+                    _previousMousePositionGlobalRotation - mousePosition;
+                _mouseVelocityTargetGlobalRotation = mousePositionDelta * deltaTime * 0.01;
             }
         }
+        
         if (button2Pressed) { // Move position
-            newPosition += - posDiff * mouseVelocity.y * 0.1;
+            glm::dvec2 mousePositionDelta =
+                _previousMousePositionMove - mousePosition;
+            _mouseVelocityTargetMove = mousePositionDelta * deltaTime * 0.01;
         }
+        
         if (button3Pressed) { // Do roll
+            glm::dvec2 mousePositionDelta =
+                _previousMousePositionRoll - mousePosition;
+            _mouseVelocityTargetRoll = mousePositionDelta * deltaTime * 0.01;
+        }
+
+        {
+            glm::dvec3 eulerAngles(_mouseVelocityLocalRotation.y, 0, 0);
+            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+
+            _localCameraRotation = _localCameraRotation * rotationDiff;
+        }
+
+        {
+            glm::dvec3 eulerAngles(-_mouseVelocityGlobalRotation.y, -_mouseVelocityGlobalRotation.x, 0);
+            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+
+            glm::dquat newRotationCamspace =
+                _globalCameraRotation * rotationDiffCamSpace;
+            glm::dquat rotationDiffWorldSpace =
+                newRotationCamspace * glm::inverse(_globalCameraRotation);
+
+            glm::dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
+
+            newPosition = camPos + rotationDiffVec3;
+
+            glm::dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+            glm::dmat4 lookAtMat = glm::lookAt(
+                glm::dvec3(0, 0, 0),
+                glm::normalize(centerPos - newPosition),
+                lookUp);
+            _globalCameraRotation =
+                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+        }
+        {
+            newPosition += -posDiff * _mouseVelocityMove.y;
+        }
+        {
             glm::dquat cameraRollRotation =
-                glm::angleAxis(mouseVelocity.x, glm::normalize(posDiff));
+                glm::angleAxis(_mouseVelocityRoll.x, glm::normalize(posDiff));
             _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
         }
+
+
+
         _camera->setRotation(_globalCameraRotation * _localCameraRotation);
         _camera->setPositionVec3(newPosition);
     }
     // Update new state
-    if (!button1Pressed && !button2Pressed && !button3Pressed) {
-        _previousMousePosition = mousePosition + (_previousMousePosition - mousePosition) * 0.8;
+    if (!button1Pressed) {
+        //_previousMousePosition = mousePosition + (_previousMousePosition - mousePosition) * 0.8;
+        _previousMousePositionGlobalRotation = mousePosition;
+        _mouseVelocityTargetGlobalRotation = glm::dvec2(0,0);
+
+        _previousMousePositionLocalRotation = mousePosition;
+        _mouseVelocityTargetLocalRotation = glm::dvec2(0, 0);
     }
+    if (!button2Pressed) {
+        //_previousMousePosition = mousePosition + (_previousMousePosition - mousePosition) * 0.8;
+        _previousMousePositionMove = mousePosition;
+        _mouseVelocityTargetMove = glm::dvec2(0, 0);
+    }
+    if (!button3Pressed) {
+        //_previousMousePosition = mousePosition + (_previousMousePosition - mousePosition) * 0.8;
+        _previousMousePositionRoll = mousePosition;
+        _mouseVelocityTargetRoll = glm::dvec2(0, 0);
+    }
+
+    double scale = 0.02;
+
+    _mouseVelocityGlobalRotation = delay(_mouseVelocityGlobalRotation, _mouseVelocityTargetGlobalRotation, scale);
+    _mouseVelocityLocalRotation = delay(_mouseVelocityLocalRotation, _mouseVelocityTargetLocalRotation, scale);
+    _mouseVelocityMove = delay(_mouseVelocityMove, _mouseVelocityTargetMove, scale);
+    _mouseVelocityRoll = delay(_mouseVelocityRoll, _mouseVelocityTargetRoll, scale);
+
 }
 
 

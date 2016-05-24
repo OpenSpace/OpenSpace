@@ -182,6 +182,12 @@ public:
 
     virtual void update(double deltaTime) = 0;
 protected:
+
+    template <typename T>
+    T delay(T in, T target, double scale) {
+        return in + (target - in) * scale;
+    }
+
     std::shared_ptr<InputState> _inputState;
     SceneGraphNode* _focusNode;
     Camera* _camera;
@@ -195,8 +201,21 @@ public:
 
     virtual void update(double deltaTime);
 private:
-    glm::dvec2 _previousMousePosition;
-    //glm::dvec2 _mouseVelocity;
+    glm::dvec2 _previousMousePositionGlobalRotation;
+    glm::dvec2 _mouseVelocityTargetGlobalRotation;
+    glm::dvec2 _mouseVelocityGlobalRotation;
+
+    glm::dvec2 _previousMousePositionLocalRotation;
+    glm::dvec2 _mouseVelocityTargetLocalRotation;
+    glm::dvec2 _mouseVelocityLocalRotation;
+
+    glm::dvec2 _previousMousePositionMove;
+    glm::dvec2 _mouseVelocityTargetMove;
+    glm::dvec2 _mouseVelocityMove;
+
+    glm::dvec2 _previousMousePositionRoll;
+    glm::dvec2 _mouseVelocityTargetRoll;
+    glm::dvec2 _mouseVelocityRoll;
 
     glm::dquat _localCameraRotation;
     glm::dquat _globalCameraRotation;
