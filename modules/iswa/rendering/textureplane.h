@@ -35,7 +35,7 @@
  public:
      TexturePlane(const ghoul::Dictionary& dictionary);
      ~TexturePlane();
- 	bool initialize() override;
+
  private:
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;

@@ -29,6 +29,9 @@
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 
+namespace {
+    const std::string _loggerCat = "IswaCygnet";
+}
 
 namespace openspace{
 
@@ -112,8 +115,16 @@ bool IswaCygnet::initialize(){
     if(!_data->groupName.empty()){
         _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
         _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
-        // std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
-        // std::cout << "Register group: " << (_group != nullptr) << std::endl;
+
+        //Subscribe to enable propert and delete
+        _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+            LDEBUG(name() + " Event enabledChanged");
+            _enabled.setValue(dict.value<bool>("enabled"));
+        });
+        _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event clearGroup");
+            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+        });
     }else{
         OsEng.gui()._iswa.registerProperty(&_alpha);
         OsEng.gui()._iswa.registerProperty(&_delete);
