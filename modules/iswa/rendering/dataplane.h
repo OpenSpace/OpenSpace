@@ -58,9 +58,11 @@ friend class IswaGroup;
     properties::Vec2Property _backgroundValues;
 
     properties::Vec2Property _normValues;
+
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
-    
+    properties::BoolProperty _autoFilter;
+
     std::string _dataBuffer;
 
     std::shared_ptr<DataProcessor> _dataProcessor; 

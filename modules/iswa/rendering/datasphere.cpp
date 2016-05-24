@@ -40,6 +40,7 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     :CygnetSphere(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Use Histogram", true)
+    ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
@@ -53,6 +54,7 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
 
     addProperty(_useLog);
     addProperty(_useHistogram);
+    addProperty(_autoFilter);
     addProperty(_normValues);
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
@@ -71,6 +73,7 @@ bool DataSphere::initialize(){
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
+        OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
@@ -141,8 +144,9 @@ bool DataSphere::loadTexture(){
 
     if(data.empty())
         return false;
-
-    _backgroundValues.setValue(_dataProcessor->filterValues());
+    
+    if(_autoFilter.value())
+        _backgroundValues.setValue(_dataProcessor->filterValues());
 
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();

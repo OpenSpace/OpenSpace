@@ -59,7 +59,6 @@ namespace openspace {
 namespace gui {
 GuiIswaComponent::GuiIswaComponent()
     :GuiPropertyComponent()
-    ,_cdfOption(-1)
 {}
 
 void GuiIswaComponent::render() {
