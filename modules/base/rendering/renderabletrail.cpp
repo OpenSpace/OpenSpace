@@ -207,7 +207,7 @@ void RenderableTrail::update(const UpdateData& data) {
     double lightTime = 0.0;
 
     bool intervalSet = hasTimeInterval();
-    double start = DBL_MIN;
+    double start = -DBL_MAX;
     double end = DBL_MAX;
     if (intervalSet) {
         getInterval(start, end);
@@ -276,7 +276,7 @@ void RenderableTrail::fullYearSweep(double time) {
     int segments = static_cast<int>(_tropic);
 
     bool intervalSet = hasTimeInterval();
-    double start = DBL_MIN;
+    double start = -DBL_MAX;
     double end = DBL_MAX;
     if (intervalSet) {
         intervalSet &= getInterval(start, end);
