@@ -49,7 +49,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.h
@@ -86,7 +85,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/texturetileset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/texturedataprovider.cpp
