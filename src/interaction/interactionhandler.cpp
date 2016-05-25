@@ -792,11 +792,14 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
 
             newPosition = camPos + rotationDiffVec3;
 
-            glm::dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+            glm::dvec3 directionToCenter = glm::normalize(centerPos - newPosition);
+
+            glm::dvec3 lookUpWhenFacingCenter =
+                _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
             glm::dmat4 lookAtMat = glm::lookAt(
                 glm::dvec3(0, 0, 0),
-                glm::normalize(centerPos - newPosition),
-                lookUp);
+                directionToCenter,
+                lookUpWhenFacingCenter);
             _globalCameraRotation =
                 glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
         }
@@ -804,7 +807,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
             glm::dvec3 centerToBoundingSphere =
                 glm::normalize(posDiff) *
                 static_cast<double>(_focusNode->boundingSphere().lengthf());
-            newPosition += -(posDiff + centerToBoundingSphere) *
+            newPosition += -(posDiff - centerToBoundingSphere) *
                 _truckMovementMouseState.velocity.get().y;
         }
         { // Do roll
