@@ -41,6 +41,8 @@ class SceneGraphNode;
 
 namespace interaction {
 
+
+//#define USE_OLD_INTERACTIONHANDLER
 #ifdef USE_OLD_INTERACTIONHANDLER
 
 class InteractionHandler : public properties::PropertyOwner {
@@ -138,7 +140,7 @@ private:
     std::mutex _keyframeMutex;
 };
 
-#endif // FALSE
+#else // USE_OLD_INTERACTIONHANDLER
 
 
 class InputState
@@ -168,8 +170,6 @@ private:
     double _mouseScrollDelta;
 };
 
-
-
 class InteractionMode
 {
 public:
@@ -180,13 +180,43 @@ public:
     void setFocusNode(SceneGraphNode* focusNode);
     void setCamera(Camera* camera);
 
+    // Accessors
+    SceneGraphNode* focusNode();
+    Camera* camera();
+
     virtual void update(double deltaTime) = 0;
 protected:
+    /**
+        Inner class that acts as a smoothing filter to a variable. The filter has a step
+        response on a form that resembles the function y = 1-e^(-t/scale). The variable
+        will be updates as soon as it is set to a value (calling the set() function).
+    */
+    template <typename T, typename ScaleType>
+    class delayedVariable {
+    public:
+        delayedVariable(ScaleType scale) {
+            _scale = scale;
+        }
+        void set(T value) {
+            _targetValue = value;
+            _currentValue = _currentValue + (_targetValue - _currentValue) * _scale;
+        }
+        T get() {
+            return _currentValue;
+        }
+    private:
+        ScaleType _scale;
+        T _targetValue;
+        T _currentValue;
+    };
 
-    template <typename T>
-    T delay(T in, T target, double scale) {
-        return in + (target - in) * scale;
-    }
+    struct MouseState {
+        MouseState(double scale)
+            : velocity(scale)
+            , previousPosition(0.0, 0.0) {}
+        glm::dvec2 previousPosition;
+        delayedVariable<glm::dvec2, double> velocity;
+    };
 
     std::shared_ptr<InputState> _inputState;
     SceneGraphNode* _focusNode;
@@ -196,26 +226,23 @@ protected:
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
-    OrbitalInteractionMode(std::shared_ptr<InputState> inputState);
+    OrbitalInteractionMode(
+        std::shared_ptr<InputState> inputState,
+        double sensitivity,
+        double velocityScaleFactor);
     ~OrbitalInteractionMode();
 
     virtual void update(double deltaTime);
 private:
-    glm::dvec2 _previousMousePositionGlobalRotation;
-    glm::dvec2 _mouseVelocityTargetGlobalRotation;
-    glm::dvec2 _mouseVelocityGlobalRotation;
+    void updateMouseStatesFromInput(double deltaTime);
+    void updateCameraStateFromMouseStates();
 
-    glm::dvec2 _previousMousePositionLocalRotation;
-    glm::dvec2 _mouseVelocityTargetLocalRotation;
-    glm::dvec2 _mouseVelocityLocalRotation;
+    double _sensitivity;
 
-    glm::dvec2 _previousMousePositionMove;
-    glm::dvec2 _mouseVelocityTargetMove;
-    glm::dvec2 _mouseVelocityMove;
-
-    glm::dvec2 _previousMousePositionRoll;
-    glm::dvec2 _mouseVelocityTargetRoll;
-    glm::dvec2 _mouseVelocityRoll;
+    MouseState _globalRotationMouseState;
+    MouseState _localRotationMouseState;
+    MouseState _truckMovementMouseState;
+    MouseState _rollMouseState;
 
     glm::dquat _localCameraRotation;
     glm::dquat _globalCameraRotation;
@@ -248,7 +275,6 @@ public:
     // Accessors
     const SceneGraphNode* const focusNode() const;
     const Camera* const camera() const;
-    //double deltaTime() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -266,9 +292,17 @@ public:
     void mouseScrollWheelCallback(double pos);
 
 private:
+    std::multimap<KeyWithModifier, std::string > _keyLua;
+
     std::shared_ptr<InteractionMode> _interactor;
     std::shared_ptr<InputState> _inputState;
+
+    // Properties
+    properties::StringProperty _origin;
+    properties::StringProperty _coordinateSystem;
 };
+
+#endif // USE_OLD_INTERACTIONHANDLER
 
 } // namespace interaction
 } // namespace openspace
