@@ -44,6 +44,7 @@ namespace interaction {
 
 void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier modifier) {
     // TODO package in script
+    /*
     const float dt = static_cast<float>( _handler->deltaTime());
     if(action == KeyAction::Press|| action == KeyAction::Repeat) {
         const float speed = 2.75;
@@ -127,6 +128,7 @@ void KeyboardControllerFixed::keyPressed(KeyAction action, Key key, KeyModifier 
             OsEng.renderEngine().camera()->setScaling(s);
         }
     }
+    */
     /*
     if (key == '1') {
         SceneGraphNode* node = getSceneGraphNode("sun");

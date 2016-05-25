@@ -301,11 +301,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     if (!fn) {
         throw ghoul::RuntimeError("Could not find focus node");
     }
-    // Check crash for when fn == nullptr
-    
-	glm::mat4 la = glm::lookAt(glm::vec3(0,0,0), fn->worldPosition().vec3() - cameraPosition.vec3(), c->lookUpVector());
+    // Check crash for when fn == nullptr    
+	glm::mat4 la = glm::lookAt(glm::vec3(0,0,0), fn->worldPosition().vec3() - cameraPosition.vec3(), c->lookUpVectorCameraSpace());
+    //glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), glm::vec3(c->lookUpVectorCameraSpace()));
 
-    c->setRotation(la);
+    c->setRotation(glm::quat_cast(la));
     c->setPosition(cameraPosition);
     c->setScaling(cameraScaling);
 

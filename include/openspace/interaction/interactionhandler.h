@@ -41,61 +41,43 @@ class SceneGraphNode;
 
 namespace interaction {
 
+
+//#define USE_OLD_INTERACTIONHANDLER
+#ifdef USE_OLD_INTERACTIONHANDLER
+
 class InteractionHandler : public properties::PropertyOwner {
 public:
     InteractionHandler();
-
     ~InteractionHandler();
 
+    // Mutators
     void setKeyboardController(KeyboardController* controller);
     void setMouseController(MouseController* controller);
+    void setFocusNode(SceneGraphNode* node);
+    void setCamera(Camera* camera);
+    void setInteractionSensitivity(float sensitivity);
+    void resetKeyBindings();
+    void setInvertRoll(bool invert);
+    void setInvertRotation(bool invert);
+
     void addController(Controller* controller);
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
 
     void lockControls();
     void unlockControls();
 
     void update(double deltaTime);
-
-    void setFocusNode(SceneGraphNode* node);
+    
+    // Accessors
     const SceneGraphNode* const focusNode() const;
-    void setCamera(Camera* camera);
     const Camera* const camera() const;
-
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
-
     double deltaTime() const;
-
-    void orbitDelta(const glm::quat& rotation);
-
-    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
-
-    //void distance(const float &d);
-
-    void rotateDelta(const glm::quat& rotation);
-
-    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
-
-    void lookAt(const glm::quat& rotation);
-
-    void setRotation(const glm::quat& rotation);
-
-    void resetKeyBindings();
-    void bindKey(Key key, KeyModifier modifier, std::string lua);
-
-    void setInteractionSensitivity(float sensitivity);
     float interactionSensitivity() const;
-
-    void setInvertRoll(bool invert);
     bool invertRoll() const;
-
-    void setInvertRotation(bool invert);
     bool invertRotation() const;
-
-    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
-    void clearKeyframes();
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -106,28 +88,45 @@ public:
     */
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-private:
-    friend class Controller;
 
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
+
+    // Interaction functions
+    void orbitDelta(const glm::quat& rotation);
+    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
+    void rotateDelta(const glm::quat& rotation);
+    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
+    void lookAt(const glm::quat& rotation);
+    void setRotation(const glm::quat& rotation);
+
+private:
+    // Remove copy and move constructors
     InteractionHandler(const InteractionHandler&) = delete;
     InteractionHandler& operator=(const InteractionHandler&) = delete;
     InteractionHandler(InteractionHandler&&) = delete;
     InteractionHandler& operator=(InteractionHandler&&) = delete;
 
-    Camera* _camera;
-    SceneGraphNode* _focusNode;
-
-    double _deltaTime;
-    std::mutex _mutex;
-
-    bool _validKeyLua;
-
-    std::multimap<KeyWithModifier, std::string > _keyLua;
-
+    // Settings
     float _controllerSensitivity;
     bool _invertRoll;
     bool _invertRotation;
 
+    // Pointers to entities to affect
+    Camera* _camera;
+    SceneGraphNode* _focusNode;
+
+    // Cached data
+    double _deltaTime;
+    std::mutex _mutex;
+
+    //bool _validKeyLua;
+    std::multimap<KeyWithModifier, std::string > _keyLua;
+
+    
     KeyboardController* _keyboardController;
     MouseController* _mouseController;
     std::vector<Controller*> _controllers;
@@ -140,6 +139,170 @@ private:
     double _currentKeyframeTime;
     std::mutex _keyframeMutex;
 };
+
+#else // USE_OLD_INTERACTIONHANDLER
+
+
+class InputState
+{
+public:
+    InputState();
+    ~InputState();
+
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double mouseX, double mouseY);
+    void mouseScrollWheelCallback(double mouseScrollDelta);
+
+    // Accessors
+    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys();
+    const std::list<MouseButton>& getPressedMouseButtons();
+    glm::dvec2 getMousePosition();
+    double getMouseScrollDelta();
+
+    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair);
+    bool isMouseButtonPressed(MouseButton mouseButton);
+private:
+    std::list<std::pair<Key, KeyModifier> > _keysDown;
+    std::list<MouseButton> _mouseButtonsDown;
+    glm::dvec2 _mousePosition;
+    double _mouseScrollDelta;
+};
+
+class InteractionMode
+{
+public:
+    InteractionMode(std::shared_ptr<InputState> inputState);
+    ~InteractionMode();
+
+    // Mutators
+    void setFocusNode(SceneGraphNode* focusNode);
+    void setCamera(Camera* camera);
+
+    // Accessors
+    SceneGraphNode* focusNode();
+    Camera* camera();
+
+    virtual void update(double deltaTime) = 0;
+protected:
+    /**
+        Inner class that acts as a smoothing filter to a variable. The filter has a step
+        response on a form that resembles the function y = 1-e^(-t/scale). The variable
+        will be updates as soon as it is set to a value (calling the set() function).
+    */
+    template <typename T, typename ScaleType>
+    class delayedVariable {
+    public:
+        delayedVariable(ScaleType scale) {
+            _scale = scale;
+        }
+        void set(T value) {
+            _targetValue = value;
+            _currentValue = _currentValue + (_targetValue - _currentValue) * _scale;
+        }
+        T get() {
+            return _currentValue;
+        }
+    private:
+        ScaleType _scale;
+        T _targetValue;
+        T _currentValue;
+    };
+
+    struct MouseState {
+        MouseState(double scale)
+            : velocity(scale)
+            , previousPosition(0.0, 0.0) {}
+        glm::dvec2 previousPosition;
+        delayedVariable<glm::dvec2, double> velocity;
+    };
+
+    std::shared_ptr<InputState> _inputState;
+    SceneGraphNode* _focusNode;
+    Camera* _camera;
+};
+
+class OrbitalInteractionMode : public InteractionMode
+{
+public:
+    OrbitalInteractionMode(
+        std::shared_ptr<InputState> inputState,
+        double sensitivity,
+        double velocityScaleFactor);
+    ~OrbitalInteractionMode();
+
+    virtual void update(double deltaTime);
+private:
+    void updateMouseStatesFromInput(double deltaTime);
+    void updateCameraStateFromMouseStates();
+
+    double _sensitivity;
+
+    MouseState _globalRotationMouseState;
+    MouseState _localRotationMouseState;
+    MouseState _truckMovementMouseState;
+    MouseState _rollMouseState;
+
+    glm::dquat _localCameraRotation;
+    glm::dquat _globalCameraRotation;
+};
+
+
+class InteractionHandler : public properties::PropertyOwner
+{
+public:
+    InteractionHandler();
+    ~InteractionHandler();
+
+    // Mutators
+    void setKeyboardController(KeyboardController* controller);
+    void setMouseController(MouseController* controller);
+    void setFocusNode(SceneGraphNode* node);
+    void setCamera(Camera* camera);
+
+    void resetKeyBindings();
+
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
+    void bindKey(Key key, KeyModifier modifier, std::string lua);
+    void lockControls();
+    void unlockControls();
+
+    void update(double deltaTime);
+
+    // Accessors
+    const SceneGraphNode* const focusNode() const;
+    const Camera* const camera() const;
+
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * interaction. The functions contained are
+    * - openspace::luascriptfunctions::setOrigin
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double x, double y);
+    void mouseScrollWheelCallback(double pos);
+
+private:
+    std::multimap<KeyWithModifier, std::string > _keyLua;
+
+    std::shared_ptr<InteractionMode> _interactor;
+    std::shared_ptr<InputState> _inputState;
+
+    // Properties
+    properties::StringProperty _origin;
+    properties::StringProperty _coordinateSystem;
+};
+
+#endif // USE_OLD_INTERACTIONHANDLER
 
 } // namespace interaction
 } // namespace openspace

@@ -282,10 +282,11 @@ bool RenderEngine::initializeGL() {
         //const glm::vec3 upVector = corners[0] - corners[1];
 
         
-		//_mainCamera->setCameraDirection(glm::normalize(-viewdir));
-		//_mainCamera->setLookUpVector(glm::normalize(upVector));
 
-        _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
+        //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
+     //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+        //_mainCamera->setLookUpVector(glm::normalize(upVector));
+        //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
         // set the initial fov to be 0.0 which means everything will be culled
         //float maxFov = 0.0f;
@@ -347,9 +348,9 @@ void RenderEngine::postSynchronizationPreDraw() {
         ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
     }
 
-	// update and evaluate the scene starting from the root node
-	_sceneGraph->update({
-		Time::ref().currentTime(),
+    // update and evaluate the scene starting from the root node
+    _sceneGraph->update({
+        Time::ref().currentTime(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
         _doPerformanceMeasurements
@@ -373,8 +374,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 }
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-	_mainCamera->sgctInternal.setViewMatrix(viewMatrix);
-	_mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
+    _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
+    _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     if (!(OsEng.isMaster() && _disableMasterRendering)) {
         _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
