@@ -63,8 +63,8 @@ namespace openspace {
     {
 
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            100,
-            100,
+            64,
+            64,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
