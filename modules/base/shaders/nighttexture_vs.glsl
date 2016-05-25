@@ -24,21 +24,25 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
+
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 //layout(location = 3) in vec2 in_nightTex;
 
-
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
-out float s;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
+
+uniform sampler2D heightTex;
+uniform bool _hasHeightMap;
+uniform float _heightExaggeration;
+
 
 void main()
 {
@@ -49,9 +53,19 @@ void main()
 
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    // vs_normal = vec4(in_normal, 0.0);
     
     vec4 position = pscTransform(tmp, ModelTransform);
     vs_position = tmp;
+
+    if (_hasHeightMap) {
+        float height = texture(heightTex, in_st).r;
+        vec3 displacementDirection = abs(normalize(in_normal.xyz));
+        float displacementFactor = height * _heightExaggeration;
+        position.xyz = position.xyz + displacementDirection * displacementFactor;
+    }
+// 
     position = ViewProjection * position;
+
     gl_Position =  z_normalization(position);
 }

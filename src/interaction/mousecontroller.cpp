@@ -57,7 +57,7 @@ glm::vec3 MouseController::mapToTrackball(glm::vec2 mousePos) {
 
 glm::vec3 MouseController::mapToCamera(glm::vec3 trackballPos) {
     //Get x,y,z axis vectors of current camera view
-    glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVector());
+    glm::vec3 currentViewYaxis = glm::normalize(_handler->camera()->lookUpVectorCameraSpace());
     psc viewDir = _handler->camera()->position() - _handler->focusNode()->worldPosition();
     glm::vec3 currentViewZaxis = glm::normalize(viewDir.vec3());
     glm::vec3 currentViewXaxis = glm::normalize(glm::cross(currentViewYaxis, currentViewZaxis));
@@ -89,7 +89,7 @@ void MouseController::trackballRotate(int x, int y) {
     if (curTrackballPos != _lastTrackballPos) {
         // calculate rotation angle (in radians)
         float rotationAngle = glm::angle(curTrackballPos, _lastTrackballPos);
-        rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
+        //rotationAngle *= static_cast<float>(_handler->deltaTime()) * 100.0f;
 
         // Map trackballpos to camera
         //        glm::vec3 trackballMappedToCamera = mapToCamera(_lastTrackballPos - curTrackballPos);
@@ -102,7 +102,7 @@ void MouseController::trackballRotate(int x, int y) {
         glm::quat quaternion = glm::angleAxis(rotationAngle, rotationAxis);
 
         // Apply quaternion to camera
-        _handler->orbitDelta(quaternion);
+        //_handler->orbitDelta(quaternion);
 
         _lastTrackballPos = curTrackballPos;
     }
@@ -129,6 +129,7 @@ void TrackballMouseController::move(float x, float y) {
 }
 
 void TrackballMouseController::scrollWheel(int pos) {
+    /*
     const float speed = 4.75f;
     const float dt = static_cast<float>(_handler->deltaTime());
     if (pos < 0) {
@@ -139,6 +140,7 @@ void TrackballMouseController::scrollWheel(int pos) {
         PowerScaledScalar dist(-speed * dt, 0.0f);
         _handler->distanceDelta(dist);
     }
+    */
 }
 
 void TrackballMouseController::update(const double& dt){
@@ -219,6 +221,7 @@ void OrbitalMouseController::scrollWheel(int pos) {
 }
 
 void OrbitalMouseController::update(const double& dt){
+    /*
     const float interactionSpeed = OsEng.interactionHandler().interactionSensitivity();
     const bool rotationInvert = OsEng.interactionHandler().invertRotation();
     const bool rollInvert = OsEng.interactionHandler().invertRoll();
@@ -230,6 +233,7 @@ void OrbitalMouseController::update(const double& dt){
             static_cast<float>(_middleMouseButtonDown) * static_cast<float>(dt) * _currentCursorDiff[MouseButtons::ButtonMiddle].x * interactionSpeed  * (rollInvert ? -1.f : 1.f),
             static_cast<float>(_rightMouseButtonDown) * static_cast<float>(dt)  * _currentCursorDiff[MouseButtons::ButtonRight].y * _navigationSpeed);
     //}
+    */
     
 //    if (_leftMouseButtonDown){
 //        _handler->orbit(static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].x * _rotationSpeed, static_cast<float>(dt)* _currentCursorDiff[MouseButtons::ButtonLeft].y * _rotationSpeed, 0.f);

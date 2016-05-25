@@ -117,12 +117,13 @@ int clearKeys(lua_State* L) {
 * Get current frame time
 */
 int dt(lua_State* L) {
+    /*
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
     lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
-    return 1;
+    */return 1;
 }
 
 /**
@@ -131,6 +132,7 @@ int dt(lua_State* L) {
 * Change distance to origin
 */
 int distance(lua_State* L) {
+    /*
     int nArguments = lua_gettop(L);
     if (nArguments != 2)
         return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
@@ -139,6 +141,7 @@ int distance(lua_State* L) {
     double d2 = luaL_checknumber(L, -1);
     PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
     OsEng.interactionHandler().distanceDelta(dist);
+    */
     return 0;
 }
 
@@ -153,7 +156,7 @@ int setInteractionSensitivity(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     float sensitivity = static_cast<float>(luaL_checknumber(L, -1));
-    OsEng.interactionHandler().setInteractionSensitivity(sensitivity);
+    //OsEng.interactionHandler().setInteractionSensitivity(sensitivity);
     return 0;
 }
 
@@ -163,8 +166,8 @@ int setInteractionSensitivity(lua_State* L) {
  * Returns the current, global interaction sensitivity
  */
 int interactionSensitivity(lua_State* L) {
-    float sensitivity = OsEng.interactionHandler().interactionSensitivity();
-    lua_pushnumber(L, sensitivity);
+    //float sensitivity = OsEng.interactionHandler().interactionSensitivity();
+    //lua_pushnumber(L, sensitivity);
     return 1;
 }
 
@@ -179,7 +182,7 @@ int setInvertRoll(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     bool invert = lua_toboolean(L, -1) == 1;
-    OsEng.interactionHandler().setInvertRoll(invert);
+    //OsEng.interactionHandler().setInvertRoll(invert);
     return 0;
 }
 
@@ -189,8 +192,8 @@ int setInvertRoll(lua_State* L) {
  * Returns the current setting for inversion of roll movement
  */
 int invertRoll(lua_State* L) {
-    bool invert = OsEng.interactionHandler().invertRoll();
-    lua_pushboolean(L, invert);
+    //bool invert = OsEng.interactionHandler().invertRoll();
+    //lua_pushboolean(L, invert);
     return 1;
 }
 
@@ -205,7 +208,7 @@ int setInvertRotation(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     bool invert = lua_toboolean(L, -1) == 1;
-    OsEng.interactionHandler().setInvertRotation(invert);
+    //OsEng.interactionHandler().setInvertRotation(invert);
     return 0;
 }
 
@@ -215,8 +218,8 @@ int setInvertRotation(lua_State* L) {
  * Returns the current setting for inversion of rotation movement
  */
 int invertRotation(lua_State* L) {
-    bool invert = OsEng.interactionHandler().invertRotation();
-    lua_pushboolean(L, invert);
+    //bool invert = OsEng.interactionHandler().invertRotation();
+    //lua_pushboolean(L, invert);
     return 1;
 }
 

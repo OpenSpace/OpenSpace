@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -87,12 +88,7 @@ RenderablePlaneProjection::~RenderablePlaneProjection() {
 }
 
 bool RenderablePlaneProjection::isReady() const {
-    bool ready = true;
-    if (!_shader)
-        ready &= false;
-    if (!_texture)
-        ready &= false;
-    return ready;
+    return _shader && _texture;
 }
 
 bool RenderablePlaneProjection::initialize() {
@@ -106,7 +102,8 @@ bool RenderablePlaneProjection::initialize() {
         _shader = renderEngine.buildRenderProgram("Image Plane",
             "${MODULE_BASE}/shaders/imageplane_vs.glsl",
             "${MODULE_BASE}/shaders/imageplane_fs.glsl");
-        if (!_shader) return false;
+        if (!_shader)
+            return false;
     }
 
     setTarget(_defaultTarget);
@@ -158,12 +155,9 @@ void RenderablePlaneProjection::render(const RenderData& data) {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _shader->deactivate();
-
 }
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
-    
-
     double time = data.time;
     const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(_instrument);
     
@@ -214,11 +208,11 @@ void RenderablePlaneProjection::loadTexture() {
 }
 
 void RenderablePlaneProjection::updatePlane(const Image img, double currentTime) {
-    
+
     std::string frame;
     std::vector<glm::dvec3> bounds;
     glm::dvec3 boresight;
-    
+
     std::string target = _defaultTarget;
     // Turned on if the plane should be attached to the closest target, 
     // rather than the target specified in img 
@@ -226,7 +220,7 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
     //    target = findClosestTarget(currentTime);
     //}
     if (img.path != "")
-    target = img.target;
+        target = img.target;
 
     setTarget(target);
 
@@ -236,7 +230,8 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
         frame = std::move(res.frameName);
         bounds = std::move(res.bounds);
         boresight = std::move(res.boresightVector);
-    } catch (const SpiceManager::SpiceException& e) {
+    }
+    catch (const SpiceManager::SpiceException& e) {
         LERROR(e.what());
     }
 
@@ -256,12 +251,12 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
     for (int j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
-        
+
         if (!_moving) {
             cornerPosition -= vecToTarget;
         }
         cornerPosition = SpiceManager::ref().frameTransformationMatrix(GalacticFrame, _target.frame, currentTime) * cornerPosition;
-                
+
         projection[j] = PowerScaledCoordinate::CreatePowerScaledCoordinate(cornerPosition[0], cornerPosition[1], cornerPosition[2]);
         projection[j][3] += 3;
     }
@@ -281,6 +276,13 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
         projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 0, // Lower left 4 = 1
         projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 0, // Lower right 5
         projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 1, // Upper left 6 = 2
+        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
+        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
+        //projection[2][0], projection[2][1], projection[2][2], projection[2][3], 0, 0, // Upper left 3
+        //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 4 = 1
+        //projection[0][0], projection[0][1], projection[0][2], projection[0][3], 1, 1, // Lower right 5
+        //projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper left 6 = 2
+
     };
     //projection[1][0], projection[1][1], projection[1][2], projection[1][3], 0, 1, // Lower left 1
     //    projection[3][0], projection[3][1], projection[3][2], projection[3][3], 1, 0, // Upper right 2
@@ -305,7 +307,6 @@ void RenderablePlaneProjection::updatePlane(const Image img, double currentTime)
 }
 
 void RenderablePlaneProjection::setTarget(std::string body) {
-
     if (body == "")
         return;
 
@@ -314,8 +315,7 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     bool hasBody, found = false;
     std::string targetBody;
 
-    for (auto node : nodes)
-    {
+    for (auto node : nodes) {
         possibleTarget = node->renderable();
         if (possibleTarget != nullptr) {
             hasBody = possibleTarget->hasBody();
