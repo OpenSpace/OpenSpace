@@ -111,10 +111,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     }
 }
 
-KameleonPlane::~KameleonPlane(){
-
-
-}
+KameleonPlane::~KameleonPlane(){}
 
 bool KameleonPlane::deinitialize(){
     IswaCygnet::deinitialize();
@@ -126,13 +123,9 @@ bool KameleonPlane::initialize(){
     _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
     // IswaCygnet::initialize();
     _textures.push_back(nullptr);
-    
 
     if(!_data->groupName.empty()){
-        _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
-        std::cout << "Register groupEvent: " << (_groupEvent != nullptr) << std::endl;
-        _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
-        std::cout << "Register group " << (_group != nullptr) << std::endl;
+        initializeGroup();
     }
     
     initializeTime();
@@ -143,8 +136,58 @@ bool KameleonPlane::initialize(){
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
-        // _fieldlines.setValue(_group->fieldlineValue());
-        // updateFieldlineSeeds();
+
+        _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+            LDEBUG(name() + " Event useLogChanged");
+            _useLog.setValue(dict.value<bool>("useLog"));
+        });
+
+        _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event normValuesChanged");
+            std::shared_ptr<glm::vec2> values;
+            bool success = dict.getValue("normValues", values);
+            if(success){
+                _normValues.setValue(*values);            
+            }
+        });
+
+        _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event useHistogramChanged");
+            _useHistogram.setValue(dict.value<bool>("useHistogram"));
+        });
+
+        _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event dataOptionsChanged");
+            std::shared_ptr<std::vector<int> > values;
+            bool success = dict.getValue("dataOptions", values);
+            if(success){
+                _dataOptions.setValue(*values);            
+            }
+        });
+
+        _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event transferFunctionsChanged");
+            _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
+        });
+
+        _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event backgroundValuesChanged");
+            std::shared_ptr<glm::vec2> values;
+            bool success = dict.getValue("backgroundValues", values);
+            if(success){
+                _backgroundValues.setValue(*values);            
+            }
+        });
+
+        _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event autoFilterChanged");
+            _autoFilter.setValue(dict.value<bool>("autoFilter"));
+        });
+
+        _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+            LDEBUG(name() + " Event updateGroup");
+            loadTexture();
+        });
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
@@ -198,86 +241,6 @@ bool KameleonPlane::initialize(){
     
     _fieldlines.onChange([this](){ 
         updateFieldlineSeeds();
-    });
-
-
-    _transferFunctionsFile.onChange([this](){
-        LDEBUG(name() + " Event setTransferFunctionsFileChanged");
-        setTransferFunctions(_transferFunctionsFile.value());
-    });
-
-    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
-        LDEBUG(name() + " Event enabledChanged");
-        _enabled.setValue(dict.value<bool>("enabled"));
-    });
-
-
-    _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
-        LDEBUG(name() + " Event useLogChanged");
-        _useLog.setValue(dict.value<bool>("useLog"));
-    });
-
-    _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event normValuesChanged");
-        std::shared_ptr<glm::vec2> values;
-        bool success = dict.getValue("normValues", values);
-        if(success){
-            _normValues.setValue(*values);            
-        }
-    });
-
-    _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event useHistogramChanged");
-        _useHistogram.setValue(dict.value<bool>("useHistogram"));
-    });
-
-    _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event autoFilterChanged");
-        _autoFilter.setValue(dict.value<bool>("autoFilter"));
-    });
-
-    _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event dataOptionsChanged");
-        std::shared_ptr<std::vector<int> > values;
-        bool success = dict.getValue("dataOptions", values);
-        if(success){
-            _dataOptions.setValue(*values);            
-        }
-    });
-
-    // _groupEvent->subscribe(name(), "fieldlinesChanged", [&](ghoul::Dictionary dict){
-    //     LDEBUG(name() + " Event fieldlinesChanged");
-    //     std::shared_ptr<std::vector<int> > values;
-    //     bool success = dict.getValue("fieldlines", values);
-    //     if(success){
-    //         _fieldlines.setValue(*values);      
-    //     }
-    // });
-
-    _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event transferFunctionsChanged");
-        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
-    });
-
-    _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event backgroundValuesChanged");
-        std::shared_ptr<glm::vec2> values;
-        bool success = dict.getValue("backgroundValues", values);
-        if(success){
-            _backgroundValues.setValue(*values);            
-        }
-    });
-
-    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event clearGroup");
-        // _delete.setValue(true);
-        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
-    });
-
-    _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
-        LDEBUG(name() + " Event updateGroup");
-        // deinitialize();
-        updateTexture();
     });
 
     fillOptions();

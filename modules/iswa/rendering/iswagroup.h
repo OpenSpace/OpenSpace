@@ -52,7 +52,7 @@ public:
 
 	void clearGroup();
 	void updateGroup();
-	
+
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(){ return _groupEvent; };
 	std::shared_ptr<DataProcessor> dataProcessor();
 	std::vector<int> fieldlineValue() {return _fieldlines.value();}
@@ -70,6 +70,7 @@ private:
 
     void readFieldlinePaths(std::string indexFile);
     void updateFieldlineSeeds();
+    void clearFieldlines();
 
 	properties::BoolProperty _enabled;
 	properties::FloatProperty _alpha;
@@ -101,8 +102,6 @@ private:
 	std::string _fieldlineIndexFile;
 	std::string _kameleonPath;
 	std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
-	
-
 };
 
 } //namespace openspace

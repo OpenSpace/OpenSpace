@@ -131,7 +131,7 @@ void Histogram::changeRange(float minValue, float maxValue){\
     for(int i=0; i<_numBins; i++){
         float unNormalizedValue = i*(oldMax-oldMin)+oldMin;
         float normalizedValue = (unNormalizedValue - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
-        int binIndex = std::min( floor(normalizedValue * _numBins), _numBins - 1.0 ); // [0, _numBins - 1]
+        int binIndex = std::min( (float)floor(normalizedValue * _numBins), _numBins - 1.0f ); // [0, _numBins - 1]
 
         newData[binIndex] = oldData[i];
     }

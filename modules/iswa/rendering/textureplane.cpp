@@ -49,6 +49,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     registerProperties();
 
     _type = IswaManager::CygnetType::Texture;
+
 }
 
 
@@ -56,7 +57,14 @@ TexturePlane::~TexturePlane(){}
 
 bool TexturePlane::loadTexture() {
 
-    DownloadManager::MemoryFile imageFile = _futureObject.get();
+    // if The future is done then get the new imageFile
+    DownloadManager::MemoryFile imageFile;
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+        imageFile = _futureObject.get();
+
+    } else {
+        return false;
+    }
 
     if(imageFile.corrupted)
         return false;

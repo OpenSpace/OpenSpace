@@ -78,33 +78,7 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     registerProperties();
 }
 
-IswaGroup::~IswaGroup(){
-    //_cygnets.clear();
-}
-
-// void IswaGroup::registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type){
-//     if(_cygnets.empty()){
-//         _type = type;
-//         registerProperties();
-//     }
-
-//     if(type != _type){
-//         LWARNING("Can't register cygnet with a different type from the group");
-//         return;
-//     }
-
-//     if(type == IswaManager::CygnetType::Data){
-//         DataPlane* dataplane = static_cast<DataPlane*>(cygnet);
-        
-//         dataplane->useLog(_useLog.value());
-//         dataplane->useHistogram(_useHistogram.value());
-//         dataplane->normValues(_normValues.value());
-//         dataplane->backgroundValues(_backgroundValues.value());
-//         dataplane->transferFunctionsFile(_transferFunctionsFile.value());
-//         dataplane->dataOptions(_dataOptions.value());
-//     }
-//     _cygnets.push_back(cygnet);
-// }
+IswaGroup::~IswaGroup(){}
 
 
 void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
@@ -152,9 +126,11 @@ void IswaGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kam
 
     if(kameleonPath != _kameleonPath){
         _kameleonPath = kameleonPath;
-        std::vector<int> fieldLinesValue = _fieldlines.value();
-        _fieldlines.setValue(std::vector<int>()); //clear the existing fieldlines
-        _fieldlines.setValue(fieldLinesValue);    //create fieldlines from the same seed points but with different cdf file
+        // std::vector<int> fieldLinesValue = _fieldlines.value();
+        clearFieldlines();
+        updateFieldlineSeeds();
+        // _fieldlines.setValue(std::vector<int>()); //clear the existing fieldlines
+        // _fieldlines.setValue(fieldLinesValue);    //create fieldlines from the same seed points but with different cdf file
     }
 }
 
@@ -250,8 +226,11 @@ void IswaGroup::updateGroup(){
 
 void IswaGroup::clearGroup(){
     _groupEvent->publish("clearGroup", ghoul::Dictionary());
+    LDEBUG("Group " + name() + " published clearGroup");
     unregisterProperties();
-    _fieldlines.setValue(std::vector<int>());
+    clearFieldlines();
+
+    // _fieldlines.setValue(std::vector<int>());
 }
 
 std::shared_ptr<DataProcessor> IswaGroup::dataProcessor(){
@@ -307,6 +286,21 @@ void IswaGroup::readFieldlinePaths(std::string indexFile){
 
         } catch(const std::exception& e) {
             LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
+        }
+    }
+}
+
+void IswaGroup::clearFieldlines(){
+        // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
+    for (auto& seedPath: _fieldlineState) {
+        // if this option was turned off
+        if( std::get<2>(seedPath.second)){
+            // if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) return;
+            
+            LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
+            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
+            std::get<2>(seedPath.second) = false;
+        // if this option was turned on
         }
     }
 }

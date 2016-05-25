@@ -578,7 +578,7 @@ void IswaManager::addCdfFiles(std::string path){
     path = absPath(path);
     if(FileSys.fileExists(path)){
 
-        std::string basePath = path.substr(0, path.find_last_of("/\\"));
+        //std::string basePath = path.substr(0, path.find_last_of("/\\"));
         std::ifstream jsonFile(path);
         
         if (jsonFile.is_open()){
@@ -604,7 +604,7 @@ void IswaManager::addCdfFiles(std::string path){
                     std::string path = cdf["path"];
                     std::string date = cdf["date"];
             
-                    _cdfInformation[groupName].push_back({name, basePath+"/"+path, groupName, date, fieldlineSeedsIndexFile});
+                    _cdfInformation[groupName].push_back({name, path, groupName, date, fieldlineSeedsIndexFile});
                 }
 
             }
