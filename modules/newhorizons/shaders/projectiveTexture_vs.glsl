@@ -56,28 +56,29 @@ void main() {
     // set variables
     vs_st = in_st;
     //vs_stp = in_position.xyz;
-    vs_position = in_position;
+    // vs_position = in_position;
     vec4 tmp    = in_position;
     
     // this is wrong for the normal. 
     // The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-
-    vec4 raw_pos = psc_to_meter(in_position, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
-        vec3 displacementDirection = (normalize(raw_pos.xzy));
-        float displacementFactor = height * _heightExaggeration * 2000;
-        position.xyz = position.xyz + displacementDirection * displacementFactor;
+        // float height = 0.00005;
+        vec3 displacementDirection = (normalize(tmp.xyz));
+        float displacementFactor = height * _heightExaggeration / 2500.0;
+        tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
     }
 
-    position = ViewProjection * position;
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
 
+    vec4 raw_pos = psc_to_meter(tmp, scaling);
+    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+
+    position = ViewProjection * position;
 
     gl_Position =  z_normalization(position);
 }
