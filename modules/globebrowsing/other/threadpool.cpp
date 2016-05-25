@@ -29,7 +29,6 @@
 #include <ostream>
 #include <thread>
 #include <queue>
-#include <atomic>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
@@ -113,8 +112,15 @@ namespace openspace {
         } // release lock
 
           // wake up one thread
-        std::cout << "Notify one thread" << std::endl;
         condition.notify_one();
     }
+
+    void ThreadPool::clearTasks() {
+        { // acquire lock
+            std::unique_lock<std::mutex> lock(queue_mutex);
+            tasks.clear();
+        } // release lock
+    }
+
 
 } // namespace openspace

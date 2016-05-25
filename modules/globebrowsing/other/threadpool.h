@@ -30,7 +30,6 @@
 #include <ostream>
 #include <thread>
 #include <queue>
-#include <atomic>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 
@@ -59,6 +58,7 @@ namespace openspace {
         ~ThreadPool();
 
         void enqueue(std::function<void()> f);
+        void clearTasks();
 
     private:
         friend class Worker;

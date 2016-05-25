@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/tileprovider.h>
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 
 #include <openspace/engine/downloadmanager.h>
 
@@ -43,7 +44,27 @@ namespace {
 
 namespace openspace {
 
+
+
+    TileDepthTransform::TileDepthTransform() { }
+
+    TileDepthTransform::TileDepthTransform(GDALDataset* dataset) {
+        GDALRasterBand* firstBand = dataset->GetRasterBand(1);
+        GDALDataType gdalType = firstBand->GetRasterDataType();
+
+        double maximumValue = (gdalType == GDT_Float32 || gdalType == GDT_Float64) ?
+            1.0 : firstBand->GetMaximum();
+
+        depthOffset = firstBand->GetOffset();
+        depthScale = firstBand->GetScale() * maximumValue;
+    }
+
+
+
+
     bool TileProvider::hasInitializedGDAL = false;
+
+
 
     TileProvider::TileProvider(
         const std::string& filePath,
@@ -54,6 +75,7 @@ namespace openspace {
     , _tileCache(tileCacheSize) // setting cache size
     , _framesSinceLastRequestFlush(0)
     , _framesUntilRequestFlush(framesUntilRequestFlush)
+    , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -69,24 +91,14 @@ namespace openspace {
             _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         }
-
-
-        int downloadApplicationVersion = 1;
-        if (!DownloadManager::isInitialized()) {
-            DownloadManager::initialize(
-                "../tmp_openspace_downloads/",
-                downloadApplicationVersion);
-        }
         
         if (!hasInitializedGDAL) {
             GDALAllRegister();
+            //CPLSetConfigOption("GDAL_CACHEMAX", "0");
             hasInitializedGDAL = true;
         }
 
-        std::string absFilePath = absPath(filePath);
-        _gdalDataSet = (GDALDataset *)GDALOpen(absFilePath.c_str(), GA_ReadOnly);
-        //auto desc = _gdalDataSet->GetDescription();
-        
+        _gdalDataSet = (GDALDataset *)GDALOpen(absPath(filePath).c_str(), GA_ReadOnly);
         ghoul_assert(_gdalDataSet != nullptr, "Failed to load dataset: " << filePath);
 
         GDALRasterBand* firstBand = _gdalDataSet->GetRasterBand(1);
@@ -95,12 +107,7 @@ namespace openspace {
 
         _tileLevelDifference = log2(minimumPixelSize) - log2(sizeLevel0);
 
-        GDALDataType gdalType = firstBand->GetRasterDataType();
-        double maximumValue = (gdalType == GDT_Float32 || gdalType == GDT_Float64) ?
-            1.0 : firstBand->GetMaximum();
-
-        _depthTransform.depthOffset = firstBand->GetOffset();
-        _depthTransform.depthScale = firstBand->GetScale() * maximumValue;
+        _depthTransform = TileDepthTransform(_gdalDataSet);
     }
 
     TileProvider::~TileProvider(){
@@ -110,6 +117,7 @@ namespace openspace {
 
 
     void TileProvider::prerender() {
+        //_rawTextureTileDataProvider.updateAsyncRequests();
         initTexturesFromLoadedData();
 
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
@@ -119,13 +127,15 @@ namespace openspace {
 
     void TileProvider::initTexturesFromLoadedData() {
         while (_tileLoadManager.numFinishedJobs() > 0) {
-            auto finishedJob = _tileLoadManager.popFinishedJob();
-            std::shared_ptr<UninitializedTextureTile> uninitedTex =
-                finishedJob->product();
-            HashKey key = uninitedTex->chunkIndex.hashKey();
-            std::shared_ptr<Texture> texture = initializeTexture(uninitedTex);
-            _tileCache.put(key, texture);
+            std::shared_ptr<TileIOResult> tileIOResult= _tileLoadManager.popFinishedJob()->product();
+            initializeAndAddToCache(tileIOResult);
         }
+        /*
+        while (_rawTextureTileDataProvider.hasTextureTileData()) {
+            auto rawTextureTile = _rawTextureTileDataProvider.nextTextureTile();
+            initializeAndAddToCache(rawTextureTile);
+        }
+        */
     }
 
     void TileProvider::clearRequestQueue() {
@@ -154,8 +164,9 @@ namespace openspace {
         TileUvTransform& uvTransform) 
     {
         HashKey key = chunkIndex.hashKey();
-        if (_tileCache.exist(key)) {
-            return { _tileCache.get(key), uvTransform };
+        if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
+            std::shared_ptr<Texture> texture = _tileCache.get(key).texture;
+            return { texture, uvTransform };
         }
         else if (chunkIndex.level <= 1) {
             return { getDefaultTexture(), uvTransform };
@@ -194,7 +205,7 @@ namespace openspace {
     std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
         HashKey hashkey = chunkIndex.hashKey();
         if (_tileCache.exist(hashkey)) {
-            return _tileCache.get(hashkey);
+            return _tileCache.get(hashkey).texture;
         }
         else {
             enqueueTileRequest(chunkIndex);
@@ -204,17 +215,23 @@ namespace openspace {
 
     bool TileProvider::enqueueTileRequest(const ChunkIndex& chunkIndex) {
         HashKey key = chunkIndex.hashKey();
-        bool tileHasBeenQueued = _queuedTileRequests.find(key) != _queuedTileRequests.end();
-        if (!tileHasBeenQueued) {
-            // enque load job
-            std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-                new TextureTileLoadJob(this, chunkIndex));
-
-            _tileLoadManager.enqueueJob(job);
-
-            _queuedTileRequests.insert(key);
+        auto it = _queuedTileRequests.begin();
+        auto end = _queuedTileRequests.end();
+        for (; it != end; it++) {
+            const ChunkIndex& otherChunk = it->second;
+            if (chunkIndex.level == otherChunk.level && 
+                chunkIndex.manhattan(otherChunk) < 1) {
+                return false;
+            }
         }
-        return !tileHasBeenQueued;
+
+        
+        std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
+            new TextureTileLoadJob(this, chunkIndex));
+        _tileLoadManager.enqueueJob(job);
+        _queuedTileRequests[key] = chunkIndex;
+        
+        return true;
     }
 
 
@@ -228,80 +245,35 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<UninitializedTextureTile> TileProvider::getUninitializedTextureTile(
+    std::shared_ptr<TileIOResult> TileProvider::syncDownloadData(
         const ChunkIndex& chunkIndex) {
-        
-        // We assume here that all rasterbands have the same data type
-        GDALDataType gdalType = _gdalDataSet->GetRasterBand(1)->GetRasterDataType();
 
-        switch (gdalType)
-        {
-        case GDT_Byte:
-            return _uByteConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_UInt16:
-            return _uShortConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Int16:
-            return _shortConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_UInt32:
-            return _uIntConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Int32:
-            return _intConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-            break;
-        case GDT_Float32:
-            return _floatConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
+        std::shared_ptr<TileIOResult> res = _rawTextureTileDataProvider.getTextureData(
+            _gdalDataSet, chunkIndex, _tileLevelDifference);
 
-            break;
-        case GDT_Float64:
-            return _doubleConverter.getUninitializedTextureTile(
-                _gdalDataSet,
-                chunkIndex,
-                _tileLevelDifference);
-
-            break;
-        default:
-            LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-        }
-        return nullptr;
+        return res;
     }
 
-    std::shared_ptr<Texture> TileProvider::initializeTexture(
-        std::shared_ptr<UninitializedTextureTile> uninitedTexture) {
-        Texture* tex = new Texture(
-            uninitedTexture->imageData,
-            uninitedTexture->dimensions,
-            uninitedTexture->texFormat.ghoulFormat,
-            uninitedTexture->texFormat.glFormat,
-            uninitedTexture->glType,
+    void TileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
+
+        std::shared_ptr<RawTileData> tileData = tileIOResult->rawTileData;
+        HashKey key = tileData->chunkIndex.hashKey();
+        Texture* texturePtr = new Texture(
+            tileData->imageData,
+            tileData->dimensions,
+            tileData->texFormat.ghoulFormat,
+            tileData->texFormat.glFormat,
+            tileData->glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
 
         // The texture should take ownership of the data
-        std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(tex);
-
+        std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(texturePtr);
         texture->uploadTexture();
-        return texture;
+        
+        MetaTexture metaTexture = { texture, tileIOResult->error };
+
+        _tileCache.put(key, metaTexture);
     }
 
 

@@ -69,6 +69,11 @@ namespace openspace {
         return ChunkIndex(newX, newY, level);
     }
 
+    int ChunkIndex::manhattan(const ChunkIndex& other) const {
+        ghoul_assert(level == other.level, "makes no sense if not on same level");
+        return std::abs(x - other.x) + std::abs(y - other.y);
+    }
+
     HashKey ChunkIndex::hashKey() const {
         return x ^ (y << 16) ^ (level << 24);
     }
