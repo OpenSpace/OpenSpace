@@ -298,8 +298,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         throw ghoul::RuntimeError("Could not find focus node");
     }
     // Check crash for when fn == nullptr
-
-    glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), glm::vec3(c->lookUpVectorCameraSpace()));
+    glm::vec3 target = glm::normalize(fn->worldPosition().vec3() - cameraPosition.vec3());
+    glm::mat4 la = glm::lookAt(glm::vec3(0, 0, 0), target, glm::vec3(c->lookUpVectorCameraSpace()));
 
     c->setRotation(glm::quat_cast(la));
     c->setPosition(cameraPosition);
@@ -311,6 +311,10 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         glm::quat rot = glm::quat(viewOffset);
         c->rotate(rot);
     }
+
+    // explicitly update and sync the camera
+    c->preSynchronization();
+    c->postSynchronizationPreDraw();
 
 
     for (SceneGraphNode* node : _graph.nodes()) {
