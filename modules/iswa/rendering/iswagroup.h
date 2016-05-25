@@ -47,11 +47,17 @@ public:
 	//void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
 	//void unregisterCygnet(IswaCygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
+	void registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options);
 	bool isType(IswaManager::CygnetType type);
+
 	void clearGroup();
+	void updateGroup();
+	
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(){ return _groupEvent; };
 	std::shared_ptr<DataProcessor> dataProcessor();
-
+	std::vector<int> fieldlineValue() {return _fieldlines.value();}
+	std::vector<int> dataOptionsValue() {return _dataOptions.value();}
+	void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
 	// bool useLog(){return _useLog.value();};
  //    glm::vec2 normValues(){return _normValues.value();};
  //    bool useHistogram(){return _useHistogram.value();};
@@ -62,13 +68,19 @@ private:
 	void registerProperties();
 	void unregisterProperties();
 
+    void readFieldlinePaths(std::string indexFile);
+    void updateFieldlineSeeds();
+
 	properties::BoolProperty _enabled;
+	properties::FloatProperty _alpha;
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
+    properties::BoolProperty _autoFilter;
     properties::Vec2Property _normValues;
     properties::Vec2Property _backgroundValues;
     properties::StringProperty _transferFunctionsFile;
 	properties::SelectionProperty _dataOptions;
+	properties::SelectionProperty _fieldlines;
 	properties::TriggerProperty _delete;
 	// properties::SelectionProperty _dataOptions;
  //    properties::StringProperty _transferFunctionsFile;
@@ -85,6 +97,12 @@ private:
 	//std::vector<IswaCygnet* > _cygnets;
 	IswaManager::CygnetType _type;
 	bool _registered;
+
+	std::string _fieldlineIndexFile;
+	std::string _kameleonPath;
+	std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
+	
+
 };
 
 } //namespace openspace

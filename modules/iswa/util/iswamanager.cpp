@@ -242,11 +242,11 @@ std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string groupName, C
 //     }
 // }
 
-void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
-    if(_groups.find(name) != _groups.end()){
-        _groups[name]->registerOptions(options);
-    }
-}
+// void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
+//     if(_groups.find(name) != _groups.end()){
+//         _groups[name]->registerOptions(options);
+//     }
+// }
 
 std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
     if(_groups.find(name) != _groups.end()){

@@ -59,20 +59,23 @@ namespace openspace {
 namespace gui {
 GuiIswaComponent::GuiIswaComponent()
     :GuiPropertyComponent()
+    ,_gmdata(false)
+    ,_gmimage(false)
+    ,_iondata(false)
 {}
 
 void GuiIswaComponent::render() {
-    bool gmdatavalue = gmdata;
-    bool gmimagevalue = gmimage;
-    bool iondatavalue = iondata;
+    bool gmdatavalue = _gmdata;
+    bool gmimagevalue = _gmimage;
+    bool iondatavalue = _iondata;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
     ImGui::Text("Global Magnetosphere");
-    ImGui::Checkbox("Gm From Data", &gmdata); ImGui::SameLine();
-    ImGui::Checkbox("Gm From Images", &gmimage);
+    ImGui::Checkbox("Gm From Data", &_gmdata); ImGui::SameLine();
+    ImGui::Checkbox("Gm From Images", &_gmimage);
 
     ImGui::Text("Ionosphere");
-    ImGui::Checkbox("Ion From Data", &iondata);
+    ImGui::Checkbox("Ion From Data", &_iondata);
 
 
     ImGui::Spacing();
@@ -83,8 +86,8 @@ void GuiIswaComponent::render() {
     if(ImGui::SmallButton("Add Cygnet"))
         OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
 
-    if(gmdata != gmdatavalue){
-        if(gmdata){
+    if(_gmdata != gmdatavalue){
+        if(_gmdata){
             std::string x = "openspace.iswa.addCygnet(-1,'Data','GMData');";
             std::string y = "openspace.iswa.addCygnet(-2,'Data','GMData');";
             std::string z = "openspace.iswa.addCygnet(-3,'Data','GMData');";
@@ -94,8 +97,8 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(gmimage != gmimagevalue){
-        if(gmimage){
+    if(_gmimage != gmimagevalue){
+        if(_gmimage){
             std::string x = "openspace.iswa.addCygnet(-1,'Texture','GMImage');";
             std::string y = "openspace.iswa.addCygnet(-2,'Texture','GMImage');";
             std::string z = "openspace.iswa.addCygnet(-3,'Texture','GMImage');";
@@ -105,8 +108,8 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(iondata != iondatavalue){
-        if(iondata){
+    if(_iondata != iondatavalue){
+        if(_iondata){
             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-4,'Data','Ionosphere');");
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");

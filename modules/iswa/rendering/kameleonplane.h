@@ -39,6 +39,7 @@
  	~KameleonPlane();
 
      bool initialize() override;
+     bool deinitialize() override;
     
     
  private:
@@ -81,7 +82,7 @@
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
-    
+
 
 	std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
@@ -100,6 +101,7 @@
      * this is the name, path to seedpoints file and a boolean to determine if it is active or inactive.
      */
     std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
+    std::string _fieldlineIndexFile;
  };
  
  } // namespace openspace

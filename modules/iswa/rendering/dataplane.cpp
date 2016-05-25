@@ -115,12 +115,6 @@ bool DataPlane::initialize(){
         setTransferFunctions(_transferFunctionsFile.value());
     });
 
-    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
-        LDEBUG(name() + " Event enabledChanged");
-        _enabled.setValue(dict.value<bool>("enabled"));
-    });
-
-
     _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event useLogChanged");
         _useLog.setValue(dict.value<bool>("useLog"));
@@ -138,6 +132,11 @@ bool DataPlane::initialize(){
     _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event useHistogramChanged");
         _useHistogram.setValue(dict.value<bool>("useHistogram"));
+    });
+
+    _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event autoFilterChanged");
+        _autoFilter.setValue(dict.value<bool>("autoFilter"));
     });
 
     _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
@@ -166,6 +165,13 @@ bool DataPlane::initialize(){
     _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event clearGroup");
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
+
+
+    _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event updateGroup");
+        // deinitialize();
+        updateTexture();
     });
 
     return true;
@@ -356,7 +362,7 @@ void DataPlane::fillOptions(){
     }
     _dataOptions.setValue(std::vector<int>(1,0));
     if(_group)
-        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+        _group->registerOptions(_dataOptions.options());
 }
 
 }// namespace openspace

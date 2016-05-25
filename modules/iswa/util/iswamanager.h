@@ -96,7 +96,7 @@ public:
     std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(std::string name, CygnetType type);
     std::shared_ptr<IswaGroup> registerToGroup(std::string name, CygnetType type);
     void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
-    void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
+    // void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
     std::shared_ptr<IswaGroup> iswaGroup(std::string name);
     
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();

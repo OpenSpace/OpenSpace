@@ -29,6 +29,9 @@
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 
+namespace {
+    const std::string _loggerCat = "IswaCygnet";
+}
 
 namespace openspace{
 
@@ -119,9 +122,20 @@ bool IswaCygnet::initialize(){
         OsEng.gui()._iswa.registerProperty(&_delete);
 
         _delete.onChange([this](){
+            deinitialize();
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
         });
     }
+
+    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event enabledChanged");
+        _enabled.setValue(dict.value<bool>("enabled"));
+    });
+
+    _groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event alphaChanged");
+        _alpha.setValue(dict.value<float>("alpha"));
+    });
     
     initializeTime();
     createGeometry();

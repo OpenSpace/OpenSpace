@@ -43,9 +43,9 @@ public:
     virtual void render() override;
 
 private:
-    bool gmdata;
-    bool gmimage;
-    bool iondata;
+    bool _gmdata;
+    bool _gmimage;
+    bool _iondata;
 
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;

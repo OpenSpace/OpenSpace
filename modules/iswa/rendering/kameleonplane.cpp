@@ -83,15 +83,11 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("kwPath", _kwPath);
     
     std::string fieldlineIndexFile;
-    dictionary.getValue("fieldlineSeedsIndexFile", fieldlineIndexFile);
-    readFieldlinePaths(absPath(fieldlineIndexFile));
-
-    _fieldlines.onChange([this](){ updateFieldlineSeeds();} );
+    dictionary.getValue("fieldlineSeedsIndexFile", _fieldlineIndexFile);
 
     std::string axis;
     dictionary.getValue("axisCut", axis);
 
-    OsEng.gui()._iswa.registerProperty(&_fieldlines);
     OsEng.gui()._iswa.registerProperty(&_slice);
 
     if(axis == "x"){
@@ -116,6 +112,13 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 }
 
 KameleonPlane::~KameleonPlane(){
+
+
+}
+
+bool KameleonPlane::deinitialize(){
+    IswaCygnet::deinitialize();
+    _fieldlines.set(std::vector<int>());
     _kw = nullptr;
 }
 
@@ -136,8 +139,12 @@ bool KameleonPlane::initialize(){
     createGeometry();
     createShader();
 
+    readFieldlinePaths(absPath(_fieldlineIndexFile));
+
     if(_group){
         _dataProcessor = _group->dataProcessor();
+        // _fieldlines.setValue(_group->fieldlineValue());
+        // updateFieldlineSeeds();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
@@ -146,6 +153,7 @@ bool KameleonPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_resolution);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+        OsEng.gui()._iswa.registerProperty(&_fieldlines);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
     
         _dataProcessor = std::make_shared<DataProcessor>(
@@ -187,6 +195,11 @@ bool KameleonPlane::initialize(){
     _slice.onChange([this](){
         updateTexture();
     });
+    
+    _fieldlines.onChange([this](){ 
+        updateFieldlineSeeds();
+    });
+
 
     _transferFunctionsFile.onChange([this](){
         LDEBUG(name() + " Event setTransferFunctionsFileChanged");
@@ -218,6 +231,11 @@ bool KameleonPlane::initialize(){
         _useHistogram.setValue(dict.value<bool>("useHistogram"));
     });
 
+    _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event autoFilterChanged");
+        _autoFilter.setValue(dict.value<bool>("autoFilter"));
+    });
+
     _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event dataOptionsChanged");
         std::shared_ptr<std::vector<int> > values;
@@ -226,6 +244,15 @@ bool KameleonPlane::initialize(){
             _dataOptions.setValue(*values);            
         }
     });
+
+    // _groupEvent->subscribe(name(), "fieldlinesChanged", [&](ghoul::Dictionary dict){
+    //     LDEBUG(name() + " Event fieldlinesChanged");
+    //     std::shared_ptr<std::vector<int> > values;
+    //     bool success = dict.getValue("fieldlines", values);
+    //     if(success){
+    //         _fieldlines.setValue(*values);      
+    //     }
+    // });
 
     _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event transferFunctionsChanged");
@@ -243,7 +270,14 @@ bool KameleonPlane::initialize(){
 
     _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event clearGroup");
+        // _delete.setValue(true);
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+    });
+
+    _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event updateGroup");
+        // deinitialize();
+        updateTexture();
     });
 
     fillOptions();
@@ -265,8 +299,10 @@ bool KameleonPlane::loadTexture() {
             getline(memorystream, optionName, '/');
             // std::cout << options[option].description << std::endl;
             _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
-            if(!_textures[option])
+            if(!_textures[option]){
                 _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
+                _group->updateGroup();
+            }
         }
     }
 
@@ -274,7 +310,7 @@ bool KameleonPlane::loadTexture() {
 
     if(data.empty())
         return false;
-    
+
     if(_autoFilter.value())
         _backgroundValues.setValue(_dataProcessor->filterValues());
     
@@ -451,9 +487,13 @@ void KameleonPlane::fillOptions(){
             numOptions++;
         }
     }
-    _dataOptions.setValue(std::vector<int>(1,0));
-    if(_group)
-        IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+    if(_group){
+        _group->registerOptions(_dataOptions.options());
+        _dataOptions.setValue(_group->dataOptionsValue());
+    }else{
+        _dataOptions.setValue(std::vector<int>(1,0));
+        // IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
+    }
     _dataOptions.onChange([this](){loadTexture();});
 }
 
@@ -464,11 +504,14 @@ void KameleonPlane::updateFieldlineSeeds(){
     for (auto& seedPath: _fieldlineState) {
         // if this option was turned off
         if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
+            if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) return;
+            
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
+            if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) != nullptr) return;
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
             IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kwPath, std::get<1>(seedPath.second));
             std::get<2>(seedPath.second) = true;
@@ -478,6 +521,10 @@ void KameleonPlane::updateFieldlineSeeds(){
 
 void KameleonPlane::readFieldlinePaths(std::string indexFile){
     LINFO("Reading seed points paths from file '" << indexFile << "'");
+    if(_group){
+        _group->setFieldlineInfo(indexFile, _kwPath);
+        return;
+    }
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
@@ -494,11 +541,20 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
             //Parse and add each fieldline as an selection
             json fieldlines = json::parse(fileContent);
             int i = 0;
+            std::string fullName = name();
+            std::string partName = fullName.substr(0,fullName.find_last_of("-"));
+            std::cout << fullName << std::endl;
+            std::cout << partName << std::endl;
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({i, it.key()});
-                _fieldlineState[i] = std::make_tuple(it.key(), it.value(), false);
+
+
+                _fieldlines.addOption({i, name()+"/"+it.key()});
+                _fieldlineState[i] = std::make_tuple(partName+"/"+it.key(), it.value(), false);
                 i++;
             }
+            // if(_group)
+            //     _group->registerFieldLineOptions(_fieldlines.options());
+
         } catch(const std::exception& e) {
             LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
         }
