@@ -49,7 +49,7 @@ void ABufferEmitVertex(vec4 pos) {
 
     // project the position to view space
     position =  modelViewProjection*position;
-    gl_Position = position;
+    gl_Position = z_normalization(position);
     EmitVertex();
 }
 
