@@ -133,7 +133,7 @@ namespace openspace {
             new ChunkedLodGlobe(_ellipsoid, _tileProviderManager));
 
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e9);
-        _distanceSwitch.addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
+        //_distanceSwitch.addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
     }
 
     RenderableGlobe::~RenderableGlobe() {
