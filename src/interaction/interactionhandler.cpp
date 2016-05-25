@@ -801,7 +801,11 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
                 glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
         }
         { // Move position towards or away from focus node
-            newPosition += -posDiff * _truckMovementMouseState.velocity.get().y;
+            glm::dvec3 centerToBoundingSphere =
+                glm::normalize(posDiff) *
+                static_cast<double>(_focusNode->boundingSphere().lengthf());
+            newPosition += -(posDiff + centerToBoundingSphere) *
+                _truckMovementMouseState.velocity.get().y;
         }
         { // Do roll
             glm::dquat cameraRollRotation =
@@ -843,7 +847,7 @@ InteractionHandler::InteractionHandler()
 
     _inputState = std::shared_ptr<InputState>(new InputState());
     _interactor = std::shared_ptr<InteractionMode>(
-        new OrbitalInteractionMode(_inputState, 0.01, 0.02));
+        new OrbitalInteractionMode(_inputState, 0.002, 0.02));
 }
 
 InteractionHandler::~InteractionHandler() {
