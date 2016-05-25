@@ -36,7 +36,6 @@
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/meshes/clipmapgrid.h>
 //#include <modules/globebrowsing/rendering/frustumculler.h>
-#include <modules/globebrowsing/other/texturetileset.h>
 #include <modules/globebrowsing/other/patchcoverageprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
 #include <modules/globebrowsing/other/layeredtextureshaderprovider.h>
