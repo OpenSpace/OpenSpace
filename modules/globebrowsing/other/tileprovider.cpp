@@ -54,12 +54,10 @@ namespace openspace {
         int tileCacheSize,
         int minimumPixelSize,
         int framesUntilRequestFlush)
-        : _filePath(filePath)
-        , _tileCache(tileCacheSize) // setting cache size
+        : _tileCache(tileCacheSize) // setting cache size
         , _framesSinceLastRequestFlush(0)
         , _framesUntilRequestFlush(framesUntilRequestFlush)
-        , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
-        , _rawTextureTileDataProvider(filePath, minimumPixelSize)
+        , _asyncTextureDataProvider(filePath, minimumPixelSize, TileProviderManager::tileRequestThreadPool)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -75,7 +73,6 @@ namespace openspace {
             _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         }
-
     }
 
     TileProvider::~TileProvider(){
@@ -84,30 +81,21 @@ namespace openspace {
 
 
     void TileProvider::prerender() {
-        //_rawTextureTileDataProvider.updateAsyncRequests();
         initTexturesFromLoadedData();
-
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();
         }
     }
 
     void TileProvider::initTexturesFromLoadedData() {
-        while (_tileLoadManager.numFinishedJobs() > 0) {
-            std::shared_ptr<TileIOResult> tileIOResult= _tileLoadManager.popFinishedJob()->product();
+        while (_asyncTextureDataProvider.hasLoadedTextureData()) {
+            std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider.nextTileIOResult();
             initializeAndAddToCache(tileIOResult);
         }
-        /*
-        while (_rawTextureTileDataProvider.hasTextureTileData()) {
-            auto rawTextureTile = _rawTextureTileDataProvider.nextTextureTile();
-            initializeAndAddToCache(rawTextureTile);
-        }
-        */
     }
 
     void TileProvider::clearRequestQueue() {
-        _tileLoadManager.clearEnqueuedJobs();
-        _queuedTileRequests.clear();
+        _asyncTextureDataProvider.clearRequestQueue();
         _framesSinceLastRequestFlush = 0;
     }
 
@@ -117,7 +105,7 @@ namespace openspace {
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
 
-        int maximumLevel = _rawTextureTileDataProvider.getMaximumLevel();
+        int maximumLevel = _asyncTextureDataProvider.getTextureDataProvider()->getMaximumLevel();
 
         while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
@@ -146,7 +134,7 @@ namespace openspace {
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first
-            enqueueTileRequest(chunkIndex);
+            _asyncTextureDataProvider.enqueueTextureData(chunkIndex);
 
             return tile;
         }
@@ -175,32 +163,10 @@ namespace openspace {
             return _tileCache.get(hashkey).texture;
         }
         else {
-            enqueueTileRequest(chunkIndex);
+            _asyncTextureDataProvider.enqueueTextureData(chunkIndex);
             return nullptr;
         }
     }
-
-    bool TileProvider::enqueueTileRequest(const ChunkIndex& chunkIndex) {
-        HashKey key = chunkIndex.hashKey();
-        auto it = _queuedTileRequests.begin();
-        auto end = _queuedTileRequests.end();
-        for (; it != end; it++) {
-            const ChunkIndex& otherChunk = it->second;
-            if (chunkIndex.level == otherChunk.level && 
-                chunkIndex.manhattan(otherChunk) < 1) {
-                return false;
-            }
-        }
-
-        
-        std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-            new TextureTileLoadJob(this, chunkIndex));
-        _tileLoadManager.enqueueJob(job);
-        _queuedTileRequests[key] = chunkIndex;
-        
-        return true;
-    }
-
 
 
     std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
@@ -208,17 +174,9 @@ namespace openspace {
     }
 
     TileDepthTransform TileProvider::depthTransform() {
-        return _rawTextureTileDataProvider.getDepthTransform();
+        return _asyncTextureDataProvider.getTextureDataProvider()->getDepthTransform();
     }
 
-
-    std::shared_ptr<TileIOResult> TileProvider::syncDownloadData(
-        const ChunkIndex& chunkIndex) {
-
-        std::shared_ptr<TileIOResult> res = _rawTextureTileDataProvider.getTextureData(chunkIndex);
-
-        return res;
-    }
 
     void TileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
 

@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEXTURE_DATA_PROVIDER_H__
-#define __TEXTURE_DATA_PROVIDER_H__
+#ifndef __TILE_DATASET_H__
+#define __TILE_DATASET_H__
 
 //#include <modules/globebrowsing/other/tileprovider.h>
 
@@ -86,14 +86,14 @@ namespace openspace {
 
 
 
-    class TextureDataProvider {
+    class TileDataset {
     public:
 
-        TextureDataProvider(const std::string& fileName, int minimumPixelSize);
-        ~TextureDataProvider();
+        TileDataset(const std::string& fileName, int minimumPixelSize);
+        ~TileDataset();
 
 
-        std::shared_ptr<TileIOResult> getTextureData(ChunkIndex chunkIndex);
+        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
 
         int getMaximumLevel() const;
 
@@ -184,4 +184,4 @@ namespace openspace {
 
 
 
-#endif  // __TEXTURE_DATA_PROVIDER_H__
+#endif  // __TILE_DATASET_H__
