@@ -43,6 +43,8 @@
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
+    const int MAX_TEXTURES = 6;
+
 }
 
 namespace openspace {
@@ -351,10 +353,11 @@ bool KameleonPlane::readyToRender(){
 
 void KameleonPlane::setUniformAndTextures(){
     std::vector<int> selectedOptions = _dataOptions.value();
-    int activeTextures = selectedOptions.size();
-    int activeTransferfunctions = _transferFunctions.size();
+    int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
+    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
 
-    ghoul::opengl::TextureUnit txUnits[10];
+
+    ghoul::opengl::TextureUnit txUnits[6];
     int j = 0;
     for(int option : selectedOptions){
         if(_textures[option]){
@@ -366,6 +369,7 @@ void KameleonPlane::setUniformAndTextures(){
             );
 
             j++;
+            if(j >= MAX_TEXTURES) break;
         }
     }
 
@@ -374,7 +378,7 @@ void KameleonPlane::setUniformAndTextures(){
             activeTransferfunctions = 1;
     }
 
-    ghoul::opengl::TextureUnit tfUnits[10];
+    ghoul::opengl::TextureUnit tfUnits[6];
     j = 0;
 
     if((activeTransferfunctions == 1)){
@@ -395,6 +399,7 @@ void KameleonPlane::setUniformAndTextures(){
                 );
 
                 j++;
+                if(j >= MAX_TEXTURES) break;
             }
         }
     }
@@ -430,6 +435,7 @@ void KameleonPlane::setTransferFunctions(std::string tfPath){
                 tfs.push_back(tf);
             }
         }
+        tfFile.close();
     }
 
     if(!tfs.empty()){
@@ -457,7 +463,11 @@ void KameleonPlane::fillOptions(){
         _dataOptions.setValue(std::vector<int>(1,0));
         // IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
     }
-    _dataOptions.onChange([this](){loadTexture();});
+    _dataOptions.onChange([this](){
+        if(_dataOptions.value().size() > MAX_TEXTURES)
+            LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
+        loadTexture();
+    });
 }
 
 void KameleonPlane::updateFieldlineSeeds(){

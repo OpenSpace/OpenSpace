@@ -37,6 +37,7 @@
 
 namespace {
     const std::string _loggerCat = "DataPlane";
+    const int MAX_TEXTURES = 6;
 }
 
 namespace openspace {
@@ -161,7 +162,11 @@ bool DataPlane::initialize(){
         loadTexture();
     });
 
-    _dataOptions.onChange([this](){ loadTexture();} );
+    _dataOptions.onChange([this](){ 
+        if(_dataOptions.value().size() > MAX_TEXTURES)
+            LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
+        loadTexture();
+    });
 
     _transferFunctionsFile.onChange([this](){
         setTransferFunctions(_transferFunctionsFile.value());
@@ -255,10 +260,10 @@ bool DataPlane::readyToRender(){
 
 void DataPlane::setUniformAndTextures(){    
     std::vector<int> selectedOptions = _dataOptions.value();
-    int activeTextures = selectedOptions.size();
-    int activeTransferfunctions = _transferFunctions.size();
+    int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
+    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
 
-    ghoul::opengl::TextureUnit txUnits[10];
+    ghoul::opengl::TextureUnit txUnits[6];
     int j = 0;
     for(int option : selectedOptions){
         if(_textures[option]){
@@ -270,6 +275,7 @@ void DataPlane::setUniformAndTextures(){
             );
 
             j++;
+            if(j >= MAX_TEXTURES) break;
         }
     }
 
@@ -278,7 +284,7 @@ void DataPlane::setUniformAndTextures(){
             activeTransferfunctions = 1;
     }
 
-    ghoul::opengl::TextureUnit tfUnits[10];
+    ghoul::opengl::TextureUnit tfUnits[6];
     j = 0;
 
     if((activeTransferfunctions == 1)){
@@ -305,6 +311,7 @@ void DataPlane::setUniformAndTextures(){
                 );
 
                 j++;
+                if(j >= MAX_TEXTURES) break;
             }
         }
     }
@@ -340,8 +347,11 @@ void DataPlane::setTransferFunctions(std::string tfPath){
                 tfs.push_back(tf);
             }
         }
+
+        tfFile.close();
     }
 
+    
     if(!tfs.empty()){
         _transferFunctions.clear();
         _transferFunctions = tfs;

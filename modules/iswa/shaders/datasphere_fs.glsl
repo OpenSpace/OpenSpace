@@ -50,6 +50,9 @@ Fragment getFragment() {
     vec4 diffuse = transparent;
     float v = 0;
 
+    float x = backgroundValues.x;
+    float y = backgroundValues.y;
+    
     if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
         for(int i=0; i<numTextures; i++){
             v += texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
@@ -57,8 +60,6 @@ Fragment getFragment() {
         v /= numTextures;
         
         vec4 color = texture(transferFunctions[0], vec2(v,0));
-        float x = backgroundValues.x;
-        float y = backgroundValues.y;
         if((v<(x+y)) && v>(x-y))
             color = mix(transparent, color, clamp(1,0,abs(v-x)));
 
@@ -67,6 +68,8 @@ Fragment getFragment() {
         for(int i=0; i<numTextures; i++){
             v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
             vec4 color = texture(transferFunctions[i], vec2(v,0));
+            if((v<(x+y)) && v>(x-y))
+                color = mix(transparent, color, clamp(1,0,abs(v-x)));
             diffuse += color;
         }
     }

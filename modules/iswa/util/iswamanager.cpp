@@ -608,6 +608,8 @@ void IswaManager::addCdfFiles(std::string path){
                 }
 
             }
+
+            jsonFile.close();
         }
     }else{
         LWARNING( path + " is not a cdf file or can't be found.");
