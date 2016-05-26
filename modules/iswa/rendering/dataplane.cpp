@@ -361,7 +361,7 @@ void DataPlane::setTransferFunctions(std::string tfPath){
 void DataPlane::fillOptions(){
     std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
     for(int i=0; i<options.size(); i++){
-        _dataOptions.addOption({i, name()+"/"+options[i]});
+        _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);
     }
     _dataOptions.setValue(std::vector<int>(1,0));

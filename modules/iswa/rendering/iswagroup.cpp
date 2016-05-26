@@ -48,10 +48,8 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_fieldlineIndexFile("")
-    // ,_id(id)
     ,_type(type)
     ,_registered(false)
-    // ,_dataProcessor(nullptr)
 {
     setName(name);
 
@@ -87,35 +85,12 @@ void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty:
     if(_type == IswaManager::CygnetType::Data){
         if(_dataOptions.options().empty()){
             for(auto option : options){
-
-                std::stringstream memorystream(option.description);
-                std::string optionName;
-                getline(memorystream, optionName, '/');
-                getline(memorystream, optionName, '/');
-
-                _dataOptions.addOption({option.value, name()+"/"+optionName});
+                _dataOptions.addOption({option.value, option.description});
             }
             _dataOptions.setValue(std::vector<int>(1,0));
         }
     }
 }
-
-// void IswaGroup::registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options){
-//     // std::cout << "Register fieldlines" << std::endl; 
-//     if(_type == IswaManager::CygnetType::Data){
-//         if(_fieldlines.options().empty()){
-//             for(auto option : options){
-
-//                 std::stringstream memorystream(option.description);
-//                 std::string optionName;
-//                 getline(memorystream, optionName, '/');
-//                 getline(memorystream, optionName, '/');
-
-//                 _fieldlines.addOption({option.value, name()+"/"+optionName});
-//             }
-//         }
-//     }
-// }
 
 void IswaGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath){
 
@@ -126,11 +101,8 @@ void IswaGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kam
 
     if(kameleonPath != _kameleonPath){
         _kameleonPath = kameleonPath;
-        // std::vector<int> fieldLinesValue = _fieldlines.value();
         clearFieldlines();
         updateFieldlineSeeds();
-        // _fieldlines.setValue(std::vector<int>()); //clear the existing fieldlines
-        // _fieldlines.setValue(fieldLinesValue);    //create fieldlines from the same seed points but with different cdf file
     }
 }
 
@@ -214,10 +186,8 @@ void IswaGroup::registerProperties(){
 }
 
 void IswaGroup::unregisterProperties(){
-    // _dataOptions.removeOptions();
     OsEng.gui()._iswa.unregisterProperties(name());
     _registered = false;
-    // _type = IswaManager::CygnetType::NoType;
 }
 
 void IswaGroup::updateGroup(){
@@ -230,7 +200,6 @@ void IswaGroup::clearGroup(){
     unregisterProperties();
     clearFieldlines();
 
-    // _fieldlines.setValue(std::vector<int>());
 }
 
 std::shared_ptr<DataProcessor> IswaGroup::dataProcessor(){
@@ -244,14 +213,11 @@ void IswaGroup::updateFieldlineSeeds(){
     for (auto& seedPath: _fieldlineState) {
         // if this option was turned off
         if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
-            // if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) return;
-            
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            // if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) != nullptr) return;
             LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
             IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kameleonPath, std::get<1>(seedPath.second));
             std::get<2>(seedPath.second) = true;
@@ -293,14 +259,10 @@ void IswaGroup::readFieldlinePaths(std::string indexFile){
 void IswaGroup::clearFieldlines(){
         // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
     for (auto& seedPath: _fieldlineState) {
-        // if this option was turned off
-        if( std::get<2>(seedPath.second)){
-            // if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) return;
-            
+        if(std::get<2>(seedPath.second)){
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
             std::get<2>(seedPath.second) = false;
-        // if this option was turned on
         }
     }
 }

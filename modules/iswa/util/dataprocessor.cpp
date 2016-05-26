@@ -374,10 +374,7 @@ std::vector<float*> DataProcessor::readJSONData(std::string& dataBuffer, propert
 
             data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
 
-            std::stringstream memorystream(options[option].description);
-            std::string optionName;
-            getline(memorystream, optionName, '/');
-            getline(memorystream, optionName, '/');
+            std::string optionName = options[option].description;
 
             json valueArray = var[optionName];
             int ySize = valueArray.size();
@@ -441,10 +438,10 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
         int i = 0;
 
         for(int i=0; i<numOptions; i++){
-            std::stringstream memorystream(options[i].description);
-            std::string optionName;
-            getline(memorystream, optionName, '/');
-            getline(memorystream, optionName, '/');
+            // std::stringstream memorystream();
+            std::string optionName = options[i].description;
+            // getline(memorystream, optionName, '/');
+            // getline(memorystream, optionName, '/');
 
             json valueArray = var[optionName];
             int ySize = valueArray.size();
@@ -531,10 +528,10 @@ std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, proper
 
             data[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
 
-            std::stringstream memorystream(options[option].description);
-            std::string optionName;
-            getline(memorystream, optionName, '/');
-            getline(memorystream, optionName, '/');
+            // std::stringstream memorystream();
+            std::string optionName = options[option].description;
+            // getline(memorystream, optionName, '/');
+            // getline(memorystream, optionName, '/');
 
             json yArray = var[optionName];
             for(int y=0; y<yArray.size(); y++){

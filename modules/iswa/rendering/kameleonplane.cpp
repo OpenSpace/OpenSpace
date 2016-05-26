@@ -123,7 +123,6 @@ bool KameleonPlane::deinitialize(){
 
 bool KameleonPlane::initialize(){
     _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-    // IswaCygnet::initialize();
     _textures.push_back(nullptr);
 
     if(!_data->groupName.empty()){
@@ -258,11 +257,7 @@ bool KameleonPlane::loadTexture() {
     for(int option : selectedOptions){
         if(!_dataSlices[option]){
 
-            std::stringstream memorystream(options[option].description);
-            std::string optionName;
-            getline(memorystream, optionName, '/');
-            getline(memorystream, optionName, '/');
-            // std::cout << options[option].description << std::endl;
+            std::string optionName = options[option].description;
             _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
             if(!_textures[option]){
                 _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
@@ -450,7 +445,7 @@ void KameleonPlane::fillOptions(){
 
     for(std::string option : options){
         if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
-            _dataOptions.addOption({numOptions, name()+"/"+option});
+            _dataOptions.addOption({numOptions, option});
             _dataSlices.push_back(nullptr);
             _textures.push_back(nullptr);
             numOptions++;
