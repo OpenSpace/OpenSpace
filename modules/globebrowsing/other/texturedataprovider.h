@@ -52,7 +52,6 @@ namespace openspace {
         };
 
 
-
         RawTileData(void* data, glm::uvec3 dims, TextureFormat format,
             GLuint glType, const ChunkIndex& chunkIndex)
             : imageData(data)
@@ -80,37 +79,33 @@ namespace openspace {
 
 
 
+    struct TileDepthTransform {
+        float depthScale;
+        float depthOffset;
+    };
+
 
 
     class TextureDataProvider {
     public:
 
-        TextureDataProvider();
+        TextureDataProvider(const std::string& fileName, int minimumPixelSize);
         ~TextureDataProvider();
 
 
-        std::shared_ptr<TileIOResult> getTextureData(
-            GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
+        std::shared_ptr<TileIOResult> getTextureData(ChunkIndex chunkIndex);
 
-        /*
-        void asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference);
-        void updateAsyncRequests();
-        bool hasTextureTileData() const;
-        std::shared_ptr<RawTileData> nextTextureTile();
-        */
+        int getMaximumLevel() const;
+
+        TileDepthTransform getDepthTransform() const;
+
 
     private:
-
-
-
-
 
 
         //////////////////////////////////////////////////////////////////////////////////
         //                          HELPER STRUCTS                                      //
         //////////////////////////////////////////////////////////////////////////////////
-
-
 
 
         struct GdalDataRegion {
@@ -138,23 +133,10 @@ namespace openspace {
             size_t bytesPerPixel;
             size_t bytesPerLine;
             size_t totalNumBytes;
-
         };
 
 
-        struct GdalAsyncRequest {
-            GDALDataset* dataSet;
-            GDALAsyncReader* asyncReader;
-            const GdalDataRegion region;
-            const DataLayout dataLayout;
-            const char* imageData;
-        };
 
-        struct GdalAsyncRequestCompare {
-            bool operator() (const GdalAsyncRequest& lhs, const GdalAsyncRequest& rhs) const {
-                return lhs.region.chunkIndex.hashKey() < rhs.region.chunkIndex.hashKey();
-            }
-        };
 
 
 
@@ -162,8 +144,10 @@ namespace openspace {
         //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
+        TileDepthTransform calculateTileDepthTransform();
 
-        
+
+        static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
 
         static glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
@@ -181,9 +165,14 @@ namespace openspace {
         //                              MEMBER VARIABLES                                //
         //////////////////////////////////////////////////////////////////////////////////
 
+        static bool GdalHasBeenInitialized;
 
-        std::queue<std::shared_ptr<RawTileData>> loadedTextureTiles;
-        std::set<GdalAsyncRequest, GdalAsyncRequestCompare> asyncRequests;
+        int _minimumPixelSize;
+        double _tileLevelDifference;
+
+        TileDepthTransform _depthTransform;
+
+        GDALDataset* _dataset;
 
     };
 

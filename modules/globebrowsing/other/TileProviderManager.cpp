@@ -31,7 +31,7 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(15);
+    ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
 
     TileProviderManager::TileProviderManager()
@@ -56,17 +56,6 @@ namespace openspace {
         _colorTextureProviders.push_back(tileProvider);
 
     }
-    /*
-    std::shared_ptr<TileProvider> TileProviderManager::getHeightMap(std::string name)
-    {
-        return _heightMapProviders[name];
-    }
-    
-    std::shared_ptr<TileProvider> TileProviderManager::getColorTexture(std::string name)
-    {
-        return _colorTextureProviders[name];
-    }
-    */
 
     const std::vector<std::shared_ptr<TileProvider> >&
         TileProviderManager::heightMapProviders()

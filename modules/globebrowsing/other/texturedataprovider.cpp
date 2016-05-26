@@ -24,6 +24,8 @@
 
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h> // abspath
+#include <ghoul/misc/assert.h>
 
 #include <modules/globebrowsing/other/texturedataprovider.h>
 #include <modules/globebrowsing/other/tileprovider.h>
@@ -37,27 +39,71 @@ namespace {
 
 namespace openspace {
 
-    TextureDataProvider::TextureDataProvider() {
+    // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
+    bool TextureDataProvider::GdalHasBeenInitialized = false; 
 
+    TextureDataProvider::TextureDataProvider(const std::string& fileName, int minimumPixelSize)
+        : _minimumPixelSize(minimumPixelSize)
+    {
+        
+        if (!GdalHasBeenInitialized) {
+            GDALAllRegister();
+            GdalHasBeenInitialized = true;
+        }
+
+        _dataset = (GDALDataset *)GDALOpen(absPath(fileName).c_str(), GA_ReadOnly);
+        ghoul_assert(_dataset != nullptr, "Failed to load dataset: " << fileName);
+
+        _depthTransform = calculateTileDepthTransform();
+        _tileLevelDifference = calculateTileLevelDifference(_dataset, minimumPixelSize);
     }
+
 
     TextureDataProvider::~TextureDataProvider() {
-
+        delete _dataset;
     }
 
+    int TextureDataProvider::calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
+        GDALRasterBand* firstBand = dataset->GetRasterBand(1);
+        int numOverviews = firstBand->GetOverviewCount();
+        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
+        return log2(minimumPixelSize) - log2(sizeLevel0);
+    }
 
-    std::shared_ptr<TileIOResult> TextureDataProvider::getTextureData(GDALDataset* dataSet,
-        ChunkIndex chunkIndex, int tileLevelDifference)
+    TileDepthTransform TextureDataProvider::calculateTileDepthTransform() {
+        GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
+        GDALDataType gdalType = firstBand->GetRasterDataType();
+
+        double maximumValue = (gdalType == GDT_Float32 || gdalType == GDT_Float64) ?
+            1.0 : firstBand->GetMaximum();
+        
+        TileDepthTransform transform;
+        transform.depthOffset = firstBand->GetOffset();
+        transform.depthScale = firstBand->GetScale() * maximumValue;
+        return transform;
+    }
+
+    int TextureDataProvider::getMaximumLevel() const {
+        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+        int maximumLevel = numOverviews - 1 - _tileLevelDifference;
+        return maximumLevel;
+    }
+
+    TileDepthTransform TextureDataProvider::getDepthTransform() const {
+        return _depthTransform;
+    }
+
+    std::shared_ptr<TileIOResult> TextureDataProvider::getTextureData(ChunkIndex chunkIndex)
     {               
-        GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
-        DataLayout dataLayout(dataSet, region);
+        GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
+        DataLayout dataLayout(_dataset, region);
         char* imageData = new char[dataLayout.totalNumBytes];
 
         CPLErr worstError = CPLErr::CE_None;
 
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < region.numRasters; i++) {
-            GDALRasterBand* rasterBand = dataSet->GetRasterBand(i + 1)->GetOverview(region.overview);
+            GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
 
             char* dataDestination = imageData + (i * dataLayout.bytesPerDatum);
             
@@ -87,85 +133,6 @@ namespace openspace {
 
         return result;
     }
-
-    /*
-    void TextureDataProvider::asyncRequest(GDALDataset * dataSet, ChunkIndex chunkIndex, int tileLevelDifference) {
-        GdalDataRegion region(dataSet, chunkIndex, tileLevelDifference);
-        DataLayout dataLayout(dataSet, region);
-
-        char* imageData = new char[dataLayout.totalNumBytes];
-
-        int* rasterBandSelection = nullptr; // default to { 1, 2, ... , region.numRasters } 
-        GDALAsyncReader * asyncReader = dataSet->BeginAsyncReader(
-            region.pixelStart.x,           // nXOff
-            region.pixelStart.y,           // nYOff
-            region.numPixels.x,            // nXSize
-            region.numPixels.y,            // nYSize
-            imageData,                     // pBuf
-            region.numPixels.x,            // nBufXSize
-            region.numPixels.y,            // nBufYSize
-            dataLayout.gdalType,		   // eBufType
-            region.numRasters,             // nBandCount
-            rasterBandSelection,           // panBandMap
-            dataLayout.bytesPerDatum,	   // nPixelSpace
-            dataLayout.bytesPerLine,       // nLineSpace
-            dataLayout.bytesPerPixel,      // nBandSpace
-            nullptr                        // papszOptions
-            );
-        
-        ghoul_assert(asyncReader != nullptr, "Async reader is null");
-
-        GdalAsyncRequest request = { dataSet, asyncReader, region, dataLayout, imageData };
-
-        asyncRequests.insert(request);
-        
-    }
-
-
-    void TextureDataProvider::updateAsyncRequests() {
-        double updateWaitTime = -1.0;
-        int nBufXOff, nBufYOff, nBufXSize, nBufYSize;
-
-        auto it = asyncRequests.begin();
-        auto end = asyncRequests.end();
-        
-        while (it != end) {
-             GDALAsyncStatusType status = it->asyncReader->GetNextUpdatedRegion(
-                updateWaitTime, &nBufXOff, &nBufYOff, &nBufXSize, &nBufYSize);
-
-
-            if (status == GDALAsyncStatusType::GARIO_ERROR) {
-                LERROR("Async IO error for chunk " << it->region.chunkIndex);
-                it->dataSet->EndAsyncReader(it->asyncReader);
-                it = asyncRequests.erase(it);
-            }
-            else if (status == GDALAsyncStatusType::GARIO_COMPLETE) {
-                auto rawTileData = createRawTileData(it->region, it->dataLayout, it->imageData);
-                loadedTextureTiles.push(rawTileData);
-                it->dataSet->EndAsyncReader(it->asyncReader);
-                it = asyncRequests.erase(it);
-            }
-            else {
-                it++;
-            }
-        }
-    }
-
-
-    bool TextureDataProvider::hasTextureTileData() const {
-        return loadedTextureTiles.size() > 0;
-    }
-
-
-    std::shared_ptr<RawTileData> TextureDataProvider::nextTextureTile() {
-        auto tile = loadedTextureTiles.front();
-        loadedTextureTiles.pop();
-        return tile;
-    }
-    */
-
-
-
 
 
     std::shared_ptr<RawTileData> TextureDataProvider::createRawTileData(const GdalDataRegion& region,

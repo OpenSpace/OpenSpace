@@ -47,15 +47,6 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
-    
-    struct TileDepthTransform {
-        TileDepthTransform();
-        TileDepthTransform(GDALDataset* dataset);
-
-        float depthScale;
-        float depthOffset;
-    };
-
 
 
     struct TileUvTransform
@@ -147,16 +138,12 @@ namespace openspace {
 
         const std::string _filePath;
 
-        static bool hasInitializedGDAL;
-        GDALDataset* _gdalDataSet;
 
         TextureDataProvider _rawTextureTileDataProvider;
 
         ConcurrentJobManager<TileIOResult> _tileLoadManager;
 
         std::shared_ptr<Texture> _defaultTexture;
-        int _tileLevelDifference;
-        TileDepthTransform _depthTransform;
 
     };
 
