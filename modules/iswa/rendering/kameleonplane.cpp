@@ -261,7 +261,9 @@ bool KameleonPlane::loadTexture() {
             _dataSlices[option] = _kw->getUniformSliceValues(optionName, _dimensions, _slice.value());
             if(!_textures[option]){
                 _dataProcessor->addValuesFromKameleonData(_dataSlices[option], _dimensions, options.size(), option);
-                _group->updateGroup();
+
+                if(_group)
+                    _group->updateGroup();
             }
         }
     }

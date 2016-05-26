@@ -190,7 +190,9 @@ bool DataSphere::loadTexture(){
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
         _dataProcessor->addValuesFromJSON(_dataBuffer, _dataOptions);
-        _group->updateGroup();
+
+        if(_group)
+            _group->updateGroup();
     }
 
     std::vector<float*> data = _dataProcessor->readJSONData2(_dataBuffer, _dataOptions);
