@@ -62,7 +62,8 @@ bool TexturePlane::loadTexture() {
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
         imageFile = _futureObject.get();
 
-    } else {
+    }
+     else {
         return false;
     }
 
@@ -73,18 +74,17 @@ bool TexturePlane::loadTexture() {
                                                         (void*) imageFile.buffer,
                                                         imageFile.size, 
                                                         imageFile.format);
+    // delete[] (char*) imageFile.buffer;
+    // if (texture) {
+    //     LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
 
-    if (texture) {
-        LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
+    //     texture->uploadTexture();
+    //     // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
+    //     texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    //     _textures[0]  = std::move(texture);
+    // }
 
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-        _textures[0]  = std::move(texture);
-    }
-
-    return false;
+    // return false;
 }
 
 

@@ -186,6 +186,7 @@ bool DataPlane::loadTexture() {
 
         _dataBuffer = "";
         _dataBuffer.append(dataFile.buffer, dataFile.size);
+        delete[] dataFile.buffer;
     }
 
     // if the buffer in the datafile is empty, do not proceed
@@ -208,6 +209,8 @@ bool DataPlane::loadTexture() {
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
+
+
 
     for(int option: selectedOptions){
         float* values = data[option];

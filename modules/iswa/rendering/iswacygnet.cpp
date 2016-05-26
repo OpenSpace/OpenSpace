@@ -188,7 +188,7 @@ void IswaCygnet::render(const RenderData& data){
 void IswaCygnet::update(const UpdateData& data){
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
+    _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
 
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
@@ -204,7 +204,10 @@ void IswaCygnet::update(const UpdateData& data){
         _textureDirty = true;
     }
     
-    if(_textureDirty) loadTexture();
+    if(_textureDirty) {
+        loadTexture();
+        _textureDirty = false;
+    }
 
     if(!_transferFunctions.empty())
         for(auto tf : _transferFunctions)

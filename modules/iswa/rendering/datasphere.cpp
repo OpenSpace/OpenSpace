@@ -180,6 +180,7 @@ bool DataSphere::loadTexture(){
 
         _dataBuffer = "";
         _dataBuffer.append(dataFile.buffer, dataFile.size);
+        delete[] dataFile.buffer;
     }
 
     // if the buffer in the datafile is empty, do not proceed

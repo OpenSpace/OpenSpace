@@ -36,13 +36,14 @@ function postInitialization()
     
     --openspace.iswa.addCygnet(-4,"Data");
 
-    --penspace.iswa.addCygnet(-1,"Data");
+    --openspace.iswa.addCygnet(-1,"Data");
     --openspace.iswa.addCygnet(-2,"Data");
     --openspace.iswa.addCygnet(-3,"Data");
 
+    openspace.iswa.addCygnet(-3,"Data","GM");
     --openspace.iswa.addCygnet(-2,"Data","GM");
     --openspace.iswa.addCygnet(-1,"Data","GM");
-    --openspace.iswa.addCygnet(-3,"Data","GM");
+
 
     openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
     
