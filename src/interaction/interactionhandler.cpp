@@ -885,6 +885,104 @@ void OrbitalInteractionMode::update(double deltaTime) {
     updateCameraStateFromMouseStates();
 }
 
+GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(
+    std::shared_ptr<InputState> inputState,
+    double sensitivity,
+    double velocityScaleFactor)
+    : OrbitalInteractionMode(inputState, sensitivity, velocityScaleFactor) {
+
+}
+
+GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
+
+}
+
+void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
+    _focusNode = focusNode;
+
+    Renderable* baseRenderable = _focusNode->renderable();
+    if (RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(baseRenderable)) {
+        _globe = globe;
+    }
+    else {
+        _globe = nullptr;
+    }
+
+}
+
+
+void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
+    if (_focusNode && _globe) {
+        // Declare variables to use in interaction calculations
+        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        glm::dvec3 camPos = _camera->positionVec3();
+        glm::dvec3 posDiff = camPos - centerPos;
+        glm::dvec3 newPosition = camPos;
+
+        glm::dvec3 centerToSurface = _globe->geodeticSurfaceProjection(camPos);
+        glm::dvec3 surfaceToCamera = camPos - (centerPos + centerToSurface);
+        glm::dvec3 directionFromSurfaceToCamera = glm::normalize(surfaceToCamera);
+        double distFromCenterToSurface =
+            glm::length(centerToSurface);
+        double distFromSurfaceToCamera = glm::length(surfaceToCamera);
+        double distFromCenterToCamera = glm::length(posDiff);
+
+        { // Do local rotation
+            glm::dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
+            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+
+            _localCameraRotation = _localCameraRotation * rotationDiff;
+        }
+        { // Do global rotation
+            glm::dvec3 eulerAngles(
+                -_globalRotationMouseState.velocity.get().y,
+                -_globalRotationMouseState.velocity.get().x,
+                0);
+            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+
+            glm::dquat newRotationCamspace =
+                _globalCameraRotation * rotationDiffCamSpace;
+            glm::dquat rotationDiffWorldSpace =
+                newRotationCamspace * glm::inverse(_globalCameraRotation);
+
+            glm::dvec3 rotationDiffVec3 =
+                (distFromCenterToCamera * directionFromSurfaceToCamera)
+                * rotationDiffWorldSpace
+                - (distFromCenterToCamera * directionFromSurfaceToCamera);
+            rotationDiffVec3 *= glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
+
+            newPosition = camPos + rotationDiffVec3;
+
+            glm::dvec3 lookUpWhenFacingCenter =
+                _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
+            glm::dmat4 lookAtMat = glm::lookAt(
+                glm::dvec3(0, 0, 0),
+                -directionFromSurfaceToCamera,
+                lookUpWhenFacingCenter);
+            _globalCameraRotation =
+                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+        }
+        { // Move position towards or away from focus node
+            newPosition += -(posDiff - centerToSurface) *
+                _truckMovementMouseState.velocity.get().y;
+        }
+        { // Do roll
+            glm::dquat cameraRollRotation =
+                glm::angleAxis(_rollMouseState.velocity.get().x, directionFromSurfaceToCamera);
+            _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
+        }
+
+        // Update the camera state
+        _camera->setRotation(_globalCameraRotation * _localCameraRotation);
+        _camera->setPositionVec3(newPosition);
+    }
+}
+
+void GlobeBrowsingInteractionMode::update(double deltaTime) {
+    updateMouseStatesFromInput(deltaTime);
+    updateCameraStateFromMouseStates();
+}
+
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
@@ -908,7 +1006,7 @@ InteractionHandler::InteractionHandler()
 
     _inputState = std::shared_ptr<InputState>(new InputState());
     _interactor = std::shared_ptr<InteractionMode>(
-        new OrbitalInteractionMode(_inputState, 0.002, 0.02));
+        new GlobeBrowsingInteractionMode(_inputState, 0.002, 0.02));
 }
 
 InteractionHandler::~InteractionHandler() {

@@ -33,6 +33,8 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#include <modules/globebrowsing/globes/renderableglobe.h>
+
 #include <mutex>
 
 namespace openspace {
@@ -188,7 +190,7 @@ public:
     ~InteractionMode();
 
     // Mutators
-    void setFocusNode(SceneGraphNode* focusNode);
+    virtual void setFocusNode(SceneGraphNode* focusNode);
     void setCamera(Camera* camera);
 
     // Accessors
@@ -255,7 +257,7 @@ public:
     ~OrbitalInteractionMode();
 
     virtual void update(double deltaTime);
-private:
+protected:
     void updateMouseStatesFromInput(double deltaTime);
     void updateCameraStateFromMouseStates();
 
@@ -268,6 +270,22 @@ private:
 
     glm::dquat _localCameraRotation;
     glm::dquat _globalCameraRotation;
+};
+
+class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
+{
+public:
+    GlobeBrowsingInteractionMode(
+        std::shared_ptr<InputState> inputState,
+        double sensitivity,
+        double velocityScaleFactor);
+    ~GlobeBrowsingInteractionMode();
+
+    virtual void setFocusNode(SceneGraphNode* focusNode);
+    virtual void update(double deltaTime);
+private:
+    void updateCameraStateFromMouseStates();
+    RenderableGlobe* _globe;
 };
 
 

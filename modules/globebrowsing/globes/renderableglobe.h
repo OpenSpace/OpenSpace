@@ -64,6 +64,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
+
     properties::BoolProperty doFrustumCulling;
     properties::BoolProperty doHorizonCulling;
     properties::BoolProperty mergeInvisible;

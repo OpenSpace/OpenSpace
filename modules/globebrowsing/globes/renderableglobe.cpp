@@ -178,4 +178,9 @@ namespace openspace {
         _distanceSwitch.update(data);
     }
 
+    glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {
+        return _ellipsoid.geodeticSurfaceProjection(position);
+    }
+
+
 }  // namespace openspace

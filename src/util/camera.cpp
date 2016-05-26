@@ -153,11 +153,11 @@ namespace openspace {
 
     const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
-            glm::vec3 cameraPosition = position().vec3();
-            glm::mat4 cameraTranslation =
-                glm::inverse(glm::translate(glm::mat4(1.0), cameraPosition));
+            Vec3 cameraPosition = position().vec3();
+            Mat4 cameraTranslation =
+                glm::inverse(glm::translate(Mat4(1.0), cameraPosition));
             _cachedCombinedViewMatrix.datum =
-                glm::mat4(viewRotationMatrix()) * cameraTranslation;
+                Mat4(viewRotationMatrix()) * cameraTranslation;
         }
         return _cachedCombinedViewMatrix.datum;
     }

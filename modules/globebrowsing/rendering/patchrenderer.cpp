@@ -440,9 +440,9 @@ namespace openspace {
         // Calculate other uniform variables needed for rendering
 
         // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewTransform = viewTransform * modelTransform;
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = data.camera.combinedViewMatrix();
+        dmat4 modelViewTransform = viewTransform * modelTransform;
 
         Geodetic2 sw = chunk.surfacePatch().southWestCorner();
         Geodetic2 se = chunk.surfacePatch().southEastCorner();
