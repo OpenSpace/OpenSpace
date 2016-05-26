@@ -85,7 +85,7 @@ namespace openspace {
         _ellipsoid = Ellipsoid(radii);
 
         
-        setBoundingSphere(pss(_ellipsoid.averageRadius(), 1.0));
+        setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
         
 
         ghoul::Dictionary texturesDictionary;
@@ -122,7 +122,7 @@ namespace openspace {
             heightMapDictionary.getValue("FilePath", path);
             std::shared_ptr<TileProvider> heightMapProvider =
                 std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 256, 60));
+                    path, 5000, 64, 60));
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
 
