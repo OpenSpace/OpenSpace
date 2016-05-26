@@ -26,6 +26,8 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
 
+#include <modules/globebrowsing/globes/chunkindex.h>
+
 #include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -46,36 +48,18 @@ namespace openspace {
 
 
 
-    TileDepthTransform::TileDepthTransform() { }
-
-    TileDepthTransform::TileDepthTransform(GDALDataset* dataset) {
-        GDALRasterBand* firstBand = dataset->GetRasterBand(1);
-        GDALDataType gdalType = firstBand->GetRasterDataType();
-
-        double maximumValue = (gdalType == GDT_Float32 || gdalType == GDT_Float64) ?
-            1.0 : firstBand->GetMaximum();
-
-        depthOffset = firstBand->GetOffset();
-        depthScale = firstBand->GetScale() * maximumValue;
-    }
-
-
-
-
-    bool TileProvider::hasInitializedGDAL = false;
-
-
 
     TileProvider::TileProvider(
         const std::string& filePath,
         int tileCacheSize,
         int minimumPixelSize,
         int framesUntilRequestFlush)
-    : _filePath(filePath)
-    , _tileCache(tileCacheSize) // setting cache size
-    , _framesSinceLastRequestFlush(0)
-    , _framesUntilRequestFlush(framesUntilRequestFlush)
-    , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
+        : _filePath(filePath)
+        , _tileCache(tileCacheSize) // setting cache size
+        , _framesSinceLastRequestFlush(0)
+        , _framesUntilRequestFlush(framesUntilRequestFlush)
+        , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
+        , _rawTextureTileDataProvider(filePath, minimumPixelSize)
     {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
@@ -91,28 +75,11 @@ namespace openspace {
             _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         }
-        
-        if (!hasInitializedGDAL) {
-            GDALAllRegister();
-            //CPLSetConfigOption("GDAL_CACHEMAX", "0");
-            hasInitializedGDAL = true;
-        }
 
-        _gdalDataSet = (GDALDataset *)GDALOpen(absPath(filePath).c_str(), GA_ReadOnly);
-        ghoul_assert(_gdalDataSet != nullptr, "Failed to load dataset: " << filePath);
-
-        GDALRasterBand* firstBand = _gdalDataSet->GetRasterBand(1);
-        int numOverviews = firstBand->GetOverviewCount();
-        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
-
-        _tileLevelDifference = log2(minimumPixelSize) - log2(sizeLevel0);
-
-        _depthTransform = TileDepthTransform(_gdalDataSet);
     }
 
     TileProvider::~TileProvider(){
         clearRequestQueue();
-        delete _gdalDataSet;
     }
 
 
@@ -150,8 +117,8 @@ namespace openspace {
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
 
-        int numOverviews = _gdalDataSet->GetRasterBand(1)->GetOverviewCount();
-        int maximumLevel = numOverviews - 1 - _tileLevelDifference;
+        int maximumLevel = _rawTextureTileDataProvider.getMaximumLevel();
+
         while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
@@ -241,15 +208,14 @@ namespace openspace {
     }
 
     TileDepthTransform TileProvider::depthTransform() {
-        return _depthTransform;
+        return _rawTextureTileDataProvider.getDepthTransform();
     }
 
 
     std::shared_ptr<TileIOResult> TileProvider::syncDownloadData(
         const ChunkIndex& chunkIndex) {
 
-        std::shared_ptr<TileIOResult> res = _rawTextureTileDataProvider.getTextureData(
-            _gdalDataSet, chunkIndex, _tileLevelDifference);
+        std::shared_ptr<TileIOResult> res = _rawTextureTileDataProvider.getTextureData(chunkIndex);
 
         return res;
     }
