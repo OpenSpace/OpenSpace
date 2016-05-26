@@ -30,6 +30,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
 #include <mutex>
@@ -155,19 +156,29 @@ public:
     void mousePositionCallback(double mouseX, double mouseY);
     void mouseScrollWheelCallback(double mouseScrollDelta);
 
+    // Mutators
+    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void clearKeyframes();
+
     // Accessors
     const std::list<std::pair<Key, KeyModifier> >& getPressedKeys();
     const std::list<MouseButton>& getPressedMouseButtons();
     glm::dvec2 getMousePosition();
     double getMouseScrollDelta();
+    std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames();
 
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair);
     bool isMouseButtonPressed(MouseButton mouseButton);
 private:
+    // Input from keyboard and mouse
     std::list<std::pair<Key, KeyModifier> > _keysDown;
     std::list<MouseButton> _mouseButtonsDown;
     glm::dvec2 _mousePosition;
     double _mouseScrollDelta;
+
+    // Remote input via keyframes
+    std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
+    std::mutex _keyframeMutex;
 };
 
 class InteractionMode
@@ -223,6 +234,17 @@ protected:
     Camera* _camera;
 };
 
+class KeyframeInteractionMode : public InteractionMode
+{
+public:
+    KeyframeInteractionMode(std::shared_ptr<InputState> inputState);
+    ~KeyframeInteractionMode();
+
+    virtual void update(double deltaTime);
+private:
+    double _currentKeyframeTime;
+};
+
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
@@ -256,8 +278,6 @@ public:
     ~InteractionHandler();
 
     // Mutators
-    void setKeyboardController(KeyboardController* controller);
-    void setMouseController(MouseController* controller);
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
 

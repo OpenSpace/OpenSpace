@@ -398,8 +398,8 @@ bool OpenSpaceEngine::initialize() {
         sceneDescriptionPath = commandlineArgumentPlaceholders.sceneName;
     sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
 
-    _interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
-    _interactionHandler->setMouseController(new interaction::OrbitalMouseController);
+    //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
+    //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
     // Run start up scripts
     runPreInitializationScripts(sceneDescriptionPath);

@@ -22,6 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
+
+//#define USE_OLD_INTERACTIONHANDLER
+#ifdef USE_OLD_INTERACTIONHANDLER
+
 #include <openspace/interaction/mousecontroller.h>
 
 #include <openspace/engine/openspaceengine.h>
@@ -248,3 +253,5 @@ void OrbitalMouseController::update(const double& dt){
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // USE_OLD_INTERACTIONHANDLER
