@@ -603,6 +603,24 @@ InputState::~InputState() {
 
 }
 
+void InputState::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
+    _keyframeMutex.lock();
+
+    //save a maximum of 10 samples (1 seconds of buffer)
+    if (_keyframes.size() >= 10) {
+        _keyframes.erase(_keyframes.begin());
+    }
+    _keyframes.push_back(kf);
+
+    _keyframeMutex.unlock();
+}
+
+void InputState::clearKeyframes() {
+    _keyframeMutex.lock();
+    _keyframes.clear();
+    _keyframeMutex.unlock();
+}
+
 void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     if (action == KeyAction::Press) {
         _keysDown.push_back(std::pair<Key, KeyModifier>(key, modifier));
@@ -695,6 +713,20 @@ Camera* InteractionMode::camera() {
     return _camera;
 }
 
+// KeyframeInteractionMode
+KeyframeInteractionMode::KeyframeInteractionMode(std::shared_ptr<InputState> inputState)
+    : InteractionMode(inputState) {
+
+}
+
+KeyframeInteractionMode::~KeyframeInteractionMode() {
+
+}
+
+void KeyframeInteractionMode::update(double deltaTime) {
+    // TODO : Get keyframes from input state and use them to position and rotate the camera
+}
+
 // OrbitalInteractionMode
 OrbitalInteractionMode::OrbitalInteractionMode(
     std::shared_ptr<InputState> inputState,
@@ -728,19 +760,25 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(double deltaTime) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
             _localRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+
+            _globalRotationMouseState.previousPosition = mousePosition;
+            _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
         }
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRotationMouseState.previousPosition - mousePosition;
             _globalRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+
+            _localRotationMouseState.previousPosition = mousePosition;
+            _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
         }
     }
-    else { //!button1Pressed
-        _globalRotationMouseState.previousPosition = mousePosition;
+    else { // !button1Pressed
         _localRotationMouseState.previousPosition = mousePosition;
-
-        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
         _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
+
+        _globalRotationMouseState.previousPosition = mousePosition;
+        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
     }
     if (button2Pressed) {
         glm::dvec2 mousePositionDelta =
@@ -855,14 +893,6 @@ InteractionHandler::InteractionHandler()
 
 InteractionHandler::~InteractionHandler() {
 
-}
-
-void InteractionHandler::setKeyboardController(KeyboardController* controller) {
-    //_interactor->setKeyboardController(controller);
-}
-
-void InteractionHandler::setMouseController(MouseController* controller) {
-    //_interactor->setMouseController(controller);
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
@@ -1000,11 +1030,11 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
 }
 
 void InteractionHandler::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
-
+    _inputState->addKeyframe(kf);
 }
 
 void InteractionHandler::clearKeyframes() {
-
+    _inputState->clearKeyframes();
 }
 
 #endif // USE_OLD_INTERACTIONHANDLER
