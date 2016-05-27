@@ -940,10 +940,10 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
-            glm::dquat newRotationCamspace =
-                _globalCameraRotation * rotationDiffCamSpace;
             glm::dquat rotationDiffWorldSpace =
-                newRotationCamspace * glm::inverse(_globalCameraRotation);
+                _globalCameraRotation *
+                rotationDiffCamSpace *
+                glm::inverse(_globalCameraRotation);
 
             glm::dvec3 rotationDiffVec3 =
                 (distFromCenterToCamera * directionFromSurfaceToCamera)
