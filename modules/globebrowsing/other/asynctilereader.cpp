@@ -41,7 +41,7 @@ namespace openspace {
 
 
     AsyncTileDataProvider::AsyncTileDataProvider(const std::string& filename, int minNumPixels, ThreadPool& pool)
-        : _textureDataProvider(std::shared_ptr<TileDataset>(new TileDataset(filename, minNumPixels)))
+        : _textureDataProvider(std::shared_ptr<TileDataset>(new TileDataset(filename, minNumPixels, 0)))
         , _concurrentJobManager(pool)
     {
 
