@@ -176,7 +176,6 @@ bool DataPlane::initialize(){
 }
 
 bool DataPlane::loadTexture() {
-
     // if The future is done then get the new dataFile
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
          DownloadManager::MemoryFile dataFile = _futureObject.get();
@@ -196,7 +195,9 @@ bool DataPlane::loadTexture() {
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
         _dataProcessor->addValues(_dataBuffer, _dataOptions);
-        _group->updateGroup();
+
+        if(_group)
+            _group->updateGroup();
     }
 
     std::vector<float*> data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
@@ -209,8 +210,6 @@ bool DataPlane::loadTexture() {
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
-
-
 
     for(int option: selectedOptions){
         float* values = data[option];
