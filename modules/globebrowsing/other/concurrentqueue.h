@@ -77,7 +77,7 @@ public:
         _cond.notify_one();
     }
 
-    size_t size() {
+    size_t size() const{
         std::unique_lock<std::mutex> mlock(_mutex);
         size_t s = _queue.size();
         mlock.unlock();
@@ -87,8 +87,8 @@ public:
 
 private:
     std::queue<T> _queue;
-    std::mutex _mutex;
-    std::condition_variable _cond;
+    mutable std::mutex _mutex;
+    mutable std::condition_variable _cond;
 };
 
 }

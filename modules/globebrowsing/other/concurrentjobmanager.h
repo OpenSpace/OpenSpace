@@ -90,7 +90,7 @@ namespace openspace {
             return _finishedJobs.pop();
         }
 
-        size_t numFinishedJobs() {
+        size_t numFinishedJobs() const{
             return _finishedJobs.size();
         }
 

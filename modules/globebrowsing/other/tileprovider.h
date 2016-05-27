@@ -37,8 +37,7 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/lrucache.h>
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/other/texturedataprovider.h>
+#include <modules/globebrowsing/other/asynctilereader.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //									TILE PROVIDER									    //
@@ -92,7 +91,7 @@ namespace openspace {
 
     private:
 
-        friend class TextureTileLoadJob;
+        friend class TileLoadJob;
 
 
 
@@ -104,19 +103,13 @@ namespace openspace {
 
         void transformFromParent(const ChunkIndex& ci, TileUvTransform& uv) const;
 
-        /**
-            Fetches all the needeed texture data from the GDAL dataset.
-        */
-        std::shared_ptr<TileIOResult> syncDownloadData(
-            const ChunkIndex& chunkIndex);
+
         
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
         void initializeAndAddToCache(
             std::shared_ptr<TileIOResult> uninitedTexture);
-
-        bool enqueueTileRequest(const ChunkIndex& ci);
 
         void clearRequestQueue();
 
@@ -131,17 +124,12 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         LRUCache<HashKey, MetaTexture> _tileCache;
-        std::unordered_map<HashKey, ChunkIndex> _queuedTileRequests;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;
 
-        const std::string _filePath;
 
-
-        TextureDataProvider _rawTextureTileDataProvider;
-
-        ConcurrentJobManager<TileIOResult> _tileLoadManager;
+        AsyncTileDataProvider _asyncTextureDataProvider;
 
         std::shared_ptr<Texture> _defaultTexture;
 
@@ -154,39 +142,5 @@ namespace openspace {
 
 
 
-
-
-
-
-
-
-namespace openspace {
-
-    using namespace ghoul::opengl;
-
-    struct TextureTileLoadJob : public Job<TileIOResult> {
-        TextureTileLoadJob(TileProvider * tileProvider, const ChunkIndex& chunkIndex)
-            : _tileProvider(tileProvider)
-            , _chunkIndex(chunkIndex) {
-
-        }
-
-        virtual ~TextureTileLoadJob() { }
-
-        virtual void execute() {
-            _uninitedTexture = _tileProvider->syncDownloadData(_chunkIndex);
-        }
-
-        virtual std::shared_ptr<TileIOResult> product() {
-            return _uninitedTexture;
-        }
-
-
-    private:
-        ChunkIndex _chunkIndex;
-        TileProvider * _tileProvider;
-        std::shared_ptr<TileIOResult> _uninitedTexture;
-    };
-}
 
 #endif  // __TILE_PROVIDER_H__

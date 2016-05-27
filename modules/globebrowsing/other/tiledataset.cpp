@@ -27,12 +27,12 @@
 #include <ghoul/filesystem/filesystem.h> // abspath
 #include <ghoul/misc/assert.h>
 
-#include <modules/globebrowsing/other/texturedataprovider.h>
+#include <modules/globebrowsing/other/tiledataset.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
 namespace {
-    const std::string _loggerCat = "TextureDataProvider";
+    const std::string _loggerCat = "TileDataset";
 }
 
 
@@ -40,9 +40,9 @@ namespace {
 namespace openspace {
 
     // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
-    bool TextureDataProvider::GdalHasBeenInitialized = false; 
+    bool TileDataset::GdalHasBeenInitialized = false; 
 
-    TextureDataProvider::TextureDataProvider(const std::string& fileName, int minimumPixelSize)
+    TileDataset::TileDataset(const std::string& fileName, int minimumPixelSize)
         : _minimumPixelSize(minimumPixelSize)
     {
         
@@ -59,18 +59,18 @@ namespace openspace {
     }
 
 
-    TextureDataProvider::~TextureDataProvider() {
+    TileDataset::~TileDataset() {
         delete _dataset;
     }
 
-    int TextureDataProvider::calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
+    int TileDataset::calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
         GDALRasterBand* firstBand = dataset->GetRasterBand(1);
         int numOverviews = firstBand->GetOverviewCount();
         int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
         return log2(minimumPixelSize) - log2(sizeLevel0);
     }
 
-    TileDepthTransform TextureDataProvider::calculateTileDepthTransform() {
+    TileDepthTransform TileDataset::calculateTileDepthTransform() {
         GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
         GDALDataType gdalType = firstBand->GetRasterDataType();
 
@@ -83,17 +83,17 @@ namespace openspace {
         return transform;
     }
 
-    int TextureDataProvider::getMaximumLevel() const {
+    int TileDataset::getMaximumLevel() const {
         int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
         int maximumLevel = numOverviews - 1 - _tileLevelDifference;
         return maximumLevel;
     }
 
-    TileDepthTransform TextureDataProvider::getDepthTransform() const {
+    TileDepthTransform TileDataset::getDepthTransform() const {
         return _depthTransform;
     }
 
-    std::shared_ptr<TileIOResult> TextureDataProvider::getTextureData(ChunkIndex chunkIndex)
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
     {               
         GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
         DataLayout dataLayout(_dataset, region);
@@ -135,7 +135,7 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<RawTileData> TextureDataProvider::createRawTileData(const GdalDataRegion& region,
+    std::shared_ptr<RawTileData> TileDataset::createRawTileData(const GdalDataRegion& region,
         const DataLayout& dataLayout, const char* imageData)
     {
         
@@ -168,7 +168,7 @@ namespace openspace {
 
 
 
-    size_t TextureDataProvider::numberOfBytes(GDALDataType gdalType) {
+    size_t TileDataset::numberOfBytes(GDALDataType gdalType) {
         switch (gdalType) {
             case GDT_Byte: return sizeof(GLubyte);
             case GDT_UInt16: return sizeof(GLushort);
@@ -184,7 +184,7 @@ namespace openspace {
     }
 
     
-    glm::uvec2 TextureDataProvider::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
+    glm::uvec2 TileDataset::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
         double padfTransform[6];
         CPLErr err = dataSet->GetGeoTransform(padfTransform);
 
@@ -222,7 +222,7 @@ namespace openspace {
     }
 
 
-    RawTileData::TextureFormat TextureDataProvider::getTextureFormat(
+    RawTileData::TextureFormat TileDataset::getTextureFormat(
         int rasterCount, GDALDataType gdalType)
     {
         RawTileData::TextureFormat format;
@@ -292,7 +292,7 @@ namespace openspace {
 
 
 
-    GLuint TextureDataProvider::getOpenGLDataType(GDALDataType gdalType) {
+    GLuint TileDataset::getOpenGLDataType(GDALDataType gdalType) {
         switch (gdalType) {
         case GDT_Byte: return GL_UNSIGNED_BYTE; 
         case GDT_UInt16: return GL_UNSIGNED_SHORT;
@@ -308,7 +308,7 @@ namespace openspace {
     }
 
 
-    TextureDataProvider::GdalDataRegion::GdalDataRegion(GDALDataset * dataSet,
+    TileDataset::GdalDataRegion::GdalDataRegion(GDALDataset * dataSet,
         const ChunkIndex& chunkIndex, int tileLevelDifference)
         : chunkIndex(chunkIndex)
     {
@@ -352,7 +352,7 @@ namespace openspace {
     }
 
 
-    TextureDataProvider::DataLayout::DataLayout(GDALDataset* dataSet, const GdalDataRegion& region) {
+    TileDataset::DataLayout::DataLayout(GDALDataset* dataSet, const GdalDataRegion& region) {
         // Assume all raster bands have the same data type
         gdalType = dataSet->GetRasterBand(1)->GetRasterDataType();
         bytesPerDatum = numberOfBytes(gdalType);
