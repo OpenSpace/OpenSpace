@@ -113,6 +113,8 @@ namespace openspace {
         // @TODO this should simply be called viewMatrix!
         // Or it needs to be changed so that it actually is combined. Right now it is
         // only the view matrix that is the same for all SGCT cameras.
+        // Right now this function returns the actual combined matrix which makes some
+        // of the old calls to the function wrong..
         const Mat4& combinedViewMatrix() const;
 
         // Synchronization

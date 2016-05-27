@@ -156,7 +156,9 @@ namespace openspace {
             Mat4 cameraTranslation =
                 glm::inverse(glm::translate(Mat4(1.0), _position.shared));
             _cachedCombinedViewMatrix.datum =
-                Mat4(viewRotationMatrix()) * cameraTranslation;
+                Mat4(sgctInternal.viewMatrix()) *
+                Mat4(viewRotationMatrix()) *
+                cameraTranslation;
         }
         return _cachedCombinedViewMatrix.datum;
     }
