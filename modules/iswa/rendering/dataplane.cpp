@@ -68,6 +68,10 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_dataOptions);
 
     _type = IswaManager::CygnetType::Data;
+
+    _programName = "DataPlaneProgram";
+    _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
+    _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
 }
 
 DataPlane::~DataPlane(){}
@@ -256,7 +260,7 @@ bool DataPlane::updateTexture(){
     return false;
 }
 
-bool DataPlane::readyToRender(){
+bool DataPlane::readyToRender() const {
     return (!_textures.empty());
 }
 
@@ -322,18 +326,6 @@ void DataPlane::setUniformAndTextures(){
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
-}
-
-bool DataPlane::createShader(){
-    if (_shader == nullptr) {
-        // DatePlane Program
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
-            "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
-            );
-        if (!_shader) return false;
-    }
 }
 
 void DataPlane::setTransferFunctions(std::string tfPath){

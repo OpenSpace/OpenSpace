@@ -23,25 +23,18 @@
  ****************************************************************************************/
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-//#include <ghoul/filesystem/filesystem>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/spicemanager.h>
 
 namespace {
-    const std::string _loggerCat = "TexutePlane";
+    const std::string _loggerCat = "TexturePlane";
 }
 
 namespace openspace {
 
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
-    :CygnetPlane(dictionary)
+    :TextureCygnet(dictionary)
+    ,_quad(0)
+    ,_vertexPositionBuffer(0)
 {
     std::string name;
     dictionary.getValue("Name", name);
@@ -50,66 +43,12 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
     _type = IswaManager::CygnetType::Texture;
 
+    _programName = "PlaneProgram";
+    _vsPath = "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl";
+    _fsPath = "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl";
 }
-
 
 TexturePlane::~TexturePlane(){}
-
-bool TexturePlane::loadTexture() {
-
-    // if The future is done then get the new imageFile
-    DownloadManager::MemoryFile imageFile;
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-        imageFile = _futureObject.get();
-
-    }
-     else {
-        return false;
-    }
-
-    if(imageFile.corrupted)
-        return false;
-
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) imageFile.buffer,
-                                                        imageFile.size, 
-                                                        imageFile.format);
-
-    if (texture) {
-        LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
-
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _textures[0]  = std::move(texture);
-    }
-
-    return false;
-}
-
-bool TexturePlane::updateTexture(){
-
-    if(_textures.empty())
-        _textures.push_back(nullptr);
-
-    if(_futureObject.valid())
-        return false;
-
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id);
-
-    if(future.valid()){
-        _futureObject = std::move(future);
-        return true;
-    }
-
-    return false;
-}
-
-
-bool TexturePlane::readyToRender(){
-    return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
-}
-
 
 void TexturePlane::setUniformAndTextures(){
     ghoul::opengl::TextureUnit unit;
@@ -120,18 +59,54 @@ void TexturePlane::setUniformAndTextures(){
     _shader->setUniform("transparency", _alpha.value());
 }
 
+bool TexturePlane::createGeometry() {
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    
+    // ============================
+    //         GEOMETRY (quad)
+    // ============================
 
-bool TexturePlane::createShader(){
-    if (_shader == nullptr) {
-        // Plane Program
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl"
-            );
-        if (!_shader) return false;
-    }
+    float s = _data->spatialScale.x;
+    const GLfloat x = s*_data->scale.x/2.0;
+    const GLfloat y = s*_data->scale.y/2.0;
+    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat w = _data->spatialScale.w;
+
+    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+        //      x      y     z     w     s     t
+        -x, -y,             -z,  w, 0, 1,
+         x,  y,              z,  w, 1, 0,
+        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x, -y,             -z,  w, 0, 1,
+         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  y,              z,  w, 1, 0,
+    };
+
+    glBindVertexArray(_quad); // bind array
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+
     return true;
+}
+
+bool TexturePlane::destroyGeometry(){
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    return true;
+}
+
+void TexturePlane::renderGeometry() const {
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 }// namespace openspace

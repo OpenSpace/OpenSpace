@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,6 +62,10 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     addProperty(_dataOptions);
 
     _type = IswaManager::CygnetType::Data;
+
+    _programName = "DataSphereProgram";
+    _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
+    _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
 }
 
 DataSphere::~DataSphere(){}
@@ -253,7 +257,7 @@ bool DataSphere::updateTexture(){
 }
 
 
-bool DataSphere::readyToRender(){
+bool DataSphere::readyToRender() const {
     return (!_textures.empty());
 
     bool ready = isReady();
@@ -329,19 +333,19 @@ void DataSphere::setUniformAndTextures(){
 }
 
 
-bool DataSphere::createShader(){
-	if (_shader == nullptr) {
-    // Plane Program
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram(
-            "DataSphereProgram",
-            "${MODULE_ISWA}/shaders/datasphere_vs.glsl",
-            "${MODULE_ISWA}/shaders/datasphere_fs.glsl");
-    if (!_shader)
-        return false;
-    }
-    return true;
-}
+// bool DataSphere::createShader(){
+// 	if (_shader == nullptr) {
+//     // Plane Program
+//     RenderEngine& renderEngine = OsEng.renderEngine();
+//     _shader = renderEngine.buildRenderProgram(
+//             "DataSphereProgram",
+//             "${MODULE_ISWA}/shaders/datasphere_vs.glsl",
+//             "${MODULE_ISWA}/shaders/datasphere_fs.glsl");
+//     if (!_shader)
+//         return false;
+//     }
+//     return true;
+// }
 
 void DataSphere::setTransferFunctions(std::string tfPath){
     std::string line;

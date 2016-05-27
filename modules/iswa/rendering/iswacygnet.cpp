@@ -243,6 +243,19 @@ void IswaCygnet::initializeTime(){
     _minRealTimeUpdateInterval = 100;
 }
 
+bool IswaCygnet::createShader(){
+    if (_shader == nullptr) {
+        // Plane Program
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram(_programName,
+            _vsPath,
+            _fsPath
+            );
+        if (!_shader) return false;
+    }
+    return true;
+}
+
 void IswaCygnet::initializeGroup(){
     _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
     _group = IswaManager::ref().registerToGroup(_data->groupName, _type);

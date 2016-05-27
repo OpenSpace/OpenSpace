@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,29 @@
 #ifndef __TEXTUREPLANE_H__
 #define __TEXTUREPLANE_H__
 
-#include <modules/iswa/rendering/cygnetplane.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/engine/downloadmanager.h>
+#include <modules/iswa/rendering/texturecygnet.h>
 
- namespace openspace{
- 
- class TexturePlane : public CygnetPlane{
- public:
-     TexturePlane(const ghoul::Dictionary& dictionary);
-     ~TexturePlane();
+namespace openspace{
 
- private:
-    virtual bool loadTexture() override;
-    virtual bool updateTexture() override;
+/**
+ * TexturePlane is a "concrete" IswaCygnet. It handles the creation, 
+ * destruction and rendering of a plane geometry. It also specifies 
+ * which shaders to use and the uniforms that it needs.
+ */
+class TexturePlane : public TextureCygnet{
+public:
+    TexturePlane(const ghoul::Dictionary& dictionary);
+    ~TexturePlane();
 
-    virtual bool readyToRender() override;
-    virtual void setUniformAndTextures() override;
-    virtual bool createShader() override;
- };
+private:
+    bool createGeometry() override;
+    void setUniformAndTextures() override;
+    bool destroyGeometry() override;
+    void renderGeometry() const override;
+
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+};
  
  } // namespace openspace
 

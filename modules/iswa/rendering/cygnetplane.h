@@ -38,7 +38,7 @@ public:
 protected:
     virtual bool createGeometry() override;
     virtual bool destroyGeometry() override;
-    virtual void renderGeometry() override;
+    virtual void renderGeometry() const override;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
