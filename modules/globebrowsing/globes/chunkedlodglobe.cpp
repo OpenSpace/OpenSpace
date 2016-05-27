@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
-#include <modules/globebrowsing/meshes/basicgrid.h>
+#include <modules/globebrowsing/meshes/skirtedgrid.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -63,7 +63,7 @@ namespace openspace {
         , _savedCamera(nullptr)
     {
 
-        auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
+        auto geometry = std::shared_ptr<SkirtedGrid>(new SkirtedGrid(
             segmentsPerPatch,
             segmentsPerPatch,
             TriangleSoup::Positions::No,

@@ -38,6 +38,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
@@ -75,6 +76,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
