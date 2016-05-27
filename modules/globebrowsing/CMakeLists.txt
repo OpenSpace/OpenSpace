@@ -50,6 +50,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/asynctilereader.h
@@ -87,6 +88,7 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/asynctilereader.cpp
