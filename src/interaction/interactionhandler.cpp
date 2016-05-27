@@ -940,11 +940,11 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
-            glm::dquat newRotationCamspace =
-                _globalCameraRotation * rotationDiffCamSpace;
+
             glm::dquat rotationDiffWorldSpace =
                 _globalCameraRotation *
-                rotationDiffCamSpace * glm::inverse(_globalCameraRotation);
+                rotationDiffCamSpace *
+                glm::inverse(_globalCameraRotation);
 
             glm::dvec3 rotationDiffVec3 =
                 (distFromCenterToCamera * directionFromSurfaceToCamera)
@@ -954,12 +954,16 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
 
             newPosition = camPos + rotationDiffVec3;
 
-            glm::dvec3 lookUpWhenFacingCenter =
+            glm::dvec3 newCenterToSurface = _globe->geodeticSurfaceProjection(newPosition);
+            glm::dvec3 newSurfaceToCamera = newPosition - (centerPos + newCenterToSurface);
+            glm::dvec3 newDirectionFromSurfaceToCamera = glm::normalize(newSurfaceToCamera);
+
+            glm::dvec3 lookUpWhenFacingSurface =
                 _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
             glm::dmat4 lookAtMat = glm::lookAt(
                 glm::dvec3(0, 0, 0),
-                -directionFromSurfaceToCamera,
-                lookUpWhenFacingCenter);
+                -newDirectionFromSurfaceToCamera,
+                lookUpWhenFacingSurface);
             _globalCameraRotation =
                 glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
         }
