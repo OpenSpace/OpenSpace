@@ -53,6 +53,7 @@ namespace openspace {
 
     ChunkedLodGlobe::ChunkedLodGlobe(
         const Ellipsoid& ellipsoid,
+        size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
         , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
@@ -63,8 +64,8 @@ namespace openspace {
     {
 
         auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            64,
-            64,
+            segmentsPerPatch,
+            segmentsPerPatch,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));

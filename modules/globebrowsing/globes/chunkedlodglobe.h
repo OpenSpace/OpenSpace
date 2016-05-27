@@ -56,6 +56,7 @@ namespace openspace {
     public:
         ChunkedLodGlobe(
             const Ellipsoid& ellipsoid,
+            size_t segmentsPerPatch,
             std::shared_ptr<TileProviderManager> tileProviderManager);
         virtual ~ChunkedLodGlobe();
 

@@ -6,6 +6,7 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            SegmentsPerPatch = 64,
             Textures = {
                 ColorTextures = {
                     {

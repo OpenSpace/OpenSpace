@@ -335,7 +335,7 @@ namespace openspace {
         case GL_FLOAT: return GDT_Float32;
         case GL_DOUBLE: return GDT_Float64;
         default:
-            LERROR("OpenGL data type unknown to GDAL: " << gdalType);
+            LERROR("OpenGL data type unknown to GDAL: " << glType);
             return GDT_Unknown;
         }
     }
