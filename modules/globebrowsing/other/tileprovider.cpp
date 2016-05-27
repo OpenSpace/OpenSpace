@@ -46,19 +46,21 @@ namespace {
 
 namespace openspace {
 
-
-
-
-    TileProvider::TileProvider(
-        const std::string& filePath,
-        int tileCacheSize,
-        int minimumPixelSize,
-        int framesUntilRequestFlush)
-        : _tileCache(tileCacheSize) // setting cache size
+    TileProvider::TileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+        int framesUntilFlushRequestQueue)
+        : _asyncTextureDataProvider(tileReader)
+        , _tileCache(tileCacheSize)
         , _framesSinceLastRequestFlush(0)
-        , _framesUntilRequestFlush(framesUntilRequestFlush)
-        , _asyncTextureDataProvider(filePath, minimumPixelSize, TileProviderManager::tileRequestThreadPool)
     {
+        initDefaultTexture();
+    }
+
+
+    TileProvider::~TileProvider(){
+        clearRequestQueue();
+    }
+
+    void TileProvider::initDefaultTexture() {
         // Set a temporary texture
         std::string fileName = "textures/earth_bluemarble.jpg";
         _defaultTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
@@ -75,10 +77,6 @@ namespace openspace {
         }
     }
 
-    TileProvider::~TileProvider(){
-        clearRequestQueue();
-    }
-
 
     void TileProvider::prerender() {
         initTexturesFromLoadedData();
@@ -88,14 +86,14 @@ namespace openspace {
     }
 
     void TileProvider::initTexturesFromLoadedData() {
-        while (_asyncTextureDataProvider.hasLoadedTextureData()) {
-            std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider.nextTileIOResult();
+        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
+            std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider->nextTileIOResult();
             initializeAndAddToCache(tileIOResult);
         }
     }
 
     void TileProvider::clearRequestQueue() {
-        _asyncTextureDataProvider.clearRequestQueue();
+        _asyncTextureDataProvider->clearRequestQueue();
         _framesSinceLastRequestFlush = 0;
     }
 
@@ -105,7 +103,7 @@ namespace openspace {
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
 
-        int maximumLevel = _asyncTextureDataProvider.getTextureDataProvider()->getMaximumLevel();
+        int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
 
         while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
@@ -134,7 +132,7 @@ namespace openspace {
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first
-            _asyncTextureDataProvider.enqueueTextureData(chunkIndex);
+            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
 
             return tile;
         }
@@ -163,7 +161,7 @@ namespace openspace {
             return _tileCache.get(hashkey).texture;
         }
         else {
-            _asyncTextureDataProvider.enqueueTextureData(chunkIndex);
+            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
             return nullptr;
         }
     }
@@ -174,7 +172,7 @@ namespace openspace {
     }
 
     TileDepthTransform TileProvider::depthTransform() {
-        return _asyncTextureDataProvider.getTextureDataProvider()->getDepthTransform();
+        return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
 

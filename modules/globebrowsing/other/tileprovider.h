@@ -74,8 +74,11 @@ namespace openspace {
     */
     class TileProvider {
     public:
-        TileProvider(const std::string& fileName, int tileCacheSize, int minimumPixelSize,
-            int framesUntilRequestFlush);
+
+        TileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+            int framesUntilFlushRequestQueue);
+
+
         ~TileProvider();
 
         Tile getHighestResolutionTile(ChunkIndex chunkIndex);
@@ -115,6 +118,8 @@ namespace openspace {
 
         void initTexturesFromLoadedData();
 
+        void initDefaultTexture();
+
 
 
 
@@ -129,7 +134,7 @@ namespace openspace {
         int _framesUntilRequestFlush;
 
 
-        AsyncTileDataProvider _asyncTextureDataProvider;
+        std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
 
         std::shared_ptr<Texture> _defaultTexture;
 

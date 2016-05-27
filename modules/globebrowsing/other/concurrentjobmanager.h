@@ -64,7 +64,7 @@ namespace openspace {
     template<typename P>
     class ConcurrentJobManager{
     public:
-        ConcurrentJobManager(ThreadPool& pool) : threadPool(pool)
+        ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool)
         {
 
         }
@@ -75,14 +75,14 @@ namespace openspace {
 
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
-            threadPool.enqueue([this, job]() {
+            threadPool->enqueue([this, job]() {
                 job->execute();
                 _finishedJobs.push(job);
             });
         }
 
         void clearEnqueuedJobs() {
-            threadPool.clearTasks();
+            threadPool->clearTasks();
         }
 
         std::shared_ptr<Job<P>> popFinishedJob() {
@@ -99,7 +99,7 @@ namespace openspace {
     private:
 
         ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-        ThreadPool& threadPool;
+        std::shared_ptr<ThreadPool> threadPool;
     };
 
 

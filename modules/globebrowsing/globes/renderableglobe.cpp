@@ -27,6 +27,8 @@
 #include <modules/globebrowsing/globes/globemesh.h>
 #include <modules/globebrowsing/globes/clipmapglobe.h>
 
+#include <modules/globebrowsing/other/threadpool.h>
+
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -94,6 +96,11 @@ namespace openspace {
         ghoul::Dictionary colorTexturesDictionary;
         texturesDictionary.getValue(keyColorTextures, colorTexturesDictionary);
 
+        int minimumTextureSide = 1024;
+        int minimumHeightmapSize = 64;
+        int frameUntilFlushRequestQueue = 60;
+        int cacheSize = 5000;
+
         
         // Create TileProviders for all color textures
         for (size_t i = 1; i < colorTexturesDictionary.size() + 1; i++)
@@ -103,9 +110,19 @@ namespace openspace {
                 colorTexturesDictionary.value<ghoul::Dictionary>(std::to_string(i));
             colorTextureDictionary.getValue("Name", name);
             colorTextureDictionary.getValue("FilePath", path);
-            std::shared_ptr<TileProvider> colorTextureProvider =
-                std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 1024, 60));
+            
+            std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
+                new TileDataset(path, minimumTextureSide));
+                
+            std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
+                new ThreadPool(1));
+
+            std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
+                new AsyncTileDataProvider(tileDataset, threadPool));
+
+            std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TileProvider>(
+                new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
+
             _tileProviderManager->addColorTexture(name, colorTextureProvider);
         }
 
@@ -120,25 +137,33 @@ namespace openspace {
                 heightMapsDictionary.value<ghoul::Dictionary>(std::to_string(i));
             heightMapDictionary.getValue("Name", name);
             heightMapDictionary.getValue("FilePath", path);
-            std::shared_ptr<TileProvider> heightMapProvider =
-                std::shared_ptr<TileProvider>(new TileProvider(
-                    path, 5000, 64, 60));
+
+            std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
+                new TileDataset(path, minimumHeightmapSize));
+
+            std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
+                new ThreadPool(1));
+
+            std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
+                new AsyncTileDataProvider(tileDataset, threadPool));
+
+            std::shared_ptr<TileProvider> heightMapProvider = std::shared_ptr<TileProvider>(
+                new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
+
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
-
-        //addSwitchValue(std::shared_ptr<ClipMapGlobe>(
-        //    new ClipMapGlobe(_ellipsoid, _tileProviderManager)), 1e8);
         
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, _tileProviderManager));
 
-        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e9);
-        //_distanceSwitch.addSwitchValue(std::shared_ptr<GlobeMesh>(new GlobeMesh()), 1e10);
+        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
     }
 
     RenderableGlobe::~RenderableGlobe() {
 
     }
+
+    
 
     bool RenderableGlobe::initialize() {
         return _distanceSwitch.initialize();

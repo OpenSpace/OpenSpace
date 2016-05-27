@@ -49,7 +49,7 @@ namespace openspace {
     struct TileLoadJob : public Job<TileIOResult> {
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
             const ChunkIndex& chunkIndex)
-            : _textureDataProvider(textureDataProvider)
+            : _tileDataset(textureDataProvider)
             , _chunkIndex(chunkIndex) 
         {
 
@@ -58,7 +58,7 @@ namespace openspace {
         virtual ~TileLoadJob() { }
 
         virtual void execute() {
-            _uninitedTexture = _textureDataProvider->readTileData(_chunkIndex);
+            _uninitedTexture = _tileDataset->readTileData(_chunkIndex);
         }
 
 
@@ -70,7 +70,7 @@ namespace openspace {
 
     private:
         ChunkIndex _chunkIndex;
-        std::shared_ptr<TileDataset> _textureDataProvider;
+        std::shared_ptr<TileDataset> _tileDataset;
         std::shared_ptr<TileIOResult> _uninitedTexture;
     };
 
@@ -81,9 +81,8 @@ namespace openspace {
     class AsyncTileDataProvider {
     public:
 
-        AsyncTileDataProvider(const std::string& filename, int minNumPixels, ThreadPool& pool);
         AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-            ThreadPool& pool);
+            std::shared_ptr<ThreadPool> pool);
 
         ~AsyncTileDataProvider();
 
@@ -103,7 +102,7 @@ namespace openspace {
 
     private:
 
-        std::shared_ptr<TileDataset> _textureDataProvider;
+        std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
         std::unordered_map<HashKey, ChunkIndex> _enqueuedTileRequests;
 

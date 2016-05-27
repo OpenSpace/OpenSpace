@@ -40,17 +40,10 @@ namespace {
 namespace openspace {
 
 
-    AsyncTileDataProvider::AsyncTileDataProvider(const std::string& filename, int minNumPixels, ThreadPool& pool)
-        : _textureDataProvider(std::shared_ptr<TileDataset>(new TileDataset(filename, minNumPixels)))
-        , _concurrentJobManager(pool)
-    {
-
-    }
-
     AsyncTileDataProvider::AsyncTileDataProvider(
-        std::shared_ptr<TileDataset> textureDataProvider,
-        ThreadPool& pool)
-        : _textureDataProvider(textureDataProvider)
+        std::shared_ptr<TileDataset> tileDataset,
+        std::shared_ptr<ThreadPool> pool)
+        : _tileDataset(tileDataset)
         , _concurrentJobManager(pool)
     {
 
@@ -62,13 +55,13 @@ namespace openspace {
 
 
     std::shared_ptr<TileDataset> AsyncTileDataProvider::getTextureDataProvider() const {
-        return _textureDataProvider;
+        return _tileDataset;
     }
 
     bool AsyncTileDataProvider::enqueueTextureData(const ChunkIndex& chunkIndex) {
         if (satisfiesEnqueueCriteria(chunkIndex)) {
             std::shared_ptr<TileLoadJob> job = std::shared_ptr<TileLoadJob>(
-                new TileLoadJob(_textureDataProvider, chunkIndex));
+                new TileLoadJob(_tileDataset, chunkIndex));
 
             _concurrentJobManager.enqueueJob(job);
             _enqueuedTileRequests[chunkIndex.hashKey()] = chunkIndex;
