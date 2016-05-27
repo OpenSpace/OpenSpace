@@ -247,6 +247,7 @@ namespace openspace {
         programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        programObject->setUniform("xSegments", _grid->xSegments());
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -480,6 +481,8 @@ namespace openspace {
         programObject->setUniform(
             "projectionTransform",
             data.camera.projectionMatrix());
+
+        programObject->setUniform("xSegments", _grid->xSegments());
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);

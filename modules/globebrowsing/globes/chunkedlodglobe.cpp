@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
-#include <modules/globebrowsing/meshes/basicgrid.h>
+#include <modules/globebrowsing/meshes/skirtedgrid.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -53,6 +53,7 @@ namespace openspace {
 
     ChunkedLodGlobe::ChunkedLodGlobe(
         const Ellipsoid& ellipsoid,
+        size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
         , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
@@ -62,9 +63,9 @@ namespace openspace {
         , _savedCamera(nullptr)
     {
 
-        auto geometry = std::shared_ptr<BasicGrid>(new BasicGrid(
-            64,
-            64,
+        auto geometry = std::shared_ptr<SkirtedGrid>(new SkirtedGrid(
+            segmentsPerPatch,
+            segmentsPerPatch,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));

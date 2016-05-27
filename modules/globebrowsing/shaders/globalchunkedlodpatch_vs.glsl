@@ -37,6 +37,9 @@ uniform vec3 radiiSquared;
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
+uniform int xSegments;
+uniform int ySegments;
+
 uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 
 layout(location = 1) in vec2 in_uv;
@@ -70,6 +73,16 @@ void main()
 		height = (sampledValue *
 			heightTiles[#{i}].depthTransform.depthScale +
 			heightTiles[#{i}].depthTransform.depthOffset);
+
+		// Skirts
+		int vertexIDx = gl_VertexID % (xSegments + 3);
+		int vertexIDy = gl_VertexID / (xSegments + 3);
+		if (vertexIDx == 0 ||
+			vertexIDy == 0 ||
+			vertexIDx == (xSegments + 2) ||
+			vertexIDy == (xSegments + 2) ) {
+			height = 0;
+		}
 	}
 	#endfor
 

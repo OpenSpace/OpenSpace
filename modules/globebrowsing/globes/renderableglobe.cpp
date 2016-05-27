@@ -43,6 +43,7 @@ namespace {
 
     // Keys for the dictionary
     const std::string keyRadii = "Radii";
+    const std::string keySegmentsPerPatch = "SegmentsPerPatch";
     const std::string keyTextures = "Textures";
     const std::string keyColorTextures = "ColorTextures";
     const std::string keyHeightMaps = "HeightMaps";
@@ -83,7 +84,13 @@ namespace openspace {
 
         // Read the radii in to its own dictionary
         Vec3 radii;
+        double patchSegmentsd;
+
         dictionary.getValue(keyRadii, radii);
+        // Ghoul can't read ints from lua dictionaries
+        dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
+        int patchSegments = patchSegmentsd;
+
         _ellipsoid = Ellipsoid(radii);
 
         
@@ -150,11 +157,12 @@ namespace openspace {
             std::shared_ptr<TileProvider> heightMapProvider = std::shared_ptr<TileProvider>(
                 new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
 
+
             _tileProviderManager->addHeightMap(name, heightMapProvider);
         }
         
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
-            new ChunkedLodGlobe(_ellipsoid, _tileProviderManager));
+            new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
 
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
     }
