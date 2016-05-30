@@ -11,9 +11,15 @@ helper.setDeltaTimeKeys({
     2160, 4320, 8640
 })
 
-openspace.bindKey("F5", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun'); openspace.printInfo('Changing Viewpoint to Sun-in-center');");
-openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter-in-center');");
-openspace.bindKey("F7", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto'); openspace.printInfo('Changing Viewpoint to Pluto-in-center');");
+openspace.bindKey("a", "openspace.setPropertyValue('Interaction.origin', 'NewHorizons')")
+openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'PlutoProjection')")
+openspace.bindKey("d", "openspace.setPropertyValue('Interaction.origin', 'Charon')")
+openspace.bindKey("z", "openspace.setPropertyValue('Interaction.origin', 'JupiterProjection')")
+openspace.bindKey("x", "openspace.setPropertyValue('Interaction.origin', 'Europa')")
+
+openspace.bindKey("F5", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun'); openspace.printInfo('Changing Viewpoint to Sun');");
+openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter');");
+openspace.bindKey("F7", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto'); openspace.printInfo('Changing Viewpoint to Pluto');");
 
 openspace.bindKey("F8", "openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 
@@ -24,12 +30,6 @@ openspace.bindKey("F11", "openspace.time.setTime('2015-07-14T11:17:00.00'); open
 openspace.bindKey("F12", "openspace.time.setTime('2015-07-14T12:45:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
 
 openspace.bindKey("r", helper.property.invert('PlutoProjection.renderable.fk'))
-
-openspace.bindKey("a", "openspace.setPropertyValue('Interaction.origin', 'NewHorizons')")
-openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'PlutoProjection')")
-openspace.bindKey("d", "openspace.setPropertyValue('Interaction.origin', 'Charon')")
-openspace.bindKey("z", "openspace.setPropertyValue('Interaction.origin', 'JupiterProjection')")
-openspace.bindKey("x", "openspace.setPropertyValue('Interaction.origin', 'Europa')")
 
 openspace.bindKey("KP_8", helper.property.increment('PlutoProjection.renderable.heightExaggeration', 2))
 openspace.bindKey("KP_2", helper.property.decrement('PlutoProjection.renderable.heightExaggeration', 2))
