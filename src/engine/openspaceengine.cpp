@@ -124,7 +124,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _globalPropertyNamespace(new properties::PropertyOwner)
     , _isMaster(false)
     , _runTime(0.0)
-    , _syncBuffer(new SyncBuffer(1024))
+    , _syncBuffer(new SyncBuffer(4096))
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
