@@ -31,7 +31,7 @@ openspace.bindKey("SHIFT+5", "openspace.time.setDeltaTime(460800)")
 
 openspace.bindKey("i", "local b = openspace.getPropertyValue('ImagePlaneRosetta.renderable.enabled'); openspace.setPropertyValue('ImagePlaneRosetta.renderable.enabled', not b)")
 
-openspace.bindKey("F8", "openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
+openspace.bindKey("F8", "openspace.setPropertyValue('67P.renderable.clearAllProjections', true");
 
 openspace.bindKey("a", "openspace.setPropertyValue('Interaction.origin', '67P')")
 openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'Rosetta')")

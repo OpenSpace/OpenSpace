@@ -68,7 +68,7 @@ void main() {
         float height = texture(heightTex, in_st).r;
         // float height = 0.00005;
         vec3 displacementDirection = (normalize(tmp.xyz));
-        float displacementFactor = height * _heightExaggeration / 2500.0;
+        float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
     }
 
