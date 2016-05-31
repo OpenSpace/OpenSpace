@@ -39,6 +39,7 @@ uniform vec2 lonLatScalingFactor;
 
 uniform int xSegments;
 uniform int ySegments;
+uniform float skirtLength;
 
 uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 
@@ -82,7 +83,7 @@ void main()
 			vertexIDy == 0 ||
 			vertexIDx == (xSegments + 2) ||
 			vertexIDy == (xSegments + 2) ) {
-			height = 0;
+			height -= skirtLength;
 		}
 	}
 	#endfor

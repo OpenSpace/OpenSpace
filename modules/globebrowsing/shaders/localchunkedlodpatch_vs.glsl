@@ -44,6 +44,7 @@ uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 
 uniform int xSegments;
 uniform int ySegments;
+uniform float skirtLength;
 
 layout(location = 1) in vec2 in_uv;
 
@@ -86,7 +87,7 @@ void main()
 			vertexIDy == 0 ||
 			vertexIDx == (xSegments + 2) ||
 			vertexIDy == (xSegments + 2) ) {
-			height = 0;
+			height -= skirtLength;
 		}
 	}
 	#endfor

@@ -248,6 +248,8 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
         programObject->setUniform("xSegments", _grid->xSegments());
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -483,6 +485,9 @@ namespace openspace {
             data.camera.projectionMatrix());
 
         programObject->setUniform("xSegments", _grid->xSegments());
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
