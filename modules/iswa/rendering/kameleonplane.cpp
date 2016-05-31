@@ -123,6 +123,7 @@ bool KameleonPlane::deinitialize(){
     IswaCygnet::deinitialize();
     _fieldlines.set(std::vector<int>());
     _kw = nullptr;
+    return true;
 }
 
 bool KameleonPlane::initialize(){
