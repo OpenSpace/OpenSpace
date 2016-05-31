@@ -8,6 +8,11 @@ else
     }
 end
 
+if UseHighResolutionTextures then
+    ColorTexture = "textures/cpmap_cyl_HR_0e.jpg"
+else
+    ColorTexture = "textures/charon_highres.jpg"
+end
 
 return {
     -- CharonProjection module
@@ -25,14 +30,10 @@ return {
             },
             Textures = {
                 Type = "simple",
-                Color = "textures/charon_highres.jpg",
+                Color = ColorTexture,
+                Height = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
             },
             Projection = {
                 Observer   = "NEW HORIZONS",

@@ -9,6 +9,12 @@ else
     }
 end
 
+if UseHighResolutionTextures then
+    ColorTexture = "textures/pmap_cyl_HR_LOR_lowres.jpg"
+else
+    ColorTexture = "textures/Shenk_180.jpg"
+end
+
 return {
     -- Pluto barycenter module
     {
@@ -37,19 +43,10 @@ return {
             },
             Textures = {
                 Type = "simple",
-                -- Color = "textures/pluto_highres_180.jpg",
-                Color = "textures/Shenk_180.jpg",
-                -- Color = "textures/pluto_large.jpg",
-                -- Color = "textures/white.png",
+                Color = ColorTexture,
+                Height = "textures/pluto_shenk_heightmap.jpg",
                 Project = "textures/3.jpg",
-                -- Height = "textures/pluto_shenk_heightmap.jpg",
-                -- NormalMap = "textures/pluto_shenk_normalmap.png",
                 Sequencing = "true"
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
             },
             Projection = {
                 Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/images",
