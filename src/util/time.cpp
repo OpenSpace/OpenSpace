@@ -99,6 +99,29 @@ std::string Time::currentTimeUTC() const {
     return SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
 }
 
+std::string Time::ISO8601() const {
+    std::string datetime = currentTimeUTC();
+    std::string month = datetime.substr(5, 3);
+
+    std::string MM = "";
+    if (month == "JAN") MM = "01";
+    else if (month == "FEB") MM = "02";
+    else if (month == "MAR") MM = "03";
+    else if (month == "APR") MM = "04";
+    else if (month == "MAY") MM = "05";
+    else if (month == "JUN") MM = "06";
+    else if (month == "JUL") MM = "07";
+    else if (month == "AUG") MM = "08";
+    else if (month == "SEP") MM = "09";
+    else if (month == "OCT") MM = "10";
+    else if (month == "NOV") MM = "11";
+    else if (month == "DEC") MM = "12";
+    else ghoul_assert(false, "Bad month");
+
+    datetime.replace(4, 5, "-" + MM + "-");
+    return datetime;
+}
+
 void Time::serialize(SyncBuffer* syncBuffer) {
     _syncMutex.lock();
 

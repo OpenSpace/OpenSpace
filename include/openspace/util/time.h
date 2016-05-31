@@ -124,6 +124,12 @@ public:
     std::string currentTimeUTC() const;
 
     /**
+    * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
+    * \return The current time as a ISO 8601 formatted string
+    */
+    std::string ISO8601() const;
+    
+    /**
      * Sets the delta time value that is the number of seconds that should pass for each
      * real-time second. This value is used in the advanceTime(double) method to easily
      * advance the simulation time.
