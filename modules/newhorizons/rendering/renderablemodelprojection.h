@@ -119,7 +119,6 @@ namespace openspace {
         glm::vec2  _camScaling;
         glm::vec3  _up;
         glm::mat4  _transform;
-        glm::mat4  _viewProjection;
         glm::mat4  _projectorMatrix;
         glm::vec3  _boresight;
 

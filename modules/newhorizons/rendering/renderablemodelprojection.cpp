@@ -343,7 +343,6 @@ void RenderableModelProjection::render(const RenderData& data) {
     if (_clearAllProjections)
         clearAllProjections();
 
-    _programObject->activate();
     _frameCount++;
 
     _camScaling = data.camera.scaling();
@@ -351,6 +350,9 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     if (_capture && _performProjection)
         project();
+
+    _programObject->activate();
+
 
     attitudeParameters(_time);
     _imageTimes.clear();
@@ -370,8 +372,7 @@ void RenderableModelProjection::render(const RenderData& data) {
     _programObject->setUniform("boresight", _boresight);
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("sun_pos", _sunPosition.vec3());
-    _viewProjection = data.camera.viewProjectionMatrix();
-    _programObject->setUniform("ViewProjection", _viewProjection);
+    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", _transform);
     setPscUniforms(*_programObject, data.camera, data.position);
 
@@ -425,6 +426,8 @@ void RenderableModelProjection::imageProjectGPU() {
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
     glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
+
+
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFboProject;
@@ -449,7 +452,9 @@ void RenderableModelProjection::imageProjectGPU() {
     glBindVertexArray(0);
     
     _fboProgramObject->deactivate();
-    //glDisable(GL_BLEND);
+
+
+    glDisable(GL_BLEND);
     //bind back to default
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
