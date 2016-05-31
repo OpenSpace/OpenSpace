@@ -58,6 +58,10 @@ class SyncBuffer;
 
 class Time {
 public:
+    Time();
+    Time(const Time& other);
+
+
     /**
      * Initializes the Time singleton.
      * \return <code>true</code> if the initialization succeeded, <code>false</code>

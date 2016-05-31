@@ -37,6 +37,45 @@ namespace openspace {
 
 Time* Time::_instance = nullptr;
 
+Time::Time()
+    : _time(-1.0)
+    , _dt(1.0)
+    //local copies
+    , _timeJumped(false)
+    , _timePaused(false)
+    , _jockeHasToFixThisLater(false)
+    //shared copies
+    , _sharedTime(-1.0)
+    , _sharedDt(1.0)
+    , _sharedTimeJumped(false)
+    //synced copies
+    , _syncedTime(-1.0)
+    , _syncedDt(1.0)
+    , _syncedTimeJumped(false)
+{
+
+}
+
+
+Time::Time(const Time& other)
+    : _time(other._time)
+    , _dt(other._dt)
+    //local copies
+    , _timeJumped(other._timeJumped)
+    , _timePaused(other._timePaused)
+    , _jockeHasToFixThisLater(other._jockeHasToFixThisLater)
+    //shared copies
+    , _sharedTime(other._sharedTime)
+    , _sharedDt(other._sharedDt)
+    , _sharedTimeJumped(other._sharedTimeJumped)
+    //synced copies
+    , _syncedTime(other._syncedTime)
+    , _syncedDt(other._syncedDt)
+    , _syncedTimeJumped(other._syncedTimeJumped)
+{
+
+}
+
 void Time::initialize() {
     ghoul_assert(_instance == nullptr, "Static time must not have been ininitialized");
     _instance = new Time();
