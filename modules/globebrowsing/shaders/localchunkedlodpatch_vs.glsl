@@ -65,18 +65,19 @@ void main()
 	
 	float height = 0;
 	
-	#for i in 0..#{numLayersHeight}
+	#for j in 1..#{numLayersHeight}
 	{
+		int i = #{j} - 1;
 		vec2 samplePos =
-			heightTiles[#{i}].uvTransform.uvScale * in_uv +
-			heightTiles[#{i}].uvTransform.uvOffset;
+			heightTiles[i].uvTransform.uvScale * in_uv +
+			heightTiles[i].uvTransform.uvOffset;
 
-		float sampledValue = texture(heightTiles[#{i}].textureSampler, samplePos).r;
+		float sampledValue = texture(heightTiles[i].textureSampler, samplePos).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
 		height = (sampledValue *
-			heightTiles[#{i}].depthTransform.depthScale +
-			heightTiles[#{i}].depthTransform.depthOffset);
+			heightTiles[i].depthTransform.depthScale +
+			heightTiles[i].depthTransform.depthOffset);
 
 		// Skirts
 		int vertexIDx = gl_VertexID % (xSegments + 3);
