@@ -38,7 +38,7 @@ function postInitialization()
 
     --openspace.iswa.addCygnet(-1,"Data");
     --openspace.iswa.addCygnet(-2,"Data");
-    openspace.iswa.addCygnet(-3,"Data");
+    --openspace.iswa.addCygnet(-3,"Data");
 
     --openspace.iswa.addCygnet(-3,"Data","GM");
     --openspace.iswa.addCygnet(-2,"Data","GM");

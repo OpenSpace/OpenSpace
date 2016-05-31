@@ -34,6 +34,7 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/util/dataprocessortext.h>
 
 namespace {
     const std::string _loggerCat = "DataPlane";
@@ -138,11 +139,7 @@ bool DataPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
-        _dataProcessor = std::make_shared<DataProcessor>(
-            _useLog.value(),
-            _useHistogram.value(),
-            _normValues
-        );
+        _dataProcessor = std::make_shared<DataProcessorText>();
     }
 
     setTransferFunctions(_transferFunctionsFile.value());
@@ -194,13 +191,13 @@ bool DataPlane::loadTexture() {
 
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
-        _dataProcessor->addValues(_dataBuffer, _dataOptions);
+        _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
         if(_group)
             _group->updateGroup();
     }
 
-    std::vector<float*> data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
+    std::vector<float*> data = _dataProcessor->processData(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;
@@ -361,7 +358,7 @@ void DataPlane::setTransferFunctions(std::string tfPath){
 }
 
 void DataPlane::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
+    std::vector<std::string> options = _dataProcessor->readMetadata(_dataBuffer);
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);

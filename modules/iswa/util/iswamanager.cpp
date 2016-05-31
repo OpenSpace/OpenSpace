@@ -159,8 +159,8 @@ void IswaManager::addKameleonCdf(std::string group, int pos){
     // auto info = _cdfInformation[group][pos];
     // std::cout << group << " " << pos << std::endl;
     createKameleonPlane(_cdfInformation[group][pos], "z");
-    createKameleonPlane(_cdfInformation[group][pos], "y");
-    createKameleonPlane(_cdfInformation[group][pos], "x");
+    // createKameleonPlane(_cdfInformation[group][pos], "y");
+    // createKameleonPlane(_cdfInformation[group][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -382,7 +382,8 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
                     "kwPath = '" + info.path + "' ," 
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
-                    "Group = '"+ info.group + "',"
+                    // "Group = '"+ info.group + "',"
+                    "Group = '',"
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"

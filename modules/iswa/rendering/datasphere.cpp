@@ -28,6 +28,7 @@
 #include <modules/base/rendering/planetgeometry.h>
 #include <fstream>
 #include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/util/dataprocessorjson.h>
 
 
 namespace {
@@ -132,11 +133,7 @@ bool DataSphere::initialize(){
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
-        _dataProcessor = std::make_shared<DataProcessor>(
-            _useLog.value(),
-            _useHistogram.value(),
-            _normValues
-        );
+        _dataProcessor = std::make_shared<DataProcessorJson>();
     }
 
     setTransferFunctions(_transferFunctionsFile.value());
@@ -189,13 +186,13 @@ bool DataSphere::loadTexture(){
 
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
-        _dataProcessor->addValuesFromJSON(_dataBuffer, _dataOptions);
+        _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
         if(_group)
             _group->updateGroup();
     }
 
-    std::vector<float*> data = _dataProcessor->readJSONData2(_dataBuffer, _dataOptions);
+    std::vector<float*> data = _dataProcessor->processData(_dataBuffer, _dataOptions);
 
     if(data.empty())
         return false;
@@ -367,7 +364,7 @@ void DataSphere::setTransferFunctions(std::string tfPath){
 }
 
 void DataSphere::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readJSONHeader(_dataBuffer);
+    std::vector<std::string> options = _dataProcessor->readMetadata(_dataBuffer);
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);

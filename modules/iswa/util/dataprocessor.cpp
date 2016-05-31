@@ -43,12 +43,20 @@ namespace {
 }
 
 namespace openspace {
+DataProcessor::DataProcessor()
+    :_useLog(false)
+    ,_useHistogram(false)
+    ,_normValues(glm::vec2(1.0))
+    ,_filterValues(glm::vec2(0.0))
+{
+    _coordinateVariables = {"x", "y", "z", "phi", "theta"};
+}
+
 DataProcessor::DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValues)
     :_useLog(useLog)
     ,_useHistogram(useHistogram)
     ,_normValues(normValues)
     ,_filterValues(glm::vec2(0))
-    ,_numValues(0)
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 };
@@ -122,7 +130,7 @@ void DataProcessor::addValues(std::string& dataBuffer, properties::SelectionProp
     if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
     if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
-    if(_sd.empty()) _sd = std::vector<float>(numOptions, 0.0f);
+    if(_standardDeviation.empty()) _standardDeviation = std::vector<float>(numOptions, 0.0f);
     if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
     if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
 
@@ -139,6 +147,8 @@ void DataProcessor::addValues(std::string& dataBuffer, properties::SelectionProp
 
             std::stringstream ss(line); 
             std::vector<float> value;
+
+
             float v;
             while(ss >> v){
                 value.push_back(v);
@@ -174,7 +184,7 @@ void DataProcessor::addValues(std::string& dataBuffer, properties::SelectionProp
             float sd = sqrt(var / numValues);
 
             _sum[i] += sum[i];
-            _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+            _standardDeviation[i] = sqrt(pow(_standardDeviation[i],2) + pow(sd, 2));
             _numValues[i] += numValues;
             _histograms[i]->generateEqualizer();
         }
@@ -321,7 +331,7 @@ std::vector<float*> DataProcessor::readData2(std::string& dataBuffer, properties
             for(int option : selectedOptions){
                 std::shared_ptr<Histogram> histogram = _histograms[option];
                 float mean = (1.0 / _numValues[option]) * _sum[option];
-                float sd = _sd[option];
+                float sd = _standardDeviation[option];
 
                 float filterMid = histogram->highestBinValue(_useHistogram);
                 float filterWidth = mean+histogram->binWidth();
@@ -419,7 +429,7 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
     if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
     if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
-    if(_sd.empty()) _sd = std::vector<float>(numOptions, 0.0f);
+    if(_standardDeviation.empty()) _standardDeviation = std::vector<float>(numOptions, 0.0f);
     if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
     if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
 
@@ -476,7 +486,7 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
     //    //  //     float sd = sqrt(var / numValues);
 
     //    //  //     _sum[i] += sum[i];
-    //    //  //     _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+    //    //  //     _standardDeviation[i] = sqrt(pow(_standardDeviation[i],2) + pow(sd, 2));
     //    //  //     _numValues[i] += numValues;
     //    //  //     _histograms[i]->generateEqualizer();
     //    //  // }
@@ -500,7 +510,7 @@ void DataProcessor::addValuesFromJSON(std::string& dataBuffer, properties::Selec
             float sd = sqrt(var / numValues);
 
             _sum[i] += sum[i];
-            _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+            _standardDeviation[i] = sqrt(pow(_standardDeviation[i],2) + pow(sd, 2));
             _numValues[i] += numValues;
             _histograms[i]->generateEqualizer();
         }
@@ -548,7 +558,7 @@ std::vector<float*> DataProcessor::readJSONData2(std::string& dataBuffer, proper
 
             if(!_histograms.empty()){
                 float mean = (1.0 / _numValues[option]) * _sum[option];
-                float sd = _sd[option];
+                float sd = _standardDeviation[option];
 
                 std::shared_ptr<Histogram> histogram = _histograms[option];
                 float filterMid = histogram->highestBinValue(_useHistogram);
@@ -586,7 +596,7 @@ void DataProcessor::addValuesFromKameleonData(float* kdata, glm::size3_t dimensi
     if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
     if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     if(_sum.empty()) _sum= std::vector<float>(numOptions, 0.0f);
-    if(_sd.empty()) _sd= std::vector<float>(numOptions, 0.0f);
+    if(_standardDeviation.empty()) _standardDeviation= std::vector<float>(numOptions, 0.0f);
     if(_numValues.empty()) _numValues= std::vector<float>(numOptions, 0.0f);
     if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
 
@@ -619,7 +629,7 @@ void DataProcessor::addValuesFromKameleonData(float* kdata, glm::size3_t dimensi
     float sd = sqrt(var / numValues);
 
     _sum[i] += sum;
-    _sd[i] = sqrt(pow(_sd[i],2) + pow(sd, 2));
+    _standardDeviation[i] = sqrt(pow(_standardDeviation[i],2) + pow(sd, 2));
     _numValues[i] += numValues;
     _histograms[i]->generateEqualizer();
 }
@@ -638,7 +648,7 @@ std::vector<float*> DataProcessor::processKameleonData2(std::vector<float*> kdat
         data[option] = new float[numValues]{0.0f};
 
         float mean = (1.0 / _numValues[option]) * _sum[option];
-        float sd = _sd[option];
+        float sd = _standardDeviation[option];
 
         for(int i=0; i<numValues; i++){
             float v = kdata[option][i];
@@ -687,8 +697,8 @@ std::vector<float*> DataProcessor::processKameleonData(std::vector<float*> kdata
         _sum= std::vector<float>(numOptions, 0.0f);
     }
 
-    if(_sd.empty()){
-        _sd= std::vector<float>(numOptions, 0.0f);
+    if(_standardDeviation.empty()){
+        _standardDeviation= std::vector<float>(numOptions, 0.0f);
     }
 
     if(_histograms.empty()){
@@ -801,7 +811,7 @@ float DataProcessor::processDataPoint(float value, int option){
     if(_numValues.empty()) return 0.0f;
     std::shared_ptr<Histogram> histogram = _histograms[option];
     float mean = (1.0 / _numValues[option]) * _sum[option];
-    float sd = _sd[option];
+    float sd = _standardDeviation[option];
 
     if(_useHistogram){
         // std::cout << sd << " " << 
@@ -835,9 +845,86 @@ void DataProcessor::clear(){
     _min.clear();
     _max.clear();
     _sum.clear();
-    _sd.clear();
+    _standardDeviation.clear();
     _histograms.clear();
     _numValues.clear();
+}
+
+void DataProcessor::initializeVectors(int numOptions){
+    if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
+    if(_max.empty()) _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
+    if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
+    if(_standardDeviation.empty())  _standardDeviation = std::vector<float>(numOptions, 0.0f);
+    if(_numValues.empty()) _numValues  = std::vector<float>(numOptions, 0.0f);
+    if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+}
+
+void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
+    int numSelected = selectedOptions.size();
+    std::shared_ptr<Histogram> histogram;
+    float mean, standardDeviation, filterMid, filterWidth;
+
+    _filterValues = glm::vec2(0.0);
+    if(numSelected <= 0) return;
+
+
+    if(!_histograms.empty()){
+        for(int option : selectedOptions){
+            histogram = _histograms[option];
+            mean = (1.0/_numValues[option])*_sum[option];
+            standardDeviation = _standardDeviation[option];
+
+            filterMid = histogram->highestBinValue(_useHistogram);
+            filterWidth = mean+histogram->binWidth();
+
+            if(_useHistogram){
+                standardDeviation = histogram->equalize(standardDeviation);
+                mean = histogram->equalize(mean);
+                filterWidth = mean+1;
+            }
+
+            filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation);
+            filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, standardDeviation));
+            _filterValues += glm::vec2(filterMid, filterWidth);
+
+        }
+        _filterValues /= numSelected;   
+    }
+}
+
+void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum){
+    int numOptions = optionValues.size();
+    int numValues;
+    float mean, value, variance, standardDeviation;
+
+    for(int i=0; i<numOptions; i++){
+        if(!_histograms[i]){
+             _histograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+        }
+        else{
+            _histograms[i]->changeRange(_min[i], _max[i]);
+        }
+
+        std::vector<float> values = optionValues[i];
+        numValues = values.size();
+
+        variance = 0;
+        mean = (1.0f/numValues)*sum[i];
+
+        for(int j=0; j<numValues; j++){
+            value = values[j];
+            variance +=  pow(value-mean, 2);
+            _histograms[i]->add(value, 1);
+        }
+
+        standardDeviation = sqrt(variance/ numValues);
+
+        _sum[i] += sum[i];
+        _standardDeviation[i] = sqrt(pow(standardDeviation, 2) + pow(_standardDeviation[i], 2));
+        _numValues[i] += numValues;
+
+        _histograms[i]->generateEqualizer();
+    }
 }
 
 }

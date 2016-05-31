@@ -477,12 +477,12 @@ float* KameleonWrapper::getUniformSliceValues(
             }
         }
     }
-    for(size_t i = 0; i < size; ++i) {
+    // for(size_t i = 0; i < size; ++i) {
         // double normalizedVal = (doubleData[i]-minValue)/(maxValue-minValue);
         // data[i] = glm::clamp(normalizedVal, 0.0, 1.0);
         // data[i] = 1;
         // std::cout << minValue << ", " << maxValue << ", " << doubleData[i] << ", " << normalizedVal << ", " << data[i] << std::endl;
-    }
+    // }
 
     delete[] doubleData;
     return data;
@@ -1055,6 +1055,10 @@ std::vector<std::string> KameleonWrapper::getVariables(){
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;
+}
+
+std::vector<std::string> KameleonWrapper::getLoadedVariables(){
+    return _kameleon->getLoadedVariables();
 }
 
 } // namespace openspace
