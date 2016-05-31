@@ -37,23 +37,38 @@ namespace openspace {
 
     class TileProviderManager {
     public:
+        struct TileProviderWithName {
+            std::string name;
+            std::shared_ptr<TileProvider> tileProvider;
+            bool isActive;
+        };
+
         TileProviderManager();
         ~TileProviderManager();
 
         static ThreadPool tileRequestThreadPool;
 
-        void addHeightMap(std::string name, std::shared_ptr<TileProvider> tileProvider);
-        void addColorTexture(std::string name, std::shared_ptr<TileProvider> tileProvider);
+        void addHeightMap(
+            std::string name,
+            std::shared_ptr<TileProvider> tileProvider,
+            bool isActive);
+        void addColorTexture(
+            std::string name,
+            std::shared_ptr<TileProvider> tileProvider,
+            bool isActive);
         /*
         std::shared_ptr<TileProvider> getHeightMap(std::string name);
         std::shared_ptr<TileProvider> getColorTexture(std::string name);
         */
-        const std::vector<std::shared_ptr<TileProvider> >& heightMapProviders();
-        const std::vector<std::shared_ptr<TileProvider> >& colorTextureProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveHeightMapProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveColorTextureProviders();
+
+        std::vector<TileProviderWithName>& heightMapProviders();
+        std::vector<TileProviderWithName>& colorTextureProviders();
 
     private:
-        std::vector<std::shared_ptr<TileProvider> > _heightMapProviders;
-        std::vector<std::shared_ptr<TileProvider> > _colorTextureProviders;
+        std::vector<TileProviderWithName> _heightMapProviders;
+        std::vector<TileProviderWithName> _colorTextureProviders;
     };
 
 } // namespace openspace

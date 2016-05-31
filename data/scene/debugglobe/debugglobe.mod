@@ -10,32 +10,20 @@ return {
             Textures = {
                 ColorTextures = {
                     {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                        FilePath = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
                     },
-                    
-
-                    --[[
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
                     },
                     {
-                        Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
-                    },
-                    {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                     },
-                    
-                    {
-                        Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
-                    },
-                    
-                    --]]
+            
                 },
+
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",

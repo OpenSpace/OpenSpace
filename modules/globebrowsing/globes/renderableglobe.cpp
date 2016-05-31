@@ -130,7 +130,10 @@ namespace openspace {
             std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TileProvider>(
                 new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
 
-            _tileProviderManager->addColorTexture(name, colorTextureProvider);
+            _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
+
+            // Create property for this tile provider
+            _activeColorLayers.push_back(properties::BoolProperty(name, name, true));
         }
 
         ghoul::Dictionary heightMapsDictionary;
@@ -158,8 +161,20 @@ namespace openspace {
                 new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
 
 
-            _tileProviderManager->addHeightMap(name, heightMapProvider);
+            _tileProviderManager->addHeightMap(name, heightMapProvider, true);
+
+            // Create property for this tile provider
+            _activeHeightMapLayers.push_back(properties::BoolProperty(name, name, true));
         }
+
+        // Add properties for the tile providers
+        for (auto it = _activeColorLayers.begin(); it != _activeColorLayers.end(); it++) {
+            addProperty(*it);
+        }
+        for (auto it = _activeHeightMapLayers.begin(); it != _activeHeightMapLayers.end(); it++) {
+            addProperty(*it);
+        }
+
         
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
@@ -198,17 +213,31 @@ namespace openspace {
                 _chunkedLodGlobe->setSaveCamera(nullptr);
             }
         }
-        _chunkedLodGlobe->doFrustumCulling = doFrustumCulling.value();
-        _chunkedLodGlobe->doHorizonCulling = doHorizonCulling.value();
-        _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
-        _chunkedLodGlobe->lodScaleFactor= lodScaleFactor.value();
-        _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
+
         _distanceSwitch.render(data);
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
         _time = data.time;
         _distanceSwitch.update(data);
+
+        _chunkedLodGlobe->doFrustumCulling = doFrustumCulling.value();
+        _chunkedLodGlobe->doHorizonCulling = doHorizonCulling.value();
+        _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
+        _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
+        _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
+
+        std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
+            _tileProviderManager->colorTextureProviders();
+        std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
+            _tileProviderManager->heightMapProviders();
+
+        for (size_t i = 0; i < colorTextureProviders.size(); i++) {
+            colorTextureProviders[i].isActive = _activeColorLayers[i].value();
+        }
+        for (size_t i = 0; i < heightMapProviders.size(); i++) {
+            heightMapProviders[i].isActive = _activeHeightMapLayers[i].value();
+        }
     }
 
     glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {

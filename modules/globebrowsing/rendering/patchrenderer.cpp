@@ -69,12 +69,12 @@ namespace openspace {
     }
 
     void PatchRenderer::update() {
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
         for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
         {
             iter->get()->prerender();
         }
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
         {
             iter->get()->prerender();
@@ -101,24 +101,6 @@ namespace openspace {
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"));
-
-        /*
-        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
-            "GlobalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
-
-        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
-            "LocalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        */
-
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -134,8 +116,8 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
@@ -261,73 +243,6 @@ namespace openspace {
 
         // disable shader
         programObject->deactivate();
-        
-
-
-
-
-
-
-
-        /*
-        // activate shader
-        _programObjectGlobalRendering->activate();
-
-
-        // For now just pick the first one from height maps
-        //auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        //auto tileProviderHeight = heightMapProviders.begin()->second;
-
-        // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight;
-        texUnitHeight.activate();
-        heightTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
-
-        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
-
-        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
-        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
-
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor;
-        texUnitColor.activate();
-        colorTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("colorTile.textureSampler", texUnitColor);
-        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
-
-        Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
-        auto patchSize = chunk.surfacePatch().size();
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
-        _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-        _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectGlobalRendering->deactivate();
-        */
     }
 
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data)
@@ -335,8 +250,8 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
 
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
@@ -434,12 +349,6 @@ namespace openspace {
         }
 
 
-
-
-
-
-
-
         // Calculate other uniform variables needed for rendering
 
         // TODO : Model transform should be fetched as a matrix directly.
@@ -499,105 +408,6 @@ namespace openspace {
 
         // disable shader
         programObject->deactivate();
-
-
-        
-
-
-
-        /*
-        using namespace glm;
-
-        // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewTransform = viewTransform * modelTransform;
-
-        // activate shader
-        _programObjectLocalRendering->activate();
-
-
-        // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders.begin()->second;
-
-        // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight;
-        texUnitHeight.activate();
-        heightTile.texture->bind();
-        _programObjectLocalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
-        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
-        
-        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
-        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor;
-        texUnitColor.activate();
-        colorTile.texture->bind();
-        _programObjectLocalRendering->setUniform("colorTile.textureSampler", texUnitColor);
-        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
-
-
-        Geodetic2 sw = chunk.surfacePatch().southWestCorner();
-        Geodetic2 se = chunk.surfacePatch().southEastCorner();
-        Geodetic2 nw = chunk.surfacePatch().northWestCorner();
-        Geodetic2 ne = chunk.surfacePatch().northEastCorner();
-
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
-
-        // Get model space positions of the four control points
-        Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);
-        Vec3 patchSeModelSpace = ellipsoid.cartesianSurfacePosition(se);
-        Vec3 patchNwModelSpace = ellipsoid.cartesianSurfacePosition(nw);
-        Vec3 patchNeModelSpace = ellipsoid.cartesianSurfacePosition(ne);
-
-        // Transform all control points to camera space
-        Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
-        Vec3 patchSeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSeModelSpace, 1));
-        Vec3 patchNwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNwModelSpace, 1));
-        Vec3 patchNeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNeModelSpace, 1));
-
-        // Send control points to shader
-        _programObjectLocalRendering->setUniform("p00", vec3(patchSwCameraSpace));
-        _programObjectLocalRendering->setUniform("p10", vec3(patchSeCameraSpace));
-        _programObjectLocalRendering->setUniform("p01", vec3(patchNwCameraSpace));
-        _programObjectLocalRendering->setUniform("p11", vec3(patchNeCameraSpace));
-
-        vec3 patchNormalCameraSpace = normalize(
-            cross(patchSeCameraSpace - patchSwCameraSpace,
-                patchNwCameraSpace - patchSwCameraSpace));
-
-        _programObjectLocalRendering->setUniform(
-            "patchNormalCameraSpace",
-            patchNormalCameraSpace);
-
-        _programObjectLocalRendering->setUniform(
-            "projectionTransform",
-            data.camera.projectionMatrix());
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectLocalRendering->deactivate();
-        */
     }
     
     //////////////////////////////////////////////////////////////////////////////////////
@@ -692,7 +502,7 @@ namespace openspace {
 
         
         // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
         auto tileProviderHeight = heightMapProviders[0];
         PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
@@ -747,7 +557,7 @@ namespace openspace {
 
 
         // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         auto tileProviderColor = colorTextureProviders[0];
         PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
 
@@ -879,7 +689,7 @@ namespace openspace {
         _programObjectLocalRendering->setUniform("patchNormal", patchNormal);
 
         // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
         auto tileProviderHeight = heightMapProviders[0];
         PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
 
@@ -935,7 +745,7 @@ namespace openspace {
 
 
         // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         auto tileProviderColor = colorTextureProviders[0];
         PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
 
