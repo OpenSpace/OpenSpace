@@ -30,20 +30,16 @@
 
 #include <memory>
 #include <chrono>
-#include <ghoul/designpattern/event.h>
-#include <openspace/properties/propertyowner.h>
+#include <modules/iswa/util/iswamanager.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <ghoul/designpattern/event.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/onscreengui/include/gui.h>
-#include <ghoul/opengl/texture.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <ghoul/misc/dictionary.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 
@@ -89,7 +85,6 @@ protected:
     void unregisterProperties();
     void initializeTime();
     void initializeGroup();
-    bool destroyShader();
     bool createShader();
     
     virtual bool createGeometry() = 0;
@@ -99,7 +94,7 @@ protected:
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
     virtual bool readyToRender() const = 0;
-    virtual void setUniformAndTextures() = 0;
+    virtual void setUniforms() = 0;
 
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
@@ -131,6 +126,10 @@ protected:
     std::string _vsPath;
     std::string _fsPath;
     std::string _programName;
+
+private:
+    bool destroyShader();
+
 };
 
 }//namespace openspace

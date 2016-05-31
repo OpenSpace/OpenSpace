@@ -267,7 +267,7 @@ bool DataSphere::readyToRender() const {
 }
 
 
-void DataSphere::setUniformAndTextures(){
+void DataSphere::setUniforms(){
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
     int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);

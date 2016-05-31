@@ -46,7 +46,7 @@ private:
     virtual bool updateTexture() override;
 
     virtual bool readyToRender() const override;
-    virtual void setUniformAndTextures() override;
+    virtual void setUniforms() override;
 
     void setTransferFunctions(std::string tfPath);
     void fillOptions();

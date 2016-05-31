@@ -352,7 +352,7 @@ bool KameleonPlane::readyToRender() const {
     return (!_textures.empty() && !_transferFunctions.empty());
 }
 
-void KameleonPlane::setUniformAndTextures(){
+void KameleonPlane::setUniforms(){
     std::vector<int> selectedOptions = _dataOptions.value();
     int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
     int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);

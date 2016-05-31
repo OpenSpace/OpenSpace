@@ -50,7 +50,7 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
 
 TexturePlane::~TexturePlane(){}
 
-void TexturePlane::setUniformAndTextures(){
+void TexturePlane::setUniforms(){
     ghoul::opengl::TextureUnit unit;
 
     unit.activate();

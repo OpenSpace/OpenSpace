@@ -35,7 +35,6 @@ uniform bool averageValues;
 uniform vec2 backgroundValues;
 uniform float transparency;
 
-
 // uniform float background;
 
 in vec2 vs_st;
@@ -63,6 +62,7 @@ Fragment getFragment() {
         vec4 color = texture(transferFunctions[0], vec2(v,0));
         if((v<(x+y)) && v>(x-y))
             color = mix(transparent, color, clamp(1,0,abs(v-x)));
+
         diffuse = color;
     }else{
         for(int i=0; i<numTextures; i++){

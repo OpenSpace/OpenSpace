@@ -24,8 +24,6 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 
@@ -86,26 +84,11 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _data->scale = scale;
     _data->offset = offset;
 
-    // std::cout << std::to_string(min) << std::endl;
-    // std::cout << std::to_string(max) << std::endl;
-    // std::cout << std::to_string(_data->scale) << std::endl;
-    // std::cout << std::to_string(_data->offset) << std::endl;
-
     addProperty(_alpha);
     addProperty(_delete);
 
-    // if(dictionary.hasValue<float>("Group")){
     dictionary.getValue("Group", _data->groupName);
-    // }
-    // _data->groupId = groupId;
-    // std::cout << _data->id << std::endl;
-    // std::cout << _data->frame << std::endl;
-    // std::cout << std::to_string(_data->offset) << std::endl;
-    // std::cout << std::to_string(_data->scale) << std::endl;
-    // std::cout << std::to_string(_data->max) << std::endl;
-    // std::cout << std::to_string(_data->min) << std::endl;
-    // std::cout << std::to_string(_data->spatialScale) << std::endl;
-    // OsEng.gui()._iswa.registerProperty(&_enabled);
+
 }
 
 IswaCygnet::~IswaCygnet(){}
@@ -178,7 +161,7 @@ void IswaCygnet::render(const RenderData& data){
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
-    setUniformAndTextures();
+    setUniforms();
     renderGeometry();
 
     glEnable(GL_CULL_FACE);

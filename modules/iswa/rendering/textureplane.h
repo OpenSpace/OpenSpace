@@ -41,7 +41,7 @@ public:
 
 private:
     bool createGeometry() override;
-    void setUniformAndTextures() override;
+    void setUniforms() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;
 

@@ -23,35 +23,20 @@
  ****************************************************************************************/
 #include <modules/iswa/rendering/dataplane.h>
 
-#include <fstream>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <modules/iswa/rendering/iswagroup.h>
-
 namespace {
     const std::string _loggerCat = "DataPlane";
-    const int MAX_TEXTURES = 6;
 }
 
 namespace openspace {
 
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
-    :CygnetPlane(dictionary)
+    :DataCygnet(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Use Histogram", true)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
+    ,_useHistogram("useHistogram", "Use Histogram", false)
+    ,_autoFilter("autoFilter", "Auto Filter", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
-    ,_dataOptions("dataOptions", "Data Options")
-    ,_dataProcessor(nullptr)
 {     
     std::string name;
     dictionary.getValue("Name", name);
@@ -65,7 +50,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_normValues);
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
-    addProperty(_dataOptions);
 
     _type = IswaManager::CygnetType::Data;
 
@@ -81,59 +65,7 @@ bool DataPlane::initialize(){
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
-
-        _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
-            LDEBUG(name() + " Event useLogChanged");
-            _useLog.setValue(dict.value<bool>("useLog"));
-        });
-
-        _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event normValuesChanged");
-            std::shared_ptr<glm::vec2> values;
-            bool success = dict.getValue("normValues", values);
-            if(success){
-                _normValues.setValue(*values);            
-            }
-        });
-
-        _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event useHistogramChanged");
-            _useHistogram.setValue(dict.value<bool>("useHistogram"));
-        });
-
-        _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event dataOptionsChanged");
-            std::shared_ptr<std::vector<int> > values;
-            bool success = dict.getValue("dataOptions", values);
-            if(success){
-                _dataOptions.setValue(*values);            
-            }
-        });
-
-        _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event transferFunctionsChanged");
-            _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
-        });
-
-        _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event backgroundValuesChanged");
-            std::shared_ptr<glm::vec2> values;
-            bool success = dict.getValue("backgroundValues", values);
-            if(success){
-                _backgroundValues.setValue(*values);            
-            }
-        });
-
-        _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event autoFilterChanged");
-            _autoFilter.setValue(dict.value<bool>("autoFilter"));
-        });
-
-        _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event updateGroup");
-            loadTexture();
-        });
-
+        subscribeToGroup();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
@@ -149,7 +81,7 @@ bool DataPlane::initialize(){
         );
     }
 
-    setTransferFunctions(_transferFunctionsFile.value());
+    readTransferFunctions(_transferFunctionsFile.value());
 
     _normValues.onChange([this](){
         _dataProcessor->normValues(_normValues.value());
@@ -173,194 +105,129 @@ bool DataPlane::initialize(){
     });
 
     _transferFunctionsFile.onChange([this](){
-        setTransferFunctions(_transferFunctionsFile.value());
+        readTransferFunctions(_transferFunctionsFile.value());
     });
+
+    _autoFilter.onChange([this](){
+        if(_autoFilter.value())
+            _backgroundValues.setValue(_dataProcessor->filterValues());
+    });
+
+    _autoFilter.setValue(true);
 
     return true;
 }
 
-bool DataPlane::loadTexture() {
-    // if The future is done then get the new dataFile
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-         DownloadManager::MemoryFile dataFile = _futureObject.get();
-
-         if(dataFile.corrupted)
-            return false;
-
-        _dataBuffer = "";
-        _dataBuffer.append(dataFile.buffer, dataFile.size);
-        delete[] dataFile.buffer;
-    }
-
-    // if the buffer in the datafile is empty, do not proceed
-    if(_dataBuffer.empty())
-        return false;
-
-    if(!_dataOptions.options().size()){ // load options for value selection
-        fillOptions();
-        _dataProcessor->addValues(_dataBuffer, _dataOptions);
-
-        if(_group)
-            _group->updateGroup();
-    }
-
-    std::vector<float*> data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
-
-    if(data.empty())
-        return false;
-
-    if(_autoFilter.value())
-        _backgroundValues.setValue(_dataProcessor->filterValues());
+bool DataPlane::createGeometry() {
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     
-    bool texturesReady = false;
-    std::vector<int> selectedOptions = _dataOptions.value();
+    // ============================
+    //         GEOMETRY (quad)
+    // ============================
+    // GLfloat x,y, z;
+    float s = _data->spatialScale.x;
+    const GLfloat x = s*_data->scale.x/2.0;
+    const GLfloat y = s*_data->scale.y/2.0;
+    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat w = _data->spatialScale.w;
 
-    for(int option: selectedOptions){
-        float* values = data[option];
-        if(!values) continue;
+    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+    //   x   y               z   w  s  t
+        -x, -y,             -z,  w, 0, 1,
+         x,  y,              z,  w, 1, 0,
+        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x, -y,             -z,  w, 0, 1,
+         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  y,              z,  w, 1, 0,
+    };
 
-        if(!_textures[option]){
-            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                    values, 
-                                                                    _dataProcessor->dimensions(),
-                                                                    ghoul::opengl::Texture::Format::Red,
-                                                                    GL_RED, 
-                                                                    GL_FLOAT,
-                                                                    ghoul::opengl::Texture::FilterMode::Linear,
-                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                                );
+    glBindVertexArray(_quad); // bind array
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-            if(texture){
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                _textures[option] = std::move(texture);
-            }
-        }else{
-            _textures[option]->setPixelData(values);
-            _textures[option]->uploadTexture();
-        }
-        texturesReady = true;
-    }
-
-    return texturesReady;
-
+    return true;
 }
 
-bool DataPlane::updateTexture(){
-    if(_futureObject.valid())
-        return false;
+bool DataPlane::destroyGeometry(){
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
 
-    if(future.valid()){
-        _futureObject = std::move(future);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
-bool DataPlane::readyToRender() const {
-    return (!_textures.empty());
+void DataPlane::renderGeometry() const {
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void DataPlane::setUniformAndTextures(){    
-    std::vector<int> selectedOptions = _dataOptions.value();
-    int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
-    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
-
-    ghoul::opengl::TextureUnit txUnits[6];
-    int j = 0;
-    for(int option : selectedOptions){
-        if(_textures[option]){
-            txUnits[j].activate();
-            _textures[option]->bind();
-            _shader->setUniform(
-                "textures[" + std::to_string(j) + "]",
-                txUnits[j]
-            );
-
-            j++;
-            if(j >= MAX_TEXTURES) break;
-        }
-    }
-
-    if(activeTextures > 0){
-        if(selectedOptions.back()>=activeTransferfunctions)
-            activeTransferfunctions = 1;
-    }
-
-    ghoul::opengl::TextureUnit tfUnits[6];
-    j = 0;
-
-    if((activeTransferfunctions == 1)){
-        tfUnits[0].activate();
-        _transferFunctions[0]->bind();
-        _shader->setUniform(
-            "transferFunctions[0]",
-            tfUnits[0]
-        );
-    }else{
-        for(int option : selectedOptions){
-            // std::cout << option << std::endl;
-            // if(option >= activeTransferfunctions){
-            //     // LWARNING("No transfer function for this value.");
-            //     break;
-            // }
-
-            if(_transferFunctions[option]){
-                tfUnits[j].activate();
-                _transferFunctions[option]->bind();
-                _shader->setUniform(
-                "transferFunctions[" + std::to_string(j) + "]",
-                tfUnits[j]
-                );
-
-                j++;
-                if(j >= MAX_TEXTURES) break;
-            }
-        }
-    }
-
-    _shader->setUniform("numTextures", activeTextures);
-    _shader->setUniform("numTransferFunctions", activeTransferfunctions);
+void DataPlane::setUniforms(){
+    // set both data texture and transfer function texture
+    setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
 }
 
-void DataPlane::setTransferFunctions(std::string tfPath){
-    std::string line;
-    std::ifstream tfFile(absPath(tfPath));
+void DataPlane::subscribeToGroup(){
+    _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event useLogChanged");
+        _useLog.setValue(dict.value<bool>("useLog"));
+    });
 
-    std::vector<std::shared_ptr<TransferFunction>> tfs;
-
-    if(tfFile.is_open()){
-        while(getline(tfFile, line)){
-            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(absPath(line));
-            if(tf){
-                tfs.push_back(tf);
-            }
+    _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event normValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("normValues", values);
+        if(success){
+            _normValues.setValue(*values);            
         }
+    });
 
-        tfFile.close();
-    }
+    _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event useHistogramChanged");
+        _useHistogram.setValue(dict.value<bool>("useHistogram"));
+    });
 
-    
-    if(!tfs.empty()){
-        _transferFunctions.clear();
-        _transferFunctions = tfs;
-    }
+    _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event dataOptionsChanged");
+        std::shared_ptr<std::vector<int> > values;
+        bool success = dict.getValue("dataOptions", values);
+        if(success){
+            _dataOptions.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event transferFunctionsChanged");
+        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
+    });
+
+    _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event backgroundValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("backgroundValues", values);
+        if(success){
+            _backgroundValues.setValue(*values);            
+        }
+    });
+
+    _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event autoFilterChanged");
+        _autoFilter.setValue(dict.value<bool>("autoFilter"));
+    });
+
+    _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event updateGroup");
+        loadTexture();
+    });
 }
 
-void DataPlane::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
-    for(int i=0; i<options.size(); i++){
-        _dataOptions.addOption({i, options[i]});
-        _textures.push_back(nullptr);
-    }
-    _dataOptions.setValue(std::vector<int>(1,0));
-    if(_group)
-        _group->registerOptions(_dataOptions.options());
-}
 
 }// namespace openspace
