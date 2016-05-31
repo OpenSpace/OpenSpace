@@ -32,6 +32,11 @@
 namespace openspace{
 class IswaGroup;
 
+/**
+ * DataPlane is a concrete IswaCygnet with data files as its input source. 
+ * The class handles creation, destruction and rendering of a plane geometry.
+ * It also specifies what uniforms to use and what GUI properties it needs.
+ */
 class DataPlane : public DataCygnet {
 friend class IswaGroup;
 public:
