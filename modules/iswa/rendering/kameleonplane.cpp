@@ -109,6 +109,10 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
         _slice.setValue((_data->offset.z - _data->gridMin.z)/_scale);
     }
+
+    _programName = "DataPlaneProgram";
+    _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
+    _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
 }
 
 KameleonPlane::~KameleonPlane(){}
@@ -116,7 +120,7 @@ KameleonPlane::~KameleonPlane(){}
 bool KameleonPlane::deinitialize(){
     IswaCygnet::deinitialize();
     _fieldlines.set(std::vector<int>());
-    // _kw = nullptr;
+    return true;
 }
 
 bool KameleonPlane::initialize(){
@@ -336,7 +340,7 @@ bool KameleonPlane::updateTexture(){
 }
 
 
-bool KameleonPlane::readyToRender(){
+bool KameleonPlane::readyToRender() const {
     return (!_textures.empty() && !_transferFunctions.empty());
 }
 
@@ -397,18 +401,6 @@ void KameleonPlane::setUniformAndTextures(){
     _shader->setUniform("numTransferFunctions", activeTransferfunctions);
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
-}
-
-bool KameleonPlane::createShader(){
-    if (_shader == nullptr) {
-        // DatePlane Program
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("DataPlaneProgram",
-            "${MODULE_ISWA}/shaders/dataplane_vs.glsl",
-            "${MODULE_ISWA}/shaders/dataplane_fs.glsl"
-            );
-        if (!_shader) return false;
-    }
 }
 
 void KameleonPlane::setTransferFunctions(std::string tfPath){

@@ -75,11 +75,11 @@ public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
     ~IswaCygnet();
 
-    virtual bool initialize() override;
-    virtual bool deinitialize() override;
-    virtual bool isReady() const override;
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    virtual bool initialize();
+    virtual bool deinitialize();
+    virtual bool isReady() const;
+    void render(const RenderData& data);
+    void update(const UpdateData& data);
 
 protected:
 
@@ -90,16 +90,16 @@ protected:
     void initializeTime();
     void initializeGroup();
     bool destroyShader();
+    bool createShader();
     
     virtual bool createGeometry() = 0;
     virtual bool destroyGeometry() = 0;
-    virtual void renderGeometry() = 0;
+    virtual void renderGeometry() const = 0;
     
     virtual bool loadTexture() = 0;
     virtual bool updateTexture() = 0;
-    virtual bool readyToRender() = 0;
+    virtual bool readyToRender() const = 0;
     virtual void setUniformAndTextures() = 0;
-    virtual bool createShader() = 0;
 
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
@@ -125,6 +125,10 @@ protected:
 
     // IswaManager::CygnetType _type;
     bool _textureDirty;
+
+    std::string _vsPath;
+    std::string _fsPath;
+    std::string _programName;
 };
 
 }//namespace openspace

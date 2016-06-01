@@ -470,6 +470,7 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 
     if(!data->group.empty()){
         std::string type = typeid(DataSphere).name();
+        registerGroup(data->group, type);
 
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->isType(type)){

@@ -54,7 +54,7 @@ bool CygnetSphere::destroyGeometry(){
 	return true;
 }
 
-void CygnetSphere::renderGeometry(){
+void CygnetSphere::renderGeometry() const {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     _sphere->render();

@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,9 +46,8 @@ friend class IswaGroup;
     virtual bool loadTexture() override;
     virtual bool updateTexture() override;
 
-    virtual bool readyToRender() override;
+    virtual bool readyToRender() const override;
     virtual void setUniformAndTextures() override;
-    virtual bool createShader() override;
 
     void setTransferFunctions(std::string tfPath);
     void fillOptions();

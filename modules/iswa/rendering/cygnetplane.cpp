@@ -77,7 +77,7 @@ bool CygnetPlane::destroyGeometry(){
 	return true;
 }
 
-void CygnetPlane::renderGeometry(){
+void CygnetPlane::renderGeometry() const {
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
