@@ -35,7 +35,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include "imgui.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
