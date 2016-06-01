@@ -41,6 +41,8 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     ,_dataOptions("dataOptions", "Data Options")
 {
     addProperty(_dataOptions);
+    registerProperties();
+    _type = IswaManager::CygnetType::Data;
 }
 
 DataCygnet::~DataCygnet(){}
@@ -64,14 +66,29 @@ bool DataCygnet::loadTexture(){
 
     if(!_dataOptions.options().size()){ // load options for value selection
         fillOptions();
-        _dataProcessor->addValues(_dataBuffer, _dataOptions);
 
-        if(_group)
+        //Temporary if statements
+        if( className == "DataSphere"){
+            _dataProcessor->addValuesFromJSON(_dataBuffer, _dataOptions);
+        } else if(className == "DataPlane"){
+            _dataProcessor->addValues(_dataBuffer, _dataOptions);
+        }
+
+        // if this datacygnet has added new values then reload texture
+        // for the whole group, including this datacygnet, and return after.
+        if(_group){
             _group->updateGroup();
+            return true;
+        }
     }
-
-    std::vector<float*> data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
-
+    //Temporary if statements
+    std::vector<float*> data;
+    if( className == "DataSphere"){
+        data = _dataProcessor->readJSONData2(_dataBuffer, _dataOptions);
+    } else if(className == "DataPlane"){
+        data = _dataProcessor->readData2(_dataBuffer, _dataOptions);
+    }
+    
     if(data.empty())
         return false;
     
@@ -104,7 +121,6 @@ bool DataCygnet::loadTexture(){
         }
         texturesReady = true;
     }
-
     return texturesReady;       
 }
 
@@ -215,7 +231,14 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
 }
 
 void DataCygnet::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readHeader(_dataBuffer);
+    std::vector<std::string> options;
+    //Temporary if statements
+    if( className == "DataSphere"){
+        options = _dataProcessor->readJSONHeader(_dataBuffer);
+    } else if(className == "DataPlane"){
+        options = _dataProcessor->readHeader(_dataBuffer);
+    }
+     
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);

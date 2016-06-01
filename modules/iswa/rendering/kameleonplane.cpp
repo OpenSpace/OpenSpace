@@ -52,7 +52,7 @@ namespace openspace {
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     :CygnetPlane(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Use Histogram", false)
+    ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
@@ -62,9 +62,6 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_resolution("resolution", "Resolutionx100", 1, 1, 5)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
-    std::string name;
-    dictionary.getValue("Name", name);
-    setName(name);
 
     registerProperties();
 

@@ -25,45 +25,48 @@
 #ifndef __DATASPHERE_H__
 #define __DATASPHERE_H__
 
-#include <modules/iswa/rendering/cygnetsphere.h>
+#include <modules/iswa/rendering/datacygnet.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/util/dataprocessor.h>
-
 
 namespace openspace{
 class PowerScaledSphere;
-class DataSphere : public CygnetSphere {
-friend class IswaGroup;
+
+/**
+ * DataSphere is a concrete IswaCygnet with data files as its input source. 
+ * The class handles creation, destruction and rendering of a sphere geometry.
+ * It also specifies what uniforms to use and what GUI properties it needs.
+ */
+class DataSphere : public DataCygnet {
 public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();
 
      bool initialize() override;
 
+protected:
+
+    /**
+     * Creates a sphere geometry
+     */
+    bool createGeometry() override;
+    bool destroyGeometry() override;
+    void renderGeometry() const override;
+    void setUniforms() override;
+
 private:
-    virtual bool loadTexture() override; 
-    virtual bool updateTexture() override;
 
-    virtual bool readyToRender() const override;
-    virtual void setUniforms() override;
+    void subscribeToGroup();
 
-    void setTransferFunctions(std::string tfPath);
-    void fillOptions();
-
-    properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _backgroundValues;
-
     properties::Vec2Property _normValues;
-    
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
-
-    std::string _dataBuffer;
-    std::shared_ptr<DataProcessor> _dataProcessor; 
+    std::shared_ptr<PowerScaledSphere> _sphere;
+    float _radius;
 };
 
 

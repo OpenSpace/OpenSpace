@@ -30,7 +30,6 @@
 #include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
-class IswaGroup;
 
 /**
  * DataPlane is a concrete IswaCygnet with data files as its input source. 

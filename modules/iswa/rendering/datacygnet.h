@@ -64,7 +64,7 @@ protected:
      */
 	void setTextureUniforms();
 
-	// Subclass interface
+	// Subclass interface. Must be protected, called from base class
 	virtual bool createGeometry() = 0;
 	virtual bool destroyGeometry() = 0;
 	virtual void renderGeometry() const = 0;
@@ -73,6 +73,9 @@ protected:
 
     properties::SelectionProperty _dataOptions;
     std::shared_ptr<DataProcessor> _dataProcessor; 
+
+    // Temporary variable untill dataprocessor is done
+    std::string className;
 
 private:
     void fillOptions();

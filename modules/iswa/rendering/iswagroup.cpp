@@ -39,8 +39,8 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     :_enabled("enabled", "Enabled", true)
     ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Use Histogram", false)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
+    ,_useHistogram("useHistogram", "Auto Contrast", false)
+    ,_autoFilter("autoFilter", "Auto Filter", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
@@ -74,6 +74,8 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     );
     _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
     registerProperties();
+
+    _autoFilter.setValue(true);
 }
 
 IswaGroup::~IswaGroup(){}
@@ -148,6 +150,16 @@ void IswaGroup::registerProperties(){
 
         _autoFilter.onChange([this]{
             LDEBUG("Group " + name() + " published autoFilterChanged");
+            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // and unregister backgroundvalues property.
+            if(_autoFilter.value()){
+                _backgroundValues.setValue(_dataProcessor->filterValues());
+                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues);
+            // else if autofilter is turned off, only register backgroundValues 
+            // if it does not have a group
+            } else {
+                 OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+            }
             _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
         });
 

@@ -43,6 +43,10 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     ,_group(nullptr)
     ,_textureDirty(false)
 {
+    std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
+
     _data = std::make_shared<Metadata>();
 
     // dict.getValue can only set strings in _data directly

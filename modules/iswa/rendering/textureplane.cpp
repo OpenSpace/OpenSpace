@@ -36,13 +36,6 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     ,_quad(0)
     ,_vertexPositionBuffer(0)
 {
-    std::string name;
-    dictionary.getValue("Name", name);
-    setName(name);
-    registerProperties();
-
-    _type = IswaManager::CygnetType::Texture;
-
     _programName = "PlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl";

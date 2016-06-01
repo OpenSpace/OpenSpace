@@ -32,17 +32,12 @@ namespace openspace {
 DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
-    ,_useHistogram("useHistogram", "Use Histogram", false)
+    ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
 {     
-    std::string name;
-    dictionary.getValue("Name", name);
-    setName(name);
-
-    registerProperties();
 
     addProperty(_useLog);
     addProperty(_useHistogram);
@@ -51,11 +46,12 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
 
-    _type = IswaManager::CygnetType::Data;
-
     _programName = "DataPlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
+
+    // Temporary
+    className = "DataPlane";
 }
 
 DataPlane::~DataPlane(){}
@@ -79,6 +75,19 @@ bool DataPlane::initialize(){
             _useHistogram.value(),
             _normValues
         );
+
+
+        //If autofiler is on, background values property should be hidden
+        _autoFilter.onChange([this](){
+            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // and unregister backgroundvalues property.
+            if(_autoFilter.value()){
+                _backgroundValues.setValue(_dataProcessor->filterValues());
+            // else if autofilter is turned off, register backgroundValues 
+            } else {
+                OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+            }
+        });
     }
 
     readTransferFunctions(_transferFunctionsFile.value());
@@ -96,6 +105,8 @@ bool DataPlane::initialize(){
     _useHistogram.onChange([this](){
         _dataProcessor->useHistogram(_useHistogram.value());
         loadTexture();
+        if(_autoFilter.value())
+            _backgroundValues.setValue(_dataProcessor->filterValues());
     });
 
     _dataOptions.onChange([this](){ 
@@ -106,11 +117,6 @@ bool DataPlane::initialize(){
 
     _transferFunctionsFile.onChange([this](){
         readTransferFunctions(_transferFunctionsFile.value());
-    });
-
-    _autoFilter.onChange([this](){
-        if(_autoFilter.value())
-            _backgroundValues.setValue(_dataProcessor->filterValues());
     });
 
     _autoFilter.setValue(true);
