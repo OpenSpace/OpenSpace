@@ -30,7 +30,7 @@
 
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
@@ -227,11 +227,11 @@ void IswaManager::registerGroup(std::string groupName, std::string type){
                             
         bool kameleonGroup = (type == typeid(KameleonPlane).name());
         if(dataGroup){
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
         }else if(kameleonGroup){
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaKameleonGroup>(groupName, type)));
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaKameleonGroup>(groupName, type)));
         }else{
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaBaseGroup>(groupName, type)));
         }
     } else if(!_groups[groupName]->isType(type)){
         LWARNING("Can't add cygnet to groups with diffent type");
@@ -239,7 +239,7 @@ void IswaManager::registerGroup(std::string groupName, std::string type){
 }
 
 
-std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
+std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     if(_groups.find(name) != _groups.end()){
         return _groups[name];
     }
@@ -251,7 +251,7 @@ std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
         return _cygnetInformation;
 }
 
-std::map<std::string, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
+std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups(){
     return _groups;
 }
 

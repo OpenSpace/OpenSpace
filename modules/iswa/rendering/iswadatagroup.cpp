@@ -41,7 +41,7 @@ namespace {
 
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
-    :IswaGroup(name, type)    
+    :IswaBaseGroup(name, type)    
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Use Histogram", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
@@ -49,8 +49,6 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
-    // ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    // ,_fieldlineIndexFile("")
 {
     addProperty(_useLog);
     addProperty(_useHistogram);
@@ -60,7 +58,6 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    std::cout << "DataGroup" << std::endl;
     createDataProcessor();
     registerProperties();
 }
@@ -68,9 +65,6 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
-    // IswaGroup::registerProperties();
-
-    // std::cout << "register properties" << std::endl;
     OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);

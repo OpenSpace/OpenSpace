@@ -28,7 +28,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 
 
 namespace {

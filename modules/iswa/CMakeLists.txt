@@ -38,7 +38,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.h
@@ -59,7 +59,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.cpp	
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswakameleongroup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.cpp

@@ -35,7 +35,7 @@
 
 namespace openspace{
 class DataProcessor{
-    friend class IswaGroup;
+    friend class IswaBaseGroup;
 public:
     DataProcessor();
     DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValues);

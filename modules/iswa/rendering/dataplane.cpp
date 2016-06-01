@@ -33,7 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
 namespace {

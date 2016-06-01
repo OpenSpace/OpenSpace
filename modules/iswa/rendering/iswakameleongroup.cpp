@@ -52,7 +52,7 @@ IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
 IswaKameleonGroup::~IswaKameleonGroup(){}
 
 void IswaKameleonGroup::clearGroup(){
-    IswaGroup::clearGroup();
+    IswaBaseGroup::clearGroup();
     clearFieldlines();
 }
 

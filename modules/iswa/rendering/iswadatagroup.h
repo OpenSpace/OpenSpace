@@ -26,19 +26,13 @@
 #include <modules/iswa/rendering/iswagroup.h>
 
 namespace openspace{
-class IswaDataGroup : public IswaGroup{
+class IswaDataGroup : public IswaBaseGroup{
 public:
     IswaDataGroup(std::string name, std::string type);
     ~IswaDataGroup();
 
-    // virtual void clearGroup() override;
-
     void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
-    // void registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options);
-
     std::vector<int> dataOptionsValue();
-    // std::vector<int> fieldlineValue();
-    // void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
 
 protected:
     void registerProperties();

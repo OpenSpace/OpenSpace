@@ -27,7 +27,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/base/rendering/planetgeometry.h>
 #include <fstream>
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 
 

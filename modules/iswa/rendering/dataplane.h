@@ -32,10 +32,10 @@
 #include <modules/iswa/util/dataprocessor.h>
 
 namespace openspace{
-class IswaGroup;
+class IswaBaseGroup;
 
 class DataPlane : public CygnetPlane {
-friend class IswaGroup;
+friend class IswaBaseGroup;
  public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();

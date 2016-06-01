@@ -85,7 +85,7 @@ properties::Property* property(const std::string& uri) {
             return property;
         }
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-        std::shared_ptr<IswaGroup> group = IswaManager::ref().iswaGroup(nameUri);
+        std::shared_ptr<IswaBaseGroup> group = IswaManager::ref().iswaGroup(nameUri);
         if(group){
             properties::Property* property = group->property(remainingUri);
             return property;

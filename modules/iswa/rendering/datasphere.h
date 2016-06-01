@@ -34,7 +34,7 @@
 namespace openspace{
 class PowerScaledSphere;
 class DataSphere : public CygnetSphere {
-friend class IswaGroup;
+friend class IswaBaseGroup;
 public:
     DataSphere(const ghoul::Dictionary& dictionary);
     ~DataSphere();

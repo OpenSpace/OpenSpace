@@ -47,12 +47,12 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace{
-class IswaGroup;
+class IswaBaseGroup;
 
 struct Metadata {
     int id;
@@ -72,7 +72,7 @@ struct Metadata {
 
 
 class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
-    friend class IswaGroup;
+    friend class IswaBaseGroup;
 
 public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
@@ -124,7 +124,7 @@ protected:
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
 
-    std::shared_ptr<IswaGroup> _group;
+    std::shared_ptr<IswaBaseGroup> _group;
 
     // IswaManager::CygnetType _type;
     bool _textureDirty;

@@ -46,7 +46,7 @@
 
 
 namespace openspace {
-class IswaGroup;
+class IswaBaseGroup;
 class IswaCygnet; 
 
 struct CdfInfo {
@@ -94,13 +94,13 @@ public:
     std::string iswaUrl(int id, std::string type = "image");
 
     std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(std::string name, CygnetType type);
-    // std::shared_ptr<IswaGroup> getIswaGroup(std::string groupName, CygnetType type);
+    // std::shared_ptr<IswaBaseGroup> getIswaBaseGroup(std::string groupName, CygnetType type);
     // void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
     // void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
-    std::shared_ptr<IswaGroup> iswaGroup(std::string name);
+    std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
-    std::map<std::string, std::shared_ptr<IswaGroup>>& groups();
+    std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     // std::vector<CdfInfo>& cdfInformation();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
 
@@ -133,7 +133,7 @@ private:
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
 
-    std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
+    std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     // std::vector<CdfInfo> _cdfInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
