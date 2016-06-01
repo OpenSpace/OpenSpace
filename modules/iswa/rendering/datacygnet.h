@@ -74,14 +74,10 @@ protected:
     properties::SelectionProperty _dataOptions;
     std::shared_ptr<DataProcessor> _dataProcessor; 
 
-    // Temporary variable untill dataprocessor is done
-    std::string className;
-
 private:
     void fillOptions();
 
     std::string _dataBuffer;
-
 };
 } //namespace openspace
 

@@ -36,7 +36,6 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
 { 
     registerProperties();
-    _type = IswaManager::CygnetType::Texture;
 }
 
 TextureCygnet::~TextureCygnet(){}

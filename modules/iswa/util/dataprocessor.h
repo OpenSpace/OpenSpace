@@ -37,6 +37,7 @@ namespace openspace{
 class DataProcessor{
     friend class IswaGroup;
 public:
+    DataProcessor();
     DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValues);
     ~DataProcessor();
 
@@ -73,7 +74,11 @@ public:
     void clear();
 
     glm::vec2 filterValues();
-private:
+
+    virtual std::vector<std::string> readMetadata(std::string data){};
+    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions){};
+    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions){};
+protected:
     void processData(
         float* outputData, // Where you want your processed data to go 
         std::vector<float>& inputData, //data that needs processing 
@@ -84,8 +89,11 @@ private:
     );
 
     float processDataPoint(float value, int option);
-
     float normalizeWithStandardScore(float value, float mean, float sd);
+
+    void initializeVectors(int numOptions);
+    void calculateFilterValues(std::vector<int> selectedOptions);
+    void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
 
     glm::size3_t _dimensions;
     bool _useLog;
@@ -96,7 +104,7 @@ private:
     std::vector<float> _min; 
     std::vector<float> _max;
     std::vector<float> _sum;
-    std::vector<float> _sd;
+    std::vector<float> _standardDeviation;
     std::vector<float> _numValues;
     std::vector<std::shared_ptr<Histogram>> _histograms;
     // int _numValues;

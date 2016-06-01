@@ -27,6 +27,9 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.h
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
@@ -44,6 +47,9 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp

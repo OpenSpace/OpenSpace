@@ -29,21 +29,21 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     openspace.printInfo("Done setting default values")
-
-    --openspace.iswa.addCygnet(0,"x");
-    --openspace.iswa.addCygnet(0,"y", "Kameleon");
-    --openspace.iswa.addCygnet(0,"z", "Kameleon");
     
-    --openspace.iswa.addCygnet(-4,"Data");
+    --openspace.iswa.addCygnet(-4,"Data","Ion");
+
+    --openspace.iswa.addCygnet(-1,"Data");
+    --openspace.iswa.addCygnet(-2,"Data");
+    --openspace.iswa.addCygnet(-3,"Data");
 
     --openspace.iswa.addCygnet(-1,"Texture");
     --openspace.iswa.addCygnet(-2,"Texture");
     --openspace.iswa.addCygnet(-3,"Texture");
 
+
     --openspace.iswa.addCygnet(-3,"Data","GM");
     --openspace.iswa.addCygnet(-2,"Data","GM");
     --openspace.iswa.addCygnet(-1,"Data","GM");
-
 
     openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
     

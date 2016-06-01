@@ -43,28 +43,24 @@ class IswaCygnet;
 class IswaGroup : public properties::PropertyOwner{
 public:
 	IswaGroup(std::string name, IswaManager::CygnetType type);
+	IswaGroup(std::string name, std::string type);
 	~IswaGroup();
-	//void registerCygnet(IswaCygnet* cygnet, IswaManager::CygnetType type);
-	//void unregisterCygnet(IswaCygnet* cygnet);
 	void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
 	void registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options);
-	bool isType(IswaManager::CygnetType type);
+	bool isType(std::string type);
 
 	void clearGroup();
 	void updateGroup();
 
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(){ return _groupEvent; };
 	std::shared_ptr<DataProcessor> dataProcessor();
+	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(){ return _groupEvent; };
 	std::vector<int> fieldlineValue() {return _fieldlines.value();}
 	std::vector<int> dataOptionsValue() {return _dataOptions.value();}
 	void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
-	// bool useLog(){return _useLog.value();};
- //    glm::vec2 normValues(){return _normValues.value();};
- //    bool useHistogram(){return _useHistogram.value();};
- //    std::vector<int> dataOptions(){return _dataOptions.value();};
- //    std::string transferFunctionsFile(){return _transferFunctionsFile.value();};
- //    glm::vec2 backgroundValues(){return _backgroundValues.value();};
+
 private:
+	void createDataProcessor();
+
 	void registerProperties();
 	void unregisterProperties();
 
@@ -83,25 +79,17 @@ private:
 	properties::SelectionProperty _dataOptions;
 	properties::SelectionProperty _fieldlines;
 	properties::TriggerProperty _delete;
-	// properties::SelectionProperty _dataOptions;
- //    properties::StringProperty _transferFunctionsFile;
- //    properties::Vec2Property _normValues;
- //    properties::Vec2Property _backgroundValues;
- //    properties::BoolProperty _useLog;
- //    properties::BoolProperty _useHistogram;;
 
-	// int groupId;
-	// IswaCygnet cygnet;
 	int _id;
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
-	//std::vector<IswaCygnet* > _cygnets;
-	IswaManager::CygnetType _type;
+
 	bool _registered;
 
 	std::string _fieldlineIndexFile;
 	std::string _kameleonPath;
 	std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
+	std::string _type;
 };
 
 } //namespace openspace

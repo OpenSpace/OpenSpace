@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/util/dataprocessortext.h>
 
 namespace {
     const std::string _loggerCat = "DataPlane";
@@ -49,14 +50,13 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     _programName = "DataPlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/dataplane_fs.glsl";
-
-    // Temporary
-    className = "DataPlane";
 }
 
 DataPlane::~DataPlane(){}
 
 bool DataPlane::initialize(){
+    std::cout << "DataPlane: " << typeid(this).name() << std::endl;
+
     IswaCygnet::initialize();
 
     if(_group){
@@ -70,12 +70,7 @@ bool DataPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
-        _dataProcessor = std::make_shared<DataProcessor>(
-            _useLog.value(),
-            _useHistogram.value(),
-            _normValues
-        );
-
+        _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this](){
@@ -182,12 +177,13 @@ void DataPlane::setUniforms(){
 }
 
 void DataPlane::subscribeToGroup(){
-    _groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+    auto groupEvent = _group->groupEvent();
+    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event useLogChanged");
         _useLog.setValue(dict.value<bool>("useLog"));
     });
 
-    _groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event normValuesChanged");
         std::shared_ptr<glm::vec2> values;
         bool success = dict.getValue("normValues", values);
@@ -196,12 +192,12 @@ void DataPlane::subscribeToGroup(){
         }
     });
 
-    _groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event useHistogramChanged");
         _useHistogram.setValue(dict.value<bool>("useHistogram"));
     });
 
-    _groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event dataOptionsChanged");
         std::shared_ptr<std::vector<int> > values;
         bool success = dict.getValue("dataOptions", values);
@@ -210,12 +206,12 @@ void DataPlane::subscribeToGroup(){
         }
     });
 
-    _groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event transferFunctionsChanged");
         _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
     });
 
-    _groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event backgroundValuesChanged");
         std::shared_ptr<glm::vec2> values;
         bool success = dict.getValue("backgroundValues", values);
@@ -224,16 +220,15 @@ void DataPlane::subscribeToGroup(){
         }
     });
 
-    _groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event autoFilterChanged");
         _autoFilter.setValue(dict.value<bool>("autoFilter"));
     });
 
-    _groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event updateGroup");
         loadTexture();
     });
 }
-
 
 }// namespace openspace

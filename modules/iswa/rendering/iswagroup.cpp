@@ -27,6 +27,15 @@
 #include <fstream>
 #include <modules/iswa/ext/json/json.hpp>
 
+#include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/util/dataprocessorjson.h>
+#include <modules/iswa/util/dataprocessorkameleon.h>
+
+#include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/rendering/datasphere.h>
+#include <modules/iswa/rendering/kameleonplane.h>
+
+
 namespace {
     const std::string _loggerCat = "IswaGroup";
     using json = nlohmann::json;
@@ -34,8 +43,7 @@ namespace {
 }
 
 namespace openspace {
-
-IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
+IswaGroup::IswaGroup(std::string name, std::string type)
     :_enabled("enabled", "Enabled", true)
     ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     ,_useLog("useLog","Use Logarithm", false)
@@ -48,8 +56,8 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_fieldlineIndexFile("")
-    ,_type(type)
     ,_registered(false)
+    ,_type(type)
 {
     setName(name);
 
@@ -67,11 +75,7 @@ IswaGroup::IswaGroup(std::string name, IswaManager::CygnetType type)
 
     addProperty(_delete);
 
-    _dataProcessor = std::make_shared<DataProcessor>(
-            _useLog.value(),
-            _useHistogram.value(),
-            _normValues
-    );
+    createDataProcessor();
     _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
     registerProperties();
 
@@ -82,9 +86,10 @@ IswaGroup::~IswaGroup(){}
 
 
 void IswaGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    if(!_registered){
-        registerProperties();    }
-    if(_type == IswaManager::CygnetType::Data){
+    if(!_registered)
+        registerProperties();
+    if(_type == typeid(DataPlane).name() || _type == typeid(DataSphere).name() || 
+        _type == typeid(KameleonPlane).name()){
         if(_dataOptions.options().empty()){
             for(auto option : options){
                 _dataOptions.addOption({option.value, option.description});
@@ -108,8 +113,7 @@ void IswaGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kam
     }
 }
 
-bool IswaGroup::isType(IswaManager::CygnetType type){
-    if(_type == IswaManager::CygnetType::NoType) return true;
+bool IswaGroup::isType(std::string type){
     return (_type == type);
 }
 
@@ -128,14 +132,14 @@ void IswaGroup::registerProperties(){
     });
 
 
-    if(_type == IswaManager::CygnetType::Data){
+    if(_type == typeid(DataPlane).name() || _type == typeid(DataSphere).name() || 
+        _type == typeid(KameleonPlane).name() ){
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iswa.registerProperty(&_fieldlines);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
 
         _useLog.onChange([this]{
@@ -183,6 +187,11 @@ void IswaGroup::registerProperties(){
             _groupEvent->publish("dataOptionsChanged", ghoul::Dictionary({{"dataOptions", std::make_shared<std::vector<int> >(_dataOptions.value())}}));
         });
 
+    }
+
+    if(_type == typeid(KameleonPlane).name()){
+        OsEng.gui()._iswa.registerProperty(&_fieldlines);
+        
         _fieldlines.onChange([this]{
             updateFieldlineSeeds();
             // LDEBUG("Group " + name() + " published fieldlinesChanged");
@@ -276,6 +285,16 @@ void IswaGroup::clearFieldlines(){
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
             std::get<2>(seedPath.second) = false;
         }
+    }
+}
+
+void IswaGroup::createDataProcessor(){
+    if(_type == typeid(DataPlane).name()){
+        _dataProcessor = std::make_shared<DataProcessorText>();
+    }else if(_type == typeid(DataSphere).name()){
+        _dataProcessor = std::make_shared<DataProcessorJson>();
+    }else if(_type == typeid(KameleonPlane).name()){
+        _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
 }
 

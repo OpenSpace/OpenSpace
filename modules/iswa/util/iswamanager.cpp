@@ -70,6 +70,10 @@ IswaManager::IswaManager()
     _type[CygnetType::Texture] = "Texture";
     _type[CygnetType::Data] = "Data";
     _type[CygnetType::Kameleon] = "Kameleon";
+    // _type[CygnetType::TexturePlane] = "TexturePlane";
+    // _type[CygnetType::DataPlane] = "DataPlane";
+    // _type[CygnetType::KameleonPlane] = "KameleonPlane";
+    // _type[CygnetType::Kameleon] = "DataSphere";
 
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
@@ -160,8 +164,8 @@ void IswaManager::addKameleonCdf(std::string group, int pos){
     // auto info = _cdfInformation[group][pos];
     // std::cout << group << " " << pos << std::endl;
     createKameleonPlane(_cdfInformation[group][pos], "z");
-    createKameleonPlane(_cdfInformation[group][pos], "y");
-    createKameleonPlane(_cdfInformation[group][pos], "x");
+    // createKameleonPlane(_cdfInformation[group][pos], "y");
+    // createKameleonPlane(_cdfInformation[group][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -213,41 +217,14 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
-std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaManager::groupEvent(std::string groupName, CygnetType type){
-
-    // Do some type checking and get the groupEvent
+void IswaManager::registerGroup(std::string groupName, std::string type){
     if(_groups.find(groupName) == _groups.end()){
         _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
     } else if(!_groups[groupName]->isType(type)){
-        LWARNING("Can't subscribe to Events from groups with diffent type");
-        return nullptr;
+        LWARNING("Can't add cygnet to groups with diffent type");
     }
-
-    return _groups[groupName]->groupEvent();
 }
 
-std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string groupName, CygnetType type){
-    if(_groups.find(groupName) == _groups.end()){
-        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
-    } else if(!_groups[groupName]->isType(type)){
-        LWARNING("Can't subscribe to Events from groups with diffent type");
-        return nullptr;
-    }
-
-    return _groups[groupName];
-}
-
-// void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
-//     if(_groups.find(name) != _groups.end()){
-//         _groups[name]->unregisterCygnet(cygnet);
-//     }
-// }
-
-// void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
-//     if(_groups.find(name) != _groups.end()){
-//         _groups[name]->registerOptions(options);
-//     }
-// }
 
 std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
     if(_groups.find(name) != _groups.end()){
@@ -384,6 +361,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
+                    "Group = '',"
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
@@ -451,12 +429,26 @@ void IswaManager::createScreenSpace(int id){
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
+    std::cout << "IswaManager: " << typeid(DataPlane).name() << std::endl;
+
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
     if(!data->group.empty()){
+        std::string type;
+        if(data->type == CygnetType::Data){
+            type = typeid(DataPlane).name();
+        }else{
+            type = typeid(TexturePlane).name();
+        }
+        
+        registerGroup(data->group, type);
+
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType(type)){
             name = data->group +"_"+ name;
+        }else{
+            data->group="";
+        }
     }
 
     data->name = name;
@@ -478,9 +470,15 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
     if(!data->group.empty()){
+        std::string type = typeid(DataSphere).name();
+        registerGroup(data->group, type);
+
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType(type)){
             name = data->group +"_"+name;
+        }else{
+            data->group="";
+        }
     }
 
     data->name = name;

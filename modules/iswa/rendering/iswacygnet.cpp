@@ -26,6 +26,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
+#include <modules/iswa/rendering/iswagroup.h>
+
 
 namespace {
     const std::string _loggerCat = "IswaCygnet";
@@ -38,8 +40,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _delete("delete", "Delete")
     ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     , _shader(nullptr)
-    ,_type(IswaManager::CygnetType::NoType)
-    ,_groupEvent()
     ,_group(nullptr)
     ,_textureDirty(false)
 {
@@ -121,9 +121,7 @@ bool IswaCygnet::initialize(){
 
 bool IswaCygnet::deinitialize(){
      if(!_data->groupName.empty())
-        _groupEvent->unsubscribe(name());
-    //     IswaManager::ref().unregisterFromGroup(_data->groupName, this);
-
+        _group->groupEvent()->unsubscribe(name());
 
     unregisterProperties();
     destroyGeometry();
@@ -232,7 +230,6 @@ void IswaCygnet::initializeTime(){
 
 bool IswaCygnet::createShader(){
     if (_shader == nullptr) {
-        // Plane Program
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram(_programName,
             _vsPath,
@@ -244,21 +241,21 @@ bool IswaCygnet::createShader(){
 }
 
 void IswaCygnet::initializeGroup(){
-    _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
-    _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
+    _group = IswaManager::ref().iswaGroup(_data->groupName);
 
-    //Subscribe to enable propert and delete
-    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+    //Subscribe to enable and delete property
+    auto groupEvent = _group->groupEvent();
+    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event enabledChanged");
         _enabled.setValue(dict.value<bool>("enabled"));
     });
 
-    _groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
+    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event alphaChanged");
         _alpha.setValue(dict.value<float>("alpha"));
     });
 
-    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event clearGroup");
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
     });

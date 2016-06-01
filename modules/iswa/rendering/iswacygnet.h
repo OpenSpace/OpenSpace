@@ -116,11 +116,8 @@ protected:
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
 
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
-
     std::shared_ptr<IswaGroup> _group;
 
-    IswaManager::CygnetType _type;
     bool _textureDirty;
 
     std::string _vsPath;
