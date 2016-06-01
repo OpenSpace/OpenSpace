@@ -33,6 +33,9 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -53,6 +56,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 
 #include <ghoul/io/texture/texturereader.h>
@@ -93,6 +97,7 @@ namespace {
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
 }
+
 
 namespace openspace {
 
@@ -139,6 +144,10 @@ RenderEngine::~RenderEngine() {
 }
 
 bool RenderEngine::deinitialize() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->deinitialize();
+    }
+
     _sceneGraph->clearSceneGraph();
     return true;
 }
@@ -207,7 +216,6 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
-
 
     return true;
 }
@@ -367,7 +375,10 @@ void RenderEngine::postSynchronizationPreDraw() {
             program->rebuildFromFile();
         }
     }
-
+    
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+            screenspacerenderable->update();
+    }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
     //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
@@ -393,6 +404,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         if (_showLog) {
             renderScreenLog();
         }
+    }
+    
+    for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+        if(screenSpaceRenderable->isEnabled())
+            screenSpaceRenderable->render();
     }
 }
 
@@ -626,6 +642,18 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "number",
                 "",
                 true
+            },
+            {
+                "registerScreenSpaceRenderable",
+                &luascriptfunctions::registerScreenSpaceRenderable,
+                "table",
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+            },
+            {
+                "unregisterScreenSpaceRenderable",
+                &luascriptfunctions::unregisterScreenSpaceRenderable,
+                "string",
+                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
             },
         },
     };
@@ -1115,6 +1143,39 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    s->initialize();
+    _screenSpaceRenderables.push_back(s);
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    auto it = std::find(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        s
+        );
+
+    if (it != _screenSpaceRenderables.end()) {
+        s->deinitialize();
+        _screenSpaceRenderables.erase(it);
+    }
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
+    auto s = screenSpaceRenderable(name);
+    if(s)
+        unregisterScreenSpaceRenderable(s);
+}
+
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
+    for(auto s : _screenSpaceRenderables){
+        if(s->name() == name){
+            return s;
+        }
+    }
+    return nullptr;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -1437,6 +1498,13 @@ void RenderEngine::renderScreenLog() {
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+                  return i->depth() > j->depth();
+              });
 }
 
 }// namespace openspace

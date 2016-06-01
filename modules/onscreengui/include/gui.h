@@ -30,6 +30,7 @@
 #include <modules/onscreengui/include/guipropertycomponent.h>
 #include <modules/onscreengui/include/guiorigincomponent.h>
 #include <modules/onscreengui/include/guitimecomponent.h>
+#include <modules/onscreengui/include/guiiswacomponent.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/util/keys.h>
@@ -71,7 +72,10 @@ public:
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _property;
+    // GuiPropertyComponent _iSWAproperty;
+    GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
+    GuiIswaComponent _iswa;
 
     bool _isEnabled;
 

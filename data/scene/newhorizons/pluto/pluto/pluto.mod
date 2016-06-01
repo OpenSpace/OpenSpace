@@ -208,7 +208,7 @@ return {
             Size = {1.0, 6.4},
             Origin = "Center",
             Billboard = true,
-            ProjectionListener = true,
+            ProjectionListener = false,
             Texture = "textures/Pluto-Text.png"
         },
         Ephemeris = {

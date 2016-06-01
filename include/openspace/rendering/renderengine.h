@@ -29,6 +29,7 @@
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 
 namespace ghoul {
@@ -51,6 +52,7 @@ class Scene;
 class Renderer;
 class RaycasterManager;
 class ScreenLog;
+class ScreenSpaceRenderable;
 
 class RenderEngine {
 public:
@@ -100,6 +102,11 @@ public:
 
     void setDisableRenderingOnMaster(bool enabled);
 
+    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::string name);
+    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
@@ -135,13 +142,14 @@ public:
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
+    void sortScreenspaceRenderables();
     // This is temporary until a proper screenspace solution is found ---abock
     struct {
         glm::vec2 _position;
         unsigned int _size;
         int _node;
     } _onScreenInformation;
-
+    
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
@@ -171,6 +179,7 @@ private:
     int _fadeDirection;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

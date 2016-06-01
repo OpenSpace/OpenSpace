@@ -278,8 +278,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 //    _children.push_back(child);
 //}
 
-void SceneGraphNode::setParent(SceneGraphNode* parent)
-{
+void SceneGraphNode::setParent(SceneGraphNode* parent) {
     _parent = parent;
 }
 

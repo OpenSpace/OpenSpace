@@ -4,6 +4,8 @@ local file3 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_sout
 local file4 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt';
 local file5 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt';
 
+local volumeFile = '${OPENSPACE_DATA}/batsrus.cdf';
+
 return {
     {
         Name = "Fieldlines1",
@@ -16,7 +18,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = volumeFile,
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -42,7 +44,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = volumeFile,
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -68,7 +70,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = volumeFile,
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -94,7 +96,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = volumeFile,
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },
@@ -120,7 +122,7 @@ return {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = "${OPENSPACE_DATA}/batsrus.cdf",
+                File = volumeFile,
                 Model = "BATSRUS",
                 Variables = {"bx", "by", "bz"}
             },

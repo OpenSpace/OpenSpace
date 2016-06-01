@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <future>
 
 namespace openspace {
 
@@ -55,26 +56,52 @@ public:
         bool isAborted;
         std::string filePath;
         std::string errorMessage;
-
+        std::string format;
         // Values set by others to be consumed by the DownloadManager
         bool abortDownload;
     };
 
+    struct MemoryFile {
+        char* buffer;
+        size_t size;
+        std::string format;
+        bool corrupted;
+    };
+
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
+
+    using SuccessCallback = std::function<void(const MemoryFile&)>;
+    using ErrorCallback = std::function<void(const std::string&)>;
+
+    using RequestFinishedCallback = std::function<void(std::string)>;
     using AsyncDownloadFinishedCallback =
         std::function<void(const std::vector<std::shared_ptr<FileFuture>>&)>;
+
+    //Just a helper function to check if a future is ready to ".get()". Not specific
+    // to DownloadManager but is useful for anyone using the DownloadManager
+    template<typename R>
+    static bool futureReady(std::future<R> const& f)
+    { return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
 
     DownloadManager(std::string requestURL, int applicationVersion,
         bool useMultithreadedDownload = true);
 
-    // callers responsibility to delete
     // callbacks happen on a different thread
     std::shared_ptr<FileFuture> downloadFile(const std::string& url, const ghoul::filesystem::File& file,
         bool overrideFile = true,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
+
+    std::shared_ptr<FileFuture> downloadToMemory(
+        const std::string& url, std::string& memoryBuffer,
+        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback()
+    );
+
+    std::future<MemoryFile> fetchFile(
+    const std::string& url,
+    SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());
 
     std::vector<std::shared_ptr<FileFuture>> downloadRequestFiles(const std::string& identifier,
         const ghoul::filesystem::Directory& destination, int version,
@@ -87,6 +114,9 @@ public:
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles, AsyncDownloadFinishedCallback callback
     );
+
+    void getFileExtension(const std::string& url,
+        RequestFinishedCallback finishedCallback = RequestFinishedCallback());
 
 private:
     std::vector<std::string> _requestURL;

@@ -83,8 +83,10 @@ public:
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
-private:
+protected:
     properties::BoolProperty _enabled;
+    
+private:
     PowerScaledScalar boundingSphere_;
     std::string _startTime;
     std::string _endTime;

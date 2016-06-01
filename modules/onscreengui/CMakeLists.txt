@@ -32,6 +32,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiperformancecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guitimecomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guiiswacomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderproperties.cpp
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -43,6 +45,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiperformancecomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guipropertycomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guitimecomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guiiswacomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderproperties.cpp
+
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

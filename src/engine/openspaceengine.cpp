@@ -46,6 +46,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -65,6 +66,10 @@
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
 #include <modules/onscreengui/include/gui.h>
+#endif
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/iswa/util/iswamanager.h>
 #endif
 
 #ifdef _MSC_VER
@@ -138,6 +143,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     SpiceManager::initialize();
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
+    TransformationManager::initialize();
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -359,6 +365,10 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(gui::GUI::luaLibrary());
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    _scriptEngine->addLibrary(IswaManager::luaLibrary());
+#endif
+
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
 
@@ -409,6 +419,10 @@ bool OpenSpaceEngine::initialize() {
 
     LINFO("Initializing GUI");
     _gui->initialize();
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    IswaManager::initialize();
+#endif
 
     LINFO("Finished initializing");
     return true;
@@ -690,7 +704,7 @@ void OpenSpaceEngine::preSynchronization() {
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     Time::ref().postSynchronizationPreDraw();
 
-    _scriptEngine->postSynchronizationPreDraw();    
+    _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {

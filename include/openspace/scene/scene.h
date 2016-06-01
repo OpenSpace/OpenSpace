@@ -97,6 +97,11 @@ public:
 
     std::vector<SceneGraphNode*> allSceneGraphNodes();
 
+    SceneGraph& sceneGraph();
+
+    void addSceneGraphNode(SceneGraphNode* node){
+        _graph.addSceneGraphNode(node);
+    }
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
