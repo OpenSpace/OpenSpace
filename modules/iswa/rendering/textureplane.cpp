@@ -47,9 +47,6 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Name", name);
     setName(name);
     registerProperties();
-
-    _type = IswaManager::CygnetType::Texture;
-
 }
 
 
