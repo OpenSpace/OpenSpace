@@ -39,6 +39,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -58,6 +59,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswagroup.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswadatagroup.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/texturecygnet.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

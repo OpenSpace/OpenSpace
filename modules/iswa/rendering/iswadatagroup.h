@@ -21,51 +21,47 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
-#ifndef __ISWAGROUP_H__
-#define __ISWAGROUP_H__
-
-#include <ghoul/designpattern/event.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-// #include <modules/iswa/rendering/iswacygnet.h>
-#include <openspace/properties/triggerproperty.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/util/dataprocessor.h>
-
+#ifndef __ISWADATAGROUP_H__
+#define __ISWADATAGROUP_H__
+#include <modules/iswa/rendering/iswagroup.h>
 
 namespace openspace{
-class IswaCygnet;
-
-class IswaGroup : public properties::PropertyOwner{
+class IswaDataGroup : public IswaGroup{
 public:
-	IswaGroup(std::string name, std::string type);
-	~IswaGroup();
-	bool isType(std::string type);
+    IswaDataGroup(std::string name, std::string type);
+    ~IswaDataGroup();
 
-	void updateGroup();
-	virtual void clearGroup();
+    virtual void clearGroup() override;
 
-	std::shared_ptr<DataProcessor> dataProcessor();
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
+    void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
+    void registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options);
 
-protected:
-	void registerProperties();
-	void unregisterProperties();
+    std::vector<int> dataOptionsValue();
+    std::vector<int> fieldlineValue();
+    void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
 
-	properties::BoolProperty _enabled;
-	properties::FloatProperty _alpha;
-    properties::TriggerProperty _delete;
+private:
+    void registerProperties();
 
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
-    std::shared_ptr<DataProcessor> _dataProcessor;
+    void createDataProcessor();
 
-	bool _registered;
-	std::string _type;
+    void readFieldlinePaths(std::string indexFile);
+    void updateFieldlineSeeds();
+    void clearFieldlines();
+
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::BoolProperty _autoFilter;
+    properties::Vec2Property _normValues;
+    properties::Vec2Property _backgroundValues;
+    properties::StringProperty _transferFunctionsFile;
+    properties::SelectionProperty _dataOptions;
+    properties::SelectionProperty _fieldlines;
+
+    std::string _fieldlineIndexFile;
+    std::string _kameleonPath;
+    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
 };
 
 } //namespace openspace
-#endif
+#endif // __ISWADATAGROUP_H__

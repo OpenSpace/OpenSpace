@@ -358,7 +358,7 @@ void DataPlane::fillOptions(){
     }
     _dataOptions.setValue(std::vector<int>(1,0));
     if(_group)
-        _group->registerOptions(_dataOptions.options());
+        std::dynamic_pointer_cast<IswaDataGroup> (_group)->registerOptions(_dataOptions.options());
 }
 
 }// namespace openspace

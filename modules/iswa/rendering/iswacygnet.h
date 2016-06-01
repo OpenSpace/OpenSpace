@@ -47,6 +47,8 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 
+#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace openspace{
 class IswaGroup;

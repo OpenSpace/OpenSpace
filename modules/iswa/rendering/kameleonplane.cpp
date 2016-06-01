@@ -439,8 +439,8 @@ void KameleonPlane::fillOptions(){
         }
     }
     if(_group){
-        _group->registerOptions(_dataOptions.options());
-        _dataOptions.setValue(_group->dataOptionsValue());
+        std::dynamic_pointer_cast<IswaDataGroup> (_group)->registerOptions(_dataOptions.options());
+        // _dataOptions.setValue(_group->dataOptionsValue());
     }else{
         _dataOptions.setValue(std::vector<int>(1,0));
         // IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
@@ -477,7 +477,7 @@ void KameleonPlane::updateFieldlineSeeds(){
 void KameleonPlane::readFieldlinePaths(std::string indexFile){
     LINFO("Reading seed points paths from file '" << indexFile << "'");
     if(_group){
-        _group->setFieldlineInfo(indexFile, _kwPath);
+        std::dynamic_pointer_cast<IswaDataGroup>(_group)->setFieldlineInfo(indexFile, _kwPath);
         return;
     }
 

@@ -26,9 +26,12 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/datasphere.h>
+#include <modules/iswa/rendering/kameleonplane.h>
+
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 #include <fstream>
 #include <algorithm>
@@ -163,8 +166,8 @@ void IswaManager::addKameleonCdf(std::string group, int pos){
     // auto info = _cdfInformation[group][pos];
     // std::cout << group << " " << pos << std::endl;
     createKameleonPlane(_cdfInformation[group][pos], "z");
-    // createKameleonPlane(_cdfInformation[group][pos], "y");
-    // createKameleonPlane(_cdfInformation[group][pos], "x");
+    createKameleonPlane(_cdfInformation[group][pos], "y");
+    createKameleonPlane(_cdfInformation[group][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -218,7 +221,17 @@ std::string IswaManager::iswaUrl(int id, std::string type){
 
 void IswaManager::registerGroup(std::string groupName, std::string type){
     if(_groups.find(groupName) == _groups.end()){
-        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+        bool dataGroup =    (type == typeid(DataPlane).name())  ||
+                            (type == typeid(DataSphere).name()) ||
+                            (type == typeid(KameleonPlane).name());
+
+        if(dataGroup){
+            std::cout << "Register data group" << std::endl;
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
+        }
+        else{
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+        }
     } else if(!_groups[groupName]->isType(type)){
         LWARNING("Can't add cygnet to groups with diffent type");
     }
@@ -346,7 +359,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
             }
 
             std::string table = "{"
-                "Name = '" +info.group+"_"+info.name+"-"+cut+"',"
+                "Name = '" +info.name+ "',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "
@@ -360,12 +373,11 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
-                    "Group = '',"
+                    // "Group = '',"
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
-                ;
-            // std::cout << table << std::endl;    
+                ; 
             return table;
         }
     }
@@ -494,11 +506,30 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 }
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
-    std::cout << info.name << " " << cut << std::endl; 
 
     const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
-
     if(FileSys.fileExists(absPath(info.path)) && extension == "cdf"){
+
+
+        if(!info.group.empty()){
+            std::string type = typeid(KameleonPlane).name();
+            registerGroup(info.group, type);
+
+            auto it = _groups.find(info.group);
+            if(it == _groups.end() || (*it).second->isType(type)){
+                info.name = info.group +"_"+info.name;
+            }else{
+                info.group="";
+            }
+        }
+
+        info.name = info.name+"-"+cut;
+
+        if( OsEng.renderEngine().scene()->sceneGraphNode(info.name) ){
+            LERROR("A node with name \"" + info.name +"\" already exist");
+            return;
+        }
+
         std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
     //         // std::cout << luaTable << std::endl;
