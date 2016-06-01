@@ -34,7 +34,9 @@ namespace openspace{
 
 TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
-{}
+{ 
+    registerProperties();
+}
 
 TextureCygnet::~TextureCygnet(){}
 

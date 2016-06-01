@@ -47,7 +47,7 @@
  	virtual bool updateTexture() override;
 
  	virtual bool readyToRender() const override;
-    virtual void setUniformAndTextures() override;
+    virtual void setUniforms() override;
 
     /**
      * Given a path to the json index of seedpoints file, this 

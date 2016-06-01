@@ -39,6 +39,7 @@
 
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>

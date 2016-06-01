@@ -92,8 +92,9 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         add(optionValues, sum);
     }
 }
-std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, float slice){
+std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, float slice, glm::size3_t& dimensions){
     _slice = slice;
+    _dimensions = dimensions; 
     return processData(path, dataOptions);
 }
 

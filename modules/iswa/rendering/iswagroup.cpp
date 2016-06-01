@@ -57,6 +57,8 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 
     _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
     registerProperties();
+
+    _autoFilter.setValue(true);
 }
 
 IswaBaseGroup::~IswaBaseGroup(){}
@@ -97,7 +99,6 @@ void IswaBaseGroup::registerProperties(){
         LDEBUG("Group " + name() + " published alphaChanged");
         _groupEvent->publish("alphaChanged", ghoul::Dictionary({{"alpha", _alpha.value()}}));
     });
-
 
     OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{

@@ -26,14 +26,58 @@
 #define __DATACYGNET_H__
 
 #include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/util/dataprocessor.h>
+#include <modules/iswa/rendering/iswagroup.h>
+
+namespace {
+	const int MAX_TEXTURES = 6;
+}
 
 namespace openspace{
 
+/**
+ * This class abstracts away the the loading of data and creation of
+ * textures for all data cygnets. It specifies the interface that needs to
+ * be implemented for all concrete subclasses
+ */
 class DataCygnet : public IswaCygnet {
 public:
     DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
 protected:
+
+	bool loadTexture() override;
+	bool updateTexture() override;
+	bool readyToRender() const override;
+
+	/**
+	 * loads the transferfunctions specified in tfPath into
+	 * _transferFunctions list.
+	 * 
+	 * @param tfPath Path to transfer function file
+	 */
+    void readTransferFunctions(std::string tfPath);
+
+    /**
+     * This function binds and sets all textures that should go to the
+     * shader program, this includes both the data and transferfunctions.
+     */
+	void setTextureUniforms();
+
+	// Subclass interface. Must be protected, called from base class
+	virtual bool createGeometry() = 0;
+	virtual bool destroyGeometry() = 0;
+	virtual void renderGeometry() const = 0;
+	// This function can call parent setTextureUniforms()
+	virtual void setUniforms() = 0;
+
+    properties::SelectionProperty _dataOptions;
+    std::shared_ptr<DataProcessor> _dataProcessor; 
+
+private:
+    void fillOptions();
+
+    std::string _dataBuffer;
 };
 } //namespace openspace
 

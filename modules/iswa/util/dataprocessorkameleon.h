@@ -37,7 +37,7 @@ public:
     virtual std::vector<std::string> readMetadata(std::string path) override;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
     virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, float slize);
+    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, float slice, glm::size3_t& dimensions);
     void dimensions(glm::size3_t dimensions){_dimensions = dimensions;}
 
 private:
