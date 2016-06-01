@@ -293,12 +293,10 @@ void FramebufferRenderer::updateRaycastData() {
 }
 
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    if (_scene == nullptr) return;
-    if (_camera == nullptr) return;
+    if (!_scene)
+        return;
+    if (!_camera)
+        return;
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
