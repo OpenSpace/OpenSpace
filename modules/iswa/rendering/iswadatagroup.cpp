@@ -49,8 +49,8 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
     ,_dataOptions("dataOptions", "Data Options")
-    ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_fieldlineIndexFile("")
+    // ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
+    // ,_fieldlineIndexFile("")
 {
     addProperty(_useLog);
     addProperty(_useHistogram);
@@ -59,24 +59,18 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
-    addProperty(_fieldlines);
 
     std::cout << "DataGroup" << std::endl;
     createDataProcessor();
     registerProperties();
 }
  
- IswaDataGroup::~IswaDataGroup(){}
-
-void IswaDataGroup::clearGroup(){
-    IswaGroup::clearGroup();
-    clearFieldlines();
-}
+IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
     // IswaGroup::registerProperties();
 
-    std::cout << "register properties" << std::endl;
+    // std::cout << "register properties" << std::endl;
     OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
@@ -119,16 +113,6 @@ void IswaDataGroup::registerProperties(){
         LDEBUG("Group " + name() + " published dataOptionsChanged");
         _groupEvent->publish("dataOptionsChanged", ghoul::Dictionary({{"dataOptions", std::make_shared<std::vector<int> >(_dataOptions.value())}}));
     });
-
-    if(_type == typeid(KameleonPlane).name()){
-        OsEng.gui()._iswa.registerProperty(&_fieldlines);
-        
-        _fieldlines.onChange([this]{
-            updateFieldlineSeeds();
-            // LDEBUG("Group " + name() + " published fieldlinesChanged");
-            // _groupEvent->publish("fieldlinesChanged", ghoul::Dictionary({{"fieldlines", std::make_shared<std::vector<int> >(_fieldlines.value())}}));
-        });
-    }
 }
 
 void IswaDataGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
@@ -140,81 +124,6 @@ void IswaDataGroup::registerOptions(const std::vector<properties::SelectionPrope
             _dataOptions.addOption({option.value, option.description});
         }
         _dataOptions.setValue(std::vector<int>(1,0));
-    }
-}
-
-void IswaDataGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath){
-
-    if(fieldlineIndexFile != _fieldlineIndexFile){
-        _fieldlineIndexFile = fieldlineIndexFile;
-        readFieldlinePaths(_fieldlineIndexFile);
-    }
-
-    if(kameleonPath != _kameleonPath){
-        _kameleonPath = kameleonPath;
-        clearFieldlines();
-        updateFieldlineSeeds();
-    }
-}
-
-void IswaDataGroup::updateFieldlineSeeds(){
-    std::vector<int> selectedOptions = _fieldlines.value();
-
-    // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
-    for (auto& seedPath: _fieldlineState) {
-        // if this option was turned off
-        if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)==selectedOptions.end() && std::get<2>(seedPath.second)){
-            LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
-            std::get<2>(seedPath.second) = false;
-        // if this option was turned on
-        } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {
-            LDEBUG("Created fieldlines: " + std::get<0>(seedPath.second));
-            IswaManager::ref().createFieldline(std::get<0>(seedPath.second), _kameleonPath, std::get<1>(seedPath.second));
-            std::get<2>(seedPath.second) = true;
-        }
-    }
-}
-
-void IswaDataGroup::readFieldlinePaths(std::string indexFile){
-    LINFO("Reading seed points paths from file '" << indexFile << "'");
-
-    // Read the index file from disk
-    std::ifstream seedFile(indexFile);
-    if (!seedFile.good())
-        LERROR("Could not open seed points file '" << indexFile << "'");
-    else {
-        std::string line;
-        std::string fileContent;
-        while (std::getline(seedFile, line)) {
-            fileContent += line;
-        }
-
-        try{
-            //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(fileContent);
-            int i = 0;
-
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({i, name()+"/"+it.key()});
-                _fieldlineState[i] = std::make_tuple(name()+"/"+it.key(), it.value(), false);
-                i++;
-            }
-
-        } catch(const std::exception& e) {
-            LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
-        }
-    }
-}
-
-void IswaDataGroup::clearFieldlines(){
-        // SeedPath == map<int selectionValue, tuple< string name, string path, bool active > >
-    for (auto& seedPath: _fieldlineState) {
-        if(std::get<2>(seedPath.second)){
-            LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
-            std::get<2>(seedPath.second) = false;
-        }
     }
 }
 

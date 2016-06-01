@@ -37,9 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <fstream>
 #include <modules/iswa/ext/json/json.hpp>
-#include <modules/iswa/rendering/iswagroup.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-
 
 namespace {
     using json = nlohmann::json;
@@ -439,7 +437,7 @@ void KameleonPlane::fillOptions(){
         }
     }
     if(_group){
-        std::dynamic_pointer_cast<IswaDataGroup> (_group)->registerOptions(_dataOptions.options());
+        std::dynamic_pointer_cast<IswaKameleonGroup> (_group)->registerOptions(_dataOptions.options());
         // _dataOptions.setValue(_group->dataOptionsValue());
     }else{
         _dataOptions.setValue(std::vector<int>(1,0));
@@ -477,7 +475,7 @@ void KameleonPlane::updateFieldlineSeeds(){
 void KameleonPlane::readFieldlinePaths(std::string indexFile){
     LINFO("Reading seed points paths from file '" << indexFile << "'");
     if(_group){
-        std::dynamic_pointer_cast<IswaDataGroup>(_group)->setFieldlineInfo(indexFile, _kwPath);
+        std::dynamic_pointer_cast<IswaKameleonGroup>(_group)->setFieldlineInfo(indexFile, _kwPath);
         return;
     }
 

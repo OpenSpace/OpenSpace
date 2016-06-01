@@ -32,6 +32,7 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswagroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 
 #include <fstream>
 #include <algorithm>
@@ -221,15 +222,15 @@ std::string IswaManager::iswaUrl(int id, std::string type){
 
 void IswaManager::registerGroup(std::string groupName, std::string type){
     if(_groups.find(groupName) == _groups.end()){
-        bool dataGroup =    (type == typeid(DataPlane).name())  ||
-                            (type == typeid(DataSphere).name()) ||
-                            (type == typeid(KameleonPlane).name());
-
+        bool dataGroup =    (type == typeid(DataPlane).name()) ||
+                            (type == typeid(DataSphere).name());
+                            
+        bool kameleonGroup = (type == typeid(KameleonPlane).name());
         if(dataGroup){
-            std::cout << "Register data group" << std::endl;
             _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
-        }
-        else{
+        }else if(kameleonGroup){
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaKameleonGroup>(groupName, type)));
+        }else{
             _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
         }
     } else if(!_groups[groupName]->isType(type)){

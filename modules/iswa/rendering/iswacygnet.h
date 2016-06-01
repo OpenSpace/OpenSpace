@@ -49,6 +49,7 @@
 
 #include <modules/iswa/rendering/iswagroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace{
 class IswaGroup;

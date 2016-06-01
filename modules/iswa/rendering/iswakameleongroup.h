@@ -21,42 +21,34 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#ifndef __ISWADATAGROUP_H__
-#define __ISWADATAGROUP_H__
-#include <modules/iswa/rendering/iswagroup.h>
+#ifndef __ISWAKAMELEONGROUP_H__
+#define __ISWAKAMELEONGROUP_H__
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace openspace{
-class IswaDataGroup : public IswaGroup{
+class IswaKameleonGroup : public IswaDataGroup{
 public:
-    IswaDataGroup(std::string name, std::string type);
-    ~IswaDataGroup();
+	IswaKameleonGroup(std::string name, std::string type);
+	~IswaKameleonGroup();
 
-    // virtual void clearGroup() override;
-
-    void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
-    // void registerFieldLineOptions(const std::vector<properties::SelectionProperty::Option>& options);
-
-    std::vector<int> dataOptionsValue();
-    // std::vector<int> fieldlineValue();
-    // void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
+	virtual void clearGroup();
+    
+    std::vector<int> fieldlineValue();
+    void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
 
 protected:
     void registerProperties();
-    void createDataProcessor();
 
-    // void readFieldlinePaths(std::string indexFile);
-    // void updateFieldlineSeeds();
-    // void clearFieldlines();
+	void readFieldlinePaths(std::string indexFile);
+    void updateFieldlineSeeds();
+    void clearFieldlines();
 
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
-    properties::Vec2Property _normValues;
-    properties::Vec2Property _backgroundValues;
-    properties::StringProperty _transferFunctionsFile;
-    properties::SelectionProperty _dataOptions;
+    properties::SelectionProperty _fieldlines;
 
+    std::string _fieldlineIndexFile;
+    std::string _kameleonPath;
+    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
 };
 
-} //namespace openspace
-#endif // __ISWADATAGROUP_H__
+}//namespace openspace
+#endif
