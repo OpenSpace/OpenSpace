@@ -27,8 +27,8 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
-#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
+#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
+#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
 
 uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
@@ -47,23 +47,22 @@ Fragment getFragment() {
 	float w2 =  (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
 	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
 
-	#for j in 1..#{numLayersColor}
+	#for i in 0..#{lastLayerIndexColor}
 	{
-		int i = #{j} - 1;
 		vec2 samplePos =
-			colorTiles[i].uvTransform.uvScale * fs_uv +
-			colorTiles[i].uvTransform.uvOffset;
+			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
+			colorTiles[#{i}].uvTransform.uvOffset;
 		vec2 samplePosParent1 =
-			colorTilesParent1[i].uvTransform.uvScale * fs_uv +
-			colorTilesParent1[i].uvTransform.uvOffset;
+			colorTilesParent1[#{i}].uvTransform.uvScale * fs_uv +
+			colorTilesParent1[#{i}].uvTransform.uvOffset;
 		vec2 samplePosParent2 =
-			colorTilesParent2[i].uvTransform.uvScale * fs_uv +
-			colorTilesParent2[i].uvTransform.uvOffset;
+			colorTilesParent2[#{i}].uvTransform.uvScale * fs_uv +
+			colorTilesParent2[#{i}].uvTransform.uvOffset;
 		
 		vec4 colorSample =
-			w1 * texture(colorTiles[i].textureSampler, samplePos) +
-			w2 * texture(colorTilesParent1[i].textureSampler, samplePosParent1) +
-			w3 * texture(colorTilesParent2[i].textureSampler, samplePosParent2);
+			w1 * texture(colorTiles[#{i}].textureSampler, samplePos) +
+			w2 * texture(colorTilesParent1[#{i}].textureSampler, samplePosParent1) +
+			w3 * texture(colorTilesParent2[#{i}].textureSampler, samplePosParent2);
 		frag.color = blendOver(frag.color, colorSample);
 	}
 	#endfor

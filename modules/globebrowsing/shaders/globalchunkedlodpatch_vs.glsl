@@ -28,8 +28,8 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 
-#define NUMLAYERS_COLORTEXTURE #{numLayersColor}
-#define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
+#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
+#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 radiiSquared;
@@ -81,28 +81,27 @@ void main()
 	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
 	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
 
-	#for j in 1..#{numLayersHeight}
+	#for i in 0..#{lastLayerIndexHeight}
 	{
-		int i = #{j} - 1;
 		vec2 samplePos =
-			heightTiles[i].uvTransform.uvScale * in_uv +
-			heightTiles[i].uvTransform.uvOffset;
+			heightTiles[#{i}].uvTransform.uvScale * in_uv +
+			heightTiles[#{i}].uvTransform.uvOffset;
 		vec2 samplePosParent1 =
-			heightTilesParent1[i].uvTransform.uvScale * in_uv +
-			heightTilesParent1[i].uvTransform.uvOffset;
+			heightTilesParent1[#{i}].uvTransform.uvScale * in_uv +
+			heightTilesParent1[#{i}].uvTransform.uvOffset;
 		vec2 samplePosParent2 =
-			heightTilesParent2[i].uvTransform.uvScale * in_uv +
-			heightTilesParent2[i].uvTransform.uvOffset;
+			heightTilesParent2[#{i}].uvTransform.uvScale * in_uv +
+			heightTilesParent2[#{i}].uvTransform.uvOffset;
 
 		float sampledValue =
-			w1 * texture(heightTiles[i].textureSampler, samplePos).r +
-			w2 * texture(heightTilesParent1[i].textureSampler, samplePosParent1).r +
-			w3 * texture(heightTilesParent2[i].textureSampler, samplePosParent2).r;
+			w1 * texture(heightTiles[#{i}].textureSampler, samplePos).r +
+			w2 * texture(heightTilesParent1[#{i}].textureSampler, samplePosParent1).r +
+			w3 * texture(heightTilesParent2[#{i}].textureSampler, samplePosParent2).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
 		height = (sampledValue *
-			heightTiles[i].depthTransform.depthScale +
-			heightTiles[i].depthTransform.depthOffset);
+			heightTiles[#{i}].depthTransform.depthScale +
+			heightTiles[#{i}].depthTransform.depthOffset);
 
 		// Skirts
 		int vertexIDx = gl_VertexID % (xSegments + 3);

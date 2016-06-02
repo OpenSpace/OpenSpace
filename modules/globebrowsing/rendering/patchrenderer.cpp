@@ -128,10 +128,10 @@ namespace openspace {
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
         LayeredTextureInfo layeredTextureInfoColor;
-        layeredTextureInfoHeight.keyNumLayers = "numLayersHeight";
-        layeredTextureInfoHeight.numLayers = numHeightMapProviders;
-        layeredTextureInfoColor.keyNumLayers = "numLayersColor";
-        layeredTextureInfoColor.numLayers = numColorTextureProviders;
+        layeredTextureInfoHeight.keyLastLayerIndex = "lastLayerIndexHeight";
+        layeredTextureInfoHeight.lastLayerIndex = numHeightMapProviders - 1;
+        layeredTextureInfoColor.keyLastLayerIndex = "lastLayerIndexColor";
+        layeredTextureInfoColor.lastLayerIndex = numColorTextureProviders - 1;
 
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
         layeredTexturePreprocessingData.layeredTextureInfo.push_back(
@@ -387,10 +387,10 @@ namespace openspace {
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
         LayeredTextureInfo layeredTextureInfoColor;
-        layeredTextureInfoHeight.keyNumLayers = "numLayersHeight";
-        layeredTextureInfoHeight.numLayers = numHeightMapProviders;
-        layeredTextureInfoColor.keyNumLayers = "numLayersColor";
-        layeredTextureInfoColor.numLayers = numColorTextureProviders;
+        layeredTextureInfoHeight.keyLastLayerIndex = "lastLayerIndexHeight";
+        layeredTextureInfoHeight.lastLayerIndex = numHeightMapProviders - 1;
+        layeredTextureInfoColor.keyLastLayerIndex = "lastLayerIndexColor";
+        layeredTextureInfoColor.lastLayerIndex = numColorTextureProviders - 1;
 
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
         layeredTexturePreprocessingData.layeredTextureInfo.push_back(

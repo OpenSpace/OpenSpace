@@ -39,8 +39,8 @@ namespace openspace {
 
     struct LayeredTextureInfo
     {
-        std::string keyNumLayers;
-        int numLayers;
+        std::string keyLastLayerIndex;
+        int lastLayerIndex;
 
         bool operator==(const LayeredTextureInfo& other) const;
     };

@@ -39,7 +39,7 @@ namespace openspace {
 
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {
-        return numLayers == other.numLayers && keyNumLayers == other.keyNumLayers;
+        return lastLayerIndex == other.lastLayerIndex && keyLastLayerIndex == other.keyLastLayerIndex;
     }
 
     bool LayeredTexturePreprocessingData::operator==(
@@ -104,7 +104,7 @@ namespace openspace {
         for (size_t i = 0; i < textureTypes.size(); i++)
         {
             shaderDictionary.setValue(
-                textureTypes[i].keyNumLayers, textureTypes[i].numLayers);
+                textureTypes[i].keyLastLayerIndex, textureTypes[i].lastLayerIndex);
         }
         
         // Remove old program
