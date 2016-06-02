@@ -59,7 +59,7 @@ namespace openspace {
         , doFrustumCulling(properties::BoolProperty("doFrustumCulling", "doFrustumCulling"))
         , doHorizonCulling(properties::BoolProperty("doHorizonCulling", "doHorizonCulling"))
         , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
-        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 0.0f, 20.0f))
+        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 20.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
     {
