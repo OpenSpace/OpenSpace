@@ -65,26 +65,33 @@ namespace openspace {
 
 
 
+    class TileProvider {
+    public:
+        virtual ~TileProvider() { }
+
+        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0) = 0;
+        virtual TileDepthTransform depthTransform() = 0;
+        virtual void prerender() = 0;
+    };
+
+
 
 
     /**
         Provides tiles through GDAL datasets which can be defined with xml files
         for example for wms.
     */
-    class CachingTileProvider {
+    class CachingTileProvider : public TileProvider {
     public:
 
         CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
             int framesUntilFlushRequestQueue);
 
-        ~CachingTileProvider();
-
+        virtual ~CachingTileProvider();
         
-        Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
-
-        TileDepthTransform depthTransform();
-
-        void prerender();
+        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual TileDepthTransform depthTransform();
+        virtual void prerender();
 
 
     private:

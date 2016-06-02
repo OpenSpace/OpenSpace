@@ -39,7 +39,7 @@ namespace openspace {
     public:
         struct TileProviderWithName {
             std::string name;
-            std::shared_ptr<CachingTileProvider> tileProvider;
+            std::shared_ptr<TileProvider> tileProvider;
             bool isActive;
         };
 
@@ -50,18 +50,18 @@ namespace openspace {
 
         void addHeightMap(
             std::string name,
-            std::shared_ptr<CachingTileProvider> tileProvider,
+            std::shared_ptr<TileProvider> tileProvider,
             bool isActive);
         void addColorTexture(
             std::string name,
-            std::shared_ptr<CachingTileProvider> tileProvider,
+            std::shared_ptr<TileProvider> tileProvider,
             bool isActive);
         /*
         std::shared_ptr<CachingTileProvider> getHeightMap(std::string name);
         std::shared_ptr<CachingTileProvider> getColorTexture(std::string name);
         */
-        const std::vector<std::shared_ptr<CachingTileProvider> > getActiveHeightMapProviders();
-        const std::vector<std::shared_ptr<CachingTileProvider> > getActiveColorTextureProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveHeightMapProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveColorTextureProviders();
 
         std::vector<TileProviderWithName>& heightMapProviders();
         std::vector<TileProviderWithName>& colorTextureProviders();
