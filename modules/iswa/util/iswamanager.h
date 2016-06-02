@@ -31,7 +31,9 @@
 #include <map>
 #include <future>
 #include <ghoul/glm.h>
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #include <ccmc/Kameleon.h>
+#endif
 #include <openspace/engine/downloadmanager.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderable.h>

@@ -27,11 +27,16 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/glm.h>
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #include <ccmc/Kameleon.h>
+#endif
+
+#include <set>
 
 namespace openspace {
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 class ccmc::Kameleon;
-
+#endif
 class TransformationManager : public ghoul::Singleton<TransformationManager> {
 	friend class ghoul::Singleton<TransformationManager>;
 
@@ -42,7 +47,9 @@ public:
 	glm::dmat3 frameTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
 
 private:
-	std::shared_ptr<ccmc::Kameleon> _kameleon;
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+    std::shared_ptr<ccmc::Kameleon> _kameleon;
+#endif
     std::set<std::string> _kameleonFrames;
     std::set<std::string> _dipoleFrames;
 };
