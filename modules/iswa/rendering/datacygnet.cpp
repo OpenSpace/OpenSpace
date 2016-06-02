@@ -159,8 +159,8 @@ void DataCygnet::setTextureUniforms(){
     }
 
     //Set Transfer Functions
-    if(activeTextures > 0){
-        if(selectedOptions.back()>=activeTransferfunctions)
+    if(activeTextures >= MAX_TEXTURES){
+        // if(selectedOptions.back()>=activeTransferfunctions)
             activeTransferfunctions = 1;
     }
 

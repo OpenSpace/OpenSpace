@@ -54,7 +54,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_resolution("resolution", "Resolution%", 1.0f, 0.1, 2.0f)
@@ -271,8 +271,8 @@ void KameleonPlane::setUniforms(){
         }
     }
 
-    if(activeTextures > 0){
-        if(selectedOptions.back()>=activeTransferfunctions)
+    if(activeTextures > MAX_TEXTURES){
+        // if(selectedOptions.back()>=activeTransferfunctions)
             activeTransferfunctions = 1;
     }
 
