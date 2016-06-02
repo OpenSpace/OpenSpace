@@ -52,29 +52,12 @@ namespace openspace {
         , _tileCache(tileCacheSize)
         , _framesSinceLastRequestFlush(0)
     {
-        initDefaultTexture();
+        
     }
 
 
     TileProvider::~TileProvider(){
         clearRequestQueue();
-    }
-
-    void TileProvider::initDefaultTexture() {
-        // Set a temporary texture
-        std::string fileName = "textures/earth_bluemarble.jpg";
-        _defaultTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
-
-        if (_defaultTexture) {
-            LDEBUG("Loaded texture from '" << fileName << "'");
-            _defaultTexture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        }
     }
 
 
@@ -117,7 +100,7 @@ namespace openspace {
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
 
-        for (int i = 0; i < levelOffset && chunkIndex.level > 2; i++) {
+        for (int i = 0; i < levelOffset && chunkIndex.level > 1; i++) {
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
@@ -134,8 +117,8 @@ namespace openspace {
             std::shared_ptr<Texture> texture = _tileCache.get(key).texture;
             return { texture, uvTransform };
         }
-        else if (chunkIndex.level <= 1) {
-            return { getDefaultTexture(), uvTransform };
+        else if (chunkIndex.level < 1) {
+            return { nullptr, uvTransform };
         }
         else {
             // We don't have the tile for the requested level
@@ -177,11 +160,6 @@ namespace openspace {
             _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
             return nullptr;
         }
-    }
-
-
-    std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
-        return _defaultTexture;
     }
 
     TileDepthTransform TileProvider::depthTransform() {

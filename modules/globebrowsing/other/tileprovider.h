@@ -81,8 +81,7 @@ namespace openspace {
 
         ~TileProvider();
 
-        Tile getHighestResolutionTile(
-            ChunkIndex chunkIndex,
+        Tile getHighestResolutionTile(ChunkIndex chunkIndex,
             TileUvTransform uvTransform = {glm::vec2(0.0f,0.0f), glm::vec2(1.0f,1.0f)});
         /**
             \param levelOffset gives a tile from a parent chunk with that particular
@@ -92,7 +91,6 @@ namespace openspace {
         Tile getHighestResolutionParentTile(ChunkIndex chunkIndex, int levelOffset = 1);
 
         std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
-        std::shared_ptr<Texture> getDefaultTexture();
         TileDepthTransform depthTransform();
 
         void prerender();
@@ -119,8 +117,7 @@ namespace openspace {
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
-        void initializeAndAddToCache(
-            std::shared_ptr<TileIOResult> uninitedTexture);
+        void initializeAndAddToCache(std::shared_ptr<TileIOResult> uninitedTexture);
 
         void clearRequestQueue();
 
@@ -143,9 +140,6 @@ namespace openspace {
 
 
         std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-
-        std::shared_ptr<Texture> _defaultTexture;
-
     };
 
     
