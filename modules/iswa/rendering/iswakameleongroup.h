@@ -35,14 +35,16 @@ public:
     
     std::vector<int> fieldlineValue();
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
+    void changeCdf(std::string path);
 
 protected:
     void registerProperties();
 
-	void readFieldlinePaths(std::string indexFile);
+    void readFieldlinePaths(std::string indexFile);
     void updateFieldlineSeeds();
     void clearFieldlines();
 
+    properties::FloatProperty _resolution;
     properties::SelectionProperty _fieldlines;
 
     std::string _fieldlineIndexFile;

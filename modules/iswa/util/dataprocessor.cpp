@@ -820,7 +820,6 @@ float DataProcessor::processDataPoint(float value, int option){
         value = histogram->equalize(value);
     }
 
-
     float v = normalizeWithStandardScore(value, mean, sd);
     return v;
 }

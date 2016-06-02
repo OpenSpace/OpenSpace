@@ -136,9 +136,9 @@ bool DataPlane::createGeometry() {
     //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x,  ((x>1)?y:-y),   z,  w, 0, 0,
         -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  ((x>1)?-y:y),  -z,  w, 1, 1,
          x,  y,              z,  w, 1, 0,
     };
 

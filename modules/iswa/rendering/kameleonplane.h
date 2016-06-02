@@ -49,6 +49,7 @@
  	virtual bool readyToRender() const override;
     virtual void setUniforms() override;
 
+    void setDimensions();
     /**
      * Given a path to the json index of seedpoints file, this 
      * method reads, parses and adds them as checkbox options
@@ -69,9 +70,10 @@
 
     void subscribeToGroup();
 
+    void changeKwPath(std::string path);
 	static int id();
 
-    properties::IntProperty _resolution;
+    properties::FloatProperty _resolution;
     properties::FloatProperty _slice;
     properties::SelectionProperty _dataOptions;
     properties::SelectionProperty _fieldlines;
@@ -85,7 +87,7 @@
     properties::BoolProperty _autoFilter;
 
 
-	std::shared_ptr<KameleonWrapper> _kw;
+	// std::shared_ptr<KameleonWrapper> _kw;
 	std::string _kwPath;
 
     glm::size3_t _dimensions;
@@ -96,6 +98,7 @@
 	std::vector<float*> _dataSlices;
     std::shared_ptr<DataProcessor> _dataProcessor;
     float _scale;
+    glm::vec3 _origOffset;
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple 
      * containing information that is needed to either add or remove a fieldline from the scenegraph.
@@ -103,6 +106,7 @@
      */
     std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
     std::string _fieldlineIndexFile;
+    int _cut;
  };
  
  } // namespace openspace
