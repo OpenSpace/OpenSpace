@@ -80,8 +80,7 @@ namespace openspace {
         ~CachingTileProvider();
 
         
-        Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0, 
-            TileUvTransform uvTransform = { glm::vec2(0, 0), glm::vec2(1, 1)});
+        Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
 
         TileDepthTransform depthTransform();
 
