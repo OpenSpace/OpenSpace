@@ -34,26 +34,20 @@ uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
 
+// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// The value increases with the distance from the vertex (or fragment) to the camera
+in float tileInterpolationParameter;
+
 in vec4 fs_position;
 in vec2 fs_uv;
-in vec3 positionCameraSpace;
-
-uniform float distanceScaleFactor;
-uniform int chunkLevel;
 
 Fragment getFragment() {
 	Fragment frag;
 
-    // Calculate desired level based on distance
-	float distToFrag = length(positionCameraSpace);
-    float projectedScaleFactor = distanceScaleFactor / distToFrag;
-	float desiredLevel = log2(projectedScaleFactor);
-
-	// x increases with distance
-	float x = chunkLevel - desiredLevel;
-	float w1 = clamp(1 - x, 0 , 1);
-	float w2 =  (clamp(x, 0 , 1) - clamp(x - 1, 0 , 1));
-	float w3 = clamp(x - 1, 0 , 1);
+	// tileInterpolationParameter increases with distance to camera
+	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
+	float w2 =  (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
+	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
 
 	#for j in 1..#{numLayersColor}
 	{
@@ -76,19 +70,6 @@ Fragment getFragment() {
 		frag.color = blendOver(frag.color, colorSample);
 	}
 	#endfor
-
-	//vec2 samplePos =
-	//	colorTile.uvTransform.uvScale * fs_uv +
-	//	colorTile.uvTransform.uvOffset;
-	//frag.color = texture(colorTile.textureSampler, samplePos);
-
-	//frag.color.rgb *= 10;
-
-	// Sample position overlay
-	//frag.color = frag.color * 0.9 + 0.2*vec4(samplePos, 0, 1);
-
-	// Border overlay
-	//frag.color = frag.color + patchBorderOverlay(fs_uv, vec3(0.5, 0.5, 0.5), 0.02);
 
 	frag.depth = fs_position.w;
 

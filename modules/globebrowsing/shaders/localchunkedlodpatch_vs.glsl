@@ -45,7 +45,6 @@ uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
 uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
 
 uniform int xSegments;
-uniform int ySegments;
 uniform float skirtLength;
 
 uniform float distanceScaleFactor;
@@ -55,7 +54,9 @@ layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
-out vec3 positionCameraSpace;
+// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// The value increases with the distance from the vertex (or fragment) to the camera
+out float tileInterpolationParameter;
 
 vec3 bilinearInterpolation(vec2 uv) {
 	// Bilinear interpolation
@@ -72,18 +73,16 @@ void main()
 	
 	float height = 0;
 	
-	positionCameraSpace = p;
-
-	// Calculate desired level based on distance
-	float distToVertex = length(positionCameraSpace);
-    float projectedScaleFactor = distanceScaleFactor / distToVertex;
+    // Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	float distToVertexOnEllipsoid = length(p);
+    float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
 	float desiredLevel = log2(projectedScaleFactor);
 
-	// x increases with distance
-	float x = chunkLevel - desiredLevel;
-	float w1 = clamp(1 - x, 0 , 1);
-	float w2 = (clamp(x, 0 , 1) - clamp(x - 1, 0 , 1));
-	float w3 = clamp(x - 1, 0 , 1);
+	tileInterpolationParameter = chunkLevel - desiredLevel;
+	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
+	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
+	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
 
 	#for j in 1..#{numLayersHeight}
 	{
