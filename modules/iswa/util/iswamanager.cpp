@@ -83,7 +83,7 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
     DlManager.fetchFile(
-        "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+        "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
         },
@@ -202,7 +202,7 @@ std::string IswaManager::iswaUrl(int id, std::string type){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
         // url = "http://10.0.0.76:3000/"+type+"/" + std::to_string(-id) + "/";
     } else{
-        url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
+        url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
     std::string t = Time::ref().currentTimeUTC(); 
@@ -442,7 +442,6 @@ void IswaManager::createScreenSpace(int id){
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
-    std::cout << "IswaManager: " << typeid(DataPlane).name() << std::endl;
 
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 

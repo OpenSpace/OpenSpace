@@ -73,11 +73,11 @@ bool TextureCygnet::loadTexture() {
 
 bool TextureCygnet::updateTexture(){
 
-    if(_textures.empty())
-        _textures.push_back(nullptr);
-
     if(_futureObject.valid())
         return false;
+
+    if(_textures.empty())
+        _textures.push_back(nullptr);
 
     std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id);
 

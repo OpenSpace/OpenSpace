@@ -226,9 +226,13 @@ void DataCygnet::fillOptions(){
         _dataOptions.addOption({i, options[i]});
         _textures.push_back(nullptr);
     }
-    _dataOptions.setValue(std::vector<int>(1,0));
-    if(_group)
-         std::dynamic_pointer_cast<IswaDataGroup>(_group)->registerOptions(_dataOptions.options());
+
+    if(_group){
+        std::dynamic_pointer_cast<IswaDataGroup>(_group)->registerOptions(_dataOptions.options());
+        _dataOptions.setValue(std::dynamic_pointer_cast<IswaDataGroup>(_group)->dataOptionsValue());
+    } else {
+        _dataOptions.setValue(std::vector<int>(1,0));
+    }
 }
 
 

@@ -44,7 +44,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     :IswaBaseGroup(name, type)    
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Use Histogram", false)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
+    ,_autoFilter("autoFilter", "Auto Filter", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
@@ -68,8 +68,8 @@ void IswaDataGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    OsEng.gui()._iswa.registerProperty(&_normValues);
     OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+    OsEng.gui()._iswa.registerProperty(&_normValues);
     OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
     OsEng.gui()._iswa.registerProperty(&_dataOptions);
 
@@ -83,8 +83,18 @@ void IswaDataGroup::registerProperties(){
         _groupEvent->publish("useHistogramChanged", ghoul::Dictionary({{"useHistogram", _useHistogram.value()}}));
     });
 
-    _autoFilter.onChange([this]{
+    //If autofiler is on, background values property should be hidden
+    _autoFilter.onChange([this](){
         LDEBUG("Group " + name() + " published autoFilterChanged");
+        // If autofiler is selected, use _dataProcessor to set backgroundValues 
+        // and unregister backgroundvalues property.
+        if(_autoFilter.value()){
+            _backgroundValues.setValue(_dataProcessor->filterValues());
+            OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+        // else if autofilter is turned off, register backgroundValues 
+        } else {
+            OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+        }
         _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
     });
 
@@ -129,6 +139,10 @@ void IswaDataGroup::createDataProcessor(){
     }else if(_type == typeid(KameleonPlane).name()){
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
+}
+
+std::vector<int> IswaDataGroup::dataOptionsValue(){
+    return _dataOptions.value();
 }
 
 } //namespace openspace

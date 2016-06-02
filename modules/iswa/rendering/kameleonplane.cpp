@@ -1,26 +1,26 @@
-// /*****************************************************************************************
-//  *                                                                                       *
-//  * OpenSpace                                                                             *
-//  *                                                                                       *
-//  * Copyright (c) 2014-2016                                                               *
-//  *                                                                                       *
-//  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-//  * software and associated documentation files (the "Software"), to deal in the Software *
-//  * without restriction, including without limitation the rights to use, copy, modify,    *
-//  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-//  * permit persons to whom the Software is furnished to do so, subject to the following   *
-//  * conditions:                                                                           *
-//  *                                                                                       *
-//  * The above copyright notice and this permission notice shall be included in all copies *
-//  * or substantial portions of the Software.                                              *
-//  *                                                                                       *
-//  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-//  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-//  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-//  * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-//  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-//  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-//  ****************************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <ghoul/filesystem/filesystem>
@@ -43,7 +43,6 @@ namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
     const int MAX_TEXTURES = 6;
-
 }
 
 namespace openspace {
@@ -134,59 +133,7 @@ bool KameleonPlane::initialize(){
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
-        auto groupEvent = _group->groupEvent();
-
-        groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
-            LDEBUG(name() + " Event useLogChanged");
-            _useLog.setValue(dict.value<bool>("useLog"));
-        });
-
-        groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event normValuesChanged");
-            std::shared_ptr<glm::vec2> values;
-            bool success = dict.getValue("normValues", values);
-            if(success){
-                _normValues.setValue(*values);            
-            }
-        });
-
-        groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event useHistogramChanged");
-            _useHistogram.setValue(dict.value<bool>("useHistogram"));
-        });
-
-        groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event dataOptionsChanged");
-            std::shared_ptr<std::vector<int> > values;
-            bool success = dict.getValue("dataOptions", values);
-            if(success){
-                _dataOptions.setValue(*values);            
-            }
-        });
-
-        groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event transferFunctionsChanged");
-            _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
-        });
-
-        groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event backgroundValuesChanged");
-            std::shared_ptr<glm::vec2> values;
-            bool success = dict.getValue("backgroundValues", values);
-            if(success){
-                _backgroundValues.setValue(*values);            
-            }
-        });
-
-        groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event autoFilterChanged");
-            _autoFilter.setValue(dict.value<bool>("autoFilter"));
-        });
-
-        groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
-            LDEBUG(name() + " Event updateGroup");
-            loadTexture();
-        });
+        subscribeToGroup();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
@@ -261,6 +208,14 @@ bool KameleonPlane::initialize(){
     }
 
     fillOptions();
+
+    // Has to be done after fillOptions()
+    _dataOptions.onChange([this](){
+        if(_dataOptions.value().size() > MAX_TEXTURES)
+            LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
+        loadTexture();
+    });
+
     std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(_dimensions);
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
 
@@ -413,30 +368,18 @@ void KameleonPlane::setTransferFunctions(std::string tfPath){
 }
 
 void KameleonPlane::fillOptions(){
-    std::cout << "Time to fill options" << std::endl;
     std::vector<std::string> options = _dataProcessor->readMetadata(_kwPath);
-    int numOptions = 0;
 
-    for(std::string option : options){
-        if(option.size() < 4 && option != "x" && option != "y" && option != "z"){
-            _dataOptions.addOption({numOptions, option});
-            _dataSlices.push_back(nullptr);
-            _textures.push_back(nullptr);
-            numOptions++;
-        }
+    for(int i=0; i<options.size(); i++){
+        _dataOptions.addOption({i, options[i]});
+        _textures.push_back(nullptr);
     }
     if(_group){
         std::dynamic_pointer_cast<IswaKameleonGroup> (_group)->registerOptions(_dataOptions.options());
-        // _dataOptions.setValue(_group->dataOptionsValue());
-    }else{
+        _dataOptions.setValue(std::dynamic_pointer_cast<IswaKameleonGroup> (_group)->dataOptionsValue());
+    } else {
         _dataOptions.setValue(std::vector<int>(1,0));
-        // IswaManager::ref().registerOptionsToGroup(_data->groupName, _dataOptions.options());
     }
-    _dataOptions.onChange([this](){
-        if(_dataOptions.value().size() > MAX_TEXTURES)
-            LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
-        loadTexture();
-    });
 }
 
 void KameleonPlane::updateFieldlineSeeds(){
@@ -501,6 +444,62 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
             LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
         }
     }
+}
+
+void KameleonPlane::subscribeToGroup(){
+    auto groupEvent = _group->groupEvent();
+
+    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+        LDEBUG(name() + " Event useLogChanged");
+        _useLog.setValue(dict.value<bool>("useLog"));
+    });
+
+    groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event normValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("normValues", values);
+        if(success){
+            _normValues.setValue(*values);            
+        }
+    });
+
+    groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event useHistogramChanged");
+        _useHistogram.setValue(dict.value<bool>("useHistogram"));
+    });
+
+    groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event dataOptionsChanged");
+        std::shared_ptr<std::vector<int> > values;
+        bool success = dict.getValue("dataOptions", values);
+        if(success){
+            _dataOptions.setValue(*values);            
+        }
+    });
+
+    groupEvent->subscribe(name(), "transferFunctionsChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event transferFunctionsChanged");
+        _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
+    });
+
+    groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event backgroundValuesChanged");
+        std::shared_ptr<glm::vec2> values;
+        bool success = dict.getValue("backgroundValues", values);
+        if(success){
+            _backgroundValues.setValue(*values);            
+        }
+    });
+
+    groupEvent->subscribe(name(), "autoFilterChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event autoFilterChanged");
+        _autoFilter.setValue(dict.value<bool>("autoFilter"));
+    });
+
+    groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event updateGroup");
+        loadTexture();
+    });
 }
 
 }// namespace openspace

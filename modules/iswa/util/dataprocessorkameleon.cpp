@@ -43,17 +43,22 @@ DataProcessorKameleon::~DataProcessorKameleon(){}
 
 
 std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path){
-    std::cout << "The path! " << path << std::endl;
+
     if(!path.empty()){
-        std::cout << "not empty!";
         if(path != _kwPath || !_kw){
-            std::cout << "tmie to create!";
 
             initializeKameleonWrapper(path);
         }
 
-        std::cout << "return variables!";
-        return _kw->getVariables(); 
+        std::vector<std::string> opts = _kw->getVariables();
+        opts.erase( std::remove_if(
+            opts.begin(), 
+            opts.end(), 
+            [](std::string opt){ return (opt.size() > 3 || opt == "x" || opt == "y" || opt == "z");}
+            ), 
+        opts.end()
+        );
+        return opts;
     }
 
     return std::vector<std::string>();

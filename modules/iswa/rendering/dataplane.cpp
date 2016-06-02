@@ -55,8 +55,6 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
 DataPlane::~DataPlane(){}
 
 bool DataPlane::initialize(){
-    std::cout << "DataPlane: " << typeid(this).name() << std::endl;
-
     IswaCygnet::initialize();
 
     if(_group){
@@ -78,6 +76,7 @@ bool DataPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
+                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
             // else if autofilter is turned off, register backgroundValues 
             } else {
                 OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
