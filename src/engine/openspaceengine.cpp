@@ -721,11 +721,23 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
         glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
+        glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
         uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
+
+        glm::vec2 windowBufferCorrectionFactor = glm::vec2(
+            static_cast<float>(drawBufferResolution.x) / static_cast<float>(windowSize.x),
+            static_cast<float>(drawBufferResolution.y) / static_cast<float>(windowSize.y)
+        );
         
         double dt = _windowWrapper->averageDeltaTime();
 
-        _gui->startFrame(static_cast<float>(dt), glm::vec2(drawBufferResolution), mousePosition, mouseButtons);
+        _gui->startFrame(
+            static_cast<float>(dt),
+            glm::vec2(drawBufferResolution),
+            windowBufferCorrectionFactor,
+            mousePosition,
+            mouseButtons
+        );
     }
 #endif
 

@@ -60,7 +60,7 @@ public:
 //    bool keyCallback(int key, int action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
     void renderMainWindow();
