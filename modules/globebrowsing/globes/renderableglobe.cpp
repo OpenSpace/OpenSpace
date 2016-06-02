@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/globes/clipmapglobe.h>
 
 #include <modules/globebrowsing/other/threadpool.h>
 

@@ -28,8 +28,6 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.h
@@ -39,7 +37,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
@@ -50,7 +47,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.h
@@ -67,8 +63,6 @@ set(HEADER_FILES
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmapglobe.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/clipmappyramid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.cpp
@@ -78,7 +72,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/meshes/clipmapgrid.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
@@ -89,7 +82,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/patchcoverageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.cpp
@@ -109,11 +101,6 @@ set(SHADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalclipmappatch_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localclipmappatch_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/simple_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
