@@ -68,10 +68,13 @@ void IswaDataGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+    if(!_autoFilter.value())
+        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+    // OsEng.gui()._iswa.registerProperty(&_autoFilter);
     OsEng.gui()._iswa.registerProperty(&_normValues);
     OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
     OsEng.gui()._iswa.registerProperty(&_dataOptions);
+
 
     _useLog.onChange([this]{
         LDEBUG("Group " + name() + " published useLogChanged");
