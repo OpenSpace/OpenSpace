@@ -271,10 +271,10 @@ void KameleonPlane::setUniforms(){
         }
     }
 
-    if(activeTextures > MAX_TEXTURES){
-        // if(selectedOptions.back()>=activeTransferfunctions)
+    // if(activeTextures > MAX_TEXTURES){
+    //     if(selectedOptions.back()>=(int)_transferFunctions.size())
+    if(activeTextures > 0 && selectedOptions.back()>=(int)_transferFunctions.size())
             activeTransferfunctions = 1;
-    }
 
     ghoul::opengl::TextureUnit tfUnits[6];
     j = 0;
