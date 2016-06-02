@@ -168,6 +168,16 @@ namespace openspace {
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
             Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+
+            if (tile.texture == nullptr || 
+                tileParent1.texture == nullptr || 
+                tileParent2.texture == nullptr) 
+            {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -239,6 +249,16 @@ namespace openspace {
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
             Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+
+
+            if (tile.texture == nullptr ||
+                tileParent1.texture == nullptr ||
+                tileParent2.texture == nullptr)
+            {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
@@ -392,6 +412,16 @@ namespace openspace {
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
             Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+
+            if (tile.texture == nullptr ||
+                tileParent1.texture == nullptr ||
+                tileParent2.texture == nullptr)
+            {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -462,6 +492,16 @@ namespace openspace {
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
             Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
             Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+
+
+            if (tile.texture == nullptr ||
+                tileParent1.texture == nullptr ||
+                tileParent2.texture == nullptr)
+            {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
