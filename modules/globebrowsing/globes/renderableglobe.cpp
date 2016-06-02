@@ -109,11 +109,12 @@ namespace openspace {
 
         
         // Create TileProviders for all color textures
-        for (size_t i = 1; i < colorTexturesDictionary.size() + 1; i++)
+        for (size_t i = 0; i < colorTexturesDictionary.size(); i++)
         {
             std::string name, path;
+            std::string dictionaryKey = std::to_string(i + 1);
             ghoul::Dictionary colorTextureDictionary =
-                colorTexturesDictionary.value<ghoul::Dictionary>(std::to_string(i));
+                colorTexturesDictionary.value<ghoul::Dictionary>(dictionaryKey);
             colorTextureDictionary.getValue("Name", name);
             colorTextureDictionary.getValue("FilePath", path);
             
@@ -132,18 +133,20 @@ namespace openspace {
             _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
 
             // Create property for this tile provider
-            _activeColorLayers.push_back(properties::BoolProperty(name, name, true));
+            bool enabled = i == 0; // Only enable first layer
+            _activeColorLayers.push_back(properties::BoolProperty(name, name, enabled));
         }
 
         ghoul::Dictionary heightMapsDictionary;
         texturesDictionary.getValue(keyHeightMaps, heightMapsDictionary);
 
         // Create TileProviders for all height maps
-        for (size_t i = 1; i < heightMapsDictionary.size() + 1; i++)
+        for (size_t i = 0; i < heightMapsDictionary.size(); i++)
         {
             std::string name, path;
+            std::string dictionaryKey = std::to_string(i + 1);
             ghoul::Dictionary heightMapDictionary =
-                heightMapsDictionary.value<ghoul::Dictionary>(std::to_string(i));
+                heightMapsDictionary.value<ghoul::Dictionary>(dictionaryKey);
             heightMapDictionary.getValue("Name", name);
             heightMapDictionary.getValue("FilePath", path);
 
@@ -163,7 +166,8 @@ namespace openspace {
             _tileProviderManager->addHeightMap(name, heightMapProvider, true);
 
             // Create property for this tile provider
-            _activeHeightMapLayers.push_back(properties::BoolProperty(name, name, true));
+            bool enabled = i == 0; // Only enable first layer
+            _activeHeightMapLayers.push_back(properties::BoolProperty(name, name, enabled));
         }
 
         // Add properties for the tile providers
