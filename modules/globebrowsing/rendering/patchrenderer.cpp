@@ -166,17 +166,22 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
-            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
-            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
-
-            if (tile.texture == nullptr || 
-                tileParent1.texture == nullptr || 
-                tileParent2.texture == nullptr) 
-            {
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+            
+            if (tile.texture == nullptr) {
                 // don't render if no tile was available
                 programObject->deactivate();
                 return;
             }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
+            }
+
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
@@ -247,17 +252,21 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
-            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
-            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
 
 
-            if (tile.texture == nullptr ||
-                tileParent1.texture == nullptr ||
-                tileParent2.texture == nullptr)
-            {
+            if (tile.texture == nullptr) {
                 // don't render if no tile was available
                 programObject->deactivate();
                 return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
             }
 
             // The texture needs a unit to sample from
@@ -410,16 +419,20 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
-            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
-            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
 
-            if (tile.texture == nullptr ||
-                tileParent1.texture == nullptr ||
-                tileParent2.texture == nullptr)
-            {
+            if (tile.texture == nullptr) {
                 // don't render if no tile was available
                 programObject->deactivate();
                 return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
             }
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
@@ -490,17 +503,21 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
-            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
-            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
 
 
-            if (tile.texture == nullptr ||
-                tileParent1.texture == nullptr ||
-                tileParent2.texture == nullptr)
-            {
+            if (tile.texture == nullptr) {
                 // don't render if no tile was available
                 programObject->deactivate();
                 return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
             }
 
             // The texture needs a unit to sample from

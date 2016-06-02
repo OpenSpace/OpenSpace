@@ -81,9 +81,10 @@ namespace openspace {
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(
-        ChunkIndex chunkIndex,
-        TileUvTransform uvTransform) {
+    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int nthHighest) {
+        TileUvTransform uvTransform;
+        uvTransform.uvOffset = glm::vec2(0, 0);
+        uvTransform.uvScale = glm::vec2(1, 1);
 
         int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
 
@@ -92,30 +93,22 @@ namespace openspace {
             chunkIndex = chunkIndex.parent();
         }
         
-        return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
-    }
-
-    Tile TileProvider::getHighestResolutionParentTile(ChunkIndex chunkIndex, int levelOffset) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
-
-        for (int i = 0; i < levelOffset && chunkIndex.level > 1; i++) {
-            transformFromParent(chunkIndex, uvTransform);
-            chunkIndex = chunkIndex.parent();
-        }
-
-        Tile toReturn = getHighestResolutionTile(chunkIndex, uvTransform);
-        return toReturn;
+        return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform, nthHighest);
     }
 
     Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
-        TileUvTransform& uvTransform) 
+        TileUvTransform& uvTransform, int nthHighest) 
     {
+        
         HashKey key = chunkIndex.hashKey();
-        if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
-            std::shared_ptr<Texture> texture = _tileCache.get(key).texture;
-            return { texture, uvTransform };
+        bool goodTileExists = _tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None;
+        if (goodTileExists) {
+            if (nthHighest > 0) {
+                transformFromParent(chunkIndex, uvTransform);
+                return getOrEnqueueHighestResolutionTile(
+                    chunkIndex.parent(), uvTransform, nthHighest - 1);
+            }
+            else return { _tileCache.get(key).texture, uvTransform };
         }
         else if (chunkIndex.level < 1) {
             return { nullptr, uvTransform };
@@ -124,7 +117,7 @@ namespace openspace {
             // We don't have the tile for the requested level
             // --> check if the parent has a tile we can use
             transformFromParent(chunkIndex, uvTransform);
-            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform);
+            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform, nthHighest);
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first
