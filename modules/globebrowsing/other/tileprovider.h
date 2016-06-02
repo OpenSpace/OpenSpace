@@ -81,7 +81,15 @@ namespace openspace {
 
         ~TileProvider();
 
-        Tile getHighestResolutionTile(ChunkIndex chunkIndex);
+        Tile getHighestResolutionTile(
+            ChunkIndex chunkIndex,
+            TileUvTransform uvTransform = {glm::vec2(0.0f,0.0f), glm::vec2(1.0f,1.0f)});
+        /**
+            \param levelOffset gives a tile from a parent chunk with that particular
+            offset. For example levelOffset = 1 gives the first parent and levelOffset = 2
+            gives the grand parent.
+        */
+        Tile getHighestResolutionParentTile(ChunkIndex chunkIndex, int levelOffset = 1);
 
         std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
         std::shared_ptr<Texture> getDefaultTexture();

@@ -14,6 +14,14 @@ return {
                         FilePath = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
                     },
                     {
+                        Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
+                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
+                    },
+                    {
+                        Name = "MODIS_Water_Mask",
+                        FilePath = "map_service_configs/MODIS_Water_Mask.xml"
+                    },
+                    {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
                     },
@@ -21,9 +29,7 @@ return {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                     },
-            
                 },
-
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
