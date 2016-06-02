@@ -82,14 +82,13 @@ namespace openspace {
 
 
     Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
-        int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
-
-        while(chunkIndex.level > maximumLevel){
+        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
 
-        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
+        int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
+        while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
