@@ -81,34 +81,30 @@ namespace openspace {
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int nthHighest) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
-
+    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
         int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
 
         while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
+
+        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
+            transformFromParent(chunkIndex, uvTransform);
+            chunkIndex = chunkIndex.parent();
+        }
         
-        return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform, nthHighest);
+        return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
     Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
-        TileUvTransform& uvTransform, int nthHighest) 
+        TileUvTransform& uvTransform) 
     {
         
         HashKey key = chunkIndex.hashKey();
-        bool goodTileExists = _tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None;
-        if (goodTileExists) {
-            if (nthHighest > 0) {
-                transformFromParent(chunkIndex, uvTransform);
-                return getOrEnqueueHighestResolutionTile(
-                    chunkIndex.parent(), uvTransform, nthHighest - 1);
-            }
-            else return { _tileCache.get(key).texture, uvTransform };
+        
+        if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
+            return { _tileCache.get(key).texture, uvTransform };
         }
         else if (chunkIndex.level < 1) {
             return { nullptr, uvTransform };
@@ -117,7 +113,7 @@ namespace openspace {
             // We don't have the tile for the requested level
             // --> check if the parent has a tile we can use
             transformFromParent(chunkIndex, uvTransform);
-            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform, nthHighest);
+            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform);
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first

@@ -80,7 +80,8 @@ namespace openspace {
         ~TileProvider();
 
         
-        Tile getHighestResolutionTile(ChunkIndex chunkIndex, int nthHighest = 0);
+        Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0, 
+            TileUvTransform uvTransform = { glm::vec2(0, 0), glm::vec2(1, 1)});
 
         TileDepthTransform depthTransform();
 
@@ -94,7 +95,7 @@ namespace openspace {
         //                                Helper functions                              //
         //////////////////////////////////////////////////////////////////////////////////
         Tile getOrEnqueueHighestResolutionTile(const ChunkIndex& ci, 
-            TileUvTransform& uvTransform, int nthHighest);
+            TileUvTransform& uvTransform);
         
         std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
 
