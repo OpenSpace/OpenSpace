@@ -6,10 +6,15 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2011 AUG 06 00:00:00")
+    openspace.time.setTime("2015 NOV 24 00:00:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
     openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
 end
+
+function postInitialization()
+
+end
+
 
 return {
     ScenePath = ".",

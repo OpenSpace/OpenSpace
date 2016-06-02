@@ -63,6 +63,19 @@ namespace openspace {
     }
 
 
+    Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
+        return getTileProvider()->getHighestResolutionTile(chunkIndex, parents);
+    }
+
+    TileDepthTransform TemporalTileProvider::depthTransform() {
+        return getTileProvider()->depthTransform();
+    }
+
+    void TemporalTileProvider::prerender() {
+        return getTileProvider()->prerender();
+    }
+
+
     std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
         TimeKey timekey = getTimeKey(t);
         auto it = _tileProviderMap.find(timekey);

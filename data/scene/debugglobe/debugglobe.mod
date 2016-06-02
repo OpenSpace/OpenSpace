@@ -40,5 +40,4 @@ return {
         },
         GuiName = "/Solar/Planets/DebugGlobe"
     },
-
 }

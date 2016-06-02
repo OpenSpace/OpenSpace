@@ -23,10 +23,9 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
-
 #include <modules/globebrowsing/globes/globemesh.h>
-
 #include <modules/globebrowsing/other/threadpool.h>
+#include <modules/globebrowsing/other/temporaltileprovider.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -107,6 +106,25 @@ namespace openspace {
         int frameUntilFlushRequestQueue = 60;
         int cacheSize = 5000;
 
+
+
+        // manually add a temporal tile provider for testing
+        std::string filename = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+        TileProviderInitData initData;
+        initData.minimumPixelSize = minimumTextureSide;
+        initData.threads = 1;
+        initData.cacheSize = 50;
+        initData.framesUntilRequestQueueFlush = 60;
+
+        std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TemporalTileProvider>(
+            new TemporalTileProvider(filename, initData));
+
+        std::string name = "Temporal VIIRS SNPP";
+        _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
+        _activeColorLayers.push_back(properties::BoolProperty(name, name, true));
+
+
+
         
         // Create TileProviders for all color textures
         for (size_t i = 0; i < colorTexturesDictionary.size(); i++)
@@ -133,9 +151,11 @@ namespace openspace {
             _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
 
             // Create property for this tile provider
-            bool enabled = i == 0; // Only enable first layer
+            bool enabled = _activeColorLayers.size() == 0; // Only enable first layer
             _activeColorLayers.push_back(properties::BoolProperty(name, name, enabled));
         }
+
+
 
         ghoul::Dictionary heightMapsDictionary;
         texturesDictionary.getValue(keyHeightMaps, heightMapsDictionary);
@@ -166,7 +186,7 @@ namespace openspace {
             _tileProviderManager->addHeightMap(name, heightMapProvider, true);
 
             // Create property for this tile provider
-            bool enabled = i == 0; // Only enable first layer
+            bool enabled = _activeHeightMapLayers.size() == 0; // Only enable first layer
             _activeHeightMapLayers.push_back(properties::BoolProperty(name, name, enabled));
         }
 

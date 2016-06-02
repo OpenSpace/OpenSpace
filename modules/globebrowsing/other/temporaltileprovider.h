@@ -35,7 +35,6 @@
 #include <unordered_map>
 
 #include "gdal_priv.h"
-#include "vrtdataset.h"
 
 
 
@@ -54,9 +53,18 @@ namespace openspace {
     };
 
     
-    class TemporalTileProvider {
+    class TemporalTileProvider : public TileProvider {
     public:
         TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
+
+
+        // These methods implements TileProvider
+        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual TileDepthTransform depthTransform();
+        virtual void prerender();
+
+
+        // Provider other convenient methods
 
         std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
 
