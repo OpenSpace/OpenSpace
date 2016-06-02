@@ -120,6 +120,10 @@ namespace openspace {
         
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
+        
+        if (numHeightMapProviders == 0 || numColorTextureProviders == 0) {
+            return;
+        }
 
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
@@ -373,6 +377,12 @@ namespace openspace {
 
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
+
+
+        if (numHeightMapProviders == 0 || numColorTextureProviders == 0) {
+            return;
+        }
+
 
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
