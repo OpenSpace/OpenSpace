@@ -107,6 +107,9 @@ namespace openspace {
                 textureTypes[i].keyNumLayers, textureTypes[i].numLayers);
         }
         
+        // Remove old program
+        _programObject.release();
+
         _programObject = OsEng.renderEngine().buildRenderProgram(
             _shaderName,
             _vsPath,

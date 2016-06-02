@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TEXTURE_DATA_PROVIDER_H__
-#define __TEXTURE_DATA_PROVIDER_H__
+#ifndef __TILE_DATASET_H__
+#define __TILE_DATASET_H__
 
 //#include <modules/globebrowsing/other/tileprovider.h>
 
@@ -33,6 +33,7 @@
 #include <modules/globebrowsing/other/threadpool.h>
 
 #include "gdal_priv.h"
+
 
 #include <memory>
 #include <set>
@@ -86,14 +87,26 @@ namespace openspace {
 
 
 
-    class TextureDataProvider {
+    class TileDataset {
     public:
 
-        TextureDataProvider(const std::string& fileName, int minimumPixelSize);
-        ~TextureDataProvider();
+        
+        /**
+        * Opens a GDALDataset in readonly mode and calculates meta data required for 
+        * reading tile using a ChunkIndex.
+        *
+        * \param gdalDatasetDesc  - A path to a specific file or raw XML describing the dataset 
+        * \param minimumPixelSize - minimum number of pixels per side per tile requested 
+        * \param datatype         - datatype for storing pixel data in requested tile
+        */
+        TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, GLuint dataType = 0);
+
+        ~TileDataset();
+
+        
 
 
-        std::shared_ptr<TileIOResult> getTextureData(ChunkIndex chunkIndex);
+        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
 
         int getMaximumLevel() const;
 
@@ -101,6 +114,7 @@ namespace openspace {
 
 
     private:
+
 
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -126,13 +140,12 @@ namespace openspace {
         };
 
         struct DataLayout {
-            DataLayout(GDALDataset* dataSet, const GdalDataRegion& region);
+            DataLayout();
+            DataLayout(GDALDataset* dataSet, GLuint glType);
 
             GDALDataType gdalType;
             size_t bytesPerDatum;
             size_t bytesPerPixel;
-            size_t bytesPerLine;
-            size_t totalNumBytes;
         };
 
 
@@ -153,9 +166,13 @@ namespace openspace {
 
         static GLuint getOpenGLDataType(GDALDataType gdalType);
 
+        static GDALDataType getGdalDataType(GLuint glType);
+
         static RawTileData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
         static size_t numberOfBytes(GDALDataType gdalType);
+
+        static size_t getMaximumValue(GDALDataType gdalType);
 
         static std::shared_ptr<RawTileData> createRawTileData(const GdalDataRegion& region,
             const DataLayout& dataLayout, const char* imageData);
@@ -173,6 +190,7 @@ namespace openspace {
         TileDepthTransform _depthTransform;
 
         GDALDataset* _dataset;
+        DataLayout _dataLayout;
 
     };
 
@@ -184,4 +202,4 @@ namespace openspace {
 
 
 
-#endif  // __TEXTURE_DATA_PROVIDER_H__
+#endif  // __TILE_DATASET_H__

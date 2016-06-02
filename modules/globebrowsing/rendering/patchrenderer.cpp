@@ -25,7 +25,6 @@
 
 #include <modules/globebrowsing/rendering/patchrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/meshes/clipmapgrid.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -69,12 +68,12 @@ namespace openspace {
     }
 
     void PatchRenderer::update() {
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
         for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
         {
             iter->get()->prerender();
         }
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
         {
             iter->get()->prerender();
@@ -101,24 +100,6 @@ namespace openspace {
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"));
-
-        /*
-        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
-            "GlobalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
-
-        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
-            "LocalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        */
-
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -134,11 +115,15 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
+        
+        if (numHeightMapProviders == 0 || numColorTextureProviders == 0) {
+            return;
+        }
 
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
@@ -163,10 +148,18 @@ namespace openspace {
         programObject->activate();
 
         std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent2;
         std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent2;
 
         texUnitHeight.resize(numHeightMapProviders);
+        texUnitHeightParent1.resize(numHeightMapProviders);
+        texUnitHeightParent2.resize(numHeightMapProviders);
         texUnitColor.resize(numColorTextureProviders);
+        texUnitColorParent1.resize(numColorTextureProviders);
+        texUnitColorParent2.resize(numColorTextureProviders);
 
 
         // Go through all the height map providers
@@ -177,11 +170,27 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+            
+            if (tile.texture == nullptr) {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
+            }
+
+
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
             texUnitHeight[i].activate();
-            int hej = 0;
             tile.texture->bind();
 
             std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
@@ -194,6 +203,41 @@ namespace openspace {
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
+
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitHeightParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitHeightParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+
+            // The texture needs a unit to sample from
+            texUnitHeightParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitHeightParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+                
+
 
             programObject->setUniform(
                 indexedTileKey + ".depthTransform.depthScale",
@@ -212,6 +256,22 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+
+
+            if (tile.texture == nullptr) {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
+            }
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
@@ -227,6 +287,38 @@ namespace openspace {
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
+
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitColorParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitColorParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitColorParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitColorParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
             
             i++;
         }
@@ -242,11 +334,26 @@ namespace openspace {
             * viewTransform * modelTransform;
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
+        vec3 pointClosestToCamera = chunk.owner()->ellipsoid().cartesianSurfacePosition(chunk.surfacePatch().closestPoint(chunk.owner()->ellipsoid().cartesianToGeodetic2(data.camera.positionVec3())));
+
+
+        
+        float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
+
         // Upload the uniform variables
         programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
+        programObject->setUniform("xSegments", _grid->xSegments());
+
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+        
+        programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
+        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
+        programObject->setUniform("chunkLevel", chunk.index().level);
+
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -258,73 +365,6 @@ namespace openspace {
 
         // disable shader
         programObject->deactivate();
-        
-
-
-
-
-
-
-
-        /*
-        // activate shader
-        _programObjectGlobalRendering->activate();
-
-
-        // For now just pick the first one from height maps
-        //auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        //auto tileProviderHeight = heightMapProviders.begin()->second;
-
-        // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight;
-        texUnitHeight.activate();
-        heightTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
-
-        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
-
-        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
-        _programObjectGlobalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
-
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor;
-        texUnitColor.activate();
-        colorTile.texture->bind();
-        _programObjectGlobalRendering->setUniform("colorTile.textureSampler", texUnitColor);
-        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
-        _programObjectGlobalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
-
-        Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
-        auto patchSize = chunk.surfacePatch().size();
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
-        _programObjectGlobalRendering->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-        _programObjectGlobalRendering->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectGlobalRendering->deactivate();
-        */
     }
 
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data)
@@ -332,11 +372,17 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
 
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
+
+
+        if (numHeightMapProviders == 0 || numColorTextureProviders == 0) {
+            return;
+        }
+
 
         // Create information for the shader provider
         LayeredTextureInfo layeredTextureInfoHeight;
@@ -360,22 +406,45 @@ namespace openspace {
         // Activate the shader program
         programObject->activate();
 
-
         std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent2;
         std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent2;
 
         texUnitHeight.resize(numHeightMapProviders);
+        texUnitHeightParent1.resize(numHeightMapProviders);
+        texUnitHeightParent2.resize(numHeightMapProviders);
         texUnitColor.resize(numColorTextureProviders);
+        texUnitColorParent1.resize(numColorTextureProviders);
+        texUnitColorParent2.resize(numColorTextureProviders);
 
 
         // Go through all the height map providers
         int i = 0;
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
+            texUnitHeight.push_back(ghoul::opengl::TextureUnit());
             auto tileProvider = it->get();
-
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+
+            if (tile.texture == nullptr) {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
+            }
+
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -393,6 +462,40 @@ namespace openspace {
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
 
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitHeightParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitHeightParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitHeightParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitHeightParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+
+
+
             programObject->setUniform(
                 indexedTileKey + ".depthTransform.depthScale",
                 depthTransform.depthScale);
@@ -408,9 +511,24 @@ namespace openspace {
         for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
         {
             auto tileProvider = it->get();
-
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+
+
+            if (tile.texture == nullptr) {
+                // don't render if no tile was available
+                programObject->deactivate();
+                return;
+            }
+
+            if (tileParent1.texture == nullptr) {
+                tileParent1 = tile;
+            }
+            if (tileParent2.texture == nullptr) {
+                tileParent2 = tileParent1;
+            }
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
@@ -427,22 +545,47 @@ namespace openspace {
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
 
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitColorParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitColorParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitColorParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitColorParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+
             i++;
         }
-
-
-
-
-
-
-
 
         // Calculate other uniform variables needed for rendering
 
         // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewTransform = viewTransform * modelTransform;
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = data.camera.combinedViewMatrix();
+        dmat4 modelViewTransform = viewTransform * modelTransform;
 
         Geodetic2 sw = chunk.surfacePatch().southWestCorner();
         Geodetic2 se = chunk.surfacePatch().southEastCorner();
@@ -481,6 +624,14 @@ namespace openspace {
             "projectionTransform",
             data.camera.projectionMatrix());
 
+        programObject->setUniform("xSegments", _grid->xSegments());
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+
+        float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
+        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
+        programObject->setUniform("chunkLevel", chunk.index().level);
+
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -491,508 +642,5 @@ namespace openspace {
 
         // disable shader
         programObject->deactivate();
-
-
-        
-
-
-
-        /*
-        using namespace glm;
-
-        // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewTransform = viewTransform * modelTransform;
-
-        // activate shader
-        _programObjectLocalRendering->activate();
-
-
-        // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders.begin()->second;
-
-        // Get the textures that should be used for rendering
-        Tile heightTile = tileProviderHeight->getHighestResolutionTile(chunk.index());
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight;
-        texUnitHeight.activate();
-        heightTile.texture->bind();
-        _programObjectLocalRendering->setUniform("heightTile.textureSampler", texUnitHeight);
-        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvScale", heightTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("heightTile.uvTransform.uvOffset", heightTile.uvTransform.uvOffset);
-        
-        TileDepthTransform depthTransformHeight = tileProviderHeight->depthTransform();
-        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthScale", depthTransformHeight.depthScale);
-        _programObjectLocalRendering->setUniform("heightTile.depthTransform.depthOffset", depthTransformHeight.depthOffset);
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders.begin()->second;
-        Tile colorTile = tileProviderColor->getHighestResolutionTile(chunk.index());
-
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor;
-        texUnitColor.activate();
-        colorTile.texture->bind();
-        _programObjectLocalRendering->setUniform("colorTile.textureSampler", texUnitColor);
-        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvScale", colorTile.uvTransform.uvScale);
-        _programObjectLocalRendering->setUniform("colorTile.uvTransform.uvOffset", colorTile.uvTransform.uvOffset);
-
-
-        Geodetic2 sw = chunk.surfacePatch().southWestCorner();
-        Geodetic2 se = chunk.surfacePatch().southEastCorner();
-        Geodetic2 nw = chunk.surfacePatch().northWestCorner();
-        Geodetic2 ne = chunk.surfacePatch().northEastCorner();
-
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
-
-        // Get model space positions of the four control points
-        Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);
-        Vec3 patchSeModelSpace = ellipsoid.cartesianSurfacePosition(se);
-        Vec3 patchNwModelSpace = ellipsoid.cartesianSurfacePosition(nw);
-        Vec3 patchNeModelSpace = ellipsoid.cartesianSurfacePosition(ne);
-
-        // Transform all control points to camera space
-        Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
-        Vec3 patchSeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSeModelSpace, 1));
-        Vec3 patchNwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNwModelSpace, 1));
-        Vec3 patchNeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNeModelSpace, 1));
-
-        // Send control points to shader
-        _programObjectLocalRendering->setUniform("p00", vec3(patchSwCameraSpace));
-        _programObjectLocalRendering->setUniform("p10", vec3(patchSeCameraSpace));
-        _programObjectLocalRendering->setUniform("p01", vec3(patchNwCameraSpace));
-        _programObjectLocalRendering->setUniform("p11", vec3(patchNeCameraSpace));
-
-        vec3 patchNormalCameraSpace = normalize(
-            cross(patchSeCameraSpace - patchSwCameraSpace,
-                patchNwCameraSpace - patchSwCameraSpace));
-
-        _programObjectLocalRendering->setUniform(
-            "patchNormalCameraSpace",
-            patchNormalCameraSpace);
-
-        _programObjectLocalRendering->setUniform(
-            "projectionTransform",
-            data.camera.projectionMatrix());
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectLocalRendering->deactivate();
-        */
     }
-    
-    //////////////////////////////////////////////////////////////////////////////////////
-    //								CLIPMAP PATCH RENDERER								//
-    //////////////////////////////////////////////////////////////////////////////////////
-    ClipMapPatchRenderer::ClipMapPatchRenderer(
-        shared_ptr<ClipMapGrid> grid,
-        shared_ptr<TileProviderManager> tileProviderManager)
-        : PatchRenderer(tileProviderManager)
-        , _grid(grid)
-        , _patchCoverageProvider(
-            Geodetic2(M_PI * 2, M_PI * 2),
-            Geodetic2(-M_PI -M_PI/2, -M_PI),
-            10)
-    {
-        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
-            "GlobalClipMapPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/globalclipmappatch_fs.glsl");
-        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
-        
-        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
-            "LocalClipMapPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/localclipmappatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/localclipmappatch_fs.glsl");
-        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
-
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    }
-
-    ClipMapPatchRenderer::~ClipMapPatchRenderer()
-    {
-        if (_programObjectGlobalRendering) {
-            RenderEngine& renderEngine = OsEng.renderEngine();
-            renderEngine.removeRenderProgram(_programObjectGlobalRendering);
-            _programObjectGlobalRendering = nullptr;
-        }
-    }
-
-    void ClipMapPatchRenderer::renderPatch(
-        const Geodetic2& patchSize,
-        const RenderData& data,
-        const Ellipsoid& ellipsoid)
-    {
-        if (glm::max(patchSize.lat, patchSize.lon) > M_PI / 200) {
-            renderPatchGlobally(patchSize, data, ellipsoid);
-        }
-        else {
-            renderPatchLocally(patchSize, data, ellipsoid);
-        }
-    }
-
-    void ClipMapPatchRenderer::renderPatchGlobally(
-        const Geodetic2& patchSize,
-        const RenderData& data,
-        const Ellipsoid& ellipsoid)
-    {
-        // activate shader
-        _programObjectGlobalRendering->activate();
-        using namespace glm;
-
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-
-        // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-
-        // Snap patch position
-        int segmentsPerPatch = _grid->segments();
-        Geodetic2 stepSize = Geodetic2(
-            patchSize.lat / segmentsPerPatch,
-            patchSize.lon / segmentsPerPatch);
-        ivec2 patchesToCoverGlobe = ivec2(
-            M_PI / patchSize.lat + 0.5,
-            M_PI * 2 / patchSize.lon + 0.5);
-        Geodetic2 cameraPosLatLon = ellipsoid.cartesianToGeodetic2(data.camera.position().dvec3());
-        ivec2 intSnapCoord = ivec2(
-            cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
-            cameraPosLatLon.lon / (M_PI)* segmentsPerPatch * patchesToCoverGlobe.x);
-        Geodetic2 newPatchCenter = Geodetic2(
-            stepSize.lat * intSnapCoord.x,
-            stepSize.lon * intSnapCoord.y);
-        GeodeticPatch newPatch(
-            newPatchCenter,
-            Geodetic2(patchSize.lat / 2, patchSize.lon / 2));
-
-        ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
-
-
-
-
-        
-        // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders[0];
-        PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight00;
-        texUnitHeight00.activate();
-        patchCoverageHeight.textureTransformPairs[0].first->bind(); // tile00
-        _programObjectGlobalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
-
-        ghoul::opengl::TextureUnit texUnitHeight10;
-        texUnitHeight10.activate();
-        patchCoverageHeight.textureTransformPairs[1].first->bind(); // tile10
-        _programObjectGlobalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
-
-        ghoul::opengl::TextureUnit texUnitHeight01;
-        texUnitHeight01.activate();
-        patchCoverageHeight.textureTransformPairs[2].first->bind(); // tile01
-        _programObjectGlobalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
-
-        ghoul::opengl::TextureUnit texUnitHeight11;
-        texUnitHeight11.activate();
-        patchCoverageHeight.textureTransformPairs[3].first->bind(); // tile11
-        _programObjectGlobalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
-
-
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileHeight00",
-            patchCoverageHeight.textureTransformPairs[0].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileHeight10",
-            patchCoverageHeight.textureTransformPairs[1].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileHeight01",
-            patchCoverageHeight.textureTransformPairs[2].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileHeight11",
-            patchCoverageHeight.textureTransformPairs[3].second);
-
-
-
-
-        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy();
-        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy();
-        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy();
-        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy();
-
-        _programObjectGlobalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
-        _programObjectGlobalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
-        _programObjectGlobalRendering->setUniform("texture01DimensionsHeight", texture01DimensionsHeight);
-        _programObjectGlobalRendering->setUniform("texture11DimensionsHeight", texture11DimensionsHeight);
-
-
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders[0];
-        PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor00;
-        texUnitColor00.activate();
-        patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
-        _programObjectGlobalRendering->setUniform("textureSamplerColor00", texUnitColor00);
-
-        ghoul::opengl::TextureUnit texUnitColor10;
-        texUnitColor10.activate();
-        patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
-        _programObjectGlobalRendering->setUniform("textureSamplerColor10", texUnitColor10);
-
-        ghoul::opengl::TextureUnit texUnitColor01;
-        texUnitColor01.activate();
-        patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
-        _programObjectGlobalRendering->setUniform("textureSamplerColor01", texUnitColor01);
-
-        ghoul::opengl::TextureUnit texUnitColor11;
-        texUnitColor11.activate();
-        patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
-        _programObjectGlobalRendering->setUniform("textureSamplerColor11", texUnitColor11);
-
-
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileColor00",
-            patchCoverageColor.textureTransformPairs[0].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileColor10",
-            patchCoverageColor.textureTransformPairs[1].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileColor01",
-            patchCoverageColor.textureTransformPairs[2].second);
-        _programObjectGlobalRendering->setUniform(
-            "uvTransformPatchToTileColor11",
-            patchCoverageColor.textureTransformPairs[3].second);
-
-
-        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy();
-        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy();
-        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy();
-        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy();
-
-        _programObjectGlobalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
-        _programObjectGlobalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);
-        _programObjectGlobalRendering->setUniform("texture01DimensionsColor", texture01DimensionsColor);
-        _programObjectGlobalRendering->setUniform("texture11DimensionsColor", texture11DimensionsColor);
-
-
-
-        _programObjectGlobalRendering->setUniform(
-            "modelViewProjectionTransform",
-            data.camera.projectionMatrix() * viewTransform *  modelTransform);
-        _programObjectGlobalRendering->setUniform("segmentsPerPatch", segmentsPerPatch);
-        _programObjectGlobalRendering->setUniform("minLatLon", vec2(newPatch.southWestCorner().toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
-        _programObjectGlobalRendering->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
-        _programObjectGlobalRendering->setUniform("contraction", contraction);
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectGlobalRendering->deactivate();
-    }
-
-    void ClipMapPatchRenderer::renderPatchLocally(
-        const Geodetic2& patchSize,
-        const RenderData& data,
-        const Ellipsoid& ellipsoid)
-    {
-        // activate shader
-        _programObjectLocalRendering->activate();
-        using namespace glm;
-
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-
-        // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-
-        mat4 modelViewTransform = viewTransform * modelTransform;
-
-        // Snap patch position
-        int segmentsPerPatch = _grid->segments();
-        Geodetic2 stepSize = Geodetic2(
-            patchSize.lat / segmentsPerPatch,
-            patchSize.lon / segmentsPerPatch);
-        ivec2 patchesToCoverGlobe = ivec2(
-            M_PI / patchSize.lat + 0.5,
-            M_PI * 2 / patchSize.lon + 0.5);
-        Geodetic2 cameraPosLatLon = ellipsoid.cartesianToGeodetic2(data.camera.position().dvec3());
-        ivec2 intSnapCoord = ivec2(
-            cameraPosLatLon.lat / (M_PI * 2) * segmentsPerPatch * patchesToCoverGlobe.y,
-            cameraPosLatLon.lon / (M_PI)* segmentsPerPatch * patchesToCoverGlobe.x);
-        Geodetic2 newPatchCenter = Geodetic2(
-            stepSize.lat * intSnapCoord.x,
-            stepSize.lon * intSnapCoord.y);
-        GeodeticPatch newPatch(
-            newPatchCenter,
-            Geodetic2(patchSize.lat / 2, patchSize.lon / 2));
-
-        ivec2 contraction = ivec2(intSnapCoord.y % 2, intSnapCoord.x % 2);
-
-        // Get global positions of the four control points
-        Vec3 patchSw = ellipsoid.cartesianSurfacePosition(newPatch.southWestCorner());
-        Vec3 patchSe = ellipsoid.cartesianSurfacePosition(newPatch.southEastCorner());
-        Vec3 patchNw = ellipsoid.cartesianSurfacePosition(newPatch.northWestCorner());
-        Vec3 patchNe = ellipsoid.cartesianSurfacePosition(newPatch.northEastCorner());
-
-        // Transform all control points to camera space
-        patchSw = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSw, 1));
-        patchSe = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSe, 1));
-        patchNw = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNw, 1));
-        patchNe = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNe, 1));
-
-
-        // Send control points to shader
-        _programObjectLocalRendering->setUniform("p00", vec3(patchSw));
-        _programObjectLocalRendering->setUniform("p10", vec3(patchSe));
-        _programObjectLocalRendering->setUniform("p01", vec3(patchNw));
-        _programObjectLocalRendering->setUniform("p11", vec3(patchNe));
-
-        vec3 patchNormal = normalize(cross(patchSe - patchSw, patchNw - patchSw));
-        _programObjectLocalRendering->setUniform("patchNormal", patchNormal);
-
-        // For now just pick the first one from height maps
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto tileProviderHeight = heightMapProviders[0];
-        PatchCoverage patchCoverageHeight = _patchCoverageProvider.getCoverage(newPatch, tileProviderHeight);
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitHeight00;
-        texUnitHeight00.activate();
-        patchCoverageHeight.textureTransformPairs[0].first->bind(); // tile00
-        _programObjectLocalRendering->setUniform("textureSamplerHeight00", texUnitHeight00);
-
-        ghoul::opengl::TextureUnit texUnitHeight10;
-        texUnitHeight10.activate();
-        patchCoverageHeight.textureTransformPairs[1].first->bind(); // tile10
-        _programObjectLocalRendering->setUniform("textureSamplerHeight10", texUnitHeight10);
-
-        ghoul::opengl::TextureUnit texUnitHeight01;
-        texUnitHeight01.activate();
-        patchCoverageHeight.textureTransformPairs[2].first->bind(); // tile01
-        _programObjectLocalRendering->setUniform("textureSamplerHeight01", texUnitHeight01);
-
-        ghoul::opengl::TextureUnit texUnitHeight11;
-        texUnitHeight11.activate();
-        patchCoverageHeight.textureTransformPairs[3].first->bind(); // tile11
-        _programObjectLocalRendering->setUniform("textureSamplerHeight11", texUnitHeight11);
-
-
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileHeight00",
-            patchCoverageHeight.textureTransformPairs[0].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileHeight10",
-            patchCoverageHeight.textureTransformPairs[1].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileHeight01",
-            patchCoverageHeight.textureTransformPairs[2].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileHeight11",
-            patchCoverageHeight.textureTransformPairs[3].second);
-
-
-
-        uvec2 texture00DimensionsHeight = patchCoverageHeight.textureTransformPairs[0].first->dimensions().xy();
-        uvec2 texture10DimensionsHeight = patchCoverageHeight.textureTransformPairs[1].first->dimensions().xy();
-        uvec2 texture01DimensionsHeight = patchCoverageHeight.textureTransformPairs[2].first->dimensions().xy();
-        uvec2 texture11DimensionsHeight = patchCoverageHeight.textureTransformPairs[3].first->dimensions().xy();
-
-        _programObjectLocalRendering->setUniform("texture00DimensionsHeight", texture00DimensionsHeight);
-        _programObjectLocalRendering->setUniform("texture10DimensionsHeight", texture10DimensionsHeight);
-        _programObjectLocalRendering->setUniform("texture01DimensionsHeight", texture01DimensionsHeight);
-        _programObjectLocalRendering->setUniform("texture11DimensionsHeight", texture11DimensionsHeight);
-
-
-
-
-
-        // Pick the first color texture
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
-        auto tileProviderColor = colorTextureProviders[0];
-        PatchCoverage patchCoverageColor = _patchCoverageProvider.getCoverage(newPatch, tileProviderColor);
-
-        // Bind and use the texture
-        ghoul::opengl::TextureUnit texUnitColor00;
-        texUnitColor00.activate();
-        patchCoverageColor.textureTransformPairs[0].first->bind(); // tile00
-        _programObjectLocalRendering->setUniform("textureSamplerColor00", texUnitColor00);
-
-        ghoul::opengl::TextureUnit texUnitColor10;
-        texUnitColor10.activate();
-        patchCoverageColor.textureTransformPairs[1].first->bind(); // tile10
-        _programObjectLocalRendering->setUniform("textureSamplerColor10", texUnitColor10);
-
-        ghoul::opengl::TextureUnit texUnitColor01;
-        texUnitColor01.activate();
-        patchCoverageColor.textureTransformPairs[2].first->bind(); // tile01
-        _programObjectLocalRendering->setUniform("textureSamplerColor01", texUnitColor01);
-
-        ghoul::opengl::TextureUnit texUnitColor11;
-        texUnitColor11.activate();
-        patchCoverageColor.textureTransformPairs[3].first->bind(); // tile11
-        _programObjectLocalRendering->setUniform("textureSamplerColor11", texUnitColor11);
-
-
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileColor00",
-            patchCoverageColor.textureTransformPairs[0].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileColor10",
-            patchCoverageColor.textureTransformPairs[1].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileColor01",
-            patchCoverageColor.textureTransformPairs[2].second);
-        _programObjectLocalRendering->setUniform(
-            "uvTransformPatchToTileColor11",
-            patchCoverageColor.textureTransformPairs[3].second);
-
-
-        uvec2 texture00DimensionsColor = patchCoverageColor.textureTransformPairs[0].first->dimensions().xy();
-        uvec2 texture10DimensionsColor = patchCoverageColor.textureTransformPairs[1].first->dimensions().xy();
-        uvec2 texture01DimensionsColor = patchCoverageColor.textureTransformPairs[2].first->dimensions().xy();
-        uvec2 texture11DimensionsColor = patchCoverageColor.textureTransformPairs[3].first->dimensions().xy();
-
-        _programObjectLocalRendering->setUniform("texture00DimensionsColor", texture00DimensionsColor);
-        _programObjectLocalRendering->setUniform("texture10DimensionsColor", texture10DimensionsColor);
-        _programObjectLocalRendering->setUniform("texture01DimensionsColor", texture01DimensionsColor);
-        _programObjectLocalRendering->setUniform("texture11DimensionsColor", texture11DimensionsColor);
-
-
-        _programObjectLocalRendering->setUniform(
-            "projectionTransform",
-            data.camera.projectionMatrix());
-        _programObjectLocalRendering->setUniform("segmentsPerPatch", segmentsPerPatch);
-        _programObjectLocalRendering->setUniform("contraction", contraction);
-
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        // render
-        _grid->geometry().drawUsingActiveProgram();
-
-        // disable shader
-        _programObjectLocalRendering->deactivate();
-    }
-
 }  // namespace openspace

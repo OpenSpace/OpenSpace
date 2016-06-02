@@ -34,10 +34,9 @@
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/meshes/grid.h>
-#include <modules/globebrowsing/meshes/clipmapgrid.h>
 //#include <modules/globebrowsing/rendering/frustumculler.h>
-#include <modules/globebrowsing/other/patchcoverageprovider.h>
 #include <modules/globebrowsing/other/tileprovidermanager.h>
+
 #include <modules/globebrowsing/other/layeredtextureshaderprovider.h>
 #include <modules/globebrowsing/globes/chunknode.h>
 
@@ -95,35 +94,6 @@ namespace openspace {
 
 
 
-    class ClipMapPatchRenderer : public PatchRenderer {
-    public:
-        ClipMapPatchRenderer(
-            shared_ptr<ClipMapGrid> grid,
-            shared_ptr<TileProviderManager> tileProviderManager);
-
-        ~ClipMapPatchRenderer();
-
-        void renderPatch(
-            const Geodetic2& patchSize,
-            const RenderData& data,
-            const Ellipsoid& ellipsoid);
-    private:
-
-        void renderPatchGlobally(
-            const Geodetic2& patchSize,
-            const RenderData& data,
-            const Ellipsoid& ellipsoid);
-        void renderPatchLocally(
-            const Geodetic2& patchSize,
-            const RenderData& data,
-            const Ellipsoid& ellipsoid);
-
-        unique_ptr<ProgramObject> _programObjectGlobalRendering;
-        unique_ptr<ProgramObject> _programObjectLocalRendering;
-
-        PatchCoverageProvider _patchCoverageProvider;
-        shared_ptr<ClipMapGrid> _grid;
-    };
 
 }  // namespace openspace
 

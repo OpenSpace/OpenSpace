@@ -22,31 +22,77 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPPYRAMID_H__
-#define __CLIPMAPPYRAMID_H__
+#ifndef __TEMPORAL_TILE_PROVIDER_H__
+#define __TEMPORAL_TILE_PROVIDER_H__
 
-// open space includes
+
+#include <ghoul/opengl/texture.h>
+
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/other/tileprovider.h>
+#include <openspace/util/time.h>
+
+#include <unordered_map>
+
+#include "gdal_priv.h"
+#include "vrtdataset.h"
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//									TILE PROVIDER									    //
+//////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
+   
+    struct TileProviderInitData {
+        int minimumPixelSize;
+        int threads;
+        int cacheSize;
+        int framesUntilRequestQueueFlush;
+    };
 
-    class ClipMapPyramid {
+    
+    class TemporalTileProvider {
     public:
-        /**
-            \Param sizeLevel0 is the size of the biggest patch in the pyramid.
-            The parameter needs to be M_PI / pow(2, i) where i is a positive or zero
-            valued integer.
-        */
-        ClipMapPyramid(Geodetic2 sizeLevel0);
-        ~ClipMapPyramid();
+        TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
 
-        Geodetic2 getPatchSizeAtLevel(int level);
-        Geodetic2 getPatchSizeAtLevel0();
+        std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
 
     private:
-        const Geodetic2 _sizeLevel0;
+
+        typedef std::string TimeKey;
+
+        std::string getGdalDatasetXML(Time t);
+        std::string getGdalDatasetXML(TimeKey key);
+
+        static const std::string TIME_PLACEHOLDER;
+
+        TimeKey getTimeKey(const Time& t);
+
+        std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                                Members variables                             //
+        //////////////////////////////////////////////////////////////////////////////////
+
+        const std::string _datasetFile;
+        
+        std::string _dataSourceXmlTemplate;
+
+        std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
+
+        TileProviderInitData _tileProviderInitData;
+
     };
+
+
 
 }  // namespace openspace
 
-#endif  // __CLIPMAPPYRAMID_H__
+
+
+
+#endif  // __TEMPORAL_TILE_PROVIDER_H__

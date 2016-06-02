@@ -37,12 +37,24 @@ uniform vec3 radiiSquared;
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 
+uniform int xSegments;
+uniform float skirtLength;
+
 uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
+uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
+uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+
+uniform vec3 cameraPosition;
+uniform float distanceScaleFactor;
+uniform int chunkLevel;
 
 layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
+// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// The value increases with the distance from the vertex (or fragment) to the camera
+out float tileInterpolationParameter;
 
 PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
@@ -58,18 +70,49 @@ void main()
 
 	float height = 0;
 
-	#for i in 0..#{numLayersHeight}
-	{
-		vec2 samplePos =
-			heightTiles[#{i}].uvTransform.uvScale * in_uv +
-			heightTiles[#{i}].uvTransform.uvOffset;
+    // Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
+    float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
+	float desiredLevel = log2(projectedScaleFactor);
 
-		float sampledValue = texture(heightTiles[#{i}].textureSampler, samplePos).r;
+	tileInterpolationParameter = chunkLevel - desiredLevel;
+	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
+	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
+	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+
+	#for j in 1..#{numLayersHeight}
+	{
+		int i = #{j} - 1;
+		vec2 samplePos =
+			heightTiles[i].uvTransform.uvScale * in_uv +
+			heightTiles[i].uvTransform.uvOffset;
+		vec2 samplePosParent1 =
+			heightTilesParent1[i].uvTransform.uvScale * in_uv +
+			heightTilesParent1[i].uvTransform.uvOffset;
+		vec2 samplePosParent2 =
+			heightTilesParent2[i].uvTransform.uvScale * in_uv +
+			heightTilesParent2[i].uvTransform.uvOffset;
+
+		float sampledValue =
+			w1 * texture(heightTiles[i].textureSampler, samplePos).r +
+			w2 * texture(heightTilesParent1[i].textureSampler, samplePosParent1).r +
+			w3 * texture(heightTilesParent2[i].textureSampler, samplePosParent2).r;
 		
 		// TODO : Some kind of blending here. Now it just writes over
 		height = (sampledValue *
-			heightTiles[#{i}].depthTransform.depthScale +
-			heightTiles[#{i}].depthTransform.depthOffset);
+			heightTiles[i].depthTransform.depthScale +
+			heightTiles[i].depthTransform.depthOffset);
+
+		// Skirts
+		int vertexIDx = gl_VertexID % (xSegments + 3);
+		int vertexIDy = gl_VertexID / (xSegments + 3);
+		if (vertexIDx == 0 ||
+			vertexIDy == 0 ||
+			vertexIDx == (xSegments + 2) ||
+			vertexIDy == (xSegments + 2) ) {
+			height -= skirtLength;
+		}
 	}
 	#endfor
 

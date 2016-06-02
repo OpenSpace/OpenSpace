@@ -73,9 +73,9 @@ namespace openspace {
         // now working with float precision. To be changed to double later.
         // The reason double does not work yet is because of the setUniform function
         // in ghoul::opengl
-        typedef glm::quat Quat;
-        typedef glm::mat4 Mat4;
-        typedef glm::vec3 Vec3;
+        typedef glm::dquat Quat;
+        typedef glm::dmat4 Mat4;
+        typedef glm::dvec3 Vec3;
 
         // Static constants
         static const Vec3 _VIEW_DIRECTION_CAMERA_SPACE;
@@ -113,6 +113,8 @@ namespace openspace {
         // @TODO this should simply be called viewMatrix!
         // Or it needs to be changed so that it actually is combined. Right now it is
         // only the view matrix that is the same for all SGCT cameras.
+        // Right now this function returns the actual combined matrix which makes some
+        // of the old calls to the function wrong..
         const Mat4& combinedViewMatrix() const;
 
         // Synchronization

@@ -64,6 +64,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
+
     properties::BoolProperty doFrustumCulling;
     properties::BoolProperty doHorizonCulling;
     properties::BoolProperty mergeInvisible;
@@ -85,6 +87,9 @@ private:
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     
     properties::BoolProperty _saveOrThrowCamera;
+
+    std::vector<properties::BoolProperty> _activeColorLayers;
+    std::vector<properties::BoolProperty> _activeHeightMapLayers;
 
     DistanceSwitch _distanceSwitch;
 };

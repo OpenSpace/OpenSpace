@@ -22,60 +22,99 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CLIPMAPGLOBE_H__
-#define __CLIPMAPGLOBE_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
+#ifndef __ASYNC_TILE_DATA_PROVIDER_H__
+#define __ASYNC_TILE_DATA_PROVIDER_H__
 
-#include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/meshes/grid.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
-#include <modules/globebrowsing/rendering/culling.h>
-#include <modules/globebrowsing/globes/clipmappyramid.h>
-#include <modules/globebrowsing/other/TileProviderManager.h>
+//#include <modules/globebrowsing/other/tileprovider.h>
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-    }
-}
+#include <ghoul/opengl/texture.h>
+
+#include <modules/globebrowsing/geodetics/geodetic2.h>
+
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/globebrowsing/other/threadpool.h>
+#include <modules/globebrowsing/other/tiledataset.h>
+
+#include <memory>
+#include <queue>
+#include <unordered_map>
+
+
 
 namespace openspace {
+   
 
-    class ClipMapGlobe : public Renderable {
-    public:
-        ClipMapGlobe(
-            const Ellipsoid& ellipsoid,
-            std::shared_ptr<TileProviderManager> tileProviderManager);
-        ~ClipMapGlobe();
 
-        bool initialize() override;
-        bool deinitialize() override;
-        bool isReady() const override;
+    struct TileLoadJob : public Job<TileIOResult> {
+        TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
+            const ChunkIndex& chunkIndex)
+            : _tileDataset(textureDataProvider)
+            , _chunkIndex(chunkIndex) 
+        {
 
-        void render(const RenderData& data) override;
-        void update(const UpdateData& data) override;
+        }
 
-        const Ellipsoid& ellipsoid() const;
+        virtual ~TileLoadJob() { }
+
+        virtual void execute() {
+            _uninitedTexture = _tileDataset->readTileData(_chunkIndex);
+        }
+
+
+
+        virtual std::shared_ptr<TileIOResult> product() {
+            return _uninitedTexture;
+        }
+
 
     private:
-        void calculateDesiredMinAndMaxDepth(
-            const RenderData& data,
-            int& minDepth,
-            int& maxDepth);
-        
-        //shared_ptr<TileProvider> _tileProvider;
-        std::unique_ptr<ClipMapPatchRenderer> _outerPatchRenderer;
-        std::unique_ptr<ClipMapPatchRenderer> _innerPatchRenderer;
-        
-        ClipMapPyramid _clipMapPyramid;
-        const Ellipsoid& _ellipsoid;
+        ChunkIndex _chunkIndex;
+        std::shared_ptr<TileDataset> _tileDataset;
+        std::shared_ptr<TileIOResult> _uninitedTexture;
     };
 
-}  // namespace openspace
 
-#endif  // __CLIPMAPGLOBE_H__
+
+
+
+    class AsyncTileDataProvider {
+    public:
+
+        AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
+            std::shared_ptr<ThreadPool> pool);
+
+        ~AsyncTileDataProvider();
+
+
+
+        bool enqueueTextureData(const ChunkIndex& chunkIndex);
+        bool hasLoadedTextureData() const;
+        std::shared_ptr<TileIOResult> nextTileIOResult();
+        
+        void clearRequestQueue();
+
+        std::shared_ptr<TileDataset> getTextureDataProvider() const;
+
+    protected:
+
+        virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
+
+    private:
+
+        std::shared_ptr<TileDataset> _tileDataset;
+        ConcurrentJobManager<TileIOResult> _concurrentJobManager;
+        std::unordered_map<HashKey, ChunkIndex> _enqueuedTileRequests;
+
+
+    };
+
+
+
+} // namespace openspace
+
+
+
+
+
+#endif  // __ASYNC_TILE_DATA_PROVIDER_H__

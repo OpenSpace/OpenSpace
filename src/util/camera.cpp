@@ -43,8 +43,8 @@ namespace openspace {
         , _focusPosition()
     {
         _scaling.local = glm::vec2(1.f, 0.f);
-        _position.local = Vec3(0, 0, 0);
-        Vec3 eulerAngles(0, 0, 0);
+        _position.local = Vec3(1.0, 1.0, 1.0);
+        Vec3 eulerAngles(1.0, 1.0, 1.0);
         _rotation.local = Quat(eulerAngles);
     }
 
@@ -153,11 +153,12 @@ namespace openspace {
 
     const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
-            glm::vec3 cameraPosition = position().vec3();
-            glm::mat4 cameraTranslation =
-                glm::inverse(glm::translate(glm::mat4(1.0), cameraPosition));
+            Mat4 cameraTranslation =
+                glm::inverse(glm::translate(Mat4(1.0), _position.shared));
             _cachedCombinedViewMatrix.datum =
-                glm::mat4(viewRotationMatrix()) * cameraTranslation;
+                Mat4(sgctInternal.viewMatrix()) *
+                Mat4(viewRotationMatrix()) *
+                cameraTranslation;
         }
         return _cachedCombinedViewMatrix.datum;
     }

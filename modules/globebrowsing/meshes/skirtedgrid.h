@@ -23,37 +23,52 @@
 ****************************************************************************************/
 
 
+#ifndef __SKIRTEDGRID_H__
+#define __SKIRTEDGRID_H__
 
-#include <modules/globebrowsing/globes/clipmappyramid.h>
+#include <glm/glm.hpp>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <modules/globebrowsing/meshes/basicgrid.h>
 
-// ghoul includes
-#include <ghoul/misc/assert.h>
-
-namespace {
-    const std::string _loggerCat = "ClipMapPyramid";
-}
+#include <vector>
 
 namespace openspace {
-    ClipMapPyramid::ClipMapPyramid(Geodetic2 sizeLevel0)
-        : _sizeLevel0(sizeLevel0)
-    {
 
-    }
+class SkirtedGrid : public Grid
+{
+public:
+    /**
+    \param xSegments is the number of grid cells in the x direction.
+    \param ySegments is the number of grid cells in the y direction.
+    \param usePositions determines whether or not to upload any vertex position data
+    to the GPU.
+    \param useTextureCoordinates determines whether or not to upload any vertex texture
+    coordinate data to the GPU.
+    \param useNormals determines whether or not to upload any vertex normal data
+    to the GPU.
+    */
+    SkirtedGrid(
+        unsigned int xSegments,
+        unsigned int ySegments,
+        TriangleSoup::Positions usePositions,
+        TriangleSoup::TextureCoordinates useTextureCoordinates,
+        TriangleSoup::Normals useNormals);
+    ~SkirtedGrid();
 
-    ClipMapPyramid::~ClipMapPyramid()
-    {}
 
-    Geodetic2 ClipMapPyramid::getPatchSizeAtLevel(int level)
-    {
-        return Geodetic2(_sizeLevel0.lat / pow(2, level), _sizeLevel0.lon / pow(2, level));
-    }
+    virtual int xSegments() const;
+    virtual int ySegments() const;
 
-    Geodetic2 ClipMapPyramid::getPatchSizeAtLevel0()
-    {
-        return _sizeLevel0;
-    }
+private:
+    virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
+    virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
+    virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
+    virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
 
-}  // namespace openspace
+    void validate(int xSegments, int ySegments);
+
+    inline size_t numElements(int xSegments, int ySegments);
+    inline size_t numVertices(int xSegments, int ySegments);
+};
+} // namespace openspace
+#endif // __SKIRTEDGRID_H__

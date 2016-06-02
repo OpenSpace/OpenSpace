@@ -46,37 +46,15 @@ namespace {
 
 namespace openspace {
 
-
-
-
-    TileProvider::TileProvider(
-        const std::string& filePath,
-        int tileCacheSize,
-        int minimumPixelSize,
-        int framesUntilRequestFlush)
-        : _filePath(filePath)
-        , _tileCache(tileCacheSize) // setting cache size
+    TileProvider::TileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+        int framesUntilFlushRequestQueue)
+        : _asyncTextureDataProvider(tileReader)
+        , _tileCache(tileCacheSize)
         , _framesSinceLastRequestFlush(0)
-        , _framesUntilRequestFlush(framesUntilRequestFlush)
-        , _tileLoadManager(TileProviderManager::tileRequestThreadPool)
-        , _rawTextureTileDataProvider(filePath, minimumPixelSize)
     {
-        // Set a temporary texture
-        std::string fileName = "textures/earth_bluemarble.jpg";
-        _defaultTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
-
-        if (_defaultTexture) {
-            LDEBUG("Loaded texture from '" << fileName << "'");
-            _defaultTexture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        }
-
+        
     }
+
 
     TileProvider::~TileProvider(){
         clearRequestQueue();
@@ -84,41 +62,32 @@ namespace openspace {
 
 
     void TileProvider::prerender() {
-        //_rawTextureTileDataProvider.updateAsyncRequests();
         initTexturesFromLoadedData();
-
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();
         }
     }
 
     void TileProvider::initTexturesFromLoadedData() {
-        while (_tileLoadManager.numFinishedJobs() > 0) {
-            std::shared_ptr<TileIOResult> tileIOResult= _tileLoadManager.popFinishedJob()->product();
+        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
+            std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider->nextTileIOResult();
             initializeAndAddToCache(tileIOResult);
         }
-        /*
-        while (_rawTextureTileDataProvider.hasTextureTileData()) {
-            auto rawTextureTile = _rawTextureTileDataProvider.nextTextureTile();
-            initializeAndAddToCache(rawTextureTile);
-        }
-        */
     }
 
     void TileProvider::clearRequestQueue() {
-        _tileLoadManager.clearEnqueuedJobs();
-        _queuedTileRequests.clear();
+        _asyncTextureDataProvider->clearRequestQueue();
         _framesSinceLastRequestFlush = 0;
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
+    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
+        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
+            transformFromParent(chunkIndex, uvTransform);
+            chunkIndex = chunkIndex.parent();
+        }
 
-        int maximumLevel = _rawTextureTileDataProvider.getMaximumLevel();
-
+        int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
         while(chunkIndex.level > maximumLevel){
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
@@ -130,13 +99,14 @@ namespace openspace {
     Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
         TileUvTransform& uvTransform) 
     {
+        
         HashKey key = chunkIndex.hashKey();
+        
         if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
-            std::shared_ptr<Texture> texture = _tileCache.get(key).texture;
-            return { texture, uvTransform };
+            return { _tileCache.get(key).texture, uvTransform };
         }
-        else if (chunkIndex.level <= 1) {
-            return { getDefaultTexture(), uvTransform };
+        else if (chunkIndex.level < 1) {
+            return { nullptr, uvTransform };
         }
         else {
             // We don't have the tile for the requested level
@@ -146,7 +116,7 @@ namespace openspace {
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first
-            enqueueTileRequest(chunkIndex);
+            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
 
             return tile;
         }
@@ -175,50 +145,15 @@ namespace openspace {
             return _tileCache.get(hashkey).texture;
         }
         else {
-            enqueueTileRequest(chunkIndex);
+            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
             return nullptr;
         }
     }
 
-    bool TileProvider::enqueueTileRequest(const ChunkIndex& chunkIndex) {
-        HashKey key = chunkIndex.hashKey();
-        auto it = _queuedTileRequests.begin();
-        auto end = _queuedTileRequests.end();
-        for (; it != end; it++) {
-            const ChunkIndex& otherChunk = it->second;
-            if (chunkIndex.level == otherChunk.level && 
-                chunkIndex.manhattan(otherChunk) < 1) {
-                return false;
-            }
-        }
-
-        
-        std::shared_ptr<TextureTileLoadJob> job = std::shared_ptr<TextureTileLoadJob>(
-            new TextureTileLoadJob(this, chunkIndex));
-        _tileLoadManager.enqueueJob(job);
-        _queuedTileRequests[key] = chunkIndex;
-        
-        return true;
-    }
-
-
-
-    std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
-        return _defaultTexture;
-    }
-
     TileDepthTransform TileProvider::depthTransform() {
-        return _rawTextureTileDataProvider.getDepthTransform();
+        return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
-
-    std::shared_ptr<TileIOResult> TileProvider::syncDownloadData(
-        const ChunkIndex& chunkIndex) {
-
-        std::shared_ptr<TileIOResult> res = _rawTextureTileDataProvider.getTextureData(chunkIndex);
-
-        return res;
-    }
 
     void TileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
 
