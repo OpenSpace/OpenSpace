@@ -46,10 +46,10 @@ public:
     ~DataCygnet();
 protected:
 
-	bool loadTexture() override;
 	bool updateTexture() override;
 	bool readyToRender() const override;
-
+	bool downloadTextureResource() override;
+    void fillOptions(std::string& source);
 	/**
 	 * loads the transferfunctions specified in tfPath into
 	 * _transferFunctions list.
@@ -63,21 +63,30 @@ protected:
      * shader program, this includes both the data and transferfunctions.
      */
 	void setTextureUniforms();
+	/**
+	 * Optional interface method. this has an implementation
+	 * in datacygnet.cpp, but needs to be overriden for kameleonplane
+	 */
+	virtual bool updateTextureResource() override;
 
 	// Subclass interface. Must be protected, called from base class
+	// ===================
 	virtual bool createGeometry() = 0;
 	virtual bool destroyGeometry() = 0;
 	virtual void renderGeometry() const = 0;
+	/**
+	 * This function should return the processed data that
+	 * will populate the texture
+	 */
+	virtual std::vector<float*> textureData() = 0;
 	// This function can call parent setTextureUniforms()
 	virtual void setUniforms() = 0;
 
     properties::SelectionProperty _dataOptions;
     std::shared_ptr<DataProcessor> _dataProcessor; 
-
-private:
-    void fillOptions();
-
     std::string _dataBuffer;
+    glm::size3_t _textureDimensions;
+
 };
 } //namespace openspace
 

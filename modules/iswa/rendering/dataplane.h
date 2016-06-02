@@ -52,6 +52,7 @@ protected:
     bool destroyGeometry() override;
     void renderGeometry() const override;
     void setUniforms() override;
+    std::vector<float*> textureData() override;
 
 private:
 

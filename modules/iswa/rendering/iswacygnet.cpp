@@ -38,10 +38,10 @@ namespace openspace{
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
-    ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     , _shader(nullptr)
-    ,_group(nullptr)
-    ,_textureDirty(false)
+    , _group(nullptr)
+    , _textureDirty(false)
 {
     std::string name;
     dictionary.getValue("Name", name);
@@ -114,7 +114,7 @@ bool IswaCygnet::initialize(){
     initializeTime();
     createGeometry();
     createShader();
-    updateTexture();
+    downloadTextureResource();
 
 	return true;
 }
@@ -179,18 +179,20 @@ void IswaCygnet::update(const UpdateData& data){
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
-        updateTexture();
+        downloadTextureResource();
 
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
-        _textureDirty = true;
+        bool success = updateTextureResource();
+        if(success)
+            _textureDirty = true;
     }
     
     if(_textureDirty) {
-        loadTexture();
+        updateTexture();
         _textureDirty = false;
     }
 

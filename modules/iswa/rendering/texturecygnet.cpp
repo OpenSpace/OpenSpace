@@ -40,24 +40,12 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
 
 TextureCygnet::~TextureCygnet(){}
 
-bool TextureCygnet::loadTexture() {
-
-    // if The future is done then get the new imageFile
-    DownloadManager::MemoryFile imageFile;
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-        imageFile = _futureObject.get();
-
-    } else {
-        return false;
-    }
-
-    if(imageFile.corrupted)
-        return false;
+bool TextureCygnet::updateTexture() {
 
     std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) imageFile.buffer,
-                                                        imageFile.size, 
-                                                        imageFile.format);
+                                                        (void*) _imageFile.buffer,
+                                                        _imageFile.size, 
+                                                        _imageFile.format);
 
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
@@ -71,7 +59,7 @@ bool TextureCygnet::loadTexture() {
     return false;
 }
 
-bool TextureCygnet::updateTexture(){
+bool TextureCygnet::downloadTextureResource(){
 
     if(_futureObject.valid())
         return false;
@@ -87,6 +75,25 @@ bool TextureCygnet::updateTexture(){
     }
 
     return false;
+}
+
+bool TextureCygnet::updateTextureResource(){
+
+    // if The future is done then get the new imageFile
+    DownloadManager::MemoryFile imageFile;
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+        imageFile = _futureObject.get();
+    } else {
+        return false;
+    }
+
+    if(imageFile.corrupted){
+        return false;
+    } else {
+        _imageFile = imageFile;
+    }
+    return true;
+    //delete[] imageFile.buffer;
 }
 
 bool TextureCygnet::readyToRender() const {

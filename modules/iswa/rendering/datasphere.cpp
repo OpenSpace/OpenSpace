@@ -93,17 +93,17 @@ bool DataSphere::initialize(){
 
     _normValues.onChange([this](){
         _dataProcessor->normValues(_normValues.value());
-        loadTexture();
+        updateTexture();
     });
     
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
-        loadTexture();
+        updateTexture();
     });
 
     _useHistogram.onChange([this](){
         _dataProcessor->useHistogram(_useHistogram.value());        
-        loadTexture();
+        updateTexture();
         if(_autoFilter.value())
             _backgroundValues.setValue(_dataProcessor->filterValues());
     });
@@ -111,7 +111,7 @@ bool DataSphere::initialize(){
     _dataOptions.onChange([this](){ 
         if(_dataOptions.value().size() > MAX_TEXTURES)
             LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
-        loadTexture();
+        updateTexture();
     });
 
     _transferFunctionsFile.onChange([this](){
@@ -141,6 +141,26 @@ void DataSphere::renderGeometry() const {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     _sphere->render();
+}
+
+std::vector<float*> DataSphere::textureData(){
+    // if the buffer in the datafile is empty, do not proceed
+    if(_dataBuffer.empty())
+        return std::vector<float*>();
+
+    if(!_dataOptions.options().size()){ // load options for value selection
+        fillOptions(_dataBuffer);
+        _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
+
+        // if this datacygnet has added new values then reload texture
+        // for the whole group, including this datacygnet, and return after.
+        if(_group){
+            _group->updateGroup();
+            return std::vector<float*>();
+        }
+    }
+    _textureDimensions = _dataProcessor->dimensions();
+    return _dataProcessor->processData(_dataBuffer, _dataOptions);
 }
 
 void DataSphere::setUniforms(){
@@ -201,7 +221,7 @@ void DataSphere::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event updateGroup");
-        loadTexture();
+        updateTexture();
     });
 }
 

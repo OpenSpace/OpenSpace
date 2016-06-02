@@ -22,46 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/iswa/rendering/kameleonplane.h>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
+#include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
+#include <ghoul/filesystem/filesystem>
+#include <modules/iswa/ext/json/json.hpp>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/scene.h>
 
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
-    const int MAX_TEXTURES = 6;
 }
 
 namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
-    :CygnetPlane(dictionary)
+    :DataCygnet(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
-    ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_resolution("resolution", "Resolutionx100", 1, 1, 5)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
-
-    registerProperties();
 
     addProperty(_useLog);
     addProperty(_useHistogram);
@@ -71,7 +58,6 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     addProperty(_resolution);
     addProperty(_slice);
     addProperty(_transferFunctionsFile);
-    addProperty(_dataOptions);
     addProperty(_fieldlines);
 
     dictionary.getValue("kwPath", _kwPath);
@@ -118,8 +104,6 @@ bool KameleonPlane::deinitialize(){
 }
 
 bool KameleonPlane::initialize(){
-    // _kw = std::make_shared<KameleonWrapper>(absPath(_kwPath));
-    _textures.push_back(nullptr);
 
     if(!_data->groupName.empty()){
         initializeGroup();
@@ -144,29 +128,41 @@ bool KameleonPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_fieldlines);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
-    
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
+
+        //If autofiler is on, background values property should be hidden
+        _autoFilter.onChange([this](){
+            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // and unregister backgroundvalues property.
+            if(_autoFilter.value()){
+                _backgroundValues.setValue(_dataProcessor->filterValues());
+                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+            // else if autofilter is turned off, register backgroundValues 
+            } else {
+                OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+            }
+        });
     }
     
-    setTransferFunctions(_transferFunctionsFile.value());
+    readTransferFunctions(_transferFunctionsFile.value());
 
     _normValues.onChange([this](){
         _dataProcessor->normValues(_normValues.value());
-        loadTexture();
+        updateTexture();
     });
 
     _useLog.onChange([this](){
         _dataProcessor->useLog(_useLog.value());
-        loadTexture();
+        updateTexture();
     });
 
     _useHistogram.onChange([this](){
         _dataProcessor->useHistogram(_useHistogram.value());
-        loadTexture();
+        updateTexture();
     });
 
     _transferFunctionsFile.onChange([this](){
-        setTransferFunctions(_transferFunctionsFile.value());
+        readTransferFunctions(_transferFunctionsFile.value());
     });
 
     _resolution.onChange([this](){
@@ -174,11 +170,11 @@ bool KameleonPlane::initialize(){
             _textures[i] = std::move(nullptr);
         }
         _dataProcessor->clear();
-        updateTexture();
+        updateTextureResource();
     });
 
     _slice.onChange([this](){
-        updateTexture();
+        updateTextureResource();
     });
     
     _fieldlines.onChange([this](){ 
@@ -191,88 +187,92 @@ bool KameleonPlane::initialize(){
         _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
         _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
 
-        // _data->offset.x = _data->gridMin.x+0.5*_slice.value()*_scale;
-
     }else if(_data->scale.y == 0){
         _dimensions.y = 1;
         _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
-
-        // _data->offset.y = _data->gridMin.y+0.5*_slice.value()*_scale;
     }else{
         _dimensions.z = 1;
         _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
         _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
-
-        // _data->offset.z = _data->gridMin.z+0.5*_slice.value()*_scale;
     }
 
-    fillOptions();
-
-    // Has to be done after fillOptions()
+    fillOptions(_kwPath);
+    // Has to be done after fillOptions
     _dataOptions.onChange([this](){
         if(_dataOptions.value().size() > MAX_TEXTURES)
             LWARNING("Too many options chosen, max is " + std::to_string(MAX_TEXTURES));
-        loadTexture();
+        updateTexture();
     });
 
     std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(_dimensions);
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
-
-    updateTexture();
+    updateTextureResource();
 
 	return true;
 }
 
-bool KameleonPlane::loadTexture() {
-    std::vector<float*> data = std::dynamic_pointer_cast<DataProcessorKameleon> (_dataProcessor)->processData(_kwPath,  _dataOptions, _slice, _dimensions);
-
-    if(data.empty())
-        return false;
-
-    if(_autoFilter.value())
-        _backgroundValues.setValue(_dataProcessor->filterValues());
+bool KameleonPlane::createGeometry() {
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     
-    bool texturesReady = false;
-    std::vector<int> selectedOptions = _dataOptions.value();
+    // ============================
+    //         GEOMETRY (quad)
+    // ============================
+    // GLfloat x,y, z;
+    float s = _data->spatialScale.x;
+    const GLfloat x = s*_data->scale.x/2.0;
+    const GLfloat y = s*_data->scale.y/2.0;
+    const GLfloat z = s*_data->scale.z/2.0;
+    const GLfloat w = _data->spatialScale.w;
 
-    for(int option: selectedOptions){
-        float* values = data[option];
-        if(!values) continue;
+    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+        //      x      y     z     w     s     t
+        -x, -y,             -z,  w, 0, 1,
+         x,  y,              z,  w, 1, 0,
+        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x, -y,             -z,  w, 0, 1,
+         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  y,              z,  w, 1, 0,
+    };
 
-        if(!_textures[option]){
-            std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
-                                                                    values, 
-                                                                    _textureDimensions,
-                                                                    ghoul::opengl::Texture::Format::Red,
-                                                                    GL_RED, 
-                                                                    GL_FLOAT,
-                                                                    ghoul::opengl::Texture::FilterMode::Linear,
-                                                                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                                                                );
+    glBindVertexArray(_quad); // bind array
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-            if(texture){
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-                _textures[option] = std::move(texture);
-            }
-        }else{
-            _textures[option]->setPixelData(values);
-            _textures[option]->uploadTexture();
-        }
-        texturesReady = true;
-    }
-
-    return texturesReady;  
+    return true;
 }
 
-bool KameleonPlane::updateTexture(){
+bool KameleonPlane::destroyGeometry(){
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
 
-    if(_data->scale.x == 0){
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    return true;
+}
+
+void KameleonPlane::renderGeometry() const {
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+std::vector<float*> KameleonPlane::textureData() {
+    return std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->processData(_kwPath,  _dataOptions, _slice, _dimensions);
+};
+
+bool KameleonPlane::updateTextureResource(){
+
+    if (_data->scale.x == 0){
         _data->offset.x = _data->gridMin.x+_slice.value()*_scale;
-    }else if(_data->scale.y == 0){
+    } else if (_data->scale.y == 0){
         _data->offset.y = _data->gridMin.y+_slice.value()*_scale;
-    }else{
+    } else {
         _data->offset.z = _data->gridMin.z+_slice.value()*_scale;
     }
 
@@ -281,105 +281,10 @@ bool KameleonPlane::updateTexture(){
     return true;
 }
 
-
-bool KameleonPlane::readyToRender() const {
-    return (!_textures.empty() && !_transferFunctions.empty());
-}
-
 void KameleonPlane::setUniforms(){
-    std::vector<int> selectedOptions = _dataOptions.value();
-    int activeTextures = std::min((int)selectedOptions.size(), MAX_TEXTURES);
-    int activeTransferfunctions = std::min((int)_transferFunctions.size(), MAX_TEXTURES);
-
-
-    ghoul::opengl::TextureUnit txUnits[6];
-    int j = 0;
-    for(int option : selectedOptions){
-        if(_textures[option]){
-            txUnits[j].activate();
-            _textures[option]->bind();
-            _shader->setUniform(
-                "textures[" + std::to_string(j) + "]",
-                txUnits[j]
-            );
-
-            j++;
-            if(j >= MAX_TEXTURES) break;
-        }
-    }
-
-    if(activeTextures > 0){
-        if(selectedOptions.back()>=activeTransferfunctions)
-            activeTransferfunctions = 1;
-    }
-
-    ghoul::opengl::TextureUnit tfUnits[6];
-    j = 0;
-
-    if((activeTransferfunctions == 1)){
-        tfUnits[0].activate();
-        _transferFunctions[0]->bind();
-        _shader->setUniform(
-            "transferFunctions[0]",
-            tfUnits[0]
-        );
-    }else{
-        for(int option : selectedOptions){
-            if(_transferFunctions[option]){
-                tfUnits[j].activate();
-                _transferFunctions[option]->bind();
-                _shader->setUniform(
-                "transferFunctions[" + std::to_string(j) + "]",
-                tfUnits[j]
-                );
-
-                j++;
-                if(j >= MAX_TEXTURES) break;
-            }
-        }
-    }
-
-    _shader->setUniform("numTextures", activeTextures);
-    _shader->setUniform("numTransferFunctions", activeTransferfunctions);
+    setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
-}
-
-void KameleonPlane::setTransferFunctions(std::string tfPath){
-    std::string line;
-    std::ifstream tfFile(absPath(tfPath));
-
-    std::vector<std::shared_ptr<TransferFunction>> tfs;
-
-    if(tfFile.is_open()){
-        while(getline(tfFile, line)){
-            std::shared_ptr<TransferFunction> tf = std::make_shared<TransferFunction>(absPath(line));
-            if(tf){
-                tfs.push_back(tf);
-            }
-        }
-        tfFile.close();
-    }
-
-    if(!tfs.empty()){
-        _transferFunctions.clear();
-        _transferFunctions = tfs;
-    }
-}
-
-void KameleonPlane::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readMetadata(_kwPath);
-
-    for(int i=0; i<options.size(); i++){
-        _dataOptions.addOption({i, options[i]});
-        _textures.push_back(nullptr);
-    }
-    if(_group){
-        std::dynamic_pointer_cast<IswaKameleonGroup> (_group)->registerOptions(_dataOptions.options());
-        _dataOptions.setValue(std::dynamic_pointer_cast<IswaKameleonGroup> (_group)->dataOptionsValue());
-    } else {
-        _dataOptions.setValue(std::vector<int>(1,0));
-    }
 }
 
 void KameleonPlane::updateFieldlineSeeds(){
@@ -416,34 +321,22 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
     if (!seedFile.good())
         LERROR("Could not open seed points file '" << indexFile << "'");
     else {
-        std::string line;
-        std::string fileContent;
-        while (std::getline(seedFile, line)) {
-            fileContent += line;
-        }
-
         try{
             //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(fileContent);
+            json fieldlines = json::parse(seedFile);
             int i = 0;
             std::string fullName = name();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            std::cout << fullName << std::endl;
-            std::cout << partName << std::endl;
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-
 
                 _fieldlines.addOption({i, name()+"/"+it.key()});
                 _fieldlineState[i] = std::make_tuple(partName+"/"+it.key(), it.value(), false);
                 i++;
             }
-            // if(_group)
-            //     _group->registerFieldLineOptions(_fieldlines.options());
-
         } catch(const std::exception& e) {
             LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
         }
-    }
+   }
 }
 
 void KameleonPlane::subscribeToGroup(){
@@ -498,7 +391,7 @@ void KameleonPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event updateGroup");
-        loadTexture();
+        updateTexture();
     });
 }
 
