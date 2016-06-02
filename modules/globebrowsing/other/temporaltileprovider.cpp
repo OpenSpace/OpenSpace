@@ -31,8 +31,12 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/util/time.h>
 
 
+#include <string>
+#include <fstream>
+#include <streambuf>
 
 
 
@@ -43,6 +47,73 @@ namespace {
 
 namespace openspace {
 
+    const std::string TemporalTileProvider::TIME_PLACEHOLDER("${t}");
+
+    TemporalTileProvider::TemporalTileProvider(const std::string& datasetFile, 
+        const TileProviderInitData& tileProviderInitData)
+        : _datasetFile(datasetFile)
+        , _tileProviderInitData(tileProviderInitData)
+    {
+        std::ifstream in(datasetFile.c_str());
+        ghoul_assert(errno == 0, strerror(errno) << std::endl << datasetFile);
+
+        // read file
+        std::string str( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
+        _dataSourceXmlTemplate = std::string(str);
+    }
+
+
+    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
+        TimeKey timekey = getTimeKey(t);
+        auto it = _tileProviderMap.find(timekey);
+        if (it != _tileProviderMap.end()) {
+            return it->second;
+        }
+        else {
+            auto tileProvider = initTileProvider(timekey);
+            _tileProviderMap[timekey] = tileProvider;
+            return tileProvider;
+        }
+    }
+
+    std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
+        std::string gdalDatasetXml = getGdalDatasetXML(timekey);
+        
+        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
+            new TileDataset(gdalDatasetXml, _tileProviderInitData.minimumPixelSize));
+
+        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
+            new ThreadPool(_tileProviderInitData.threads));
+
+        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
+            new AsyncTileDataProvider(tileDataset, threadPool));
+
+        std::shared_ptr<TileProvider> tileProvider= std::shared_ptr<TileProvider>(
+            new TileProvider(tileReader, 
+                             _tileProviderInitData.cacheSize,
+                             _tileProviderInitData.framesUntilRequestQueueFlush));
+
+        return tileProvider;
+    }
+
+    TemporalTileProvider::TimeKey TemporalTileProvider::getTimeKey(const Time& t) {
+        std::string datestring = t.ISO8601();
+        datestring = datestring.substr(0, 10);
+        return datestring;
+    }
+
+    std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
+        return getGdalDatasetXML(getTimeKey(t));
+    }
+
+    std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
+        std::string xmlTemplate(_dataSourceXmlTemplate);
+        size_t pos = xmlTemplate.find(TIME_PLACEHOLDER);
+        size_t numChars = TIME_PLACEHOLDER.length();
+        ghoul_assert(pos != std::string::npos, "Invalid dataset file");
+        std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
+        return timeSpecifiedXml;
+    }
 
 
 }  // namespace openspace

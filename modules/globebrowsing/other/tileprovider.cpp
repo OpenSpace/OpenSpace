@@ -52,29 +52,12 @@ namespace openspace {
         , _tileCache(tileCacheSize)
         , _framesSinceLastRequestFlush(0)
     {
-        initDefaultTexture();
+        
     }
 
 
     TileProvider::~TileProvider(){
         clearRequestQueue();
-    }
-
-    void TileProvider::initDefaultTexture() {
-        // Set a temporary texture
-        std::string fileName = "textures/earth_bluemarble.jpg";
-        _defaultTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(fileName)));
-
-        if (_defaultTexture) {
-            LDEBUG("Loaded texture from '" << fileName << "'");
-            _defaultTexture->uploadTexture();
-
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_testTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _defaultTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _defaultTexture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        }
     }
 
 
@@ -98,13 +81,15 @@ namespace openspace {
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(
-        ChunkIndex chunkIndex,
-        TileUvTransform uvTransform) {
-
+    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
         int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
 
         while(chunkIndex.level > maximumLevel){
+            transformFromParent(chunkIndex, uvTransform);
+            chunkIndex = chunkIndex.parent();
+        }
+
+        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
         }
@@ -112,30 +97,17 @@ namespace openspace {
         return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
-    Tile TileProvider::getHighestResolutionParentTile(ChunkIndex chunkIndex, int levelOffset) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
-
-        for (int i = 0; i < levelOffset && chunkIndex.level > 2; i++) {
-            transformFromParent(chunkIndex, uvTransform);
-            chunkIndex = chunkIndex.parent();
-        }
-
-        Tile toReturn = getHighestResolutionTile(chunkIndex, uvTransform);
-        return toReturn;
-    }
-
     Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
         TileUvTransform& uvTransform) 
     {
+        
         HashKey key = chunkIndex.hashKey();
+        
         if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
-            std::shared_ptr<Texture> texture = _tileCache.get(key).texture;
-            return { texture, uvTransform };
+            return { _tileCache.get(key).texture, uvTransform };
         }
-        else if (chunkIndex.level <= 1) {
-            return { getDefaultTexture(), uvTransform };
+        else if (chunkIndex.level < 1) {
+            return { nullptr, uvTransform };
         }
         else {
             // We don't have the tile for the requested level
@@ -177,11 +149,6 @@ namespace openspace {
             _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
             return nullptr;
         }
-    }
-
-
-    std::shared_ptr<Texture> TileProvider::getDefaultTexture() {
-        return _defaultTexture;
     }
 
     TileDepthTransform TileProvider::depthTransform() {

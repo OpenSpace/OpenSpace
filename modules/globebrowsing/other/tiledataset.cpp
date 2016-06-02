@@ -31,6 +31,8 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
+
+
 namespace {
     const std::string _loggerCat = "TileDataset";
 }
@@ -42,17 +44,16 @@ namespace openspace {
     // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
     bool TileDataset::GdalHasBeenInitialized = false; 
 
-    TileDataset::TileDataset(const std::string& fileName, int minimumPixelSize, GLuint dataType)
+    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, GLuint dataType)
         : _minimumPixelSize(minimumPixelSize)
     {
-        
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
             GdalHasBeenInitialized = true;
         }
 
-        _dataset = (GDALDataset *)GDALOpen(absPath(fileName).c_str(), GA_ReadOnly);
-        ghoul_assert(_dataset != nullptr, "Failed to load dataset: " << fileName);
+        _dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
+        ghoul_assert(_dataset != nullptr, "Failed to load dataset:\n" << gdalDatasetDesc);
         _dataLayout = DataLayout(_dataset, dataType);
 
         _depthTransform = calculateTileDepthTransform();

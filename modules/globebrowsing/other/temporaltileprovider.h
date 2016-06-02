@@ -30,6 +30,15 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/other/tileprovider.h>
+#include <openspace/util/time.h>
+
+#include <unordered_map>
+
+#include "gdal_priv.h"
+#include "vrtdataset.h"
+
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //									TILE PROVIDER									    //
@@ -37,10 +46,49 @@
 
 namespace openspace {
    
+    struct TileProviderInitData {
+        int minimumPixelSize;
+        int threads;
+        int cacheSize;
+        int framesUntilRequestQueueFlush;
+    };
+
     
     class TemporalTileProvider {
+    public:
+        TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
+
+        std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
+
+    private:
+
+        typedef std::string TimeKey;
+
+        std::string getGdalDatasetXML(Time t);
+        std::string getGdalDatasetXML(TimeKey key);
+
+        static const std::string TIME_PLACEHOLDER;
+
+        TimeKey getTimeKey(const Time& t);
+
+        std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                                Members variables                             //
+        //////////////////////////////////////////////////////////////////////////////////
+
+        const std::string _datasetFile;
         
+        std::string _dataSourceXmlTemplate;
+
+        std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
+
+        TileProviderInitData _tileProviderInitData;
+
     };
+
+
 
 }  // namespace openspace
 

@@ -34,6 +34,7 @@
 
 #include "gdal_priv.h"
 
+
 #include <memory>
 #include <set>
 #include <queue>
@@ -88,11 +89,21 @@ namespace openspace {
 
     class TileDataset {
     public:
-    
-        // Default dataType = 0 means GDAL will use the same data type as the data
-        // is originally in
-        TileDataset(const std::string& fileName, int minimumPixelSize, GLuint dataType = 0);
+
+        
+        /**
+        * Opens a GDALDataset in readonly mode and calculates meta data required for 
+        * reading tile using a ChunkIndex.
+        *
+        * \param gdalDatasetDesc  - A path to a specific file or raw XML describing the dataset 
+        * \param minimumPixelSize - minimum number of pixels per side per tile requested 
+        * \param datatype         - datatype for storing pixel data in requested tile
+        */
+        TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, GLuint dataType = 0);
+
         ~TileDataset();
+
+        
 
 
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
@@ -103,6 +114,7 @@ namespace openspace {
 
 
     private:
+
 
 
         //////////////////////////////////////////////////////////////////////////////////
