@@ -58,7 +58,7 @@ namespace openspace {
     public:
         TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
 
-        std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
+        std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
 
     private:
 
@@ -71,7 +71,7 @@ namespace openspace {
 
         TimeKey getTimeKey(const Time& t);
 
-        std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
+        std::shared_ptr<CachingTileProvider> initTileProvider(TimeKey timekey);
 
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ namespace openspace {
         
         std::string _dataSourceXmlTemplate;
 
-        std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
+        std::unordered_map<TimeKey, std::shared_ptr<CachingTileProvider> > _tileProviderMap;
 
         TileProviderInitData _tileProviderInitData;
 

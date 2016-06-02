@@ -71,13 +71,13 @@ namespace openspace {
         Provides tiles through GDAL datasets which can be defined with xml files
         for example for wms.
     */
-    class TileProvider {
+    class CachingTileProvider {
     public:
 
-        TileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+        CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
             int framesUntilFlushRequestQueue);
 
-        ~TileProvider();
+        ~CachingTileProvider();
 
         
         Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0, 

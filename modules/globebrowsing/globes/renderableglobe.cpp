@@ -127,8 +127,8 @@ namespace openspace {
             std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
                 new AsyncTileDataProvider(tileDataset, threadPool));
 
-            std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TileProvider>(
-                new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
+            std::shared_ptr<CachingTileProvider> colorTextureProvider = std::shared_ptr<CachingTileProvider>(
+                new CachingTileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
 
             _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
 
@@ -159,8 +159,8 @@ namespace openspace {
             std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
                 new AsyncTileDataProvider(tileDataset, threadPool));
 
-            std::shared_ptr<TileProvider> heightMapProvider = std::shared_ptr<TileProvider>(
-                new TileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
+            std::shared_ptr<CachingTileProvider> heightMapProvider = std::shared_ptr<CachingTileProvider>(
+                new CachingTileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
 
 
             _tileProviderManager->addHeightMap(name, heightMapProvider, true);

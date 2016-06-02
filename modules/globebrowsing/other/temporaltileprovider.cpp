@@ -63,7 +63,7 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
+    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
         TimeKey timekey = getTimeKey(t);
         auto it = _tileProviderMap.find(timekey);
         if (it != _tileProviderMap.end()) {
@@ -76,7 +76,7 @@ namespace openspace {
         }
     }
 
-    std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
+    std::shared_ptr<CachingTileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
         
         std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
@@ -88,8 +88,8 @@ namespace openspace {
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));
 
-        std::shared_ptr<TileProvider> tileProvider= std::shared_ptr<TileProvider>(
-            new TileProvider(tileReader, 
+        std::shared_ptr<CachingTileProvider> tileProvider= std::shared_ptr<CachingTileProvider>(
+            new CachingTileProvider(tileReader, 
                              _tileProviderInitData.cacheSize,
                              _tileProviderInitData.framesUntilRequestQueueFlush));
 

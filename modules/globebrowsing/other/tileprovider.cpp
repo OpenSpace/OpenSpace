@@ -46,7 +46,7 @@ namespace {
 
 namespace openspace {
 
-    TileProvider::TileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+    CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
         int framesUntilFlushRequestQueue)
         : _asyncTextureDataProvider(tileReader)
         , _tileCache(tileCacheSize)
@@ -56,32 +56,32 @@ namespace openspace {
     }
 
 
-    TileProvider::~TileProvider(){
+    CachingTileProvider::~CachingTileProvider(){
         clearRequestQueue();
     }
 
 
-    void TileProvider::prerender() {
+    void CachingTileProvider::prerender() {
         initTexturesFromLoadedData();
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();
         }
     }
 
-    void TileProvider::initTexturesFromLoadedData() {
+    void CachingTileProvider::initTexturesFromLoadedData() {
         while (_asyncTextureDataProvider->hasLoadedTextureData()) {
             std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider->nextTileIOResult();
             initializeAndAddToCache(tileIOResult);
         }
     }
 
-    void TileProvider::clearRequestQueue() {
+    void CachingTileProvider::clearRequestQueue() {
         _asyncTextureDataProvider->clearRequestQueue();
         _framesSinceLastRequestFlush = 0;
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
+    Tile CachingTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents, TileUvTransform uvTransform) {
         for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
             transformFromParent(chunkIndex, uvTransform);
             chunkIndex = chunkIndex.parent();
@@ -96,7 +96,7 @@ namespace openspace {
         return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
-    Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
+    Tile CachingTileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
         TileUvTransform& uvTransform) 
     {
         
@@ -124,7 +124,7 @@ namespace openspace {
 
 
 
-    void TileProvider::transformFromParent(const ChunkIndex& chunkIndex, TileUvTransform& uv) const {
+    void CachingTileProvider::transformFromParent(const ChunkIndex& chunkIndex, TileUvTransform& uv) const {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
@@ -139,7 +139,7 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<Texture> TileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
+    std::shared_ptr<Texture> CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
         HashKey hashkey = chunkIndex.hashKey();
         if (_tileCache.exist(hashkey)) {
             return _tileCache.get(hashkey).texture;
@@ -150,12 +150,12 @@ namespace openspace {
         }
     }
 
-    TileDepthTransform TileProvider::depthTransform() {
+    TileDepthTransform CachingTileProvider::depthTransform() {
         return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
 
-    void TileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
+    void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
 
         std::shared_ptr<RawTileData> tileData = tileIOResult->rawTileData;
         HashKey key = tileData->chunkIndex.hashKey();
