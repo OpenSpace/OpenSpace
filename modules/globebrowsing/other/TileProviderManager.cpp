@@ -44,29 +44,57 @@ namespace openspace {
 
     void TileProviderManager::addHeightMap(
         std::string name,
-        std::shared_ptr<TileProvider> tileProvider)
+        std::shared_ptr<TileProvider> tileProvider,
+        bool isActive)
     {
-        _heightMapProviders.push_back(tileProvider);
+        _heightMapProviders.push_back({ name , tileProvider, isActive});
     }
 
     void TileProviderManager::addColorTexture(
         std::string name,
-        std::shared_ptr<TileProvider> tileProvider)
+        std::shared_ptr<TileProvider> tileProvider,
+        bool isActive)
     {
-        _colorTextureProviders.push_back(tileProvider);
-
+        _colorTextureProviders.push_back({ name , tileProvider, isActive });
     }
 
-    const std::vector<std::shared_ptr<TileProvider> >&
+    std::vector<TileProviderManager::TileProviderWithName>&
         TileProviderManager::heightMapProviders()
     {
         return _heightMapProviders;
     }
 
-    const std::vector<std::shared_ptr<TileProvider> >&
+    std::vector<TileProviderManager::TileProviderWithName>&
         TileProviderManager::colorTextureProviders()
     {
         return _colorTextureProviders;
     }
+
+    const std::vector<std::shared_ptr<TileProvider> >
+        TileProviderManager::getActiveHeightMapProviders()
+    {
+        std::vector<std::shared_ptr<TileProvider> > tileProviders;
+        for (auto it = _heightMapProviders.begin(); it != _heightMapProviders.end(); it++)
+        {
+            if (it->isActive) {
+                tileProviders.push_back(it->tileProvider);
+            }
+        }
+        return tileProviders;
+    }
+
+    const std::vector<std::shared_ptr<TileProvider> >
+        TileProviderManager::getActiveColorTextureProviders()
+    {
+        std::vector<std::shared_ptr<TileProvider> > tileProviders;
+        for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++)
+        {
+            if (it->isActive) {
+                tileProviders.push_back(it->tileProvider);
+            }
+        }
+        return tileProviders;
+    }
+
 
 }  // namespace openspace

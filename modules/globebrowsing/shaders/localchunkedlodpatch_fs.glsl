@@ -31,19 +31,48 @@
 #define NUMLAYERS_HEIGHTMAP #{numLayersHeight}
 
 uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
+uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
+uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
 
 in vec4 fs_position;
 in vec2 fs_uv;
+in vec3 positionCameraSpace;
+
+uniform float distanceScaleFactor;
+uniform int chunkLevel;
 
 Fragment getFragment() {
 	Fragment frag;
 
-	#for i in 0..#{numLayersColor}
+    // Calculate desired level based on distance
+	float distToFrag = length(positionCameraSpace);
+    float projectedScaleFactor = distanceScaleFactor / distToFrag;
+	float desiredLevel = log2(projectedScaleFactor);
+
+	// x increases with distance
+	float x = chunkLevel - desiredLevel;
+	float w1 = clamp(1 - x, 0 , 1);
+	float w2 =  (clamp(x, 0 , 1) - clamp(x - 1, 0 , 1));
+	float w3 = clamp(x - 1, 0 , 1);
+
+	#for j in 1..#{numLayersColor}
 	{
+		int i = #{j} - 1;
+
 		vec2 samplePos =
-			colorTiles[#{i}].uvTransform.uvScale * fs_uv +
-			colorTiles[#{i}].uvTransform.uvOffset;
-		vec4 colorSample = texture(colorTiles[#{i}].textureSampler, samplePos);
+			colorTiles[i].uvTransform.uvScale * fs_uv +
+			colorTiles[i].uvTransform.uvOffset;
+		vec2 samplePosParent1 =
+			colorTilesParent1[i].uvTransform.uvScale * fs_uv +
+			colorTilesParent1[i].uvTransform.uvOffset;
+		vec2 samplePosParent2 =
+			colorTilesParent2[i].uvTransform.uvScale * fs_uv +
+			colorTilesParent2[i].uvTransform.uvOffset;
+		
+		vec4 colorSample =
+			w1 * texture(colorTiles[i].textureSampler, samplePos) +
+			w2 * texture(colorTilesParent1[i].textureSampler, samplePosParent1) +
+			w3 * texture(colorTilesParent2[i].textureSampler, samplePosParent2);
 		frag.color = blendOver(frag.color, colorSample);
 	}
 	#endfor

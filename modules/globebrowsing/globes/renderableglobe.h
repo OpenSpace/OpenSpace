@@ -88,6 +88,9 @@ private:
     
     properties::BoolProperty _saveOrThrowCamera;
 
+    std::vector<properties::BoolProperty> _activeColorLayers;
+    std::vector<properties::BoolProperty> _activeHeightMapLayers;
+
     DistanceSwitch _distanceSwitch;
 };
 

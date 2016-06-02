@@ -68,12 +68,12 @@ namespace openspace {
     }
 
     void PatchRenderer::update() {
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
         for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
         {
             iter->get()->prerender();
         }
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
         {
             iter->get()->prerender();
@@ -100,24 +100,6 @@ namespace openspace {
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"));
-
-        /*
-        _programObjectGlobalRendering = OsEng.renderEngine().buildRenderProgram(
-            "GlobalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectGlobalRendering != nullptr, "Failed to initialize programObject!");
-
-        _programObjectLocalRendering = OsEng.renderEngine().buildRenderProgram(
-            "LocalChunkedLodPatch",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-            "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
-        ghoul_assert(_programObjectLocalRendering != nullptr, "Failed to initialize programObject!");
-        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-        _programObjectGlobalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        _programObjectLocalRendering->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-        */
-
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -133,8 +115,8 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
         
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
@@ -162,10 +144,18 @@ namespace openspace {
         programObject->activate();
 
         std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent2;
         std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent2;
 
         texUnitHeight.resize(numHeightMapProviders);
+        texUnitHeightParent1.resize(numHeightMapProviders);
+        texUnitHeightParent2.resize(numHeightMapProviders);
         texUnitColor.resize(numColorTextureProviders);
+        texUnitColorParent1.resize(numColorTextureProviders);
+        texUnitColorParent2.resize(numColorTextureProviders);
 
 
         // Go through all the height map providers
@@ -176,6 +166,8 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -192,6 +184,41 @@ namespace openspace {
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
+
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitHeightParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitHeightParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+
+            // The texture needs a unit to sample from
+            texUnitHeightParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitHeightParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+                
+
 
             programObject->setUniform(
                 indexedTileKey + ".depthTransform.depthScale",
@@ -210,6 +237,8 @@ namespace openspace {
             auto tileProvider = it->get();
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
@@ -225,6 +254,38 @@ namespace openspace {
             programObject->setUniform(
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
+
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitColorParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitColorParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitColorParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitColorParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
             
             i++;
         }
@@ -240,12 +301,26 @@ namespace openspace {
             * viewTransform * modelTransform;
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
+        vec3 pointClosestToCamera = chunk.owner()->ellipsoid().cartesianSurfacePosition(chunk.surfacePatch().closestPoint(chunk.owner()->ellipsoid().cartesianToGeodetic2(data.camera.positionVec3())));
+
+
+        
+        float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
+
         // Upload the uniform variables
         programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
         programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
         programObject->setUniform("xSegments", _grid->xSegments());
+
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+        
+        programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
+        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
+        programObject->setUniform("chunkLevel", chunk.index().level);
+
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -257,7 +332,6 @@ namespace openspace {
 
         // disable shader
         programObject->deactivate();
-
     }
 
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data)
@@ -265,8 +339,8 @@ namespace openspace {
         using namespace glm;
 
         // All providers of tiles
-        auto heightMapProviders = _tileProviderManager->heightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->colorTextureProviders();
+        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
+        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
 
         int numHeightMapProviders = heightMapProviders.size();
         int numColorTextureProviders = colorTextureProviders.size();
@@ -293,22 +367,31 @@ namespace openspace {
         // Activate the shader program
         programObject->activate();
 
-
         std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent2;
         std::vector<ghoul::opengl::TextureUnit> texUnitColor;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent1;
+        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent2;
 
         texUnitHeight.resize(numHeightMapProviders);
+        texUnitHeightParent1.resize(numHeightMapProviders);
+        texUnitHeightParent2.resize(numHeightMapProviders);
         texUnitColor.resize(numColorTextureProviders);
+        texUnitColorParent1.resize(numColorTextureProviders);
+        texUnitColorParent2.resize(numColorTextureProviders);
 
 
         // Go through all the height map providers
         int i = 0;
         for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
         {
+            texUnitHeight.push_back(ghoul::opengl::TextureUnit());
             auto tileProvider = it->get();
-
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
             TileDepthTransform depthTransform = tileProvider->depthTransform();
 
             // The texture needs a unit to sample from
@@ -326,6 +409,40 @@ namespace openspace {
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
 
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitHeightParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitHeightParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitHeightParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitHeightParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+
+
+
             programObject->setUniform(
                 indexedTileKey + ".depthTransform.depthScale",
                 depthTransform.depthScale);
@@ -341,9 +458,10 @@ namespace openspace {
         for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
         {
             auto tileProvider = it->get();
-
             // Get the texture that should be used for rendering
             Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+            Tile tileParent1 = tileProvider->getHighestResolutionParentTile(chunk.index(), 1);
+            Tile tileParent2 = tileProvider->getHighestResolutionParentTile(chunk.index(), 2);
 
             // The texture needs a unit to sample from
             texUnitColor[i].activate();
@@ -360,9 +478,40 @@ namespace openspace {
                 indexedTileKey + ".uvTransform.uvOffset",
                 tile.uvTransform.uvOffset);
 
+            // Blend tile with two parents
+            // The texture needs a unit to sample from
+            texUnitColorParent1[i].activate();
+            tileParent1.texture->bind();
+
+            std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent1 + ".textureSampler", texUnitColorParent1[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvScale",
+                tileParent1.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent1 + ".uvTransform.uvOffset",
+                tileParent1.uvTransform.uvOffset);
+
+
+            // The texture needs a unit to sample from
+            texUnitColorParent2[i].activate();
+            tileParent2.texture->bind();
+
+            std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
+            // Send uniforms for the tile to the shader
+            programObject->setUniform(indexedTileKeyParent2 + ".textureSampler", texUnitColorParent2[i]);
+
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvScale",
+                tileParent2.uvTransform.uvScale);
+            programObject->setUniform(
+                indexedTileKeyParent2 + ".uvTransform.uvOffset",
+                tileParent2.uvTransform.uvOffset);
+
             i++;
         }
-
 
         // Calculate other uniform variables needed for rendering
 
@@ -409,6 +558,12 @@ namespace openspace {
             data.camera.projectionMatrix());
 
         programObject->setUniform("xSegments", _grid->xSegments());
+        // The length of the skirts is proportional to its size
+        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+
+        float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
+        programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
+        programObject->setUniform("chunkLevel", chunk.index().level);
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -421,6 +576,4 @@ namespace openspace {
         // disable shader
         programObject->deactivate();
     }
-    
-
 }  // namespace openspace

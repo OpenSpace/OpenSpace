@@ -98,10 +98,9 @@ namespace openspace {
     }
 
 
-    Tile TileProvider::getHighestResolutionTile(ChunkIndex chunkIndex) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
+    Tile TileProvider::getHighestResolutionTile(
+        ChunkIndex chunkIndex,
+        TileUvTransform uvTransform) {
 
         int maximumLevel = _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
 
@@ -111,6 +110,20 @@ namespace openspace {
         }
         
         return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
+    }
+
+    Tile TileProvider::getHighestResolutionParentTile(ChunkIndex chunkIndex, int levelOffset) {
+        TileUvTransform uvTransform;
+        uvTransform.uvOffset = glm::vec2(0, 0);
+        uvTransform.uvScale = glm::vec2(1, 1);
+
+        for (int i = 0; i < levelOffset && chunkIndex.level > 2; i++) {
+            transformFromParent(chunkIndex, uvTransform);
+            chunkIndex = chunkIndex.parent();
+        }
+
+        Tile toReturn = getHighestResolutionTile(chunkIndex, uvTransform);
+        return toReturn;
     }
 
     Tile TileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 

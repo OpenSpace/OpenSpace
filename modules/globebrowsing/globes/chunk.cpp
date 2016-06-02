@@ -121,7 +121,7 @@ namespace openspace {
 
         Scalar scaleFactor = _owner->lodScaleFactor * ellipsoid.minimumRadius();;
         Scalar projectedScaleFactor = scaleFactor / distance;
-        int desiredLevel = floor(log2(projectedScaleFactor));
+        int desiredLevel = ceil(log2(projectedScaleFactor));
 
         // clamp level
         desiredLevel = glm::clamp(desiredLevel, _owner->minSplitDepth, _owner->maxSplitDepth);
