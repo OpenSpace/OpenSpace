@@ -153,15 +153,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
             }
         );
     }
-    // else{
-    //     // Kameleonplane?
-    //     // LERROR("No cygnet with id 0");
-    //     std::string kwPath = "${OPENSPACE_DATA}/BATSRUS.cdf";
-    //     if(type == "x" || type == "y" || type == "z")
-    //         createKameleonPlane(kwPath, type, group);
-    //     else
-    //         createKameleonPlane(kwPath, "z", group);
-    // }
 }
 
 void IswaManager::addKameleonCdf(std::string groupName, int pos){
@@ -537,7 +528,6 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
 
         std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
-    //         // std::cout << luaTable << std::endl;
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             OsEng.scriptEngine().queueScript(script);
         }

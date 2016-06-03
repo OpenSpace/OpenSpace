@@ -104,12 +104,12 @@ void IswaDataGroup::registerProperties(){
 
     _normValues.onChange([this]{
         LDEBUG("Group " + name() + " published normValuesChanged");
-        _groupEvent->publish("normValuesChanged", ghoul::Dictionary({{"normValues", std::make_shared<glm::vec2>(_normValues.value())}}));
+        _groupEvent->publish("normValuesChanged", ghoul::Dictionary({{"normValues", _normValues.value()}}));
     });
 
     _backgroundValues.onChange([this]{
         LDEBUG("Group " + name() + " published backgroundValuesChanged");
-        _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", std::make_shared<glm::vec2>(_backgroundValues.value())}}));
+        _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}}));
     });
 
     _transferFunctionsFile.onChange([this]{
@@ -119,7 +119,9 @@ void IswaDataGroup::registerProperties(){
 
     _dataOptions.onChange([this]{
         LDEBUG("Group " + name() + " published dataOptionsChanged");
-        _groupEvent->publish("dataOptionsChanged", ghoul::Dictionary({{"dataOptions", std::make_shared<std::vector<int> >(_dataOptions.value())}}));
+        ghoul::Dictionary dict;
+        dict.setValue<std::vector<int>>("dataOptions", _dataOptions.value());
+        _groupEvent->publish("dataOptionsChanged", dict);
     });
 }
 

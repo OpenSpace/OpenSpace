@@ -204,10 +204,10 @@ void DataPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "normValuesChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event normValuesChanged");
-        std::shared_ptr<glm::vec2> values;
+        glm::vec2 values;
         bool success = dict.getValue("normValues", values);
         if(success){
-            _normValues.setValue(*values);            
+            _normValues.setValue(values);            
         }
     });
 
@@ -218,10 +218,10 @@ void DataPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "dataOptionsChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event dataOptionsChanged");
-        std::shared_ptr<std::vector<int> > values;
-        bool success = dict.getValue("dataOptions", values);
+        std::vector<int> values;
+        bool success = dict.getValue<std::vector<int> >("dataOptions", values);
         if(success){
-            _dataOptions.setValue(*values);            
+            _dataOptions.setValue(values);            
         }
     });
 
@@ -232,10 +232,10 @@ void DataPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "backgroundValuesChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event backgroundValuesChanged");
-        std::shared_ptr<glm::vec2> values;
+        glm::vec2 values;
         bool success = dict.getValue("backgroundValues", values);
         if(success){
-            _backgroundValues.setValue(*values);            
+            _backgroundValues.setValue(values);            
         }
     });
 
