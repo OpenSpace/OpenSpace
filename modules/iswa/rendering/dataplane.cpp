@@ -34,7 +34,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
     ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
-    ,_autoFilter("autoFilter", "Auto Filter", false)
+    ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
@@ -136,9 +136,9 @@ bool DataPlane::createGeometry() {
     //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
-        -x,  ((x>1)?y:-y),   z,  w, 0, 0,
+        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
         -x, -y,             -z,  w, 0, 1,
-         x,  ((x>1)?-y:y),  -z,  w, 1, 1,
+         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
          x,  y,              z,  w, 1, 0,
     };
 
@@ -246,6 +246,8 @@ void DataPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event updateGroup");
+        if(_autoFilter.value())
+            _backgroundValues.setValue(_dataProcessor->filterValues());
         updateTexture();
     });
 }

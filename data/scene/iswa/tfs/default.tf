@@ -1,1 +1,1 @@
-${SCENE}/iswa/tfs/colormap_hot.jpg
+${SCENE}/iswa/tfs/colormap_hot.png

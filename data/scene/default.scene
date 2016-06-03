@@ -29,59 +29,7 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     openspace.printInfo("Done setting default values")
-    
-    --openspace.iswa.addCygnet(-4,"Data","Ion");
-
-    --openspace.iswa.addCygnet(-1,"Data");
-    --openspace.iswa.addCygnet(-2,"Data");
-    --openspace.iswa.addCygnet(-3,"Data");
-
-    --openspace.iswa.addCygnet(-1,"Texture");
-    --openspace.iswa.addCygnet(-2,"Texture");
-    --openspace.iswa.addCygnet(-3,"Texture");
-
-
-    --openspace.iswa.addCygnet(-3,"Data","GM");
-    --openspace.iswa.addCygnet(-2,"Data","GM");
-    --openspace.iswa.addCygnet(-1,"Data","GM");
-
     openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
-    
-    --[[
-    openspace.iswa.addScreenSpaceCygnet(
-    {
-        CygnetId = 2,
-        Position = {-0.8, 0.3},
-        Scale = 0.2
-    });
-    {
-        Type = "ScreenSpaceCygnet",
-        CygnetId = 7,
-        Position = {0.0, 0.0},
-        FlatScreen = true,
-        Scale = 0.25,
-    });
-
-    openspace.registerScreenSpaceRenderable(
-    {
-        Name = "Crazy Cat",
-        Type = "ScreenSpaceImage",
-        TexturePath = "${OPENSPACE_DATA}/test2.jpg",
-        Position = {0.8, -0.3},
-        FlatScreen = true,
-        Scale = 0.25,
-    });
-
-    openspace.registerScreenSpaceRenderable(
-    {
-        Name = "From Online", 
-        Type = "ScreenSpaceImage",
-        URL = "http://i.imgur.com/KUunHgr.jpg",
-        Position = {-0.8, 0.3},
-        FlatScreen = true,
-        Scale = 0.25,
-    });
-    ]]--
 end
 
 
@@ -94,20 +42,19 @@ return {
     },
     Modules = {
         "sun",
-        --"mercury",
-        --"venus",
+        "mercury",
+        "venus",
         "earth",
-        --"mars",
-        --"jupiter",
-        --"saturn",
-        --"uranus",
-        --"neptune",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
         "stars",
-        -- "stars-denver",
+        --"stars-denver",
         "milkyway",
-        -- "milkyway-eso",
+        "milkyway-eso",
         --"constellationbounds",
-        --"fieldlines",
         --"io",
         --"europa",
         --"ganymede",
