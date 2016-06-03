@@ -90,6 +90,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _rotation("rotation", "Rotation", 0, 0, 360)
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
+    , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
@@ -166,6 +167,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
 
+    addProperty(_projectionFading);
     addProperty(_heightExaggeration);
 
     SequenceParser* parser;
@@ -493,6 +495,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
+    _programObject->setUniform("_projectionFading", _projectionFading);
 
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     

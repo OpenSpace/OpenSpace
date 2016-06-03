@@ -98,6 +98,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
+    properties::FloatProperty _projectionFading;
+
     properties::FloatProperty _heightExaggeration;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;

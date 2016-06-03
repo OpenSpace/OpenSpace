@@ -33,6 +33,8 @@ in vec4 ProjTexCoord;
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
 
+uniform float _projectionFading;
+
 uniform vec4 objpos;
 uniform vec3 sun_pos;
 
@@ -59,8 +61,13 @@ Fragment getFragment() {
     vec4 textureColor = texture(baseTexture, vs_st);
     vec4 projectionColor = texture(projectionTexture, vs_st);
     if (projectionColor.a != 0.0) {
-        textureColor.rgb = mix(textureColor.rgb, projectionColor.rgb, projectionColor.a);
+        textureColor.rgb = mix(
+            textureColor.rgb,
+            projectionColor.rgb,
+            min(_projectionFading, projectionColor.a)
+        );
     }
+
 
     Fragment frag;
     frag.color =  max(intensity * textureColor, ambient);
