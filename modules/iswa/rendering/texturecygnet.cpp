@@ -40,28 +40,15 @@ TextureCygnet::TextureCygnet(const ghoul::Dictionary& dictionary)
 
 TextureCygnet::~TextureCygnet(){}
 
-bool TextureCygnet::loadTexture() {
-
-    // if The future is done then get the new imageFile
-    DownloadManager::MemoryFile imageFile;
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-        imageFile = _futureObject.get();
-
-    } else {
-        return false;
-    }
-
-    if(imageFile.corrupted)
-        return false;
+bool TextureCygnet::updateTexture() {
 
     std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) imageFile.buffer,
-                                                        imageFile.size, 
-                                                        imageFile.format);
+                                                        (void*) _imageFile.buffer,
+                                                        _imageFile.size, 
+                                                        _imageFile.format);
 
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
-
         texture->uploadTexture();
         // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -71,7 +58,7 @@ bool TextureCygnet::loadTexture() {
     return false;
 }
 
-bool TextureCygnet::updateTexture(){
+bool TextureCygnet::downloadTextureResource(){
 
     if(_futureObject.valid())
         return false;
@@ -87,6 +74,27 @@ bool TextureCygnet::updateTexture(){
     }
 
     return false;
+}
+
+bool TextureCygnet::updateTextureResource(){
+
+    // if The future is done then get the new imageFile
+    DownloadManager::MemoryFile imageFile;
+    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
+        imageFile = _futureObject.get();
+
+        if(imageFile.corrupted){
+            if(imageFile.buffer)
+                delete[] imageFile.buffer;
+            return false;
+        } else {
+            _imageFile = imageFile;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
 }
 
 bool TextureCygnet::readyToRender() const {

@@ -94,11 +94,6 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
-    std::shared_ptr<FileFuture> downloadToMemory(
-        const std::string& url, std::string& memoryBuffer,
-        DownloadFinishedCallback finishedCallback = DownloadFinishedCallback()
-    );
-
     std::future<MemoryFile> fetchFile(
     const std::string& url,
     SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());

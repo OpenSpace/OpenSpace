@@ -47,36 +47,9 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
 
 DataCygnet::~DataCygnet(){}
 
-bool DataCygnet::loadTexture(){
-    // if The future is done then get the new dataFile
-    if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
-         DownloadManager::MemoryFile dataFile = _futureObject.get();
+bool DataCygnet::updateTexture(){
 
-         if(dataFile.corrupted)
-            return false;
-
-        _dataBuffer = "";
-        _dataBuffer.append(dataFile.buffer, dataFile.size);
-        delete[] dataFile.buffer;
-    }
-
-    // if the buffer in the datafile is empty, do not proceed
-    if(_dataBuffer.empty())
-        return false;
-
-    if(!_dataOptions.options().size()){ // load options for value selection
-        fillOptions();
-        _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
-
-        // if this datacygnet has added new values then reload texture
-        // for the whole group, including this datacygnet, and return after.
-        if(_group){
-            _group->updateGroup();
-            return true;
-        }
-    }
-
-    std::vector<float*> data = _dataProcessor->processData(_dataBuffer, _dataOptions);
+    std::vector<float*> data = textureData();
 
     if(data.empty())
         return false;
@@ -91,7 +64,7 @@ bool DataCygnet::loadTexture(){
         if(!_textures[option]){
             std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                     values, 
-                                                                    _dataProcessor->dimensions(),
+                                                                    _textureDimensions,
                                                                     ghoul::opengl::Texture::Format::Red,
                                                                     GL_RED, 
                                                                     GL_FLOAT,
@@ -110,10 +83,10 @@ bool DataCygnet::loadTexture(){
         }
         texturesReady = true;
     }
-    return texturesReady;       
+    return texturesReady;
 }
 
-bool DataCygnet::updateTexture(){
+bool DataCygnet::downloadTextureResource(){
     if(_futureObject.valid())
         return false;
 
@@ -127,8 +100,20 @@ bool DataCygnet::updateTexture(){
     return false;
 }
 
+bool DataCygnet::updateTextureResource(){
+    DownloadManager::MemoryFile dataFile = _futureObject.get();
+
+     if(dataFile.corrupted)
+        return false;
+
+    _dataBuffer = std::string(dataFile.buffer, dataFile.size);
+    delete[] dataFile.buffer;
+
+    return true;
+}
+
 bool DataCygnet::readyToRender() const{
-    return (!_textures.empty());
+    return (!_textures.empty() && !_transferFunctions.empty());
 }
 
 /**
@@ -158,8 +143,6 @@ void DataCygnet::setTextureUniforms(){
         }
     }
 
-    //Set Transfer Functions
-    // if(activeTextures >= MAX_TEXTURES){
     if(activeTextures > 0 && selectedOptions.back()>=(int)_transferFunctions.size())
             activeTransferfunctions = 1;
 
@@ -218,8 +201,8 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
     }
 }
 
-void DataCygnet::fillOptions(){
-    std::vector<std::string> options = _dataProcessor->readMetadata(_dataBuffer);
+void DataCygnet::fillOptions(std::string& source){
+    std::vector<std::string> options = _dataProcessor->readMetadata(source);
      
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});

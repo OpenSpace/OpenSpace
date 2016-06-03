@@ -43,7 +43,7 @@ public:
 
      bool initialize() override;
 
-protected:
+private:
 
     /**
      * Creates a plane geometry
@@ -52,9 +52,7 @@ protected:
     bool destroyGeometry() override;
     void renderGeometry() const override;
     void setUniforms() override;
-
-private:
-
+    std::vector<float*> textureData() override;
     void subscribeToGroup();
 
     properties::StringProperty _transferFunctionsFile;
