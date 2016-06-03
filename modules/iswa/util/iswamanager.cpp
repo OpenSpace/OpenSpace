@@ -164,12 +164,18 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
     // }
 }
 
-void IswaManager::addKameleonCdf(std::string group, int pos){
+void IswaManager::addKameleonCdf(std::string groupName, int pos){
     // auto info = _cdfInformation[group][pos];
     // std::cout << group << " " << pos << std::endl;
-    createKameleonPlane(_cdfInformation[group][pos], "z");
-    createKameleonPlane(_cdfInformation[group][pos], "y");
-    createKameleonPlane(_cdfInformation[group][pos], "x");
+    auto group = iswaGroup(groupName);
+    if(group){
+        std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
+        return;
+    }
+
+    createKameleonPlane(_cdfInformation[groupName][pos], "z");
+    createKameleonPlane(_cdfInformation[groupName][pos], "y");
+    createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){

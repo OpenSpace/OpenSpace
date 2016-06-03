@@ -42,9 +42,12 @@ namespace {
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
 	:IswaDataGroup(name, type)
+    ,_resolution("resolution", "Resolution%", 1.0f, 0.1, 2.0f)
 	,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_fieldlineIndexFile("")
+    ,_kameleonPath("")
 {
+    addProperty(_resolution);
     addProperty(_fieldlines);
 	registerProperties();
 }
@@ -75,8 +78,14 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::st
 
 
 void IswaKameleonGroup::registerProperties(){
+    OsEng.gui()._iswa.registerProperty(&_resolution);
     OsEng.gui()._iswa.registerProperty(&_fieldlines);
     
+    _resolution.onChange([this]{
+        LDEBUG("Group " + name() + " published resolutionChanged");
+        _groupEvent->publish("resolutionChanged", ghoul::Dictionary({{"resolution", _resolution.value()}}));
+    });
+
     _fieldlines.onChange([this]{
         updateFieldlineSeeds();
   	});
@@ -102,7 +111,7 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
             int i = 0;
 
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-                _fieldlines.addOption({i, name()+"/"+it.key()});
+                _fieldlines.addOption({i, it.key()});
                 _fieldlineState[i] = std::make_tuple(name()+"/"+it.key(), it.value(), false);
                 i++;
             }
@@ -141,6 +150,14 @@ void IswaKameleonGroup::clearFieldlines(){
             std::get<2>(seedPath.second) = false;
         }
     }
+}
+
+void IswaKameleonGroup::changeCdf(std::string path){
+    _kameleonPath = path;
+    clearFieldlines();
+    updateFieldlineSeeds();
+
+    _groupEvent->publish("cdfChanged", ghoul::Dictionary({{"path", path}}));
 }
 
 }//namespace openspace

@@ -44,9 +44,9 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_resolution("resolution", "Resolutionx100", 1, 1, 5)
+    ,_resolution("resolution", "Resolution%", 1.0f, 0.1, 2.0f)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
 
@@ -70,25 +70,20 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
     OsEng.gui()._iswa.registerProperty(&_slice);
 
-    if(axis == "x"){
-        _scale = _data->scale.x;
-        _data->scale.x = 0;
-        _data->offset.x = 0;
 
-        _slice.setValue(0.8);
-    }else if(axis == "y"){
-        _scale = _data->scale.y;
-        _data->scale.y = 0;
-        // _data->offset.y = 0;
+    if(axis == "x")         _cut = 0;
+    else if (axis == "y")   _cut = 1;
+    else                    _cut = 2;
 
-        _slice.setValue((_data->offset.y -_data->gridMin.y)/_scale);
-    }else{
-        _scale = _data->scale.z;
-        _data->scale.z = 0;
-        // _data->offset.z = 0;
+    _origOffset = _data->offset;
 
-        _slice.setValue((_data->offset.z - _data->gridMin.z)/_scale);
-    }
+    _scale = _data->scale[_cut];
+    _data->scale[_cut] = 0;
+    _data->offset[_cut] = 0;
+
+    _slice.setValue((_data->offset[_cut] -_data->gridMin[_cut])/_scale);
+
+    setDimensions();
 
     _programName = "DataPlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/dataplane_vs.glsl";
@@ -169,8 +164,10 @@ bool KameleonPlane::initialize(){
         for(int i=0; i<_textures.size(); i++){
             _textures[i] = std::move(nullptr);
         }
-        _dataProcessor->clear();
+
         updateTextureResource();
+        setDimensions();
+
     });
 
     _slice.onChange([this](){
@@ -180,22 +177,6 @@ bool KameleonPlane::initialize(){
     _fieldlines.onChange([this](){ 
         updateFieldlineSeeds();
     });
-
-    _dimensions = glm::size3_t(_resolution.value()*100);
-    if(_data->scale.x == 0){
-        _dimensions.x = 1;
-        _dimensions.z = (int) _dimensions.y * (_data->scale.y/_data->scale.z);
-        _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
-
-    }else if(_data->scale.y == 0){
-        _dimensions.y = 1;
-        _dimensions.z = (int) _dimensions.x * (_data->scale.x/_data->scale.z);
-        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
-    }else{
-        _dimensions.z = 1;
-        _dimensions.y = (int) _dimensions.x * (_data->scale.x/_data->scale.y); 
-        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
-    }
 
     fillOptions(_kwPath);
     // Has to be done after fillOptions
@@ -268,20 +249,14 @@ std::vector<float*> KameleonPlane::textureData() {
 
 bool KameleonPlane::updateTextureResource(){
 
-    if (_data->scale.x == 0){
-        _data->offset.x = _data->gridMin.x+_slice.value()*_scale;
-    } else if (_data->scale.y == 0){
-        _data->offset.y = _data->gridMin.y+_slice.value()*_scale;
-    } else {
-        _data->offset.z = _data->gridMin.z+_slice.value()*_scale;
-    }
-
+    _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
     _textureDirty = true;
 
     return true;
 }
 
 void KameleonPlane::setUniforms(){
+
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues.value());
     _shader->setUniform("transparency", _alpha.value());
@@ -328,8 +303,7 @@ void KameleonPlane::readFieldlinePaths(std::string indexFile){
             std::string fullName = name();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
-
-                _fieldlines.addOption({i, name()+"/"+it.key()});
+                _fieldlines.addOption({i, it.key()});
                 _fieldlineState[i] = std::make_tuple(partName+"/"+it.key(), it.value(), false);
                 i++;
             }
@@ -393,6 +367,46 @@ void KameleonPlane::subscribeToGroup(){
         LDEBUG(name() + " Event updateGroup");
         updateTexture();
     });
+
+    groupEvent->subscribe(name(), "resolutionChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event resolutionChanged");
+        float resolution;
+        bool success = dict.getValue("resolution", resolution);
+        if(success){
+            _resolution.setValue(resolution);
+        }
+    });
+
+    groupEvent->subscribe(name(), "cdfChanged", [&](ghoul::Dictionary dict){
+        LDEBUG(name() + " Event cdfChanged");
+        std::string path;
+        bool success = dict.getValue("path", path);
+        if(success){
+            changeKwPath(path);
+        }
+
+        updateTexture();
+    });
+}
+
+void KameleonPlane::setDimensions(){
+    // the cdf files has an offset of 0.5 in normali resolution.
+    // with lower resolution the offset increases. 
+    _data->offset = _origOffset - 0.5f*(1.0f/_resolution.value());
+    _dimensions = glm::size3_t(_data->scale*(float)_resolution.value());
+    _dimensions[_cut] = 1;
+
+    if(_cut == 0){
+        _textureDimensions = glm::size3_t(_dimensions.y, _dimensions.z, 1);
+    }else if(_cut == 1){
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.z, 1);
+    }else{
+        _textureDimensions = glm::size3_t(_dimensions.x, _dimensions.y, 1);
+    }
+}
+
+void KameleonPlane::changeKwPath(std::string kwPath){
+    _kwPath = kwPath;
 }
 
 }// namespace openspace

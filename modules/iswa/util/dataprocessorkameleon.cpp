@@ -54,7 +54,7 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path){
         opts.erase( std::remove_if(
             opts.begin(), 
             opts.end(), 
-            [](std::string opt){ return (opt.size() > 3 || opt == "x" || opt == "y" || opt == "z");}
+            [this](std::string opt){ return (opt.size() > 3 || _coordinateVariables.find(opt) != _coordinateVariables.end());}
             ), 
         opts.end()
         );
@@ -82,6 +82,7 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         float value;
 
         for(int i=0; i<numOptions; i++){
+            //0.5 to gather interesting values for the normalization/histograms.
             values = _kw->getUniformSliceValues(options[i].description, _dimensions, 0.5f);
 
             for(int j=0; j<numValues; j++){

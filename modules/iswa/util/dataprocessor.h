@@ -38,56 +38,20 @@ class DataProcessor{
     friend class IswaBaseGroup;
 public:
     DataProcessor();
-    DataProcessor(bool useLog, bool useHistogram, glm::vec2 normValues);
     ~DataProcessor();
 
-    void useLog(bool useLog){
-        _useLog = useLog;
-    }
+    virtual std::vector<std::string> readMetadata(std::string data) = 0;
+    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
+    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions) = 0;
 
-    void useHistogram(bool useHistogram){
-        _useHistogram = useHistogram;
-    }
-
-    void normValues(glm::vec2 normValues){
-        _normValues = normValues;
-    }
-
-    glm::size3_t dimensions(){
-        return _dimensions;
-    }
-
-    std::vector<std::string> readHeader(std::string& dataBuffer);
-    std::vector<float*> readData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-    std::vector<float*> readData2(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-    void addValues(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-
-    std::vector<std::string> readJSONHeader(std::string& dataBuffer);
-    std::vector<float*> readJSONData(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-    std::vector<float*> readJSONData2(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-    void addValuesFromJSON(std::string& dataBuffer, properties::SelectionProperty dataOptions);
-
-    std::vector<float*> processKameleonData(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions);
-    std::vector<float*> processKameleonData2(std::vector<float*> kdata, glm::size3_t dimensions, properties::SelectionProperty dataOptions);
-    void addValuesFromKameleonData(float* kdata, glm::size3_t dimensions, int numOptions, int option);
-
-    void clear();
-
+    void useLog(bool useLog);
+    void useHistogram(bool useHistogram);
+    void normValues(glm::vec2 normValues);
+    glm::size3_t dimensions();
     glm::vec2 filterValues();
 
-    virtual std::vector<std::string> readMetadata(std::string data){};
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions){};
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions){};
+    void clear();
 protected:
-    void processData(
-        float* outputData, // Where you want your processed data to go 
-        std::vector<float>& inputData, //data that needs processing 
-        float min, // min value of the input data
-        float max, // max valye of the input data
-        float sum, // sum of the input data 
-        int selected = 0
-    );
-
     float processDataPoint(float value, int option);
     float normalizeWithStandardScore(float value, float mean, float sd);
 
@@ -107,7 +71,6 @@ protected:
     std::vector<float> _standardDeviation;
     std::vector<float> _numValues;
     std::vector<std::shared_ptr<Histogram>> _histograms;
-    // int _numValues;
     std::set<std::string> _coordinateVariables;
 };
 

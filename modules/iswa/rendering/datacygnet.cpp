@@ -144,11 +144,8 @@ void DataCygnet::setTextureUniforms(){
         }
     }
 
-    //Set Transfer Functions
-    if(activeTextures > 0){
-        if(selectedOptions.back()>=activeTransferfunctions)
+    if(activeTextures > 0 && selectedOptions.back()>=(int)_transferFunctions.size())
             activeTransferfunctions = 1;
-    }
 
     ghoul::opengl::TextureUnit tfUnits[MAX_TEXTURES];
     j = 0;

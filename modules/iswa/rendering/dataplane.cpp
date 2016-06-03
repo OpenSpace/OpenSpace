@@ -37,7 +37,7 @@ DataPlane::DataPlane(const ghoul::Dictionary& dictionary)
     ,_autoFilter("autoFilter", "Auto Filter", false)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/hot.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
 {     
 
     addProperty(_useLog);
@@ -136,9 +136,9 @@ bool DataPlane::createGeometry() {
     //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
+        -x,  ((x>1)?y:-y),   z,  w, 0, 0,
         -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
+         x,  ((x>1)?-y:y),  -z,  w, 1, 1,
          x,  y,              z,  w, 1, 0,
     };
 
