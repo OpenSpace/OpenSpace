@@ -22,37 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
 
 #include <modules/base/rendering/planetgeometry.h>
+#include <modules/newhorizons/util/hongkangparser.h>
+#include <modules/newhorizons/util/labelparser.h>
+#include <modules/newhorizons/util/sequenceparser.h>
 
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/time.h>
 
-#include <openspace/engine/configurationmanager.h>
-
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureconversion.h>
-//#include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/scene/scenegraphnode.h>
-
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-
-#include <openspace/util/factorymanager.h>
-
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/rendering/renderengine.h>
-#include <iomanip> 
-#include <string>
-#include <thread>      
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
@@ -98,7 +84,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _projectionTexture(nullptr)
     , _heightMapTexture(nullptr)
     , _capture(false)
-    , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -519,11 +504,6 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data) {
-    if (_time >= Time::ref().currentTime()) {
-        // if jump back in time -> empty queue.  
-        imageQueue = std::queue<Image>();
-    }
-
     _time = Time::ref().currentTime();
     _capture = false;
 

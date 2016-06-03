@@ -61,8 +61,8 @@ void main() {
     vec4 position = pscTransform(tmp, ModelTransform);
     vs_position = tmp;
 
-    vec4 raw_pos = psc_to_meter(tmp, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+    // vec4 raw_pos = psc_to_meter(tmp, scaling);
+    // ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
 
 
     position = ViewProjection * position;

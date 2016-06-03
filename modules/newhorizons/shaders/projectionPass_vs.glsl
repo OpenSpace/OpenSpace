@@ -24,22 +24,22 @@
 
 #version __CONTEXT__
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-uniform vec3 boresight;
-
 out vec4 vs_position;
-out vec4 ProjTexCoord;
-out vec2 vs_uv;
 out vec4 vs_normal;
+out vec2 vs_uv;
+out vec4 ProjTexCoord;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform vec2 _scaling;
+
+uniform vec3 boresight;
 
 void main() {
     vs_position  = in_position;

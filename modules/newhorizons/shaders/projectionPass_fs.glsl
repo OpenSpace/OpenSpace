@@ -24,21 +24,20 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+in vec4 vs_position;
+in vec4 vs_normal;
+in vec2 vs_uv;
+in vec4 ProjTexCoord;
+
+out vec4 color;
+
 uniform sampler2D projectionTexture;
 
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
 uniform vec3 boresight;
-
-
-in vec4 vs_position;
-in vec4 ProjTexCoord;
-in vec2 vs_uv;
-in vec4 vs_normal;
-
-out vec4 color;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
 
 bool inRange(float x, float a, float b) {
     return (x >= a && x <= b);
@@ -55,7 +54,6 @@ void main() {
   projected.y /= projected.w;
   //invert gl coordinates
   projected.x = 1 - projected.x;
-  // projected.y = 1 - projected.y; 
   
   if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
         color = texture(projectionTexture, projected.xy);

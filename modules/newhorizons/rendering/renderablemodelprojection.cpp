@@ -1,46 +1,41 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-// open space includes
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/labelparser.h>
+
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/filesystem.h>
-
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-
-
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <thread>
 
 namespace {
     const std::string _loggerCat = "RenderableModelProjection";
@@ -67,7 +62,6 @@ namespace {
 
     const std::string keyTranslation = "DataInputTranslation";
     const std::string sequenceTypeImage = "image-sequence";
-
 }
 
 namespace openspace {
@@ -90,7 +84,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _frameCount(0)
     , _programIsDirty(false)
-    , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png")) 
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -100,7 +93,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     success = dictionary.getValue(keyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
+        _geometry = std::unique_ptr<modelgeometry::ModelGeometry>(modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary));
     }
 
     std::string texturePath = "";
@@ -112,7 +105,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     if (success)
         _defaultProjImage = absPath(texturePath);
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_projectionFading);
 
@@ -271,15 +264,12 @@ bool RenderableModelProjection::auxiliaryRendertarget() {
 
     glBindVertexArray(0);
 
-
     return completeSuccess;
 }
 
 bool RenderableModelProjection::deinitialize() {
-    if (_geometry) {
+    if (_geometry)
         _geometry->deinitialize();
-        delete _geometry;
-    }
 
     _geometry = nullptr;
     _baseTexture = nullptr;

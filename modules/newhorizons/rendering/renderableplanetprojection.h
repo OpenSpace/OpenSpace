@@ -25,38 +25,23 @@
 #ifndef __RENDERABLEPLANETPROJECTION_H__
 #define __RENDERABLEPLANETPROJECTION_H__
 
-#include <ghoul/opengl/textureunit.h>
-
-// open space includes
 #include <openspace/rendering/renderable.h>
+
 #include <modules/newhorizons/util/imagesequencer.h>
-
-#include <modules/newhorizons/util/sequenceparser.h>
-#include <modules/newhorizons/util/hongkangparser.h>
-#include <modules/newhorizons/util/labelparser.h>
-#include <modules/newhorizons/util/decoder.h>
-
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
-#include <ghoul/opengl/framebufferobject.h>
-
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/query/query.h>
-
-#include <queue>
 
 namespace openspace {
 
-namespace planetgeometry{
-class PlanetGeometry;
+namespace planetgeometry {
+    class PlanetGeometry;
 }
-
 
 class RenderablePlanetProjection : public Renderable {
 public:
@@ -138,7 +123,6 @@ private:
 
     std::string _target;
     std::string _frame;
-    std::string _clearingImage;
     std::string _next;
 
     bool _capture;
@@ -147,9 +131,6 @@ private:
     GLuint _fboID;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-
-
-    std::queue<Image> imageQueue;
 };
 }  // namespace openspace
 
