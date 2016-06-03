@@ -47,7 +47,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(std::string data){
 
         for(json::iterator it = variables.begin(); it != variables.end(); ++it){
             std::string option = it.key();
-            if(option == "x"){
+            if(option == "ep"){
                 json row = it.value();
                 json col = row.at(0);
 
