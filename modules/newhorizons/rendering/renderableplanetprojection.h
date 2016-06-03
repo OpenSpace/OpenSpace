@@ -80,9 +80,9 @@ protected:
     glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
     void attitudeParameters(double time);
 
-    void textureBind();
     void project();
     void clearAllProjections();
+
 private:
     void imageProjectGPU();
 
@@ -90,7 +90,6 @@ private:
 
     properties::StringProperty  _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
-    properties::StringProperty _normalMapTexturePath;
 
     properties::StringProperty  _projectionTexturePath;
     properties::IntProperty _rotation;
@@ -104,9 +103,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
     std::unique_ptr<ghoul::opengl::Texture> _textureProj;
-    std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _normalMapTexture;
 
     properties::FloatProperty _heightExaggeration;
     properties::BoolProperty _enableNormalMapping;
@@ -150,7 +147,6 @@ private:
 
     std::string _target;
     std::string _frame;
-    std::string _defaultProjImage;
     std::string _clearingImage;
     std::string _next;
 
@@ -162,7 +158,6 @@ private:
     GLuint _vertexPositionBuffer;
 
     bool _hasHeightMap;
-    bool _hasNormalMap;
 
     std::queue<Image> imageQueue;
 };

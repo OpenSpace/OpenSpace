@@ -27,37 +27,25 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
-//in vec3 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-uniform vec3 boresight;
-
+out vec4 vs_position;
 out vec2 vs_st;
 out vec4 vs_normal;
-out vec4 vs_position;
-out float s;
 out vec4 ProjTexCoord;
 
-uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
-
-//texture projection matrix
-
+uniform mat4 ViewProjection;
 uniform mat4 ProjectorMatrix;
 
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
-uniform sampler2D heightTex;
-
+uniform sampler2D heightTexture;
 
 void main() {
-    // Radius = 0.71492 *10^8; 
-    // set variables
     vs_st = in_st;
-    //vs_stp = in_position.xyz;
-    // vs_position = in_position;
-    vec4 tmp    = in_position;
+    vec4 tmp = in_position;
     
     // this is wrong for the normal. 
     // The normal transform is the transposed inverse of the model transform
@@ -65,8 +53,7 @@ void main() {
     
 
     if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        // float height = 0.00005;
+        float height = texture(heightTexture, in_st).r;
         vec3 displacementDirection = (normalize(tmp.xyz));
         float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
@@ -77,6 +64,7 @@ void main() {
 
     vec4 raw_pos = psc_to_meter(tmp, scaling);
     ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+
 
     position = ViewProjection * position;
 

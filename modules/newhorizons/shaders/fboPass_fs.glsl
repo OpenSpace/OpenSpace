@@ -24,21 +24,22 @@
 
 #version __CONTEXT__
 
-uniform sampler2D texture1;
-uniform sampler2D texture2;
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+in vec4 vs_position;
+out vec4 color;
+
+uniform sampler2D projectionTexture;
+uniform sampler2D baseTexture;
+
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
+
 uniform vec2 _scaling;
 uniform vec4 _radius;
 uniform int _segments;
 
-uniform float projectionFading;
-
-in vec4 vs_position;
-
 uniform vec3 boresight;
-
-out vec4 color;
 
 #define M_PI 3.14159265358979323846
 
@@ -57,8 +58,6 @@ vec4 uvToModel(vec2 uv, vec4 radius, float segments){
 
     return vec4(0.0); 
 }
-
-#include "PowerScaling/powerScaling_vs.hglsl"
 
 bool inRange(float x, float a, float b){
     return (x >= a && x <= b);
@@ -85,11 +84,9 @@ void main() {
   {
     // The 1-x is in this texture call because of flipped textures
     // to be fixed soon ---abock
-        color = texture(texture1, vec2(projected.x, 1-projected.y));
-  }else{
-      color = texture(texture2, uv);
-     color.a = projectionFading;
+        color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
+  } else {
+    color = texture(baseTexture, uv);
+    color.a = 0.0;
   }
-  
-  // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
 }

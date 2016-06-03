@@ -88,7 +88,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     : Renderable(dictionary)
     , _colorTexturePath("planetTexture", "RGB Texture")
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
-    , _normalMapTexturePath("normalMap", "Normalmap Texture")
     , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
     //, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
@@ -101,20 +100,15 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _texture(nullptr)
     , _textureOriginal(nullptr)
     , _textureProj(nullptr)
-    , _textureWhiteSquare(nullptr)
     , _heightMapTexture(nullptr)
-    , _normalMapTexture(nullptr)
     , _geometry(nullptr)
     , _capture(false)
     , _hasHeightMap(false)
-    , _hasNormalMap(false)
     , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "");
-
-    _defaultProjImage = absPath("textures/defaultProj.png");
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(
@@ -180,13 +174,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _hasHeightMap = true;
     }
 
-    std::string normalMapPath = "";
-    success = dictionary.getValue("Textures.NormalMap", normalMapPath);
-    if (success) {
-        _normalMapTexturePath = absPath(normalMapPath);
-        _hasNormalMap = true;
-    }
-
     addPropertySubOwner(_geometry);
     addProperty(_rotation);
     //addProperty(_fadeProjection);
@@ -199,9 +186,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
-
-    addProperty(_normalMapTexturePath);
-    _normalMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
 
     addProperty(_projectionTexturePath);
     _projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
@@ -296,7 +280,6 @@ bool RenderablePlanetProjection::initialize() {
     completeSuccess &= (_texture != nullptr);
     completeSuccess &= (_textureOriginal != nullptr);
     completeSuccess &= (_textureProj != nullptr);
-    completeSuccess &= (_textureWhiteSquare != nullptr);
 
     completeSuccess &= _geometry->initialize(this);
 
@@ -308,7 +291,8 @@ bool RenderablePlanetProjection::initialize() {
 
 bool RenderablePlanetProjection::auxiliaryRendertarget() {
     bool completeSuccess = true;
-    if (!_texture) return false;
+    if (!_texture)
+        return false;
 
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -355,7 +339,6 @@ bool RenderablePlanetProjection::deinitialize() {
     _texture = nullptr;
     _textureProj = nullptr;
     _textureOriginal = nullptr;
-    _textureWhiteSquare = nullptr;
     delete _geometry;
     _geometry = nullptr;
 
@@ -368,7 +351,7 @@ bool RenderablePlanetProjection::deinitialize() {
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
-    return _geometry && _programObject && _texture && _textureWhiteSquare;
+    return _geometry && _programObject && _texture;
 }
 
 void RenderablePlanetProjection::imageProjectGPU() {
@@ -393,13 +376,12 @@ void RenderablePlanetProjection::imageProjectGPU() {
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
     _textureProj->bind();
-    _fboProgramObject->setUniform("texture1"       , unitFbo);
+    _fboProgramObject->setUniform("projectionTexture", unitFbo);
         
     ghoul::opengl::TextureUnit unitFbo2;
     unitFbo2.activate();
     _textureOriginal->bind();
-    _fboProgramObject->setUniform("texture2", unitFbo2);
-    //_fboProgramObject->setUniform("projectionFading", _fadeProjection);
+    _fboProgramObject->setUniform("baseTexture", unitFbo2);
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
@@ -498,32 +480,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     _projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
 }
 
-
-void RenderablePlanetProjection::textureBind() {
-    ghoul::opengl::TextureUnit unit[4];
-    unit[0].activate();
-    _texture->bind();
-    _programObject->setUniform("texture1", unit[0]);
-    unit[1].activate();
-    _textureWhiteSquare->bind();
-    _programObject->setUniform("texture2", unit[1]);
-
-    if (_hasHeightMap) {
-        unit[2].activate();
-        _heightMapTexture->bind();
-        _programObject->setUniform("heightTex", unit[2]);
-    }
-
-    if (_hasNormalMap) {
-        unit[3].activate();
-        _normalMapTexture->bind();
-        _programObject->setUniform("normalTex", unit[3]);
-    }
-
-
-}
-
-void RenderablePlanetProjection::project(){
+void RenderablePlanetProjection::project() {
     // If high dt -> results in GPU queue overflow
     // switching to using a simple queue to distribute
     // images 1 image / frame -> projections appear slower
@@ -591,18 +548,24 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _programObject->activate();
     // setup the data to the shader
     _programObject->setUniform("sun_pos", sun_pos.vec3());
-    _programObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform" , _transform);
-    _programObject->setUniform("boresight"    , _boresight);
 
     _programObject->setUniform("_hasHeightMap", _hasHeightMap);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
-    _programObject->setUniform("_enableNormalMapping", _enableNormalMapping && _hasNormalMap);
 
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
-    textureBind();
+    ghoul::opengl::TextureUnit unit[2];
+    unit[0].activate();
+    _texture->bind();
+    _programObject->setUniform("baseTexture", unit[0]);
+
+    if (_hasHeightMap) {
+        unit[1].activate();
+        _heightMapTexture->bind();
+        _programObject->setUniform("heightTexture", unit[1]);
+    }
     
     // render geometry
     _geometry->render();
@@ -679,14 +642,6 @@ void RenderablePlanetProjection::loadTexture() {
             _textureOriginal->setFilter(Texture::FilterMode::Linear);
         }
     }
-    _textureWhiteSquare = nullptr;
-    if (_colorTexturePath.value() != "") {
-        _textureWhiteSquare = ghoul::io::TextureReader::ref().loadTexture(_defaultProjImage);
-        if (_textureWhiteSquare) {
-            _textureWhiteSquare->uploadTexture();
-            _textureWhiteSquare->setFilter(Texture::FilterMode::Linear);
-        }
-    }
 
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {
@@ -697,15 +652,6 @@ void RenderablePlanetProjection::loadTexture() {
             _heightMapTexture->setFilter(Texture::FilterMode::Linear);
         }
     }
-
-    _normalMapTexture = nullptr;
-    if (_normalMapTexturePath.value() != "") {
-        _normalMapTexture = ghoul::io::TextureReader::ref().loadTexture(_normalMapTexturePath);
-        if (_normalMapTexture) {
-            _normalMapTexture->uploadTexture();
-            _normalMapTexture->setFilter(Texture::FilterMode::Linear);
-        }
-    }
-
 }
+
 }  // namespace openspace
