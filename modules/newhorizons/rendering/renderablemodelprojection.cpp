@@ -75,13 +75,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
-    , _projectionTexture(nullptr)
-    , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _geometry(nullptr)
     , _alpha(1.f)
     , _performShading("performShading", "Perform Shading", true)
-    , _performProjection("performProjection", "Perform Projections", true)
-    , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _frameCount(0)
     , _programIsDirty(false)
 {
@@ -218,27 +214,6 @@ bool RenderableModelProjection::initialize() {
         LWARNING("Lack of vertex data from geometry for image projection");
 
     completeSuccess &= auxiliaryRendertarget();
-
-    return completeSuccess;
-}
-
-bool RenderableModelProjection::auxiliaryRendertarget() {
-    bool completeSuccess = true;
-    // set FBO to texture to project to
-
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    glGenFramebuffers(1, &_fboID);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_projectionTexture, 0);
-    // check FBO status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-        completeSuccess &= false;
-    // switch back to window-system-provided framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-
     int vertexSize = sizeof(modelgeometry::ModelGeometry::Vertex);
 
     glGenVertexArrays(1, &_vaoID);
@@ -253,12 +228,12 @@ bool RenderableModelProjection::auxiliaryRendertarget() {
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize,
-        reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, location)));
+                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, location)));
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vertexSize,
-        reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, tex)));
+                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, tex)));
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, vertexSize,
-        reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, normal)));
-            
+                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, normal)));
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, _geometryIndeces.size() * sizeof(int), &_geometryIndeces[0], GL_STATIC_DRAW);
 
@@ -284,28 +259,6 @@ bool RenderableModelProjection::deinitialize() {
     }
 
     return true;
-}
-
-void RenderableModelProjection::clearAllProjections() {
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
-
-    glClearColor(0.f, 0.f, 0.f, 0.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-               m_viewport[2], m_viewport[3]);
-
-
-
-    _clearAllProjections = false;
 }
 
 void RenderableModelProjection::render(const RenderData& data) {
@@ -465,33 +418,10 @@ void RenderableModelProjection::attitudeParameters(double time) {
     position[3] += (3 + _camScaling[1]);
     glm::vec3 cpos = position.vec3();
 
-    _projectorMatrix = computeProjectorMatrix(cpos, boresight, _up);
+    _projectorMatrix = computeProjectorMatrix(cpos, boresight, _up, _instrumentMatrix, 
+                                              _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight);
+
 }
-
-glm::mat4 RenderableModelProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up) {
-    //rotate boresight into correct alignment
-    _boresight = _instrumentMatrix*aim;
-    glm::vec3 uptmp(_instrumentMatrix*glm::dvec3(up));
-
-    // create view matrix
-    glm::vec3 e3 = glm::normalize(_boresight);
-    glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
-    glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                            e1.y, e2.y, e3.y, 0.f,
-                                            e1.z, e2.z, e3.z, 0.f,
-                                            -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
-        
-    // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
-    // bias matrix
-    glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
-                                                    0, 0.5f, 0, 0,
-                                                    0, 0, 0.5f, 0,
-                                                    0.5f, 0.5f, 0.5f, 1);
-    return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
-}
-
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
@@ -514,28 +444,7 @@ void RenderableModelProjection::loadTextures() {
             _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-
-    int maxSize = OpenGLCap.max2DTextureSize() / 2;
-
-    LINFO("Creating projection texture of size '" << maxSize << ", " << maxSize / 2 << "'");
-    _projectionTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(maxSize, maxSize / 2, 1),
-        ghoul::opengl::Texture::Format::RGBA
-        );
-    _projectionTexture->uploadTexture();
-}
-
-std::unique_ptr<ghoul::opengl::Texture> RenderableModelProjection::loadProjectionTexture(const std::string& texturePath) {
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath));
-
-    if (texture) {
-        texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-    }
-
-    return texture;
+    generateProjectionLayerTexture();
 }
 
 }  // namespace openspace

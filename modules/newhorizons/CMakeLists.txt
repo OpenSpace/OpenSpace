@@ -37,6 +37,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.h
@@ -55,6 +56,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.cpp

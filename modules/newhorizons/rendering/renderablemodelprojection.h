@@ -26,6 +26,7 @@
 #define __RENDERABLEMODELPROJECTION_H__
 
 #include <openspace/rendering/renderable.h>
+#include <modules/newhorizons/util/projectioncomponent.h>
 
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/newhorizons/util/imagesequencer.h>
@@ -44,7 +45,7 @@ namespace modelgeometry {
     class ModelGeometry;
 }
 
-class RenderableModelProjection : public Renderable {
+class RenderableModelProjection : public Renderable, private ProjectionComponent {
 public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
 
@@ -59,20 +60,14 @@ public:
 
 protected:
     void loadTextures();
-    std::unique_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
 
 private:
-    bool auxiliaryRendertarget();
-    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
     void attitudeParameters(double time);
     void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
 
     void project();
-    void clearAllProjections();
 
     properties::StringProperty _colorTexturePath;
-    properties::BoolProperty _performProjection;
-    properties::BoolProperty _clearAllProjections;
 
     properties::IntProperty _rotationX;
     properties::IntProperty _rotationY;
@@ -82,9 +77,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
-
-    properties::FloatProperty _projectionFading;
 
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
@@ -118,11 +110,6 @@ private:
     glm::mat4  _transform;
     glm::mat4  _projectorMatrix;
     glm::vec3  _boresight;
-
-    // FBO stuff
-    GLuint _fboID;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
 
     GLuint _vbo;
     GLuint _ibo;

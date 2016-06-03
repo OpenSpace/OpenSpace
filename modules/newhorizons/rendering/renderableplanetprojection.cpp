@@ -38,7 +38,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
@@ -74,14 +73,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _colorTexturePath("planetTexture", "RGB Texture")
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
-    , _performProjection("performProjection", "Perform Projections", true)
-    , _clearAllProjections("clearAllProjections", "Clear Projections", false)
-    , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
-    , _projectionTexture(nullptr)
     , _heightMapTexture(nullptr)
     , _capture(false)
 {
@@ -213,9 +208,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection() {
-    deinitialize();
-}
+RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
@@ -242,52 +235,32 @@ bool RenderablePlanetProjection::initialize() {
     completeSuccess &= (_projectionTexture != nullptr);
     completeSuccess &= _geometry->initialize(this);
 
-    if (completeSuccess)
+    if (completeSuccess) {
         completeSuccess &= auxiliaryRendertarget();
+        // SCREEN-QUAD 
+        const GLfloat size = 1.f;
+        const GLfloat w = 1.f;
+        const GLfloat vertex_data[] = {
+            -size, -size, 0.f, w, 0.f, 0.f,
+            size, size, 0.f, w, 1.f, 1.f,
+            -size, size, 0.f, w, 0.f, 1.f,
+            -size, -size, 0.f, w, 0.f, 0.f,
+            size, -size, 0.f, w, 1.f, 0.f,
+            size, size, 0.f, w, 1.f, 1.f,
+        };
 
-    return completeSuccess;
-}
+        glGenVertexArrays(1, &_quad);
+        glBindVertexArray(_quad);
+        glGenBuffers(1, &_vertexPositionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
 
-bool RenderablePlanetProjection::auxiliaryRendertarget() {
-    bool completeSuccess = true;
-
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    // setup FBO
-    glGenFramebuffers(1, &_fboID);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_projectionTexture, 0);
-    // check FBO status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-        completeSuccess &= false;
-    // switch back to window-system-provided framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-
-    // SCREEN-QUAD 
-    const GLfloat size = 1.f;
-    const GLfloat w = 1.f;
-    const GLfloat vertex_data[] = {
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
-        -size, size, 0.f, w, 0.f, 1.f,
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, -size, 0.f, w, 1.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
-    };
-
-    glGenVertexArrays(1, &_quad);
-    glBindVertexArray(_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-    
-    glBindVertexArray(0);
+        glBindVertexArray(0);
+    }
 
     return completeSuccess;
 }
@@ -360,29 +333,6 @@ void RenderablePlanetProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::
                 m_viewport[2], m_viewport[3]);
 }
 
-glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up) {
-    //rotate boresight into correct alignment
-    _boresight = _instrumentMatrix*aim;
-    glm::vec3 uptmp(_instrumentMatrix*glm::dvec3(up));
-
-    // create view matrix
-    glm::vec3 e3 = glm::normalize(_boresight);
-    glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
-    glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                         e1.y, e2.y, e3.y, 0.f,
-                                         e1.z, e2.z, e3.z, 0.f,
-                                         -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
-    // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(_fovy), _aspectRatio, _nearPlane, _farPlane);
-    // bias matrix
-    glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
-                                                  0, 0.5f, 0, 0,
-                                                  0, 0, 0.5f, 0,
-                                                  0.5f, 0.5f, 0.5f, 1);
-    return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
-}
-
 void RenderablePlanetProjection::attitudeParameters(double time) {
     // precomputations for shader
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
@@ -420,31 +370,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     //position[3] += 3;
     glm::vec3 cpos = position.vec3();
 
-    _projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
-}
-
-void RenderablePlanetProjection::clearAllProjections() {
-    // keep handle to the current bound FBO
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    //counter = 0;
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
-    _fboProgramObject->activate();
-
-    glClearColor(0.f, 0.f, 0.f, 0.f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    //bind back to default
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-               m_viewport[2], m_viewport[3]);
-
-    _clearAllProjections = false;
+    _projectorMatrix = computeProjectorMatrix(cpos, bs, _up, _instrumentMatrix, 
+                                              _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight);
 }
 
 void RenderablePlanetProjection::render(const RenderData& data) {
@@ -520,19 +447,6 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _programObject->rebuildFromFile();
 }
 
-std::unique_ptr<ghoul::opengl::Texture> RenderablePlanetProjection::loadProjectionTexture(const std::string& texturePath) {
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath));
-    if (texture) {
-        ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *texture);
-        texture->uploadTexture();
-        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-    }
-    return texture;
-}
-
 void RenderablePlanetProjection::loadTextures() {
     using ghoul::opengl::Texture;
     _baseTexture = nullptr;
@@ -545,14 +459,7 @@ void RenderablePlanetProjection::loadTextures() {
         }
     }
 
-    int maxSize = OpenGLCap.max2DTextureSize() / 2;
-
-    LINFO("Creating projection texture of size '" << maxSize << ", " << maxSize/2 << "'");
-    _projectionTexture = std::make_unique<Texture>(
-        glm::uvec3(maxSize, maxSize / 2, 1),
-        Texture::Format::RGBA
-    );
-    _projectionTexture->uploadTexture();
+    generateProjectionLayerTexture();
 
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {

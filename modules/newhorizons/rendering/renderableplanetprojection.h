@@ -26,6 +26,7 @@
 #define __RENDERABLEPLANETPROJECTION_H__
 
 #include <openspace/rendering/renderable.h>
+#include <modules/newhorizons/util/projectioncomponent.h>
 
 #include <modules/newhorizons/util/imagesequencer.h>
 
@@ -43,7 +44,7 @@ namespace planetgeometry {
     class PlanetGeometry;
 }
 
-class RenderablePlanetProjection : public Renderable {
+class RenderablePlanetProjection : public Renderable, private ProjectionComponent {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
@@ -59,12 +60,8 @@ public:
 
 protected:
     void loadTextures();
-    std::unique_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
-    bool auxiliaryRendertarget();
-    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
     void attitudeParameters(double time);
 
-    void clearAllProjections();
 
 private:
     void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
@@ -73,17 +70,12 @@ private:
     properties::StringProperty _heightMapTexturePath;
 
     properties::IntProperty _rotation;
-    properties::BoolProperty _performProjection;
-    properties::BoolProperty _clearAllProjections;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-
-    properties::FloatProperty _projectionFading;
 
     properties::FloatProperty _heightExaggeration;
 
@@ -127,10 +119,9 @@ private:
 
     bool _capture;
 
-    // FBO stuff
-    GLuint _fboID;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
+
 };
 }  // namespace openspace
 
