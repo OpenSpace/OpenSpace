@@ -188,6 +188,11 @@ bool KameleonPlane::initialize(){
 
     std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->dimensions(_dimensions);
     _dataProcessor->addDataValues(_kwPath, _dataOptions);
+    // if this datacygnet has added new values then reload texture
+    // for the whole group, including this datacygnet, and return after.
+    if(_group){
+        _group->updateGroup();
+    }
     updateTextureResource();
 
 	return true;
@@ -365,6 +370,8 @@ void KameleonPlane::subscribeToGroup(){
 
     groupEvent->subscribe(name(), "updateGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event updateGroup");
+        if(_autoFilter.value())
+            _backgroundValues.setValue(_dataProcessor->filterValues());
         updateTexture();
     });
 
