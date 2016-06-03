@@ -39,6 +39,7 @@
 #include <modules/volume/rawvolumereader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 
 #include <fstream>
 
@@ -54,23 +55,16 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
     , _stepSize("stepSize", "Step Size", 0.001, 0.0005, 0.05)
-    , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
+    , _pointStepSize("pointStepSize", "Point Step Size", 0.01, 0.01, 0.1)
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
     , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) {
 
-    float scalingExponent, stepSize;
+    float stepSize;
     glm::vec3 scaling, translation, rotation;
     glm::vec4 color;
     ghoul::Dictionary volumeDictionary, pointsDictionary;
 
-    if (dictionary.getValue("ScalingExponent", scalingExponent)) {
-        _scalingExponent = scalingExponent;
-    }
-    if (dictionary.getValue("Scaling", scaling)) {
-        _scaling = scaling;
-    }
     if (dictionary.getValue("Translation", translation)) {
         _translation = translation;
     }
@@ -93,6 +87,14 @@ namespace openspace {
         } else {
             LERROR("No volume dimensions specified.");
         }
+        glm::vec3 volumeSize;
+        if (volumeDictionary.getValue("Size", volumeSize)) {
+            _volumeSize = static_cast<glm::vec3>(volumeSize);
+        }
+        else {
+            LERROR("No volume dimensions specified.");
+        }
+
     } else {
         LERROR("No volume dictionary specified.");
     }
@@ -102,6 +104,13 @@ namespace openspace {
             _pointsFilename = absPath(pointsFilename);
         } else {
             LERROR("No points filename specified.");
+        }
+        glm::vec3 pointsScaling;
+        if (pointsDictionary.getValue("Scaling", pointsScaling)) {
+            _pointScaling = static_cast<glm::vec3>(pointsScaling);
+        }
+        else {
+            LERROR("No volume dimensions specified.");
         }
     } else {
         LERROR("No points dictionary specified.");
@@ -147,37 +156,51 @@ bool RenderableGalaxy::initialize() {
 
     onEnabledChange(onChange);
 
-    addProperty(_scaling);
-    addProperty(_scalingExponent);
     addProperty(_stepSize);
+    addProperty(_pointStepSize);
     addProperty(_translation);
     addProperty(_rotation);
     
     // initialize points.
-    std::ifstream pointFile(_pointsFilename, std::ios::in);
+    std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
 
     std::vector<glm::vec3> pointPositions;
     std::vector<glm::vec3> pointColors;
 
-    std::string format;
-    pointFile >> format >> _nPoints;
+    int64_t nPoints;
+    pointFile.seekg(0, std::ios::beg); // read heder.
+    pointFile.read(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
 
-    // temporarily decrease number of points.
-    _nPoints = std::min(static_cast<size_t>(100000), _nPoints);
+    _nPoints = static_cast<size_t>(nPoints);
+
+    size_t nFloats = _nPoints * 7;
+
+    float* pointData = new float[nFloats];
+    pointFile.seekg(sizeof(int64_t), std::ios::beg); // read past heder.
+    pointFile.read(reinterpret_cast<char*>(pointData), nFloats * sizeof(float));
+    pointFile.close();
+
+    float maxdist = 0;
+    
 
     float x, y, z, r, g, b, a;
     for (size_t i = 0; i < _nPoints; ++i) {
-        pointFile >> x >> y >> z >> r >> g >> b >> a;
-        if (pointFile.good()) {                       
-            pointPositions.push_back(glm::vec3(x, y, z));
-            pointColors.push_back(glm::vec3(r, g, b));
-        }
-        else {
-            LERROR("Could not read points.");
-            break;
-        }
+        float x = pointData[i * 7 + 0];
+        float y = pointData[i * 7 + 1];
+        float z = pointData[i * 7 + 2];
+        float r = pointData[i * 7 + 3];
+        float g = pointData[i * 7 + 4];
+        float b = pointData[i * 7 + 5];
+        maxdist = std::max(maxdist, glm::length(glm::vec3(x, y, z)));
+        //float a = pointData[i * 7 + 6];  alpha is not used.
+                               
+        pointPositions.push_back(glm::vec3(x, y, z));
+        pointColors.push_back(glm::vec3(r, g, b));        
     }
-    pointFile.close();
+
+    std::cout << maxdist << std::endl;
+
+    delete[] pointData;
 
     glGenVertexArrays(1, &_pointsVao);
     glGenBuffers(1, &_positionVbo);
@@ -200,7 +223,11 @@ bool RenderableGalaxy::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _pointsProgram = renderEngine.buildRenderProgram("Galaxy points",
         "${MODULE_GALAXY}/shaders/points.vs",
-        "${MODULE_GALAXY}/shaders/points.fs");
+        "${MODULE_GALAXY}/shaders/points.fs",
+        ghoul::Dictionary(),
+        RenderEngine::RenderProgramType::Post);
+
+    _pointsProgram->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
 
     GLint positionAttrib = _pointsProgram->attributeLocation("inPosition");
     GLint colorAttrib = _pointsProgram->attributeLocation("inColor");
@@ -234,29 +261,80 @@ bool RenderableGalaxy::isReady() const {
 void RenderableGalaxy::update(const UpdateData& data) {
     if (_raycaster) {
 
-        glm::mat4 transform = glm::translate(glm::mat4(1.0), static_cast<glm::vec3>(_translation) * std::powf(10.0, static_cast<float>(_scalingExponent)));
+        //glm::mat4 transform = glm::translate(, static_cast<glm::vec3>(_translation));
         glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
-        transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1, 0, 0));
+        glm::mat4 transform = glm::rotate(glm::mat4(1.0), eulerRotation.x, glm::vec3(1, 0, 0));
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0, 1, 0));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0, 0, 1));
-        transform = glm::scale(transform, _aspect * static_cast<glm::vec3>(_scaling) * std::powf(10.0, static_cast<float>(_scalingExponent)));
-        
+
+
+        glm::mat4 volumeTransform = glm::scale(transform, static_cast<glm::vec3>(_volumeSize));
+        _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
+       
+        // Todo: handle floating point overflow, to actually support translation.
+        volumeTransform = glm::translate(volumeTransform, static_cast<glm::vec3>(_translation));
+        _pointTransform = glm::translate(_pointTransform, static_cast<glm::vec3>(_translation));
+
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
-        _raycaster->setModelTransform(transform);
+        _raycaster->setModelTransform(volumeTransform);
         _raycaster->setTime(data.time);
     }
 }
 
 void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
-    tasks.raycasterTasks.push_back(task);
+
+    glm::vec3 position = data.camera.position().vec3();
+    float length = safeLength(position);
+    glm::vec3 galaxySize = static_cast<glm::vec3>(_volumeSize);
+
+    float maxDim = std::max(std::max(galaxySize.x, galaxySize.y), galaxySize.z);
+    
+
+    float lowerRampStart = maxDim * 0.02;
+    float lowerRampEnd = maxDim * 0.5;
+
+    float upperRampStart = maxDim * 2.0;
+    float upperRampEnd = maxDim * 10;
+
+    float opacityCoefficient = 1.0;
+
+    if (length < lowerRampStart) {
+        opacityCoefficient = 0; // camera really close
+    } else if (length < lowerRampEnd) {
+        opacityCoefficient = (length - lowerRampStart) / (lowerRampEnd - lowerRampStart);
+    } else if (length < upperRampStart) {
+        opacityCoefficient = 1.0; // sweet spot (max)
+    } else if (length < upperRampEnd) {
+        opacityCoefficient = 1.0 - (length - upperRampStart) / (upperRampEnd - upperRampStart); //fade out
+    } else {
+        opacityCoefficient = 0;
+    }
+
+    _opacityCoefficient = opacityCoefficient;
+    ghoul_assert(_opacityCoefficient >= 0.0 && _opacityCoefficient <= 1.0, "Opacity coefficient was not between 0 and 1");
+    if (opacityCoefficient > 0) {
+        _raycaster->setOpacityCoefficient(_opacityCoefficient);
+        tasks.raycasterTasks.push_back(task);
+    }
+}
+
+float RenderableGalaxy::safeLength(const glm::vec3& vector) {
+    float maxComponent = std::max(std::max(std::abs(vector.x), std::abs(vector.y)), std::abs(vector.z));
+    return glm::length(vector / maxComponent) * maxComponent;
+}
+
+void RenderableGalaxy::postRender(const RenderData& data) {
+
+    _raycaster->setStepSize(_pointStepSize);
 
     _pointsProgram->activate();
     setPscUniforms(*_pointsProgram.get(), data.camera, data.position);
 
+    OsEng.ref().renderEngine().preRaycast(*_pointsProgram);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0);
+    glm::mat4 modelMatrix = _pointTransform;
     glm::mat4 viewMatrix = data.camera.viewMatrix();
     glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
@@ -264,14 +342,20 @@ void RenderableGalaxy::render(const RenderData& data, RendererTasks& tasks) {
     _pointsProgram->setUniform("view", viewMatrix);
     _pointsProgram->setUniform("projection", projectionMatrix);
 
+    float emittanceFactor = _opacityCoefficient * static_cast<glm::vec3>(_volumeSize).x;
+    _pointsProgram->setUniform("emittanceFactor",  emittanceFactor);
+
     glBindVertexArray(_pointsVao);
+    glDisable(GL_DEPTH_TEST);
     glDepthMask(false);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDrawArrays(GL_POINTS, 0, _nPoints);
     glBindVertexArray(0);
     glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
 }
        
 }

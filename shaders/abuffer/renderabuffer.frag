@@ -33,6 +33,11 @@ void main() {
     Fragment frag = getFragment();
     int sampleMask = gl_SampleMaskIn[0];
 
+    if (frag.depth < 0) {
+//         discard;
+    }
+    
+    //frag.forceFboRendering = true;
     // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
     if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
         uint newHead = atomicCounterIncrement(atomicCounterBuffer);
@@ -54,6 +59,10 @@ void main() {
         discard;
     } else {
         _out_color_ = frag.color;
-        gl_FragDepth = normalizeFloat(frag.depth);        
+        gl_FragDepth = normalizeFloat(frag.depth);
     }
+
+    //gl_FragDepth = 1;
+
 }
+

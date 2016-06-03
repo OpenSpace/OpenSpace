@@ -44,6 +44,7 @@ namespace {
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
     const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
+    const std::string PostRenderFragmentShaderPath = "${SHADERS}/framebuffer/postrenderframebuffer.frag";
 }
 
 namespace openspace {
@@ -400,7 +401,8 @@ void FramebufferRenderer::setResolution(glm::ivec2 res) {
 
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
-    dict.setValue("fragmentRendererPath", RenderFragmentShaderPath);
+    dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
     dict.setValue("windowWidth", _resolution.x);
     dict.setValue("windowHeight", _resolution.y);
 

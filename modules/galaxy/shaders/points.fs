@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+uniform float emittanceFactor;
+
 in vec3 vsPosition;
 in vec3 vsColor;
 
@@ -30,12 +32,16 @@ in vec3 vsColor;
 
 Fragment getFragment() {
     vec4 color = vec4(vsColor, 1.0);
-
+    
     Fragment frag;
-    frag.color = vec4(vsColor.rgb * 0.1, 1.0);
-    frag.depth = pscDepth(vec4(vsPosition, 0.0));
-    frag.forceFboRendering = true;
+    float depth = pscDepth(vec4(vsPosition, 0.0));
 
+    float coefficient = exp(1.27 * log(emittanceFactor) - 2*log(depth));
+
+    frag.color = vec4(vsColor.rgb * coefficient, 1.0);
+    
+    
+    frag.depth = depth;
 
     return frag;
 }

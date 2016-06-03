@@ -269,6 +269,18 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
+void SceneGraphNode::postRender(const RenderData& data) {
+    const psc thisPosition = worldPosition();
+    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement };
+
+    _performanceRecord.renderTime = 0;
+    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
+        _renderable->postRender(newData);
+    }
+}
+
+
+
 
 // not used anymore @AA
 //void SceneGraphNode::addNode(SceneGraphNode* child)

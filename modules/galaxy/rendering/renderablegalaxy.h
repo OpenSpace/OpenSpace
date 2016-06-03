@@ -44,12 +44,16 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
+    void postRender(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 private:
-    properties::Vec3Property _scaling;
-    properties::IntProperty _scalingExponent;
+    float safeLength(const glm::vec3& vector);
+
+    glm::vec3 _volumeSize;
+    glm::vec3 _pointScaling;
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _pointStepSize;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
 
@@ -60,7 +64,9 @@ private:
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::mat4 _pointTransform;
     glm::vec3 _aspect;
+    float _opacityCoefficient;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     size_t _nPoints;

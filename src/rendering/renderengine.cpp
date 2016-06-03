@@ -92,6 +92,7 @@ namespace {
     std::chrono::seconds ScreenLogTimeToLive(15);
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
+    const std::string PostRenderFsPath = "${SHADERS}/postrender.frag";
 }
 
 namespace openspace {
@@ -486,7 +487,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name,
     std::string vsPath,
     std::string fsPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data,
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
 
@@ -497,10 +499,16 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
+
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         dict);
 
     if (program) {
@@ -517,20 +525,27 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string vsPath,
     std::string fsPath,
     std::string csPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data, 
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
+
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
 
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         csPath,
         dict);
 
@@ -566,6 +581,37 @@ void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
         program->setDictionary(dict);
     }
 }
+
+
+/**
+* Set resolve data
+* Called from the renderer, whenever it needs to update
+* the dictionary of all post rendering programs.
+*/
+void RenderEngine::setResolveData(const ghoul::Dictionary& data) {
+    _resolveData = data;
+    for (auto program : _programs) {
+        ghoul::Dictionary dict = program->dictionary();
+        dict.setValue("resolveData", _resolveData);
+        program->setDictionary(dict);
+    }
+}
+
+/**
+* Set raycasting uniforms on the program object, and setup raycasting.
+*/
+void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->preRaycast(programObject);
+}
+
+/**
+* Tear down raycasting for the specified program object.
+*/
+void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->postRaycast(programObject);
+}
+
+
 
 /**
  * Set renderer

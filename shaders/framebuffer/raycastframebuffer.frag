@@ -99,7 +99,6 @@ void main() {
     }
 
 
-    finalColor = vec4(0.0);
     float currentDepth = 0.0;
     // todo: shorten depth if geometry is intersecting!
     float nextStepSize = stepSize#{id}(position, direction);
@@ -112,7 +111,11 @@ void main() {
     int sampleIndex = 0;
     float opacityDecay = 1.0 / nAaSamples;
 
-    for (steps = 0; finalColor.a < ALPHA_LIMIT && steps < RAYCAST_MAX_STEPS; ++steps) {
+    vec3 accumulatedColor = vec3(0.0);
+    vec3 accumulatedAlpha = vec3(0.0);
+        
+    
+    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
 
         
         while (sampleIndex < nAaSamples && currentDepth + nextStepSize * jitterFactor > raycastDepths[sampleIndex]) {
@@ -132,11 +135,13 @@ void main() {
         vec3 jitteredPosition = position + direction*jitteredStepSize;
         position += direction * currentStepSize;
 
-        vec4 raycasterContribution = sample#{id}(jitteredPosition, direction, finalColor, nextStepSize);
+        
+        sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
 
         float sampleDistance = aaOpacity * (jitteredStepSize + previousJitterDistance);
 
-        blendStep(finalColor, raycasterContribution, sampleDistance);
+        //blendStep(finalColor, raycasterContribution, sampleDistance);
+        //finalColor 
 
         previousJitterDistance = currentStepSize - jitteredStepSize;
         
@@ -146,6 +151,8 @@ void main() {
 
     }
 
+    finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3);
+    
     finalColor.rgb /= finalColor.a;
     gl_FragDepth = normalizeFloat(entryDepth);
 }

@@ -36,6 +36,7 @@
 #include <openspace/util/progressbar.h>
 
 #include <apps/DataConverter/milkywayconversiontask.h>
+#include <apps/DataConverter/milkywaypointsconversiontask.h>
 
 int main(int argc, char** argv) {
     using namespace openspace;
@@ -61,14 +62,19 @@ int main(int argc, char** argv) {
     // or at the very least: a command line interface.
  
     MilkyWayConversionTask mwConversionTask(
-        "F:/milky-way/cam2_main.",
+        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
         ".exr",
         1385,
         512,
-        "F:/milky-way/mw_512_512_64.rawvolume", 
+        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
         glm::vec3(512, 512, 64));
     
+    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
+
+
     mwConversionTask.perform(onProgress);
+    //mwpConversionTask.perform(onProgress);
+
 
     std::cout << "Done." << std::endl;
 

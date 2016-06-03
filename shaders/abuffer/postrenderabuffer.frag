@@ -22,34 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
-
-
-#include "resolveconstants.glsl"
+#include "fragment.glsl"
+#include <#{fragmentPath}>
 #include "abufferfragment.glsl"
 #include "abufferresources.glsl"
-#include "fragment.glsl"
 #include "PowerScaling/powerScalingMath.hglsl"
-#include "blending.glsl"
 #include "rand.glsl"
-
-layout (location = 0) out vec4 finalColor;
-
-uniform float blackoutFactor;
-uniform sampler2DMS mainColorTexture;
-uniform sampler2DMS mainDepthTexture;
-uniform float gamma = 1.0;
+#include "resolveconstants.glsl"
 
 #include "resolvehelpers.glsl"
 
+#define RAYCASTING_ENABLED #{resolveData.raycastingEnabled}
+uniform float blackoutFactor;
+uniform sampler2DMS mainColorTexture;
+uniform sampler2DMS mainDepthTexture;
 
+out vec4 _out_color_;
 
 void main() {
-    // TODO: disable multisampling for main fbo.
+
+    Fragment newFrag = getFragment();
+    int sampleMask = gl_SampleMaskIn[0];
+    
+    if (newFrag.depth < 0) {
+        discard;
+    }
+
     float fboDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
     vec4 fboRgba = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);
     
-    // RGB color values, premultiplied with alpha channels.
+    if (newFrag.depth > fboDepth) {
+        discard;
+    }
+
+    //newFrag.color *= countSamples(sampleMask) / nAaSamples;
+/*
     vec3 accumulatedColor = vec3(0.0);
     
     // One alpha channel per color channel to allow for
@@ -57,70 +64,47 @@ void main() {
     // Always within the interval [0, 1]
     vec3 accumulatedAlpha = vec3(0.0); 
 
-    uint nOriginalFrags = loadFragments();
-    uint raycasterMask = 0;
-    uint nFilteredFrags = nOriginalFrags;
-
-    // discard all fragments in abuffer with higher depth value than the fbo
-    nFilteredFrags = depthFilterFragments(nOriginalFrags, fboDepth);
-
-    // sort remaining fragments from front to back
-    sortFragments(nFilteredFrags);
-
-    // merge fragments whose sample masks don't igntersect
-    // to get the correct alpha for fragments on borders between triangles
-    uint nFrags = mergeFragments(nFilteredFrags);
-
     
-
-    
-#if STORE_SORTED    
-    //storeFragments(nFrags);
-#endif
-
-#if RAYCASTING_ENABLED
-
-    
-    retrieveRaycasterData(nFrags);
+    uint nFrags = loadFragments();
+    uint raycasterMask;
 #if RAYCASTING_ENABLED    
     bool insideAnyRaycaster = initRaycasterMask(raycasterMask);
 #endif    
-    //debugColor = vec4(raycasterData[0].direction, 1.0);
-     
+
+    
+#if RAYCASTING_ENABLED
+    retrieveRaycasterData(nFrags);
+
     if (insideAnyRaycaster) {
         //raycast to the first fragment
-//        discard;
         float startDepth = 0;
-        float endDepth = _depth_(fragments[0]);
+        float endDepth = min(_depth_(fragments[0]), newFrag.depth);
         raycast(endDepth - startDepth, raycasterMask, accumulatedColor, accumulatedAlpha);
-        //accumulatedColor = vec3(1.0);        
     }
 #endif
-    
+
     for (uint i = 0; i < nFrags; i++) {
         ABufferFragment frag = fragments[i];
+
+        if (_depth_(frag) > newFrag.depth) {
+            break;
+        }
 
         int type = _type_(frag);
         uint blend = _blend_(frag);
 
         if (type == 0) { // geometry fragment
             vec4 color = _color_(frag);
-            color.rgb = pow(color.rgb, vec3(gamma));
-            
             if (blend == BLEND_MODE_NORMAL) {
                 accumulatedColor += (1 - accumulatedAlpha) * color.rgb * color.a;
-                accumulatedAlpha += (1 - accumulatedAlpha) * color.aaa;
-
-                //normalBlend(finalColor, color);
+                accumulatedAlpha += (1 - accumulatedAlpha) * color.aaa;                
             } else if (blend == BLEND_MODE_ADDITIVE) {
                 accumulatedColor += (1 - accumulatedAlpha) * color.rgb;
-                //additiveBlend(finalColor, color);
             }
         }
 #if RAYCASTING_ENABLED
         else if (type > 0) { // enter volume
             int raycasterId = type - 1;
-            //accumulatedColor += (1 - accumulatedAlpha) * _position_(frag);            
             // only enter volume if a valid scale was detected
             if (raycasterData[raycasterId].scale > 0) {
                 raycasterMask |= (1 << (raycasterId));
@@ -128,45 +112,24 @@ void main() {
         } else { // exit volume
             int raycasterId = -type - 1;
             raycasterMask &= INT_MAX - (1 << (raycasterId));
-            //accumulatedColor = vec3(1.0);
-            //accumulatedColor += (1 - accumulatedAlpha) * _position_(frag);
         }
         // Ray cast to next fragment
         if (i + 1 < nFrags && raycasterMask != 0) {
             float startDepth = _depth_(fragments[i]);
-            float endDepth = _depth_(fragments[i + 1]);
-            
+            float endDepth = min(_depth_(fragments[i + 1]), newFrag.depth);            
             raycast(endDepth - startDepth, raycasterMask, accumulatedColor, accumulatedAlpha);
-            
         }
 #endif
     }
+*/
+    vec4 newColor = newFrag.color;
+    vec3 contribution =  newColor.rgb * blackoutFactor;
+    //vec3 contribution = newColor.rgb * blackoutFactor;    
 
-
-    accumulatedAlpha = clamp(accumulatedAlpha, 0.0, 1.0);
-    //maccumulatedAlpha = vec3(0.0);
-    accumulatedColor += (1 - accumulatedAlpha) * fboRgba.rgb;
-    
-
-    finalColor = vec4(accumulatedColor.rgb, 1.0);
-    
-    // Gamma correction.
-    finalColor.rgb = pow(finalColor.rgb, vec3(1.0 / gamma));
-    // Black out factor.
 
     
-    finalColor = vec4(finalColor.rgb * blackoutFactor, 1.0);
-    //finalColor = vec4(0.0);
-    //finalColor = vec4(vec3(acc/1000.0), 1.0);
-    //finalColor = vec4(vec3(float(nFrags) / 10), 1.0);
-    //finalColor = vec4(vec3(float(_depth_(fragments[0])) / 10), 1.0);
-
-    //finalColor = vec4(vec3(nFilteredFrags - nFrags) * 0.2, 1.0);
-    //finalColor = vec4(vec3(nFrags) * 0.2, 1.0);    
-    
-    //finalColor = vec4(raycasterData[0].position, 1.0);
-    //finalColor = debugColor;
-    //finalColor = vec4(gamma * 0.5);
+    _out_color_ = vec4(contribution, 1.0);
+    //    _out_color_ = vec4(1.0);
 
 }
 

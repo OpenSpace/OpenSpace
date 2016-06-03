@@ -29,6 +29,7 @@
 #define MAX_LAYERS #{rendererData.maxLayers}
 
 ABufferFragment fragments[MAX_LAYERS];
+uint fragmentIndices[MAX_LAYERS];
 
 layout (binding = 0, r32ui) uniform uimage2D anchorPointerTexture;
 layout (binding = 1, rgba32ui) uniform uimageBuffer fragmentTexture;
@@ -56,10 +57,30 @@ uint loadFragments() {
     while (currentIndex != NULL_POINTER && nFrags < MAX_LAYERS) { 
         ABufferFragment frag = loadFragment(currentIndex);
         fragments[nFrags] = frag;
+        fragmentIndices[nFrags] = currentIndex;
         currentIndex = _next_(frag);
         nFrags++;
     }
     return nFrags;
 }
+
+/**
+ * Store the current contents of the fragments array back into the abuffer.
+ */
+void storeFragments(uint nFrags) {
+    if (nFrags == 0)
+        return;
+    uint maxFragIndex = nFrags - 1;
+    for (int i = 0; i < maxFragIndex; i++) {
+        _next_(fragments[i], fragmentIndices[i+1]);
+        storeFragment(fragmentIndices[i], fragments[i]);
+    }
+    _next_(fragments[maxFragIndex], NULL_POINTER);
+    storeFragment(fragmentIndices[maxFragIndex], fragments[maxFragIndex]);
+            
+}
+
+
+
 
 #endif

@@ -41,15 +41,10 @@ void main() {
     vec4 p = vec4(inPosition, 0.0);
 
     vec4 tmp = p;
-    vec4 position = pscTransform(tmp, mat4(1.0));
+    vec4 position = pscTransform(tmp, model);
     vsPosition = position.xyz;    
-    position = projection * view * model * position;
+    position = projection * view * position;
     gl_Position =  z_normalization(position);
 
-    
-    //float distThreshold = 0.0001;
-
-    //gl_PointSize = min(1.0, position.z);
-    gl_PointSize = 1.0;
     vsColor = inColor;
 }

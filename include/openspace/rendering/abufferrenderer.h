@@ -35,6 +35,7 @@
 #include <map>
 
 
+#include <ghoul/opengl/textureunit.h>
 #include <openspace/rendering/volume.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/raycasterlistener.h>
@@ -68,6 +69,9 @@ public:
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
+
+    void preRaycast(ghoul::opengl::ProgramObject& programObject);
+    void postRaycast(ghoul::opengl::ProgramObject& programObject);
 
     void update();
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -112,6 +116,9 @@ private:
 
     GLuint _mainColorTexture;
     GLuint _mainDepthTexture;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _mainColorTextureUnit;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _mainDepthTextureUnit;
+
     GLuint _mainFramebuffer;
     GLuint _screenQuad;
     GLuint _anchorPointerTexture;
@@ -121,6 +128,11 @@ private:
     GLuint _fragmentTexture;
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
+
+
+    std::unique_ptr<RendererTasks> _rendererTasks;
+    std::unique_ptr<RenderData> _renderData;
+    float _blackoutFactor;
 
     ghoul::Dictionary _rendererData;
 };        // ABufferRenderer

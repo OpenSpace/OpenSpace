@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -23,77 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLE_H__
-#define __RENDERABLE_H__
+#include "PowerScaling/powerScalingMath.hglsl"
+#include <#{fragmentPath}>
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/updatestructures.h>
+out vec4 _out_color_;
 
-#include <ghoul/opengl/programobject.h>
-
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-    }
-    class Dictionary;
+void main() {
+     Fragment f = getFragment();
+     _out_color_ = f.color;
+     gl_FragDepth = normalizeFloat(f.depth);
 }
-
-namespace openspace {
-
-// Forward declare to minimize dependencies
-
-class Camera;
-class PowerScaledCoordinate;
-
-class Renderable : public properties::PropertyOwner {
-public:
-    static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
-
-    // constructors & destructor
-    Renderable(const ghoul::Dictionary& dictionary);
-    virtual ~Renderable();
-
-    virtual bool initialize() = 0;
-    virtual bool deinitialize() = 0;
-
-    virtual bool isReady() const = 0;
-    bool isEnabled() const;
-
-    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
-    const PowerScaledScalar& getBoundingSphere();
-
-    virtual void render(const RenderData& data);
-    virtual void render(const RenderData& data, RendererTasks& rendererTask);
-    virtual void postRender(const RenderData& data);
-    virtual void update(const UpdateData& data);
-
-    bool isVisible() const;
-    
-    bool hasTimeInterval();
-    bool getInterval(double& start, double& end);
-    
-    bool hasBody();
-    bool getBody(std::string& body);
-    void setBody(std::string& body);
-
-    void onEnabledChange(std::function<void(bool)> callback);
-
-    static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
-
-private:
-    properties::BoolProperty _enabled;
-    PowerScaledScalar boundingSphere_;
-    std::string _startTime;
-    std::string _endTime;
-    std::string _targetBody;
-    bool _hasBody;
-    bool _hasTimeInterval;
-};
-
-}  // namespace openspace
-
-#endif  // __RENDERABLE_H__

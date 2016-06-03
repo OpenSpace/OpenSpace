@@ -24,6 +24,7 @@
 
 uniform float maxStepSize#{id} = 0.1;
 uniform vec3 aspect#{id} = vec3(1.0);
+uniform float opacityCoefficient#{id} = 1.0; 
 
 uniform sampler3D galaxyTexture#{id};
 
@@ -34,10 +35,11 @@ void sample#{id}(vec3 samplePos,
                  inout float maxStepSize) {
     
     vec3 aspect = aspect#{id};
-    maxStepSize = maxStepSize#{id} * length(dir * 1.0/aspect);
+    maxStepSize = maxStepSize#{id} * length(dir * 1/aspect);
+    
     vec4 sampledColor = texture(galaxyTexture#{id}, samplePos.xyz);
 
-    float STEP_SIZE = maxStepSize#{id};
+    float STEP_SIZE = maxStepSize;
 
     vec3 alphaTint = vec3(0.3, 0.54, 0.85);
     //alphaTint = vec3(0.0, 0.5, 1.0);
@@ -54,7 +56,7 @@ void sample#{id}(vec3 samplePos,
     //sampledColor.a = pow(sampledColor.a, 10.0);
     //sampledColor.a = pow(sampledColor.a, 100000000.0);
     sampledColor.rgb *= 4000.0;
-    sampledColor.a *= 1;
+    sampledColor.a = sampledColor.a * 0.3; //1.0;
 
     
     //float emissionCoefficient = 80;
@@ -75,8 +77,8 @@ void sample#{id}(vec3 samplePos,
     vec3 backColor = sampledColor.rgb;
     vec3 backAlpha = sampledColor.a * alphaTint;
 
-    backColor *= STEP_SIZE;
-    backAlpha *= STEP_SIZE;
+    backColor *= STEP_SIZE * opacityCoefficient#{id};
+    backAlpha *= STEP_SIZE * opacityCoefficient#{id};
 
     backColor = clamp(backColor, 0.0, 1.0);
     backAlpha = clamp(backAlpha, 0.0, 1.0);
@@ -84,7 +86,10 @@ void sample#{id}(vec3 samplePos,
     vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
     accumulatedColor += oneMinusFrontAlpha * backColor;
     accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-    
+
+    acc+= 1.0;
+
+    //accumulatedColor = vec3(opacityCoefficient#{id});
 }
 
 float stepSize#{id}(vec3 samplePos, vec3 dir) {

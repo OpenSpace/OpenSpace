@@ -71,6 +71,11 @@ public:
     virtual void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {};
 
     /**
+    * Return true if the camera is inside the volume.
+    * Also set localPosition to the camera position in the volume's local coordainte system.
+    */
+    virtual bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) { return false; };
+    /**
      * Return a path the file to use as vertex shader
      *
      * The shader preprocessor will have acceess to
