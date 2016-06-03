@@ -57,7 +57,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     ,_dataOptions("dataOptions", "Data Options")
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_resolution("resolution", "Resolution%", 1.0f, 0.1, 2.0f)
+    ,_resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
 
@@ -486,8 +486,8 @@ void KameleonPlane::subscribeToGroup(){
 void KameleonPlane::setDimensions(){
     // the cdf files has an offset of 0.5 in normali resolution.
     // with lower resolution the offset increases. 
-    _data->offset = _origOffset - 0.5f*(1.0f/_resolution.value());
-    _dimensions = glm::size3_t(_data->scale*(float)_resolution.value());
+    _data->offset = _origOffset - 0.5f*(100.0f/_resolution.value());
+    _dimensions = glm::size3_t(_data->scale*((float)_resolution.value()/100.f));
     _dimensions[_cut] = 1;
 
     if(_cut == 0){
