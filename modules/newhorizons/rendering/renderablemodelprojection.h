@@ -85,6 +85,8 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
         std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
 
+        properties::FloatProperty _projectionFading;
+
         modelgeometry::ModelGeometry* _geometry;
 
         float _alpha;

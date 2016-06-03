@@ -36,8 +36,7 @@ uniform vec3 camdir;
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
 uniform bool _performShading;
-
-
+uniform float _projectionFading;
 uniform vec3 sun_pos;
 
 Fragment getFragment() {
@@ -75,11 +74,9 @@ Fragment getFragment() {
         textureColor.rgb = mix(
             textureColor.rgb,
             projectionColor.rgb,
-            min(1.0, projectionColor.a)
+            min(_projectionFading, projectionColor.a)
         );
     }
-
-    // textureColor = projectionColor;
 
     Fragment frag;
     frag.color = max(intensity * textureColor, ambient);

@@ -82,6 +82,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _projectionTexture(nullptr)
+    , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _geometry(nullptr)
     , _alpha(1.f)
     , _performShading("performShading", "Perform Shading", true)
@@ -112,6 +113,8 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         _defaultProjImage = absPath(texturePath);
 
     addPropertySubOwner(_geometry);
+
+    addProperty(_projectionFading);
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
@@ -351,6 +354,7 @@ void RenderableModelProjection::render(const RenderData& data) {
     _programObject->setUniform("sun_pos", _sunPosition.vec3());
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", _transform);
+    _programObject->setUniform("_projectionFading", _projectionFading);
     setPscUniforms(*_programObject, data.camera, data.position);
 
     _geometry->setUniforms(*_programObject);
