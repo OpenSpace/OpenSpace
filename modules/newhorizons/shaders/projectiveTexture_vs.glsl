@@ -31,9 +31,8 @@ layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
 out vec4 vs_position;
-out vec2 vs_st;
 out vec4 vs_normal;
-out vec4 ProjTexCoord;
+out vec2 vs_st;
 
 uniform mat4 ModelTransform;
 uniform mat4 ViewProjection;

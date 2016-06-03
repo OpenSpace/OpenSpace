@@ -35,6 +35,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -73,17 +75,14 @@ namespace openspace {
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
-    , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotationX("rotationX", "RotationX", 0, 0, 360)
     , _rotationY("rotationY", "RotationY", 0, 0, 360)
     , _rotationZ("rotationZ", "RotationZ", 0, 0, 360)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
-    , _texture(nullptr)
+    , _baseTexture(nullptr)
+    , _projectionTexture(nullptr)
     , _geometry(nullptr)
-    //, _textureOriginal(nullptr)
-    , _textureProj(nullptr)
-    , _textureWhiteSquare(nullptr)
     , _alpha(1.f)
     , _performShading("performShading", "Perform Shading", true)
     , _performProjection("performProjection", "Perform Projections", true)
@@ -108,10 +107,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     if (success)
         _colorTexturePath = absPath(texturePath);
         
-    success = dictionary.getValue(keyTextureProject, texturePath);
-    if (success)
-        _projectionTexturePath = absPath(texturePath);
-
     success = dictionary.getValue(keyTextureDefault, texturePath);
     if (success)
         _defaultProjImage = absPath(texturePath);
@@ -119,9 +114,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     addPropertySubOwner(_geometry);
 
     addProperty(_colorTexturePath);
-    addProperty(_projectionTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTexture, this));
-    _projectionTexturePath.onChange(std::bind(&RenderableModelProjection::loadProjectionTexture, this));
+    _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
 
     dictionary.getValue(keySource, _source);
     dictionary.getValue(keyDestination, _destination);
@@ -184,7 +177,8 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 bool RenderableModelProjection::isReady() const {
     bool ready = true;
     ready &= (_programObject != nullptr);
-    ready &= (_texture != nullptr);
+    ready &= (_baseTexture != nullptr);
+    ready &= (_projectionTexture != nullptr);
     return ready;
 }
 
@@ -213,13 +207,10 @@ bool RenderableModelProjection::initialize() {
     }
     _fboProgramObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*) { this->_programIsDirty = true; } );
 
-    loadTexture();
-    loadProjectionTexture();
+    loadTextures();
 
-    completeSuccess &= (_texture != nullptr);
-    //completeSuccess &= (_textureOriginal != nullptr);
-    completeSuccess &= (_textureProj != nullptr);
-    completeSuccess &= (_textureWhiteSquare != nullptr);
+    completeSuccess &= (_baseTexture != nullptr);
+    completeSuccess &= (_projectionTexture != nullptr);
 
     completeSuccess &= _geometry->initialize(this);
     completeSuccess &= !_source.empty();
@@ -244,7 +235,7 @@ bool RenderableModelProjection::auxiliaryRendertarget() {
 
     glGenFramebuffers(1, &_fboID);
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_projectionTexture, 0);
     // check FBO status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -288,10 +279,8 @@ bool RenderableModelProjection::deinitialize() {
     }
 
     _geometry = nullptr;
-    _texture = nullptr;
-    _textureProj = nullptr;
-    //_textureOriginal = nullptr;
-    _textureWhiteSquare = nullptr;
+    _baseTexture = nullptr;
+    _projectionTexture = nullptr;
 
     glDeleteBuffers(1, &_vbo);
 
@@ -305,38 +294,29 @@ bool RenderableModelProjection::deinitialize() {
 }
 
 void RenderableModelProjection::clearAllProjections() {
-    _texture = nullptr;
-    if (_colorTexturePath.value() != "") {
-        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
-        if (_texture) {
-            LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-    }
-
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
-    // check FBO status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    // switch back to window-system-provided framebuffer
+
+    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
+
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(m_viewport[0], m_viewport[1],
+               m_viewport[2], m_viewport[3]);
 
 
-    //float tmp = _fadeProjection;
-    //_fadeProjection = 1.f;
-    //_projectionTexturePath = _clearingImage;
-    //imageProjectGPU();
-    //_fadeProjection = tmp;
+
     _clearAllProjections = false;
 }
 
 void RenderableModelProjection::render(const RenderData& data) {
     if (!_programObject)
-        return;
-    if (!_textureProj)
         return;
 
     if (_clearAllProjections)
@@ -367,8 +347,6 @@ void RenderableModelProjection::render(const RenderData& data) {
     else
         _alpha = 1.0f;
         
-    _programObject->setUniform("ProjectorMatrix", _projectorMatrix);
-    _programObject->setUniform("boresight", _boresight);
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("sun_pos", _sunPosition.vec3());
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -377,7 +355,15 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     _geometry->setUniforms(*_programObject);
     
-    textureBind();
+    ghoul::opengl::TextureUnit unit[2];
+    unit[0].activate();
+    _baseTexture->bind();
+    _programObject->setUniform("baseTexture", unit[0]);
+
+    unit[1].activate();
+    _projectionTexture->bind();
+    _programObject->setUniform("projectionTexture", unit[1]);
+
     _geometry->render();
         
     // disable shader
@@ -409,9 +395,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
-void RenderableModelProjection::imageProjectGPU() {
-    glDisable(GL_DEPTH_TEST);
-
+void RenderableModelProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture) {
     // keep handle to the current bound FBO
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -419,25 +403,17 @@ void RenderableModelProjection::imageProjectGPU() {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);    
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    // set blend eq
-    glEnable(GL_BLEND);
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-    glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
+    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
 
 
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFboProject;
     unitFboProject.activate();
-    _textureProj->bind();
-    _fboProgramObject->setUniform("projectTexture", unitFboProject);
+    projectionTexture->bind();
+    _fboProgramObject->setUniform("projectionTexture", unitFboProject);
 
-    ghoul::opengl::TextureUnit unitFboCurrent;
-    unitFboCurrent.activate();
-    _texture->bind();
-    _fboProgramObject->setUniform("currentTexture", unitFboCurrent);
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform", _transform);
     _fboProgramObject->setUniform("_scaling", _camScaling);
@@ -452,14 +428,9 @@ void RenderableModelProjection::imageProjectGPU() {
     
     _fboProgramObject->deactivate();
 
-
-    glDisable(GL_BLEND);
-    //bind back to default
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
         m_viewport[2], m_viewport[3]);
-            
-    glEnable(GL_DEPTH_TEST);
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
@@ -528,67 +499,49 @@ glm::mat4 RenderableModelProjection::computeProjectorMatrix(const glm::vec3 loc,
 }
 
 
-void RenderableModelProjection::textureBind() {
-    ghoul::opengl::TextureUnit unit[2];
-    unit[0].activate();
-    _texture->bind();
-    _programObject->setUniform("currentTexture", unit[0]);
-    unit[1].activate();
-    _textureWhiteSquare->bind();
-    _programObject->setUniform("projectedTexture", unit[1]);
-}
-
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
         //std::thread t1(&RenderableModelProjection::attitudeParameters, this, img.startTime);
         //t1.join();
         attitudeParameters(img.startTime);
-        _projectionTexturePath = img.path;
-        imageProjectGPU(); //fbopass
+        //_projectionTexturePath = img.path;
+        imageProjectGPU(loadProjectionTexture(img.path)); //fbopass
     }
     _capture = false;
 }
 
-void RenderableModelProjection::loadTexture() {
-    _texture = nullptr;
+void RenderableModelProjection::loadTextures() {
+    _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
-        if (_texture) {
+        _baseTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _baseTexture->uploadTexture();
+            _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-    //_textureOriginal = nullptr;
-    //if (_colorTexturePath.value() != "") {
-    //    _textureOriginal = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
-    //    if (_textureOriginal) {
-    //        LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
-    //        _textureOriginal->uploadTexture();
-    //        _textureOriginal->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    //    }
-    //}
-    _textureWhiteSquare = nullptr;
-    if (_defaultProjImage != "") {
-        _textureWhiteSquare = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_defaultProjImage)));
-        if (_textureWhiteSquare) {
-            _textureWhiteSquare->uploadTexture();
-            _textureWhiteSquare->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        }
-    }
+
+    int maxSize = OpenGLCap.max2DTextureSize() / 2;
+
+    LINFO("Creating projection texture of size '" << maxSize << ", " << maxSize / 2 << "'");
+    _projectionTexture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(maxSize, maxSize / 2, 1),
+        ghoul::opengl::Texture::Format::RGBA
+        );
+    _projectionTexture->uploadTexture();
 }
 
-void RenderableModelProjection::loadProjectionTexture() {
-    _textureProj = nullptr;
-    if (_projectionTexturePath.value() != "") {
-        _textureProj = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath)));
-        if (_textureProj) {
-            _textureProj->uploadTexture();
-            _textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        }
+std::unique_ptr<ghoul::opengl::Texture> RenderableModelProjection::loadProjectionTexture(const std::string& texturePath) {
+    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath));
+
+    if (texture) {
+        texture->uploadTexture();
+        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+        //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
     }
 
+    return texture;
 }
 
 }  // namespace openspace

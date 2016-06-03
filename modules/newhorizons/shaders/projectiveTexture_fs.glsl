@@ -26,9 +26,8 @@
 #include "fragment.glsl"
 
 in vec4 vs_position;
-in vec2 vs_st;
 in vec4 vs_normal;
-in vec4 ProjTexCoord;
+in vec2 vs_st;
 
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;

@@ -24,26 +24,21 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-uniform mat4 ProjectorMatrix;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-uniform vec3 boresight;
+out vec4 vs_position;
+out vec4 vs_normal;
+out vec2 vs_st;
+
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
 uniform float _magnification;
 
-out vec2 vs_st;
-out vec4 vs_normal;
-out vec4 vs_position;
-out float s;
-out vec4 ProjTexCoord;
-
-
-#include "PowerScaling/powerScaling_vs.hglsl"
 void main() {
     vec4 pos = in_position;
     pos.w += _magnification;
@@ -56,8 +51,6 @@ void main() {
     vec4 position = pscTransform(tmp, ModelTransform);
     vs_position = tmp;
 
-    vec4 raw_pos = psc_to_meter(pos, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
     position = ViewProjection * position;
     gl_Position =  z_normalization(position);
 }

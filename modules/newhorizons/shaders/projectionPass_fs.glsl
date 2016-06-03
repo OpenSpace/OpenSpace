@@ -24,10 +24,8 @@
 
 #version __CONTEXT__
 
-uniform sampler2D projectTexture;
-uniform sampler2D currentTexture;
+uniform sampler2D projectionTexture;
 
-uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
 uniform vec2 _scaling;
 uniform vec3 boresight;
@@ -60,9 +58,7 @@ void main() {
   // projected.y = 1 - projected.y; 
   
   if((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-        color = texture(projectTexture, projected.xy);
-  } else {
-        color = texture(currentTexture, uv);
+        color = texture(projectionTexture, projected.xy);
+        color.a = 1.0;
   }
-
 }
