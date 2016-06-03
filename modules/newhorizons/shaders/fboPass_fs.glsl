@@ -30,7 +30,6 @@ in vec4 vs_position;
 out vec4 color;
 
 uniform sampler2D projectionTexture;
-uniform sampler2D baseTexture;
 
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
@@ -64,29 +63,27 @@ bool inRange(float x, float a, float b){
 } 
 
 void main() {
-  vec2 uv = (vs_position.xy + vec2(1.0)) / vec2(2.0);
-  
-  vec4 vertex = uvToModel(uv, _radius, _segments);
-  
-  vec4 raw_pos   = psc_to_meter(vertex, _scaling);
-  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
-    
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  
-  vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
-  
-  vec3 v_b = normalize(boresight);
-  
-  if((inRange(projected.x, 0, 1) &&  
+    vec2 uv = (vs_position.xy + vec2(1.0)) / vec2(2.0);
+
+    vec4 vertex = uvToModel(uv, _radius, _segments);
+
+    vec4 raw_pos   = psc_to_meter(vertex, _scaling);
+    vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
+
+    projected.x /= projected.w;
+    projected.y /= projected.w;
+
+    vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
+
+    vec3 v_b = normalize(boresight);
+
+    if((inRange(projected.x, 0, 1) &&  
       inRange(projected.y, 0, 1)) &&
       dot(v_b, normal) < 0 )
-  {
+    {
     // The 1-x is in this texture call because of flipped textures
     // to be fixed soon ---abock
         color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
-  } else {
-    color = texture(baseTexture, uv);
-    color.a = 0.0;
-  }
+        color.a = 1.0;
+    }
 }

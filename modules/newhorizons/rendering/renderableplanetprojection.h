@@ -70,45 +70,37 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-    ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
+    ghoul::opengl::Texture* baseTexture() { return _projectionTexture.get(); };
 
 protected:
-
-    void loadTexture();
-    void loadProjectionTexture();
+    void loadTextures();
+    std::unique_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
     bool auxiliaryRendertarget();
     glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
     void attitudeParameters(double time);
 
-    void project();
     void clearAllProjections();
 
 private:
-    void imageProjectGPU();
+    void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
 
-    std::map<std::string, Decoder*> _fileTranslation;
-
-    properties::StringProperty  _colorTexturePath;
+    properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
 
-    properties::StringProperty  _projectionTexturePath;
     properties::IntProperty _rotation;
-    //properties::FloatProperty _fadeProjection;
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
-    std::unique_ptr<ghoul::opengl::Texture> _textureProj;
+    std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
     properties::FloatProperty _heightExaggeration;
-    properties::BoolProperty _enableNormalMapping;
 
-    planetgeometry::PlanetGeometry* _geometry;
+    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
     glm::vec2  _camScaling;
     glm::vec3  _up;
@@ -138,9 +130,6 @@ private:
     glm::vec3  _boresight;
 
     double _time;
-    double _previousTime;
-    double _previousCapture;
-    double lightTime;
 
     std::vector<Image> _imageTimes;
     int _sequenceID;
@@ -157,7 +146,6 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
-    bool _hasHeightMap;
 
     std::queue<Image> imageQueue;
 };

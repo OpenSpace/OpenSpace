@@ -41,6 +41,8 @@
 
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/rendering/renderengine.h>
@@ -77,33 +79,24 @@ namespace {
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
     const std::string sequenceTypeHybrid = "hybrid";
-
 }
 
 namespace openspace {
-
-//#define ORIGINAL_SEQUENCER
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("planetTexture", "RGB Texture")
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
-    , _projectionTexturePath("projectionTexture", "RGB Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
-    //, _fadeProjection("fadeProjections", "Image Fading Factor", 0.f, 0.f, 1.f)
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
-    , _enableNormalMapping("enableNormalMapping", "Enable Normal Mapping", true)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
-    , _texture(nullptr)
-    , _textureOriginal(nullptr)
-    , _textureProj(nullptr)
+    , _baseTexture(nullptr)
+    , _projectionTexture(nullptr)
     , _heightMapTexture(nullptr)
-    , _geometry(nullptr)
     , _capture(false)
-    , _hasHeightMap(false)
     , _clearingImage(absPath("${OPENSPACE_DATA}/scene/common/textures/clear.png"))
 {
     std::string name;
@@ -115,7 +108,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         keyGeometry, geometryDictionary);
     if (success) {
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+        using planetgeometry::PlanetGeometry;
+        _geometry = std::unique_ptr<PlanetGeometry>(
+            PlanetGeometry::createFromDictionary(geometryDictionary)
+        );
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -133,15 +129,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); 
     bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
     bool b8 = dictionary.getValue(keyInstrumentFar, _farPlane);
-
-    ghoul_assert(b1, "");
-    ghoul_assert(b2, "");
-    ghoul_assert(b3, "");
-    ghoul_assert(b4, "");
-    ghoul_assert(b5, "");
-    ghoul_assert(b6, "");
-    ghoul_assert(b7, "");
-    ghoul_assert(b8, "");
 
     // @TODO copy-n-paste from renderablefov ---abock
     ghoul::Dictionary potentialTargets;
@@ -162,36 +149,24 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (success){
         _colorTexturePath = absPath(texturePath); 
     }
-    success = dictionary.getValue("Textures.Project", texturePath);
-    if (success){
-        _projectionTexturePath = absPath(texturePath);
-    }
 
     std::string heightMapPath = "";
     success = dictionary.getValue("Textures.Height", heightMapPath);
-    if (success) {
+    if (success)
         _heightMapTexturePath = absPath(heightMapPath);
-        _hasHeightMap = true;
-    }
 
-    addPropertySubOwner(_geometry);
-    addProperty(_rotation);
-    //addProperty(_fadeProjection);
+    addPropertySubOwner(_geometry.get());
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
 
 
     addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
+    _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
 
     addProperty(_heightMapTexturePath);
-    _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTexture, this));
-
-    addProperty(_projectionTexturePath);
-    _projectionTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadProjectionTexture, this));
+    _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
 
     addProperty(_heightExaggeration);
-    addProperty(_enableNormalMapping);
 
     SequenceParser* parser;
 
@@ -274,13 +249,10 @@ bool RenderablePlanetProjection::initialize() {
         "${MODULE_NEWHORIZONS}/shaders/fboPass_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/fboPass_fs.glsl"
     );
-    
-    loadTexture();
-    loadProjectionTexture();
-    completeSuccess &= (_texture != nullptr);
-    completeSuccess &= (_textureOriginal != nullptr);
-    completeSuccess &= (_textureProj != nullptr);
 
+    loadTextures();
+    completeSuccess &= (_baseTexture != nullptr);
+    completeSuccess &= (_projectionTexture != nullptr);
     completeSuccess &= _geometry->initialize(this);
 
     if (completeSuccess)
@@ -291,8 +263,6 @@ bool RenderablePlanetProjection::initialize() {
 
 bool RenderablePlanetProjection::auxiliaryRendertarget() {
     bool completeSuccess = true;
-    if (!_texture)
-        return false;
 
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -300,7 +270,7 @@ bool RenderablePlanetProjection::auxiliaryRendertarget() {
     // setup FBO
     glGenFramebuffers(1, &_fboID);
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_projectionTexture, 0);
     // check FBO status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -336,10 +306,7 @@ bool RenderablePlanetProjection::auxiliaryRendertarget() {
 }
 
 bool RenderablePlanetProjection::deinitialize() {
-    _texture = nullptr;
-    _textureProj = nullptr;
-    _textureOriginal = nullptr;
-    delete _geometry;
+    _baseTexture = nullptr;
     _geometry = nullptr;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -348,15 +315,15 @@ bool RenderablePlanetProjection::deinitialize() {
         _programObject = nullptr;
     }
 
+    _fboProgramObject = nullptr;
+
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
-    return _geometry && _programObject && _texture;
+    return _geometry && _programObject && _baseTexture && _projectionTexture;
 }
 
-void RenderablePlanetProjection::imageProjectGPU() {
-    glDisable(GL_DEPTH_TEST);
-
+void RenderablePlanetProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture) {
     // keep handle to the current bound FBO
     GLint defaultFBO;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
@@ -365,24 +332,15 @@ void RenderablePlanetProjection::imageProjectGPU() {
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     //counter = 0;
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    // set blend eq
-    glEnable(GL_BLEND);
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ZERO);
 
-    glViewport(0, 0, static_cast<GLsizei>(_texture->width()), static_cast<GLsizei>(_texture->height()));
+    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
     unitFbo.activate();
-    _textureProj->bind();
+    projectionTexture->bind();
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
         
-    ghoul::opengl::TextureUnit unitFbo2;
-    unitFbo2.activate();
-    _textureOriginal->bind();
-    _fboProgramObject->setUniform("baseTexture", unitFbo2);
-
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform" , _transform);
     _fboProgramObject->setUniform("_scaling"       , _camScaling);
@@ -408,14 +366,11 @@ void RenderablePlanetProjection::imageProjectGPU() {
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _fboProgramObject->deactivate();
-    //glDisable(GL_BLEND);
 
     //bind back to default
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
                 m_viewport[2], m_viewport[3]);
-
-    glEnable(GL_DEPTH_TEST);
 }
 
 glm::mat4 RenderablePlanetProjection::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up) {
@@ -469,6 +424,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         return;
     }
 
+    double lightTime;
     glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
@@ -480,52 +436,32 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     _projectorMatrix = computeProjectorMatrix(cpos, bs, _up);
 }
 
-void RenderablePlanetProjection::project() {
-    // If high dt -> results in GPU queue overflow
-    // switching to using a simple queue to distribute
-    // images 1 image / frame -> projections appear slower
-    // but less viewable lagg for the sim overall.
-
-    // Comment out if not using queue and prefer old method -------------
-    // + in update() function
-    //if (!imageQueue.empty()){
-    //    Image& img = imageQueue.front();
-    //    RenderablePlanetProjection::attitudeParameters(img.startTime);
-    //    // if image has new path - ie actual image, NOT placeholder
-    //    if (_projectionTexturePath.value() != img.path){
-    //        // rebind and upload 
-    //        _projectionTexturePath = img.path; 
-    //    }
-    //    imageProjectGPU(); // fbopass
-    //    imageQueue.pop();
-    //}
-    // ------------------------------------------------------------------
-
-    //---- Old method --- // 
-    // @mm
-    for (const Image& img : _imageTimes) {
-            RenderablePlanetProjection::attitudeParameters(img.startTime);
-            if (_projectionTexturePath.value() != img.path){
-                _projectionTexturePath = img.path; // path to current images
-            }
-            imageProjectGPU(); // fbopass
-    }
-    _capture = false;
-}
-
 void RenderablePlanetProjection::clearAllProjections() {
-    //float tmp = _fadeProjection;
-    //_fadeProjection = 1.f;
-    _projectionTexturePath = _clearingImage;
-    imageProjectGPU();
-    //_fadeProjection = tmp;
+    // keep handle to the current bound FBO
+    GLint defaultFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+
+    GLint m_viewport[4];
+    glGetIntegerv(GL_VIEWPORT, m_viewport);
+    //counter = 0;
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+
+    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
+    _fboProgramObject->activate();
+
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //bind back to default
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(m_viewport[0], m_viewport[1],
+               m_viewport[2], m_viewport[3]);
+
     _clearAllProjections = false;
 }
 
 void RenderablePlanetProjection::render(const RenderData& data) {
     if (!_programObject)
-        return;
-    if (!_textureProj)
         return;
     
     if (_clearAllProjections)
@@ -534,8 +470,13 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVector();
 
-    if (_capture && _performProjection)
-        project();
+    if (_capture && _performProjection) {
+        for (const Image& img : _imageTimes) {
+            RenderablePlanetProjection::attitudeParameters(img.startTime);
+            imageProjectGPU(loadProjectionTexture(img.path));
+        }
+        _capture = false;
+    }
     attitudeParameters(_time);
     _imageTimes.clear();
 
@@ -546,41 +487,40 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     // Main renderpass
     _programObject->activate();
-    // setup the data to the shader
     _programObject->setUniform("sun_pos", sun_pos.vec3());
     _programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform" , _transform);
 
-    _programObject->setUniform("_hasHeightMap", _hasHeightMap);
+    _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
 
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
-    ghoul::opengl::TextureUnit unit[2];
+    ghoul::opengl::TextureUnit unit[3];
     unit[0].activate();
-    _texture->bind();
+    _baseTexture->bind();
     _programObject->setUniform("baseTexture", unit[0]);
 
-    if (_hasHeightMap) {
-        unit[1].activate();
+    unit[1].activate();
+    _projectionTexture->bind();
+    _programObject->setUniform("projectionTexture", unit[1]);
+
+    if (_heightMapTexture) {
+        unit[2].activate();
         _heightMapTexture->bind();
-        _programObject->setUniform("heightTexture", unit[1]);
+        _programObject->setUniform("heightTexture", unit[2]);
     }
     
-    // render geometry
     _geometry->render();
-    // disable shader
     _programObject->deactivate();
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data) {
-    //if (data.isTimeJump) {
     if (_time >= Time::ref().currentTime()) {
         // if jump back in time -> empty queue.  
         imageQueue = std::queue<Image>();
     }
 
-    //_time = data.time;
     _time = Time::ref().currentTime();
     _capture = false;
 
@@ -593,55 +533,43 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _fboProgramObject->rebuildFromFile();
     }
 
-    // remove these lines if not using queue ------------------------
-    // @mm
-    //_capture = true;
-    //for (auto img : _imageTimes){
-    //    imageQueue.push(img);
-    //}
-    //_imageTimes.clear();
-    // --------------------------------------------------------------
-
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
 }
 
-void RenderablePlanetProjection::loadProjectionTexture() {
-    _textureProj = nullptr;
-    if (_projectionTexturePath.value() != "") {
-        _textureProj = ghoul::io::TextureReader::ref().loadTexture(absPath(_projectionTexturePath));
-        if (_textureProj) {
-            ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *_textureProj);
-            _textureProj->uploadTexture(); 
-            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-            //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            _textureProj->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-            _textureProj->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        }
+std::unique_ptr<ghoul::opengl::Texture> RenderablePlanetProjection::loadProjectionTexture(const std::string& texturePath) {
+    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath));
+    if (texture) {
+        ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *texture);
+        texture->uploadTexture();
+        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
     }
+    return texture;
 }
 
-void RenderablePlanetProjection::loadTexture() {
+void RenderablePlanetProjection::loadTextures() {
     using ghoul::opengl::Texture;
-    _texture = nullptr;
+    _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
-        if (_texture) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_texture);
-            _texture->uploadTexture();
-            _texture->setFilter(Texture::FilterMode::Linear);
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        if (_baseTexture) {
+            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_baseTexture);
+            _baseTexture->uploadTexture();
+            _baseTexture->setFilter(Texture::FilterMode::Linear);
         }
     }
-    _textureOriginal = nullptr;
-    if (_colorTexturePath.value() != "") {
-        _textureOriginal = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
-        if (_textureOriginal) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_textureOriginal);
 
-            _textureOriginal->uploadTexture();
-            _textureOriginal->setFilter(Texture::FilterMode::Linear);
-        }
-    }
+    int maxSize = OpenGLCap.max2DTextureSize() / 2;
+
+    LINFO("Creating projection texture of size '" << maxSize << ", " << maxSize/2 << "'");
+    _projectionTexture = std::make_unique<Texture>(
+        glm::uvec3(maxSize, maxSize / 2, 1),
+        Texture::Format::RGBA
+    );
+    _projectionTexture->uploadTexture();
 
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {
