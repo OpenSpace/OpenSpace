@@ -38,6 +38,8 @@
 #include <fstream>
 #include <streambuf>
 
+#include "cpl_minixml.h"
+
 
 
 namespace {
@@ -47,7 +49,7 @@ namespace {
 
 namespace openspace {
 
-    const std::string TemporalTileProvider::TIME_PLACEHOLDER("${t}");
+    const std::string TemporalTileProvider::TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
     TemporalTileProvider::TemporalTileProvider(const std::string& datasetFile, 
         const TileProviderInitData& tileProviderInitData)
@@ -58,10 +60,34 @@ namespace openspace {
         ghoul_assert(errno == 0, strerror(errno) << std::endl << datasetFile);
 
         // read file
-        std::string str( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
-        _dataSourceXmlTemplate = std::string(str);
+        std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
+        _gdalXmlTemplate = consumeTemporalMetaData(xml);
     }
 
+    std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
+        CPLXMLNode* node = CPLParseXMLString(xml.c_str());
+        
+        std::string timeStart = getXMLValue(node, "OpenSpaceTimeStart", "2015 NOV 24");
+        std::string timeResolution = getXMLValue(node, "OpenSpaceTimeResolution", "1d");
+        std::string timeEnd = getXMLValue(node, "OpenSpaceTimeEnd", "Now");
+        std::string timeIdFormat = getXMLValue(node, "OpenSpaceTimeIdFormat", "YYYY-MM-DDThh:mm:ssZ");
+
+        _timeFormat = TimeIdProviderFactory::getProvider(timeIdFormat);
+
+        CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
+        return CPLSerializeXMLTree(gdalNode);
+    }
+
+
+    std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key, const std::string& defaultVal) {
+        CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
+        if (n == nullptr || n->psChild == nullptr || n->psChild->pszValue == nullptr) {
+            return defaultVal;
+        }
+        else {
+            return std::string(n->psChild->pszValue);
+        }
+    }
 
     Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
         return getTileProvider()->getHighestResolutionTile(chunkIndex, parents);
@@ -77,7 +103,7 @@ namespace openspace {
 
 
     std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
-        TimeKey timekey = getTimeKey(t);
+        TimeKey timekey = _timeFormat->stringify(t);
         auto it = _tileProviderMap.find(timekey);
         if (it != _tileProviderMap.end()) {
             return it->second;
@@ -108,19 +134,14 @@ namespace openspace {
 
         return tileProvider;
     }
-
-    TemporalTileProvider::TimeKey TemporalTileProvider::getTimeKey(const Time& t) {
-        std::string datestring = t.ISO8601();
-        datestring = datestring.substr(0, 10);
-        return datestring;
-    }
-
+    
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
-        return getGdalDatasetXML(getTimeKey(t));
+        TimeKey timekey = _timeFormat->stringify(t);
+        return getGdalDatasetXML(timekey);
     }
 
     std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
-        std::string xmlTemplate(_dataSourceXmlTemplate);
+        std::string xmlTemplate(_gdalXmlTemplate);
         size_t pos = xmlTemplate.find(TIME_PLACEHOLDER);
         size_t numChars = TIME_PLACEHOLDER.length();
         ghoul_assert(pos != std::string::npos, "Invalid dataset file");
@@ -128,5 +149,43 @@ namespace openspace {
         return timeSpecifiedXml;
     }
 
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                 Time Id Providers                                //
+    //////////////////////////////////////////////////////////////////////////////////////
+    std::string YYYY_MM_DD::stringify(const Time& t) const {
+        return t.ISO8601().substr(0, 10);
+    }
+
+    std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
+        return t.ISO8601().substr(0, 19) + "Z";
+    }
+
+    
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Time Id Providers Facotry                             //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    bool TimeIdProviderFactory::initialized = false;
+
+    std::unordered_map<std::string, TimeFormat*> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, TimeFormat*>();
+
+
+    void TimeIdProviderFactory::init() {
+        _timeIdProviderMap.insert({ "YYYY-MM-DD", new YYYY_MM_DD });
+        _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", new YYYY_MM_DDThh_mm_ssZ });
+        initialized = true;
+    }
+
+    TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
+        if (!initialized) {
+            init();
+        }
+        return _timeIdProviderMap[format];
+    }
 
 }  // namespace openspace

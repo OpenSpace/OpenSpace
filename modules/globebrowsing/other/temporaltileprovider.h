@@ -44,7 +44,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-   
+
+       
     struct TileProviderInitData {
         int minimumPixelSize;
         int threads;
@@ -52,47 +53,79 @@ namespace openspace {
         int framesUntilRequestQueueFlush;
     };
 
-    
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                 Time Id Providers                                //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    struct TimeFormat {
+        virtual std::string stringify(const Time& t) const = 0;
+    };
+
+    struct YYYY_MM_DD : public TimeFormat {
+        virtual std::string stringify(const Time& t) const;
+    };
+
+    struct YYYY_MM_DDThh_mm_ssZ : public TimeFormat {
+        virtual std::string stringify(const Time& t) const;
+    };
+
+
+
+    struct TimeIdProviderFactory {
+        static TimeFormat* getProvider(const std::string& format);
+        static void init();
+
+        static std::unordered_map<std::string, TimeFormat*> _timeIdProviderMap;
+        static bool initialized;
+    };
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                              Temporal tile Provider                              //
+    //////////////////////////////////////////////////////////////////////////////////////
+
     class TemporalTileProvider : public TileProvider {
     public:
         TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
 
-
         // These methods implements TileProvider
+
         virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
         virtual TileDepthTransform depthTransform();
         virtual void prerender();
 
 
-        // Provider other convenient methods
-
         std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
 
     private:
+
+        static const std::string TIME_PLACEHOLDER;
 
         typedef std::string TimeKey;
 
         std::string getGdalDatasetXML(Time t);
         std::string getGdalDatasetXML(TimeKey key);
 
-        static const std::string TIME_PLACEHOLDER;
-
-        TimeKey getTimeKey(const Time& t);
-
+        
         std::shared_ptr<CachingTileProvider> initTileProvider(TimeKey timekey);
 
+        std::string consumeTemporalMetaData(const std::string &xml);
+        std::string getXMLValue(CPLXMLNode*, const std::string& key, const std::string& defaultVal);
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Members variables                             //
         //////////////////////////////////////////////////////////////////////////////////
 
         const std::string _datasetFile;
-        
-        std::string _dataSourceXmlTemplate;
+        std::string _gdalXmlTemplate;
 
         std::unordered_map<TimeKey, std::shared_ptr<CachingTileProvider> > _tileProviderMap;
-
         TileProviderInitData _tileProviderInitData;
+
+        TimeFormat * _timeFormat;
 
     };
 
