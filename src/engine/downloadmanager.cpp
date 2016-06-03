@@ -63,13 +63,6 @@ namespace {
         return written;
     }
 
-
-    size_t writeToMemory(void *contents, size_t size, size_t nmemb, void *userp)
-    {
-        ((std::string*)userp)->append((char*)contents, size * nmemb);
-        return size * nmemb;
-    }
-
     size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp){
         size_t realsize = size * nmemb;
         openspace::DownloadManager::MemoryFile *mem = (openspace::DownloadManager::MemoryFile *)userp;
@@ -222,66 +215,6 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     return future;
 }
 
-
-std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadToMemory(
-    const std::string& url, std::string& memoryBuffer,
-    DownloadFinishedCallback finishedCallback)
-{
-
-    std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(std::string("memory"));
-    LDEBUG("Start downloading file: '" << url << "' into memory");
-    
-    auto downloadFunction = [url, finishedCallback, future, &memoryBuffer]() {
-        CURL* curl = curl_easy_init();
-        if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &memoryBuffer);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeToMemory);
-            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
-            
-            CURLcode res = curl_easy_perform(curl);
-            if(res == CURLE_OK){
-                // ask for the content-type
-                char *ct;
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-                if (res == CURLE_OK){
-                    future->format = std::string(ct);
-                    future->isFinished = true;
-                }
-            } else {
-                future->errorMessage = curl_easy_strerror(res);
-                future->isAborted = true;
-            }
-
-            if (finishedCallback)
-                finishedCallback(*future);
-
-            curl_easy_cleanup(curl);
-            
-        }
-    };
-    
-    if (_useMultithreadedDownload) {
-        std::thread t = std::thread(downloadFunction);
-     
-#ifdef WIN32
-        std::thread::native_handle_type h = t.native_handle();
-        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
-#else
-        // TODO: Implement thread priority ---abock
-#endif
-        
-        t.detach();
-    }
-    else {
-        downloadFunction();
-    }
-
-    return future;
-}
-
 std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     const std::string& url,
     SuccessCallback successCallback, ErrorCallback errorCallback)
@@ -325,7 +258,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 std::string err = curl_easy_strerror(res);
                 errorCallback(err);
                 curl_easy_cleanup(curl);
-                // Throw an error and use try-catch around future.get() call
+                // Throw an error and use try-catch around call to future.get()
                 //throw std::runtime_error( err );
 
                 // or set a boolean variable in MemoryFile to determine if it is valid/corrupted or not.

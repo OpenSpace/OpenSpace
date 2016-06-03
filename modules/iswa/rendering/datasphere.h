@@ -53,9 +53,6 @@ protected:
     void renderGeometry() const override;
     void setUniforms() override;
     std::vector<float*> textureData() override;
-
-private:
-
     void subscribeToGroup();
 
     properties::StringProperty _transferFunctionsFile;

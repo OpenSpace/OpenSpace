@@ -146,7 +146,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         // Download metadata
         DlManager.fetchFile(
             "http://128.183.168.116:3000/" + std::to_string(-id),
-            // "http://10.0.0.76:3000/" + std::to_string(-id),
+            // "http://localhost:3000/" + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
@@ -206,7 +206,7 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     std::string url;
     if(id < 0){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
-        // url = "http://10.0.0.76:3000/"+type+"/" + std::to_string(-id) + "/";
+        // url = "http://localhost:3000/"+type+"/" + std::to_string(-id) + "/";
     } else{
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
@@ -270,19 +270,17 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
-    DlManager.downloadToMemory(
-                "http://128.183.168.116:3000/" + std::to_string(-id),
-                // "http://10.0.0.76:3000/" + std::to_string(-id),
-                metaFuture->json,
-                [metaFuture](const DownloadManager::FileFuture& f){
-                    if(f.isFinished){
-                        metaFuture->isFinished;
-                        LDEBUG("Download to memory finished");
-                    } else if (f.isAborted){
-                        LWARNING("Download to memory was aborted: " + f.errorMessage);
-                    }
-                }
-            );
+    DlManager.fetchFile(
+        "http://128.183.168.116:3000/" + std::to_string(-id),
+        // "http://localhost:3000/" + std::to_string(-id),
+        [&metaFuture](const DownloadManager::MemoryFile& file){
+            metaFuture->json = std::string(file.buffer, file.size);
+            metaFuture->isFinished = true;
+        },
+        [](const std::string& err){
+            LWARNING("Download Metadata to memory was aborted: " + err);
+        }
+    );
     return metaFuture;
 }
 

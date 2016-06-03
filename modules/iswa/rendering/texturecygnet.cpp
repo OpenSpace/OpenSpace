@@ -49,7 +49,6 @@ bool TextureCygnet::updateTexture() {
 
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
-
         texture->uploadTexture();
         // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
@@ -83,17 +82,19 @@ bool TextureCygnet::updateTextureResource(){
     DownloadManager::MemoryFile imageFile;
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
         imageFile = _futureObject.get();
+
+        if(imageFile.corrupted){
+            if(imageFile.buffer)
+                delete[] imageFile.buffer;
+            return false;
+        } else {
+            _imageFile = imageFile;
+        }
     } else {
         return false;
     }
 
-    if(imageFile.corrupted){
-        return false;
-    } else {
-        _imageFile = imageFile;
-    }
     return true;
-    //delete[] imageFile.buffer;
 }
 
 bool TextureCygnet::readyToRender() const {

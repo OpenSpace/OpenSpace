@@ -106,8 +106,7 @@ bool DataCygnet::updateTextureResource(){
      if(dataFile.corrupted)
         return false;
 
-    _dataBuffer = "";
-    _dataBuffer.append(dataFile.buffer, dataFile.size);
+    _dataBuffer = std::string(dataFile.buffer, dataFile.size);
     delete[] dataFile.buffer;
 
     return true;

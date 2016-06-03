@@ -30,12 +30,10 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.h
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.h
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.h
@@ -53,11 +51,9 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorkameleon.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswacygnet.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/dataplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/textureplane.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/kameleonplane.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/rendering/cygnetsphere.cpp	
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/datasphere.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspacecygnet.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/rendering/iswabasegroup.cpp

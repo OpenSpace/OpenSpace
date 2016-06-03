@@ -31,15 +31,11 @@
 #include <memory>
 #include <chrono>
 #include <modules/iswa/util/iswamanager.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <ghoul/designpattern/event.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 
