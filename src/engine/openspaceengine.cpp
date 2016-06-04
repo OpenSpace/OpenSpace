@@ -370,6 +370,7 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(LuaConsole::luaLibrary());
     _scriptEngine->addLibrary(gui::GUI::luaLibrary());
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
+    _scriptEngine->addLibrary(ModuleEngine::luaLibrary());
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _scriptEngine->addLibrary(IswaManager::luaLibrary());

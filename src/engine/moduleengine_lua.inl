@@ -22,79 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/moduleengine.h>
-
-#include <openspace/moduleregistration.h>
-#include <openspace/util/openspacemodule.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <algorithm>
-
-#include "moduleengine_lua.inl"
-
-namespace {
-    const std::string _loggerCat = "ModuleEngine";
-}
+#include <openspace/engine/openspaceengine.h>
+#include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace {
+namespace luascriptfunctions {
 
-void ModuleEngine::initialize() {
-    for (OpenSpaceModule* m : AllModules)
-        registerModule(std::unique_ptr<OpenSpaceModule>(m));
-}
+/**
+ * \ingroup LuaScripts
+ * isLoaded(string):
+ * Checks whether the passed OpenSpaceModule is loaded or not
+ */
+int isLoaded(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-void ModuleEngine::deinitialize() {
-    LDEBUG("Deinitializing modules");
-    for (auto& m : _modules) {
-        LDEBUG("Deinitialieing module '" << m->name() << "'");
-        m->deinitialize();
-    }
-    _modules.clear();
-    LDEBUG("Finished destroying modules");
-}
+    const int type = lua_type(L, -1);
+    if (type != LUA_TSTRING)
+        return luaL_error(L, "Expected argument of type 'string'");
+    std::string moduleName = lua_tostring(L, -1);
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
-    ghoul_assert(module, "Module must not be nullptr");
+    std::vector<OpenSpaceModule*> modules = OsEng.moduleEngine().modules();
     
     auto it = std::find_if(
-        _modules.begin(),
-        _modules.end(),
-        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->name() == module->name();
+        modules.begin(),
+        modules.end(),
+        [moduleName](OpenSpaceModule* module) {
+            return module->name() == moduleName;
         }
     );
-    if (it != _modules.end()) {
-        throw ghoul::RuntimeError(
-            "Module name '" + module->name() + "' was registered before", "ModuleEngine"
-        );
-    }
-    
-    LDEBUG("Registering module '" << module->name() << "'");
-    module->initialize();
-    _modules.push_back(std::move(module));
+
+    if (it != modules.end())
+        lua_pushboolean(L, 1);
+    else
+        lua_pushboolean(L, 0);
+
+    return 1;
 }
 
-std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
-    std::vector<OpenSpaceModule*> result;
-    for (auto& m : _modules)
-        result.push_back(m.get());
-    return result;
-}
-
-scripting::ScriptEngine::LuaLibrary ModuleEngine::luaLibrary() {
-    return {
-        "modules",
-        {
-            {
-                "isLoaded",
-                &luascriptfunctions::isLoaded,
-                "string",
-                "Checks whether a specific module is loaded"
-            }
-        }
-
-    };
-}
-
+} // namespace luascriptfunctions
 } // namespace openspace
