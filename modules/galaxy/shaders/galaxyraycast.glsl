@@ -87,7 +87,7 @@ void sample#{id}(vec3 samplePos,
     accumulatedColor += oneMinusFrontAlpha * backColor;
     accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
 
-    acc+= 1.0;
+    // acc+= 1.0;
 
     //accumulatedColor = vec3(opacityCoefficient#{id});
 }
