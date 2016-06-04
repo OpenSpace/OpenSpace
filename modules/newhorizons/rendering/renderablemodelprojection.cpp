@@ -121,13 +121,13 @@ bool RenderableModelProjection::initialize() {
         
     RenderEngine& renderEngine = OsEng.renderEngine();
     _programObject = renderEngine.buildRenderProgram("ModelShader",
-        "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
+        "${MODULE_NEWHORIZONS}/shaders/renderableModel_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/renderableModel_fs.glsl");
 
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
-        "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
+        "${MODULE_NEWHORIZONS}/shaders/renderableModelProjection_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/renderableModelProjection_fs.glsl");
     _fboProgramObject->setIgnoreUniformLocationError(
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );

@@ -310,7 +310,7 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
     _projectionTexture = std::make_unique<ghoul::opengl::Texture> (
         glm::uvec3(maxSize, maxSize / 2, 1),
         ghoul::opengl::Texture::Format::RGBA
-        );
+    );
     if (_projectionTexture)
         _projectionTexture->uploadTexture();
     

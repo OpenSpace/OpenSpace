@@ -119,13 +119,13 @@ bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
 
     _programObject = OsEng.renderEngine().buildRenderProgram("projectiveProgram",
-        "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_fs.glsl"
+        "${MODULE_NEWHORIZONS}/shaders/renderablePlanet_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/renderablePlanet_fs.glsl"
     );
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
-        "${MODULE_NEWHORIZONS}/shaders/fboPass_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/fboPass_fs.glsl"
+        "${MODULE_NEWHORIZONS}/shaders/renderablePlanetProjection_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/renderablePlanetProjection_fs.glsl"
     );
 
     completeSuccess &= loadTextures();
