@@ -32,7 +32,6 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
@@ -53,13 +52,12 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture* baseTexture() { return _projectionTexture.get(); };
 
 protected:
-    void loadTextures();
+    bool loadTextures();
     void attitudeParameters(double time);
 
 
@@ -81,41 +79,21 @@ private:
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
-    glm::vec2  _camScaling;
-    glm::vec3  _up;
-    glm::mat4  _transform;
-    glm::mat4  _projectorMatrix;
-
-    //sequenceloading
-    std::string _sequenceSource;
-    std::string _sequenceType;
-    bool _foundSequence;
-
-    // spice
-    std::string _instrumentID;
-    std::string _projectorID;
-    std::string _projecteeID;
-    SpiceManager::AberrationCorrection _aberration;
-    std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
-
-
-    float _fovy;
-    float _aspectRatio;
-    float _nearPlane;
-    float _farPlane;
+    glm::vec2 _camScaling;
+    glm::vec3 _up;
+    glm::mat4 _transform;
+    glm::mat4 _projectorMatrix;
 
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
-    glm::vec3  _boresight;
+    glm::vec3 _boresight;
 
     double _time;
 
     std::vector<Image> _imageTimes;
-    int _sequenceID;
 
     std::string _target;
     std::string _frame;
-    std::string _next;
 
     bool _capture;
 

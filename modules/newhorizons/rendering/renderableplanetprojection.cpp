@@ -25,9 +25,6 @@
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
 
 #include <modules/base/rendering/planetgeometry.h>
-#include <modules/newhorizons/util/hongkangparser.h>
-#include <modules/newhorizons/util/labelparser.h>
-#include <modules/newhorizons/util/sequenceparser.h>
 
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -41,29 +38,13 @@
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
-    const std::string keyProjObserver         = "Projection.Observer";
-    const std::string keyProjTarget           = "Projection.Target";
-    const std::string keyProjAberration       = "Projection.Aberration";
-    const std::string keyInstrument           = "Instrument.Name";
-    const std::string keyInstrumentFovy       = "Instrument.Fovy";
-    const std::string keyInstrumentAspect     = "Instrument.Aspect";
-    const std::string keyInstrumentNear       = "Instrument.Near";
-    const std::string keyInstrumentFar        = "Instrument.Far";
-    const std::string keySequenceDir          = "Projection.Sequence";
-    const std::string keySequenceType         = "Projection.SequenceType";
     const std::string keyPotentialTargets     = "PotentialTargets";
-    const std::string keyTranslation          = "DataInputTranslation";
-
-
 
     const std::string keyFrame = "Frame";
     const std::string keyGeometry = "Geometry";
     const std::string keyShading = "PerformShading";
     const std::string keyBody = "Body";
     const std::string _mainFrame = "GALACTIC";
-    const std::string sequenceTypeImage = "image-sequence";
-    const std::string sequenceTypePlaybook = "playbook";
-    const std::string sequenceTypeHybrid = "hybrid";
 }
 
 namespace openspace {
@@ -100,16 +81,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (_target != "")
         setBody(_target);
 
-    bool b1 = dictionary.getValue(keyInstrument, _instrumentID);
-    bool b2 = dictionary.getValue(keyProjObserver, _projectorID);
-    bool b3 = dictionary.getValue(keyProjTarget, _projecteeID);
-    std::string a = "NONE";
-    bool b4 = dictionary.getValue(keyProjAberration, a);
-    _aberration = SpiceManager::AberrationCorrection(a);
-    bool b5 = dictionary.getValue(keyInstrumentFovy, _fovy);        
-    bool b6 = dictionary.getValue(keyInstrumentAspect, _aspectRatio); 
-    bool b7 = dictionary.getValue(keyInstrumentNear, _nearPlane);
-    bool b8 = dictionary.getValue(keyInstrumentFar, _farPlane);
+    success = initializeProjectionSettings(dictionary);
+    ghoul_assert(success, "");
 
     // @TODO copy-n-paste from renderablefov ---abock
     ghoul::Dictionary potentialTargets;
@@ -150,93 +123,32 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_projectionFading);
     addProperty(_heightExaggeration);
 
-    SequenceParser* parser;
-
-   // std::string sequenceSource;
-    bool _foundSequence = dictionary.getValue(keySequenceDir, _sequenceSource);
-    if (_foundSequence) {
-        _sequenceSource = absPath(_sequenceSource);
-
-        _foundSequence = dictionary.getValue(keySequenceType, _sequenceType);
-        //Important: client must define translation-list in mod file IFF playbook
-        if (dictionary.hasKey(keyTranslation)){
-            ghoul::Dictionary translationDictionary;
-            //get translation dictionary
-            dictionary.getValue(keyTranslation, translationDictionary);
-
-            if (_sequenceType == sequenceTypePlaybook) {
-                parser = new HongKangParser(name,
-                                            _sequenceSource,
-                                            _projectorID,
-                                            translationDictionary,
-                                            _potentialTargets);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-            }
-            else if (_sequenceType == sequenceTypeImage) {
-                parser = new LabelParser(name,
-                                         _sequenceSource,
-                                         translationDictionary);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-            }
-            else if (_sequenceType == sequenceTypeHybrid) {
-                //first read labels
-                parser = new LabelParser(name,
-                                         _sequenceSource,
-                                         translationDictionary);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-
-                std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
-                if (foundEventFile){
-                    //then read playbook
-                    _eventFile = absPath(_eventFile);
-                    parser = new HongKangParser(name,
-                                                _eventFile,
-                                                _projectorID,
-                                                translationDictionary,
-                                                _potentialTargets);
-                    openspace::ImageSequencer::ref().runSequenceParser(parser);
-                }
-                else{
-                    LWARNING("No eventfile has been provided, please check modfiles");
-                }
-            }
-        }
-        else{
-            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
-        }
-    }
+    success = initializeParser(dictionary);
+    ghoul_assert(success, "");
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
 
 bool RenderablePlanetProjection::initialize() {
     bool completeSuccess = true;
-    if (_programObject == nullptr) {
-        // projection program
 
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _programObject = renderEngine.buildRenderProgram("projectiveProgram",
-            "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_vs.glsl",
-            "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_fs.glsl"
-        );
-
-        if (!_programObject)
-            return false;
-    }
+    _programObject = OsEng.renderEngine().buildRenderProgram("projectiveProgram",
+        "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/projectiveTexture_fs.glsl"
+    );
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build("fboPassProgram",
         "${MODULE_NEWHORIZONS}/shaders/fboPass_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/fboPass_fs.glsl"
     );
 
-    loadTextures();
-    completeSuccess &= (_baseTexture != nullptr);
-    completeSuccess &= (_projectionTexture != nullptr);
+    completeSuccess &= loadTextures();
+    completeSuccess &= ProjectionComponent::initialize();
+
     completeSuccess &= _geometry->initialize(this);
 
     if (completeSuccess) {
-        completeSuccess &= auxiliaryRendertarget();
+        //completeSuccess &= auxiliaryRendertarget();
         // SCREEN-QUAD 
         const GLfloat size = 1.f;
         const GLfloat w = 1.f;
@@ -266,14 +178,15 @@ bool RenderablePlanetProjection::initialize() {
 }
 
 bool RenderablePlanetProjection::deinitialize() {
+    ProjectionComponent::deinitialize();
     _baseTexture = nullptr;
     _geometry = nullptr;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_programObject) {
-        renderEngine.removeRenderProgram(_programObject);
-        _programObject = nullptr;
-    }
+    glDeleteVertexArrays(1, &_quad);
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+
+    OsEng.renderEngine().removeRenderProgram(_programObject);
+    _programObject = nullptr;
 
     _fboProgramObject = nullptr;
 
@@ -283,17 +196,11 @@ bool RenderablePlanetProjection::isReady() const {
     return _geometry && _programObject && _baseTexture && _projectionTexture;
 }
 
-void RenderablePlanetProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture) {
-    // keep handle to the current bound FBO
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+void RenderablePlanetProjection::imageProjectGPU(
+                                std::unique_ptr<ghoul::opengl::Texture> projectionTexture)
+{
+    imageProjectBegin();
 
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);
-    //counter = 0;
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
@@ -327,22 +234,33 @@ void RenderablePlanetProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _fboProgramObject->deactivate();
 
-    //bind back to default
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-                m_viewport[2], m_viewport[3]);
+    imageProjectEnd();
 }
 
 void RenderablePlanetProjection::attitudeParameters(double time) {
     // precomputations for shader
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
-    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _mainFrame, time);
+    _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
+        _instrumentID, _mainFrame, time
+    );
 
     _transform = glm::mat4(1);
     //90 deg rotation w.r.t spice req. 
-    glm::mat4 rot = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-    glm::mat4 roty = glm::rotate(_transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-    glm::mat4 rotProp = glm::rotate(_transform, static_cast<float>(glm::radians(static_cast<float>(_rotation))), glm::vec3(0, 1, 0));
+    glm::mat4 rot = glm::rotate(
+        _transform,
+        static_cast<float>(M_PI_2),
+        glm::vec3(1, 0, 0)
+    );
+    glm::mat4 roty = glm::rotate(
+        _transform,
+        static_cast<float>(M_PI_2),
+        glm::vec3(0, -1, 0)
+    );
+    glm::mat4 rotProp = glm::rotate(
+        _transform,
+        static_cast<float>(glm::radians(static_cast<float>(_rotation))),
+        glm::vec3(0, 1, 0)
+    );
 
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
@@ -362,7 +280,9 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     }
 
     double lightTime;
-    glm::dvec3 p = SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime);
+    glm::dvec3 p = SpiceManager::ref().targetPosition(
+        _projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime
+    );
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
     //change to KM and add psc camera scaling. 
@@ -371,13 +291,11 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     glm::vec3 cpos = position.vec3();
 
     _projectorMatrix = computeProjectorMatrix(cpos, bs, _up, _instrumentMatrix, 
-                                              _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight);
+        _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight
+    );
 }
 
 void RenderablePlanetProjection::render(const RenderData& data) {
-    if (!_programObject)
-        return;
-    
     if (_clearAllProjections)
         clearAllProjections();
 
@@ -431,23 +349,26 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 }
 
 void RenderablePlanetProjection::update(const UpdateData& data) {
-    _time = Time::ref().currentTime();
-    _capture = false;
-
-    if (openspace::ImageSequencer::ref().isReady() && _performProjection){
-        openspace::ImageSequencer::ref().updateSequencer(_time);
-        _capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
-    }
-
-    if (_fboProgramObject && _fboProgramObject->isDirty()) {
+    if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
     }
 
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
+
+    _time = Time::ref().currentTime();
+    _capture = false;
+
+    if (openspace::ImageSequencer::ref().isReady() && _performProjection){
+        openspace::ImageSequencer::ref().updateSequencer(_time);
+        _capture = openspace::ImageSequencer::ref().getImagePaths(
+            _imageTimes, _projecteeID, _instrumentID
+        );
+    }
+
 }
 
-void RenderablePlanetProjection::loadTextures() {
+bool RenderablePlanetProjection::loadTextures() {
     using ghoul::opengl::Texture;
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
@@ -459,8 +380,6 @@ void RenderablePlanetProjection::loadTextures() {
         }
     }
 
-    generateProjectionLayerTexture();
-
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
@@ -470,6 +389,9 @@ void RenderablePlanetProjection::loadTextures() {
             _heightMapTexture->setFilter(Texture::FilterMode::Linear);
         }
     }
+
+    return _baseTexture != nullptr;
+
 }
 
 }  // namespace openspace

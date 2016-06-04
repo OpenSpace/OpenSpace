@@ -26,7 +26,9 @@
 #define __PROJECTIONCOMPONENT_H__
 
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/util/spicemanager.h>
 
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 
 namespace openspace {
@@ -36,7 +38,16 @@ public:
     ProjectionComponent();
 
 protected:
-    void generateProjectionLayerTexture();
+    bool initialize();
+    bool deinitialize();
+
+    bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
+    bool initializeParser(const ghoul::Dictionary& dictionary);
+
+    void imageProjectBegin();
+    void imageProjectEnd();
+
+    bool generateProjectionLayerTexture();
     bool auxiliaryRendertarget();
 
     std::unique_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
@@ -55,13 +66,25 @@ protected:
 
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
-
     properties::FloatProperty _projectionFading;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
 
+    std::string _instrumentID;
+    std::string _projectorID;
+    std::string _projecteeID;
+    SpiceManager::AberrationCorrection _aberration;
+    std::vector<std::string> _potentialTargets;
+    float _fovy;
+    float _aspectRatio;
+    float _nearPlane;
+    float _farPlane;
+
+
     GLuint _fboID;
 
+    GLint _defaultFBO;
+    GLint _viewport[4];
 };
 
 } // namespace openspace

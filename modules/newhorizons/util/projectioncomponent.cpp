@@ -24,20 +24,168 @@
 
 #include <modules/newhorizons/util/projectioncomponent.h>
 
+#include <modules/newhorizons/util/hongkangparser.h>
+#include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/labelparser.h>
+
+#include <openspace/scene/scenegraphnode.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
+namespace {
+    const std::string keyInstrument = "Instrument.Name";
+    const std::string keyInstrumentFovy = "Instrument.Fovy";
+    const std::string keyInstrumentAspect = "Instrument.Aspect";
+    const std::string keyInstrumentNear = "Instrument.Near";
+    const std::string keyInstrumentFar = "Instrument.Far";
+
+    const std::string keyProjObserver = "Projection.Observer";
+    const std::string keyProjTarget = "Projection.Target";
+    const std::string keyProjAberration = "Projection.Aberration";
+
+    const std::string keySequenceDir = "Projection.Sequence";
+    const std::string keySequenceType = "Projection.SequenceType";
+    const std::string keyTranslation = "DataInputTranslation";
+
+    const std::string sequenceTypeImage = "image-sequence";
+    const std::string sequenceTypePlaybook = "playbook";
+    const std::string sequenceTypeHybrid = "hybrid";
+
+    const std::string _loggerCat = "ProjectionComponent";
+}
+
 namespace openspace {
+
+using ghoul::Dictionary;
 
 ProjectionComponent::ProjectionComponent()
     : _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _projectionTexture(nullptr)
-{
+{}
 
+bool ProjectionComponent::initialize() {
+    bool a = generateProjectionLayerTexture();
+    bool b = auxiliaryRendertarget();
+    return a && b;
+}
+
+bool ProjectionComponent::deinitialize() {
+    _projectionTexture = nullptr;
+
+    glDeleteFramebuffers(1, &_fboID);
+
+    return true;
+}
+
+bool ProjectionComponent::initializeProjectionSettings(const Dictionary& dictionary) {
+    bool completeSuccess = true;
+    completeSuccess &= dictionary.getValue(keyInstrument, _instrumentID);
+    completeSuccess &= dictionary.getValue(keyProjObserver, _projectorID);
+    completeSuccess &= dictionary.getValue(keyProjTarget, _projecteeID);
+    completeSuccess &= dictionary.getValue(keyInstrumentFovy, _fovy);
+    completeSuccess &= dictionary.getValue(keyInstrumentAspect, _aspectRatio);
+    completeSuccess &= dictionary.getValue(keyInstrumentNear, _nearPlane);
+    completeSuccess &= dictionary.getValue(keyInstrumentFar, _farPlane);
+    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
+
+    std::string a = "NONE";
+    bool s = dictionary.getValue(keyProjAberration, a);
+    _aberration = SpiceManager::AberrationCorrection(a);
+    completeSuccess &= s;
+    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
+
+    return completeSuccess;
+}
+
+bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) {
+    bool completeSuccess = true;
+
+    std::string name;
+    dictionary.getValue(SceneGraphNode::KeyName, name);
+
+    SequenceParser* parser;
+
+    std::string sequenceSource;
+    std::string sequenceType;
+    bool foundSequence = dictionary.getValue(keySequenceDir, sequenceSource);
+    if (foundSequence) {
+        sequenceSource = absPath(sequenceSource);
+
+        foundSequence = dictionary.getValue(keySequenceType, sequenceType);
+        //Important: client must define translation-list in mod file IFF playbook
+        if (dictionary.hasKey(keyTranslation)) {
+            ghoul::Dictionary translationDictionary;
+            //get translation dictionary
+            dictionary.getValue(keyTranslation, translationDictionary);
+
+            if (sequenceType == sequenceTypePlaybook) {
+                parser = new HongKangParser(name,
+                                            sequenceSource,
+                                            _projectorID,
+                                            translationDictionary,
+                                            _potentialTargets);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
+            }
+            else if (sequenceType == sequenceTypeImage) {
+                parser = new LabelParser(name,
+                                         sequenceSource,
+                                         translationDictionary);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
+            }
+            else if (sequenceType == sequenceTypeHybrid) {
+                //first read labels
+                parser = new LabelParser(name,
+                                         sequenceSource,
+                                         translationDictionary);
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
+
+                std::string _eventFile;
+                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
+                if (foundEventFile) {
+                    //then read playbook
+                    _eventFile = absPath(_eventFile);
+                    parser = new HongKangParser(name,
+                                                _eventFile,
+                                                _projectorID,
+                                                translationDictionary,
+                                                _potentialTargets);
+                    openspace::ImageSequencer::ref().runSequenceParser(parser);
+                }
+                else {
+                    LWARNING("No eventfile has been provided, please check modfiles");
+                }
+            }
+        }
+        else {
+            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
+        }
+    }
+
+    return completeSuccess;
+}
+
+void ProjectionComponent::imageProjectBegin() {
+    // keep handle to the current bound FBO
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+
+    glGetIntegerv(GL_VIEWPORT, _viewport);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+
+    glViewport(
+        0, 0,
+        static_cast<GLsizei>(_projectionTexture->width()),
+        static_cast<GLsizei>(_projectionTexture->height())
+    );
+}
+
+void ProjectionComponent::imageProjectEnd() {
+    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
 }
 
 bool ProjectionComponent::auxiliaryRendertarget() {
@@ -49,7 +197,13 @@ bool ProjectionComponent::auxiliaryRendertarget() {
     // setup FBO
     glGenFramebuffers(1, &_fboID);
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_projectionTexture, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        *_projectionTexture,
+        0
+    );
     // check FBO status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
@@ -60,12 +214,12 @@ bool ProjectionComponent::auxiliaryRendertarget() {
     return completeSuccess;
 }
 
-glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up,
+glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim,
+                                                      const glm::vec3 up,
                                                       const glm::dmat3& instrumentMatrix,
                                                       float fieldOfViewY,
                                                       float aspectRatio,
-                                                      float nearPlane,
-                                                      float farPlane,
+                                                      float nearPlane, float farPlane,
                                                       glm::vec3& boreSight)
 {
     //rotate boresight into correct alignment
@@ -113,31 +267,39 @@ void ProjectionComponent::clearAllProjections() {
     _clearAllProjections = false;
 }
 
-std::unique_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(const std::string& texturePath) {
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(texturePath));
+std::unique_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
+                                                           const std::string& texturePath)
+{
+    using std::unique_ptr;
+    using ghoul::opengl::Texture;
+    using ghoul::io::TextureReader;
+    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
     if (texture) {
         ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *texture);
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
     return texture;
 }
 
-void ProjectionComponent::generateProjectionLayerTexture() {
+bool ProjectionComponent::generateProjectionLayerTexture() {
     int maxSize = OpenGLCap.max2DTextureSize() / 2;
 
-    LINFOC(
-        "ProjectionComponent",
+    LINFO(
         "Creating projection texture of size '" << maxSize << ", " << maxSize / 2 << "'"
     );
     _projectionTexture = std::make_unique<ghoul::opengl::Texture> (
         glm::uvec3(maxSize, maxSize / 2, 1),
         ghoul::opengl::Texture::Format::RGBA
         );
-    _projectionTexture->uploadTexture();
+    if (_projectionTexture)
+        _projectionTexture->uploadTexture();
+    
+    return _projectionTexture != nullptr;
+
 }
 
 } // namespace openspace

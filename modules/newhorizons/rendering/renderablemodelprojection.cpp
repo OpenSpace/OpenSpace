@@ -24,9 +24,6 @@
 
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
-#include <modules/newhorizons/util/imagesequencer.h>
-#include <modules/newhorizons/util/labelparser.h>
-
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
@@ -35,7 +32,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
     const std::string _loggerCat = "RenderableModelProjection";
@@ -47,21 +43,6 @@ namespace {
     const std::string keyTextureColor = "Textures.Color";
     const std::string keyTextureProject = "Textures.Project";
     const std::string keyTextureDefault = "Textures.Default";
-
-    const std::string keySequenceDir = "Projection.Sequence";
-    const std::string keySequenceType = "Projection.SequenceType";
-    const std::string keyProjObserver = "Projection.Observer";
-    const std::string keyProjTarget = "Projection.Target";
-    const std::string keyProjAberration = "Projection.Aberration";
-
-    const std::string keyInstrument = "Instrument.Name";
-    const std::string keyInstrumentFovy = "Instrument.Fovy";
-    const std::string keyInstrumentAspect = "Instrument.Aspect";
-    const std::string keyInstrumentNear = "Instrument.Near";
-    const std::string keyInstrumentFar = "Instrument.Far";
-
-    const std::string keyTranslation = "DataInputTranslation";
-    const std::string sequenceTypeImage = "image-sequence";
 }
 
 namespace openspace {
@@ -69,17 +50,12 @@ namespace openspace {
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
-    , _rotationX("rotationX", "RotationX", 0, 0, 360)
-    , _rotationY("rotationY", "RotationY", 0, 0, 360)
-    , _rotationZ("rotationZ", "RotationZ", 0, 0, 360)
+    , _rotation("rotation", "Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _geometry(nullptr)
-    , _alpha(1.f)
     , _performShading("performShading", "Perform Shading", true)
-    , _frameCount(0)
-    , _programIsDirty(false)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -88,8 +64,11 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
     if (success) {
+        using modelgeometry::ModelGeometry;
         geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = std::unique_ptr<modelgeometry::ModelGeometry>(modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary));
+        _geometry = std::unique_ptr<ModelGeometry>(
+            ModelGeometry::createFromDictionary(geometryDictionary)
+        );
     }
 
     std::string texturePath = "";
@@ -115,20 +94,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         setBody(_target);
 
     bool completeSuccess = true;
-    completeSuccess &= dictionary.getValue(keyInstrument, _instrumentID);
-    completeSuccess &= dictionary.getValue(keyProjObserver, _projectorID);
-    completeSuccess &= dictionary.getValue(keyProjTarget, _projecteeID);
-    completeSuccess &= dictionary.getValue(keyInstrumentFovy, _fovy);
-    completeSuccess &= dictionary.getValue(keyInstrumentAspect, _aspectRatio);
-    completeSuccess &= dictionary.getValue(keyInstrumentNear, _nearPlane);
-    completeSuccess &= dictionary.getValue(keyInstrumentFar, _farPlane);
-    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
-    
-    std::string a = "NONE";
-    bool s = dictionary.getValue(keyProjAberration, a);
-    _aberration = SpiceManager::AberrationCorrection(a);
-    completeSuccess &= s;
-    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
+    completeSuccess &= initializeProjectionSettings(dictionary);
     
     openspace::SpiceManager::ref().addFrame(_target, _source);
     setBoundingSphere(pss(1.f, 9.f));
@@ -136,34 +102,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     addProperty(_performShading);
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
-    addProperty(_rotationX);
-    addProperty(_rotationY);
-    addProperty(_rotationZ);
+    addProperty(_rotation);
 
-    SequenceParser* parser;
-
-    bool foundSequence = dictionary.getValue(keySequenceDir, _sequenceSource);
-    if (foundSequence) {
-        _sequenceSource = absPath(_sequenceSource);
-
-        foundSequence = dictionary.getValue(keySequenceType, _sequenceType);
-        ghoul_assert(foundSequence, "Did not find sequence");
-        //Important: client must define translation-list in mod file IFF playbook
-        if (dictionary.hasKey(keyTranslation)) {
-            ghoul::Dictionary translationDictionary;
-            //get translation dictionary
-            dictionary.getValue(keyTranslation, translationDictionary);
-            if (_sequenceType == sequenceTypeImage) {
-                parser = new LabelParser(name, _sequenceSource, translationDictionary);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-
-            }
-        }
-        else {
-            LWARNING("No translation provided, please make sure all spice calls match playbook!");
-        }
-    }
-
+    success = initializeParser(dictionary);
+    ghoul_assert(success, "");
 }
 
 bool RenderableModelProjection::isReady() const {
@@ -177,67 +119,26 @@ bool RenderableModelProjection::isReady() const {
 bool RenderableModelProjection::initialize() {
     bool completeSuccess = true;
         
-    if (_programObject == nullptr) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _programObject = renderEngine.buildRenderProgram("ModelShader",
-            "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
-            "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    _programObject = renderEngine.buildRenderProgram("ModelShader",
+        "${MODULE_NEWHORIZONS}/shaders/modelShader_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/modelShader_fs.glsl");
 
 
-        if (!_programObject)
-            return false;
-    }
-    _programObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*) { this->_programIsDirty = true; } );
+    _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
+        "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
+    _fboProgramObject->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
 
-    if (_fboProgramObject == nullptr) {
-        _fboProgramObject = ghoul::opengl::ProgramObject::Build("ProjectionPass",
-            "${MODULE_NEWHORIZONS}/shaders/projectionPass_vs.glsl",
-            "${MODULE_NEWHORIZONS}/shaders/projectionPass_fs.glsl");
-        _fboProgramObject->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
-        if (!_fboProgramObject)
-            return false;
-    }
-    _fboProgramObject->setProgramObjectCallback([&](ghoul::opengl::ProgramObject*) { this->_programIsDirty = true; } );
+    completeSuccess &= loadTextures();
 
-    loadTextures();
-
-    completeSuccess &= (_baseTexture != nullptr);
-    completeSuccess &= (_projectionTexture != nullptr);
+    completeSuccess &= ProjectionComponent::initialize();
 
     completeSuccess &= _geometry->initialize(this);
     completeSuccess &= !_source.empty();
     completeSuccess &= !_destination.empty();
-        
-
-    bool gotverts = _geometry->getVertices(&_geometryVertecies) && _geometry->getIndices(&_geometryIndeces);
-    if (!gotverts)
-        LWARNING("Lack of vertex data from geometry for image projection");
-
-    completeSuccess &= auxiliaryRendertarget();
-    int vertexSize = sizeof(modelgeometry::ModelGeometry::Vertex);
-
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vbo);
-    glGenBuffers(1, &_ibo);
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _geometryVertecies.size() * vertexSize, &_geometryVertecies[0], GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize,
-                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, location)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vertexSize,
-                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, tex)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, vertexSize,
-                          reinterpret_cast<const GLvoid*>(offsetof(modelgeometry::ModelGeometry::Vertex, normal)));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _geometryIndeces.size() * sizeof(int), &_geometryIndeces[0], GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
 
     return completeSuccess;
 }
@@ -248,27 +149,18 @@ bool RenderableModelProjection::deinitialize() {
 
     _geometry = nullptr;
     _baseTexture = nullptr;
-    _projectionTexture = nullptr;
 
-    glDeleteBuffers(1, &_vbo);
+    ProjectionComponent::deinitialize();
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_programObject) {
-        renderEngine.removeRenderProgram(_programObject);
-        _programObject = nullptr;
-    }
+    OsEng.renderEngine().removeRenderProgram(_programObject);
+    _programObject = nullptr;
 
     return true;
 }
 
 void RenderableModelProjection::render(const RenderData& data) {
-    if (!_programObject)
-        return;
-
     if (_clearAllProjections)
         clearAllProjections();
-
-    _frameCount++;
 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVector();
@@ -278,20 +170,8 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     _programObject->activate();
 
-
     attitudeParameters(_time);
     _imageTimes.clear();
-        
-    double time = openspace::Time::ref().currentTime();
-    bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
-    if (!targetPositionCoverage) {
-        int frame = _frameCount % 180;
-
-        float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
-        _alpha = 0.5f + fadingFactor * 0.5f;
-    }
-    else
-        _alpha = 1.0f;
         
     _programObject->setUniform("_performShading", _performShading);
     _programObject->setUniform("sun_pos", _sunPosition.vec3());
@@ -313,53 +193,49 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     _geometry->render();
         
-    // disable shader
     _programObject->deactivate();
 }
 
 void RenderableModelProjection::update(const UpdateData& data) {
-    if (_programIsDirty) {
+    if (_programObject->isDirty())
         _programObject->rebuildFromFile();
+
+    if (_fboProgramObject->isDirty())
         _fboProgramObject->rebuildFromFile();
-        _programIsDirty = false;
-    }
         
     _time = data.time;
 
     if (openspace::ImageSequencer::ref().isReady() && _performProjection) {
         openspace::ImageSequencer::ref().updateSequencer(_time);
-        _capture = openspace::ImageSequencer::ref().getImagePaths(_imageTimes, _projecteeID, _instrumentID);
+        _capture = openspace::ImageSequencer::ref().getImagePaths(
+            _imageTimes, _projecteeID, _instrumentID
+        );
     }
         
     // set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(
+            _source, _destination, _time
+        );
     }
 
-    double  lt;
+    double lt;
     glm::dvec3 p =
-    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
+        openspace::SpiceManager::ref().targetPosition(
+            "SUN", _target, "GALACTIC", {}, _time, lt
+    );
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
 void RenderableModelProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture) {
-    // keep handle to the current bound FBO
-    GLint defaultFBO;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    
-    GLint m_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, m_viewport);    
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
-    glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
-
+    ProjectionComponent::imageProjectBegin();
 
     _fboProgramObject->activate();
 
-    ghoul::opengl::TextureUnit unitFboProject;
-    unitFboProject.activate();
+    ghoul::opengl::TextureUnit unitFbo;
+    unitFbo.activate();
     projectionTexture->bind();
-    _fboProgramObject->setUniform("projectionTexture", unitFboProject);
+    _fboProgramObject->setUniform("projectionTexture", unitFbo);
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform", _transform);
@@ -367,17 +243,11 @@ void RenderableModelProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::T
     _fboProgramObject->setUniform("boresight", _boresight);
 
     _geometry->setUniforms(*_fboProgramObject);
+    _geometry->render();
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geometryIndeces.size()), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    
     _fboProgramObject->deactivate();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(m_viewport[0], m_viewport[1],
-        m_viewport[2], m_viewport[3]);
+    ProjectionComponent::imageProjectEnd();
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
@@ -390,10 +260,21 @@ void RenderableModelProjection::attitudeParameters(double time) {
     }
 
     _transform = glm::mat4(1);
-
-    glm::mat4 rotPropX = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationX)), glm::vec3(1, 0, 0));
-    glm::mat4 rotPropY = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationY)), glm::vec3(0, 1, 0));
-    glm::mat4 rotPropZ = glm::rotate(_transform, glm::radians(static_cast<float>(_rotationZ)), glm::vec3(0, 0, 1));
+    glm::mat4 rotPropX = glm::rotate(
+        _transform,
+        glm::radians(static_cast<float>(_rotation.value().x)),
+        glm::vec3(1, 0, 0)
+    );
+    glm::mat4 rotPropY = glm::rotate(
+        _transform,
+        glm::radians(static_cast<float>(_rotation.value().y)),
+        glm::vec3(0, 1, 0)
+    );
+    glm::mat4 rotPropZ = glm::rotate(
+        _transform, 
+        glm::radians(static_cast<float>(_rotation.value().z)),
+        glm::vec3(0, 0, 1)
+    );
         
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -419,32 +300,32 @@ void RenderableModelProjection::attitudeParameters(double time) {
     glm::vec3 cpos = position.vec3();
 
     _projectorMatrix = computeProjectorMatrix(cpos, boresight, _up, _instrumentMatrix, 
-                                              _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight);
-
+        _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight
+    );
 }
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
-        //std::thread t1(&RenderableModelProjection::attitudeParameters, this, img.startTime);
-        //t1.join();
         attitudeParameters(img.startTime);
-        //_projectionTexturePath = img.path;
-        imageProjectGPU(loadProjectionTexture(img.path)); //fbopass
+        imageProjectGPU(loadProjectionTexture(img.path));
     }
     _capture = false;
 }
 
-void RenderableModelProjection::loadTextures() {
+bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        _baseTexture = std::move(
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
+        );
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();
             _baseTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         }
     }
-    generateProjectionLayerTexture();
+
+    return _baseTexture != nullptr;
 }
 
 }  // namespace openspace

@@ -33,7 +33,7 @@
 
 #include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/util/spicemanager.h>
+#include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
@@ -57,11 +57,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-
-protected:
-    void loadTextures();
-
 private:
+    bool loadTextures();
     void attitudeParameters(double time);
     void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
 
@@ -69,9 +66,7 @@ private:
 
     properties::StringProperty _colorTexturePath;
 
-    properties::IntProperty _rotationX;
-    properties::IntProperty _rotationY;
-    properties::IntProperty _rotationZ;
+    properties::Vec3Property _rotation;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
@@ -80,7 +75,6 @@ private:
 
     std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
 
-    float _alpha;
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
 
@@ -89,21 +83,6 @@ private:
     std::string _destination;
     std::string _target;
 
-    // sequence loading
-    std::string _sequenceSource;
-    std::string _sequenceType;
-
-    // projection mod info
-    std::string _instrumentID;
-    std::string _projectorID;
-    std::string _projecteeID;
-    SpiceManager::AberrationCorrection _aberration;
-    std::vector<std::string> _potentialTargets;
-    float _fovy;
-    float _aspectRatio;
-    float _nearPlane;
-    float _farPlane;
-
     // uniforms
     glm::vec2  _camScaling;
     glm::vec3  _up;
@@ -111,14 +90,7 @@ private:
     glm::mat4  _projectorMatrix;
     glm::vec3  _boresight;
 
-    GLuint _vbo;
-    GLuint _ibo;
-    GLuint _vaoID;
-    std::vector<modelgeometry::ModelGeometry::Vertex> _geometryVertecies;
-    std::vector<int> _geometryIndeces;
-
     std::vector<Image> _imageTimes;
-    int _frameCount;
     double _time;
 
     bool _capture;
@@ -126,7 +98,6 @@ private:
     psc _sunPosition;
 
     properties::BoolProperty _performShading;
-    bool _programIsDirty;
 };
 
 }  // namespace openspace
