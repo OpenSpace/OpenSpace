@@ -21,28 +21,22 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+#include <modules/iswa/util/dataprocessor.h>
 
-#ifndef __CYGNETPLANE_H__
-#define __CYGNETPLANE_H__
+#ifndef __DATAPROCESSORJSON_H__
+#define __DATAPROCESSORJSON_H__
 
-#include <modules/iswa/rendering/iswacygnet.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledcoordinate.h>
+namespace openspace {
 
-namespace openspace{
-class CygnetPlane : public IswaCygnet {
+class DataProcessorJson : public DataProcessor {
 public:
-    CygnetPlane(const ghoul::Dictionary& dictionary);
-    ~CygnetPlane();
+    DataProcessorJson();
+    ~DataProcessorJson();
 
-protected:
-    virtual bool createGeometry() override;
-    virtual bool destroyGeometry() override;
-    virtual void renderGeometry() const override;
-
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    virtual std::vector<std::string> readMetadata(std::string data) override;
+    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
+    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions) override;
 };
-} //namespace openspace
-
-#endif //__CYGNETPLANE_H__
+ 
+}// namespace
+#endif __DATAPROCESSORJSON_H__

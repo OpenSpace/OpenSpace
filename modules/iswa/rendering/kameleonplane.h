@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,30 +25,41 @@
 #ifndef __KAMELEONPLANE_H__
 #define __KAMELEONPLANE_H__
 
-#include <modules/iswa/rendering/cygnetplane.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/iswa/util/dataprocessor.h>
+#include <modules/iswa/rendering/datacygnet.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/selectionproperty.h>
 
- namespace openspace{
- 
- class KameleonPlane : public CygnetPlane {
- public:
+namespace openspace{
+
+/**
+ * KameleonPlane is a concrete IswaCygnet with volume data files from 
+ * disk as input source. An object of this class will provide a cutplane
+ * through a volume of space weather data. It will also give the option
+ * to create fieldlines around and intersecting the planes. Interaction
+ * with the planes is possible through sliders that will move the planes
+ * through the data volume.
+ */
+class KameleonPlane : public DataCygnet {
+public:
  	KameleonPlane(const ghoul::Dictionary& dictionary);
  	~KameleonPlane();
 
      bool initialize() override;
      bool deinitialize() override;
-    
-    
- private:
- 	virtual bool loadTexture() override;
- 	virtual bool updateTexture() override;
 
- 	virtual bool readyToRender() const override;
-    virtual void setUniformAndTextures() override;
+private:
 
+    /**
+     * Creates a plane geometry
+     */
+    bool createGeometry() override;
+    bool destroyGeometry() override;
+    bool updateTextureResource() override; 
+    void renderGeometry() const override;
+    void setUniforms() override;
+    std::vector<float*> textureData() override;
+
+    void setDimensions();
     /**
      * Given a path to the json index of seedpoints file, this 
      * method reads, parses and adds them as checkbox options
@@ -63,37 +74,33 @@
      * SelectionProperty and creates or removes fieldlines in the scene.
      */
     void updateFieldlineSeeds();
+    void subscribeToGroup();
 
-    void setTransferFunctions(std::string tfPath);
-    void fillOptions();
-
+    void changeKwPath(std::string path);
 	static int id();
 
-    properties::IntProperty _resolution;
+    properties::FloatProperty _resolution;
     properties::FloatProperty _slice;
-    properties::SelectionProperty _dataOptions;
-    properties::SelectionProperty _fieldlines;
     properties::StringProperty _transferFunctionsFile;
-    properties::Vec2Property _backgroundValues;
 
+    properties::SelectionProperty _fieldlines;
+
+    properties::Vec2Property _backgroundValues;
     properties::Vec2Property _normValues;
 
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
-
-	std::shared_ptr<KameleonWrapper> _kw;
-	std::string _kwPath;
+    std::string _kwPath;
 
     glm::size3_t _dimensions;
-	glm::size3_t _textureDimensions;
-	float* _dataSlice;
-	std::string _var;
-
-	std::vector<float*> _dataSlices;
-    std::shared_ptr<DataProcessor> _dataProcessor;
+    float* _dataSlice;
+    std::string _var;
     float _scale;
+
+    glm::vec3 _origOffset;
+
     /**
      * _fieldlineState maps the checkbox value of each fieldline seedpoint file to a tuple 
      * containing information that is needed to either add or remove a fieldline from the scenegraph.
@@ -101,8 +108,12 @@
      */
     std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
     std::string _fieldlineIndexFile;
- };
+    int _cut;
+
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+};
  
- } // namespace openspace
+} // namespace openspace
 
 #endif //__KAMELEONPLANE_H__

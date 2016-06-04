@@ -48,7 +48,7 @@
 
 
 namespace openspace {
-class IswaGroup;
+class IswaBaseGroup;
 class IswaCygnet; 
 
 struct CdfInfo {
@@ -95,15 +95,10 @@ public:
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
     std::string iswaUrl(int id, std::string type = "image");
 
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent(std::string name, CygnetType type);
-    std::shared_ptr<IswaGroup> registerToGroup(std::string name, CygnetType type);
-    void unregisterFromGroup(std::string name, IswaCygnet* cygnet);
-    // void registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options);
-    std::shared_ptr<IswaGroup> iswaGroup(std::string name);
+    std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
-    std::map<std::string, std::shared_ptr<IswaGroup>>& groups();
-    // std::vector<CdfInfo>& cdfInformation();
+    std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
@@ -125,7 +120,8 @@ private:
     void createKameleonPlane(CdfInfo info, std::string cut);
 
     void fillCygnetInfo(std::string jsonString);
-
+    void registerGroup(std::string groupName, std::string type);
+    
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
     std::map<int, std::string> _geom;
@@ -133,9 +129,8 @@ private:
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
 
-    std::map<std::string, std::shared_ptr<IswaGroup>> _groups;
+    std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
-    // std::vector<CdfInfo> _cdfInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
 
     ghoul::Event<> _iswaEvent;

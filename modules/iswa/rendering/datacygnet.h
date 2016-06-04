@@ -26,14 +26,67 @@
 #define __DATACYGNET_H__
 
 #include <modules/iswa/rendering/iswacygnet.h>
+#include <modules/iswa/util/dataprocessor.h>
+
+namespace {
+    const int MAX_TEXTURES = 6;
+}
 
 namespace openspace{
 
+/**
+ * This class abstracts away the the loading of data and creation of
+ * textures for all data cygnets. It specifies the interface that needs to
+ * be implemented for all concrete subclasses
+ */
 class DataCygnet : public IswaCygnet {
 public:
     DataCygnet(const ghoul::Dictionary& dictionary);
     ~DataCygnet();
 protected:
+    bool updateTexture() override;
+    void fillOptions(std::string& source);
+
+    /**
+     * loads the transferfunctions specified in tfPath into
+     * _transferFunctions list.
+     * 
+     * @param tfPath Path to transfer function file
+     */
+    void readTransferFunctions(std::string tfPath);
+
+    /**
+     * This function binds and sets all textures that should go to the
+     * shader program, this includes both the data and transferfunctions.
+     */
+    void setTextureUniforms();
+    /**
+     * Optional interface method. this has an implementation
+     * in datacygnet.cpp, but needs to be overriden for kameleonplane
+     */
+    virtual bool updateTextureResource() override;
+
+    // Subclass interface.
+    // ===================
+    virtual bool createGeometry() = 0;
+    virtual bool destroyGeometry() = 0;
+    virtual void renderGeometry() const = 0;
+    /**
+     * This function should return the processed data that
+     * will populate the texture
+     */
+    virtual std::vector<float*> textureData() = 0;
+    // This function can call parent setTextureUniforms()
+    virtual void setUniforms() = 0;
+
+    properties::SelectionProperty _dataOptions;
+    std::shared_ptr<DataProcessor> _dataProcessor; 
+    std::string _dataBuffer;
+    glm::size3_t _textureDimensions;
+
+private:
+    bool readyToRender() const override;
+    bool downloadTextureResource() override;
 };
 } //namespace openspace
 

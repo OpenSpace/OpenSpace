@@ -21,7 +21,7 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/rendering/iswagroup.h>
 
 #include <fstream>
 #include <modules/iswa/ext/json/json.hpp>
@@ -57,8 +57,6 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 
     _groupEvent = std::make_shared<ghoul::Event<ghoul::Dictionary> >();
     registerProperties();
-
-    _autoFilter.setValue(true);
 }
 
 IswaBaseGroup::~IswaBaseGroup(){}
@@ -68,7 +66,9 @@ bool IswaBaseGroup::isType(std::string type){
 }
 
 void IswaBaseGroup::updateGroup(){
+    LDEBUG("Group " + name() + " published updateGroup");
     _groupEvent->publish("updateGroup", ghoul::Dictionary());
+    
 }
 
 void IswaBaseGroup::clearGroup(){
@@ -99,6 +99,7 @@ void IswaBaseGroup::registerProperties(){
         LDEBUG("Group " + name() + " published alphaChanged");
         _groupEvent->publish("alphaChanged", ghoul::Dictionary({{"alpha", _alpha.value()}}));
     });
+
 
     OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{

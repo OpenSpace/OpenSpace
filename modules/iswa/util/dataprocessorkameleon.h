@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,34 +21,35 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+#include <modules/iswa/util/dataprocessor.h>
+#include <modules/kameleon/include/kameleonwrapper.h>
 
-#ifndef __TEXTUREPLANE_H__
-#define __TEXTUREPLANE_H__
+#ifndef __DATAPROCESSORKAMELEON_H__
+#define __DATAPROCESSORKAMELEON_H__
 
-#include <modules/iswa/rendering/texturecygnet.h>
+namespace openspace {
 
-namespace openspace{
-
-/**
- * TexturePlane is a "concrete" IswaCygnet with texture as its input source.
- * It handles the creation, destruction and rendering of a plane geometry. 
- * It also specifies which shaders to use and the uniforms that it needs.
- */
-class TexturePlane : public TextureCygnet{
+class DataProcessorKameleon : public DataProcessor {
 public:
-    TexturePlane(const ghoul::Dictionary& dictionary);
-    ~TexturePlane();
+    DataProcessorKameleon();
+    ~DataProcessorKameleon();
+
+    virtual std::vector<std::string> readMetadata(std::string path) override;
+    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
+    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions) override;
+    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, float slice, glm::size3_t& dimensions);
+    void dimensions(glm::size3_t dimensions){_dimensions = dimensions;}
 
 private:
-    bool createGeometry() override;
-    void setUniforms() override;
-    bool destroyGeometry() override;
-    void renderGeometry() const override;
+    void initializeKameleonWrapper(std::string kwPath);
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+	std::shared_ptr<KameleonWrapper> _kw;
+	std::string _kwPath;
+	std::vector<std::string> _loadedVariables;
+	bool _initialized;
+	float _slice;
+	// std::vector<float*> _data;
 };
- 
- } // namespace openspace
 
-#endif
+}// namespace
+#endif __DATAPROCESSORKAMELEON_H__

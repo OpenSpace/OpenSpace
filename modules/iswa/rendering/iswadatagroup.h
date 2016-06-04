@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,34 +21,36 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
-#ifndef __TEXTUREPLANE_H__
-#define __TEXTUREPLANE_H__
-
-#include <modules/iswa/rendering/texturecygnet.h>
+#ifndef __ISWADATAGROUP_H__
+#define __ISWADATAGROUP_H__
+#include <modules/iswa/rendering/iswagroup.h>
 
 namespace openspace{
-
-/**
- * TexturePlane is a "concrete" IswaCygnet with texture as its input source.
- * It handles the creation, destruction and rendering of a plane geometry. 
- * It also specifies which shaders to use and the uniforms that it needs.
- */
-class TexturePlane : public TextureCygnet{
+class IswaDataGroup : public IswaBaseGroup{
 public:
-    TexturePlane(const ghoul::Dictionary& dictionary);
-    ~TexturePlane();
+    IswaDataGroup(std::string name, std::string type);
+    ~IswaDataGroup();
 
-private:
-    bool createGeometry() override;
-    void setUniforms() override;
-    bool destroyGeometry() override;
-    void renderGeometry() const override;
+    void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
+    std::vector<int> dataOptionsValue();
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+protected:
+    void registerProperties();
+    void createDataProcessor();
+
+    // void readFieldlinePaths(std::string indexFile);
+    // void updateFieldlineSeeds();
+    // void clearFieldlines();
+
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::BoolProperty _autoFilter;
+    properties::Vec2Property _normValues;
+    properties::Vec2Property _backgroundValues;
+    properties::StringProperty _transferFunctionsFile;
+    properties::SelectionProperty _dataOptions;
+
 };
- 
- } // namespace openspace
 
-#endif
+} //namespace openspace
+#endif // __ISWADATAGROUP_H__

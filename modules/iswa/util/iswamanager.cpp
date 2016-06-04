@@ -26,15 +26,20 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/textureplane.h>
 #include <modules/iswa/rendering/datasphere.h>
+#include <modules/iswa/rendering/kameleonplane.h>
+
 #include <modules/iswa/rendering/screenspacecygnet.h>
 #include <modules/iswa/rendering/iswacygnet.h>
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 
 #include <fstream>
 #include <algorithm>
 
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
@@ -69,12 +74,16 @@ IswaManager::IswaManager()
     _type[CygnetType::Texture] = "Texture";
     _type[CygnetType::Data] = "Data";
     _type[CygnetType::Kameleon] = "Kameleon";
+    // _type[CygnetType::TexturePlane] = "TexturePlane";
+    // _type[CygnetType::DataPlane] = "DataPlane";
+    // _type[CygnetType::KameleonPlane] = "KameleonPlane";
+    // _type[CygnetType::Kameleon] = "DataSphere";
 
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
     DlManager.fetchFile(
-        "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+        "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
         },
@@ -137,30 +146,27 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         // Download metadata
         DlManager.fetchFile(
             "http://128.183.168.116:3000/" + std::to_string(-id),
-            // "http://10.0.0.76:3000/" + std::to_string(-id),
+            // "http://localhost:3000/" + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
             }
         );
     }
-    // else{
-    //     // Kameleonplane?
-    //     // LERROR("No cygnet with id 0");
-    //     std::string kwPath = "${OPENSPACE_DATA}/BATSRUS.cdf";
-    //     if(type == "x" || type == "y" || type == "z")
-    //         createKameleonPlane(kwPath, type, group);
-    //     else
-    //         createKameleonPlane(kwPath, "z", group);
-    // }
 }
 
-void IswaManager::addKameleonCdf(std::string group, int pos){
+void IswaManager::addKameleonCdf(std::string groupName, int pos){
     // auto info = _cdfInformation[group][pos];
     // std::cout << group << " " << pos << std::endl;
-    createKameleonPlane(_cdfInformation[group][pos], "z");
-    createKameleonPlane(_cdfInformation[group][pos], "y");
-    createKameleonPlane(_cdfInformation[group][pos], "x");
+    auto group = iswaGroup(groupName);
+    if(group){
+        std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
+        return;
+    }
+
+    createKameleonPlane(_cdfInformation[groupName][pos], "z");
+    createKameleonPlane(_cdfInformation[groupName][pos], "y");
+    createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
@@ -191,9 +197,9 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     std::string url;
     if(id < 0){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
-        // url = "http://10.0.0.76:3000/"+type+"/" + std::to_string(-id) + "/";
+        // url = "http://localhost:3000/"+type+"/" + std::to_string(-id) + "/";
     } else{
-        url = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
+        url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
     std::string t = Time::ref().currentTimeUTC(); 
@@ -212,43 +218,26 @@ std::string IswaManager::iswaUrl(int id, std::string type){
     return url;
 }
 
-std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaManager::groupEvent(std::string groupName, CygnetType type){
-
-    // Do some type checking and get the groupEvent
+void IswaManager::registerGroup(std::string groupName, std::string type){
     if(_groups.find(groupName) == _groups.end()){
-        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
+        bool dataGroup =    (type == typeid(DataPlane).name()) ||
+                            (type == typeid(DataSphere).name());
+                            
+        bool kameleonGroup = (type == typeid(KameleonPlane).name());
+        if(dataGroup){
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
+        }else if(kameleonGroup){
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaKameleonGroup>(groupName, type)));
+        }else{
+            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaBaseGroup>(groupName, type)));
+        }
     } else if(!_groups[groupName]->isType(type)){
-        LWARNING("Can't subscribe to Events from groups with diffent type");
-        return nullptr;
+        LWARNING("Can't add cygnet to groups with diffent type");
     }
-
-    return _groups[groupName]->groupEvent();
 }
 
-std::shared_ptr<IswaGroup> IswaManager::registerToGroup(std::string groupName, CygnetType type){
-    if(_groups.find(groupName) == _groups.end()){
-        _groups.insert(std::pair<std::string, std::shared_ptr<IswaGroup>>(groupName, std::make_shared<IswaGroup>(groupName, type)));
-    } else if(!_groups[groupName]->isType(type)){
-        LWARNING("Can't subscribe to Events from groups with diffent type");
-        return nullptr;
-    }
 
-    return _groups[groupName];
-}
-
-// void IswaManager::unregisterFromGroup(std::string name, IswaCygnet* cygnet){
-//     if(_groups.find(name) != _groups.end()){
-//         _groups[name]->unregisterCygnet(cygnet);
-//     }
-// }
-
-// void IswaManager::registerOptionsToGroup(std::string name, const std::vector<properties::SelectionProperty::Option>& options){
-//     if(_groups.find(name) != _groups.end()){
-//         _groups[name]->registerOptions(options);
-//     }
-// }
-
-std::shared_ptr<IswaGroup> IswaManager::iswaGroup(std::string name){
+std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     if(_groups.find(name) != _groups.end()){
         return _groups[name];
     }
@@ -260,7 +249,7 @@ std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
         return _cygnetInformation;
 }
 
-std::map<std::string, std::shared_ptr<IswaGroup>>& IswaManager::groups(){
+std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups(){
     return _groups;
 }
 
@@ -272,19 +261,17 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
-    DlManager.downloadToMemory(
-                "http://128.183.168.116:3000/" + std::to_string(-id),
-                // "http://10.0.0.76:3000/" + std::to_string(-id),
-                metaFuture->json,
-                [metaFuture](const DownloadManager::FileFuture& f){
-                    if(f.isFinished){
-                        metaFuture->isFinished;
-                        LDEBUG("Download to memory finished");
-                    } else if (f.isAborted){
-                        LWARNING("Download to memory was aborted: " + f.errorMessage);
-                    }
-                }
-            );
+    DlManager.fetchFile(
+        "http://128.183.168.116:3000/" + std::to_string(-id),
+        // "http://localhost:3000/" + std::to_string(-id),
+        [&metaFuture](const DownloadManager::MemoryFile& file){
+            metaFuture->json = std::string(file.buffer, file.size);
+            metaFuture->isFinished = true;
+        },
+        [](const std::string& err){
+            LWARNING("Download Metadata to memory was aborted: " + err);
+        }
+    );
     return metaFuture;
 }
 
@@ -369,7 +356,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
             }
 
             std::string table = "{"
-                "Name = '" +info.group+"_"+info.name+"-"+cut+"',"
+                "Name = '" +info.name+ "',"
                 "Parent = '" + parent + "', " 
                 "Renderable = {"    
                     "Type = 'KameleonPlane', "
@@ -383,11 +370,11 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
+                    // "Group = '',"
                     "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
                     "}"
                 "}"
-                ;
-            // std::cout << table << std::endl;    
+                ; 
             return table;
         }
     }
@@ -450,12 +437,25 @@ void IswaManager::createScreenSpace(int id){
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     // check if this plane already exist
+
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
     if(!data->group.empty()){
+        std::string type;
+        if(data->type == CygnetType::Data){
+            type = typeid(DataPlane).name();
+        }else{
+            type = typeid(TexturePlane).name();
+        }
+        
+        registerGroup(data->group, type);
+
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType(type)){
             name = data->group +"_"+ name;
+        }else{
+            data->group="";
+        }
     }
 
     data->name = name;
@@ -477,9 +477,15 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
 
     if(!data->group.empty()){
+        std::string type = typeid(DataSphere).name();
+        registerGroup(data->group, type);
+
         auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType((CygnetType) data->type))
+        if(it == _groups.end() || (*it).second->isType(type)){
             name = data->group +"_"+name;
+        }else{
+            data->group="";
+        }
     }
 
     data->name = name;
@@ -496,14 +502,32 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 }
 
 void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
-    std::cout << info.name << " " << cut << std::endl; 
 
     const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
-
     if(FileSys.fileExists(absPath(info.path)) && extension == "cdf"){
+
+
+        if(!info.group.empty()){
+            std::string type = typeid(KameleonPlane).name();
+            registerGroup(info.group, type);
+
+            auto it = _groups.find(info.group);
+            if(it == _groups.end() || (*it).second->isType(type)){
+                info.name = info.group +"_"+info.name;
+            }else{
+                info.group="";
+            }
+        }
+
+        info.name = info.name+"-"+cut;
+
+        if( OsEng.renderEngine().scene()->sceneGraphNode(info.name) ){
+            LERROR("A node with name \"" + info.name +"\" already exist");
+            return;
+        }
+
         std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
-    //         // std::cout << luaTable << std::endl;
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             OsEng.scriptEngine().queueScript(script);
         }

@@ -30,26 +30,21 @@
 
 #include <memory>
 #include <chrono>
+#include <modules/iswa/util/iswamanager.h>
 #include <ghoul/designpattern/event.h>
-#include <openspace/properties/propertyowner.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <modules/onscreengui/include/gui.h>
 #include <ghoul/opengl/texture.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <modules/iswa/util/iswamanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace{
-class IswaGroup;
+class IswaBaseGroup;
 
 struct Metadata {
     int id;
@@ -69,7 +64,7 @@ struct Metadata {
 
 
 class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
-    friend class IswaGroup;
+    friend class IswaBaseGroup;
 
 public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
@@ -85,21 +80,51 @@ protected:
 
     void enabled(bool enabled){_enabled.setValue(enabled);};
 
+    /**
+     * Registers the properties that are equal in all IswaCygnets
+     * regardless of being part of a group or not
+     */
     void registerProperties();
     void unregisterProperties();
     void initializeTime();
     void initializeGroup();
-    bool destroyShader();
+    /**
+     * Creates the shader program. Concrete IswaCygnets must set 
+     * _vsPath, _fsPath and _programName before this function in called.
+     * @return true if successful creation
+     */
     bool createShader();
     
+    // Subclass interface
+    // ==================
     virtual bool createGeometry() = 0;
     virtual bool destroyGeometry() = 0;
     virtual void renderGeometry() const = 0;
-    
-    virtual bool loadTexture() = 0;
+
+    /**
+     * Should create a new texture and populate the _textures vector
+     * @return true if update was successfull
+     */
     virtual bool updateTexture() = 0;
+    /**
+     * Is called before updateTexture. For IswaCygnets getting data
+     * from a http request, this function should get the dataFile
+     * from the future object.
+     * @return true if update was successfull
+     */
+    virtual bool updateTextureResource() = 0;
+    /**
+     * should send a http request to get the resource it needs to create 
+     * a texture. For Texture cygnets, this should be an image. For DataCygnets,
+     * this should be the data file.
+     * @return true if update was successfull
+     */
+    virtual bool downloadTextureResource() = 0;
     virtual bool readyToRender() const = 0;
-    virtual void setUniformAndTextures() = 0;
+     /**
+     * should set all uniforms needed to render
+     */
+    virtual void setUniforms() = 0;
 
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
@@ -121,16 +146,17 @@ protected:
     std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
     std::future<DownloadManager::MemoryFile> _futureObject;
 
-    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
+    std::shared_ptr<IswaBaseGroup> _group;
 
-    std::shared_ptr<IswaGroup> _group;
-
-    IswaManager::CygnetType _type;
     bool _textureDirty;
 
     std::string _vsPath;
     std::string _fsPath;
     std::string _programName;
+
+private:
+    bool destroyShader();
+
 };
 
 }//namespace openspace

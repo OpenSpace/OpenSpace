@@ -139,6 +139,7 @@ public:
     std::string getParent();
     std::string getFrame();
     std::vector<std::string> getVariables();
+    std::vector<std::string> getLoadedVariables();
 
 private:
     typedef std::vector<glm::vec3> TraceLine;

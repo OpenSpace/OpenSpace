@@ -24,10 +24,10 @@
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
+
 
 namespace {
     const std::string _loggerCat = "IswaCygnet";
@@ -38,13 +38,15 @@ namespace openspace{
 IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _delete("delete", "Delete")
-    ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     , _shader(nullptr)
-    ,_type(IswaManager::CygnetType::NoType)
-    ,_groupEvent()
-    ,_group(nullptr)
-    ,_textureDirty(false)
+    , _group(nullptr)
+    , _textureDirty(false)
 {
+    std::string name;
+    dictionary.getValue("Name", name);
+    setName(name);
+
     _data = std::make_shared<Metadata>();
 
     // dict.getValue can only set strings in _data directly
@@ -86,26 +88,11 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     _data->scale = scale;
     _data->offset = offset;
 
-    // std::cout << std::to_string(min) << std::endl;
-    // std::cout << std::to_string(max) << std::endl;
-    // std::cout << std::to_string(_data->scale) << std::endl;
-    // std::cout << std::to_string(_data->offset) << std::endl;
-
     addProperty(_alpha);
     addProperty(_delete);
 
-    // if(dictionary.hasValue<float>("Group")){
     dictionary.getValue("Group", _data->groupName);
-    // }
-    // _data->groupId = groupId;
-    // std::cout << _data->id << std::endl;
-    // std::cout << _data->frame << std::endl;
-    // std::cout << std::to_string(_data->offset) << std::endl;
-    // std::cout << std::to_string(_data->scale) << std::endl;
-    // std::cout << std::to_string(_data->max) << std::endl;
-    // std::cout << std::to_string(_data->min) << std::endl;
-    // std::cout << std::to_string(_data->spatialScale) << std::endl;
-    // OsEng.gui()._iswa.registerProperty(&_enabled);
+
 }
 
 IswaCygnet::~IswaCygnet(){}
@@ -127,16 +114,14 @@ bool IswaCygnet::initialize(){
     initializeTime();
     createGeometry();
     createShader();
-    updateTexture();
+    downloadTextureResource();
 
 	return true;
 }
 
 bool IswaCygnet::deinitialize(){
      if(!_data->groupName.empty())
-        _groupEvent->unsubscribe(name());
-    //     IswaManager::ref().unregisterFromGroup(_data->groupName, this);
-
+        _group->groupEvent()->unsubscribe(name());
 
     unregisterProperties();
     destroyGeometry();
@@ -178,7 +163,7 @@ void IswaCygnet::render(const RenderData& data){
 
     setPscUniforms(*_shader.get(), data.camera, position);
 
-    setUniformAndTextures();
+    setUniforms();
     renderGeometry();
 
     glEnable(GL_CULL_FACE);
@@ -194,18 +179,20 @@ void IswaCygnet::update(const UpdateData& data){
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
     if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
-        updateTexture();
+        downloadTextureResource();
 
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime = _openSpaceTime;
     }
 
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
-        _textureDirty = true;
+        bool success = updateTextureResource();
+        if(success)
+            _textureDirty = true;
     }
     
     if(_textureDirty) {
-        loadTexture();
+        updateTexture();
         _textureDirty = false;
     }
 
@@ -245,7 +232,6 @@ void IswaCygnet::initializeTime(){
 
 bool IswaCygnet::createShader(){
     if (_shader == nullptr) {
-        // Plane Program
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram(_programName,
             _vsPath,
@@ -257,21 +243,21 @@ bool IswaCygnet::createShader(){
 }
 
 void IswaCygnet::initializeGroup(){
-    _groupEvent = IswaManager::ref().groupEvent(_data->groupName, _type);
-    _group = IswaManager::ref().registerToGroup(_data->groupName, _type);
+    _group = IswaManager::ref().iswaGroup(_data->groupName);
 
-    //Subscribe to enable propert and delete
-    _groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
+    //Subscribe to enable and delete property
+    auto groupEvent = _group->groupEvent();
+    groupEvent->subscribe(name(), "enabledChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event enabledChanged");
         _enabled.setValue(dict.value<bool>("enabled"));
     });
 
-    _groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
+    groupEvent->subscribe(name(), "alphaChanged", [&](const ghoul::Dictionary& dict){
         LDEBUG(name() + " Event alphaChanged");
         _alpha.setValue(dict.value<float>("alpha"));
     });
 
-    _groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
+    groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event clearGroup");
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
     });

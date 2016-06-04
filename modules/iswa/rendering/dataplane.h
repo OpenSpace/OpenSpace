@@ -25,49 +25,47 @@
 #ifndef __DATAPLANE_H__
 #define __DATAPLANE_H__
 
-#include <modules/iswa/rendering/cygnetplane.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
+#include <modules/iswa/rendering/datacygnet.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/selectionproperty.h>
-#include <modules/iswa/util/dataprocessor.h>
 
 namespace openspace{
-class IswaGroup;
-
-class DataPlane : public CygnetPlane {
-friend class IswaGroup;
- public:
+/**
+ * DataPlane is a concrete IswaCygnet with data files as its input source. 
+ * The class handles creation, destruction and rendering of a plane geometry.
+ * It also specifies what uniforms to use and what GUI properties it needs.
+ */
+class DataPlane : public DataCygnet {
+friend class IswaBaseGroup;
+public:
      DataPlane(const ghoul::Dictionary& dictionary);
      ~DataPlane();
 
      bool initialize() override;
 
- private:
-    virtual bool loadTexture() override;
-    virtual bool updateTexture() override;
+private:
 
-    virtual bool readyToRender() const override;
-    virtual void setUniformAndTextures() override;
+    /**
+     * Creates a plane geometry
+     */
+    bool createGeometry() override;
+    bool destroyGeometry() override;
+    void renderGeometry() const override;
+    void setUniforms() override;
+    std::vector<float*> textureData() override;
+    void subscribeToGroup();
 
-    void setTransferFunctions(std::string tfPath);
-    void fillOptions();
-
-    properties::SelectionProperty _dataOptions;
     properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _backgroundValues;
-
     properties::Vec2Property _normValues;
-
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
-    std::string _dataBuffer;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+};
 
-    std::shared_ptr<DataProcessor> _dataProcessor; 
-
- };
- 
- } // namespace openspace
+} // namespace openspace
 
 #endif //__DATAPLANE_H__

@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,34 +21,27 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+#include <modules/iswa/util/dataprocessor.h>
 
-#ifndef __CYGNETSPHERE_H__
-#define __CYGNETSPHERE_H__
+#ifndef __DATAPROCESSORTEXT_H__
+#define __DATAPROCESSORTEXT_H__
 
-#include <modules/iswa/rendering/iswacygnet.h>
+namespace openspace {
 
-namespace openspace{
-class PowerScaledSphere;
-
-namespace planetgeometry {
-	class PlanetGeometry;
-}
-
-class CygnetSphere : public IswaCygnet {
+class DataProcessorText : public DataProcessor {
 public:
-    CygnetSphere(const ghoul::Dictionary& dictionary);
-    ~CygnetSphere();
+    DataProcessorText();
+    ~DataProcessorText();
 
-protected:
-    std::shared_ptr<PowerScaledSphere> _sphere;
+    virtual std::vector<std::string> readMetadata(std::string data) override;
+    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
+    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions) override;
+
 private:
-    virtual bool createGeometry() override;
-    virtual bool destroyGeometry() override;
-    virtual void renderGeometry() const override;
-
-    float _radius; 
+	// void initialize(int numOptions);
+	// void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
+	// void calculateFilterValues(std::vector<int> selectedOptions);
 };
 
-} //namespace openspace
-
-#endif // __CYGNETSPHERE_H__
+}// namespace
+#endif __DATAPROCESSORTEXT_H__

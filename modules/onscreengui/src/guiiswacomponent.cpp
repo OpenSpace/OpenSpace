@@ -70,21 +70,21 @@ void GuiIswaComponent::render() {
     bool iondatavalue = _iondata;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
-    ImGui::Text("Global Magnetosphere");
-    ImGui::Checkbox("Gm From Data", &_gmdata); ImGui::SameLine();
-    ImGui::Checkbox("Gm From Images", &_gmimage);
+    // ImGui::Text("Global Magnetosphere");
+    // ImGui::Checkbox("Gm From Data", &_gmdata); ImGui::SameLine();
+    // ImGui::Checkbox("Gm From Images", &_gmimage);
 
-    ImGui::Text("Ionosphere");
-    ImGui::Checkbox("Ion From Data", &_iondata);
+    // ImGui::Text("Ionosphere");
+    // ImGui::Checkbox("Ion From Data", &_iondata);
 
 
-    ImGui::Spacing();
-    static const int addCygnetBufferSize = 256;
-    static char addCygnetBuffer[addCygnetBufferSize];
-    ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+    // ImGui::Spacing();
+    // static const int addCygnetBufferSize = 256;
+    // static char addCygnetBuffer[addCygnetBufferSize];
+    // ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
-    if(ImGui::SmallButton("Add Cygnet"))
-        OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
+    // if(ImGui::SmallButton("Add Cygnet"))
+    //     OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
@@ -138,8 +138,8 @@ void GuiIswaComponent::render() {
                 if(cdfOptionValue != cdfOption){
                    if(cdfOptionValue >= 0){
                         groupName = cdfs[cdfOptionValue].group;
-                        std::cout << groupName << std::endl;
-                        OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
+                        // std::cout << groupName << std::endl;
+                        // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
                     }
 
                     std::string path  = cdfs[cdfOption].path;

@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2015                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,34 +21,36 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-
-#ifndef __TEXTUREPLANE_H__
-#define __TEXTUREPLANE_H__
-
-#include <modules/iswa/rendering/texturecygnet.h>
+#ifndef __ISWAKAMELEONGROUP_H__
+#define __ISWAKAMELEONGROUP_H__
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace openspace{
-
-/**
- * TexturePlane is a "concrete" IswaCygnet with texture as its input source.
- * It handles the creation, destruction and rendering of a plane geometry. 
- * It also specifies which shaders to use and the uniforms that it needs.
- */
-class TexturePlane : public TextureCygnet{
+class IswaKameleonGroup : public IswaDataGroup{
 public:
-    TexturePlane(const ghoul::Dictionary& dictionary);
-    ~TexturePlane();
+	IswaKameleonGroup(std::string name, std::string type);
+	~IswaKameleonGroup();
 
-private:
-    bool createGeometry() override;
-    void setUniforms() override;
-    bool destroyGeometry() override;
-    void renderGeometry() const override;
+	virtual void clearGroup();
+    
+    std::vector<int> fieldlineValue();
+    void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
+    void changeCdf(std::string path);
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+protected:
+    void registerProperties();
+
+    void readFieldlinePaths(std::string indexFile);
+    void updateFieldlineSeeds();
+    void clearFieldlines();
+
+    properties::FloatProperty _resolution;
+    properties::SelectionProperty _fieldlines;
+
+    std::string _fieldlineIndexFile;
+    std::string _kameleonPath;
+    std::map<int, std::tuple<std::string, std::string, bool> > _fieldlineState;
 };
- 
- } // namespace openspace
 
+}//namespace openspace
 #endif
