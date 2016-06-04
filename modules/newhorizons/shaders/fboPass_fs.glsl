@@ -84,6 +84,5 @@ void main() {
     // The 1-x is in this texture call because of flipped textures
     // to be fixed soon ---abock
         color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
-        color.a = 1.0;
     }
 }

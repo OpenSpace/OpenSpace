@@ -23,7 +23,7 @@ return {
                 Destination = "GALACTIC"
             },
             Projection = {
-                Sequence   = "rosettaimages2",
+                Sequence   = "rosettaimages",
                 SequenceType = "image-sequence",
                 Observer   = "ROSETTA",
                 Target     = "CHURYUMOV-GERASIMENKO",

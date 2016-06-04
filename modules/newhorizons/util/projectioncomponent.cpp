@@ -290,7 +290,8 @@ std::unique_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     using ghoul::io::TextureReader;
     unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
     if (texture) {
-        ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *texture);
+        if (texture->format() == Texture::Format::Red)
+            ghoul::opengl::convertTextureFormat(ghoul::opengl::Texture::Format::RGB, *texture);
         texture->uploadTexture();
         // TODO: AnisotropicMipMap crashes on ATI cards ---abock
         //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
