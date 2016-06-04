@@ -36,6 +36,8 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
+    const std::string keyPotentialTargets = "PotentialTargets";
+
     const std::string keyInstrument = "Instrument.Name";
     const std::string keyInstrumentFovy = "Instrument.Fovy";
     const std::string keyInstrumentAspect = "Instrument.Aspect";
@@ -99,6 +101,19 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
     completeSuccess &= s;
     ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
 
+
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
+        ghoul::Dictionary potentialTargets = dictionary.value<ghoul::Dictionary>(
+            keyPotentialTargets
+        );
+
+        _potentialTargets.resize(potentialTargets.size());
+        for (int i = 0; i < potentialTargets.size(); ++i) {
+            std::string target;
+            potentialTargets.getValue(std::to_string(i + 1), target);
+            _potentialTargets[i] = target;
+        }
+    }
     return completeSuccess;
 }
 

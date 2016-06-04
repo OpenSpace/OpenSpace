@@ -38,7 +38,6 @@
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
-    const std::string keyPotentialTargets     = "PotentialTargets";
 
     const std::string keyFrame = "Frame";
     const std::string keyGeometry = "Geometry";
@@ -84,18 +83,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     success = initializeProjectionSettings(dictionary);
     ghoul_assert(success, "");
 
-    // @TODO copy-n-paste from renderablefov ---abock
-    ghoul::Dictionary potentialTargets;
-    success = dictionary.getValue(keyPotentialTargets, potentialTargets);
-    ghoul_assert(success, "");
-
-    _potentialTargets.resize(potentialTargets.size());
-    for (int i = 0; i < potentialTargets.size(); ++i) {
-        std::string target;
-        potentialTargets.getValue(std::to_string(i + 1), target);
-        _potentialTargets[i] = target;
-    }
-
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
     std::string texturePath = "";
@@ -112,7 +99,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addPropertySubOwner(_geometry.get());
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
-
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
