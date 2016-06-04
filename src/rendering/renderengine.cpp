@@ -557,6 +557,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program) {
+    if (!program)
+        return;
+
     ghoul::opengl::ProgramObject* ptr = program.get();
     auto it = std::find(
         _programs.begin(),
