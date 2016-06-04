@@ -227,7 +227,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
-void RenderableModelProjection::imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture) {
+void RenderableModelProjection::imageProjectGPU(
+                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
+{
     ProjectionComponent::imageProjectBegin();
 
     _fboProgramObject->activate();

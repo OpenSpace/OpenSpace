@@ -183,7 +183,7 @@ bool RenderablePlanetProjection::isReady() const {
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
-                                std::unique_ptr<ghoul::opengl::Texture> projectionTexture)
+                                std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
 {
     imageProjectBegin();
 

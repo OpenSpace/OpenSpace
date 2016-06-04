@@ -62,7 +62,7 @@ protected:
 
 
 private:
-    void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
+    void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;

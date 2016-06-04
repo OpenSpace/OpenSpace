@@ -56,6 +56,9 @@ namespace {
     const std::string sequenceTypePlaybook = "playbook";
     const std::string sequenceTypeHybrid = "hybrid";
 
+    const std::string placeholderFile =
+        "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
+
     const std::string _loggerCat = "ProjectionComponent";
 }
 
@@ -73,6 +76,21 @@ ProjectionComponent::ProjectionComponent()
 bool ProjectionComponent::initialize() {
     bool a = generateProjectionLayerTexture();
     bool b = auxiliaryRendertarget();
+
+    using std::unique_ptr;
+    using ghoul::opengl::Texture;
+    using ghoul::io::TextureReader;
+
+    unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(placeholderFile));
+    if (texture) {
+        texture->uploadTexture();
+        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+        //_textureProj->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        texture->setFilter(Texture::FilterMode::Linear);
+        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+    }
+    _placeholderTexture = std::move(texture);
+    
     return a && b;
 }
 
@@ -282,12 +300,17 @@ void ProjectionComponent::clearAllProjections() {
     _clearAllProjections = false;
 }
 
-std::unique_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
+std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
                                                            const std::string& texturePath)
 {
     using std::unique_ptr;
     using ghoul::opengl::Texture;
     using ghoul::io::TextureReader;
+
+    if (absPath(texturePath) == absPath(placeholderFile))
+        return _placeholderTexture;
+
+
     unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
     if (texture) {
         if (texture->format() == Texture::Format::Red)
@@ -298,7 +321,7 @@ std::unique_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         texture->setFilter(Texture::FilterMode::Linear);
         texture->setWrapping(Texture::WrappingMode::ClampToBorder);
     }
-    return texture;
+    return std::move(texture);
 }
 
 bool ProjectionComponent::generateProjectionLayerTexture() {

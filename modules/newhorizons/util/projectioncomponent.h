@@ -50,7 +50,7 @@ protected:
     bool generateProjectionLayerTexture();
     bool auxiliaryRendertarget();
 
-    std::unique_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
+    std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(const std::string& texturePath);
     glm::mat4 computeProjectorMatrix(
         const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up,
         const glm::dmat3& instrumentMatrix,
@@ -69,6 +69,8 @@ protected:
     properties::FloatProperty _projectionFading;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
+
+    std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
 
     std::string _instrumentID;
     std::string _projectorID;

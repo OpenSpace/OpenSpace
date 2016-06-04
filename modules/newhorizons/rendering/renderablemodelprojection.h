@@ -60,7 +60,7 @@ public:
 private:
     bool loadTextures();
     void attitudeParameters(double time);
-    void imageProjectGPU(std::unique_ptr<ghoul::opengl::Texture> projectionTexture);
+    void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
     void project();
 
