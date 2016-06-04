@@ -22,51 +22,47 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <sstream>
-#include <memory>
+#include <modules/galaxy/rendering/galaxyraycaster.h>
 
-#include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
 #include <glm/glm.hpp>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/bufferbinding.h>
-
-
+#include <sstream>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/texture.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
-#include <ghoul/opengl/texture.h>
+
 
 
 namespace {
-    const std::string GlslRaycastPath = "${MODULES}/multiresvolume/shaders/raycast.glsl";
-    const std::string GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/multiresvolume/shaders/boundsVs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/multiresvolume/shaders/boundsFs.glsl";
+    const std::string GlslRaycastPath = "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+    const std::string GlslBoundsVsPath = "${MODULES}/galaxy/shaders/raycasterbounds.vs";
+    const std::string GlslBoundsFsPath = "${MODULES}/galaxy/shaders/raycasterbounds.fs";
 }
 
 namespace openspace {
 
-MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
-    std::shared_ptr<AtlasManager> atlasManager,
-    std::shared_ptr<TransferFunction> transferFunction)
-    : _tsp(tsp)
-    , _atlasManager(atlasManager)
-    , _transferFunction(transferFunction)
-    , _boundingBox(glm::vec3(1.0)) {}
+GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture)
+    : _boundingBox(glm::vec3(1.0))
+    , _texture(texture)
+    , _textureUnit(nullptr) {}
     
-MultiresVolumeRaycaster::~MultiresVolumeRaycaster() {}
+GalaxyRaycaster::~GalaxyRaycaster() {}
 
-void MultiresVolumeRaycaster::initialize() {
+void GalaxyRaycaster::initialize() {
     _boundingBox.initialize();
 }
     
-void MultiresVolumeRaycaster::deinitialize() {
+void GalaxyRaycaster::deinitialize() {
 }
     
-void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+void GalaxyRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("blendMode", static_cast<unsigned int>(1));
+
     Renderable::setPscUniforms(program, data.camera, data.position);
     
     // Cull back face
@@ -77,10 +73,11 @@ void MultiresVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::o
     _boundingBox.render();
 }
     
-void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
+void GalaxyRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
     // Uniforms
     program.setUniform("modelTransform", _modelTransform);
     program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    program.setUniform("blendMode", static_cast<unsigned int>(1));
     Renderable::setPscUniforms(program, data.camera, data.position);
 
     // Cull front face
@@ -94,45 +91,34 @@ void MultiresVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::op
     glCullFace(GL_BACK);
 }
     
-void MultiresVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
-    std::string timestepUniformName = "timestep" + std::to_string(data.id);
+void GalaxyRaycaster::preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+    std::string colorUniformName = "color" + std::to_string(data.id);
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-
-    std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.0f : 0.0f);
-    program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
-
-    _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->getTexture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    std::string galaxyTextureUniformName = "galaxyTexture" + std::to_string(data.id);
+    std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
+    std::string opacityCoefficientUniformName = "opacityCoefficient" + std::to_string(data.id);
     
-    _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _atlasUnit->activate();
-    _atlasManager->textureAtlas().bind();
-    program.setUniform("textureAtlas_" + id, _atlasUnit->unitNumber());
+    program.setUniform(volumeAspectUniformName, _aspect);
+    program.setUniform(stepSizeUniformName, _stepSize);
+    program.setUniform(opacityCoefficientUniformName, _opacityCoefficient);
 
+    _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _textureUnit->activate();
+    _texture.bind();
+    program.setUniform(galaxyTextureUniformName, *_textureUnit);
     
-    _atlasMapBinding = std::make_unique<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _atlasMapBinding->bindingNumber(), _atlasManager->atlasMapBuffer());
-    program.setSsboBinding("atlasMapBlock_" + id, _atlasMapBinding->bindingNumber());
-
-    
-    program.setUniform("gridType_" + id, static_cast<int>(_tsp->header().gridType_));
-    program.setUniform("maxNumBricksPerAxis_" + id, static_cast<unsigned int>(_tsp->header().xNumBricks_));
-    program.setUniform("paddedBrickDim_" + id, static_cast<unsigned int>(_tsp->paddedBrickDim()));
-    
-    glm::size3_t size = _atlasManager->textureSize();
-    glm::ivec3 atlasSize(size.x, size.y, size.z);
-    program.setUniform("atlasSize_" + id, atlasSize);
 }
     
-bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
+void GalaxyRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
+    _textureUnit = nullptr; // release texture unit.
+}
+
+bool GalaxyRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
     // Camera rig position in world coordinates.
     glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
     //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-    glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
-
+    //glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+ 
     // Camera position in world coordinates.
     glm::vec4 camWorldPos = rigWorldPos;
     glm::vec3 objPos = data.position.vec3();
@@ -147,39 +133,45 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& 
     glm::mat4 scaledModelTransform = modelTransform / divisor;
 
     glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
-
-
+    
     localPosition = (modelPos.xyz() + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
-
 }
 
-void MultiresVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
-    // For example: release texture units
-}
-    
-std::string MultiresVolumeRaycaster::getBoundsVsPath() const {
+std::string GalaxyRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
 }
     
-std::string MultiresVolumeRaycaster::getBoundsFsPath() const {
+std::string GalaxyRaycaster::getBoundsFsPath() const {
     return GlslBoundsFsPath;
 }
 
-std::string MultiresVolumeRaycaster::getRaycastPath() const {
+std::string GalaxyRaycaster::getRaycastPath() const {
     return GlslRaycastPath;
 }
 
-std::string MultiresVolumeRaycaster::getHelperPath() const {
-    return GlslHelperPath; // no helper file
+std::string GalaxyRaycaster::getHelperPath() const {
+    return ""; // no helper file
 }
 
-void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {
+void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {
+    _aspect = aspect / std::max(std::max(aspect.x, aspect.y), aspect.z);
+}
+
+void GalaxyRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = transform;
 }
+
+void GalaxyRaycaster::setOpacityCoefficient(float opacityCoefficient) {
+    _opacityCoefficient = opacityCoefficient;
+}
+
+void GalaxyRaycaster::setTime(double time) {
+    _time = time;
+}
     
-void MultiresVolumeRaycaster::setStepSizeCoefficient(float stepSizeCoefficient) {
-    _stepSizeCoefficient = stepSizeCoefficient;
+void GalaxyRaycaster::setStepSize(float stepSize) {
+    _stepSize = stepSize;
 }
     
 }

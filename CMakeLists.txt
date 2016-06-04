@@ -27,6 +27,8 @@ cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 project (OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
+set(BOOST_ROOT "G:/deps/bin/boost_1_60_0")
+
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")

@@ -81,6 +81,9 @@ public:
 
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks);
+
+  
+     
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
     //virtual std::string getHeaderPath() override;
     //virtual std::string getHelperPath() override;
@@ -120,6 +123,7 @@ private:
     std::string _volumeName;
 
     std::string _transferFunctionPath;
+    std::string _errorHistogramsPath;
 
     std::shared_ptr<TransferFunction> _transferFunction;
 

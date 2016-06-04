@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,25 +21,59 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+#ifndef __RENDERABLEGALAXY_H__
+#define __RENDERABLEGALAXY_H__
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/rendering/renderable.h>
+#include <modules/galaxy/rendering/galaxyraycaster.h>
+#include <modules/volume/rawvolume.h>
 
-out vec3 vPosition;
-out vec4 worldPosition;
+namespace openspace {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {
-	vPosition = vertPosition.xyz;
-
-	worldPosition = vec4(vertPosition.xyz, 0.0);
-	vec4 position = pscTransform(worldPosition, modelTransform);
+struct RenderData;
     
-	// project the position to view space
-    gl_Position =  z_normalization(viewProjection * position);
+class RenderableGalaxy : public Renderable {
+public:
+    RenderableGalaxy(const ghoul::Dictionary& dictionary);
+    ~RenderableGalaxy();
+    
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void postRender(const RenderData& data) override;
+    void update(const UpdateData& data) override;
+
+private:
+    float safeLength(const glm::vec3& vector);
+
+    glm::vec3 _volumeSize;
+    glm::vec3 _pointScaling;
+    properties::FloatProperty _stepSize;
+    properties::FloatProperty _pointStepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+
+    std::string _volumeFilename;
+    glm::ivec3 _volumeDimensions;
+    std::string _pointsFilename;
+
+    std::unique_ptr<GalaxyRaycaster> _raycaster;
+    std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::mat4 _pointTransform;
+    glm::vec3 _aspect;
+    float _opacityCoefficient;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
+    size_t _nPoints;
+    GLuint _pointsVao;
+    GLuint _positionVbo;
+    GLuint _colorVbo;
+};
 }
+
+#endif // __RENDERABLEGALAXY_H__

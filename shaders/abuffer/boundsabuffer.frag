@@ -37,6 +37,11 @@ void main() {
 
     int sampleMask = gl_SampleMaskIn[0];
 
+    if (frag.depth < 0) {
+    //        discard;
+        }
+
+    
     uint newHead = atomicCounterIncrement(atomicCounterBuffer);
     uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
 

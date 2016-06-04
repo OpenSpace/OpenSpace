@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014-2015                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,25 +21,20 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+#ifndef __GALAXYMODULE_H__
+#define __GALAXYMODULE_H__
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+#include <openspace/util/openspacemodule.h>
 
-out vec3 vPosition;
-out vec4 worldPosition;
+namespace openspace {
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+class GalaxyModule : public OpenSpaceModule {
+public:
+    GalaxyModule();
+    void internalInitialize() override;
+};
 
-void main() {
-	vPosition = vertPosition.xyz;
+} // namespace openspace
 
-	worldPosition = vec4(vertPosition.xyz, 0.0);
-	vec4 position = pscTransform(worldPosition, modelTransform);
-    
-	// project the position to view space
-    gl_Position =  z_normalization(viewProjection * position);
-}
+#endif // __GALAXYMODULE_H__

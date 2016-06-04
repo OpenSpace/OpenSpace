@@ -7,7 +7,7 @@ return {
         },
         Renderable = {
             Type = "RenderableSphere",
-            Size = {10, 20},
+            Size = {10, 30},
             Segments = 40,
             Texture = "textures/DarkUniverse_mellinger_8k.jpg",
             Orientation = "Inside/Outside"

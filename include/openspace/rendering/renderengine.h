@@ -62,6 +62,12 @@ public:
         Invalid
     };
 
+    enum class RenderProgramType {
+        Default = 0,
+        Post
+    };
+
+
     static const std::string PerformanceMeasurementSharedData;
     
     static const std::string KeyFontMono;
@@ -111,24 +117,43 @@ public:
         std::string name,
         std::string vsPath,
         std::string fsPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
+        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
         std::string fsPath,
         std::string csPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
+        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
     void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+
+    /**
+    * Set raycasting uniforms on the program object, and setup raycasting.
+    */
+    void preRaycast(ghoul::opengl::ProgramObject& programObject);
+
+    /**
+    * Tear down raycasting for the specified program object.
+    */
+    void postRaycast(ghoul::opengl::ProgramObject& programObject);
+
 
     void setRendererFromString(const std::string& method);
 
     /**
-     * Let's the renderer update the data to be brought into the rendererer programs
+     * Lets the renderer update the data to be brought into the rendererer programs
      * as a 'rendererData' variable in the dictionary.
      */
-    void setRendererData(const ghoul::Dictionary& renderer);
+    void setRendererData(const ghoul::Dictionary& rendererData);
+    
+    /**
+    * Lets the renderer update the data to be brought into the post rendererer programs
+    * as a 'resolveData' variable in the dictionary.
+    */
+    void setResolveData(const ghoul::Dictionary& resolveData);
     
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -164,6 +189,7 @@ private:
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
     ghoul::Dictionary _rendererData;
+    ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
     bool _showInfo;

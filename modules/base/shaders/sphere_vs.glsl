@@ -49,7 +49,7 @@ void main()
 
     vec4 position = pscTransform(tmp, mt);
 
-    vs_position = in_position;
+    vs_position = tmp;
     vs_st = in_st;
     
     position = ViewProjection * position;

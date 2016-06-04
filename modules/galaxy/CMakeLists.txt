@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2016                                                               #
+# Copyright (c) 2014-2015                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -22,26 +22,24 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-set(APPLICATION_NAME DataConverter)
-set(APPLICATION_LINK_TO_OPENSPACE ON)
+include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
-
-set(application_path ${OPENSPACE_APPS_DIR}/DataConverter)
+set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.h  
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.h  
+)
+source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${application_path}/main.cpp
-  ${application_path}/milkywayconversiontask.cpp
-  ${application_path}/milkywaypointsconversiontask.cpp    
+    ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.cpp  
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.cpp  
 )
-set(HEADER_FILES
-  ${application_path}/conversiontask.h
-  ${application_path}/milkywayconversiontask.h
-  ${application_path}/milkywaypointsconversiontask.h    
-)
+source_group("Source Files" FILES ${SOURCE_FILES})
 
-add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
-    ${SOURCE_FILES}
-    ${HEADER_FILES}
+create_new_module(
+    "Galaxy"
+    galaxy
+    ${HEADER_FILES} ${SOURCE_FILES}
 )
-

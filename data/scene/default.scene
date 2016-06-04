@@ -37,8 +37,8 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
-        Position = {1, 0, 0, 5},
+        Focus = "Root",
+        Position = {1, 0, 0, 2},
     },
     Modules = {
         "sun",

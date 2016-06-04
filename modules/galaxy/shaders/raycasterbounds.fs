@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,25 +21,23 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version __CONTEXT__
 
-layout(location = 0) in vec4 vertPosition;
+in vec3 vPosition;
+in vec4 worldPosition;
 
-uniform mat4 viewProjection;
-uniform mat4 modelTransform;
+uniform uint blendMode;
 
-out vec3 vPosition;
-out vec4 worldPosition;
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+Fragment getFragment() {
+	vec4 fragColor = vec4((vPosition+0.5), 1.0);
+	vec4 position = worldPosition;
+	float depth = pscDepth(position);
 
-void main() {
-	vPosition = vertPosition.xyz;
-
-	worldPosition = vec4(vertPosition.xyz, 0.0);
-	vec4 position = pscTransform(worldPosition, modelTransform);
-    
-	// project the position to view space
-    gl_Position =  z_normalization(viewProjection * position);
+    Fragment frag;
+    frag.color = fragColor;
+    frag.depth = depth;
+    frag.blend = blendMode;
+    return frag;
 }

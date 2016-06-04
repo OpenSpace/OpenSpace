@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MULTIRESVOLUMERAYCASTER_H__
-#define __MULTIRESVOLUMERAYCASTER_H__
+#ifndef __GALAXYRAYCASTER_H__
+#define __GALAXYRAYCASTER_H__
 
 #include <ghoul/glm.h>
 #include <string>
@@ -31,17 +31,11 @@
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
-#include <openspace/rendering/transferfunction.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/bufferbinding.h>
-
-#include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/tsp.h>
-
 
 namespace ghoul {
     namespace opengl {
         class Texture;
+        class TextureUnit;
         class ProgramObject;
     }
 }
@@ -51,15 +45,12 @@ namespace openspace {
 class RenderData;
 class RaycastData;
 
-class MultiresVolumeRaycaster : public VolumeRaycaster {
+class GalaxyRaycaster : public VolumeRaycaster {
 public:
 
-    MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
-        std::shared_ptr<AtlasManager> atlasManager,
-        std::shared_ptr<TransferFunction> transferFunction);
+    GalaxyRaycaster(ghoul::opengl::Texture& texture);
 
-    virtual ~MultiresVolumeRaycaster();
-
+    virtual ~GalaxyRaycaster();
     void initialize();
     void deinitialize();
     void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
@@ -68,31 +59,29 @@ public:
     void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
     bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
 
+
     std::string getBoundsVsPath() const override;
     std::string getBoundsFsPath() const override;
     std::string getRaycastPath() const override;
     std::string getHelperPath() const override;
 
+    void setAspect(const glm::vec3& aspect);
     void setModelTransform(glm::mat4 transform);
-    //void setTime(double time);
-    void setStepSizeCoefficient(float coefficient);
+    void setTime(double time);
+    void setStepSize(float stepSize);
+    void setOpacityCoefficient(float opacityCoefficient);
 private:
     BoxGeometry _boundingBox;
+    float _stepSize;
     glm::mat4 _modelTransform;
-    float _stepSizeCoefficient;
+    glm::vec3 _aspect;
     double _time;
+    float _opacityCoefficient;
+    ghoul::opengl::Texture& _texture;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
 
-    std::shared_ptr<TSP> _tsp;
-    std::shared_ptr<AtlasManager> _atlasManager;
-    std::shared_ptr<TransferFunction> _transferFunction;
-
-    std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
-    std::unique_ptr<ghoul::opengl::TextureUnit> _atlasUnit;
-    std::unique_ptr < ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _atlasMapBinding;
-
-
-}; // MultiresVolumeRaycaster
+}; // GalaxyRaycaster
 
 } // openspace
 
-#endif  // __MULTIRESVOLUMERAYCASTER_H__ 
+#endif  // __GALAXYRRAYCASTER_H__

@@ -39,7 +39,10 @@ void main() {
 
 	worldPosition = vec4(vertPosition.xyz, 0.0);
 	vec4 position = pscTransform(worldPosition, modelTransform);
+
+
     
 	// project the position to view space
     gl_Position =  z_normalization(viewProjection * position);
+    //gl_Position.z = 1.0;
 }
