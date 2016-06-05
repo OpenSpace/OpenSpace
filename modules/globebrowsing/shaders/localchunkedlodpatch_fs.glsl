@@ -61,10 +61,24 @@ Fragment getFragment() {
 			colorTilesParent2[#{i}].uvTransform.uvScale * fs_uv +
 			colorTilesParent2[#{i}].uvTransform.uvOffset;
 		
+
+/*
+		vec4 colorSample =
+			w1 * textureLod(colorTiles[#{i}].textureSampler, samplePos, 0) +
+			w2 * textureLod(colorTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
+			w3 * textureLod(colorTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
+*/
 		vec4 colorSample =
 			w1 * texture(colorTiles[#{i}].textureSampler, samplePos) +
 			w2 * texture(colorTilesParent1[#{i}].textureSampler, samplePosParent1) +
 			w3 * texture(colorTilesParent2[#{i}].textureSampler, samplePosParent2);
+		/*	
+		vec4 colorSample =
+			w1 * textureGrad(colorTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
+			w2 * textureGrad(colorTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
+			w3 * textureGrad(colorTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
+		*/
+
 		frag.color = blendOver(frag.color, colorSample);
 	}
 	#endfor

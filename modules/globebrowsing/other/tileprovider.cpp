@@ -167,9 +167,11 @@ namespace openspace {
             tileData->glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
-
+        
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(texturePtr);
+        //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
         texture->uploadTexture();
         
         MetaTexture metaTexture = { texture, tileIOResult->error };

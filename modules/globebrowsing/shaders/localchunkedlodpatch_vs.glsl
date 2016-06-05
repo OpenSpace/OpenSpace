@@ -96,11 +96,25 @@ void main()
 			heightTilesParent2[#{i}].uvTransform.uvScale * in_uv +
 			heightTilesParent2[#{i}].uvTransform.uvOffset;
 
+
+/*
+		float sampledValue =
+			w1 * textureLod(heightTiles[#{i}].textureSampler, samplePos, 0).r +
+			w2 * textureLod(heightTilesParent1[#{i}].textureSampler, samplePosParent1, 0).r +
+			w3 * textureLod(heightTilesParent2[#{i}].textureSampler, samplePosParent2, 0).r;
+*/
+/*
+		float sampledValue =
+			w1 * textureGrad(heightTiles[#{i}].textureSampler, samplePos, vec2(1), vec2(1)).r +
+			w2 * textureGrad(heightTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(1), vec2(1)).r +
+			w3 * textureGrad(heightTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(1), vec2(1)).r;
+*/		
 		float sampledValue =
 			w1 * texture(heightTiles[#{i}].textureSampler, samplePos).r +
 			w2 * texture(heightTilesParent1[#{i}].textureSampler, samplePosParent1).r +
 			w3 * texture(heightTilesParent2[#{i}].textureSampler, samplePosParent2).r;
-		
+
+
 		// TODO : Some kind of blending here. Now it just writes over
 		height = (sampledValue *
 			heightTiles[#{i}].depthTransform.depthScale +
