@@ -315,7 +315,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
     _programObject->setUniform("_projectionFading", _projectionFading);
 
-    _programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
+    //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     

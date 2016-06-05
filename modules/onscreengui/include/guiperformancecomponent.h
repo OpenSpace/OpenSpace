@@ -44,6 +44,7 @@ public:
 protected:
     ghoul::SharedMemory* _performanceMemory = nullptr;
     float _minMaxValues[2];
+    int _sortingSelection;
 };
 
 } // namespace gui
