@@ -1,5 +1,7 @@
 UseAccurateNewHorizonsKernels = false
-UseHighResolutionTextures = false
+-- TextureResolution = "low"
+TextureResolution = "med"
+-- TextureResolution = "high"
 
 function preInitialization()
     --[[

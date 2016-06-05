@@ -8,11 +8,12 @@ else
     }
 end
 
-if UseHighResolutionTextures then
-    ColorTexture = "textures/cpmap_cyl_HR_0e.jpg"
-else
-    ColorTexture = "textures/charon_highres.jpg"
-end
+Files = {
+    low = "textures/charon_highres.jpg",
+    med = "textures/charon_highres.jpg",
+    high = "textures/cpmap_cyl_HR_0e.jpg"
+}
+ColorTexture = Files[TextureResolution]
 
 return {
     -- CharonProjection module

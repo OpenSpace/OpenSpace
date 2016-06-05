@@ -9,11 +9,12 @@ else
     }
 end
 
-if UseHighResolutionTextures then
-    ColorTexture = "textures/pmap_cyl_HR_LOR_lowres.jpg"
-else
-    ColorTexture = "textures/Shenk_180.jpg"
-end
+Files = {
+    low = "textures/pluto_large.jpg",
+    med = "textures/Shenk_180.jpg",
+    high = "textures/pmap_cyl_HR_LOR_lowres.jpg"
+}
+ColorTexture = Files[TextureResolution]
 
 return {
     -- Pluto barycenter module
@@ -49,7 +50,7 @@ return {
                 Sequencing = "true"
             },
             Projection = {
-                Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/images",
+                Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/full_images",
                 EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
                 SequenceType   = "hybrid",
                 Observer       = "NEW HORIZONS",
