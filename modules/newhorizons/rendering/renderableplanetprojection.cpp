@@ -54,6 +54,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
+    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
@@ -108,6 +109,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_projectionFading);
     addProperty(_heightExaggeration);
+    addProperty(_debugProjectionTextureRotation);
 
     success = initializeParser(dictionary);
     ghoul_assert(success, "");
@@ -312,6 +314,8 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
     _programObject->setUniform("_projectionFading", _projectionFading);
+
+    _programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     

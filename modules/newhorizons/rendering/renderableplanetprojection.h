@@ -76,6 +76,7 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
     properties::FloatProperty _heightExaggeration;
+    properties::FloatProperty _debugProjectionTextureRotation;
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     

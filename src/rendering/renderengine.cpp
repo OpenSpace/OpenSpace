@@ -372,8 +372,13 @@ void RenderEngine::postSynchronizationPreDraw() {
     _renderer->update();
 
     for (auto program : _programs) {
-        if (program->isDirty()) {
-            program->rebuildFromFile();
+        try {
+            if (program->isDirty()) {
+                program->rebuildFromFile();
+            }
+        }
+        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+            LERRORC(e.component, e.what());
         }
     }
     
