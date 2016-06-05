@@ -75,7 +75,6 @@ namespace openspace {
 
 
     struct TimeIdProviderFactory {
-        ~TimeIdProviderFactory();
         static TimeFormat* getProvider(const std::string& format);
         static void init();
 

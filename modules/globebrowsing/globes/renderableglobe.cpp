@@ -114,7 +114,7 @@ namespace openspace {
         // manually add a temporal tile provider for testing
         std::string filename = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
         TileProviderInitData initData;
-        initData.minimumPixelSize = minimumTextureSide;
+        initData.minimumPixelSize = minimumTextureSize;
         initData.threads = 1;
         initData.cacheSize = 50;
         initData.framesUntilRequestQueueFlush = 60;
