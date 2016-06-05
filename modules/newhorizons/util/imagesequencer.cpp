@@ -191,15 +191,16 @@ std::map<std::string, bool> ImageSequencer::getActiveInstruments(){
     // return entire map, seen in GUI.
     return _switchingMap;
 }
-bool ImageSequencer::instrumentActive(std::string instrumentID){ 
-    for (auto i : _instrumentTimes){
+
+bool ImageSequencer::instrumentActive(std::string instrumentID) {
+    for (const auto& i : _instrumentTimes) {
         //check if this instrument is in range
-        if (i.second.inRange(_currentTime)){ 
+        if (i.second.inRange(_currentTime)) { 
             //if so, then get the corresponding spiceID
             std::vector<std::string> spiceIDs = _fileTranslation[i.first]->getTranslation(); 
             //check which specific subinstrument is firing
-            for (auto s : spiceIDs){
-                if (s == instrumentID){
+            for (auto s : spiceIDs) {
+                if (s == instrumentID) {
                     return true;
                 }
             }
@@ -209,7 +210,7 @@ bool ImageSequencer::instrumentActive(std::string instrumentID){
 }
 
 float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) const {
-    for (auto i : _instrumentTimes){
+    for (const auto& i : _instrumentTimes){
         //check if this instrument is in range
         if (i.second.inRange(_currentTime)){
             //if so, then get the corresponding spiceID
@@ -319,6 +320,14 @@ void ImageSequencer::sortData() {
         std::sort(_subsetMap[sub.first]._subset.begin(),
                   _subsetMap[sub.first]._subset.end(), imageComparer);
     }
+
+    std::sort(
+        _instrumentTimes.begin(),
+        _instrumentTimes.end(),
+        [](const std::pair<std::string, TimeRange>& a, const std::pair<std::string, TimeRange>& b) {
+            return a.second._min < b.second._min;
+        }
+    );
 }
 
 void ImageSequencer::runSequenceParser(SequenceParser* parser){

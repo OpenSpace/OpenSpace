@@ -142,7 +142,7 @@ void GuiPerformanceComponent::render() {
             std::sort(
                 indices.begin(),
                 indices.end(),
-                [sortIndex, &averages](int a, int b) {
+                [sortIndex, &averages](size_t a, size_t b) {
                     return averages[a][sortIndex] > averages[b][sortIndex];
                 }
             );

@@ -54,7 +54,7 @@ struct TimeRange {
     bool inRange(double min, double max){
         return (min >= _min && max <= _max);
     }
-    bool inRange(double val){
+    bool inRange(double val) const {
         return (val >= _min && val <= _max);
     }
     double _min;
