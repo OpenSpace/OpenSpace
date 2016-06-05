@@ -301,13 +301,15 @@ void ProjectionComponent::clearAllProjections() {
 }
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
-                                                           const std::string& texturePath)
+                                                           const std::string& texturePath,
+                                                           bool isPlaceholder)
 {
     using std::unique_ptr;
     using ghoul::opengl::Texture;
     using ghoul::io::TextureReader;
 
-    if (absPath(texturePath) == absPath(placeholderFile))
+
+    if (isPlaceholder)
         return _placeholderTexture;
 
 

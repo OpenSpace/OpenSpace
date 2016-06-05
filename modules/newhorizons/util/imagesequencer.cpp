@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <modules/newhorizons/util/imagesequencer.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -164,8 +163,7 @@ const Image ImageSequencer::getLatestImageForInstrument(const std::string _instr
     if (it != _latestImages.end())
         return _latestImages[_instrumentID];
     else {
-        Image dummyImage = { 0, 0, "", std::vector<std::string>(), "", false };
-        return dummyImage;
+        return Image();
     }
 }
 
@@ -262,7 +260,8 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
             if (curr->startTime >= prev->startTime){
                 std::copy_if(prev, curr, back_inserter(captureTimes), 
                     [instrumentRequest](const Image& i) {
-                    return i.activeInstruments[0] == instrumentRequest;
+                    bool correctInstrument = i.activeInstruments[0] == instrumentRequest;
+                    return correctInstrument;
                 });
 
                 //std::reverse(captureTimes.begin(), captureTimes.end());
@@ -270,13 +269,41 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                 if (!captures.empty())
                     _latestImages[captures.back().activeInstruments.front()] = captures.back();
 
+                std::vector<int> toDelete;
+                for (auto it = captures.begin(); it != captures.end(); ++it) {
+                    if (it->isPlaceholder) {
+                        double beforeDist = std::numeric_limits<double>::max();
+                        if (it != captures.begin()) {
+                            auto before = std::prev(it);
+                            beforeDist = abs(before->startTime - it->startTime);
+                        }
+                        
+                        double nextDist = std::numeric_limits<double>::max();
+                        if (it != captures.end() - 1) {
+                            auto next = std::next(it);
+                            nextDist = abs(next->startTime - it->startTime);
+                        }
+                        
+                        if (beforeDist < 1.0 || nextDist < 1.0) {
+                            toDelete.push_back(std::distance(captures.begin(), it));
+                        }
+                    }
+                }
+
+                for (size_t i = 0; i < toDelete.size(); ++i) {
+                    // We have to subtract i here as we already have deleted i value
+                    // before this and we need to adjust the location
+                    int v = toDelete[i] - i;
+                    captures.erase(captures.begin() + v);
+                }
+
                 return true;
             }
         }
     }
     return false;
 }
-void ImageSequencer::sortData(){
+void ImageSequencer::sortData() {
     auto targetComparer = [](const std::pair<double, std::string> &a,
                              const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
