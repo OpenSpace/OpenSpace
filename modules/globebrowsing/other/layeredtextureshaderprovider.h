@@ -40,7 +40,11 @@ namespace openspace {
     struct LayeredTextureInfo
     {
         std::string keyLastLayerIndex;
+        std::string keyUseThisLayerType;
+        std::string keyLayerBlendingEnabled;
         int lastLayerIndex;
+        bool useThisLayerType;
+        bool layerBlendingEnabled;
 
         bool operator==(const LayeredTextureInfo& other) const;
     };

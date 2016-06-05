@@ -27,9 +27,7 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
-
-#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
-#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
+#include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 radiiSquared;
@@ -40,9 +38,11 @@ uniform vec2 lonLatScalingFactor;
 uniform int xSegments;
 uniform float skirtLength;
 
+#if USE_HEIGHTMAP
 uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
 uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
 uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+#endif // USE_HEIGHTMAP
 
 uniform vec3 cameraPosition;
 uniform float distanceScaleFactor;
@@ -68,70 +68,38 @@ void main()
 {
 	PositionNormalPair pair = globalInterpolation();
 
-	float height = 0;
-
-    // Calculate desired level based on distance to the vertex on the ellipsoid
-    // Before any heightmapping is done
 	float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
     float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
 	float desiredLevel = log2(projectedScaleFactor);
 
 	tileInterpolationParameter = chunkLevel - desiredLevel;
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
 
-	#for i in 0..#{lastLayerIndexHeight}
-	{
-		vec2 samplePos =
-			heightTiles[#{i}].uvTransform.uvScale * in_uv +
-			heightTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			heightTilesParent1[#{i}].uvTransform.uvScale * in_uv +
-			heightTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			heightTilesParent2[#{i}].uvTransform.uvScale * in_uv +
-			heightTilesParent2[#{i}].uvTransform.uvOffset;
+	float height = 0;
 
+#if USE_HEIGHTMAP
+	
+	// Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	height = calculateHeight(
+		in_uv,
+		tileInterpolationParameter, 							// Variable to determine which texture to sample from
+		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
 
-			/*
-		float sampledValue =
-			w1 * textureLod(heightTiles[#{i}].textureSampler, samplePos, 0).r +
-			w2 * textureLod(heightTilesParent1[#{i}].textureSampler, samplePosParent1, 0).r +
-			w3 * textureLod(heightTilesParent2[#{i}].textureSampler, samplePosParent2, 0).r;
-*/
-			/*
-		float sampledValue =
-			w1 * textureGrad(heightTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)).r +
-			w2 * textureGrad(heightTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)).r +
-			w3 * textureGrad(heightTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0)).r;
-*/
-		float sampledValue =
-			w1 * texture(heightTiles[#{i}].textureSampler, samplePos).r +
-			w2 * texture(heightTilesParent1[#{i}].textureSampler, samplePosParent1).r +
-			w3 * texture(heightTilesParent2[#{i}].textureSampler, samplePosParent2).r;
+#endif // USE_HEIGHTMAP
 
-
-		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue *
-			heightTiles[#{i}].depthTransform.depthScale +
-			heightTiles[#{i}].depthTransform.depthOffset);
-
-		// Skirts
-		int vertexIDx = gl_VertexID % (xSegments + 3);
-		int vertexIDy = gl_VertexID / (xSegments + 3);
-		if (vertexIDx == 0 ||
-			vertexIDy == 0 ||
-			vertexIDx == (xSegments + 2) ||
-			vertexIDy == (xSegments + 2) ) {
-			height -= skirtLength;
-		}
+	// Skirts
+	int vertexIDx = gl_VertexID % (xSegments + 3);
+	int vertexIDy = gl_VertexID / (xSegments + 3);
+	if (vertexIDx == 0 ||
+		vertexIDy == 0 ||
+		vertexIDx == (xSegments + 2) ||
+		vertexIDy == (xSegments + 2) ) {
+		height -= skirtLength;
 	}
-	#endfor
-
+	
 	// Add the height in the direction of the normal
 	pair.position += pair.normal * height;
-
+	
 	vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
 
 	// Write output

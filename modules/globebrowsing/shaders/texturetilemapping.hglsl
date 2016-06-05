@@ -1,0 +1,174 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef TEXTURETILEMAPPING_HGLSL
+#define TEXTURETILEMAPPING_HGLSL
+
+#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
+
+#ifndef NUMLAYERS_HEIGHTMAP
+#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
+#endif // NUMLAYERS_HEIGHTMAP
+
+#ifndef USE_HEIGHTMAP 
+#define USE_HEIGHTMAP #{useHeightMap}
+#endif // USE_HEIGHTMAP
+
+#ifndef HEIGHTMAP_BLENDING_ENABLED 
+#define HEIGHTMAP_BLENDING_ENABLED #{heightMapBlendingEnabled}
+#endif // HEIGHTMAP_BLENDING_ENABLED
+
+#ifndef NUMLAYERS_COLORTEXTURE
+#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
+#endif // NUMLAYERS_HEIGHTMAP
+
+#ifndef USE_COLORTEXTURE 
+#define USE_COLORTEXTURE #{useColorTexture}
+#endif // USE_COLORTEXTURE
+
+#ifndef COLORTEXTURE_BLENDING_ENABLED 
+#define COLORTEXTURE_BLENDING_ENABLED #{colorTextureBlendingEnabled}
+#endif // HEIGHTMAP_BLENDING_ENABLED
+
+float calculateHeight(
+	const vec2 uv,
+	const float tileInterpolationParameter,
+	const TextureTile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+
+	float height = 0;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if HEIGHTMAP_BLENDING_ENABLED
+	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
+	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
+	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+#else // HEIGHTMAP_BLENDING_ENABLED
+	float w1 = 1;
+	float w2 = 0;
+	float w3 = 0;
+#endif // HEIGHTMAP_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexHeight}
+	{
+		vec2 samplePos =
+			heightTiles[#{i}].uvTransform.uvScale * uv +
+			heightTiles[#{i}].uvTransform.uvOffset;
+		vec2 samplePosParent1 =
+			heightTilesParent1[#{i}].uvTransform.uvScale * uv +
+			heightTilesParent1[#{i}].uvTransform.uvOffset;
+		vec2 samplePosParent2 =
+			heightTilesParent2[#{i}].uvTransform.uvScale * uv +
+			heightTilesParent2[#{i}].uvTransform.uvOffset;
+
+		/*
+		float sampledValue =
+			w1 * textureLod(heightTiles[#{i}].textureSampler, samplePos, 0).r +
+			w2 * textureLod(heightTilesParent1[#{i}].textureSampler, samplePosParent1, 0).r +
+			w3 * textureLod(heightTilesParent2[#{i}].textureSampler, samplePosParent2, 0).r;
+		*/
+		/*
+		float sampledValue =
+			w1 * textureGrad(heightTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)).r +
+			w2 * textureGrad(heightTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)).r +
+			w3 * textureGrad(heightTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0)).r;
+		*/
+
+		float sampledValue =
+			w1 * texture(heightTiles[#{i}].textureSampler, samplePos).r +
+			w2 * texture(heightTilesParent1[#{i}].textureSampler, samplePosParent1).r +
+			w3 * texture(heightTilesParent2[#{i}].textureSampler, samplePosParent2).r;
+
+		// TODO : Some kind of blending here. Now it just writes over
+		height = (sampledValue *
+			heightTiles[#{i}].depthTransform.depthScale +
+			heightTiles[#{i}].depthTransform.depthOffset);
+	}
+	#endfor
+
+	return height;
+}
+
+vec4 calculateColor(
+	const vec2 uv,
+	const float tileInterpolationParameter,
+	const TextureTile colorTiles[NUMLAYERS_COLORTEXTURE],
+	const TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
+	const TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
+
+	vec4 color = vec4(0);
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if COLORTEXTURE_BLENDING_ENABLED
+	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
+	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
+	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+#else // COLORTEXTURE_BLENDING_ENABLED
+	float w1 = 1;
+	float w2 = 0;
+	float w3 = 0;
+#endif // COLORTEXTURE_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexColor}
+	{
+		vec2 samplePos =
+			colorTiles[#{i}].uvTransform.uvScale * uv +
+			colorTiles[#{i}].uvTransform.uvOffset;
+		vec2 samplePosParent1 =
+			colorTilesParent1[#{i}].uvTransform.uvScale * uv +
+			colorTilesParent1[#{i}].uvTransform.uvOffset;
+		vec2 samplePosParent2 =
+			colorTilesParent2[#{i}].uvTransform.uvScale * uv +
+			colorTilesParent2[#{i}].uvTransform.uvOffset;
+		
+		/*
+		vec4 colorSample =
+			w1 * textureLod(colorTiles[#{i}].textureSampler, samplePos, 0) +
+			w2 * textureLod(colorTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
+			w3 * textureLod(colorTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
+		*/
+		/*
+		vec4 colorSample =
+			w1 * textureGrad(colorTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
+			w2 * textureGrad(colorTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
+			w3 * textureGrad(colorTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
+		*/
+		
+		vec4 colorSample =
+			w1 * texture(colorTiles[#{i}].textureSampler, samplePos) +
+			w2 * texture(colorTilesParent1[#{i}].textureSampler, samplePosParent1) +
+			w3 * texture(colorTilesParent2[#{i}].textureSampler, samplePosParent2);
+
+		color = blendOver(color, colorSample);
+	}
+	#endfor
+
+	return color;
+}
+
+#endif // TEXTURETILEMAPPING_HGLSL
