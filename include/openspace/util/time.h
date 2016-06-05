@@ -58,7 +58,7 @@ class SyncBuffer;
 
 class Time {
 public:
-    Time();
+    Time(double secondsJ2000 = -1);
     Time(const Time& other);
 
 
@@ -76,6 +76,8 @@ public:
      * \pre The Time singleton must have been initialized
      */
     static void deinitialize();
+
+    static Time now();
 
     /**
      * Returns the reference to the Time singleton object.
@@ -119,6 +121,8 @@ public:
      * \return The current time as the number of seconds past the J2000 epoch
      */
     double currentTime() const;
+
+    double unsyncedJ2000Seconds() const;
 
     /**
      * Returns the current time as a formatted date string compliant with ISO 8601 and

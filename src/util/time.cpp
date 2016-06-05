@@ -24,6 +24,8 @@
 
 #include <openspace/util/time.h>
 
+#include <time.h>
+
 #include "time_lua.inl"
 
 #include <openspace/util/spicemanager.h>
@@ -33,12 +35,14 @@
 #include <ghoul/misc/assert.h>
 
 
+
+
 namespace openspace {
 
 Time* Time::_instance = nullptr;
 
-Time::Time()
-    : _time(-1.0)
+Time::Time(double secondsJ2000)
+    : _time(secondsJ2000)
     , _dt(1.0)
     //local copies
     , _timeJumped(false)
@@ -92,6 +96,17 @@ Time& Time::ref() {
     return *_instance;
 }
 
+Time Time::now() {
+    Time now;
+    time_t secondsSince1970;
+    secondsSince1970 = time(nullptr);
+    time_t secondsInAYear = 365.25 * 24 * 60 * 60;
+    double secondsSince2000 = (double)(secondsSince1970 - 30*secondsInAYear);
+    now.setTime(secondsSince2000);
+    return now;
+}
+
+
 bool Time::isInitialized() {
     return (_instance != nullptr);
 }
@@ -103,6 +118,10 @@ void Time::setTime(double value, bool requireJump) {
 
 double Time::currentTime() const {
     return _syncedTime;
+}
+
+double Time::unsyncedJ2000Seconds() const {
+    return _time;
 }
 
 double Time::advanceTime(double tickTime) {
@@ -139,7 +158,7 @@ std::string Time::currentTimeUTC() const {
 }
 
 std::string Time::ISO8601() const {
-    std::string datetime = currentTimeUTC();
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     std::string month = datetime.substr(5, 3);
 
     std::string MM = "";
