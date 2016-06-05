@@ -58,6 +58,8 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/util/performancemeasurement.h>
+
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
@@ -722,38 +724,15 @@ bool RenderEngine::doesPerformanceMeasurements() const {
 }
 
 void RenderEngine::storePerformanceMeasurements() {
-    const int8_t Version = 0;
-    const int nValues = 250;
-    const int lengthName = 256;
-    const int maxValues = 256;
+    using namespace performance;
 
-    struct PerformanceLayout {
-        int8_t version;
-        int32_t nValuesPerEntry;
-        int32_t nEntries;
-        int32_t maxNameLength;
-        int32_t maxEntries;
-
-        struct PerformanceLayoutEntry {
-            char name[lengthName];
-            float renderTime[nValues];
-            float updateRenderable[nValues];
-            float updateEphemeris[nValues];
-
-            int32_t currentRenderTime;
-            int32_t currentUpdateRenderable;
-            int32_t currentUpdateEphemeris;
-        };
-
-        PerformanceLayoutEntry entries[maxValues];
-    };
 
     const int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
     if (!_performanceMemory) {
 
         // Compute the total size
         const int totalSize = sizeof(int8_t) + 4 * sizeof(int32_t) +
-            maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
+            PerformanceLayout::MaxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
         LINFO("Create shared memory of " << totalSize << " bytes");
 
         try {
@@ -762,24 +741,20 @@ void RenderEngine::storePerformanceMeasurements() {
         catch (const ghoul::SharedMemory::SharedMemoryError& e) {
             LINFOC(e.component, e.what());
         }
-        
+
         ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
         _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
-
         void* ptr = _performanceMemory->memory();
-        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
-        layout->version = Version;
-        layout->nValuesPerEntry = nValues;
-        layout->nEntries = nNodes;
-        layout->maxNameLength = lengthName;
-        layout->maxEntries = maxValues;
 
-        memset(layout->entries, 0, maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
+        PerformanceLayout* layout = new (ptr) PerformanceLayout(nNodes);
+
+
+        memset(layout->entries, 0, PerformanceLayout::MaxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
 
         for (int i = 0; i < nNodes; ++i) {
             SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
 
-            memset(layout->entries[i].name, 0, lengthName);
+            memset(layout->entries[i].name, 0, PerformanceLayout::LengthName);
 #ifdef _MSC_VER
             strcpy_s(layout->entries[i].name, node->name().length() + 1, node->name().c_str());
 #else
@@ -804,9 +779,9 @@ void RenderEngine::storePerformanceMeasurements() {
         entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
         entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
 
-        entry.currentRenderTime = (entry.currentRenderTime + 1) % nValues;
-        entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % nValues;
-        entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % nValues;
+        entry.currentRenderTime = (entry.currentRenderTime + 1) % PerformanceLayout::NumberValues;
+        entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % PerformanceLayout::NumberValues;
+        entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % PerformanceLayout::NumberValues;
     }
     _performanceMemory->releaseLock();
 }

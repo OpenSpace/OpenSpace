@@ -26,6 +26,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/performancemeasurement.h>
+
 #include <ghoul/misc/sharedmemory.h>
 
 #include <imgui.h>
@@ -53,32 +55,7 @@ void GuiPerformanceComponent::deinitialize() {
 }
 
 void GuiPerformanceComponent::render() {
-    // Copy and paste from renderengine.cpp::storePerformanceMeasurements method
-//    const int8_t Version = 0;
-    const int nValues = 250;
-    const int lengthName = 256;
-    const int maxValues = 256;
-
-    struct PerformanceLayout {
-        int8_t version;
-        int32_t nValuesPerEntry;
-        int32_t nEntries;
-        int32_t maxNameLength;
-        int32_t maxEntries;
-
-        struct PerformanceLayoutEntry {
-            char name[lengthName];
-            float renderTime[nValues];
-            float updateRenderable[nValues];
-            float updateEphemeris[nValues];
-
-            int32_t currentRenderTime;
-            int32_t currentUpdateRenderable;
-            int32_t currentUpdateEphemeris;
-        };
-
-        PerformanceLayoutEntry entries[maxValues];
-    };
+    using namespace performance;
 
     ImGui::Begin("Performance", &_isEnabled);
     if (OsEng.renderEngine().doesPerformanceMeasurements() &&
@@ -116,7 +93,7 @@ void GuiPerformanceComponent::render() {
 
             int v[3] = { 0, 0, 0 };
 
-            for (int j = 0; j < nValues; ++j) {
+            for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
                 averages[i][0] += entry.updateEphemeris[j];
                 if (entry.updateEphemeris[j] != 0.f)
                     ++v[0];
@@ -158,7 +135,8 @@ void GuiPerformanceComponent::render() {
                 ImGui::PlotLines(
                     fmt::format("UpdateEphemeris\nAverage: {}us", averages[i][0]).c_str(),
                     &entry.updateEphemeris[0],
-                    layout.nValuesPerEntry,
+                    PerformanceLayout::NumberValues,
+                    //layout.nValuesPerEntry,
                     0,
                     updateEphemerisTime.c_str(),
                     _minMaxValues[0],
@@ -170,7 +148,7 @@ void GuiPerformanceComponent::render() {
                 ImGui::PlotLines(
                     fmt::format("UpdateRender\nAverage: {}us", averages[i][1]).c_str(),
                     &entry.updateRenderable[0],
-                    layout.nValuesPerEntry,
+                    PerformanceLayout::NumberValues,
                     0,
                     updateRenderableTime.c_str(),
                     _minMaxValues[0],
@@ -182,7 +160,7 @@ void GuiPerformanceComponent::render() {
                 ImGui::PlotLines(
                     fmt::format("RenderTime\nAverage: {}us", averages[i][2]).c_str(),
                     &entry.renderTime[0],
-                    layout.nValuesPerEntry,
+                    PerformanceLayout::NumberValues,
                     0,
                     renderTime.c_str(),
                     _minMaxValues[0],
@@ -199,7 +177,6 @@ void GuiPerformanceComponent::render() {
 
     ImGui::End();
 }
-
 
 } // namespace gui
 } // namespace openspace
