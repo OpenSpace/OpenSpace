@@ -73,6 +73,12 @@ public:
     properties::BoolProperty initChunkVisible;
     properties::BoolProperty renderSmallChunksFirst;
 
+    // Layered rendering
+    properties::BoolProperty useHeightMap;
+    properties::BoolProperty useColorMap;
+    properties::BoolProperty blendHeightMap;
+    properties::BoolProperty blendColorMap;
+
 private:
 
     double _time;

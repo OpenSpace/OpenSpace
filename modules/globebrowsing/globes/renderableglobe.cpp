@@ -61,8 +61,11 @@ namespace openspace {
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 20.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
+        , useHeightMap(properties::BoolProperty("useHeightMap", "useHeightMap", true))
+        , useColorMap(properties::BoolProperty("useColorMap", "useColorMap", true))
+        , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
+        , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
     {
-        
         setName("RenderableGlobe");
         
         addProperty(_saveOrThrowCamera);
@@ -72,13 +75,15 @@ namespace openspace {
         addProperty(lodScaleFactor);
         addProperty(initChunkVisible);
         addProperty(renderSmallChunksFirst);
-                
+
+        addProperty(useHeightMap);
+        addProperty(useColorMap);
+        addProperty(blendHeightMap);
+        addProperty(blendColorMap);
+
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
         renderSmallChunksFirst.setValue(true);
-
-        
-
 
         // Read the radii in to its own dictionary
         Vec3 radii;
@@ -101,8 +106,7 @@ namespace openspace {
         ghoul::Dictionary colorTexturesDictionary;
         texturesDictionary.getValue(keyColorTextures, colorTexturesDictionary);
 
-        int minimumTextureSide = 1024;
-        int minimumHeightmapSize = 64;
+        int minimumTextureSize = 1024;
         int frameUntilFlushRequestQueue = 60;
         int cacheSize = 5000;
 
@@ -136,7 +140,7 @@ namespace openspace {
             colorTextureDictionary.getValue("FilePath", path);
             
             std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-                new TileDataset(path, minimumTextureSide));
+                new TileDataset(path, minimumTextureSize));
                 
             std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
                 new ThreadPool(1));
@@ -170,7 +174,7 @@ namespace openspace {
             heightMapDictionary.getValue("FilePath", path);
 
             std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-                new TileDataset(path, minimumHeightmapSize));
+                new TileDataset(path, patchSegments));
 
             std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
                 new ThreadPool(1));
@@ -248,6 +252,11 @@ namespace openspace {
         _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
+
+        _chunkedLodGlobe->useHeightMap = useHeightMap.value();
+        _chunkedLodGlobe->useColorMap = useColorMap.value();
+        _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
+        _chunkedLodGlobe->blendColorMap = blendColorMap.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
             _tileProviderManager->colorTextureProviders();

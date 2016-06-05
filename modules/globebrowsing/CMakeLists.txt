@@ -96,11 +96,16 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blending.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetile.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})

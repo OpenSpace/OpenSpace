@@ -93,6 +93,11 @@ namespace openspace {
         bool initChunkVisible;
         bool renderSmallChunksFirst = true;
 
+        // Layered rendering
+        bool useHeightMap;
+        bool useColorMap;
+        bool blendHeightMap;
+        bool blendColorMap;
 
     private:
 

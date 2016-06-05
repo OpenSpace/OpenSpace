@@ -33,6 +33,7 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#include <list>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <mutex>

@@ -18,6 +18,10 @@ return {
                         FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
                     },
                     {
+                        Name = "ESRI Imagery World 2D",
+                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                    },
+                    {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/MODIS_Water_Mask.xml"
                     },
@@ -26,8 +30,12 @@ return {
                         FilePath = "map_service_configs/Coastlines.xml",
                     },
                     {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        Name = "Reference_Features",
+                        FilePath = "map_service_configs/Reference_Features.xml",
+                    },
+                    {
+                        Name = "Reference_Labels",
+                        FilePath = "map_service_configs/Reference_Labels.xml",
                     },
                 },
                 HeightMaps = {

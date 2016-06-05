@@ -39,7 +39,13 @@ namespace openspace {
 
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {
-        return numLayers == other.numLayers && keyNumLayers == other.keyNumLayers;
+        return
+            lastLayerIndex == other.lastLayerIndex &&
+            keyLastLayerIndex == other.keyLastLayerIndex &&
+            keyUseThisLayerType == other.keyUseThisLayerType &&
+            useThisLayerType == other.useThisLayerType &&
+            keyLayerBlendingEnabled == other.keyLayerBlendingEnabled &&
+            layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
     bool LayeredTexturePreprocessingData::operator==(
@@ -101,10 +107,13 @@ namespace openspace {
         // Different texture types can be height maps or color texture for example
         // These are used differently within the shaders.
         auto textureTypes = _preprocessingData.layeredTextureInfo;
-        for (size_t i = 0; i < textureTypes.size(); i++)
-        {
+        for (size_t i = 0; i < textureTypes.size(); i++) {
             shaderDictionary.setValue(
-                textureTypes[i].keyNumLayers, textureTypes[i].numLayers);
+                textureTypes[i].keyLastLayerIndex, textureTypes[i].lastLayerIndex);
+            shaderDictionary.setValue(
+                textureTypes[i].keyUseThisLayerType, textureTypes[i].useThisLayerType);
+            shaderDictionary.setValue(
+                textureTypes[i].keyLayerBlendingEnabled, textureTypes[i].layerBlendingEnabled);
         }
         
         // Remove old program
