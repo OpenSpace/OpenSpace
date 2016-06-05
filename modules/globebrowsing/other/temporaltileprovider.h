@@ -75,11 +75,35 @@ namespace openspace {
 
 
     struct TimeIdProviderFactory {
+        ~TimeIdProviderFactory();
         static TimeFormat* getProvider(const std::string& format);
         static void init();
 
         static std::unordered_map<std::string, TimeFormat*> _timeIdProviderMap;
         static bool initialized;
+    };
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                  Time Quantizer                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+    struct TimeQuantizer {
+        TimeQuantizer() {}
+        TimeQuantizer(const Time& start, const Time& end, double resolution);
+        TimeQuantizer(const Time& start, const Time& end, const std::string& resolutionStr);
+
+        static double parseTimeResolutionStr(const std::string& resoltutionStr);
+
+
+        bool quantize(Time& t) const;
+
+    private:
+        double _start;
+        double _end;
+        double _resolution;
+
+        bool _clampTime = true;
     };
 
 
@@ -91,6 +115,8 @@ namespace openspace {
     public:
         TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
 
+
+
         // These methods implements TileProvider
 
         virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
@@ -98,13 +124,16 @@ namespace openspace {
         virtual void prerender();
 
 
+
+        typedef std::string TimeKey;
+
         std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
+        std::shared_ptr<CachingTileProvider> getTileProvider(TimeKey timekey);
 
     private:
 
         static const std::string TIME_PLACEHOLDER;
 
-        typedef std::string TimeKey;
 
         std::string getGdalDatasetXML(Time t);
         std::string getGdalDatasetXML(TimeKey key);
@@ -126,7 +155,7 @@ namespace openspace {
         TileProviderInitData _tileProviderInitData;
 
         TimeFormat * _timeFormat;
-
+        TimeQuantizer _timeQuantizer;
     };
 
 

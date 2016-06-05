@@ -66,12 +66,19 @@ namespace openspace {
 
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
         CPLXMLNode* node = CPLParseXMLString(xml.c_str());
-        
-        std::string timeStart = getXMLValue(node, "OpenSpaceTimeStart", "2015 NOV 24");
-        std::string timeResolution = getXMLValue(node, "OpenSpaceTimeResolution", "1d");
+
+        std::string timeStart = getXMLValue(node, "OpenSpaceTimeStart", "2000 Jan 1");
+        std::string timeResolution = getXMLValue(node, "OpenSpaceTimeResolution", "2d");
         std::string timeEnd = getXMLValue(node, "OpenSpaceTimeEnd", "Now");
         std::string timeIdFormat = getXMLValue(node, "OpenSpaceTimeIdFormat", "YYYY-MM-DDThh:mm:ssZ");
 
+        Time start; start.setTime(timeStart);
+        Time end(Time::now());
+        if (timeEnd != "Now") {
+            end.setTime(timeEnd);
+        }
+
+        _timeQuantizer = TimeQuantizer(start, end, timeResolution);
         _timeFormat = TimeIdProviderFactory::getProvider(timeIdFormat);
 
         CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
@@ -81,12 +88,8 @@ namespace openspace {
 
     std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key, const std::string& defaultVal) {
         CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
-        if (n == nullptr || n->psChild == nullptr || n->psChild->pszValue == nullptr) {
-            return defaultVal;
-        }
-        else {
-            return std::string(n->psChild->pszValue);
-        }
+        bool hasValue = (n != nullptr && n->psChild != nullptr && n->psChild->pszValue != nullptr);
+        return hasValue ? std::string(n->psChild->pszValue) : defaultVal;
     }
 
     Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
@@ -103,7 +106,16 @@ namespace openspace {
 
 
     std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
-        TimeKey timekey = _timeFormat->stringify(t);
+        Time tCopy(t);
+        if (_timeQuantizer.quantize(tCopy)) {
+            TimeKey timekey = _timeFormat->stringify(tCopy);
+            return getTileProvider(timekey);
+        }
+        return nullptr;
+    }
+
+
+    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
         auto it = _tileProviderMap.find(timekey);
         if (it != _tileProviderMap.end()) {
             return it->second;
@@ -114,6 +126,7 @@ namespace openspace {
             return tileProvider;
         }
     }
+
 
     std::shared_ptr<CachingTileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
@@ -174,7 +187,6 @@ namespace openspace {
 
     std::unordered_map<std::string, TimeFormat*> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, TimeFormat*>();
 
-
     void TimeIdProviderFactory::init() {
         _timeIdProviderMap.insert({ "YYYY-MM-DD", new YYYY_MM_DD });
         _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", new YYYY_MM_DDThh_mm_ssZ });
@@ -188,4 +200,63 @@ namespace openspace {
         return _timeIdProviderMap[format];
     }
 
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                  Time Quantizer                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+    TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, double resolution)
+        : _start(start.unsyncedJ2000Seconds())
+        , _end(end.unsyncedJ2000Seconds())
+        , _resolution(resolution)
+    {
+
+    }
+
+    TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, const std::string& resolution)
+        : TimeQuantizer(start, end, parseTimeResolutionStr(resolution))
+    {
+
+    }
+
+    double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) {
+        const char unit = resoltutionStr.back();
+        double value = std::stod(resoltutionStr);
+
+        // convert value to seconds, based on unit.
+        // The switch statment has intentional fall throughs
+        switch (unit) {
+        case 'y': value *= 365;
+        case 'd': value *= 24.0;
+        case 'h': value *= 60.0;
+        case 'm': value *= 60.0;
+        case 's': value *= 1.0;
+            break;
+        default:
+            ghoul_assert(false, "Invalid unit format. Using default value 1 d");
+            value = 60 * 60 * 24;
+        }
+
+        return value;
+    }
+
+    bool TimeQuantizer::quantize(Time& t) const {
+        double unquantized = t.unsyncedJ2000Seconds();
+        if (_start <= unquantized && unquantized <= _end) {
+            double quantized = std::floor((unquantized - _start) / _resolution) * _resolution + _start;
+            t.setTime(quantized);
+            return true;
+        }
+        else if (_clampTime) {
+            double clampedTime = unquantized;
+            clampedTime = std::max(clampedTime, _start);
+            clampedTime = std::min(clampedTime, _end);
+            t.setTime(clampedTime);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 }  // namespace openspace
