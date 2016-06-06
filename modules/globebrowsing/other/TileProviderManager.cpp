@@ -25,37 +25,101 @@
 #include <modules/globebrowsing/other/tileprovidermanager.h>
 #include <ghoul/logging/logmanager.h>
 
+
 namespace {
     const std::string _loggerCat = "TileProviderManager";
+
+    const std::string keyColorTextures = "ColorTextures";
+    const std::string keyHeightMaps = "HeightMaps";
 }
+
 
 namespace openspace {
 
     ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
 
-    TileProviderManager::TileProviderManager()
-    {
+    TileProviderManager::TileProviderManager(const ghoul::Dictionary& texDict){
+
+        // manually add a temporal tile provider for testing
+        std::string filename = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+        TileProviderInitData initData;
+        initData.minimumPixelSize = 1024;
+        initData.threads = 1;
+        initData.cacheSize = 50;
+        initData.framesUntilRequestQueueFlush = 60;
+
+        std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TemporalTileProvider>(
+            new TemporalTileProvider(filename, initData));
+        std::string name = "Temporal VIIRS SNPP";
+        _colorTextureProviders.push_back({ name, colorTextureProvider, true });
+
+
+        ghoul::Dictionary colorTexturesDict;
+        texDict.getValue(keyColorTextures, colorTexturesDict);
+
+        TileProviderInitData colorInitData;
+        colorInitData.minimumPixelSize = 1024;
+        colorInitData.threads = 1;
+        colorInitData.cacheSize = 500;
+        colorInitData.framesUntilRequestQueueFlush = 60;
+
+        initTexures(_colorTextureProviders, colorTexturesDict, colorInitData);
+
+
+        ghoul::Dictionary heightTexturesDict;
+        texDict.getValue(keyHeightMaps, heightTexturesDict);
+
+        TileProviderInitData heightInitData;
+        heightInitData.minimumPixelSize = 64;
+        heightInitData.threads = 1;
+        heightInitData.cacheSize = 500;
+        heightInitData.framesUntilRequestQueueFlush = 60;
+
+        initTexures(_heightMapProviders, heightTexturesDict, heightInitData);
     }
 
     TileProviderManager::~TileProviderManager()
     {
     }
 
-    void TileProviderManager::addHeightMap(
-        std::string name,
-        std::shared_ptr<TileProvider> tileProvider,
-        bool isActive)
+    void TileProviderManager::initTexures(std::vector<TileProviderWithName>& dest,
+        const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
-        _heightMapProviders.push_back({ name , tileProvider, isActive});
+
+        // Create TileProviders for all color textures
+        for (size_t i = 0; i < texturesDict.size(); i++) {
+            std::string name, path;
+            std::string dictKey = std::to_string(i + 1);
+            ghoul::Dictionary texDict = texturesDict.value<ghoul::Dictionary>(dictKey);
+            texDict.getValue("Name", name);
+            texDict.getValue("FilePath", path);
+
+
+            std::shared_ptr<TileProvider> tileProvider = initProvider(path, initData);
+
+            bool enabled = dest.size() == 0; // Only enable first layer
+            dest.push_back({ name, tileProvider, enabled });
+        }
     }
 
-    void TileProviderManager::addColorTexture(
-        std::string name,
-        std::shared_ptr<TileProvider> tileProvider,
-        bool isActive)
+
+    std::shared_ptr<TileProvider> TileProviderManager::initProvider(const std::string& file,
+        const TileProviderInitData& initData)
     {
-        _colorTextureProviders.push_back({ name , tileProvider, isActive });
+        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
+            new TileDataset(file, initData.minimumPixelSize));
+
+        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
+            new ThreadPool(1));
+
+        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
+            new AsyncTileDataProvider(tileDataset, threadPool));
+
+        std::shared_ptr<TileProvider> tileProvider = std::shared_ptr<TileProvider>(
+            new CachingTileProvider(tileReader, initData.cacheSize, initData.framesUntilRequestQueueFlush));
+
+        return tileProvider;
     }
 
     std::vector<TileProviderManager::TileProviderWithName>&

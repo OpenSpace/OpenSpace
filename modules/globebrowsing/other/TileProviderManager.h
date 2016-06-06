@@ -25,8 +25,13 @@
 #ifndef __TILE_PROVIDER_MANAGER_H__
 #define __TILE_PROVIDER_MANAGER_H__
 
-#include "modules/globebrowsing/other/tileprovider.h"
+
+#include <modules/globebrowsing/other/temporaltileprovider.h>
+#include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/other/threadpool.h>
+
+#include <ghoul/misc/dictionary.h>
+
 
 #include <memory>
 #include <vector>
@@ -43,23 +48,11 @@ namespace openspace {
             bool isActive;
         };
 
-        TileProviderManager();
+        TileProviderManager(const ghoul::Dictionary& dict);
         ~TileProviderManager();
 
         static ThreadPool tileRequestThreadPool;
 
-        void addHeightMap(
-            std::string name,
-            std::shared_ptr<TileProvider> tileProvider,
-            bool isActive);
-        void addColorTexture(
-            std::string name,
-            std::shared_ptr<TileProvider> tileProvider,
-            bool isActive);
-        /*
-        std::shared_ptr<CachingTileProvider> getHeightMap(std::string name);
-        std::shared_ptr<CachingTileProvider> getColorTexture(std::string name);
-        */
         const std::vector<std::shared_ptr<TileProvider> > getActiveHeightMapProviders();
         const std::vector<std::shared_ptr<TileProvider> > getActiveColorTextureProviders();
 
@@ -67,6 +60,12 @@ namespace openspace {
         std::vector<TileProviderWithName>& colorTextureProviders();
 
     private:
+        static void initTexures(std::vector<TileProviderWithName>& destination,
+            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
+
+        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
+            const TileProviderInitData& initData);
+
         std::vector<TileProviderWithName> _heightMapProviders;
         std::vector<TileProviderWithName> _colorTextureProviders;
     };
