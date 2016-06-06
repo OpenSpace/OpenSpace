@@ -54,6 +54,10 @@ bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
 
+void PerformanceManager::storeIndividualPerformanceMeasurement(std::string identifier, long long us) {
+
+}
+
 void PerformanceManager::storeScenePerformanceMeasurements(
                                            const std::vector<SceneGraphNode*>& sceneNodes)
 {

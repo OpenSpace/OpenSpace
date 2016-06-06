@@ -24,8 +24,30 @@
 
 #include <openspace/performance/performancehelper.h>
 
+#include <openspace/performance/performancemanager.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace openspace {
 namespace performance {
+
+PerformanceHelper::PerformanceHelper(std::string identifier,
+                                     performance::PerformanceManager* manager)
+    : _identifier(std::move(identifier))
+    , _manager(manager)
+{
+    glFinish();
+
+    _startTime = std::chrono::high_resolution_clock::now();
+}
+
+PerformanceHelper::~PerformanceHelper() {
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        endTime - _startTime).count();
+
+    _manager->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
+}
 
 
 } // namespace performance

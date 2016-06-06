@@ -25,6 +25,7 @@
 #ifndef __PERFORMANCEMANAGER_H__
 #define __PERFORMANCEMANAGER_H__
 
+#include <chrono>
 #include <vector>
 
 namespace ghoul {
@@ -45,6 +46,8 @@ public:
     ~PerformanceManager();
 
     bool isMeasuringPerformance() const;
+
+    void storeIndividualPerformanceMeasurement(std::string identifier, long long us);
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
 
 private:

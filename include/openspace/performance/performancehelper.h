@@ -25,8 +25,25 @@
 #ifndef __PERFORMANCEHELPER_H__
 #define __PERFORMANCEHELPER_H__
 
+#include <chrono>
+#include <string>
+
 namespace openspace {
 namespace performance {
+
+class PerformanceManager;
+
+class PerformanceHelper {
+public:
+    PerformanceHelper(std::string identifier, performance::PerformanceManager* manager);
+    ~PerformanceHelper();
+
+private:
+    std::string _identifier;
+    performance::PerformanceManager* _manager;
+
+    std::chrono::high_resolution_clock::time_point _startTime;
+};
 
 } // namespace performance
 } // namespace openspace
