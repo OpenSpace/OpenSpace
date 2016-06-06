@@ -26,6 +26,7 @@
 #define __PERFORMANCEMANAGER_H__
 
 #include <chrono>
+#include <map>
 #include <vector>
 
 namespace ghoul {
@@ -45,13 +46,18 @@ public:
     PerformanceManager();
     ~PerformanceManager();
 
+    void resetPerformanceMeasurements();
+    
     bool isMeasuringPerformance() const;
 
-    void storeIndividualPerformanceMeasurement(std::string identifier, long long us);
+    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
 
 private:
     bool _doPerformanceMeasurements;
+    
+    std::map<std::string, size_t> individualPerformanceLocations;
+    
     ghoul::SharedMemory* _performanceMemory;
 };
 

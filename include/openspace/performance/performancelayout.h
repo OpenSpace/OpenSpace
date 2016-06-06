@@ -36,9 +36,7 @@ struct PerformanceLayout {
     static const int NumberValues = 256;
     static const int MaxValues = 256;
 
-    PerformanceLayout(int32_t nEntries);
-
-    int32_t nEntries;
+    PerformanceLayout();
 
     struct SceneGraphPerformanceLayout {
         char name[LengthName];
@@ -51,6 +49,7 @@ struct PerformanceLayout {
         int32_t currentUpdateEphemeris;
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
+    int16_t nScaleGraphEntries;
 
     struct FunctionPerformanceLayout {
         char name[LengthName];
@@ -58,6 +57,7 @@ struct PerformanceLayout {
         int32_t currentTime;
     };
     FunctionPerformanceLayout functionEntries[MaxValues];
+    int16_t nFunctionEntries;
 };
 
 } // namespace performance

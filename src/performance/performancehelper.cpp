@@ -36,9 +36,11 @@ PerformanceHelper::PerformanceHelper(std::string identifier,
     : _identifier(std::move(identifier))
     , _manager(manager)
 {
-    glFinish();
+    if (_manager) {
+        glFinish();
 
-    _startTime = std::chrono::high_resolution_clock::now();
+        _startTime = std::chrono::high_resolution_clock::now();
+    }
 }
 
 PerformanceHelper::~PerformanceHelper() {
@@ -46,7 +48,9 @@ PerformanceHelper::~PerformanceHelper() {
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
         endTime - _startTime).count();
 
-    _manager->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
+    if (_manager) {
+        _manager->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
+    }
 }
 
 

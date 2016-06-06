@@ -43,6 +43,23 @@ const std::string PerformanceManager::PerformanceMeasurementSharedData =
 PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
 {
+    // Compute the total size
+    const int totalSize = sizeof(PerformanceLayout);
+    LINFO("Create shared memory of " << totalSize << " bytes");
+    
+    try {
+        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+    }
+    catch (const ghoul::SharedMemory::SharedMemoryError& e) {
+        LINFOC(e.component, e.what());
+    }
+    
+    ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
+    _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
+    void* ptr = _performanceMemory->memory();
+    
+    // Using the placement-new to create a PerformanceLayout in the shared memory
+    PerformanceLayout* layout = new (ptr) PerformanceLayout;
 }
 
 PerformanceManager::~PerformanceManager() {
@@ -50,12 +67,47 @@ PerformanceManager::~PerformanceManager() {
         ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
+void PerformanceManager::resetPerformanceMeasurements() {
+    // Using the placement-new to create a PerformanceLayout in the shared memory
+    _performanceMemory->acquireLock();
+    void* ptr = _performanceMemory->memory();
+    new (ptr) PerformanceLayout;
+    _performanceMemory->releaseLock();
+    
+    individualPerformanceLocations.clear();
+}
+    
 bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
 
-void PerformanceManager::storeIndividualPerformanceMeasurement(std::string identifier, long long us) {
+void PerformanceManager::storeIndividualPerformanceMeasurement
+                                         (std::string identifier, long long microseconds)
+{
+    void* ptr = _performanceMemory->memory();
+    PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
+    _performanceMemory->acquireLock();
 
+    auto it = individualPerformanceLocations.find(identifier);
+    PerformanceLayout::FunctionPerformanceLayout* p = nullptr;
+    if (it == individualPerformanceLocations.end()) {
+        p = &(layout->functionEntries[layout->nFunctionEntries]);
+        individualPerformanceLocations[identifier] = layout->nFunctionEntries;
+        ++(layout->nFunctionEntries);
+    }
+    else {
+        p = &(layout->functionEntries[it->second]);
+    }
+#ifdef _MSC_VER
+    strcpy_s(p->name, identifier.length() + 1, identifier.c_str());
+#else
+    strcpy(p->name, identifier.c_str());
+#endif
+    
+    p->time[p->currentTime] = static_cast<float>(microseconds);
+    p->currentTime = (p->currentTime + 1) % PerformanceLayout::NumberValues;
+
+    _performanceMemory->releaseLock();
 }
 
 void PerformanceManager::storeScenePerformanceMeasurements(
@@ -63,47 +115,22 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 {
     using namespace performance;
 
-    int nNodes = static_cast<int>(sceneNodes.size());
-    if (!_performanceMemory) {
-        // Compute the total size
-        const int totalSize = sizeof(PerformanceLayout);
-        LINFO("Create shared memory of " << totalSize << " bytes");
-
-        try {
-            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
-        }
-        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
-            LINFOC(e.component, e.what());
-        }
-
-        ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
-        _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
-        void* ptr = _performanceMemory->memory();
-
-        // Using the placement-new to create a PerformanceLayout in the shared memory
-        PerformanceLayout* layout = new (ptr) PerformanceLayout(nNodes);
-
-        for (int i = 0; i < nNodes; ++i) {
-            SceneGraphNode* node = sceneNodes[i];
-
-            memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
-#ifdef _MSC_VER
-            strcpy_s(layout->sceneGraphEntries[i].name, node->name().length() + 1, node->name().c_str());
-#else
-            strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
-#endif
-
-            layout->sceneGraphEntries[i].currentRenderTime = 0;
-            layout->sceneGraphEntries[i].currentUpdateRenderable = 0;
-            layout->sceneGraphEntries[i].currentUpdateEphemeris = 0;
-        }
-    }
-
     void* ptr = _performanceMemory->memory();
     PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
     _performanceMemory->acquireLock();
+    
+    int nNodes = static_cast<int>(sceneNodes.size());
+    layout->nScaleGraphEntries = nNodes;
     for (int i = 0; i < nNodes; ++i) {
         SceneGraphNode* node = sceneNodes[i];
+
+        memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
+#ifdef _MSC_VER
+        strcpy_s(layout->sceneGraphEntries[i].name, node->name().length() + 1, node->name().c_str());
+#else
+        strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
+#endif
+        
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 

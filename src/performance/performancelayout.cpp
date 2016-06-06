@@ -29,8 +29,9 @@
 namespace openspace {
 namespace performance {
 
-PerformanceLayout::PerformanceLayout(int32_t nEntries)
-    : nEntries(nEntries)
+PerformanceLayout::PerformanceLayout()
+    : nScaleGraphEntries(0)
+    , nFunctionEntries(0)
 {
     std::memset(
         sceneGraphEntries,
