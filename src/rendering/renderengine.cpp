@@ -720,6 +720,10 @@ bool RenderEngine::doesPerformanceMeasurements() const {
     return _performanceManager != nullptr;
 }
 
+performance::PerformanceManager* RenderEngine::performanceManager() {
+    return _performanceManager.get();
+}
+
 // This method is temporary and will be removed once the scalegraph is in effect ---abock
 void RenderEngine::changeViewPoint(std::string origin) {
     SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");

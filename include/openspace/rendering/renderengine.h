@@ -98,6 +98,7 @@ public:
     // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
+    performance::PerformanceManager* performanceManager();
 
     void serialize(SyncBuffer* syncBuffer);
     void deserialize(SyncBuffer* syncBuffer);
