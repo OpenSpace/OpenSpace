@@ -148,7 +148,7 @@ void RenderableTrail::render(const RenderData& data) {
     _programObject->activate();
     psc currentPosition = data.position;
     psc campos = data.camera.position();
-    glm::mat4 camrot = data.camera.viewRotationMatrix();
+    glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
 
     glm::mat4 transform = glm::mat4(1);
 

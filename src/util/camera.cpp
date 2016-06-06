@@ -1,26 +1,26 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2016                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 
 // open space includes
 #include <openspace/util/camera.h>
@@ -96,15 +96,15 @@ namespace openspace {
     }
 
     // Accessors
-    const Camera::Vec3& Camera::positionVec3() const{
+    const Camera::Vec3& Camera::positionVec3() const {
         return _position.synced;
     }
 
-    const Camera::Vec3& Camera::unsynchedPositionVec3() const{
+    const Camera::Vec3& Camera::unsynchedPositionVec3() const {
         return _position.local;
     }
 
-    const Camera::Vec3& Camera::focusPositionVec3() const{
+    const Camera::Vec3& Camera::focusPositionVec3() const {
         return _focusPosition;
     }
 
@@ -116,7 +116,7 @@ namespace openspace {
         }
         return _cachedViewDirection.datum;
     }
-    
+
     const Camera::Vec3& Camera::lookUpVectorCameraSpace() const {
         return _LOOKUP_VECTOR_CAMERA_SPACE;
     }
@@ -124,7 +124,7 @@ namespace openspace {
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
         return glm::normalize(_rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE));
     }
-    
+
     const glm::vec2& Camera::scaling() const {
         return _scaling.synced;
     }
@@ -162,7 +162,7 @@ namespace openspace {
         }
         return _cachedCombinedViewMatrix.datum;
     }
-    
+
     // Synchronization
     void Camera::serialize(SyncBuffer* syncBuffer) {
         std::lock_guard<std::mutex> _lock(_mutex);

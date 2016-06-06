@@ -187,7 +187,7 @@ bool RenderablePlane::deinitialize() {
 void RenderablePlane::render(const RenderData& data) {
     glm::mat4 transform = glm::mat4(1.0);
     if (_billboard)
-        transform = glm::inverse(data.camera.viewRotationMatrix());
+        transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
 
     // Activate shader
     _shader->activate();

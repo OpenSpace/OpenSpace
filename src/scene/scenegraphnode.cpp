@@ -380,7 +380,7 @@ bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScal
                                          const Camera* camera)
 {
     // direction the camera is looking at in power scale
-    psc psc_camdir = psc(camera->viewDirectionWorldSpace());
+    psc psc_camdir = psc(glm::vec3(camera->viewDirectionWorldSpace()));
 
     // the position of the camera, moved backwards in the view direction to encapsulate
     // the sphere radius

@@ -1036,7 +1036,7 @@ void ParallelConnection::broadcast(){
         //create a keyframe with current position and orientation of camera
         network::datamessagestructures::PositionKeyframe kf;
         kf._position = OsEng.interactionHandler().camera()->position();
-        kf._viewRotationQuat = glm::quat_cast(OsEng.interactionHandler().camera()->viewRotationMatrix());
+        kf._viewRotationQuat = glm::quat_cast(glm::mat4(OsEng.interactionHandler().camera()->viewRotationMatrix()));
                 
         //timestamp as current runtime of OpenSpace instance
         kf._timeStamp = OsEng.runTime();
