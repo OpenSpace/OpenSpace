@@ -153,6 +153,8 @@ namespace openspace {
         std::unordered_map<TimeKey, std::shared_ptr<CachingTileProvider> > _tileProviderMap;
         TileProviderInitData _tileProviderInitData;
 
+        std::shared_ptr<TileProvider> _currentTileProvider;
+
         TimeFormat * _timeFormat;
         TimeQuantizer _timeQuantizer;
     };

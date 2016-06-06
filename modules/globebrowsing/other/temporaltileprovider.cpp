@@ -93,15 +93,26 @@ namespace openspace {
     }
 
     Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
-        return getTileProvider()->getHighestResolutionTile(chunkIndex, parents);
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from getHighestResolutionTile()");
+            prerender();
+        }
+
+        return _currentTileProvider->getHighestResolutionTile(chunkIndex, parents);
     }
 
     TileDepthTransform TemporalTileProvider::depthTransform() {
-        return getTileProvider()->depthTransform();
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from depthTransform()");
+            prerender();
+        }
+
+        return _currentTileProvider->depthTransform();
     }
 
     void TemporalTileProvider::prerender() {
-        return getTileProvider()->prerender();
+        _currentTileProvider = getTileProvider();
+        _currentTileProvider->prerender();
     }
 
 

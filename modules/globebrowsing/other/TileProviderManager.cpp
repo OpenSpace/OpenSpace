@@ -132,6 +132,21 @@ namespace openspace {
         return _colorTextureProviders;
     }
 
+    void TileProviderManager::prerender() {
+        for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++) {
+            if (it->isActive) {
+                it->tileProvider->prerender();
+            }
+        }
+
+        for (auto it = _heightMapProviders.begin(); it != _heightMapProviders.end(); it++){
+            if (it->isActive) {
+                it->tileProvider->prerender();
+            }
+        }
+    }
+
+
     const std::vector<std::shared_ptr<TileProvider> >
         TileProviderManager::getActiveHeightMapProviders()
     {

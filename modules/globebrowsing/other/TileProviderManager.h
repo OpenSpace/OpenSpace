@@ -59,6 +59,8 @@ namespace openspace {
         std::vector<TileProviderWithName>& heightMapProviders();
         std::vector<TileProviderWithName>& colorTextureProviders();
 
+        void prerender();
+
     private:
         static void initTexures(std::vector<TileProviderWithName>& destination,
             const ghoul::Dictionary& dict, const TileProviderInitData& initData);
