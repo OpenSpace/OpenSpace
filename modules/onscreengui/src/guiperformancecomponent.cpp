@@ -66,6 +66,12 @@ void GuiPerformanceComponent::render() {
         ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
         ImGui::Checkbox("Functions", &_functionsIsEnabled);
         
+        ImGui::Spacing();
+        
+        if (ImGui::Button("Reset measurements")) {
+            OsEng.renderEngine().performanceManager()->resetPerformanceMeasurements();
+        }
+        
         if (_sceneGraphIsEnabled) {
             ImGui::Begin("SceneGraph", &_sceneGraphIsEnabled);
         
