@@ -45,8 +45,6 @@ namespace openspace {
 namespace gui {
 
 void GuiPerformanceComponent::initialize() {
-    _minMaxValues[0] = 100.f;
-    _minMaxValues[1] = 250.f;
     _sortingSelection = -1;
     
     _sceneGraphIsEnabled = false;
@@ -65,9 +63,6 @@ void GuiPerformanceComponent::render() {
     if (OsEng.renderEngine().doesPerformanceMeasurements() &&
             ghoul::SharedMemory::exists(PerformanceManager::PerformanceMeasurementSharedData))
     {
-        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 250000.f);
-        _minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
-        
         ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
         ImGui::Checkbox("Functions", &_functionsIsEnabled);
         
@@ -96,7 +91,11 @@ void GuiPerformanceComponent::render() {
             // UpdateRender
             // RenderTime
             std::vector<std::array<float, 3>> averages(layout->nScaleGraphEntries, { 0.f, 0.f, 0.f });
-
+            
+            std::vector<std::array<std::pair<float, float>, 3>> minMax(
+                layout->nScaleGraphEntries
+            );
+            
             for (int i = 0; i < layout->nScaleGraphEntries; ++i) {
                 const PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
@@ -105,13 +104,13 @@ void GuiPerformanceComponent::render() {
                 for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
                     averages[i][0] += entry.updateEphemeris[j];
                     if (entry.updateEphemeris[j] != 0.f)
-                        ++v[0];
+                        ++(v[0]);
                     averages[i][1] += entry.updateRenderable[j];
                     if (entry.updateRenderable[j] != 0.f)
-                        ++v[1];
+                        ++(v[1]);
                     averages[i][2] += entry.renderTime[j];
                     if (entry.renderTime[j] != 0.f)
-                        ++v[2];
+                        ++(v[2]);
                 }
 
                 if (v[0] != 0)
@@ -120,6 +119,37 @@ void GuiPerformanceComponent::render() {
                     averages[i][1] /= static_cast<float>(v[1]);
                 if (v[2] != 0)
                     averages[i][2] /= static_cast<float>(v[2]);
+                
+                auto minmaxEphemeris = std::minmax_element(
+                    std::begin(entry.updateEphemeris),
+                    std::end(entry.updateEphemeris)
+                );
+                minMax[i][0] = std::make_pair(
+                    *(minmaxEphemeris.first),
+                    *(minmaxEphemeris.second)
+                );
+                
+                
+                auto minmaxUpdateRenderable = std::minmax_element(
+                    std::begin(entry.updateRenderable),
+                    std::end(entry.updateRenderable)
+                );
+                minMax[i][1] = std::make_pair(
+                    *(minmaxUpdateRenderable.first),
+                    *(minmaxUpdateRenderable.second)
+                );
+
+                
+                auto minmaxRendering = std::minmax_element(
+                    std::begin(entry.renderTime),
+                    std::end(entry.renderTime)
+                );
+                minMax[i][2] = std::make_pair(
+                    *(minmaxRendering.first),
+                    *(minmaxRendering.second)
+                );
+                
+
             }
 
             if (_sortingSelection != -1) {
@@ -142,37 +172,37 @@ void GuiPerformanceComponent::render() {
                     std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
                     ;
                     ImGui::PlotLines(
-                        fmt::format("UpdateEphemeris\nAverage: {}us", averages[i][0]).c_str(),
+                        fmt::format("UpdateEphemeris\nAverage: {}us", averages[indices[i]][0]).c_str(),
                         &entry.updateEphemeris[0],
                         PerformanceLayout::NumberValues,
                         0,
                         updateEphemerisTime.c_str(),
-                        _minMaxValues[0],
-                        _minMaxValues[1],
+                        minMax[indices[i]][0].first,
+                        minMax[indices[i]][0].second,
                         ImVec2(0, 40)
                     );
 
                     std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
                     ImGui::PlotLines(
-                        fmt::format("UpdateRender\nAverage: {}us", averages[i][1]).c_str(),
+                        fmt::format("UpdateRender\nAverage: {}us", averages[indices[i]][1]).c_str(),
                         &entry.updateRenderable[0],
                         PerformanceLayout::NumberValues,
                         0,
                         updateRenderableTime.c_str(),
-                        _minMaxValues[0],
-                        _minMaxValues[1],
+                        minMax[indices[i]][1].first,
+                        minMax[indices[i]][1].second,
                         ImVec2(0, 40)
                     );
 
                     std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
                     ImGui::PlotLines(
-                        fmt::format("RenderTime\nAverage: {}us", averages[i][2]).c_str(),
+                        fmt::format("RenderTime\nAverage: {}us", averages[indices[i]][2]).c_str(),
                         &entry.renderTime[0],
                         PerformanceLayout::NumberValues,
                         0,
                         renderTime.c_str(),
-                        _minMaxValues[0],
-                        _minMaxValues[1],
+                        minMax[indices[i]][2].first,
+                        minMax[indices[i]][2].second,
                         ImVec2(0, 40)
                     );
                 }
@@ -203,6 +233,11 @@ void GuiPerformanceComponent::render() {
                 }
                 avg /= count;
                 
+                auto minmax = std::minmax_element(
+                    std::begin(layout->functionEntries[i].time),
+                    std::end(layout->functionEntries[i].time)
+                );
+                
                 const PerformanceLayout::FunctionPerformanceLayout& f = layout->functionEntries[i];
                 
                 std::string renderTime = std::to_string(entry.time[entry.currentTime - 1]) + "us";
@@ -212,8 +247,8 @@ void GuiPerformanceComponent::render() {
                     PerformanceLayout::NumberValues,
                     0,
                     renderTime.c_str(),
-                    _minMaxValues[0],
-                    _minMaxValues[1],
+                    *(minmax.first),
+                    *(minmax.second),
                     ImVec2(0, 40)
                 );
             }
