@@ -50,6 +50,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/matrixproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
@@ -81,7 +82,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/performancemeasurement.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledcoordinate.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledscalar.cpp
     ${OPENSPACE_BASE_DIR}/src/util/powerscaledsphere.cpp
@@ -120,6 +120,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/performance/performancelayout.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrixproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/numericalproperty.inl
@@ -161,7 +162,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/mouse.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/openspacemodule.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/performancemeasurement.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledcoordinate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledscalar.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/powerscaledsphere.h
