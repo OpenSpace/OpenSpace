@@ -25,6 +25,8 @@
 #ifndef __PERFORMANCEHELPER_H__
 #define __PERFORMANCEHELPER_H__
 
+namespace openspace {
+namespace performance {
 
 } // namespace performance
 } // namespace openspace

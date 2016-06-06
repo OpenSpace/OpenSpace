@@ -86,7 +86,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 #ifdef _MSC_VER
             strcpy_s(layout->sceneGraphEntries[i].name, node->name().length() + 1, node->name().c_str());
 #else
-            strcpy(layout->entries[i].name, node->name().c_str());
+            strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
 #endif
 
             layout->sceneGraphEntries[i].currentRenderTime = 0;
