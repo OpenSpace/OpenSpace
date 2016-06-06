@@ -25,6 +25,8 @@
 #include <modules/globebrowsing/other/tileprovidermanager.h>
 #include <ghoul/logging/logmanager.h>
 
+#include "cpl_minixml.h"
+
 
 namespace {
     const std::string _loggerCat = "TileProviderManager";
@@ -40,20 +42,6 @@ namespace openspace {
 
 
     TileProviderManager::TileProviderManager(const ghoul::Dictionary& texDict){
-
-        // manually add a temporal tile provider for testing
-        std::string filename = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
-        TileProviderInitData initData;
-        initData.minimumPixelSize = 1024;
-        initData.threads = 1;
-        initData.cacheSize = 50;
-        initData.framesUntilRequestQueueFlush = 60;
-
-        std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TemporalTileProvider>(
-            new TemporalTileProvider(filename, initData));
-        std::string name = "Temporal VIIRS SNPP";
-        _colorTextureProviders.push_back({ name, colorTextureProvider, true });
-
 
         ghoul::Dictionary colorTexturesDict;
         texDict.getValue(keyColorTextures, colorTexturesDict);
@@ -107,6 +95,14 @@ namespace openspace {
     std::shared_ptr<TileProvider> TileProviderManager::initProvider(const std::string& file,
         const TileProviderInitData& initData)
     {
+        std::shared_ptr<TileProvider> tileProvider;
+        CPLXMLNode * node = CPLParseXMLFile(file.c_str());
+        if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
+            tileProvider = std::shared_ptr<TileProvider>(
+                new TemporalTileProvider(file, initData));
+            return tileProvider;
+        }
+
         std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
             new TileDataset(file, initData.minimumPixelSize));
 
@@ -116,7 +112,7 @@ namespace openspace {
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));
 
-        std::shared_ptr<TileProvider> tileProvider = std::shared_ptr<TileProvider>(
+        tileProvider = std::shared_ptr<TileProvider>(
             new CachingTileProvider(tileReader, initData.cacheSize, initData.framesUntilRequestQueueFlush));
 
         return tileProvider;
