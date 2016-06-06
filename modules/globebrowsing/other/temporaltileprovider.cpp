@@ -93,15 +93,26 @@ namespace openspace {
     }
 
     Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
-        return getTileProvider()->getHighestResolutionTile(chunkIndex, parents);
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from getHighestResolutionTile()");
+            prerender();
+        }
+
+        return _currentTileProvider->getHighestResolutionTile(chunkIndex, parents);
     }
 
     TileDepthTransform TemporalTileProvider::depthTransform() {
-        return getTileProvider()->depthTransform();
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from depthTransform()");
+            prerender();
+        }
+
+        return _currentTileProvider->depthTransform();
     }
 
     void TemporalTileProvider::prerender() {
-        return getTileProvider()->prerender();
+        _currentTileProvider = getTileProvider();
+        _currentTileProvider->prerender();
     }
 
 
@@ -140,10 +151,11 @@ namespace openspace {
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));
 
+        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(_tileProviderInitData.cacheSize));
+
         std::shared_ptr<CachingTileProvider> tileProvider= std::shared_ptr<CachingTileProvider>(
-            new CachingTileProvider(tileReader, 
-                             _tileProviderInitData.cacheSize,
-                             _tileProviderInitData.framesUntilRequestQueueFlush));
+            new CachingTileProvider(tileReader, tileCache,
+                _tileProviderInitData.framesUntilRequestQueueFlush));
 
         return tileProvider;
     }

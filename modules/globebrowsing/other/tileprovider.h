@@ -58,7 +58,7 @@ namespace openspace {
         TileUvTransform uvTransform;
     };
     
-    struct MetaTexture {
+    struct TextureAndStatus {
         std::shared_ptr<Texture> texture;
         CPLErr ioError;
     };
@@ -75,6 +75,7 @@ namespace openspace {
     };
 
 
+    typedef LRUCache<HashKey, TextureAndStatus> TileCache;
 
 
     /**
@@ -84,7 +85,10 @@ namespace openspace {
     class CachingTileProvider : public TileProvider {
     public:
 
-        CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+
+        CachingTileProvider(
+            std::shared_ptr<AsyncTileDataProvider> tileReader, 
+            std::shared_ptr<TileCache> tileCache,
             int framesUntilFlushRequestQueue);
 
         virtual ~CachingTileProvider();
@@ -125,7 +129,7 @@ namespace openspace {
         //                                Member variables                              //
         //////////////////////////////////////////////////////////////////////////////////
 
-        LRUCache<HashKey, MetaTexture> _tileCache;
+        std::shared_ptr<TileCache> _tileCache;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;

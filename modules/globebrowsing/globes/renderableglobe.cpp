@@ -53,8 +53,7 @@ namespace openspace {
 
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : _tileProviderManager(std::shared_ptr<TileProviderManager>(new TileProviderManager))
-        , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , doFrustumCulling(properties::BoolProperty("doFrustumCulling", "doFrustumCulling"))
         , doHorizonCulling(properties::BoolProperty("doHorizonCulling", "doHorizonCulling"))
         , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
@@ -89,121 +88,27 @@ namespace openspace {
 
         // Read the radii in to its own dictionary
         Vec3 radii;
-        double patchSegmentsd;
-
         dictionary.getValue(keyRadii, radii);
+        _ellipsoid = Ellipsoid(radii);
+        setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
+
         // Ghoul can't read ints from lua dictionaries
+        double patchSegmentsd;
         dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
         int patchSegments = patchSegmentsd;
-
-        _ellipsoid = Ellipsoid(radii);
-
         
-        setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
-        
-
+        // Init tile provider manager
         ghoul::Dictionary texturesDictionary;
         dictionary.getValue(keyTextures, texturesDictionary);
+        _tileProviderManager = std::shared_ptr<TileProviderManager>(
+            new TileProviderManager(texturesDictionary));
 
-        ghoul::Dictionary colorTexturesDictionary;
-        texturesDictionary.getValue(keyColorTextures, colorTexturesDictionary);
+        auto colorProviders = _tileProviderManager->colorTextureProviders();
+        auto heightProviders = _tileProviderManager->heightMapProviders();
 
-        int minimumTextureSize = 1024;
-        int frameUntilFlushRequestQueue = 60;
-        int cacheSize = 5000;
+        addToggleLayerProperties(colorProviders, _activeColorLayers);
+        addToggleLayerProperties(heightProviders, _activeHeightMapLayers);
 
-
-        // manually add a temporal tile provider for testing
-        std::string filename = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
-        TileProviderInitData initData;
-        initData.minimumPixelSize = minimumTextureSize;
-        initData.threads = 1;
-        initData.cacheSize = 50;
-        initData.framesUntilRequestQueueFlush = 60;
-
-        std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TemporalTileProvider>(
-            new TemporalTileProvider(filename, initData));
-
-        std::string name = "Temporal VIIRS SNPP";
-        _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
-        _activeColorLayers.push_back(properties::BoolProperty(name, name, true));
-
-
-
-        
-        // Create TileProviders for all color textures
-        for (size_t i = 0; i < colorTexturesDictionary.size(); i++)
-        {
-            std::string name, path;
-            std::string dictionaryKey = std::to_string(i + 1);
-            ghoul::Dictionary colorTextureDictionary =
-                colorTexturesDictionary.value<ghoul::Dictionary>(dictionaryKey);
-            colorTextureDictionary.getValue("Name", name);
-            colorTextureDictionary.getValue("FilePath", path);
-            
-            std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-                new TileDataset(path, minimumTextureSize));
-                
-            std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-                new ThreadPool(1));
-
-            std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-                new AsyncTileDataProvider(tileDataset, threadPool));
-
-            std::shared_ptr<TileProvider> colorTextureProvider = std::shared_ptr<TileProvider>(
-                new CachingTileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
-
-            _tileProviderManager->addColorTexture(name, colorTextureProvider, true);
-
-            // Create property for this tile provider
-            bool enabled = _activeColorLayers.size() == 0; // Only enable first layer
-            _activeColorLayers.push_back(properties::BoolProperty(name, name, enabled));
-        }
-
-
-
-        ghoul::Dictionary heightMapsDictionary;
-        texturesDictionary.getValue(keyHeightMaps, heightMapsDictionary);
-
-        // Create TileProviders for all height maps
-        for (size_t i = 0; i < heightMapsDictionary.size(); i++)
-        {
-            std::string name, path;
-            std::string dictionaryKey = std::to_string(i + 1);
-            ghoul::Dictionary heightMapDictionary =
-                heightMapsDictionary.value<ghoul::Dictionary>(dictionaryKey);
-            heightMapDictionary.getValue("Name", name);
-            heightMapDictionary.getValue("FilePath", path);
-
-            std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-                new TileDataset(path, patchSegments));
-
-            std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-                new ThreadPool(1));
-
-            std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-                new AsyncTileDataProvider(tileDataset, threadPool));
-
-            std::shared_ptr<TileProvider> heightMapProvider = std::shared_ptr<TileProvider>(
-                new CachingTileProvider(tileReader, cacheSize, frameUntilFlushRequestQueue));
-
-
-            _tileProviderManager->addHeightMap(name, heightMapProvider, true);
-
-            // Create property for this tile provider
-            bool enabled = _activeHeightMapLayers.size() == 0; // Only enable first layer
-            _activeHeightMapLayers.push_back(properties::BoolProperty(name, name, enabled));
-        }
-
-        // Add properties for the tile providers
-        for (auto it = _activeColorLayers.begin(); it != _activeColorLayers.end(); it++) {
-            addProperty(*it);
-        }
-        for (auto it = _activeHeightMapLayers.begin(); it != _activeHeightMapLayers.end(); it++) {
-            addProperty(*it);
-        }
-
-        
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
 
@@ -214,7 +119,21 @@ namespace openspace {
 
     }
 
-    
+    void RenderableGlobe::addToggleLayerProperties(
+        std::vector<TileProviderManager::TileProviderWithName>& tileProviders,
+        std::vector<properties::BoolProperty>& dest)
+    {
+        for (size_t i = 0; i < tileProviders.size(); i++) {
+            bool enabled = i == 0; // Only enable first layer
+            std::string name = tileProviders[i].name;
+            dest.push_back(properties::BoolProperty(name, name, enabled));
+        }
+        auto it = dest.begin();
+        auto end = dest.end();
+        while (it != end) {
+            addProperty(*(it++));
+        }
+    }
 
     bool RenderableGlobe::initialize() {
         return _distanceSwitch.initialize();
@@ -266,6 +185,7 @@ namespace openspace {
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
             _tileProviderManager->heightMapProviders();
 
+        
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();
         }

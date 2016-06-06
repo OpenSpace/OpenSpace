@@ -10,8 +10,20 @@ return {
             Textures = {
                 ColorTextures = {
                     {
-                        Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
+                        Name = "OpenStreetMap",
+                        FilePath = "map_service_configs/OpenStreetMap.xml"
+                    },
+                    {
+                        Name = "Temporal VIIRS SNPP",
+                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
+                    },
+                    {
+                        Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
+                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml"
+                    },
+                    {
+                        Name = "Temporal Aqua Orbit Asc",
+                        FilePath = "map_service_configs/Temporal_Aqua_Orbit_Asc.xml"
                     },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",

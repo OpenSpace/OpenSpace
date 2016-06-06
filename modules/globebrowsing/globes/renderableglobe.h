@@ -82,6 +82,11 @@ public:
 
 private:
 
+    void addToggleLayerProperties(
+        std::vector<TileProviderManager::TileProviderWithName>&,
+        std::vector<properties::BoolProperty>& dest
+    );
+
     double _time;
 
     Ellipsoid _ellipsoid;
