@@ -24,56 +24,25 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <modules/globebrowsing/other/temporaltileprovider.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_threadpool.inl>
-#include <test_aabb.inl>
-
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
-//#include <test_patchcoverageprovider.inl>
-
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <glm/glm.hpp>
 #include <iostream>
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+class TemporalTileProviderTest : public testing::Test {};
+
+std::string fileName = "data/scene/debugglobe/map_service_configs/VIIRS_SNPP_CorrectedReflectance_TrueColor_temporal.xml";
+
+TEST_F(TemporalTileProviderTest, Basic) {
+    double t = 2016.01;
+    openspace::Time::ref().setTime(t);
+    openspace::Time::ref().preSynchronization();
+    openspace::Time::ref().postSynchronizationPreDraw();
+    openspace::TemporalTileProvider provider(absPath(fileName));
 }
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
-
-	testing::InitGoogleTest(&argc, argv);
-
-	int returnVal = RUN_ALL_TESTS();
-
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
-
-	return returnVal;
-}

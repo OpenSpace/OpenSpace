@@ -111,8 +111,6 @@ namespace openspace {
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
             * viewTransform * modelTransform;
 
-
-
         double centerRadius = ellipsoid.maximumRadius();
         //double centerRadius = glm::length(ellipsoid.cartesianSurfacePosition(patch.center()));
         double maxCenterRadius = centerRadius + maxHeight;
@@ -121,18 +119,7 @@ namespace openspace {
         double maxHeightOffset = maxCenterRadius / cos(maximumPatchSide) - centerRadius;
         double minHeightOffset = 0; // for now
 
-
-        /*
-        Geodetic3 centerGeodetic = { patch.center(), 0};
-        vec4 centerModelSpace = vec4(ellipsoid.cartesianPosition(centerGeodetic), 1);
-        vec4 centerClippingSpace = modelViewProjectionTransform * centerModelSpace;
-        vec3 centerScreenSpace = (1.0f / glm::abs(centerClippingSpace.w)) * centerClippingSpace.xyz();
-        AABB3 viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
-        return viewFrustum.intersects(centerScreenSpace);
-        */
-
         // Create a bounding box that fits the patch corners
-        
         AABB3 bounds; // in screen space
         int numPositiveZ = 0;
         for (size_t i = 0; i < 8; i++) {
@@ -147,12 +134,7 @@ namespace openspace {
 
         
         return bounds.intersects(FrustumCuller::viewFrustum);
-        
-        /*
-        vec2 center = bounds.center();
-        vec2 margin = 0.5f * bounds.size();
-        return testPoint(center, margin) == PointLocation::Inside;
-        */
+
     }
 
 

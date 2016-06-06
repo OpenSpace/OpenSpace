@@ -24,56 +24,43 @@
 
 #include "gtest/gtest.h"
 
-#include <ghoul/cmdparser/cmdparser>
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/logging/logging>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/../modules/globebrowsing/rendering/aabb.h>
 
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
-//#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_threadpool.inl>
-#include <test_aabb.inl>
+#include <fstream>
+#include <glm/glm.hpp>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-//#include <test_angle.inl>
-//#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
-//#include <test_patchcoverageprovider.inl>
+using namespace openspace;
 
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
+class AABBTest : public testing::Test {};
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/configurationmanager.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
-#include <iostream>
 
-using namespace ghoul::cmdparser;
-using namespace ghoul::filesystem;
-using namespace ghoul::logging;
+TEST_F(AABBTest, ContainsAABB3) {
+    AABB3 a1;
+    AABB3 a2;
 
-namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+    a1.expand(glm::vec3(0, 0, 0));
+    a1.expand(glm::vec3(1, 1, 1));
+
+    a2.expand(glm::vec3(0.1, 0.1, 0.1));
+    a2.expand(glm::vec3(0.9, 0.9, 0.9));
+
+    EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
+    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
 }
 
-int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+TEST_F(AABBTest, ContainsAABB2) {
+	
+    AABB2 a1;
+    AABB2 a2;
+    
+    a1.expand(glm::vec2(0, 0));
+    a1.expand(glm::vec2(1, 1));
 
-	testing::InitGoogleTest(&argc, argv);
+    a2.expand(glm::vec2(0.1, 0.1));
+    a2.expand(glm::vec2(0.9, 0.9));
 
-	int returnVal = RUN_ALL_TESTS();
-
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
-
-	return returnVal;
+    EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
+    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
 }

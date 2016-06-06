@@ -44,7 +44,8 @@ namespace openspace {
         void expand(const vec2& p);
         vec2 center() const;
         vec2 size() const;
-        bool intersects(const vec2& p) const;
+        bool contains(const vec2& p) const;
+        bool contains(const AABB2& o) const;
         bool intersects(const AABB2& o) const;
 
         vec2 min;
@@ -59,7 +60,8 @@ namespace openspace {
         void expand(const vec3 p);
         vec3 center() const;
         vec3 size() const;
-        bool intersects(const vec3& p) const;
+        bool contains(const vec3& p) const;
+        bool contains(const AABB3& o) const;
         bool intersects(const AABB3& o) const;
 
         vec3 min;
