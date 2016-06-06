@@ -102,6 +102,7 @@ private:
     std::string _target;
     bool _hasNightTexture;
     bool _hasHeightTexture;
+    bool _shadowEnabled;
     double _time;
 };
 

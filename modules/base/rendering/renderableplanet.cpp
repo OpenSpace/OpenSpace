@@ -76,6 +76,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _planetRadius(0.f)
     , _hasNightTexture(false)
     , _hasHeightTexture(false)
+    , _shadowEnabled(false)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -222,6 +223,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                         sc.caster = caster;
                         _shadowConfArray.push_back(sc);
                     }
+                _shadowEnabled = true;
             }
         }
     }
@@ -234,7 +236,7 @@ RenderablePlanet::~RenderablePlanet() {
 bool RenderablePlanet::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
-    if (_programObject == nullptr && !_shadowConfArray.empty() && _hasNightTexture) {
+    if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowNightProgram",
@@ -243,7 +245,7 @@ bool RenderablePlanet::initialize() {
         if (!_programObject)
             return false;
     } 
-    else if (_programObject == nullptr && !_shadowConfArray.empty()) {
+    else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
