@@ -726,13 +726,10 @@ bool RenderEngine::doesPerformanceMeasurements() const {
 void RenderEngine::storePerformanceMeasurements() {
     using namespace performance;
 
-
-    const int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
+    int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
     if (!_performanceMemory) {
-
         // Compute the total size
-        const int totalSize = sizeof(int8_t) + 4 * sizeof(int32_t) +
-            PerformanceLayout::MaxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
+        const int totalSize = sizeof(PerformanceLayout);
         LINFO("Create shared memory of " << totalSize << " bytes");
 
         try {
@@ -746,10 +743,8 @@ void RenderEngine::storePerformanceMeasurements() {
         _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
         void* ptr = _performanceMemory->memory();
 
+        // Using the placement-new to create a PerformanceLayout in the shared memory
         PerformanceLayout* layout = new (ptr) PerformanceLayout(nNodes);
-
-
-        memset(layout->entries, 0, PerformanceLayout::MaxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
 
         for (int i = 0; i < nNodes; ++i) {
             SceneGraphNode* node = scene()->allSceneGraphNodes()[i];

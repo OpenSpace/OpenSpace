@@ -24,13 +24,25 @@
 
 #include <openspace/util/performancemeasurement.h>
 
+#include <cstring>
+
 namespace openspace {
 namespace performance {
 
 PerformanceLayout::PerformanceLayout(int32_t nEntries)
     : nEntries(nEntries)
 {
+    std::memset(
+        sceneGraphEntries,
+        0,
+        MaxValues * sizeof(SceneGraphPerformanceLayout)
+    );
 
+    std::memset(
+        functionEntries,
+        0,
+        MaxValues * sizeof(FunctionPerformanceLayout)
+    );
 }
 
 } // namespace performance

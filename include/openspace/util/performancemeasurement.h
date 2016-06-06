@@ -30,8 +30,6 @@
 namespace openspace {
 namespace performance {
 
-
-
 struct PerformanceLayout {
     static const int8_t Version = 0;
     static const int LengthName = 256;
@@ -42,7 +40,7 @@ struct PerformanceLayout {
 
     int32_t nEntries;
 
-    struct PerformanceLayoutEntry {
+    struct SceneGraphPerformanceLayout {
         char name[LengthName];
         float renderTime[NumberValues];
         float updateRenderable[NumberValues];
@@ -52,8 +50,21 @@ struct PerformanceLayout {
         int32_t currentUpdateRenderable;
         int32_t currentUpdateEphemeris;
     };
+    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
 
-    PerformanceLayoutEntry entries[MaxValues];
+    struct FunctionPerformanceLayout {
+        char name[LengthName];
+        float time[NumberValues];
+        int32_t currentTime;
+    };
+    FunctionPerformanceLayout functionEntries[MaxValues];
+};
+
+struct FunctionPerformanceHelper {
+    FunctionPerformanceHelper();
+    ~FunctionPerformanceHelper();
+
+
 };
 
 } // namespace performance

@@ -97,8 +97,11 @@ public:
     void takeScreenshot();
     void toggleInfoText(bool b);
 
+    // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
+
+
 
     void serialize(SyncBuffer* syncBuffer);
     void deserialize(SyncBuffer* syncBuffer);
