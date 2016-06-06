@@ -22,45 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCELAYOUT_H__
-#define __PERFORMANCELAYOUT_H__
+#ifndef __PERFORMANCEMANAGER_H__
+#define __PERFORMANCEMANAGER_H__
 
-#include <cstdint>
+#include <vector>
+
+namespace ghoul {
+    class SharedMemory;
+}
 
 namespace openspace {
+
+class SceneGraphNode;
+
 namespace performance {
 
-struct PerformanceLayout {
-    static const int8_t Version = 0;
-    static const int LengthName = 256;
-    static const int NumberValues = 256;
-    static const int MaxValues = 256;
+class PerformanceManager {
+public:
+    static const std::string PerformanceMeasurementSharedData;
 
-    PerformanceLayout(int32_t nEntries);
+    PerformanceManager();
+    ~PerformanceManager();
 
-    int32_t nEntries;
+    bool isMeasuringPerformance() const;
+    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
 
-    struct SceneGraphPerformanceLayout {
-        char name[LengthName];
-        float renderTime[NumberValues];
-        float updateRenderable[NumberValues];
-        float updateEphemeris[NumberValues];
-
-        int32_t currentRenderTime;
-        int32_t currentUpdateRenderable;
-        int32_t currentUpdateEphemeris;
-    };
-    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
-
-    struct FunctionPerformanceLayout {
-        char name[LengthName];
-        float time[NumberValues];
-        int32_t currentTime;
-    };
-    FunctionPerformanceLayout functionEntries[MaxValues];
+private:
+    bool _doPerformanceMeasurements;
+    ghoul::SharedMemory* _performanceMemory;
 };
 
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCELAYOUT_H__
+#endif // __PERFORMANCEMANAGER_H__

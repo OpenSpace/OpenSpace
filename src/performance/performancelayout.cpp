@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/performancemeasurement.h>
+#include <openspace/performance/performancelayout.h>
 
 #include <cstring>
 

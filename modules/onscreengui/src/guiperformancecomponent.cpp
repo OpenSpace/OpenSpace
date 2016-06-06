@@ -25,8 +25,9 @@
 #include <modules/onscreengui/include/guiperformancecomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/performance/performancelayout.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/performancemeasurement.h>
 
 #include <ghoul/misc/sharedmemory.h>
 
@@ -59,7 +60,7 @@ void GuiPerformanceComponent::render() {
 
     ImGui::Begin("Performance", &_isEnabled);
     if (OsEng.renderEngine().doesPerformanceMeasurements() &&
-            ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
+            ghoul::SharedMemory::exists(PerformanceManager::PerformanceMeasurementSharedData))
     {
         ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
         _minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
@@ -72,24 +73,23 @@ void GuiPerformanceComponent::render() {
         ImGui::RadioButton("RenderTime", &_sortingSelection, 2);
 
         if (!_performanceMemory)
-            _performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
-
+            _performanceMemory = new ghoul::SharedMemory(PerformanceManager::PerformanceMeasurementSharedData);
 
         void* ptr = _performanceMemory->memory();
 
-        PerformanceLayout layout = *reinterpret_cast<PerformanceLayout*>(ptr);
+        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
 
-        std::vector<size_t> indices(layout.nEntries);
+        std::vector<size_t> indices(layout->nEntries);
         std::iota(indices.begin(), indices.end(), 0);
 
         // Ordering:
         // updateEphemeris
         // UpdateRender
         // RenderTime
-        std::vector<std::array<float, 3>> averages(layout.nEntries, { 0.f, 0.f, 0.f });
+        std::vector<std::array<float, 3>> averages(layout->nEntries, { 0.f, 0.f, 0.f });
 
-        for (int i = 0; i < layout.nEntries; ++i) {
-            const PerformanceLayout::PerformanceLayoutEntry& entry = layout.entries[i];
+        for (int i = 0; i < layout->nEntries; ++i) {
+            const PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
             int v[3] = { 0, 0, 0 };
 
@@ -126,8 +126,8 @@ void GuiPerformanceComponent::render() {
 
         }
 
-        for (int i = 0; i < layout.nEntries; ++i) {
-            const PerformanceLayout::PerformanceLayoutEntry& entry = layout.entries[indices[i]];
+        for (int i = 0; i < layout->nEntries; ++i) {
+            const PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[indices[i]];
 
             if (ImGui::CollapsingHeader(entry.name)) {
                 std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
@@ -136,7 +136,6 @@ void GuiPerformanceComponent::render() {
                     fmt::format("UpdateEphemeris\nAverage: {}us", averages[i][0]).c_str(),
                     &entry.updateEphemeris[0],
                     PerformanceLayout::NumberValues,
-                    //layout.nValuesPerEntry,
                     0,
                     updateEphemerisTime.c_str(),
                     _minMaxValues[0],

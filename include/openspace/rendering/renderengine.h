@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -67,9 +68,6 @@ public:
         Post
     };
 
-
-    static const std::string PerformanceMeasurementSharedData;
-    
     static const std::string KeyFontMono;
     static const std::string KeyFontLight;
 
@@ -100,8 +98,6 @@ public:
     // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
-
-
 
     void serialize(SyncBuffer* syncBuffer);
     void deserialize(SyncBuffer* syncBuffer);
@@ -181,13 +177,15 @@ public:
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
-    void storePerformanceMeasurements();
+
     void renderInformation();
     void renderScreenLog();
 
     Camera* _mainCamera;
     Scene* _sceneGraph;
     RaycasterManager* _raycasterManager;
+
+    std::unique_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
@@ -199,9 +197,6 @@ private:
     bool _showLog;
     bool _takeScreenshot;
 
-    bool _doPerformanceMeasurements;
-    ghoul::SharedMemory* _performanceMemory;
-    
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;

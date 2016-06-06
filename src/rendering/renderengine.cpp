@@ -36,6 +36,8 @@
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
+#include <openspace/performance/performancemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -57,9 +59,6 @@
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
-
-#include <openspace/util/performancemeasurement.h>
-
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
@@ -104,9 +103,6 @@ namespace {
 
 namespace openspace {
 
-const std::string RenderEngine::PerformanceMeasurementSharedData =
-    "OpenSpacePerformanceMeasurementSharedData";
-
 const std::string RenderEngine::KeyFontMono = "Mono";
 const std::string RenderEngine::KeyFontLight = "Light";
     
@@ -115,12 +111,11 @@ RenderEngine::RenderEngine()
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
+    , _performanceManager(nullptr)
     , _log(nullptr)
     , _showInfo(true)
     , _showLog(true)
     , _takeScreenshot(false)
-    , _doPerformanceMeasurements(false)
-    , _performanceMemory(nullptr)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
@@ -139,11 +134,8 @@ RenderEngine::~RenderEngine() {
     _sceneGraph = nullptr;
 
     delete _mainCamera;
-    delete _performanceMemory;
     delete _raycasterManager;
 
-    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
-        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
 bool RenderEngine::deinitialize() {
@@ -367,7 +359,7 @@ void RenderEngine::postSynchronizationPreDraw() {
         Time::ref().currentTime(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
-        _doPerformanceMeasurements
+        _performanceManager != nullptr
     });
     _sceneGraph->evaluate(_mainCamera);
 
@@ -401,7 +393,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
 
 
     if (!(OsEng.isMaster() && _disableMasterRendering)) {
-        _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
+        _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
     // Print some useful information on the master viewport
@@ -428,8 +420,8 @@ void RenderEngine::postDraw() {
         _takeScreenshot = false;
     }
 
-    if (_doPerformanceMeasurements)
-        storePerformanceMeasurements();
+    if (_performanceManager)
+        _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
 }
 
 void RenderEngine::takeScreenshot() {
@@ -716,69 +708,16 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
 }
 
 void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
-    _doPerformanceMeasurements = performanceMeasurements;
+    if (performanceMeasurements) {
+        if (!_performanceManager)
+            _performanceManager = std::make_unique<performance::PerformanceManager>();
+    }
+    else
+        _performanceManager = nullptr;
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {
-    return _doPerformanceMeasurements;
-}
-
-void RenderEngine::storePerformanceMeasurements() {
-    using namespace performance;
-
-    int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
-    if (!_performanceMemory) {
-        // Compute the total size
-        const int totalSize = sizeof(PerformanceLayout);
-        LINFO("Create shared memory of " << totalSize << " bytes");
-
-        try {
-            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
-        }
-        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
-            LINFOC(e.component, e.what());
-        }
-
-        ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
-        _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
-        void* ptr = _performanceMemory->memory();
-
-        // Using the placement-new to create a PerformanceLayout in the shared memory
-        PerformanceLayout* layout = new (ptr) PerformanceLayout(nNodes);
-
-        for (int i = 0; i < nNodes; ++i) {
-            SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
-
-            memset(layout->entries[i].name, 0, PerformanceLayout::LengthName);
-#ifdef _MSC_VER
-            strcpy_s(layout->entries[i].name, node->name().length() + 1, node->name().c_str());
-#else
-            strcpy(layout->entries[i].name, node->name().c_str());
-#endif
-
-            layout->entries[i].currentRenderTime = 0;
-            layout->entries[i].currentUpdateRenderable = 0;
-            layout->entries[i].currentUpdateEphemeris = 0;
-        }
-    }
-
-    void* ptr = _performanceMemory->memory();
-    PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
-    _performanceMemory->acquireLock();
-    for (int i = 0; i < nNodes; ++i) {
-        SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
-        SceneGraphNode::PerformanceRecord r = node->performanceRecord();
-        PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
-
-        entry.renderTime[entry.currentRenderTime] = r.renderTime / 1000.f;
-        entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
-        entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
-
-        entry.currentRenderTime = (entry.currentRenderTime + 1) % PerformanceLayout::NumberValues;
-        entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % PerformanceLayout::NumberValues;
-        entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % PerformanceLayout::NumberValues;
-    }
-    _performanceMemory->releaseLock();
+    return _performanceManager != nullptr;
 }
 
 // This method is temporary and will be removed once the scalegraph is in effect ---abock
