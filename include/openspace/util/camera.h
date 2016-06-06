@@ -73,9 +73,9 @@ namespace openspace {
         // now working with float precision. To be changed to double later.
         // The reason double does not work yet is because of the setUniform function
         // in ghoul::opengl
-        typedef glm::quat Quat;
-        typedef glm::mat4 Mat4;
-        typedef glm::vec3 Vec3;
+        typedef glm::dquat Quat;
+        typedef glm::dmat4 Mat4;
+        typedef glm::dvec3 Vec3;
 
         // Static constants
         static const Vec3 _VIEW_DIRECTION_CAMERA_SPACE;
@@ -100,7 +100,6 @@ namespace openspace {
         const Vec3& positionVec3() const;
         const Vec3& unsynchedPositionVec3() const;
         const Vec3& focusPositionVec3() const;
-        // Should return const refs
         const Vec3& viewDirectionWorldSpace() const;
         const Vec3& lookUpVectorCameraSpace() const;
         const Vec3& lookUpVectorWorldSpace() const;
