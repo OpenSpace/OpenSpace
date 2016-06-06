@@ -88,9 +88,9 @@ void GuiIswaComponent::render() {
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-1,'Data','GMData');";
-            std::string y = "openspace.iswa.addCygnet(-2,'Data','GMData');";
-            std::string z = "openspace.iswa.addCygnet(-3,'Data','GMData');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Data','GMData');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Data','GMData');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Data','GMData');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
@@ -110,7 +110,7 @@ void GuiIswaComponent::render() {
 
     if(_iondata != iondatavalue){
         if(_iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-4,'Data','Ionosphere');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-7,'Data','Ionosphere');");
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }
