@@ -24,7 +24,7 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <algorithm>
 #include <iterator>
-
+#include <boost/iostreams/device/mapped_file.hpp>
 namespace {
     const std::string _loggerCat = "DataProcessorText";
 }
@@ -102,7 +102,7 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
                 back_inserter(values)
             );
 
-            if(values.size() <= 0) continue;
+          if(values.size() <= 0) continue;
 
             for(int i=0; i<numOptions; i++){
                 value = values[i+3];
