@@ -10,10 +10,6 @@ return {
             Textures = {
                 ColorTextures = {
                     {
-                        Name = "OpenStreetMap",
-                        FilePath = "map_service_configs/OpenStreetMap.xml"
-                    },
-                    {
                         Name = "Temporal VIIRS SNPP",
                         FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
                     },
