@@ -92,6 +92,7 @@ namespace openspace {
         float lodScaleFactor;
         bool initChunkVisible;
         bool renderSmallChunksFirst = true;
+        float chunkHeight;
 
         // Layered rendering
         bool useHeightMap;

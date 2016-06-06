@@ -91,7 +91,7 @@ namespace openspace {
 
         
         
-        const int maxHeight = 8700; // should be read from gdal dataset or mod file
+        const int maxHeight = _owner->chunkHeight; // should be read from gdal dataset or mod file
 
 
         if (_owner->doFrustumCulling) {
@@ -107,7 +107,7 @@ namespace openspace {
         }
 
 
-        Vec3 cameraPosition = myRenderData.camera.position().dvec3();
+        Vec3 cameraPosition = myRenderData.camera.positionVec3();
         Geodetic2 pointOnPatch = _surfacePatch.closestPoint(
                 ellipsoid.cartesianToGeodetic2(cameraPosition));
         Vec3 globePosition = myRenderData.position.dvec3();
