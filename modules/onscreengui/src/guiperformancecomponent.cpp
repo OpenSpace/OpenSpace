@@ -48,6 +48,9 @@ void GuiPerformanceComponent::initialize() {
     _minMaxValues[0] = 100.f;
     _minMaxValues[1] = 250.f;
     _sortingSelection = -1;
+    
+    _sceneGraphIsEnabled = false;
+    _functionsIsEnabled = false;
 }
 
 void GuiPerformanceComponent::deinitialize() {
@@ -62,10 +65,15 @@ void GuiPerformanceComponent::render() {
     if (OsEng.renderEngine().doesPerformanceMeasurements() &&
             ghoul::SharedMemory::exists(PerformanceManager::PerformanceMeasurementSharedData))
     {
-        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
+        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 250000.f);
         _minMaxValues[1] = fmaxf(_minMaxValues[0], _minMaxValues[1]);
         
-        if (ImGui::CollapsingHeader("SceneGraph")) {
+        ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
+        ImGui::Checkbox("Functions", &_functionsIsEnabled);
+        
+        if (_sceneGraphIsEnabled) {
+            ImGui::Begin("SceneGraph", &_sceneGraphIsEnabled);
+        
             // The indices correspond to the index into the average array further below
             ImGui::Text("Sorting");
             ImGui::RadioButton("No Sorting", &_sortingSelection, -1);
@@ -169,9 +177,11 @@ void GuiPerformanceComponent::render() {
                     );
                 }
             }
+            ImGui::End();
         }
         
-        if (ImGui::CollapsingHeader("Functions")) {
+        if (_functionsIsEnabled) {
+            ImGui::Begin("Functions", &_functionsIsEnabled);
             using namespace performance;
             
             if (!_performanceMemory)
@@ -207,7 +217,7 @@ void GuiPerformanceComponent::render() {
                     ImVec2(0, 40)
                 );
             }
-            
+            ImGui::End();
         }
     }
     else {
