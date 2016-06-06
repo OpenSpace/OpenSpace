@@ -22,16 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/performance/performancehelper.h>
+#include <openspace/performance/performancemeasurement.h>
 
 #include <openspace/performance/performancemanager.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
+#include <iostream>
+
 namespace openspace {
 namespace performance {
 
-PerformanceHelper::PerformanceHelper(std::string identifier,
+PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
                                      performance::PerformanceManager* manager)
     : _identifier(std::move(identifier))
     , _manager(manager)
@@ -43,7 +45,7 @@ PerformanceHelper::PerformanceHelper(std::string identifier,
     }
 }
 
-PerformanceHelper::~PerformanceHelper() {
+PerformanceMeasurement::~PerformanceMeasurement() {
     auto endTime = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
         endTime - _startTime).count();

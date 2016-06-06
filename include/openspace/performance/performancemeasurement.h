@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCEHELPER_H__
-#define __PERFORMANCEHELPER_H__
+#ifndef __PERFORMANCEMEASUREMENT_H__
+#define __PERFORMANCEMEASUREMENT_H__
 
 #include <chrono>
 #include <string>
@@ -33,10 +33,10 @@ namespace performance {
 
 class PerformanceManager;
 
-class PerformanceHelper {
+class PerformanceMeasurement {
 public:
-    PerformanceHelper(std::string identifier, performance::PerformanceManager* manager);
-    ~PerformanceHelper();
+    PerformanceMeasurement(std::string identifier, performance::PerformanceManager* manager);
+    ~PerformanceMeasurement();
 
 private:
     std::string _identifier;
@@ -49,9 +49,9 @@ private:
 #define __LABEL(a) __MERGE(unique_name_, a)
 
 /// Declare a new variable for measuring the performance of the current block
-#define PerformanceMeasurement(name) auto __LABEL(__LINE__) = openspace::performance::PerformanceHelper((name), OsEng.renderEngine().performanceManager())
+#define PerfMeasure(name) auto __LABEL(__LINE__) = openspace::performance::PerformanceMeasurement((name), OsEng.renderEngine().performanceManager())
     
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCEHELPER_H__
+#endif // __PERFORMANCEMEASUREMENTHELPER_H__

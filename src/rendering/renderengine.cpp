@@ -223,7 +223,6 @@ bool RenderEngine::initializeGL() {
     // development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
-    
     try {
         const float fontSizeTime = 15.f;
         _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
