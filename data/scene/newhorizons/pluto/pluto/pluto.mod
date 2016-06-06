@@ -9,6 +9,13 @@ else
     }
 end
 
+Files = {
+    low = "textures/pluto_large.jpg",
+    med = "textures/Shenk_180.jpg",
+    high = "textures/pmap_cyl_HR_LOR_lowres.jpg"
+}
+ColorTexture = Files[TextureResolution]
+
 return {
     -- Pluto barycenter module
     {
@@ -37,21 +44,14 @@ return {
             },
             Textures = {
                 Type = "simple",
-                -- Color = "textures/pluto_highres_180.jpg",
-                Color = "textures/Shenk_180.jpg",
-                -- Color = "textures/pluto_large.jpg",
-                -- Color = "textures/white.png",
+                Color = ColorTexture,
+                Height = "textures/pluto_shenk_heightmap.jpg",
                 Project = "textures/3.jpg",
-                Sequencing = "true",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
+                Sequencing = "true"
             },
             Projection = {
-                Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojection/all_images",
-                EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/plutoprojection/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+                Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/full_images",
+                EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
                 SequenceType   = "hybrid",
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
@@ -209,7 +209,7 @@ return {
             Size = {1.0, 6.4},
             Origin = "Center",
             Billboard = true,
-            ProjectionListener = true,
+            ProjectionListener = false,
             Texture = "textures/Pluto-Text.png"
         },
         Ephemeris = {

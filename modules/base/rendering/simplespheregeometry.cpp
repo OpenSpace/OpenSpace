@@ -45,7 +45,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     : PlanetGeometry()
     , _realRadius("radius", "Radius", glm::vec4(1.f, 1.f, 1.f, 0.f), glm::vec4(-10.f, -10.f, -10.f, -20.f),
                 glm::vec4(10.f, 10.f, 10.f, 20.f))
-    , _segments("segments", "Segments", 20, 1, 50)
+    , _segments("segments", "Segments", 20, 1, 5000)
     , _sphere(nullptr)
 {
     using constants::simplespheregeometry::keyRadius;
@@ -77,7 +77,6 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     }
     else
         _segments = static_cast<int>(segments);
-
     // The shader need the radii values but they are not changeable runtime
     // TODO: Possibly add a scaling property @AA
     addProperty(_realRadius);

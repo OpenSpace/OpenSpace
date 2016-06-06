@@ -33,6 +33,9 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -53,6 +56,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 
 #include <ghoul/io/texture/texturereader.h>
@@ -92,7 +96,9 @@ namespace {
     std::chrono::seconds ScreenLogTimeToLive(15);
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
+    const std::string PostRenderFsPath = "${SHADERS}/postrender.frag";
 }
+
 
 namespace openspace {
 
@@ -139,6 +145,10 @@ RenderEngine::~RenderEngine() {
 }
 
 bool RenderEngine::deinitialize() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->deinitialize();
+    }
+
     _sceneGraph->clearSceneGraph();
     return true;
 }
@@ -188,7 +198,7 @@ bool RenderEngine::initialize() {
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
     _mainCamera->setScaling(glm::vec2(1.0, -8.0));
-    _mainCamera->setPosition(psc(0.f, 0.f, 1.499823f, 11.f));
+    _mainCamera->setPosition(psc(0.5f, 0.f, 1.499823f, 11.f));
 
     OsEng.interactionHandler().setCamera(_mainCamera);
     if (_renderer) {
@@ -207,7 +217,6 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
-
 
     return true;
 }
@@ -363,11 +372,19 @@ void RenderEngine::postSynchronizationPreDraw() {
     _renderer->update();
 
     for (auto program : _programs) {
-        if (program->isDirty()) {
-            program->rebuildFromFile();
+        try {
+            if (program->isDirty()) {
+                program->rebuildFromFile();
+            }
+        }
+        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+            LERRORC(e.component, e.what());
         }
     }
-
+    
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+            screenspacerenderable->update();
+    }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
     //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
@@ -393,6 +410,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         if (_showLog) {
             renderScreenLog();
         }
+    }
+    
+    for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+        if(screenSpaceRenderable->isEnabled())
+            screenSpaceRenderable->render();
     }
 }
 
@@ -486,7 +508,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name,
     std::string vsPath,
     std::string fsPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data,
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
 
@@ -497,10 +520,16 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
+
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         dict);
 
     if (program) {
@@ -517,20 +546,27 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string vsPath,
     std::string fsPath,
     std::string csPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data, 
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
+
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
 
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         csPath,
         dict);
 
@@ -541,6 +577,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program) {
+    if (!program)
+        return;
+
     ghoul::opengl::ProgramObject* ptr = program.get();
     auto it = std::find(
         _programs.begin(),
@@ -566,6 +605,37 @@ void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
         program->setDictionary(dict);
     }
 }
+
+
+/**
+* Set resolve data
+* Called from the renderer, whenever it needs to update
+* the dictionary of all post rendering programs.
+*/
+void RenderEngine::setResolveData(const ghoul::Dictionary& data) {
+    _resolveData = data;
+    for (auto program : _programs) {
+        ghoul::Dictionary dict = program->dictionary();
+        dict.setValue("resolveData", _resolveData);
+        program->setDictionary(dict);
+    }
+}
+
+/**
+* Set raycasting uniforms on the program object, and setup raycasting.
+*/
+void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->preRaycast(programObject);
+}
+
+/**
+* Tear down raycasting for the specified program object.
+*/
+void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->postRaycast(programObject);
+}
+
+
 
 /**
  * Set renderer
@@ -626,6 +696,18 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "number",
                 "",
                 true
+            },
+            {
+                "registerScreenSpaceRenderable",
+                &luascriptfunctions::registerScreenSpaceRenderable,
+                "table",
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+            },
+            {
+                "unregisterScreenSpaceRenderable",
+                &luascriptfunctions::unregisterScreenSpaceRenderable,
+                "string",
+                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
             },
         },
     };
@@ -1115,6 +1197,39 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    s->initialize();
+    _screenSpaceRenderables.push_back(s);
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    auto it = std::find(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        s
+        );
+
+    if (it != _screenSpaceRenderables.end()) {
+        s->deinitialize();
+        _screenSpaceRenderables.erase(it);
+    }
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
+    auto s = screenSpaceRenderable(name);
+    if(s)
+        unregisterScreenSpaceRenderable(s);
+}
+
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
+    for(auto s : _screenSpaceRenderables){
+        if(s->name() == name){
+            return s;
+        }
+    }
+    return nullptr;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -1164,33 +1279,38 @@ void RenderEngine::renderInformation() {
             );
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+        bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+
         if (openspace::ImageSequencer::ref().isReady()) {
             penPosition.y -= 25.f;
 
             glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
 
-            try {
-                double lt;
-                glm::dvec3 p =
-                    SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
-                psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-                float a, b, c;
-                glm::dvec3 radii;
-                SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-                a = radii.x;
-                b = radii.y;
-                c = radii.z;
-                float radius = (a + b) / 2.f;
-                float distToSurf = glm::length(nhPos.vec3()) - radius;
+            if (hasNewHorizons) {
+                try {
+                    double lt;
+                    glm::dvec3 p =
+                        SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+                    float a, b, c;
+                    glm::dvec3 radii;
+                    SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                    a = radii.x;
+                    b = radii.y;
+                    c = radii.z;
+                    float radius = (a + b) / 2.f;
+                    float distToSurf = glm::length(nhPos.vec3()) - radius;
 
-                RenderFont(*_fontInfo,
-                    penPosition,
-                    "Distance to Pluto: % .1f (KM)",
-                    distToSurf
+                    RenderFont(*_fontInfo,
+                               penPosition,
+                               "Distance to Pluto: % .1f (KM)",
+                               distToSurf
                     );
-                penPosition.y -= _fontInfo->height();
+                    penPosition.y -= _fontInfo->height();
+                }
+                catch (...) {
+                }
             }
-            catch (...) {}
 
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
             float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
@@ -1263,8 +1383,10 @@ void RenderEngine::renderInformation() {
                     hh.c_str(), mm.c_str(), ss.c_str()
                     );
 
-
-                std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
+#if 0
+// Why is it (2) in the original? ---abock
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
+                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
                 std::string space;
                 glm::vec4 color;
                 size_t isize = incidentTargets.second.size();
@@ -1285,6 +1407,7 @@ void RenderEngine::renderInformation() {
                     for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
                         space += " ";
                 }
+#endif
                 penPosition.y -= _fontInfo->height();
 
                 std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
@@ -1429,6 +1552,13 @@ void RenderEngine::renderScreenLog() {
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+                  return i->depth() > j->depth();
+              });
 }
 
 }// namespace openspace

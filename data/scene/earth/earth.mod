@@ -42,8 +42,8 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-				Night = "textures/earth_night.jpg",
-                -- Depth = "textures/earth_depth.png"
+                Night = "textures/earth_night.jpg",
+                Height = "textures/earth_bluemarble_height.jpg"
             },
             Atmosphere = {
                 Type = "Nishita", -- for example, values missing etc etc

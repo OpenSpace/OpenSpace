@@ -28,6 +28,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
@@ -65,6 +66,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/ephemeris.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
@@ -86,8 +88,10 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/screenlog.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
 )
 
 set(OPENSPACE_HEADER
@@ -138,6 +142,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/ephemeris.h
@@ -163,6 +169,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
 )
 
 # Place files into source groups

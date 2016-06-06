@@ -68,6 +68,7 @@ public:
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
+    virtual void postRender(const RenderData& data);
     virtual void update(const UpdateData& data);
 
     bool isVisible() const;
@@ -83,8 +84,10 @@ public:
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
-private:
+protected:
     properties::BoolProperty _enabled;
+    
+private:
     PowerScaledScalar boundingSphere_;
     std::string _startTime;
     std::string _endTime;

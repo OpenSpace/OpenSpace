@@ -30,11 +30,15 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 
+// test files
 #include <test_common.inl>
 //#include <test_spicemanager.inl>
 #include <test_scenegraphloader.inl>
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
+#include <test_screenspaceimage.inl>
+#include <test_iswamanager.inl>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/configurationmanager.h>

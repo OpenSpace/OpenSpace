@@ -27,10 +27,12 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-
+#include <stdio.h>
+#include <ghoul/misc/thread.h>
 #include <chrono>
 #include <fstream>
 #include <thread>
+#include <cstring>
 
 #ifdef OPENSPACE_CURL_ENABLED
 #include <curl/curl.h>
@@ -61,6 +63,23 @@ namespace {
         return written;
     }
 
+    size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp){
+        size_t realsize = size * nmemb;
+        openspace::DownloadManager::MemoryFile *mem = (openspace::DownloadManager::MemoryFile *)userp;
+
+        mem->buffer = (char*)realloc(mem->buffer, mem->size + realsize + 1);
+        if(mem->buffer == NULL) {
+            /* out of memory! */ 
+            printf("not enough memory (realloc returned NULL)\n");
+            return 0;
+        }
+
+        std::memcpy(&(mem->buffer[mem->size]), contents, realsize);
+        mem->size += realsize;
+        mem->buffer[mem->size] = 0;
+
+        return realsize;
+    }
 
     int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
                  curl_off_t ulnow)
@@ -196,6 +215,63 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     return future;
 }
 
+std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
+    const std::string& url,
+    SuccessCallback successCallback, ErrorCallback errorCallback)
+{
+    LDEBUG("Start downloading file: '" << url << "' into memory");
+    
+    auto downloadFunction = [url, successCallback, errorCallback]() {
+        DownloadManager::MemoryFile file;
+        file.buffer = (char*)malloc(1);
+        file.size = 0;
+        file.corrupted = false;
+
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+            curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&file);
+            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
+            curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+            // Will fail when response status is 400 or above
+            curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+            
+            CURLcode res = curl_easy_perform(curl);
+            if(res == CURLE_OK){
+                // ask for the content-type
+                char *ct;
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
+                if(res == CURLE_OK){
+                    std::string extension = std::string(ct);
+                    std::stringstream ss(extension);
+                    getline(ss, extension ,'/');
+                    getline(ss, extension);
+                    file.format = extension;
+                } else{
+                    LWARNING("Could not get File extension from file downloaded from: " + url);
+                }
+                successCallback(file);
+                curl_easy_cleanup(curl);
+                return std::move(file);
+            } else {
+                std::string err = curl_easy_strerror(res);
+                errorCallback(err);
+                curl_easy_cleanup(curl);
+                // Throw an error and use try-catch around call to future.get()
+                //throw std::runtime_error( err );
+
+                // or set a boolean variable in MemoryFile to determine if it is valid/corrupted or not.
+                // Return MemoryFile even if it is not valid, and check if it is after future.get() call.
+                file.corrupted = true;
+                return std::move(file);
+            }
+        }
+    };
+
+    return std::move( std::async(std::launch::async, downloadFunction) );
+}
+
 std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(
     const std::string& identifier, const ghoul::filesystem::Directory& destination,
     int version, bool overrideFiles, DownloadFinishedCallback finishedCallback,
@@ -273,7 +349,43 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     
     if (_useMultithreadedDownload) {
         std::thread t = std::thread(downloadFunction);
-        
+        ghoul::thread::setPriority(t, ghoul::thread::ThreadPriority::Lowest);
+        t.detach();
+    }
+    else
+        downloadFunction();
+}
+
+void DownloadManager::getFileExtension(const std::string& url,
+    RequestFinishedCallback finishedCallback){
+
+    auto requestFunction = [url, finishedCallback]() {
+        CURL* curl = curl_easy_init();
+        if (curl) {
+            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+            //USING CURLOPT NOBODY
+            curl_easy_setopt(curl, CURLOPT_NOBODY,1);
+            CURLcode res = curl_easy_perform(curl);
+            if(CURLE_OK == res) {
+                char *ct;
+                // ask for the content-type
+                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);    
+                if ((res == CURLE_OK) && ct){
+
+                    if (finishedCallback)
+                        finishedCallback(std::string(ct));
+                }
+            }
+            
+/*            else
+                future->errorMessage = curl_easy_strerror(res);*/
+            
+            curl_easy_cleanup(curl);
+        }
+    };
+    if (_useMultithreadedDownload) {
+        std::thread t = std::thread(requestFunction);
+     
 #ifdef WIN32
         std::thread::native_handle_type h = t.native_handle();
         SetPriorityClass(h, IDLE_PRIORITY_CLASS);
@@ -284,8 +396,9 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
         
         t.detach();
     }
-    else
-        downloadFunction();
+    else {
+        requestFunction();
+    }
 }
 
 } // namespace openspace

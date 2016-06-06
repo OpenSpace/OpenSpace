@@ -80,9 +80,16 @@ protected:
 
 private:
     properties::StringProperty _colorTexturePath;
+    properties::StringProperty _nightTexturePath;
+    properties::StringProperty _heightMapTexturePath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
+    std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+
+    properties::FloatProperty _heightExaggeration;
+
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
@@ -91,10 +98,10 @@ private:
     float _planetRadius;
 
     glm::dmat3 _stateMatrix;
-    std::string _nightTexturePath;
     std::string _frame;
     std::string _target;
     bool _hasNightTexture;
+    bool _hasHeightTexture;
     double _time;
 };
 

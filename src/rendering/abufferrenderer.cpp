@@ -35,8 +35,11 @@
 
 
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+
+
 
 #include <string>
 #include <iterator>
@@ -45,8 +48,9 @@ namespace {
     const std::string _loggerCat = "ABufferRenderer";
     const std::string BoundsFragmentShaderPath = "${SHADERS}/abuffer/boundsabuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/abuffer/renderabuffer.frag";
+    const std::string PostRenderFragmentShaderPath = "${SHADERS}/abuffer/postrenderabuffer.frag";
     const int MaxRaycasters = 32;
-    const int MaxLayers = 16;
+    const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
 }
 
@@ -97,7 +101,15 @@ void ABufferRenderer::initialize() {
     glBufferData(GL_ATOMIC_COUNTER_BUFFER, sizeof(GLuint), NULL, GL_DYNAMIC_COPY);
     glGenBuffers(1, &_fragmentBuffer);
     glGenTextures(1, &_fragmentTexture);
-    
+
+    glGenTextures(1, &_mainColorTexture);
+    glGenTextures(1, &_mainDepthTexture);
+    glGenFramebuffers(1, &_mainFramebuffer);
+
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+
+      
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -112,11 +124,27 @@ void ABufferRenderer::initialize() {
     updateRaycastData();
     updateResolveDictionary();
 
+    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Main framebuffer is not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
+
     try {
+        ghoul::Dictionary dict;
+        dict.setValue("resolveData", _resolveDictionary);
+        dict.setValue("rendererData", _rendererData);
+
         _resolveProgram = ghoul::opengl::ProgramObject::Build("ABuffer Resolve",
             "${SHADERS}/abuffer/resolveabuffer.vert",
             "${SHADERS}/abuffer/resolveabuffer.frag",
-            _resolveDictionary);
+            dict);
     } catch (ghoul::RuntimeError e) {
         LERROR(e.message);
     }
@@ -171,7 +199,10 @@ void ABufferRenderer::update() {
     
     if (_dirtyResolveDictionary) {
         updateResolveDictionary();
-        _resolveProgram->setDictionary(_resolveDictionary);
+        ghoul::Dictionary dict;
+        dict.setValue("resolveData", _resolveDictionary);
+        dict.setValue("rendererData", _rendererData);
+        _resolveProgram->setDictionary(dict);
     }
 
     // If the resolve dictionary changed (or a file changed on disk)
@@ -201,6 +232,23 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     if (_scene == nullptr) return;
     if (_camera == nullptr) return;
 
+
+
+    _mainColorTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _mainColorTextureUnit->activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+
+    _mainDepthTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+    _mainDepthTextureUnit->activate();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     // Reset
     clear();
     glEnable(GL_DEPTH_TEST);
@@ -217,6 +265,12 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     RenderData data{ *_camera, psc(), doPerformanceMeasurements };
     RendererTasks tasks;
     _scene->render(data, tasks);
+
+    _rendererTasks = std::make_unique<RendererTasks>(tasks);
+    _renderData = std::make_unique<RenderData>(data);
+    _blackoutFactor = blackoutFactor;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
 
     // Step 2: Perform raycasting tasks requested by the scene
@@ -239,33 +293,64 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     // Step 3: Resolve the buffer
     _resolveProgram->activate();
 
-    // 3a: Perform the pre-raycast step for all raycaster tasks.
-    for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
-        VolumeRaycaster* raycaster = raycasterTask.raycaster;
-        auto raycastData = _raycastData.find(raycaster);
-        if (raycastData != _raycastData.end()) {
-                raycaster->preRaycast(raycastData->second, *_resolveProgram.get());
+    // TEMPORARY GAMMA CORRECTION.
+
+    float gamma = 1.0;
+    glm::vec3 cameraPos = data.camera.position().vec3();
+    float maxComponent = std::max(std::max(std::abs(cameraPos.x), std::abs(cameraPos.y)), std::abs(cameraPos.z));
+    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10);
+
+    float minLogDist = 15;
+    float maxLogDist = 20;
+
+    float t = (logDistance - minLogDist) / (maxLogDist - minLogDist);
+    t = glm::clamp(t, 0.0f, 1.0f);
+    gamma = 1.0 * (1 - t) + 2.2 * t;
+
+    _resolveProgram->setUniform("gamma", gamma);
+
+    // END TEMPORARY GAMMA CORRECTION.
+
+    preRaycast(*_resolveProgram);
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    postRaycast(*_resolveProgram);
+
+    _resolveProgram->deactivate();
+
+    _scene->postRender(data);
+
+    _mainColorTextureUnit = nullptr;
+    _mainDepthTextureUnit = nullptr;
+}
+
+
+void ABufferRenderer::preRaycast(ghoul::opengl::ProgramObject& program) {
+
+    program.setUniform("mainColorTexture", _mainColorTextureUnit->unitNumber());
+    program.setUniform("mainDepthTexture", _mainDepthTextureUnit->unitNumber());
+    
+    for (const auto& raycastData : _raycastData) {
+        raycastData.first->preRaycast(raycastData.second, program);
+
+        glm::vec3 localCameraPosition;
+        bool cameraIsInside = raycastData.first->cameraIsInside(*_renderData, localCameraPosition);
+        program.setUniform("insideRaycaster" + std::to_string(raycastData.second.id), cameraIsInside);
+        if (cameraIsInside) {
+            program.setUniform("cameraPosInRaycaster" + std::to_string(raycastData.second.id), localCameraPosition);
         }
     }
 
     // 3b: Set "global" uniforms, and start the resolve pass.
-    _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
-    _resolveProgram->setUniform("nAaSamples", _nAaSamples);
-    glBindVertexArray(_screenQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    // 3c: Perform the post-raycast step for all raycaster tasks.
-    for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
-        VolumeRaycaster* raycaster = raycasterTask.raycaster;
-        auto raycastData = _raycastData.find(raycaster);
-        if (raycastData != _raycastData.end()) {
-            raycaster->postRaycast(raycastData->second, *_resolveProgram.get());
-        }
-    }
-
-    _resolveProgram->deactivate();
+    program.setUniform("blackoutFactor", _blackoutFactor);
+    program.setUniform("nAaSamples", _nAaSamples);
 }
 
+void ABufferRenderer::postRaycast(ghoul::opengl::ProgramObject& program) {
+    for (const auto& raycastData : _raycastData) {
+        raycastData.first->postRaycast(raycastData.second, program);
+    }
+}
 
 void ABufferRenderer::setScene(Scene* scene) {
     _scene = scene;
@@ -293,6 +378,7 @@ void ABufferRenderer::clear() {
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
     glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
+
 }
 
 void ABufferRenderer::updateResolution() {
@@ -319,6 +405,26 @@ void ABufferRenderer::updateResolution() {
     glBindTexture(GL_TEXTURE_BUFFER, 0);
 
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
+
+    int nSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        nSamples,
+        GL_RGBA,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        true);
+
+    glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+    glTexImage2DMultisample(
+        GL_TEXTURE_2D_MULTISAMPLE,
+        nSamples,
+        GL_DEPTH_COMPONENT32F,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        true);
 
     
     _dirtyResolution = false;
@@ -353,11 +459,14 @@ void ABufferRenderer::updateResolveDictionary() {
     }
 
     dict.setValue("helperPaths", helperPathsDict);
-    dict.setValue("rendererData", _rendererData);
     dict.setValue("raycastingEnabled", _raycastData.size() > 0);
+    dict.setValue("storeSorted", true);
     dict.setValue("nRaycasters", static_cast<unsigned long long>(_raycastData.size()));
 
     _resolveDictionary = dict;
+
+    OsEng.renderEngine().setResolveData(dict);
+
     _dirtyResolveDictionary = false;
 }
 
@@ -434,6 +543,7 @@ void ABufferRenderer::updateRendererData() {
     dict.setValue("windowWidth", _resolution.x);
     dict.setValue("windowHeight", _resolution.y);
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
     dict.setValue("maxLayers", MaxLayers);
     dict.setValue("maxTotalFragments", MaxLayers * _resolution.x * _resolution.y);
 

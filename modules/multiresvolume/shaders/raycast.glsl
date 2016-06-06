@@ -73,7 +73,13 @@ float stepSize#{id}(vec3 samplePos, vec3 dir){
     }
 }
 
-vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
+void sample#{id}(vec3 samplePos,
+                 vec3 dir,
+                 inout vec3 accumulatedColor,
+                 inout vec3 accumulatedAlpha,
+                 inout float maxStepSize) {
+
+    //vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float maxStepSize) {
     //return vec4(1.0, 1.0, 1.0, 1.0);
     
     if (true /*opacity_#{id} >= MULTIRES_OPACITY_THRESHOLD*/) {
@@ -85,23 +91,30 @@ vec4 sample#{id}(vec3 samplePos, vec3 dir, vec4 foregroundColor, inout float max
         //sampleCoords = vec3(1.0,0.0, 0.0);
         float intensity = texture(textureAtlas_#{id}, sampleCoords).x;
         //intensity = sampleCoords;
-
+        maxStepSize = stepSizeCoefficient_#{id}/float(maxNumBricksPerAxis_#{id})/float(paddedBrickDim_#{id});
         //return vec4(vec3(intensity), 1.0);
         vec4 contribution = texture(transferFunction_#{id}, intensity);
-
+        contribution.a = 1.0 - pow(1.0 - contribution.a, maxStepSize);
         //contribution = vec4(sampleCoords, 1.0);
         //vec4 contribution = vec4(vec3(intensity), 1.0);
         //contribution.a *= 0.3;
         //contribution = vec4(1.0, 1.0, 1.0, intensity * 1000000.0);
         //contribution = vec4(1.0, 1.0, 1.0, 1.0);
-        maxStepSize = stepSizeCoefficient_#{id}/float(maxNumBricksPerAxis_#{id})/float(paddedBrickDim_#{id});
+
         //contribution.a *= opacity_#{id};
 
         //maxStepSize = 0.01;
-        return contribution;
+
+        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+        accumulatedColor += oneMinusFrontAlpha * contribution.rgb * contribution.a;
+        accumulatedAlpha += oneMinusFrontAlpha * vec3(contribution.a);
+
+
+        //accumulatedAlpha = vec3(1.0-);
+        //return contribution;
     } else {
         maxStepSize = 2.0;
-        return vec4(0.0);
+        //return vec4(0.0);
     }
 }
 

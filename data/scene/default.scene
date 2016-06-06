@@ -20,14 +20,16 @@ function postInitialization()
     openspace.setPropertyValue("Sun.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", true)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
-    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
-    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     openspace.printInfo("Done setting default values")
+
+    if openspace.modules.isLoaded("ISWA") then
+        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
+    end
 end
 
 
@@ -36,7 +38,7 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {1, 0, 0, 5},
+        Position = {1, 0, 0, 2},
     },
     Modules = {
         "sun",
@@ -49,17 +51,9 @@ return {
         "uranus",
         "neptune",
         "stars",
-        -- "stars-denver",
+        --"stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        --"constellationbounds",
-        -- "fieldlines",
-        --"io",
-        --"europa",
-        --"ganymede",
-        --"callisto",
-        --"gridGalactic",
-        --"gridEcliptic",
-        --"gridEquatorial",
+        "constellationbounds",
     }
 }
