@@ -74,14 +74,14 @@ vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[numberOfShadows], co
         float r_u_pi = shadowInfoArray[0].rc * (shadowInfoArray[0].xu - length_pc_proj) / shadowInfoArray[0].xu;
         
         if ( length_d < r_u_pi ) { // umbra
-            return vec4(0.0, 0.0, 0.0, 1.0);
+            //return vec4(0.0, 0.0, 0.0, 1.0);
             //return vec4(1.0, 0.0, 0.0, 1.0);
-            //return butterworthFunc(length_d, r_u_pi, 4.0);
+            return butterworthFunc(length_d, r_u_pi, 4.0);
         }
         else if ( length_d < r_p_pi ) {// penumbra
-            return vec4(0.5, 0.5, 0.5, 1.0);
+            //return vec4(0.5, 0.5, 0.5, 1.0);
             //return vec4(0.0, 1.0, 0.0, 1.0);
-            //return vec4(vec3(length_d/r_p_pi), 1.0);
+            return vec4(vec3(length_d/r_p_pi), 1.0);
         }
     }
      

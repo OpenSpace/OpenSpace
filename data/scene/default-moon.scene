@@ -19,16 +19,16 @@ function preInitialization()
 
      --   6:20 -> 23:20 day before in UTC
     ]]--
-    --openspace.time.setTime("2016-03-08T22:45:00")
+    openspace.time.setTime("2016-03-08T22:45:00")
 
 
     -- Total Lunar Eclipse Jan 31, 2018 at 10:51:13 UTC
     -- Regions seeing, at least, some parts of the eclipse: North/East Europe,
     -- Asia, Australia, North/East Africa, North America, North/East South America,
     -- Pacific, Atlantic, Indian Ocean, Arctic, Antarctica.
-    openspace.time.setTime("2018-01-31T10:30:00")
+    --openspace.time.setTime("2018-01-31T10:30:00")
 
-    openspace.time.setDeltaTime(200.0)
+    --openspace.time.setDeltaTime(200.0)
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end
 
@@ -56,8 +56,8 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        --Focus = "Earth",
-        Focus = "Moon",
+        Focus = "Earth",
+        --Focus = "Moon",
         Position = {1, 0, 0, 5},
     },
     Modules = {

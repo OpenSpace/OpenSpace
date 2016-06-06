@@ -330,13 +330,6 @@ void RenderablePlanet::render(const RenderData& data)
 
     // setup the data to the shader
     double  lt;
-    glm::dvec3 p =
-    SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
-    p *= 1000.0; // from Km to m
-    psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-
-    //_programObject->setUniform("light_dir", sun_pos.vec4());
-
     glm::dvec3 pt =
     SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, _time, lt);
     psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(pt.x, pt.y, pt.z);
@@ -409,9 +402,13 @@ void RenderablePlanet::render(const RenderData& data)
             float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
             float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
                         
+            float casterDistSun = glm::length(casterPos);
+            float planetDistSun = glm::length(data.position.vec3());
+
             ShadowRenderingStruct shadowData;
             shadowData.isShadowing = false;
-            if ((d_test - rp_test) < _planetRadius) {
+            if (((d_test - rp_test) < _planetRadius) &&
+                (casterDistSun < planetDistSun) ) {
                 // The current caster is shadowing the current planet
                 shadowData.isShadowing       = true;
                 shadowData.rs                = shadowConf.source.second;

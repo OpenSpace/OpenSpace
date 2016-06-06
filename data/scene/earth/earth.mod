@@ -30,11 +30,13 @@ return {
             Shadow_Group = {
                 Source1 = {
                     Name = "Sun",
+                    -- All radius in meters
                     Radius = {696.3, 6}
                 },
                 --Source2 = { Name = "Monolith", Radius = {0.01, 6} },
                 Caster1 = { 
                     Name = "Moon",
+                    -- All radius in meters
                     Radius = {1.737, 6}
                 },
                 --Caster2 = { Name = "Independency Day Ship", Radius = {0.0, 0.0} }
