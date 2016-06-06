@@ -46,10 +46,11 @@ namespace {
 
 namespace openspace {
 
-    CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, int tileCacheSize,
+    CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
+        std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
         : _asyncTextureDataProvider(tileReader)
-        , _tileCache(tileCacheSize)
+        , _tileCache(tileCache)
         , _framesSinceLastRequestFlush(0)
     {
         
@@ -107,8 +108,8 @@ namespace openspace {
         
         HashKey key = chunkIndex.hashKey();
         
-        if (_tileCache.exist(key) && _tileCache.get(key).ioError == CPLErr::CE_None) {
-            return { _tileCache.get(key).texture, uvTransform };
+        if (_tileCache->exist(key) && _tileCache->get(key).ioError == CPLErr::CE_None) {
+            return { _tileCache->get(key).texture, uvTransform };
         }
         else if (chunkIndex.level < 1) {
             return { nullptr, uvTransform };
@@ -146,8 +147,8 @@ namespace openspace {
 
     std::shared_ptr<Texture> CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
         HashKey hashkey = chunkIndex.hashKey();
-        if (_tileCache.exist(hashkey)) {
-            return _tileCache.get(hashkey).texture;
+        if (_tileCache->exist(hashkey)) {
+            return _tileCache->get(hashkey).texture;
         }
         else {
             _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
@@ -179,9 +180,9 @@ namespace openspace {
 
         texture->uploadTexture();
         
-        MetaTexture metaTexture = { texture, tileIOResult->error };
+        TextureAndStatus metaTexture = { texture, tileIOResult->error };
 
-        _tileCache.put(key, metaTexture);
+        _tileCache->put(key, metaTexture);
     }
 
 

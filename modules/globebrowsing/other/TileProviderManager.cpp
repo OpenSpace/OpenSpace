@@ -112,8 +112,10 @@ namespace openspace {
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));
 
+        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(initData.cacheSize));
+
         tileProvider = std::shared_ptr<TileProvider>(
-            new CachingTileProvider(tileReader, initData.cacheSize, initData.framesUntilRequestQueueFlush));
+            new CachingTileProvider(tileReader, tileCache, initData.framesUntilRequestQueueFlush));
 
         return tileProvider;
     }
