@@ -119,6 +119,7 @@ bool TriangleSoup::updateDataInGPU() {
 		}
 	}
 
+
 	// First VAO setup
 	glBindVertexArray(_vaoID);
 
@@ -158,6 +159,9 @@ bool TriangleSoup::updateDataInGPU() {
 		GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+
+    _gpuDataNeedUpdate = false;
+
 	return true;
 }
 
