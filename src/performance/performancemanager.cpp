@@ -104,8 +104,13 @@ void PerformanceManager::storeIndividualPerformanceMeasurement
     strcpy(p->name, identifier.c_str());
 #endif
     
-    p->time[p->currentTime] = static_cast<float>(microseconds);
-    p->currentTime = (p->currentTime + 1) % PerformanceLayout::NumberValues;
+    std::rotate(
+        std::begin(p->time),
+        std::next(std::begin(p->time)),
+        std::end(p->time)
+    );
+    p->time[PerformanceLayout::NumberValues - 1] =
+        static_cast<float>(microseconds);
 
     _performanceMemory->releaseLock();
 }
@@ -134,13 +139,26 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
-        entry.renderTime[entry.currentRenderTime] = r.renderTime / 1000.f;
-        entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
-        entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
-
-        entry.currentRenderTime = (entry.currentRenderTime + 1) % PerformanceLayout::NumberValues;
-        entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % PerformanceLayout::NumberValues;
-        entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % PerformanceLayout::NumberValues;
+        std::rotate(
+            std::begin(entry.renderTime),
+            std::next(std::begin(entry.renderTime)),
+            std::end(entry.renderTime)
+        );
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / 1000.f;
+        
+        std::rotate(
+            std::begin(entry.updateEphemeris),
+            std::next(std::begin(entry.updateEphemeris)),
+            std::end(entry.updateEphemeris)
+        );
+        entry.updateEphemeris[PerformanceLayout::NumberValues - 1] = r.updateTimeEphemeris / 1000.f;
+        
+        std::rotate(
+            std::begin(entry.updateRenderable),
+            std::next(std::begin(entry.updateRenderable)),
+            std::end(entry.updateRenderable)
+        );
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / 1000.f;
     }
     _performanceMemory->releaseLock();
 }

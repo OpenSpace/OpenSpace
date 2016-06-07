@@ -43,10 +43,6 @@ struct PerformanceLayout {
         float renderTime[NumberValues];
         float updateRenderable[NumberValues];
         float updateEphemeris[NumberValues];
-
-        int32_t currentRenderTime;
-        int32_t currentUpdateRenderable;
-        int32_t currentUpdateEphemeris;
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
     int16_t nScaleGraphEntries;
@@ -54,7 +50,6 @@ struct PerformanceLayout {
     struct FunctionPerformanceLayout {
         char name[LengthName];
         float time[NumberValues];
-        int32_t currentTime;
     };
     FunctionPerformanceLayout functionEntries[MaxValues];
     int16_t nFunctionEntries;

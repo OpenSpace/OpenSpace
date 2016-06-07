@@ -175,7 +175,7 @@ void GuiPerformanceComponent::render() {
                 const PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[indices[i]];
 
                 if (ImGui::CollapsingHeader(entry.name)) {
-                    std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
+                    std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[PerformanceLayout::NumberValues - 1]) + "us";
                     ;
                     ImGui::PlotLines(
                         fmt::format("UpdateEphemeris\nAverage: {}us", averages[indices[i]][0]).c_str(),
@@ -188,7 +188,7 @@ void GuiPerformanceComponent::render() {
                         ImVec2(0, 40)
                     );
 
-                    std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
+                    std::string updateRenderableTime = std::to_string(entry.updateRenderable[PerformanceLayout::NumberValues - 1]) + "us";
                     ImGui::PlotLines(
                         fmt::format("UpdateRender\nAverage: {}us", averages[indices[i]][1]).c_str(),
                         &entry.updateRenderable[0],
@@ -200,7 +200,7 @@ void GuiPerformanceComponent::render() {
                         ImVec2(0, 40)
                     );
 
-                    std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
+                    std::string renderTime = std::to_string(entry.renderTime[PerformanceLayout::NumberValues - 1]) + "us";
                     ImGui::PlotLines(
                         fmt::format("RenderTime\nAverage: {}us", averages[indices[i]][2]).c_str(),
                         &entry.renderTime[0],
@@ -246,7 +246,7 @@ void GuiPerformanceComponent::render() {
                 
                 const PerformanceLayout::FunctionPerformanceLayout& f = layout->functionEntries[i];
                 
-                std::string renderTime = std::to_string(entry.time[entry.currentTime - 1]) + "us";
+                std::string renderTime = std::to_string(entry.time[PerformanceLayout::NumberValues - 1]) + "us";
                 ImGui::PlotLines(
                     fmt::format("{}\nAverage: {}us", entry.name, avg).c_str(),
                     &entry.time[0],
