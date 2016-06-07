@@ -43,7 +43,6 @@ namespace openspace {
         std::string keyUseThisLayerType;
         std::string keyLayerBlendingEnabled;
         int lastLayerIndex;
-        bool useThisLayerType;
         bool layerBlendingEnabled;
 
         bool operator==(const LayeredTextureInfo& other) const;

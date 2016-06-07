@@ -61,8 +61,6 @@ namespace openspace {
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
         , chunkHeight(properties::FloatProperty("chunkHeight", "chunkHeight", 8700.0f, 0.0f, 8700.0f))
-        , useHeightMap(properties::BoolProperty("useHeightMap", "useHeightMap", true))
-        , useColorMap(properties::BoolProperty("useColorMap", "useColorMap", true))
         , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
         , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
     {
@@ -77,8 +75,6 @@ namespace openspace {
         addProperty(renderSmallChunksFirst);
         addProperty(chunkHeight);
 
-        addProperty(useHeightMap);
-        addProperty(useColorMap);
         addProperty(blendHeightMap);
         addProperty(blendColorMap);
 
@@ -175,8 +171,6 @@ namespace openspace {
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
         _chunkedLodGlobe->chunkHeight = chunkHeight.value();
 
-        _chunkedLodGlobe->useHeightMap = useHeightMap.value();
-        _chunkedLodGlobe->useColorMap = useColorMap.value();
         _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
         _chunkedLodGlobe->blendColorMap = blendColorMap.value();
 
@@ -184,7 +178,6 @@ namespace openspace {
             _tileProviderManager->colorTextureProviders();
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
             _tileProviderManager->heightMapProviders();
-
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();

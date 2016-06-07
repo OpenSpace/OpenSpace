@@ -27,9 +27,11 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
+#if USE_COLORTEXTURE
 uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
+#endif // USE_COLORTEXTURE
 
 // tileInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera

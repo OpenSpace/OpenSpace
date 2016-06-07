@@ -95,8 +95,6 @@ namespace openspace {
         float chunkHeight;
 
         // Layered rendering
-        bool useHeightMap;
-        bool useColorMap;
         bool blendHeightMap;
         bool blendColorMap;
 

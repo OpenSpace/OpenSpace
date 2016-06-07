@@ -28,6 +28,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
+// First layer type from LayeredTextureShaderProvider
 #ifndef NUMLAYERS_HEIGHTMAP
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
 #endif // NUMLAYERS_HEIGHTMAP
@@ -40,9 +41,10 @@
 #define HEIGHTMAP_BLENDING_ENABLED #{heightMapBlendingEnabled}
 #endif // HEIGHTMAP_BLENDING_ENABLED
 
+// Second layer type from LayeredTextureShaderProvider
 #ifndef NUMLAYERS_COLORTEXTURE
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
-#endif // NUMLAYERS_HEIGHTMAP
+#endif // NUMLAYERS_COLORTEXTURE
 
 #ifndef USE_COLORTEXTURE 
 #define USE_COLORTEXTURE #{useColorTexture}
@@ -50,7 +52,7 @@
 
 #ifndef COLORTEXTURE_BLENDING_ENABLED 
 #define COLORTEXTURE_BLENDING_ENABLED #{colorTextureBlendingEnabled}
-#endif // HEIGHTMAP_BLENDING_ENABLED
+#endif // COLORTEXTURE_BLENDING_ENABLED
 
 float calculateHeight(
 	const vec2 uv,

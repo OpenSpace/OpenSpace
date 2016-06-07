@@ -75,8 +75,6 @@ public:
     properties::FloatProperty chunkHeight;
 
     // Layered rendering
-    properties::BoolProperty useHeightMap;
-    properties::BoolProperty useColorMap;
     properties::BoolProperty blendHeightMap;
     properties::BoolProperty blendColorMap;
 
