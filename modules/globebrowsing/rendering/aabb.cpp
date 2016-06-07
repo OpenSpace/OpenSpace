@@ -67,6 +67,14 @@ namespace openspace {
             && (min.y <= o.max.y) && (o.min.y <= max.y);
     }
 
+    AABBSpatialRelation AABB2::relationTo(const AABB2& o) const {
+        if (intersects(o)) {
+            if (contains(o)) return AABBSpatialRelation::Containing;
+            if (o.contains(*this)) return AABBSpatialRelation::Contained;
+            return AABBSpatialRelation::Intersecting;
+        }
+        return AABBSpatialRelation::None;
+    }
 
 
 
@@ -109,6 +117,14 @@ namespace openspace {
             && (min.z <= o.max.z) && (o.min.z <= max.z);
     }
 
+    AABBSpatialRelation AABB3::relationTo(const AABB3& o) const {
+        if (intersects(o)) {
+            if (contains(o)) return AABBSpatialRelation::Containing;
+            if (o.contains(*this)) return AABBSpatialRelation::Contained;
+            return AABBSpatialRelation::Intersecting;
+        }
+        return AABBSpatialRelation::None;
+    }
 
 
 

@@ -36,6 +36,13 @@ namespace openspace {
 
     using namespace glm;
 
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
 
     struct AABB2 {
         AABB2();
@@ -47,6 +54,7 @@ namespace openspace {
         bool contains(const vec2& p) const;
         bool contains(const AABB2& o) const;
         bool intersects(const AABB2& o) const;
+        AABBSpatialRelation relationTo(const AABB2& o) const;
 
         vec2 min;
         vec2 max;
@@ -63,6 +71,8 @@ namespace openspace {
         bool contains(const vec3& p) const;
         bool contains(const AABB3& o) const;
         bool intersects(const AABB3& o) const;
+        AABBSpatialRelation relationTo(const AABB3& o) const;
+
 
         vec3 min;
         vec3 max;

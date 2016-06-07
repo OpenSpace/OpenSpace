@@ -59,6 +59,10 @@ TEST_F(AABBTest, Contains2) {
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
     EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+
+    EXPECT_EQ(AABBSpatialRelation::Containing, a1.relationTo(a2)) << "a1 contains a2";
+    EXPECT_EQ(AABBSpatialRelation::Contained, a2.relationTo(a1)) << "a2 contained by a1";
+
 }
 
 
@@ -88,7 +92,12 @@ TEST_F(AABBTest, Intersects2) {
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
     EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+
+    EXPECT_EQ(AABBSpatialRelation::Intersecting, a1.relationTo(a2)) << "They should intersect";
+    EXPECT_EQ(AABBSpatialRelation::Intersecting, a2.relationTo(a1)) << "They should intersect";
+
 }
+
 
 
 TEST_F(AABBTest, Contains3) {
@@ -105,6 +114,10 @@ TEST_F(AABBTest, Contains3) {
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
     EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+
+    EXPECT_EQ(AABBSpatialRelation::Containing, a1.relationTo(a2)) << "a1 contains a2";
+    EXPECT_EQ(AABBSpatialRelation::Contained, a2.relationTo(a1)) << "a2 contained by a1";
+
 }
 
 
@@ -122,5 +135,8 @@ TEST_F(AABBTest, Intersects3) {
     EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
     EXPECT_FALSE(a1.contains(a2)) << "a1 should not contain a2";
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
+
+    EXPECT_EQ(AABBSpatialRelation::Intersecting, a1.relationTo(a2)) << "They should intersect";
+    EXPECT_EQ(AABBSpatialRelation::Intersecting, a2.relationTo(a1)) << "They should intersect";
 }
 
