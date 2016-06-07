@@ -68,11 +68,6 @@ uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 
-// TODO: Remove from there!
-// the transmittance sampler is in scatteringinclude.glsl
-
-//layout(origin_upper_left) in vec4 gl_FragCoord;
-
 in vec2 vs_st;
 in vec2 vs_nightTex;
 in vec4 vs_normal;
@@ -421,8 +416,8 @@ Fragment getFragment() {
             //diffuse = HDR(vec4(groundColor, 1.0)); 
             //diffuse = HDR(vec4(inscatterColor, 1.0)); 
             
-            //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2 + clouds); 
-            diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) *
+            //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2); 
+            diffuse = HDR((vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2) *
                         calcShadow(shadowDataArray, vs_posWorld.xyz) ); 
         }
         // else
