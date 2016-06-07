@@ -20,7 +20,7 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(const glm::vec3
     glm::ivec3 maxCoords = minCoords + _filterSize; // max coords to sample from, including interpolation.
     glm::ivec3 clampCeiling = _volume->dimensions() - glm::ivec3(1);
 
-    VolumeType::VoxelType value;
+    typename VolumeType::VoxelType value;
     for (int z = minCoords.z; z <= maxCoords.z; z++) {
         for (int y = minCoords.y; y <= maxCoords.y; y++) {
             for (int x = minCoords.x; x <= maxCoords.x; x++) {

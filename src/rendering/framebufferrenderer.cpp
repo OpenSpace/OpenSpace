@@ -33,6 +33,8 @@
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <openspace/performance/performancemeasurement.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/textureunit.h>
 #include <vector>
@@ -44,6 +46,7 @@ namespace {
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
     const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
+    const std::string PostRenderFragmentShaderPath = "${SHADERS}/framebuffer/postrenderframebuffer.frag";
 }
 
 namespace openspace {
@@ -156,6 +159,8 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool att
 }
 
 void FramebufferRenderer::update() {
+    PerfMeasure("FramebufferRenderer::update");
+    
     if (_dirtyResolution) {
         updateResolution();
     }
@@ -196,6 +201,8 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
+    PerfMeasure("FramebufferRenderer::updateResolution");
+
     int nSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
@@ -246,9 +253,13 @@ void FramebufferRenderer::updateResolution() {
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    _dirtyResolution = false;
 }
 
 void FramebufferRenderer::updateRaycastData() {
+    PerfMeasure("FramebufferRenderer::updateRaycastData");
+
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
@@ -293,12 +304,12 @@ void FramebufferRenderer::updateRaycastData() {
 }
 
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-    if (_scene == nullptr) return;
-    if (_camera == nullptr) return;
+    PerfMeasure("FramebufferRenderer::render");
+    
+    if (!_scene)
+        return;
+    if (!_camera)
+        return;
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -393,11 +404,15 @@ void FramebufferRenderer::setCamera(Camera* camera) {
 
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _resolution = res;
+    _dirtyResolution = true;
 }
 
 void FramebufferRenderer::updateRendererData() {
+    PerfMeasure("FramebufferRenderer::updateRendererData");
+
     ghoul::Dictionary dict;
-    dict.setValue("fragmentRendererPath", RenderFragmentShaderPath);
+    dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
+    dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
     dict.setValue("windowWidth", _resolution.x);
     dict.setValue("windowHeight", _resolution.y);
 

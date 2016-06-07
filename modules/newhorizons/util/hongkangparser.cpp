@@ -313,6 +313,7 @@ void HongKangParser::createImage(Image& image, double startTime, double stopTime
     }
     image.target = targ;
     image.projected = false;
+    image.isPlaceholder = true;
 }
 
 double HongKangParser::getETfromMet(std::string line){

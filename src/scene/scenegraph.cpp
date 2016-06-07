@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/interaction/interactionhandler.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -34,6 +35,7 @@
 #include <ghoul/misc/onscopeexit.h>
 
 #include <stack>
+#include <unordered_map>
 
 #ifdef _MSC_VER
 #ifdef OPENSPACE_ENABLE_VLD
@@ -444,11 +446,78 @@ bool SceneGraph::sortTopologically() {
 }
 
 bool SceneGraph::addSceneGraphNode(SceneGraphNode* node) {
+    // @TODO rework this ---abock
+    ghoul_assert(node, "Node must not be nullptr");
+
+    SceneGraphNodeInternal* internalNode = new SceneGraphNodeInternal;
+    internalNode->node = node;
+
+    auto it = std::find_if(
+        _nodes.begin(),
+        _nodes.end(),
+        [node](SceneGraphNodeInternal* i) {
+            return i->node == node->parent();
+        }
+    );
+
+    if (it == _nodes.end()) {
+        LERROR("Parent node was not found");
+        delete internalNode;
+        return false;
+    }
+
+    (*it)->incomingEdges.push_back(internalNode);
+    internalNode->outgoingEdges.push_back(*it);
+
+    _nodes.push_back(internalNode);
+    sortTopologically();
+
     return true;
 }
 
 bool SceneGraph::removeSceneGraphNode(SceneGraphNode* node) {
-    // How to handle orphaned nodes? (reparent to root?) --- abock
+    // @TODO rework this ---abock
+    ghoul_assert(node, "Node must not be nullptr");
+
+    auto it = std::find_if(
+        _nodes.begin(),
+        _nodes.end(),
+        [node](SceneGraphNodeInternal* i) {
+            return i->node == node;
+        }
+    );
+
+    if (it == _nodes.end()) {
+        LERROR("The node '" << node->name() << "' did not exist in the scenegraph");
+        return false;
+    }
+
+    // Remove internal node from the list of nodes
+    SceneGraphNodeInternal* internalNode = *it;
+    _nodes.erase(it);
+
+    if (OsEng.interactionHandler().focusNode() == node)
+        OsEng.interactionHandler().setFocusNode(node->parent());
+
+    sortTopologically();
+
+#if 0
+    SceneGraphNodeInternal* parentInternalNode = nodeByName(node->parent()->name());
+    ghoul_assert(parentInternalNode, "Could not find internal parent node");
+
+    // Reparent its children to its parent
+    for (SceneGraphNode* c : node->children())
+        c->setParent(node->parent());
+
+    // Reset the dependencies accordingly
+    // VERY untested ---abock
+    for (SceneGraphNodeInternal* c : internalNode->incomingEdges) {
+        parentInternalNode->outgoingEdges.insert(parentInternalNode->outgoingEdges.end(), c->outgoingEdges.begin(), c->outgoingEdges.end());
+        parentInternalNode->incomingEdges.insert(parentInternalNode->incomingEdges.end(), c->incomingEdges.begin(), c->incomingEdges.end());
+    }
+
+#endif
+
     return true;
 }
 

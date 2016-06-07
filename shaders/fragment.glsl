@@ -32,6 +32,7 @@ struct Fragment {
     vec4 color;
     float depth;
     uint blend;
+    bool forceFboRendering;
 };
 
 #endif    

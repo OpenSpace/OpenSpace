@@ -53,6 +53,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 
     std::string renderableType;
     success = dictionary.getValue(KeyType, renderableType);
+
     if (!success) {
         LERROR("Renderable '" << name << "' did not have key '" << KeyType << "'");
         return nullptr;
@@ -129,6 +130,10 @@ void Renderable::render(const RenderData& data, RendererTasks& tasks)
 }
 
 void Renderable::render(const RenderData& data)
+{
+}
+
+void Renderable::postRender(const RenderData& data)
 {
 }
 

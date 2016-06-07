@@ -6,7 +6,10 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2014 AUG 21 18:00:00")
+    openspace.time.setTime("2014-08-15T03:05:18.101")
+    -- openspace.time.setTime("2014-11-17T03:05:18.101")
+    -- openspace.time.setTime("2015-07-29T06:02:10.000")
+    -- openspace.time.setTime("2014 AUG 21 18:00:00")
     -- openspace.time.setTime("2015 SEP 10 19:39:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_rosetta.lua'))
 end

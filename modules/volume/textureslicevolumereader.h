@@ -18,7 +18,6 @@ public:
     VoxelType get(const glm::ivec3& coordinates) const;
     virtual glm::ivec3 dimensions() const;
     void setPaths(const std::vector<std::string> paths);
-    void setCacheSize(size_t size);    
     void initialize();
 private:
     ghoul::opengl::Texture& getSlice(int sliceIndex) const;

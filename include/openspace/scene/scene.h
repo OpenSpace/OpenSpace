@@ -85,6 +85,11 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
 
     /*
+    * Post-Render visible SceneGraphNodes using the provided camera
+    */
+    void postRender(const RenderData& data);
+
+    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;
@@ -97,6 +102,11 @@ public:
 
     std::vector<SceneGraphNode*> allSceneGraphNodes();
 
+    SceneGraph& sceneGraph();
+
+    void addSceneGraphNode(SceneGraphNode* node){
+        _graph.addSceneGraphNode(node);
+    }
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are

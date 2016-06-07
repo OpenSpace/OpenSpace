@@ -37,6 +37,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.h
@@ -55,6 +56,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/projectioncomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/scannerdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.cpp
@@ -64,16 +66,16 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/crawlingline_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fboPass_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fboPass_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fov_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectiveTexture_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectionPass_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/projectionPass_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/modelShader_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/modelShader_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModel_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModel_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModelProjection_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderableModelProjection_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanet_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanet_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanetProjection_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablePlanetProjection_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/terminatorshadow_vs.glsl
 )

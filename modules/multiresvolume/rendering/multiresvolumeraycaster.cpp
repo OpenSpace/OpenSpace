@@ -127,6 +127,33 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     program.setUniform("atlasSize_" + id, atlasSize);
 }
     
+bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
+    // Camera rig position in world coordinates.
+    glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
+    //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
+    glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
+
+    // Camera position in world coordinates.
+    glm::vec4 camWorldPos = rigWorldPos;
+    glm::vec3 objPos = data.position.vec3();
+
+    glm::mat4 modelTransform = glm::translate(_modelTransform, objPos);
+
+    float divisor = 1.0;
+    for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
+        if (abs(modelTransform[i][j] > divisor)) divisor = modelTransform[i][j];
+    }
+
+    glm::mat4 scaledModelTransform = modelTransform / divisor;
+
+    glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
+
+
+    localPosition = (modelPos.xyz() + glm::vec3(0.5));
+    return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+
+}
+
 void MultiresVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
     // For example: release texture units
 }

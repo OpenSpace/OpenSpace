@@ -35,6 +35,8 @@ namespace properties {
 class Renderable;
 class Scene;
 class SceneGraphNode;
+class IswaGroup;
+class ScreenSpaceRenderable;
 
 Scene* sceneGraph();
 SceneGraphNode* sceneGraphNode(const std::string& name);

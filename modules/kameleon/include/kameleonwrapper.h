@@ -93,6 +93,11 @@ public:
         const std::string& var, 
         const glm::size3_t& outDimensions);
 
+    float* getUniformSliceValues(    
+    const std::string& var, 
+    const glm::size3_t& outDimensions,
+    const float& zSlice);
+
     float* getUniformSampledVectorValues(
         const std::string& xVar, 
         const std::string& yVar,
@@ -120,7 +125,9 @@ public:
         float stepsize);
 
     glm::vec3 getModelBarycenterOffset();
+    glm::vec4 getModelBarycenterOffsetScaled();
     glm::vec3 getModelScale();
+    glm::vec4 getModelScaleScaled();
     glm::vec3 getGridMax();
     glm::vec3 getGridMin();
     std::string getVariableUnit(const std::string& variable);
@@ -129,6 +136,10 @@ public:
 
     Model model();
     GridType gridType();
+    std::string getParent();
+    std::string getFrame();
+    std::vector<std::string> getVariables();
+    std::vector<std::string> getLoadedVariables();
 
 private:
     typedef std::vector<glm::vec3> TraceLine;

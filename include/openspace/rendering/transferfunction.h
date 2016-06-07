@@ -41,6 +41,7 @@ namespace openspace {
         TransferFunction(const std::string& filepath, TfChangedCallback tfChangedCallback = TfChangedCallback());
         void setPath(const std::string& filepath);
         ghoul::opengl::Texture& getTexture();
+        void bind();
         void update();
         glm::vec4 sample(size_t t);
         size_t width();

@@ -38,6 +38,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.h
 )
@@ -57,6 +59,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.cpp
 )
@@ -85,6 +89,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screnspace_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screnspace_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
