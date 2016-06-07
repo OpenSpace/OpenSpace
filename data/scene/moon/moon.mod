@@ -27,11 +27,6 @@ return {
                 Color = "textures/Moon16K.dds",
                 --Color = "textures/moonmap4k.jpg",
             },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
         },
         Ephemeris = {
             Type = "Spice",

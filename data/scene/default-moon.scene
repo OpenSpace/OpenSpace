@@ -67,7 +67,7 @@ return {
         "earth",
         "moon",
         "mars",
-        "jupiter",
+        --"jupiter",
         "saturn",
         "uranus",
         "neptune",
