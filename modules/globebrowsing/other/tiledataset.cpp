@@ -107,7 +107,7 @@ namespace openspace {
         CPLErr worstError = CPLErr::CE_None;
 
         // Read the data (each rasterband is a separate channel)
-        for (size_t i = 0; i < region.numRasters; i++) {
+        for (size_t i = 0; i < _dataLayout.numRasters; i++) {
             GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
 
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
@@ -156,7 +156,7 @@ namespace openspace {
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
             size_t i = 0;
             for (size_t x = 0; x < region.numPixels.x; x++) {
-                for (size_t c = 0; c < region.numRasters; c++) {
+                for (size_t c = 0; c < dataLayout.numRasters; c++) {
                     for (size_t b = 0; b < dataLayout.bytesPerDatum; b++) {
                         imageDataYflipped[yi_flipped + i] = imageData[yi + i];
                         i++;
@@ -168,7 +168,7 @@ namespace openspace {
         delete[] imageData;
 
         glm::uvec3 dims(region.numPixels.x, region.numPixels.y, 1);
-        RawTileData::TextureFormat textureFormat = getTextureFormat(region.numRasters, dataLayout.gdalType);
+        RawTileData::TextureFormat textureFormat = getTextureFormat(dataLayout.numRasters, dataLayout.gdalType);
         GLuint glType = getOpenGLDataType(dataLayout.gdalType);
         RawTileData* textureDataPtr = new RawTileData(imageDataYflipped, dims,
             textureFormat, glType, region.chunkIndex);
@@ -186,9 +186,9 @@ namespace openspace {
         size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
-        std::vector<float> maxValues(region.numRasters);
-        std::vector<float> minValues(region.numRasters);
-        for (size_t c = 0; c < region.numRasters; c++) {
+        std::vector<float> maxValues(dataLayout.numRasters);
+        std::vector<float> minValues(dataLayout.numRasters);
+        for (size_t c = 0; c < dataLayout.numRasters; c++) {
             maxValues[c] = -FLT_MAX;
             minValues[c] = FLT_MAX;
         }
@@ -200,7 +200,7 @@ namespace openspace {
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
             size_t i = 0;
             for (size_t x = 0; x < region.numPixels.x; x++) {
-                for (size_t c = 0; c < region.numRasters; c++) {
+                for (size_t c = 0; c < dataLayout.numRasters; c++) {
 
                     float val = valueReader(&(imageData[yi + i]));
                     maxValues[c] = std::max(val, maxValues[c]);
@@ -439,8 +439,6 @@ namespace openspace {
 
         // Set member variables
         overview = ov;
-        numRasters = dataSet->GetRasterCount();
-        ghoul_assert(numRasters > 0, "Bad dataset. Contains no rasterband.");
 
         pixelStart = glm::uvec2(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
         pixelEnd = glm::uvec2(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
@@ -453,8 +451,9 @@ namespace openspace {
     TileDataset::DataLayout::DataLayout(GDALDataset* dataSet, GLuint glType) {
         // Assume all raster bands have the same data type
         gdalType =  glType != 0 ? getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
+        numRasters = dataSet->GetRasterCount();
         bytesPerDatum = numberOfBytes(gdalType);
-        bytesPerPixel = bytesPerDatum * dataSet->GetRasterCount();
+        bytesPerPixel = bytesPerDatum * numRasters;
     }
 
 }  // namespace openspace

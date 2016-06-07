@@ -138,8 +138,6 @@ namespace openspace {
             glm::uvec2 pixelEnd;
             glm::uvec2 numPixels;
 
-            size_t numRasters;
-
             int overview;
 
         };
@@ -150,6 +148,7 @@ namespace openspace {
 
             GDALDataType gdalType;
             size_t bytesPerDatum;
+            size_t numRasters;
             size_t bytesPerPixel;
         };
 
