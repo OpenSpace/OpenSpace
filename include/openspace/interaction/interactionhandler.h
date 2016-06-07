@@ -300,6 +300,10 @@ public:
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
 
+    // Interaction mode setters
+    void setInteractionModeToOrbital();
+    void setInteractionModeToGlobeBrowsing();
+
     void resetKeyBindings();
 
     void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
@@ -312,8 +316,9 @@ public:
     void update(double deltaTime);
 
     // Accessors
-    const SceneGraphNode* const focusNode() const;
-    const Camera* const camera() const;
+    SceneGraphNode* const focusNode() const;
+    Camera* const camera() const;
+    std::shared_ptr<InputState> inputState() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -331,10 +336,16 @@ public:
     void mouseScrollWheelCallback(double pos);
 
 private:
+    void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
+
     std::multimap<KeyWithModifier, std::string > _keyLua;
 
-    std::shared_ptr<InteractionMode> _interactor;
     std::shared_ptr<InputState> _inputState;
+
+    std::shared_ptr<InteractionMode> _currentInteractionMode;
+
+    std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+    std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
