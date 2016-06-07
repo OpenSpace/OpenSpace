@@ -35,24 +35,24 @@ namespace openspace {
 
 
     AABB2::AABB2() : min(1e35), max(-1e35) { }
-    AABB2::AABB2(const dvec2& min, const dvec2& max) : min(min), max(max) { }
+    AABB2::AABB2(const vec2& min, const vec2& max) : min(min), max(max) { }
 
-    void AABB2::expand(const dvec2& p) {
+    void AABB2::expand(const vec2& p) {
         min.x = glm::min(min.x, p.x);
         min.y = glm::min(min.y, p.y);
         max.x = glm::max(max.x, p.x);
         max.y = glm::max(max.y, p.y);
     }
 
-    dvec2 AABB2::center() const {
-        return 0.5 * (min + max);
+    vec2 AABB2::center() const {
+        return 0.5f * (min + max);
     }
 
-    dvec2 AABB2::size() const {
+    vec2 AABB2::size() const {
         return max - min;
     }
 
-    bool AABB2::intersects(const dvec2& p) const {
+    bool AABB2::intersects(const vec2& p) const {
         return (min.x < p.x) && (p.x < max.x)
             && (min.y < p.y) && (p.y < max.y);
     }
@@ -67,9 +67,9 @@ namespace openspace {
 
 
     AABB3::AABB3() : min(1e35), max(-1e35) { }
-    AABB3::AABB3(const dvec3& min, const dvec3& max) : min(min), max(max) { }
+    AABB3::AABB3(const vec3& min, const vec3& max) : min(min), max(max) { }
 
-    void AABB3::expand(const dvec3 p) {
+    void AABB3::expand(const vec3 p) {
         min.x = glm::min(min.x, p.x);
         min.y = glm::min(min.y, p.y);
         min.z = glm::min(min.z, p.z);
@@ -78,15 +78,15 @@ namespace openspace {
         max.z = glm::max(max.z, p.z);
     }
 
-    dvec3 AABB3::center() const {
-        return 0.5 * (min + max);
+    vec3 AABB3::center() const {
+        return 0.5f * (min + max);
     }
 
-    dvec3 AABB3::size() const {
+    vec3 AABB3::size() const {
         return max - min;
     }
 
-    bool AABB3::intersects(const dvec3& p) const {
+    bool AABB3::intersects(const vec3& p) const {
         return (min.x < p.x) && (p.x < max.x)
             && (min.y < p.y) && (p.y < max.y)
             && (min.z < p.z) && (p.z < max.z);

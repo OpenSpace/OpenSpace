@@ -47,7 +47,7 @@ namespace openspace {
     }
 
 
-    const AABB3 FrustumCuller::viewFrustum(dvec3(-1, -1, 0), dvec3(1, 1, 1e35));
+    const AABB3 FrustumCuller::viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
 
 
     bool FrustumCuller::isVisible(
@@ -56,12 +56,12 @@ namespace openspace {
 
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
-        dvec2 pointScreenSpace =
+        vec2 pointScreenSpace =
             transformToScreenSpace(point, modelViewProjectionTransform);
-        return testPoint(pointScreenSpace, dvec2(0));
+        return testPoint(pointScreenSpace, vec2(0));
     }
 
 
@@ -76,26 +76,26 @@ namespace openspace {
 
 
         // Calculate the MVP matrix
-        dmat4 modelTransform = translate(mat4(1), data.position.vec3());
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
         // Calculate the patch's center point in screen space
         dvec4 patchCenterModelSpace =
             dvec4(ellipsoid.cartesianSurfacePosition(patch.center()), 1);
-        dvec4 patchCenterClippingSpace =
+        vec4 patchCenterClippingSpace =
             modelViewProjectionTransform * patchCenterModelSpace;
-        dvec2 pointScreenSpace =
-            (1.0 / patchCenterClippingSpace.w) * patchCenterClippingSpace.xy();
+        vec2 pointScreenSpace =
+            (1.0f / patchCenterClippingSpace.w) * patchCenterClippingSpace.xy();
 
         // Calculate the screen space margin that represents an axis aligned bounding 
         // box based on the patch's minimum boudning sphere
-        double boundingRadius = patch.minimalBoundingRadius(ellipsoid);
-        dvec4 marginClippingSpace =
-            dvec4(dvec3(boundingRadius), 0) * dmat4(data.camera.projectionMatrix());
-        dvec2 marginScreenSpace =
-            (1.0 / patchCenterClippingSpace.w) * marginClippingSpace.xy();
+        float boundingRadius = patch.minimalBoundingRadius(ellipsoid);
+        vec4 marginClippingSpace =
+            vec4(vec3(boundingRadius), 0) * mat4(data.camera.projectionMatrix());
+        vec2 marginScreenSpace =
+            (1.0f / patchCenterClippingSpace.w) * marginClippingSpace.xy();
 
         // Test the bounding box by testing the center point and the corresponding margin
         PointLocation res = testPoint(pointScreenSpace, marginScreenSpace);
@@ -108,7 +108,7 @@ namespace openspace {
         // Calculate the MVP matrix
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
 
@@ -140,8 +140,8 @@ namespace openspace {
             double offset = i < 4 ? minHeightOffset : maxHeightOffset;
             Geodetic3 cornerGeodetic = { patch.getCorner(q), offset };
             dvec4 cornerModelSpace = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
-            dvec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
-            dvec3 cornerScreenSpace = (1.0 / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
+            vec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
+            vec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
             bounds.expand(cornerScreenSpace);
         }
 
@@ -156,12 +156,12 @@ namespace openspace {
     }
 
 
-    PointLocation FrustumCuller::testPoint(const glm::dvec2& pointScreenSpace,
-        const glm::dvec2& marginScreenSpace)
+    PointLocation FrustumCuller::testPoint(const glm::vec2& pointScreenSpace,
+        const glm::vec2& marginScreenSpace)
     {
         const vec2& p = pointScreenSpace;
 
-        dvec2 cullBounds = dvec2(1) + marginScreenSpace;
+        vec2 cullBounds = vec2(1) + marginScreenSpace;
         int x = p.x <= -cullBounds.x ? 0 : p.x < cullBounds.x ? 1 : 2;
         int y = p.y <= -cullBounds.y ? 0 : p.y < cullBounds.y ? 1 : 2;
         PointLocation res = (PointLocation) (3 * y + x);
@@ -169,24 +169,24 @@ namespace openspace {
         return res;
     }
 
-    bool FrustumCuller::testPoint(const glm::dvec3& pointScreenSpace,
-        const glm::dvec3& marginScreenSpace) 
+    bool FrustumCuller::testPoint(const glm::vec3& pointScreenSpace,
+        const glm::vec3& marginScreenSpace) 
     {
 
-        const dvec3& p = pointScreenSpace;
+        const vec3& p = pointScreenSpace;
 
-        dvec3 cullBounds = dvec3(1) + marginScreenSpace;
+        vec3 cullBounds = vec3(1) + marginScreenSpace;
         int x = p.x <= -cullBounds.x ? 0 : p.x < cullBounds.x ? 1 : 2;
         int y = p.y <= -cullBounds.y ? 0 : p.y < cullBounds.y ? 1 : 2;
         int z = p.z <= -cullBounds.z ? 0 : p.z < cullBounds.z ? 1 : 2;
         return x == 1 && y == 1 && z == 1;
     }
 
-    glm::dvec2 FrustumCuller::transformToScreenSpace(const dvec3& point,
+    glm::vec2 FrustumCuller::transformToScreenSpace(const dvec3& point,
         const dmat4x4& modelViewProjection)
     {
-        dvec4 pointProjectionSpace = modelViewProjection * dvec4(point, 1.0);
-        dvec2 pointScreenSpace =
+        vec4 pointProjectionSpace = modelViewProjection * dvec4(point, 1.0);
+        vec2 pointScreenSpace =
             (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy();
         return pointScreenSpace;
     }

@@ -39,31 +39,31 @@ namespace openspace {
 
     struct AABB2 {
         AABB2();
-        AABB2(const dvec2& min, const dvec2& max);
+        AABB2(const vec2& min, const vec2& max);
 
-        void expand(const dvec2& p);
-        dvec2 center() const;
-        dvec2 size() const;
-        bool intersects(const dvec2& p) const;
+        void expand(const vec2& p);
+        vec2 center() const;
+        vec2 size() const;
+        bool intersects(const vec2& p) const;
         bool intersects(const AABB2& o) const;
 
-        dvec2 min;
-        dvec2 max;
+        vec2 min;
+        vec2 max;
     };
 
 
     struct AABB3 {
         AABB3();
-        AABB3(const dvec3& min, const dvec3& max);
+        AABB3(const vec3& min, const vec3& max);
 
-        void expand(const dvec3 p);
-        dvec3 center() const;
-        dvec3 size() const;
-        bool intersects(const dvec3& p) const;
+        void expand(const vec3 p);
+        vec3 center() const;
+        vec3 size() const;
+        bool intersects(const vec3& p) const;
         bool intersects(const AABB3& o) const;
 
-        dvec3 min;
-        dvec3 max;
+        vec3 min;
+        vec3 max;
     };
    
 }  // namespace openspace

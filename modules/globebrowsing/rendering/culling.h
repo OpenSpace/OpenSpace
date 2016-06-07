@@ -93,15 +93,15 @@ namespace openspace {
         what is considered to be inside the view frustrum.
         */
         static PointLocation testPoint(
-            const glm::dvec2& pointScreenSpace,
-            const glm::dvec2& marginScreenSpace = vec2(0));
+            const glm::vec2& pointScreenSpace,
+            const glm::vec2& marginScreenSpace = dvec2(0));
 
         static bool testPoint(
-            const glm::dvec3& pointScreenSpace,
-            const glm::dvec3& marginScreenSpace = vec3(0));
+            const glm::vec3& pointScreenSpace,
+            const glm::vec3& marginScreenSpace = dvec3(0));
 
 
-        static glm::dvec2 transformToScreenSpace(
+        static glm::vec2 transformToScreenSpace(
             const dvec3& point,
             const dmat4x4& modelViewProjection);
 
