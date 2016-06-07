@@ -36,7 +36,62 @@ class AABBTest : public testing::Test {};
 
 
 
-TEST_F(AABBTest, ContainsAABB3) {
+TEST_F(AABBTest, Contains2) {
+
+    AABB2 a1;
+    AABB2 a2;
+    /*
+        a1
+        +-----+
+        |+---+|
+        ||a2 ||
+        |+---+|
+        +-----+
+    */
+
+    a1.expand(glm::vec2(0, 0));
+    a1.expand(glm::vec2(1, 1));
+
+    a2.expand(glm::vec2(0.1, 0.1));
+    a2.expand(glm::vec2(0.9, 0.9));
+
+    EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
+    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
+    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
+    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+}
+
+
+TEST_F(AABBTest, Intersects2) {
+    AABB2 a1;
+    AABB2 a2;
+
+    /*
+    a1
+    +-----+
+    |     |
+    |     |   a2
+    |    ++----+
+    +----++    |
+         |     |
+         |     |
+         +-----+
+    */
+
+    a1.expand(glm::vec2(0, 0));
+    a1.expand(glm::vec2(1, 1));
+
+    a2.expand(glm::vec2(0.9, 0.9));
+    a2.expand(glm::vec2(1.9, 1.9));
+
+    EXPECT_FALSE(a1.contains(a2)) << "a1 should not contain a2";
+    EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
+    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
+    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+}
+
+
+TEST_F(AABBTest, Contains3) {
     AABB3 a1;
     AABB3 a2;
 
@@ -48,19 +103,24 @@ TEST_F(AABBTest, ContainsAABB3) {
 
     EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
+    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
+    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
 }
 
-TEST_F(AABBTest, ContainsAABB2) {
-	
-    AABB2 a1;
-    AABB2 a2;
-    
-    a1.expand(glm::vec2(0, 0));
-    a1.expand(glm::vec2(1, 1));
 
-    a2.expand(glm::vec2(0.1, 0.1));
-    a2.expand(glm::vec2(0.9, 0.9));
+TEST_F(AABBTest, Intersects3) {
+    AABB3 a1;
+    AABB3 a2;
 
-    EXPECT_TRUE(a1.contains(a2)) << "a1 should contain a2";
+    a1.expand(glm::vec3(0, 0, 0));
+    a1.expand(glm::vec3(1, 1, 1));
+
+    a2.expand(glm::vec3(0.9, 0.9, 0.9));
+    a2.expand(glm::vec3(1.9, 1.9, 1.9));
+
+    EXPECT_TRUE(a1.intersects(a2)) << "a1 should intersect a2";
+    EXPECT_TRUE(a2.intersects(a1)) << "a2 should intersect a1";
+    EXPECT_FALSE(a1.contains(a2)) << "a1 should not contain a2";
     EXPECT_FALSE(a2.contains(a1)) << "a2 should not contain a1";
 }
+
