@@ -41,7 +41,7 @@ vec3 transmittance(const float r, const float mu) {
     // See Colliene to understand the different mapping.
 	float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
     
-    return texture2D(transmittanceTexture, vec2(u_mu, u_r)).rgb;
+    return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }
 
 Fragment getFragment() {
