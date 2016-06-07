@@ -72,6 +72,7 @@ public:
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
     properties::BoolProperty renderSmallChunksFirst;
+    properties::FloatProperty chunkHeight;
 
     // Layered rendering
     properties::BoolProperty useHeightMap;

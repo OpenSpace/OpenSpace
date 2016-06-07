@@ -52,11 +52,11 @@ namespace openspace {
 
     bool FrustumCuller::isVisible(
         const RenderData& data,
-        const vec3& point) {
+        const dvec3& point) {
 
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
         vec2 pointScreenSpace =
@@ -76,14 +76,14 @@ namespace openspace {
 
 
         // Calculate the MVP matrix
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
         // Calculate the patch's center point in screen space
-        vec4 patchCenterModelSpace =
-            vec4(ellipsoid.cartesianSurfacePosition(patch.center()), 1);
+        dvec4 patchCenterModelSpace =
+            dvec4(ellipsoid.cartesianSurfacePosition(patch.center()), 1);
         vec4 patchCenterClippingSpace =
             modelViewProjectionTransform * patchCenterModelSpace;
         vec2 pointScreenSpace =
@@ -91,9 +91,9 @@ namespace openspace {
 
         // Calculate the screen space margin that represents an axis aligned bounding 
         // box based on the patch's minimum boudning sphere
-        double boundingRadius = patch.minimalBoundingRadius(ellipsoid);
+        float boundingRadius = patch.minimalBoundingRadius(ellipsoid);
         vec4 marginClippingSpace =
-            vec4(vec3(boundingRadius), 0) * data.camera.projectionMatrix();
+            vec4(vec3(boundingRadius), 0) * mat4(data.camera.projectionMatrix());
         vec2 marginScreenSpace =
             (1.0f / patchCenterClippingSpace.w) * marginClippingSpace.xy();
 
@@ -106,9 +106,9 @@ namespace openspace {
         const Ellipsoid& ellipsoid, const Scalar maxHeight)
     {
         // Calculate the MVP matrix
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
-        mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
         double centerRadius = ellipsoid.maximumRadius();
@@ -126,7 +126,7 @@ namespace openspace {
             Quad q = (Quad) (i%4);
             double offset = i < 4 ? minHeightOffset : maxHeightOffset;
             Geodetic3 cornerGeodetic = { patch.getCorner(q), offset };
-            vec4 cornerModelSpace = vec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
+            dvec4 cornerModelSpace = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
             vec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
             vec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
             bounds.expand(cornerScreenSpace);
@@ -164,10 +164,10 @@ namespace openspace {
         return x == 1 && y == 1 && z == 1;
     }
 
-    glm::vec2 FrustumCuller::transformToScreenSpace(const vec3& point,
-        const mat4x4& modelViewProjection)
+    glm::vec2 FrustumCuller::transformToScreenSpace(const dvec3& point,
+        const dmat4x4& modelViewProjection)
     {
-        vec4 pointProjectionSpace = modelViewProjection * vec4(point, 1.0f);
+        vec4 pointProjectionSpace = modelViewProjection * dvec4(point, 1.0);
         vec2 pointScreenSpace =
             (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy();
         return pointScreenSpace;
@@ -214,7 +214,7 @@ namespace openspace {
         Vec3 globePosition = data.position.dvec3();
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
 
-        Vec3 cameraPosition = data.camera.position().dvec3();
+        Vec3 cameraPosition = data.camera.positionVec3();
 
         Vec3 globeToCamera = cameraPosition - globePosition;
 

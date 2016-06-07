@@ -69,7 +69,7 @@ namespace openspace {
         */
         static bool isVisible(
             const RenderData& data,
-            const vec3& point);
+            const dvec3& point);
 
 
         /**
@@ -96,16 +96,16 @@ namespace openspace {
         */
         static PointLocation testPoint(
             const glm::vec2& pointScreenSpace,
-            const glm::vec2& marginScreenSpace = vec2(0));
+            const glm::vec2& marginScreenSpace = dvec2(0));
 
         static bool testPoint(
             const glm::vec3& pointScreenSpace,
-            const glm::vec3& marginScreenSpace = vec3(0));
+            const glm::vec3& marginScreenSpace = dvec3(0));
 
 
         static glm::vec2 transformToScreenSpace(
-            const vec3& point,
-            const mat4x4& modelViewProjection);
+            const dvec3& point,
+            const dmat4x4& modelViewProjection);
 
     };
 
