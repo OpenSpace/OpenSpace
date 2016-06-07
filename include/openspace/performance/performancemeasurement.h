@@ -22,34 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#ifndef __PERFORMANCEMEASUREMENT_H__
+#define __PERFORMANCEMEASUREMENT_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
-
-namespace ghoul {
-    class SharedMemory;
-}
+#include <chrono>
+#include <string>
 
 namespace openspace {
-namespace gui {
+namespace performance {
 
-class GuiPerformanceComponent : public GuiComponent {
+class PerformanceManager;
+
+class PerformanceMeasurement {
 public:
-    void initialize();
-    void deinitialize();
+    PerformanceMeasurement(std::string identifier, performance::PerformanceManager* manager);
+    ~PerformanceMeasurement();
 
-    void render();
+private:
+    std::string _identifier;
+    performance::PerformanceManager* _manager;
 
-protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
-    
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
+    std::chrono::high_resolution_clock::time_point _startTime;
 };
+    
+#define __MERGE(a,b)  a##b
+#define __LABEL(a) __MERGE(unique_name_, a)
 
-} // namespace gui
+/// Declare a new variable for measuring the performance of the current block
+#define PerfMeasure(name) auto __LABEL(__LINE__) = openspace::performance::PerformanceMeasurement((name), OsEng.renderEngine().performanceManager())
+    
+} // namespace performance
 } // namespace openspace
 
-#endif // __GUIPERFORMANCECOMPONENT_H__
+#endif // __PERFORMANCEMEASUREMENTHELPER_H__

@@ -22,34 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#ifndef __PERFORMANCEMANAGER_H__
+#define __PERFORMANCEMANAGER_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <chrono>
+#include <map>
+#include <vector>
 
 namespace ghoul {
     class SharedMemory;
 }
 
 namespace openspace {
-namespace gui {
 
-class GuiPerformanceComponent : public GuiComponent {
+class SceneGraphNode;
+
+namespace performance {
+
+class PerformanceManager {
 public:
-    void initialize();
-    void deinitialize();
+    static const std::string PerformanceMeasurementSharedData;
 
-    void render();
+    PerformanceManager();
+    ~PerformanceManager();
 
-protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
+    void resetPerformanceMeasurements();
     
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
+    bool isMeasuringPerformance() const;
+
+    void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
+    void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
+
+private:
+    bool _doPerformanceMeasurements;
+    
+    std::map<std::string, size_t> individualPerformanceLocations;
+    
+    ghoul::SharedMemory* _performanceMemory;
 };
 
-} // namespace gui
+} // namespace performance
 } // namespace openspace
 
-#endif // __GUIPERFORMANCECOMPONENT_H__
+#endif // __PERFORMANCEMANAGER_H__

@@ -22,34 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#include <openspace/performance/performancemeasurement.h>
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <openspace/performance/performancemanager.h>
 
-namespace ghoul {
-    class SharedMemory;
-}
+#include <ghoul/opengl/ghoul_gl.h>
+
+#include <iostream>
 
 namespace openspace {
-namespace gui {
+namespace performance {
 
-class GuiPerformanceComponent : public GuiComponent {
-public:
-    void initialize();
-    void deinitialize();
+PerformanceMeasurement::PerformanceMeasurement(std::string identifier,
+                                     performance::PerformanceManager* manager)
+    : _identifier(std::move(identifier))
+    , _manager(manager)
+{
+    if (_manager) {
+        glFinish();
 
-    void render();
+        _startTime = std::chrono::high_resolution_clock::now();
+    }
+}
 
-protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
-    
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
-};
+PerformanceMeasurement::~PerformanceMeasurement() {
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+        endTime - _startTime).count();
 
-} // namespace gui
+    if (_manager) {
+        _manager->storeIndividualPerformanceMeasurement(std::move(_identifier), duration);
+    }
+}
+
+
+} // namespace performance
 } // namespace openspace
-
-#endif // __GUIPERFORMANCECOMPONENT_H__

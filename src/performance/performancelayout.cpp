@@ -22,34 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#include <openspace/performance/performancelayout.h>
 
-#include <modules/onscreengui/include/guicomponent.h>
-
-namespace ghoul {
-    class SharedMemory;
-}
+#include <cstring>
 
 namespace openspace {
-namespace gui {
+namespace performance {
 
-class GuiPerformanceComponent : public GuiComponent {
-public:
-    void initialize();
-    void deinitialize();
+PerformanceLayout::PerformanceLayout()
+    : nScaleGraphEntries(0)
+    , nFunctionEntries(0)
+{
+    std::memset(
+        sceneGraphEntries,
+        0,
+        MaxValues * sizeof(SceneGraphPerformanceLayout)
+    );
 
-    void render();
+    std::memset(
+        functionEntries,
+        0,
+        MaxValues * sizeof(FunctionPerformanceLayout)
+    );
+}
 
-protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
-    
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
-};
-
-} // namespace gui
+} // namespace performance
 } // namespace openspace
-
-#endif // __GUIPERFORMANCECOMPONENT_H__
