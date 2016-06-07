@@ -51,6 +51,8 @@ namespace openspace {
     };
 
 
+
+
     class FrustumCuller {
     public:
 

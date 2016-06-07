@@ -52,16 +52,29 @@ namespace openspace {
         return max - min;
     }
 
-    bool AABB2::intersects(const vec2& p) const {
-        return (min.x < p.x) && (p.x < max.x)
-            && (min.y < p.y) && (p.y < max.y);
+    bool AABB2::contains(const vec2& p) const {
+        return (min.x <= p.x) && (p.x <= max.x)
+            && (min.y <= p.y) && (p.y <= max.y);
+    }
+
+    bool AABB2::contains(const AABB2& o) const {
+        return (min.x <= o.min.x) && (o.max.x <= max.x)
+            && (min.y <= o.min.y) && (o.max.y <= max.y);
     }
 
     bool AABB2::intersects(const AABB2& o) const {
-        return (min.x < o.max.x) && (o.min.x < max.x)
-            && (min.y < o.max.y) && (o.min.y < max.y);
+        return (min.x <= o.max.x) && (o.min.x <= max.x)
+            && (min.y <= o.max.y) && (o.min.y <= max.y);
     }
 
+    AABBSpatialRelation AABB2::relationTo(const AABB2& o) const {
+        if (intersects(o)) {
+            if (contains(o)) return AABBSpatialRelation::Containing;
+            if (o.contains(*this)) return AABBSpatialRelation::Contained;
+            return AABBSpatialRelation::Intersecting;
+        }
+        return AABBSpatialRelation::None;
+    }
 
 
 
@@ -86,17 +99,33 @@ namespace openspace {
         return max - min;
     }
 
-    bool AABB3::intersects(const vec3& p) const {
-        return (min.x < p.x) && (p.x < max.x)
-            && (min.y < p.y) && (p.y < max.y)
-            && (min.z < p.z) && (p.z < max.z);
+    bool AABB3::contains(const vec3& p) const {
+        return (min.x <= p.x) && (p.x <= max.x)
+            && (min.y <= p.y) && (p.y <= max.y)
+            && (min.z <= p.z) && (p.z <= max.z);
+    }
+
+    bool AABB3::contains(const AABB3& o) const {
+        return (min.x <= o.min.x) && (o.max.x <= max.x)
+            && (min.y <= o.min.y) && (o.max.y <= max.y)
+            && (min.z <= o.min.z) && (o.max.z <= max.z);
     }
 
     bool AABB3::intersects(const AABB3& o) const {
-        return (min.x < o.max.x) && (o.min.x < max.x)
-            && (min.y < o.max.y) && (o.min.y < max.y)
-            && (min.z < o.max.z) && (o.min.z < max.z);
+        return (min.x <= o.max.x) && (o.min.x <= max.x)
+            && (min.y <= o.max.y) && (o.min.y <= max.y)
+            && (min.z <= o.max.z) && (o.min.z <= max.z);
     }
+
+    AABBSpatialRelation AABB3::relationTo(const AABB3& o) const {
+        if (intersects(o)) {
+            if (contains(o)) return AABBSpatialRelation::Containing;
+            if (o.contains(*this)) return AABBSpatialRelation::Contained;
+            return AABBSpatialRelation::Intersecting;
+        }
+        return AABBSpatialRelation::None;
+    }
+
 
 
 }  // namespace openspace
