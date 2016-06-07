@@ -44,6 +44,10 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
+    struct TilePreprocessData {
+        std::vector<float> maxValues;
+        std::vector<float> minValues;
+    };
 
     struct RawTileData {
 
@@ -65,6 +69,7 @@ namespace openspace {
         }
 
         void* imageData;
+        std::shared_ptr<TilePreprocessData> preprocessData;
         glm::uvec3 dimensions;
         TextureFormat texFormat;
         GLuint glType;
@@ -106,7 +111,7 @@ namespace openspace {
         
 
 
-        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
+        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex, bool doPreprocessing = false);
 
         int getMaximumLevel() const;
 
@@ -171,6 +176,12 @@ namespace openspace {
         static RawTileData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
         static size_t numberOfBytes(GDALDataType gdalType);
+
+        std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<RawTileData> tileData,
+            const GdalDataRegion& region, const DataLayout& dataLayout);
+
+        typedef std::function<float(const char*)> ValueReader;
+        static ValueReader getValueReader(GDALDataType gdalType);
 
         static size_t getMaximumValue(GDALDataType gdalType);
 

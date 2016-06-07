@@ -31,6 +31,8 @@
 #include <modules/globebrowsing/other/tileprovider.h>
 #include <modules/globebrowsing/geodetics/angle.h>
 
+#include <float.h>
+
 
 
 namespace {
@@ -44,7 +46,7 @@ namespace openspace {
     // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
     bool TileDataset::GdalHasBeenInitialized = false; 
 
-    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, GLuint dataType)
+    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize,  GLuint dataType)
         : _minimumPixelSize(minimumPixelSize)
     {
         if (!GdalHasBeenInitialized) {
@@ -95,7 +97,7 @@ namespace openspace {
         return _depthTransform;
     }
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex, bool doPreprocessing)
     {               
         GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
@@ -129,6 +131,9 @@ namespace openspace {
 
         std::shared_ptr<RawTileData> tileData = nullptr;
         tileData = createRawTileData(region, _dataLayout, imageData);
+        if (doPreprocessing) {
+            tileData->preprocessData = preprocess(tileData, region, _dataLayout);
+        }
 
         std::shared_ptr<TileIOResult> result(new TileIOResult);
         result->error = worstError;
@@ -144,14 +149,19 @@ namespace openspace {
         size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
-        //if(cplError == CPLErr::CE_Fatal)
-
         // GDAL reads image data top to bottom. We want the opposite.
         char* imageDataYflipped = new char[totalNumBytes];
         for (size_t y = 0; y < region.numPixels.y; y++) {
-            for (size_t x = 0; x < bytesPerLine; x++) {
-                imageDataYflipped[x + y * bytesPerLine] =
-                    imageData[x + (region.numPixels.y - 1 - y) * bytesPerLine];
+            size_t yi_flipped = y * bytesPerLine;
+            size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+            size_t i = 0;
+            for (size_t x = 0; x < region.numPixels.x; x++) {
+                for (size_t c = 0; c < region.numRasters; c++) {
+                    for (size_t b = 0; b < dataLayout.bytesPerDatum; b++) {
+                        imageDataYflipped[yi_flipped + i] = imageData[yi + i];
+                        i++;
+                    }
+                }
             }
         }
 
@@ -162,7 +172,6 @@ namespace openspace {
         GLuint glType = getOpenGLDataType(dataLayout.gdalType);
         RawTileData* textureDataPtr = new RawTileData(imageDataYflipped, dims,
             textureFormat, glType, region.chunkIndex);
-
         std::shared_ptr<RawTileData> textureData =
             std::shared_ptr<RawTileData>(textureDataPtr);
 
@@ -170,6 +179,59 @@ namespace openspace {
     }
 
 
+
+    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<RawTileData> tileData,
+        const GdalDataRegion& region, const DataLayout& dataLayout)
+    {
+        size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
+        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
+
+        std::vector<float> maxValues(region.numRasters);
+        std::vector<float> minValues(region.numRasters);
+        for (size_t c = 0; c < region.numRasters; c++) {
+            maxValues[c] = -FLT_MAX;
+            minValues[c] = FLT_MAX;
+        }
+
+        ValueReader valueReader = getValueReader(dataLayout.gdalType);
+        const char* imageData = static_cast<const char*> (tileData->imageData);
+        for (size_t y = 0; y < region.numPixels.y; y++) {
+            size_t yi_flipped = y * bytesPerLine;
+            size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+            size_t i = 0;
+            for (size_t x = 0; x < region.numPixels.x; x++) {
+                for (size_t c = 0; c < region.numRasters; c++) {
+
+                    float val = valueReader(&(imageData[yi + i]));
+                    maxValues[c] = std::max(val, maxValues[c]);
+                    minValues[c] = std::min(val, minValues[c]);
+
+                    i += dataLayout.bytesPerDatum;
+                }
+            }
+        }
+
+        TilePreprocessData* preprocessData = new TilePreprocessData();
+        preprocessData->maxValues = std::move(maxValues);
+        preprocessData->minValues = std::move(minValues);
+        return std::shared_ptr < TilePreprocessData>(preprocessData);
+    }
+
+
+    TileDataset::ValueReader TileDataset::getValueReader(GDALDataType gdalType) {
+        switch (gdalType) {
+        case GDT_Byte:      return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLubyte*>(src)); };
+        case GDT_UInt16:    return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLushort*>(src)); };
+        case GDT_Int16:     return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLshort*>(src)); };
+        case GDT_UInt32:    return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLuint*>(src)); };
+        case GDT_Int32:     return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLint*>(src)); };
+        case GDT_Float32:   return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLfloat*>(src)); };
+        case GDT_Float64:   return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLdouble*>(src)); };
+        default:
+            LERROR("Unknown data type");
+            return nullptr;
+        }
+    }
 
 
 
@@ -395,11 +457,4 @@ namespace openspace {
         bytesPerPixel = bytesPerDatum * dataSet->GetRasterCount();
     }
 
-
-
-
-
-
-    
-            
 }  // namespace openspace
