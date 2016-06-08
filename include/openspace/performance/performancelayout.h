@@ -22,34 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#ifndef __PERFORMANCELAYOUT_H__
+#define __PERFORMANCELAYOUT_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
-
-namespace ghoul {
-    class SharedMemory;
-}
+#include <cstdint>
 
 namespace openspace {
-namespace gui {
+namespace performance {
 
-class GuiPerformanceComponent : public GuiComponent {
-public:
-    void initialize();
-    void deinitialize();
+struct PerformanceLayout {
+    static const int8_t Version = 0;
+    static const int LengthName = 256;
+    static const int NumberValues = 256;
+    static const int MaxValues = 256;
 
-    void render();
+    PerformanceLayout();
 
-protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
-    
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
+    struct SceneGraphPerformanceLayout {
+        char name[LengthName];
+        float renderTime[NumberValues];
+        float updateRenderable[NumberValues];
+        float updateEphemeris[NumberValues];
+    };
+    SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
+    int16_t nScaleGraphEntries;
+
+    struct FunctionPerformanceLayout {
+        char name[LengthName];
+        float time[NumberValues];
+    };
+    FunctionPerformanceLayout functionEntries[MaxValues];
+    int16_t nFunctionEntries;
 };
 
-} // namespace gui
+} // namespace performance
 } // namespace openspace
 
-#endif // __GUIPERFORMANCECOMPONENT_H__
+#endif // __PERFORMANCELAYOUT_H__

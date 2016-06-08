@@ -33,6 +33,8 @@
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <openspace/performance/performancemeasurement.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/textureunit.h>
 #include <vector>
@@ -150,6 +152,8 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool att
 }
 
 void FramebufferRenderer::update() {
+    PerfMeasure("FramebufferRenderer::update");
+    
     if (_dirtyResolution) {
         updateResolution();
     }
@@ -202,6 +206,8 @@ void FramebufferRenderer::update() {
 
 void FramebufferRenderer::updateResolution() {
     int nSamples = _nAaSamples;
+    PerfMeasure("FramebufferRenderer::updateResolution");
+
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
     glTexImage2DMultisample(
@@ -256,6 +262,8 @@ void FramebufferRenderer::updateResolution() {
 }
 
 void FramebufferRenderer::updateRaycastData() {
+    PerfMeasure("FramebufferRenderer::updateRaycastData");
+
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
@@ -310,6 +318,8 @@ void FramebufferRenderer::updateRaycastData() {
 }
 
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
+    PerfMeasure("FramebufferRenderer::render");
+    
     if (!_scene)
         return;
     if (!_camera)
@@ -450,6 +460,8 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
 }
 
 void FramebufferRenderer::updateRendererData() {
+    PerfMeasure("FramebufferRenderer::updateRendererData");
+
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));

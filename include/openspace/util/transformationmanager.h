@@ -33,9 +33,12 @@
 
 #include <set>
 
+namespace ccmc {
+    class Kameleon;
+} // namespace ccmc
+
 namespace openspace {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-class ccmc::Kameleon;
 #endif
 class TransformationManager : public ghoul::Singleton<TransformationManager> {
 	friend class ghoul::Singleton<TransformationManager>;
