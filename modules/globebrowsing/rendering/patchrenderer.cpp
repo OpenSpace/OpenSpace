@@ -68,16 +68,7 @@ namespace openspace {
     }
 
     void PatchRenderer::update() {
-        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
-        for (auto iter = heightMapProviders.begin(); iter != heightMapProviders.end(); iter++)
-        {
-            iter->get()->prerender();
-        }
-        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
-        for (auto iter = colorTextureProviders.begin(); iter != colorTextureProviders.end(); iter++)
-        {
-            iter->get()->prerender();
-        }
+
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
