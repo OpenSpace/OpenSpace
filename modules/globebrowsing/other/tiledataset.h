@@ -49,20 +49,16 @@ namespace openspace {
         std::vector<float> minValues;
     };
 
+    struct TextureFormat {
+        Texture::Format ghoulFormat;
+        GLuint glFormat;
+    };
+
     struct RawTileData {
 
-        struct TextureFormat {
-            Texture::Format ghoulFormat;
-            GLuint glFormat;
-        };
-
-
-        RawTileData(void* data, glm::uvec3 dims, TextureFormat format,
-            GLuint glType, const ChunkIndex& chunkIndex)
+        RawTileData(void* data, glm::uvec3 dims, const ChunkIndex& chunkIndex)
             : imageData(data)
             , dimensions(dims)
-            , texFormat(format)
-            , glType(glType)
             , chunkIndex(chunkIndex)
         {
 
@@ -71,14 +67,13 @@ namespace openspace {
         void* imageData;
         std::shared_ptr<TilePreprocessData> preprocessData;
         glm::uvec3 dimensions;
-        TextureFormat texFormat;
-        GLuint glType;
         ChunkIndex chunkIndex;
     };
 
 
 
     struct TileIOResult {
+
         CPLErr error;
         std::shared_ptr<RawTileData> rawTileData;
     };
@@ -108,24 +103,33 @@ namespace openspace {
 
         ~TileDataset();
 
-        
+        struct DataLayout {
+            DataLayout();
+            DataLayout(GDALDataset* dataSet, GLuint glType);
+
+            GDALDataType gdalType;
+            GLuint glType;
 
 
+            size_t bytesPerDatum;
+            size_t numRasters;
+            size_t bytesPerPixel;
+
+            TextureFormat textureFormat;
+        };
+
+
+       
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex, bool doPreprocessing = false);
 
         int getMaximumLevel() const;
 
         TileDepthTransform getDepthTransform() const;
 
+        const DataLayout& getDataLayout() const;
+
 
     private:
-
-
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //                          HELPER STRUCTS                                      //
-        //////////////////////////////////////////////////////////////////////////////////
-
 
         struct GdalDataRegion {
 
@@ -141,17 +145,6 @@ namespace openspace {
             int overview;
 
         };
-
-        struct DataLayout {
-            DataLayout();
-            DataLayout(GDALDataset* dataSet, GLuint glType);
-
-            GDALDataType gdalType;
-            size_t bytesPerDatum;
-            size_t numRasters;
-            size_t bytesPerPixel;
-        };
-
 
 
 
@@ -172,7 +165,7 @@ namespace openspace {
 
         static GDALDataType getGdalDataType(GLuint glType);
 
-        static RawTileData::TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+        static TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
         static size_t numberOfBytes(GDALDataType gdalType);
 

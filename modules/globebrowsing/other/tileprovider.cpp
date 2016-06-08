@@ -165,12 +165,13 @@ namespace openspace {
 
         std::shared_ptr<RawTileData> tileData = tileIOResult->rawTileData;
         HashKey key = tileData->chunkIndex.hashKey();
+        TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
             tileData->imageData,
             tileData->dimensions,
-            tileData->texFormat.ghoulFormat,
-            tileData->texFormat.glFormat,
-            tileData->glType,
+            dataLayout.textureFormat.ghoulFormat,
+            dataLayout.textureFormat.glFormat,
+            dataLayout.glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
         

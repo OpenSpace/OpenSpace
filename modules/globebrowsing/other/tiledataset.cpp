@@ -60,6 +60,7 @@ namespace openspace {
 
         _depthTransform = calculateTileDepthTransform();
         _tileLevelDifference = calculateTileLevelDifference(_dataset, minimumPixelSize);
+
     }
 
 
@@ -109,7 +110,7 @@ namespace openspace {
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < _dataLayout.numRasters; i++) {
             GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
-
+            
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
             
             CPLErr err = rasterBand->RasterIO(
@@ -167,17 +168,18 @@ namespace openspace {
 
         delete[] imageData;
 
-        glm::uvec3 dims(region.numPixels.x, region.numPixels.y, 1);
-        RawTileData::TextureFormat textureFormat = getTextureFormat(dataLayout.numRasters, dataLayout.gdalType);
+        glm::uvec3 dims(region.numPixels, 1);
         GLuint glType = getOpenGLDataType(dataLayout.gdalType);
-        RawTileData* textureDataPtr = new RawTileData(imageDataYflipped, dims,
-            textureFormat, glType, region.chunkIndex);
+        RawTileData* textureDataPtr = new RawTileData(imageDataYflipped, dims, region.chunkIndex);
         std::shared_ptr<RawTileData> textureData =
             std::shared_ptr<RawTileData>(textureDataPtr);
 
         return textureData;
     }
 
+    const TileDataset::DataLayout& TileDataset::getDataLayout() const {
+        return _dataLayout;
+    }
 
 
     std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<RawTileData> tileData,
@@ -229,6 +231,7 @@ namespace openspace {
         case GDT_Float64:   return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLdouble*>(src)); };
         default:
             LERROR("Unknown data type");
+            ghoul_assert(false, "Unknown data type");
             return nullptr;
         }
     }
@@ -245,7 +248,8 @@ namespace openspace {
             case GDT_Float32: return sizeof(GLfloat);
             case GDT_Float64: return sizeof(GLdouble);
             default:  
-                LERROR("Unknown data type"); 
+                LERROR("Unknown data type");
+                ghoul_assert(false, "Unknown data type");
                 return -1; 
         }
     }
@@ -303,10 +307,10 @@ namespace openspace {
     }
 
 
-    RawTileData::TextureFormat TileDataset::getTextureFormat(
+    TextureFormat TileDataset::getTextureFormat(
         int rasterCount, GDALDataType gdalType)
     {
-        RawTileData::TextureFormat format;
+        TextureFormat format;
 
         switch (rasterCount) {
         case 1: // Red
@@ -446,14 +450,17 @@ namespace openspace {
     }
 
     TileDataset::DataLayout::DataLayout() {
+
     }
 
-    TileDataset::DataLayout::DataLayout(GDALDataset* dataSet, GLuint glType) {
+    TileDataset::DataLayout::DataLayout(GDALDataset* dataSet, GLuint _glType) {
         // Assume all raster bands have the same data type
-        gdalType =  glType != 0 ? getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
+        gdalType = _glType != 0 ? getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
+        glType = getOpenGLDataType(gdalType);
         numRasters = dataSet->GetRasterCount();
         bytesPerDatum = numberOfBytes(gdalType);
         bytesPerPixel = bytesPerDatum * numRasters;
+        textureFormat = getTextureFormat(numRasters, gdalType);
     }
 
 }  // namespace openspace
