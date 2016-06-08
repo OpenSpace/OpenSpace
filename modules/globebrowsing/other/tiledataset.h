@@ -160,7 +160,7 @@ namespace openspace {
         typedef std::function<float(const char*)> ValueReader;
         static ValueReader getValueReader(GDALDataType gdalType);
 
-        static float TileDataset::readFloat(GDALDataType gdalType, const char* src);
+        static float readFloat(GDALDataType gdalType, const char* src);
 
 
         static size_t getMaximumValue(GDALDataType gdalType);
