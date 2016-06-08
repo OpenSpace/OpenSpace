@@ -47,35 +47,37 @@ namespace openspace {
     using namespace ghoul::opengl;
 
     
-    struct TileUvTransform
-    {
+    struct TileUvTransform{
         glm::vec2 uvOffset;
         glm::vec2 uvScale;
     };
-    
+
     struct Tile {
         std::shared_ptr<Texture> texture;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+
+        enum class Status { Unavailable, IOError, OK } status;
+
+        static const Tile TileUnavailable;
+    };
+    
+    struct TileAndTransform {
+        Tile tile;
         TileUvTransform uvTransform;
     };
     
-    struct TextureAndStatus {
-        std::shared_ptr<Texture> texture;
-        CPLErr ioError;
-    };
-
-
-
+    
     class TileProvider {
     public:
         virtual ~TileProvider() { }
 
-        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0) = 0;
+        virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void prerender() = 0;
     };
 
 
-    typedef LRUCache<HashKey, TextureAndStatus> TileCache;
+    typedef LRUCache<HashKey, Tile> TileCache;
 
 
     /**
@@ -93,7 +95,7 @@ namespace openspace {
 
         virtual ~CachingTileProvider();
         
-        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
         virtual TileDepthTransform depthTransform();
         virtual void prerender();
 
@@ -104,10 +106,10 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                                Helper functions                              //
         //////////////////////////////////////////////////////////////////////////////////
-        Tile getOrEnqueueHighestResolutionTile(const ChunkIndex& ci, 
+        TileAndTransform getOrEnqueueHighestResolutionTile(const ChunkIndex& ci,
             TileUvTransform& uvTransform);
         
-        std::shared_ptr<Texture> getOrStartFetchingTile(ChunkIndex chunkIndex);
+        Tile getOrStartFetchingTile(ChunkIndex chunkIndex);
 
 
         void transformFromParent(const ChunkIndex& ci, TileUvTransform& uv) const;

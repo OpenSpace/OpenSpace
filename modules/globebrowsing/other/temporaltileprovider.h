@@ -51,6 +51,7 @@ namespace openspace {
         int threads;
         int cacheSize;
         int framesUntilRequestQueueFlush;
+        bool preprocessTiles = false;
     };
 
 
@@ -118,7 +119,7 @@ namespace openspace {
 
         // These methods implements TileProvider
 
-        virtual Tile getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
         virtual TileDepthTransform depthTransform();
         virtual void prerender();
 

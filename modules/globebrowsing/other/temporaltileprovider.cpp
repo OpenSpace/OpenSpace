@@ -92,7 +92,7 @@ namespace openspace {
         return hasValue ? std::string(n->psChild->pszValue) : defaultVal;
     }
 
-    Tile TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
+    TileAndTransform TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
         if (_currentTileProvider == nullptr) {
             LDEBUG("Warning: had to call prerender from getHighestResolutionTile()");
             prerender();
@@ -143,7 +143,9 @@ namespace openspace {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
         
         std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(gdalDatasetXml, _tileProviderInitData.minimumPixelSize));
+            new TileDataset(gdalDatasetXml,
+                _tileProviderInitData.minimumPixelSize,
+                _tileProviderInitData.preprocessTiles));
 
         std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
             new ThreadPool(_tileProviderInitData.threads));

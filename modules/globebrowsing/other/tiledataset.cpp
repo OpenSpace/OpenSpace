@@ -46,8 +46,10 @@ namespace openspace {
     // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
     bool TileDataset::GdalHasBeenInitialized = false; 
 
-    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize,  GLuint dataType)
+    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, 
+        bool doPreprocessing, GLuint dataType)
         : _minimumPixelSize(minimumPixelSize)
+        , _doPreprocessing(doPreprocessing)
     {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
@@ -98,7 +100,7 @@ namespace openspace {
         return _depthTransform;
     }
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex, bool doPreprocessing)
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
     {               
         GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
@@ -134,11 +136,12 @@ namespace openspace {
         result->chunkIndex = chunkIndex;
         result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
         result->dimensions = glm::uvec3(region.numPixels, 1);
-        if (doPreprocessing) {
+        if (_doPreprocessing) {
             result->preprocessData = preprocess(imageData, region, _dataLayout);
         }
         result->error = worstError;
 
+        delete[] imageData;
         return result;
     }
 
@@ -164,7 +167,6 @@ namespace openspace {
             }
         }
 
-        delete[] imageData;
         return imageDataYflipped;
     }
 
@@ -180,11 +182,13 @@ namespace openspace {
         size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
-        std::vector<float> maxValues(dataLayout.numRasters);
-        std::vector<float> minValues(dataLayout.numRasters);
+        TilePreprocessData* preprocessData = new TilePreprocessData();
+        preprocessData->maxValues.resize(dataLayout.numRasters);
+        preprocessData->minValues.resize(dataLayout.numRasters);
+
         for (size_t c = 0; c < dataLayout.numRasters; c++) {
-            maxValues[c] = -FLT_MAX;
-            minValues[c] = FLT_MAX;
+            preprocessData->maxValues[c] = -FLT_MAX;
+            preprocessData->minValues[c] = FLT_MAX;
         }
 
         ValueReader valueReader = getValueReader(dataLayout.gdalType);
@@ -195,18 +199,15 @@ namespace openspace {
             for (size_t x = 0; x < region.numPixels.x; x++) {
                 for (size_t c = 0; c < dataLayout.numRasters; c++) {
 
-                    float val = valueReader(&(imageData[yi + i]));
-                    maxValues[c] = std::max(val, maxValues[c]);
-                    minValues[c] = std::min(val, minValues[c]);
+                    float val = readFloat(dataLayout.gdalType, &(imageData[yi + i]));
+                    preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
+                    preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
 
                     i += dataLayout.bytesPerDatum;
                 }
             }
         }
 
-        TilePreprocessData* preprocessData = new TilePreprocessData();
-        preprocessData->maxValues = std::move(maxValues);
-        preprocessData->minValues = std::move(minValues);
         return std::shared_ptr < TilePreprocessData>(preprocessData);
     }
 
@@ -224,6 +225,22 @@ namespace openspace {
             LERROR("Unknown data type");
             ghoul_assert(false, "Unknown data type");
             return nullptr;
+        }
+    }
+
+     float TileDataset::readFloat(GDALDataType gdalType, const char* src) {
+        switch (gdalType) {
+        case GDT_Byte:      return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
+        case GDT_UInt16:    return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
+        case GDT_Int16:     return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
+        case GDT_UInt32:    return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
+        case GDT_Int32:     return static_cast<float>(*reinterpret_cast<const GLint*>(src));
+        case GDT_Float32:   return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
+        case GDT_Float64:   return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
+        default:
+            LERROR("Unknown data type");
+            ghoul_assert(false, "Unknown data type");
+            return -1.0;
         }
     }
 

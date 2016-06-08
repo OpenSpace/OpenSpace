@@ -83,7 +83,8 @@ namespace openspace {
         * \param minimumPixelSize - minimum number of pixels per side per tile requested 
         * \param datatype         - datatype for storing pixel data in requested tile
         */
-        TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, GLuint dataType = 0);
+        TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, 
+            bool doPreprocessing, GLuint dataType = 0);
 
         ~TileDataset();
 
@@ -104,7 +105,7 @@ namespace openspace {
 
 
        
-        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex, bool doPreprocessing = false);
+        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
 
         int getMaximumLevel() const;
 
@@ -159,6 +160,9 @@ namespace openspace {
         typedef std::function<float(const char*)> ValueReader;
         static ValueReader getValueReader(GDALDataType gdalType);
 
+        static float TileDataset::readFloat(GDALDataType gdalType, const char* src);
+
+
         static size_t getMaximumValue(GDALDataType gdalType);
 
         static char* getImageDataFlippedY(const GdalDataRegion& region,
@@ -179,6 +183,7 @@ namespace openspace {
         GDALDataset* _dataset;
         DataLayout _dataLayout;
 
+        bool _doPreprocessing;
     };
 
 

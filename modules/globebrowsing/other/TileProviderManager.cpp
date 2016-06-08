@@ -51,6 +51,7 @@ namespace openspace {
         colorInitData.threads = 1;
         colorInitData.cacheSize = 500;
         colorInitData.framesUntilRequestQueueFlush = 60;
+        colorInitData.preprocessTiles = false;
 
         initTexures(_colorTextureProviders, colorTexturesDict, colorInitData);
 
@@ -63,6 +64,7 @@ namespace openspace {
         heightInitData.threads = 1;
         heightInitData.cacheSize = 500;
         heightInitData.framesUntilRequestQueueFlush = 60;
+        heightInitData.preprocessTiles = true;
 
         initTexures(_heightMapProviders, heightTexturesDict, heightInitData);
     }
@@ -104,7 +106,7 @@ namespace openspace {
         }
 
         std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(file, initData.minimumPixelSize));
+            new TileDataset(file, initData.minimumPixelSize, initData.preprocessTiles));
 
         std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
             new ThreadPool(1));

@@ -184,19 +184,20 @@ namespace openspace {
             {
                 auto tileProvider = it->get();
                 // Get the texture that should be used for rendering
-                Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
-
-                if (tile.texture == nullptr) {
+                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunk.index());
+                
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
                     return;
                 }
+
                 TileDepthTransform depthTransform = tileProvider->depthTransform();
 
 
                 // The texture needs a unit to sample from
                 texUnitHeight[i].activate();
-                tile.texture->bind();
+                tileAndTransform.tile.texture->bind();
 
                 std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
                 // Send uniforms for the tile to the shader
@@ -204,10 +205,10 @@ namespace openspace {
 
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvScale",
-                    tile.uvTransform.uvScale);
+                    tileAndTransform.uvTransform.uvScale);
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvOffset",
-                    tile.uvTransform.uvOffset);
+                    tileAndTransform.uvTransform.uvOffset);
 
                 programObject->setUniform(
                     indexedTileKey + ".depthTransform.depthScale",
@@ -218,20 +219,20 @@ namespace openspace {
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTextureInfoHeight.layerBlendingEnabled) {
-                    Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
-                    Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
-
-                    if (tileParent1.texture == nullptr) {
-                        tileParent1 = tile;
+                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+                    
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent1 = tileAndTransform;
                     }
-                    if (tileParent2.texture == nullptr) {
-                        tileParent2 = tileParent1;
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent2 = tileAndTransformParent1;
                     }
 
                     // Blend tile with two parents
                     // The texture needs a unit to sample from
                     texUnitHeightParent1[i].activate();
-                    tileParent1.texture->bind();
+                    tileAndTransformParent1.tile.texture->bind();
 
                     std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -239,15 +240,15 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvScale",
-                        tileParent1.uvTransform.uvScale);
+                        tileAndTransformParent1.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvOffset",
-                        tileParent1.uvTransform.uvOffset);
+                        tileAndTransformParent1.uvTransform.uvOffset);
 
 
                     // The texture needs a unit to sample from
                     texUnitHeightParent2[i].activate();
-                    tileParent2.texture->bind();
+                    tileAndTransformParent2.tile.texture->bind();
 
                     std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -255,10 +256,10 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvScale",
-                        tileParent2.uvTransform.uvScale);
+                        tileAndTransformParent2.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvOffset",
-                        tileParent2.uvTransform.uvOffset);
+                        tileAndTransformParent2.uvTransform.uvOffset);
                 }
 
                 i++;
@@ -273,9 +274,9 @@ namespace openspace {
             {
                 auto tileProvider = it->get();
                 // Get the texture that should be used for rendering
-                Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunk.index());
 
-                if (tile.texture == nullptr) {
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
                     return;
@@ -283,7 +284,7 @@ namespace openspace {
 
                 // The texture needs a unit to sample from
                 texUnitColor[i].activate();
-                tile.texture->bind();
+                tileAndTransform.tile.texture->bind();
 
                 std::string indexedTileKey = "colorTiles[" + std::to_string(i) + "]";
                 // Send uniforms for the tile to the shader
@@ -291,27 +292,27 @@ namespace openspace {
 
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvScale",
-                    tile.uvTransform.uvScale);
+                    tileAndTransform.uvTransform.uvScale);
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvOffset",
-                    tile.uvTransform.uvOffset);
+                    tileAndTransform.uvTransform.uvOffset);
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTextureInfoColor.layerBlendingEnabled) {
-                    Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
-                    Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
 
-                    if (tileParent1.texture == nullptr) {
-                        tileParent1 = tile;
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent1 = tileAndTransform;
                     }
-                    if (tileParent2.texture == nullptr) {
-                        tileParent2 = tileParent1;
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent2 = tileAndTransformParent1;
                     }
 
                     // Blend tile with two parents
                     // The texture needs a unit to sample from
                     texUnitColorParent1[i].activate();
-                    tileParent1.texture->bind();
+                    tileAndTransformParent1.tile.texture->bind();
 
                     std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -319,15 +320,15 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvScale",
-                        tileParent1.uvTransform.uvScale);
+                        tileAndTransformParent1.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvOffset",
-                        tileParent1.uvTransform.uvOffset);
+                        tileAndTransformParent1.uvTransform.uvOffset);
 
 
                     // The texture needs a unit to sample from
                     texUnitColorParent2[i].activate();
-                    tileParent2.texture->bind();
+                    tileAndTransformParent2.tile.texture->bind();
 
                     std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -335,10 +336,10 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvScale",
-                        tileParent2.uvTransform.uvScale);
+                        tileAndTransformParent2.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvOffset",
-                        tileParent2.uvTransform.uvOffset);
+                        tileAndTransformParent2.uvTransform.uvOffset);
                 }
                 i++;
             }
@@ -459,9 +460,9 @@ namespace openspace {
             {
                 auto tileProvider = it->get();
                 // Get the texture that should be used for rendering
-                Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunk.index());
 
-                if (tile.texture == nullptr) {
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
                     return;
@@ -471,7 +472,7 @@ namespace openspace {
 
                 // The texture needs a unit to sample from
                 texUnitHeight[i].activate();
-                tile.texture->bind();
+                tileAndTransform.tile.texture->bind();
 
                 std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
                 // Send uniforms for the tile to the shader
@@ -479,10 +480,10 @@ namespace openspace {
 
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvScale",
-                    tile.uvTransform.uvScale);
+                    tileAndTransform.uvTransform.uvScale);
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvOffset",
-                    tile.uvTransform.uvOffset);
+                    tileAndTransform.uvTransform.uvOffset);
 
                 programObject->setUniform(
                     indexedTileKey + ".depthTransform.depthScale",
@@ -493,20 +494,20 @@ namespace openspace {
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTextureInfoHeight.layerBlendingEnabled) {
-                    Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
-                    Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
 
-                    if (tileParent1.texture == nullptr) {
-                        tileParent1 = tile;
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent1 = tileAndTransform;
                     }
-                    if (tileParent2.texture == nullptr) {
-                        tileParent2 = tileParent1;
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent2 = tileAndTransformParent1;
                     }
 
                     // Blend tile with two parents
                     // The texture needs a unit to sample from
                     texUnitHeightParent1[i].activate();
-                    tileParent1.texture->bind();
+                    tileAndTransformParent1.tile.texture->bind();
 
                     std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -514,15 +515,15 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvScale",
-                        tileParent1.uvTransform.uvScale);
+                        tileAndTransformParent1.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvOffset",
-                        tileParent1.uvTransform.uvOffset);
+                        tileAndTransformParent1.uvTransform.uvOffset);
 
 
                     // The texture needs a unit to sample from
                     texUnitHeightParent2[i].activate();
-                    tileParent2.texture->bind();
+                    tileAndTransformParent2.tile.texture->bind();
 
                     std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -530,10 +531,10 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvScale",
-                        tileParent2.uvTransform.uvScale);
+                        tileAndTransformParent2.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvOffset",
-                        tileParent2.uvTransform.uvOffset);
+                        tileAndTransformParent2.uvTransform.uvOffset);
                 }
 
                 i++;
@@ -548,9 +549,9 @@ namespace openspace {
             {
                 auto tileProvider = it->get();
                 // Get the texture that should be used for rendering
-                Tile tile = tileProvider->getHighestResolutionTile(chunk.index());
+                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunk.index());
 
-                if (tile.texture == nullptr) {
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
                     return;
@@ -558,7 +559,7 @@ namespace openspace {
 
                 // The texture needs a unit to sample from
                 texUnitColor[i].activate();
-                tile.texture->bind();
+                tileAndTransform.tile.texture->bind();
 
                 std::string indexedTileKey = "colorTiles[" + std::to_string(i) + "]";
                 // Send uniforms for the tile to the shader
@@ -566,27 +567,26 @@ namespace openspace {
 
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvScale",
-                    tile.uvTransform.uvScale);
+                    tileAndTransform.uvTransform.uvScale);
                 programObject->setUniform(
                     indexedTileKey + ".uvTransform.uvOffset",
-                    tile.uvTransform.uvOffset);
+                    tileAndTransform.uvTransform.uvOffset);
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTextureInfoColor.layerBlendingEnabled) {
-                    Tile tileParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
-                    Tile tileParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
-
-                    if (tileParent1.texture == nullptr) {
-                        tileParent1 = tile;
+                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunk.index(), 1);
+                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunk.index(), 2);
+                    if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent1 = tileAndTransform;
                     }
-                    if (tileParent2.texture == nullptr) {
-                        tileParent2 = tileParent1;
+                    if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent2 = tileAndTransformParent1;
                     }
 
                     // Blend tile with two parents
                     // The texture needs a unit to sample from
                     texUnitColorParent1[i].activate();
-                    tileParent1.texture->bind();
+                    tileAndTransformParent1.tile.texture->bind();
 
                     std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -594,15 +594,15 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvScale",
-                        tileParent1.uvTransform.uvScale);
+                        tileAndTransformParent1.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent1 + ".uvTransform.uvOffset",
-                        tileParent1.uvTransform.uvOffset);
+                        tileAndTransformParent1.uvTransform.uvOffset);
 
 
                     // The texture needs a unit to sample from
                     texUnitColorParent2[i].activate();
-                    tileParent2.texture->bind();
+                    tileAndTransformParent2.tile.texture->bind();
 
                     std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
                     // Send uniforms for the tile to the shader
@@ -610,10 +610,10 @@ namespace openspace {
 
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvScale",
-                        tileParent2.uvTransform.uvScale);
+                        tileAndTransformParent2.uvTransform.uvScale);
                     programObject->setUniform(
                         indexedTileKeyParent2 + ".uvTransform.uvOffset",
-                        tileParent2.uvTransform.uvOffset);
+                        tileAndTransformParent2.uvTransform.uvOffset);
                 }
                 i++;
             }

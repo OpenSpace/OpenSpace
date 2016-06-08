@@ -46,6 +46,10 @@ namespace {
 
 namespace openspace {
 
+    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
+
+
+
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
@@ -82,7 +86,7 @@ namespace openspace {
     }
 
 
-    Tile CachingTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
+    TileAndTransform CachingTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
         TileUvTransform uvTransform;
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
@@ -102,23 +106,23 @@ namespace openspace {
         return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
-    Tile CachingTileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
+    TileAndTransform CachingTileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
         TileUvTransform& uvTransform) 
     {
         
         HashKey key = chunkIndex.hashKey();
         
-        if (_tileCache->exist(key) && _tileCache->get(key).ioError == CPLErr::CE_None) {
-            return { _tileCache->get(key).texture, uvTransform };
+        if (_tileCache->exist(key) && _tileCache->get(key).status == Tile::Status::OK) {
+            return { _tileCache->get(key), uvTransform };
         }
         else if (chunkIndex.level < 1) {
-            return { nullptr, uvTransform };
+            return{ Tile::TileUnavailable, uvTransform };
         }
         else {
             // We don't have the tile for the requested level
             // --> check if the parent has a tile we can use
             transformFromParent(chunkIndex, uvTransform);
-            Tile tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform);
+            TileAndTransform tile = getOrEnqueueHighestResolutionTile(chunkIndex.parent(), uvTransform);
 
             // As we didn't have this tile, push it to the request queue
             // post order enqueueing tiles --> enqueue tiles at low levels first
@@ -145,14 +149,14 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<Texture> CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
+    Tile CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
         HashKey hashkey = chunkIndex.hashKey();
         if (_tileCache->exist(hashkey)) {
-            return _tileCache->get(hashkey).texture;
+            return _tileCache->get(hashkey);
         }
         else {
             _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
-            return nullptr;
+            return Tile::TileUnavailable;
         }
     }
 
@@ -179,9 +183,14 @@ namespace openspace {
 
         texture->uploadTexture();
         
-        TextureAndStatus metaTexture = { texture, tileIOResult->error };
 
-        _tileCache->put(key, metaTexture);
+        Tile tile = {
+            texture,
+            tileIOResult->preprocessData,
+            tileIOResult->error == CE_None ? Tile::Status::OK : Tile::Status::IOError
+        };
+
+        _tileCache->put(key, tile);
     }
 
 
