@@ -42,7 +42,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.h
 
@@ -77,7 +77,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/patchrenderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.cpp
 

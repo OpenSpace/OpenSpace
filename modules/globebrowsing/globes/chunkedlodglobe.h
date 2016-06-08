@@ -40,7 +40,7 @@
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/globes/chunknode.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 
 namespace ghoul {

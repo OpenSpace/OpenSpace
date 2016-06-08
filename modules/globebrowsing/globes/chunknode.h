@@ -34,7 +34,7 @@
 #include <modules/globebrowsing/globes/chunkindex.h>
 #include <modules/globebrowsing/globes/chunk.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 
 
 
