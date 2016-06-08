@@ -31,6 +31,8 @@
 
 #include <algorithm>
 
+#include "moduleengine_lua.inl"
+
 namespace {
     const std::string _loggerCat = "ModuleEngine";
 }
@@ -78,6 +80,21 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     for (auto& m : _modules)
         result.push_back(m.get());
     return result;
+}
+
+scripting::ScriptEngine::LuaLibrary ModuleEngine::luaLibrary() {
+    return {
+        "modules",
+        {
+            {
+                "isLoaded",
+                &luascriptfunctions::isLoaded,
+                "string",
+                "Checks whether a specific module is loaded"
+            }
+        }
+
+    };
 }
 
 } // namespace openspace

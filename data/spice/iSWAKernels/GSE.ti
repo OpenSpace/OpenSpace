@@ -1,0 +1,31 @@
+Geocentric Solar Ecliptic (GSE) frame: 
+ 
+ +X is parallel to the geometric earth-sun position vector. 
+ 
+ +Y axis is the normalized component of the geometric earth-sun velocity 
+ vector orthogonal to the GSE +X axis. 
+ 
+ +Z axis is parallel to the cross product of the GSE +X axis 
+ and the GSE +Y axis. 
+ 
+\begindata 
+ 
+ FRAME_GSE = 2 
+ FRAME_2_NAME = 'GSE' 
+ FRAME_2_CLASS = 5 
+ FRAME_2_CLASS_ID = 2 
+ FRAME_2_CENTER = 399 
+ FRAME_2_RELATIVE = 'J2000' 
+ FRAME_2_DEF_STYLE = 'PARAMETERIZED' 
+ FRAME_2_FAMILY = 'TWO-VECTOR' 
+ FRAME_2_PRI_AXIS = 'X' 
+ FRAME_2_PRI_VECTOR_DEF = 'OBSERVER_TARGET_POSITION' 
+ FRAME_2_PRI_OBSERVER = 'EARTH' 
+ FRAME_2_PRI_TARGET = 'SUN' 
+ FRAME_2_PRI_ABCORR = 'NONE' 
+ FRAME_2_SEC_AXIS = 'Y' 
+ FRAME_2_SEC_VECTOR_DEF = 'OBSERVER_TARGET_VELOCITY' 
+ FRAME_2_SEC_OBSERVER = 'EARTH' 
+ FRAME_2_SEC_TARGET = 'SUN' 
+ FRAME_2_SEC_ABCORR = 'NONE' 
+ FRAME_2_SEC_FRAME = 'J2000' 

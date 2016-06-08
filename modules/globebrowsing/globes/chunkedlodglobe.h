@@ -69,10 +69,13 @@ namespace openspace {
         void render(const RenderData& data) override;
         void update(const UpdateData& data) override;
 
+        void setStateMatrix(const glm::dmat3& stateMatrix);
+
         double minDistToCamera;
 
         //Scalar globeRadius;
         const Ellipsoid& ellipsoid() const;
+        const glm::dmat3& stateMatrix();
 
         const int minSplitDepth;
         const int maxSplitDepth;
@@ -95,8 +98,6 @@ namespace openspace {
         float chunkHeight;
 
         // Layered rendering
-        bool useHeightMap;
-        bool useColorMap;
         bool blendHeightMap;
         bool blendColorMap;
 
@@ -120,6 +121,7 @@ namespace openspace {
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
         const Ellipsoid& _ellipsoid;
+        glm::dmat3 _stateMatrix;
 
         Camera* _savedCamera;
         

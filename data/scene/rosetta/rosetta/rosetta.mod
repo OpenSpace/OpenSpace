@@ -54,6 +54,27 @@ return {
                 -- '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
                 -- "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
 
+                --SCLK
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SCLK/ROS_160425_STEP.TSC",
+                
+                -- FK
+
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_CHURYUMOV_V01.TF",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_V26.TF",
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
+                -- CK
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/RATT_DV_211_01_01____00288.BC",
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/CATT_DV_211_01_______00288.BC",
+                '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
+                "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
+
+                -- PCK
+                "${OPENSPACE_DATA}/spice/RosettaKernels_New/PCK/ROS_CGS_RSOC_V03.TPC",
+                -- "${OPENSPACE_DATA}/spice/RosettaKernels/PCK/ROS_CGS_RSOC_V03.TPC",
+                
+
+
                 "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2014_V0047.BC",
                 "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2015_V0042.BC",
                 "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2016_V0019.BC",

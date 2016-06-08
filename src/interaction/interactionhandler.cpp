@@ -905,6 +905,7 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
         _globe = globe;
     }
     else {
+        LWARNING("Focus node is not a renderable globe. GlobeBrowsingInteraction is not possible");
         _globe = nullptr;
     }
 
@@ -1009,9 +1010,15 @@ InteractionHandler::InteractionHandler()
     });
     addProperty(_coordinateSystem);
 
+    // Create the interactionModes
     _inputState = std::shared_ptr<InputState>(new InputState());
-    _interactor = std::shared_ptr<InteractionMode>(
+    _orbitalInteractionMode = std::shared_ptr<OrbitalInteractionMode>(
+        new OrbitalInteractionMode(_inputState, 0.002, 0.02));
+    _globebrowsingInteractionMode = std::shared_ptr<GlobeBrowsingInteractionMode>(
         new GlobeBrowsingInteractionMode(_inputState, 0.002, 0.02));
+
+    // Set the interactionMode
+    _currentInteractionMode = _orbitalInteractionMode;
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -1019,11 +1026,32 @@ InteractionHandler::~InteractionHandler() {
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
-    _interactor->setFocusNode(node);
+    _currentInteractionMode->setFocusNode(node);
 }
 
 void InteractionHandler::setCamera(Camera* camera) {
-    _interactor->setCamera(camera);
+    _currentInteractionMode->setCamera(camera);
+}
+
+void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
+    // Camera and focus node is passed over from the previous interaction mode
+    Camera* camera = _currentInteractionMode->camera();
+    SceneGraphNode* focusNode = _currentInteractionMode->focusNode();
+
+    // Set the interaction mode
+    _currentInteractionMode = interactionMode;
+
+    // Update the camera and focusnode for the new interaction mode
+    _currentInteractionMode->setCamera(camera);
+    _currentInteractionMode->setFocusNode(focusNode);
+}
+
+void InteractionHandler::setInteractionModeToOrbital() {
+    setInteractionMode(_orbitalInteractionMode);
+}
+
+void InteractionHandler::setInteractionModeToGlobeBrowsing() {
+    setInteractionMode(_globebrowsingInteractionMode);
 }
 
 void InteractionHandler::lockControls() {
@@ -1035,16 +1063,21 @@ void InteractionHandler::unlockControls() {
 }
 
 void InteractionHandler::update(double deltaTime) {
-    _interactor->update(deltaTime);
+    _currentInteractionMode->update(deltaTime);
 }
 
-const SceneGraphNode* const InteractionHandler::focusNode() const {
-    return _interactor->focusNode();
+SceneGraphNode* const InteractionHandler::focusNode() const {
+    return _currentInteractionMode->focusNode();
 }
 
-const Camera* const InteractionHandler::camera() const {
-    return _interactor->camera();
+Camera* const InteractionHandler::camera() const {
+    return _currentInteractionMode->camera();
 }
+
+std::shared_ptr<InputState> InteractionHandler::inputState() const {
+    return _inputState;
+}
+
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     _inputState->mouseButtonCallback(button, action);
@@ -1089,65 +1122,21 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
-        "",
-        "Clear all key bindings"
+                "",
+                "Clear all key bindings"
             },
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
-        "string, string",
-        "Binds a key by name to a lua string command"
+                "string, string",
+                "Binds a key by name to a lua string command"
             },
             {
-                "dt",
-                &luascriptfunctions::dt,
-        "",
-        "Get current frame time"
-            },
-            {
-                "distance",
-                &luascriptfunctions::distance,
-        "number",
-        "Change distance to origin",
-        true
-            },
-            {
-                "setInteractionSensitivity",
-                &luascriptfunctions::setInteractionSensitivity,
-        "number",
-        "Sets the global interaction sensitivity"
-            },
-            {
-                "interactionSensitivity",
-                &luascriptfunctions::interactionSensitivity,
-        "",
-        "Gets the current global interaction sensitivity"
-            },
-            {
-                "setInvertRoll",
-                &luascriptfunctions::setInvertRoll,
-        "bool",
-        "Sets the setting if roll movements are inverted"
-            },
-            {
-                "invertRoll",
-                &luascriptfunctions::invertRoll,
-        "",
-        "Returns the status of roll movement inversion"
-            },
-            {
-                "setInvertRotation",
-                &luascriptfunctions::setInvertRotation,
-        "bool",
-        "Sets the setting if rotation movements are inverted"
-            },
-            {
-                "invertRotation",
-                &luascriptfunctions::invertRotation,
-        "",
-        "Returns the status of rotation movement inversion"
+                "setInteractionMode",
+                &luascriptfunctions::setInteractionMode,
+                "string",
+                "Set the interaction mode for the camera"
             }
-
         }
     };
 }

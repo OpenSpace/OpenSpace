@@ -33,6 +33,11 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 
+#include <modules/base/rendering/screenspaceimage.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
+
+#include <openspace/performance/performancemanager.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -53,7 +58,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-
+#include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
@@ -92,12 +97,11 @@ namespace {
     std::chrono::seconds ScreenLogTimeToLive(15);
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
+    const std::string PostRenderFsPath = "${SHADERS}/postrender.frag";
 }
 
-namespace openspace {
 
-const std::string RenderEngine::PerformanceMeasurementSharedData =
-    "OpenSpacePerformanceMeasurementSharedData";
+namespace openspace {
 
 const std::string RenderEngine::KeyFontMono = "Mono";
 const std::string RenderEngine::KeyFontLight = "Light";
@@ -107,12 +111,11 @@ RenderEngine::RenderEngine()
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
+    , _performanceManager(nullptr)
     , _log(nullptr)
     , _showInfo(true)
     , _showLog(true)
     , _takeScreenshot(false)
-    , _doPerformanceMeasurements(false)
-    , _performanceMemory(nullptr)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
@@ -131,14 +134,15 @@ RenderEngine::~RenderEngine() {
     _sceneGraph = nullptr;
 
     delete _mainCamera;
-    delete _performanceMemory;
     delete _raycasterManager;
 
-    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
-        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
 bool RenderEngine::deinitialize() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->deinitialize();
+    }
+
     _sceneGraph->clearSceneGraph();
     return true;
 }
@@ -206,7 +210,6 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
-
     return true;
 }
 
@@ -217,7 +220,6 @@ bool RenderEngine::initializeGL() {
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
-    
     
     try {
         const float fontSizeTime = 15.f;
@@ -351,18 +353,26 @@ void RenderEngine::postSynchronizationPreDraw() {
         Time::ref().currentTime(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
-        _doPerformanceMeasurements
+        _performanceManager != nullptr
     });
     _sceneGraph->evaluate(_mainCamera);
 
     _renderer->update();
 
     for (auto program : _programs) {
-        if (program->isDirty()) {
-            program->rebuildFromFile();
+        try {
+            if (program->isDirty()) {
+                program->rebuildFromFile();
+            }
+        }
+        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+            LERRORC(e.component, e.what());
         }
     }
-
+    
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+            screenspacerenderable->update();
+    }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
     //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
@@ -376,7 +386,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     if (!(OsEng.isMaster() && _disableMasterRendering)) {
-        _renderer->render(_globalBlackOutFactor, _doPerformanceMeasurements);
+        _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
     // Print some useful information on the master viewport
@@ -388,6 +398,11 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
             renderScreenLog();
         }
     }
+    
+    for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+        if(screenSpaceRenderable->isEnabled())
+            screenSpaceRenderable->render();
+    }
 }
 
 void RenderEngine::postDraw() {
@@ -398,8 +413,8 @@ void RenderEngine::postDraw() {
         _takeScreenshot = false;
     }
 
-    if (_doPerformanceMeasurements)
-        storePerformanceMeasurements();
+    if (_performanceManager)
+        _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
 }
 
 void RenderEngine::takeScreenshot() {
@@ -480,7 +495,8 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name,
     std::string vsPath,
     std::string fsPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data,
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
 
@@ -491,10 +507,16 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
+
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         dict);
 
     if (program) {
@@ -511,20 +533,27 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string vsPath,
     std::string fsPath,
     std::string csPath,
-    const ghoul::Dictionary& data) {
+    const ghoul::Dictionary& data, 
+    RenderEngine::RenderProgramType type) {
 
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
+
+    if (type == RenderEngine::RenderProgramType::Post) {
+        dict.setValue("resolveData", _resolveData);
+    }
 
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
+    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        RenderFsPath,
+        path,
         csPath,
         dict);
 
@@ -535,6 +564,9 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
 }
 
 void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program) {
+    if (!program)
+        return;
+
     ghoul::opengl::ProgramObject* ptr = program.get();
     auto it = std::find(
         _programs.begin(),
@@ -560,6 +592,37 @@ void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
         program->setDictionary(dict);
     }
 }
+
+
+/**
+* Set resolve data
+* Called from the renderer, whenever it needs to update
+* the dictionary of all post rendering programs.
+*/
+void RenderEngine::setResolveData(const ghoul::Dictionary& data) {
+    _resolveData = data;
+    for (auto program : _programs) {
+        ghoul::Dictionary dict = program->dictionary();
+        dict.setValue("resolveData", _resolveData);
+        program->setDictionary(dict);
+    }
+}
+
+/**
+* Set raycasting uniforms on the program object, and setup raycasting.
+*/
+void RenderEngine::preRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->preRaycast(programObject);
+}
+
+/**
+* Tear down raycasting for the specified program object.
+*/
+void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
+    _renderer->postRaycast(programObject);
+}
+
+
 
 /**
  * Set renderer
@@ -621,106 +684,37 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 "",
                 true
             },
+            {
+                "registerScreenSpaceRenderable",
+                &luascriptfunctions::registerScreenSpaceRenderable,
+                "table",
+                "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
+            },
+            {
+                "unregisterScreenSpaceRenderable",
+                &luascriptfunctions::unregisterScreenSpaceRenderable,
+                "string",
+                "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
+            },
         },
     };
 }
 
 void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
-    _doPerformanceMeasurements = performanceMeasurements;
+    if (performanceMeasurements) {
+        if (!_performanceManager)
+            _performanceManager = std::make_unique<performance::PerformanceManager>();
+    }
+    else
+        _performanceManager = nullptr;
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {
-    return _doPerformanceMeasurements;
+    return _performanceManager != nullptr;
 }
 
-void RenderEngine::storePerformanceMeasurements() {
-    const int8_t Version = 0;
-    const int nValues = 250;
-    const int lengthName = 256;
-    const int maxValues = 256;
-
-    struct PerformanceLayout {
-        int8_t version;
-        int32_t nValuesPerEntry;
-        int32_t nEntries;
-        int32_t maxNameLength;
-        int32_t maxEntries;
-
-        struct PerformanceLayoutEntry {
-            char name[lengthName];
-            float renderTime[nValues];
-            float updateRenderable[nValues];
-            float updateEphemeris[nValues];
-
-            int32_t currentRenderTime;
-            int32_t currentUpdateRenderable;
-            int32_t currentUpdateEphemeris;
-        };
-
-        PerformanceLayoutEntry entries[maxValues];
-    };
-
-    const int nNodes = static_cast<int>(scene()->allSceneGraphNodes().size());
-    if (!_performanceMemory) {
-
-        // Compute the total size
-        const int totalSize = sizeof(int8_t) + 4 * sizeof(int32_t) +
-            maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry);
-        LINFO("Create shared memory of " << totalSize << " bytes");
-
-        try {
-            ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
-        }
-        catch (const ghoul::SharedMemory::SharedMemoryError& e) {
-            LINFOC(e.component, e.what());
-        }
-        
-        ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
-        _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
-
-        void* ptr = _performanceMemory->memory();
-        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
-        layout->version = Version;
-        layout->nValuesPerEntry = nValues;
-        layout->nEntries = nNodes;
-        layout->maxNameLength = lengthName;
-        layout->maxEntries = maxValues;
-
-        memset(layout->entries, 0, maxValues * sizeof(PerformanceLayout::PerformanceLayoutEntry));
-
-        for (int i = 0; i < nNodes; ++i) {
-            SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
-
-            memset(layout->entries[i].name, 0, lengthName);
-#ifdef _MSC_VER
-            strcpy_s(layout->entries[i].name, node->name().length() + 1, node->name().c_str());
-#else
-            strcpy(layout->entries[i].name, node->name().c_str());
-#endif
-
-            layout->entries[i].currentRenderTime = 0;
-            layout->entries[i].currentUpdateRenderable = 0;
-            layout->entries[i].currentUpdateEphemeris = 0;
-        }
-    }
-
-    void* ptr = _performanceMemory->memory();
-    PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
-    _performanceMemory->acquireLock();
-    for (int i = 0; i < nNodes; ++i) {
-        SceneGraphNode* node = scene()->allSceneGraphNodes()[i];
-        SceneGraphNode::PerformanceRecord r = node->performanceRecord();
-        PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
-
-        entry.renderTime[entry.currentRenderTime] = r.renderTime / 1000.f;
-        entry.updateEphemeris[entry.currentUpdateEphemeris] = r.updateTimeEphemeris / 1000.f;
-        entry.updateRenderable[entry.currentUpdateRenderable] = r.updateTimeRenderable / 1000.f;
-
-        entry.currentRenderTime = (entry.currentRenderTime + 1) % nValues;
-        entry.currentUpdateEphemeris = (entry.currentUpdateEphemeris + 1) % nValues;
-        entry.currentUpdateRenderable = (entry.currentUpdateRenderable + 1) % nValues;
-    }
-    _performanceMemory->releaseLock();
+performance::PerformanceManager* RenderEngine::performanceManager() {
+    return _performanceManager.get();
 }
 
 // This method is temporary and will be removed once the scalegraph is in effect ---abock
@@ -1109,6 +1103,39 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    s->initialize();
+    _screenSpaceRenderables.push_back(s);
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+    auto it = std::find(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        s
+        );
+
+    if (it != _screenSpaceRenderables.end()) {
+        s->deinitialize();
+        _screenSpaceRenderables.erase(it);
+    }
+}
+
+void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
+    auto s = screenSpaceRenderable(name);
+    if(s)
+        unregisterScreenSpaceRenderable(s);
+}
+
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
+    for(auto s : _screenSpaceRenderables){
+        if(s->name() == name){
+            return s;
+        }
+    }
+    return nullptr;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -1431,6 +1458,13 @@ void RenderEngine::renderScreenLog() {
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
+}
+
+void RenderEngine::sortScreenspaceRenderables(){
+    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
+              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
+                  return i->depth() > j->depth();
+              });
 }
 
 }// namespace openspace

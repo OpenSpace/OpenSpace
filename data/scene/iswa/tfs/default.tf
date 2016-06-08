@@ -1,0 +1,1 @@
+${SCENE}/iswa/tfs/colormap_hot.png

@@ -25,40 +25,25 @@
 #ifndef __RENDERABLEPLANETPROJECTION_H__
 #define __RENDERABLEPLANETPROJECTION_H__
 
-#include <ghoul/opengl/textureunit.h>
-
-// open space includes
 #include <openspace/rendering/renderable.h>
+#include <modules/newhorizons/util/projectioncomponent.h>
+
 #include <modules/newhorizons/util/imagesequencer.h>
-
-#include <modules/newhorizons/util/sequenceparser.h>
-#include <modules/newhorizons/util/hongkangparser.h>
-#include <modules/newhorizons/util/labelparser.h>
-#include <modules/newhorizons/util/decoder.h>
-
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/util/spicemanager.h>
 
-#include <ghoul/opengl/framebufferobject.h>
-
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <openspace/query/query.h>
-
-#include <queue>
 
 namespace openspace {
 
-namespace planetgeometry{
-class PlanetGeometry;
+namespace planetgeometry {
+    class PlanetGeometry;
 }
 
-
-class RenderablePlanetProjection : public Renderable {
+class RenderablePlanetProjection : public Renderable, private ProjectionComponent {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
@@ -67,104 +52,55 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-    ghoul::opengl::Texture* baseTexture() { return _texture.get(); };
+    ghoul::opengl::Texture* baseTexture() { return _projectionTexture.get(); };
 
 protected:
-
-    void loadTexture();
-    void loadProjectionTexture();
-    bool auxiliaryRendertarget();
-    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim, const glm::vec3 up);
+    bool loadTextures();
     void attitudeParameters(double time);
 
-    void textureBind();
-    void project();
-    void clearAllProjections();
+
 private:
-    void imageProjectGPU();
+    void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
-    std::map<std::string, Decoder*> _fileTranslation;
-
-    properties::StringProperty  _colorTexturePath;
+    properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;
-    properties::StringProperty _normalMapTexturePath;
 
-    properties::StringProperty  _projectionTexturePath;
     properties::IntProperty _rotation;
-    //properties::FloatProperty _fadeProjection;
-    properties::BoolProperty _performProjection;
-    properties::BoolProperty _clearAllProjections;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::opengl::Texture> _textureOriginal;
-    std::unique_ptr<ghoul::opengl::Texture> _textureProj;
-    std::unique_ptr<ghoul::opengl::Texture> _textureWhiteSquare;
+    std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _normalMapTexture;
 
     properties::FloatProperty _heightExaggeration;
-    properties::BoolProperty _enableNormalMapping;
+    properties::FloatProperty _debugProjectionTextureRotation;
 
-    planetgeometry::PlanetGeometry* _geometry;
+    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     
-    glm::vec2  _camScaling;
-    glm::vec3  _up;
-    glm::mat4  _transform;
-    glm::mat4  _projectorMatrix;
-
-    //sequenceloading
-    std::string _sequenceSource;
-    std::string _sequenceType;
-    bool _foundSequence;
-
-    // spice
-    std::string _instrumentID;
-    std::string _projectorID;
-    std::string _projecteeID;
-    SpiceManager::AberrationCorrection _aberration;
-    std::vector<std::string> _potentialTargets; // @TODO copy-n-paste from renderablefov
-
-
-    float _fovy;
-    float _aspectRatio;
-    float _nearPlane;
-    float _farPlane;
+    glm::vec2 _camScaling;
+    glm::vec3 _up;
+    glm::mat4 _transform;
+    glm::mat4 _projectorMatrix;
 
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
-    glm::vec3  _boresight;
+    glm::vec3 _boresight;
 
     double _time;
-    double _previousTime;
-    double _previousCapture;
-    double lightTime;
 
     std::vector<Image> _imageTimes;
-    int _sequenceID;
 
     std::string _target;
     std::string _frame;
-    std::string _defaultProjImage;
-    std::string _clearingImage;
-    std::string _next;
 
     bool _capture;
 
-    // FBO stuff
-    GLuint _fboID;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
-    bool _hasHeightMap;
-    bool _hasNormalMap;
-
-    std::queue<Image> imageQueue;
 };
 }  // namespace openspace
 

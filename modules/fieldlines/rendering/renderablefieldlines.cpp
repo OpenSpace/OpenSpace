@@ -24,6 +24,7 @@
 
 #include <modules/fieldlines/rendering/renderablefieldlines.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -94,9 +95,10 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "Renderable does not have a name"
     );
-
+    
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
+    setName(name);
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
@@ -144,6 +146,13 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     _seedPointSourceFile.onChange(dirtySeedpoints);
     addProperty(_seedPointSourceFile);
+
+    // OsEng.gui()._property.registerProperty(&_enabled);
+    // OsEng.gui()._property.registerProperty(&_stepSize);
+    // OsEng.gui()._property.registerProperty(&_classification);
+    // OsEng.gui()._property.registerProperty(&_fieldlineColor);
+    // OsEng.gui()._property.registerProperty(&_seedPointSource);
+    // OsEng.gui()._property.registerProperty(&_seedPointSourceFile);
 }
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
@@ -200,12 +209,13 @@ bool RenderableFieldlines::initialize() {
         return false;
     }
 
-    _program = ghoul::opengl::ProgramObject::Build(
+    _program = OsEng.renderEngine().buildRenderProgram(
         "Fieldline",
         "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
         "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
     );
+
     if (!_program)
         return false;
 
@@ -217,6 +227,13 @@ bool RenderableFieldlines::deinitialize() {
     _fieldlineVAO = 0;
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_program) {
+        renderEngine.removeRenderProgram(_program);
+        _program = nullptr;
+    }
+
     return true;
 }
 
@@ -224,8 +241,8 @@ void RenderableFieldlines::render(const RenderData& data) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
-    _program->setUniform("cameraViewDir", data.camera.viewDirection());
-
+    _program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+    glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 
     _program->setUniform("classification", _classification);
@@ -240,7 +257,7 @@ void RenderableFieldlines::render(const RenderData& data) {
         static_cast<GLsizei>(_lineStart.size())
     );
     glBindVertexArray(0);
-
+    glEnable(GL_CULL_FACE);
     _program->deactivate();
 }
 

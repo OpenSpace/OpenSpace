@@ -45,5 +45,10 @@ vec4 blendAdd(vec4 oldColor, vec4 newColor)
 	return oldColor + newColor;
 }
 
+vec4 blendSubtract(vec4 oldColor, vec4 newColor)
+{
+	return oldColor - newColor;
+}
+
 
 #endif

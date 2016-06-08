@@ -43,7 +43,6 @@ namespace openspace {
             lastLayerIndex == other.lastLayerIndex &&
             keyLastLayerIndex == other.keyLastLayerIndex &&
             keyUseThisLayerType == other.keyUseThisLayerType &&
-            useThisLayerType == other.useThisLayerType &&
             keyLayerBlendingEnabled == other.keyLayerBlendingEnabled &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
@@ -108,10 +107,12 @@ namespace openspace {
         // These are used differently within the shaders.
         auto textureTypes = _preprocessingData.layeredTextureInfo;
         for (size_t i = 0; i < textureTypes.size(); i++) {
+            // lastLayerIndex must be at least 0 for the shader to compile,
+            // the layer type is inactivated by setting useThisLayerType to false
             shaderDictionary.setValue(
-                textureTypes[i].keyLastLayerIndex, textureTypes[i].lastLayerIndex);
+                textureTypes[i].keyLastLayerIndex, glm::max(textureTypes[i].lastLayerIndex, 0));
             shaderDictionary.setValue(
-                textureTypes[i].keyUseThisLayerType, textureTypes[i].useThisLayerType);
+                textureTypes[i].keyUseThisLayerType, textureTypes[i].lastLayerIndex >= 0);
             shaderDictionary.setValue(
                 textureTypes[i].keyLayerBlendingEnabled, textureTypes[i].layerBlendingEnabled);
         }

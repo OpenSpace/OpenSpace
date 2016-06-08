@@ -224,4 +224,9 @@ size_t TransferFunction::width() {
     update();
     return _texture->width();
 }
+
+void TransferFunction::bind() {
+    update();
+    _texture->bind();
+}
 }

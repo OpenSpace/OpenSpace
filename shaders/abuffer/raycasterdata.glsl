@@ -31,6 +31,8 @@ struct RaycasterData {
     float scale;
     float previousJitterDistance;
     uint blend;
-}
+};
 
+RaycasterData raycasterData[N_RAYCASTERS];    
+    
 #endif

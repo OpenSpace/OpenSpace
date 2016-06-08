@@ -1,0 +1,31 @@
+Geocentric Solar Magnetospheric (GSM) frame: 
+ 
+ +X is parallel to the geometric earth-sun position vector. 
+ 
+ +Z axis is normalized component of north centered geomagnetic dipole 
+ vector orthogonal to GSM +X axis. 
+ 
+ +Y completes the right-handed frame. 
+ 
+\begindata 
+ 
+ FRAME_GSM = 1
+ FRAME_1_NAME = 'GSM' 
+ FRAME_1_CLASS = 5 
+ FRAME_1_CLASS_ID = 1
+ FRAME_1_CENTER = 399 
+ FRAME_1_RELATIVE = 'GALACTIC' 
+ FRAME_1_DEF_STYLE = 'PARAMETERIZED' 
+ FRAME_1_FAMILY = 'TWO-VECTOR' 
+ FRAME_1_PRI_AXIS = 'X' 
+ FRAME_1_PRI_VECTOR_DEF = 'OBSERVER_TARGET_POSITION' 
+ FRAME_1_PRI_OBSERVER = 'EARTH' 
+ FRAME_1_PRI_TARGET = 'SUN' 
+ FRAME_1_PRI_ABCORR = 'NONE' 
+ FRAME_1_SEC_AXIS = 'Z' 
+ FRAME_1_SEC_VECTOR_DEF = 'CONSTANT' 
+ FRAME_1_SEC_FRAME = 'ECLIPJ2000' 
+ FRAME_1_SEC_SPEC = 'LATITUDINAL' 
+ FRAME_1_SEC_UNITS = 'DEGREES' 
+ FRAME_1_SEC_LONGITUDE = 288.43 
+ FRAME_1_SEC_LATITUDE = 79.54 

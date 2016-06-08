@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
 	<Node address="localhost" port="20401">
-		<Window fullScreen="false">
+		<Window fullScreen="false" numberOfSamples="8" name="OpenSpace">
 			<Stereo type="test" />
 			<!-- 16:9 aspect ratio -->
 			<Size x="640" y="360" />

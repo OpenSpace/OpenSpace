@@ -6,13 +6,19 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2015 NOV 24 00:00:00")
+    --openspace.time.setTime("2015 NOV 24 00:00:00")
+    openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
-    openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
+    --openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
 end
 
 function postInitialization()
+    openspace.setInteractionMode('GlobeBrowsingInteractionMode')
 
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.printInfo("Done setting default values")
 end
 
 

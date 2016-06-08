@@ -34,6 +34,9 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <modules/base/rendering/screenspaceimage.h>
+// #include <modules/iswa/util/iswamanager.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -129,6 +132,18 @@ namespace {
 }
 
 namespace openspace {
+    void addScreenSpaceRenderable(std::string texturePath){
+        std::string filepath ="${OPENSPACE_DATA}/"+texturePath;
+        if( ! FileSys.fileExists(filepath)) {
+            LWARNING("Could not find image '" << filepath << "'");
+            return;
+        }
+        std::string luaTable = "{Type = 'ScreenSpaceImage', TexturePath = '+" + filepath + " ' }";
+        std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+        OsEng.scriptEngine().queueScript(script);
+        // OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));
+    }
+
 namespace gui {
 
 GUI::GUI() 
@@ -190,8 +205,10 @@ void GUI::initialize() {
     //io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
 
     _property.initialize();
+    _screenSpaceProperty.initialize();
     _performance.initialize();
     _help.initialize();
+    _iswa.initialize();
 }
 
 void GUI::initializeGL() {
@@ -236,8 +253,10 @@ void GUI::initializeGL() {
     
 
     _property.initializeGL();
+    _screenSpaceProperty.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
+    _iswa.initializeGL();
 }
 
 void GUI::deinitializeGL() {
@@ -247,11 +266,14 @@ void GUI::deinitializeGL() {
     glDeleteBuffers(1, &vbo);
 
     _property.deinitializeGL();
+    _screenSpaceProperty.deinitializeGL();
     _performance.deinitializeGL();
     _help.deinitializeGL();
+    _iswa.deinitializeGL();
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
+                     const glm::vec2& mousePosCorrectionFactor,
                      const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
@@ -259,11 +281,14 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
     io.DeltaTime = deltaTime;
-#ifdef __APPLE__
-    io.MousePos = ImVec2(mousePos.x * 2, mousePos.y * 2);
-#else
-    io.MousePos = ImVec2(mousePos.x, mousePos.y);
-#endif
+
+    io.MousePos = ImVec2(mousePos.x * mousePosCorrectionFactor.x, mousePos.y * mousePosCorrectionFactor.y);
+
+//#ifdef __APPLE__
+//    io.MousePos = ImVec2(mousePos.x * 2, mousePos.y * 2);
+//#else
+//    io.MousePos = ImVec2(mousePos.x, mousePos.y);
+//#endif
     io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
     io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 
@@ -275,10 +300,14 @@ void GUI::endFrame() {
 
     if (_property.isEnabled())
         _property.render();
+    if (_screenSpaceProperty.isEnabled())
+        _screenSpaceProperty.render();
     if (_performance.isEnabled())
         _performance.render();
     if (_help.isEnabled())
         _help.render();
+    if (_iswa.isEnabled())
+        _iswa.render();
 
     ImGui::Render();
 }
@@ -373,7 +402,11 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
 void GUI::renderMainWindow() {
     ImGui::Begin("OpenSpace GUI", nullptr);
 
-    ImGui::Checkbox("Properties", &_property._isEnabled);
+    ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
+    ImGui::Checkbox("ScreenSpace Properties", &_screenSpaceProperty._isEnabled);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    ImGui::Checkbox("iSWA", &_iswa._isEnabled);
+#endif
     ImGui::Checkbox("Performance", &_performance._isEnabled);
     _origin.render();
     _time.render();
@@ -394,6 +427,24 @@ void GUI::renderMainWindow() {
         OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', '67P');");
 
     ImGui::Checkbox("Help", &_help._isEnabled);
+
+    static const int addImageBufferSize = 256;
+    static char addImageBuffer[addImageBufferSize];
+    ImGui::InputText("addImage", addImageBuffer, addImageBufferSize);
+
+    if(ImGui::SmallButton("Add Image")){
+        addScreenSpaceRenderable(std::string(addImageBuffer));
+    }
+
+// #ifdef OPENSPACE_MODULE_ISWA_ENABLED
+//         static const int addCygnetBufferSize = 256;
+//         static char addCygnetBuffer[addCygnetBufferSize];
+//         ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+
+//         if(ImGui::SmallButton("Add Cygnet"))
+//             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
+    
+// #endif
 
     ImGui::End();
 }

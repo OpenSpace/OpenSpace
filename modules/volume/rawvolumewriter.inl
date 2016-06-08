@@ -63,7 +63,7 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
 template <typename VoxelType>    
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     glm::ivec3 dims = dimensions();
-    ghoul_assert(dims == volume.dims());
+    ghoul_assert(dims == volume.dims(), "Dimensions of input and output volume must agree");
 
     const char* buffer = reinterpret_cast<char*>(volume.data());
     size_t length = static_cast<size_t>(dims.x) *

@@ -40,6 +40,7 @@ namespace {
     const std::string _loggerCat = "RenderableGlobe";
 
     // Keys for the dictionary
+    const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
     const std::string keyTextures = "Textures";
@@ -61,8 +62,6 @@ namespace openspace {
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
         , chunkHeight(properties::FloatProperty("chunkHeight", "chunkHeight", 8700.0f, 0.0f, 8700.0f))
-        , useHeightMap(properties::BoolProperty("useHeightMap", "useHeightMap", true))
-        , useColorMap(properties::BoolProperty("useColorMap", "useColorMap", true))
         , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
         , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
     {
@@ -77,14 +76,14 @@ namespace openspace {
         addProperty(renderSmallChunksFirst);
         addProperty(chunkHeight);
 
-        addProperty(useHeightMap);
-        addProperty(useColorMap);
         addProperty(blendHeightMap);
         addProperty(blendColorMap);
 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
         renderSmallChunksFirst.setValue(true);
+
+        dictionary.getValue(keyFrame, _frame);
 
         // Read the radii in to its own dictionary
         Vec3 radii;
@@ -165,6 +164,12 @@ namespace openspace {
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
+        // set spice-orientation in accordance to timestamp
+        //_chunkedLodGlobe->setStateMatrix(
+        //    SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time));
+        // We currently do not consider rotation anywhere in the rendering.
+        // @TODO Consider rotation everywhere in the rendering (culling, splitting, camera, etc)
+        _chunkedLodGlobe->setStateMatrix(glm::dmat3(1.0));
         _time = data.time;
         _distanceSwitch.update(data);
 
@@ -175,8 +180,6 @@ namespace openspace {
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
         _chunkedLodGlobe->chunkHeight = chunkHeight.value();
 
-        _chunkedLodGlobe->useHeightMap = useHeightMap.value();
-        _chunkedLodGlobe->useColorMap = useColorMap.value();
         _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
         _chunkedLodGlobe->blendColorMap = blendColorMap.value();
 
@@ -184,7 +187,6 @@ namespace openspace {
             _tileProviderManager->colorTextureProviders();
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
             _tileProviderManager->heightMapProviders();
-
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();
@@ -196,6 +198,10 @@ namespace openspace {
 
     glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {
         return _ellipsoid.geodeticSurfaceProjection(position);
+    }
+
+    std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {
+        return _chunkedLodGlobe;
     }
 
 

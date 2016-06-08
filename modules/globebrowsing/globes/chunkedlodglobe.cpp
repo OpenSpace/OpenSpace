@@ -127,6 +127,16 @@ namespace openspace {
         
     }
 
+    void ChunkedLodGlobe::setStateMatrix(const glm::dmat3& stateMatrix)
+    {
+        _stateMatrix = stateMatrix;
+    }
+
+    const glm::dmat3& ChunkedLodGlobe::stateMatrix()
+    {
+        return _stateMatrix;
+    }
+
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const
     {
         return _ellipsoid;

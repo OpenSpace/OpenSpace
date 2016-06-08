@@ -30,6 +30,7 @@
 #include <modules/onscreengui/include/guipropertycomponent.h>
 #include <modules/onscreengui/include/guiorigincomponent.h>
 #include <modules/onscreengui/include/guitimecomponent.h>
+#include <modules/onscreengui/include/guiiswacomponent.h>
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/util/keys.h>
@@ -59,7 +60,7 @@ public:
 //    bool keyCallback(int key, int action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
     void renderMainWindow();
@@ -71,7 +72,10 @@ public:
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _property;
+    // GuiPropertyComponent _iSWAproperty;
+    GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
+    GuiIswaComponent _iswa;
 
     bool _isEnabled;
 

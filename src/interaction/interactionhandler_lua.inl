@@ -113,6 +113,40 @@ int clearKeys(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* setInteractionMode():
+* Set the interaction mode
+*/
+int setInteractionMode(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.setInteractionMode";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+
+    std::string interactionModeName = luaL_checkstring(L, -1);
+    
+    if (interactionModeName.empty())
+        return luaL_error(L, "interactionmode name string is empty");
+
+    if (interactionModeName == "OrbitalInteractionMode") {
+        OsEng.interactionHandler().setInteractionModeToOrbital();
+    }
+    else if (interactionModeName == "GlobeBrowsingInteractionMode") {
+        OsEng.interactionHandler().setInteractionModeToGlobeBrowsing();
+    }
+    else { // Default
+        return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
+    }
+
+    return 0;
+}
+
+#ifdef USE_OLD_INTERACTIONHANDLER
+
+/**
+* \ingroup LuaScripts
 * dt(bool):
 * Get current frame time
 */
@@ -222,7 +256,7 @@ int invertRotation(lua_State* L) {
     //lua_pushboolean(L, invert);
     return 1;
 }
-
+#endif USE_OLD_INTERACTIONHANDLER
 } // namespace luascriptfunctions
 
 } // namespace openspace

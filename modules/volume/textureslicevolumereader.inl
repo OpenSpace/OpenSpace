@@ -39,11 +39,6 @@ void TextureSliceVolumeReader<VoxelType>::setPaths(const std::vector<std::string
 }
 
 template <typename VoxelType>
-void TextureSliceVolumeReader<VoxelType>::setCacheSize(size_t sliceCacheSize) {
-    _cache.resize(sliceCacheSize);
-}
-
-template <typename VoxelType>
 ghoul::opengl::Texture& TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const {
     ghoul_assert(_initialized, "Volume is not initialized");
     ghoul_assert(sliceIndex >= 0 && sliceIndex < _paths.size(),

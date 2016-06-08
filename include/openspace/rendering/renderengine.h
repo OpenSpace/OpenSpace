@@ -29,7 +29,9 @@
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -51,6 +53,7 @@ class Scene;
 class Renderer;
 class RaycasterManager;
 class ScreenLog;
+class ScreenSpaceRenderable;
 
 class RenderEngine {
 public:
@@ -60,8 +63,11 @@ public:
         Invalid
     };
 
-    static const std::string PerformanceMeasurementSharedData;
-    
+    enum class RenderProgramType {
+        Default = 0,
+        Post
+    };
+
     static const std::string KeyFontMono;
     static const std::string KeyFontLight;
 
@@ -89,8 +95,10 @@ public:
     void takeScreenshot();
     void toggleInfoText(bool b);
 
+    // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
+    performance::PerformanceManager* performanceManager();
 
     void serialize(SyncBuffer* syncBuffer);
     void deserialize(SyncBuffer* syncBuffer);
@@ -100,28 +108,52 @@ public:
 
     void setDisableRenderingOnMaster(bool enabled);
 
+    void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
+    void unregisterScreenSpaceRenderable(std::string name);
+    std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
         std::string fsPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
+        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
         std::string fsPath,
         std::string csPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
+        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
     void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
+
+    /**
+    * Set raycasting uniforms on the program object, and setup raycasting.
+    */
+    void preRaycast(ghoul::opengl::ProgramObject& programObject);
+
+    /**
+    * Tear down raycasting for the specified program object.
+    */
+    void postRaycast(ghoul::opengl::ProgramObject& programObject);
+
 
     void setRendererFromString(const std::string& method);
 
     /**
-     * Let's the renderer update the data to be brought into the rendererer programs
+     * Lets the renderer update the data to be brought into the rendererer programs
      * as a 'rendererData' variable in the dictionary.
      */
-    void setRendererData(const ghoul::Dictionary& renderer);
+    void setRendererData(const ghoul::Dictionary& rendererData);
+    
+    /**
+    * Lets the renderer update the data to be brought into the post rendererer programs
+    * as a 'resolveData' variable in the dictionary.
+    */
+    void setResolveData(const ghoul::Dictionary& resolveData);
     
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -135,17 +167,18 @@ public:
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
+    void sortScreenspaceRenderables();
     // This is temporary until a proper screenspace solution is found ---abock
     struct {
         glm::vec2 _position;
         unsigned int _size;
         int _node;
     } _onScreenInformation;
-
+    
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
-    void storePerformanceMeasurements();
+
     void renderInformation();
     void renderScreenLog();
 
@@ -153,24 +186,25 @@ private:
     Scene* _sceneGraph;
     RaycasterManager* _raycasterManager;
 
+    std::unique_ptr<performance::PerformanceManager> _performanceManager;
+
     std::unique_ptr<Renderer> _renderer;
     RendererImplementation _rendererImplementation;
     ghoul::Dictionary _rendererData;
+    ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
     bool _showInfo;
     bool _showLog;
     bool _takeScreenshot;
 
-    bool _doPerformanceMeasurements;
-    ghoul::SharedMemory* _performanceMemory;
-    
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
+    std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;

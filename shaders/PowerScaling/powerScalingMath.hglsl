@@ -76,15 +76,7 @@ vec2 psc_subtraction(vec2 v1, vec2 v2) {
 
 vec4 z_normalization(vec4 v_in) {
     vec4 v_out = v_in;
-    if(v_out.z > 0.0) {
-        v_out.z = 1;
-    } else if(v_out.z < 0.0) {
-        v_out.z = 1;
-    } else {
-        float tmp = max(max(abs(v_out.x), abs(v_out.y)),0);
-        if(tmp == 0.0)
-            v_out.s = FLT_MAX;
-    }
+    v_out.z = 0;
     return v_out;
 }
 

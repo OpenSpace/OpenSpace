@@ -25,11 +25,8 @@
 #ifndef __SCENEGRAPH_H__
 #define __SCENEGRAPH_H__
 
-#include <ghoul/misc/dictionary.h>
-
-#include <unordered_map>
 #include <vector>
-
+#include <string>
 namespace openspace {
 
 class SceneGraphNode;

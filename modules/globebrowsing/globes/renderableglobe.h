@@ -65,6 +65,7 @@ public:
     void update(const UpdateData& data) override;
 
     glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
+    std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
     properties::BoolProperty doFrustumCulling;
     properties::BoolProperty doHorizonCulling;
@@ -75,12 +76,11 @@ public:
     properties::FloatProperty chunkHeight;
 
     // Layered rendering
-    properties::BoolProperty useHeightMap;
-    properties::BoolProperty useColorMap;
     properties::BoolProperty blendHeightMap;
     properties::BoolProperty blendColorMap;
 
 private:
+    std::string _frame;
 
     void addToggleLayerProperties(
         std::vector<TileProviderManager::TileProviderWithName>&,
@@ -93,7 +93,6 @@ private:
 
     //std::vector<std::string> _heightMapKeys;
     //std::vector<std::string> _colorTextureKeys;
-
 
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
