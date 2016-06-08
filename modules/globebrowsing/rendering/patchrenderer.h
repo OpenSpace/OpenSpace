@@ -85,9 +85,26 @@ namespace openspace {
         void renderChunkLocally(
             const Chunk& chunk, const RenderData& data);
 
-      shared_ptr<Grid> _grid;
+      
         unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
         unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
+
+        void setDepthTransformUniforms(
+            ProgramObject* programObject, 
+            const std::string& indexedTileKey,
+            const TileDepthTransform& tileDepthTransform);
+
+        void activateTileAndSetTileUniforms(
+            ProgramObject* programObject,
+            ghoul::opengl::TextureUnit& texUnit, 
+            const std::string indexedTileKey,
+            const TileAndTransform& tileAndTransform);
+
+        ProgramObject* getActivatedProgramWithTileData(
+            LayeredTextureShaderProvider* layeredTextureShaderProvider, 
+            const Chunk& chunk);
+
+        shared_ptr<Grid> _grid;
     };
 
 
