@@ -194,6 +194,9 @@ namespace openspace {
         for (size_t i = 0; i < heightMapProviders.size(); i++) {
             heightMapProviders[i].isActive = _activeHeightMapLayers[i].value();
         }
+
+        // Update this after active layers have been updated
+        _tileProviderManager->prerender();
     }
 
     glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {
