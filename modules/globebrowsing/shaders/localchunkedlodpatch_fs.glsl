@@ -55,7 +55,8 @@ Fragment getFragment() {
 		colorTilesParent2);
 
 #endif // USE_COLORTEXTURE
-	//frag.color += patchBorderOverlay(fs_uv, vec3(0.2), 0.02);
+
+	//frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
 
 	frag.depth = fs_position.w;
 
