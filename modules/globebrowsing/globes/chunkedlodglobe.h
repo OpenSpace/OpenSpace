@@ -71,6 +71,8 @@ namespace openspace {
 
         void setStateMatrix(const glm::dmat3& stateMatrix);
 
+        bool testIfCullable(const Chunk& chunk, const RenderData& renderData);
+
         double minDistToCamera;
 
         //Scalar globeRadius;
@@ -119,6 +121,8 @@ namespace openspace {
 
         static const ChunkIndex LEFT_HEMISPHERE_INDEX;
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
+
+        std::vector<ChunkCuller*> _chunkCullers;
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;
