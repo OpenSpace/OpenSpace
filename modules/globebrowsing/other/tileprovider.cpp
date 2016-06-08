@@ -162,13 +162,11 @@ namespace openspace {
 
 
     void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
-
-        std::shared_ptr<RawTileData> tileData = tileIOResult->rawTileData;
-        HashKey key = tileData->chunkIndex.hashKey();
+        HashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
-            tileData->imageData,
-            tileData->dimensions,
+            tileIOResult->imageData,
+            tileIOResult->dimensions,
             dataLayout.textureFormat.ghoulFormat,
             dataLayout.textureFormat.glFormat,
             dataLayout.glType,

@@ -77,7 +77,7 @@ namespace openspace {
     
     std::shared_ptr<TileIOResult> AsyncTileDataProvider::nextTileIOResult() {
         auto tileIOResult = _concurrentJobManager.popFinishedJob()->product();
-        HashKey key = tileIOResult->rawTileData->chunkIndex.hashKey();
+        HashKey key = tileIOResult->chunkIndex.hashKey();
         if (_enqueuedTileRequests.find(key) != _enqueuedTileRequests.end()) {
             _enqueuedTileRequests.erase(key);
         }

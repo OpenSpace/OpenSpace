@@ -130,22 +130,20 @@ namespace openspace {
             worstError = std::max(worstError, err);
         }
 
-        std::shared_ptr<RawTileData> tileData = nullptr;
-        tileData = createRawTileData(region, _dataLayout, imageData);
-        if (doPreprocessing) {
-            tileData->preprocessData = preprocess(tileData, region, _dataLayout);
-        }
-
         std::shared_ptr<TileIOResult> result(new TileIOResult);
+        result->chunkIndex = chunkIndex;
+        result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
+        result->dimensions = glm::uvec3(region.numPixels, 1);
+        if (doPreprocessing) {
+            result->preprocessData = preprocess(imageData, region, _dataLayout);
+        }
         result->error = worstError;
-        result->rawTileData = tileData;
 
         return result;
     }
 
-
-    std::shared_ptr<RawTileData> TileDataset::createRawTileData(const GdalDataRegion& region,
-        const DataLayout& dataLayout, const char* imageData)
+    char* TileDataset::getImageDataFlippedY(const GdalDataRegion& region,
+        const DataLayout& dataLayout, const char* imageData) 
     {
         size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
@@ -167,22 +165,16 @@ namespace openspace {
         }
 
         delete[] imageData;
-
-        glm::uvec3 dims(region.numPixels, 1);
-        GLuint glType = getOpenGLDataType(dataLayout.gdalType);
-        RawTileData* textureDataPtr = new RawTileData(imageDataYflipped, dims, region.chunkIndex);
-        std::shared_ptr<RawTileData> textureData =
-            std::shared_ptr<RawTileData>(textureDataPtr);
-
-        return textureData;
+        return imageDataYflipped;
     }
+
 
     const TileDataset::DataLayout& TileDataset::getDataLayout() const {
         return _dataLayout;
     }
 
 
-    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<RawTileData> tileData,
+    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(const char* imageData,
         const GdalDataRegion& region, const DataLayout& dataLayout)
     {
         size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
@@ -196,7 +188,6 @@ namespace openspace {
         }
 
         ValueReader valueReader = getValueReader(dataLayout.gdalType);
-        const char* imageData = static_cast<const char*> (tileData->imageData);
         for (size_t y = 0; y < region.numPixels.y; y++) {
             size_t yi_flipped = y * bytesPerLine;
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;

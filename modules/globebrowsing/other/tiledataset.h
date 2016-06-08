@@ -54,28 +54,12 @@ namespace openspace {
         GLuint glFormat;
     };
 
-    struct RawTileData {
-
-        RawTileData(void* data, glm::uvec3 dims, const ChunkIndex& chunkIndex)
-            : imageData(data)
-            , dimensions(dims)
-            , chunkIndex(chunkIndex)
-        {
-
-        }
-
-        void* imageData;
-        std::shared_ptr<TilePreprocessData> preprocessData;
-        glm::uvec3 dimensions;
-        ChunkIndex chunkIndex;
-    };
-
-
-
     struct TileIOResult {
-
+        void* imageData;
+        glm::uvec3 dimensions;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+        ChunkIndex chunkIndex;
         CPLErr error;
-        std::shared_ptr<RawTileData> rawTileData;
     };
 
 
@@ -169,7 +153,7 @@ namespace openspace {
 
         static size_t numberOfBytes(GDALDataType gdalType);
 
-        std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<RawTileData> tileData,
+        std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
             const GdalDataRegion& region, const DataLayout& dataLayout);
 
         typedef std::function<float(const char*)> ValueReader;
@@ -177,7 +161,7 @@ namespace openspace {
 
         static size_t getMaximumValue(GDALDataType gdalType);
 
-        static std::shared_ptr<RawTileData> createRawTileData(const GdalDataRegion& region,
+        static char* getImageDataFlippedY(const GdalDataRegion& region,
             const DataLayout& dataLayout, const char* imageData);
 
 
