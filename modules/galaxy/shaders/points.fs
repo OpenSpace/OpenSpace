@@ -36,10 +36,10 @@ Fragment getFragment() {
     Fragment frag;
     float depth = pscDepth(vec4(vsPosition, 0.0));
 
-    float coefficient = exp(1.27 * log(emittanceFactor) - 2*log(depth));
+    float coefficient = exp(1.38 * log(emittanceFactor) - 2*log(depth));
 
     frag.color = vec4(vsColor.rgb * coefficient, 1.0);
-    
+
     
     frag.depth = depth;
 

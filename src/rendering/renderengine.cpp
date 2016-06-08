@@ -185,6 +185,7 @@ bool RenderEngine::initialize() {
     }
 
     _raycasterManager = new RaycasterManager();
+    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
     LINFO("Seting renderer from string: " << renderingMethod);
     setRendererFromString(renderingMethod);
@@ -636,9 +637,18 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
 
     _renderer = std::move(renderer);
     _renderer->setResolution(res);
+    _renderer->setNAaSamples(_nAaSamples);
     _renderer->initialize();
     _renderer->setCamera(_mainCamera);
     _renderer->setScene(_sceneGraph);
+}
+
+
+void RenderEngine::setNAaSamples(int nAaSamples) {
+    _nAaSamples = nAaSamples;
+    if (_renderer) {
+        _renderer->setNAaSamples(_nAaSamples);
+    }
 }
 
 scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
@@ -656,6 +666,12 @@ scripting::ScriptEngine::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::setRenderer,
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
+            },
+            {
+                "setNAaSamples",
+                &luascriptfunctions::setNAaSamples,
+                "int",
+                "Sets the number of anti-aliasing (msaa) samples"
             },
             {
                 "showRenderInformation",

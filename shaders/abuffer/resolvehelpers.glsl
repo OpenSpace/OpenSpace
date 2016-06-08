@@ -25,10 +25,13 @@
 #ifndef _RESOLVEHELPERS_GLSL_
 #define _RESOLVEHELPERS_GLSL_
 
+
+float acc = 0;
+
 #if RAYCASTING_ENABLED
 #include "raycasterdata.glsl"
 
-float acc = 0;
+
 
 
 // Include all ray caster helpers
@@ -40,9 +43,13 @@ float acc = 0;
 // Include all ray casters
 #for id, raycaster in resolveData.raycasters
 #include <#{raycaster.raycastPath}>
-uniform bool insideRaycaster#{id};
-uniform vec3 cameraPosInRaycaster#{id}
 #endfor
+
+#for index in 1..#{resolveData.nRaycasters}
+uniform bool insideRaycaster#{index};
+uniform vec3 cameraPosInRaycaster#{index}
+#endfor
+
 
 #endif
 
@@ -79,7 +86,7 @@ uint countSamples(uint mask) {
 uint depthFilterFragments(uint nFrags, float depthThreshold) {
     uint j = 0;
     for (uint i = 0; i < nFrags; i++) {
-        if (_depth_(fragments[i]) < depthThreshold) {
+        if (_type_(fragments[i]) != 0 || _depth_(fragments[i]) < depthThreshold) {
             fragments[j] = fragments[i];
             j++;
         }
@@ -129,16 +136,16 @@ j < nFrags && ((newMask = _msaa_(fragments[j])) & accumulatedMask) == 0 && _type
  */
 void retrieveRaycasterData(uint nFrags) {
     float entryDepths[N_RAYCASTERS];
-#for i in 0..#{resolveData.nRaycasters}
+#for i in 1..#{resolveData.nRaycasters}
     {
-    int i = #{i};
-    entryDepths[i] = -1;
-    raycasterData[i].scale = -1;    
+    int j = #{i} - 1;
+    entryDepths[j] = -1;
+    raycasterData[j].scale = -1;    
     bool inside = insideRaycaster#{i};
     if (inside) {
-        entryDepths[i] = 0;
-        raycasterData[i].position = cameraPosInRaycaster#{i};
-        raycasterData[i].previousJitterDistance = 0;
+        entryDepths[j] = 0;
+        raycasterData[j].position = cameraPosInRaycaster#{i};
+        raycasterData[j].previousJitterDistance = 0;
     }
     }
 #endfor
@@ -167,6 +174,7 @@ void retrieveRaycasterData(uint nFrags) {
     }
 }
 
+
 /**
  * Perform raycasting
  */
@@ -185,7 +193,6 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec3 accumulatedColor
 #endfor
 
     float currentDepth = 0.0;
-
     for (int steps = 0;
          (accumulatedAlpha.x < ALPHA_LIMIT ||
           accumulatedAlpha.y < ALPHA_LIMIT ||
@@ -220,7 +227,7 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec3 accumulatedColor
                                   accumulatedColor,
                                   accumulatedAlpha,
                                   maxStepSizeLocal);
-            
+
             
             float sampleDistance = jitteredStepSizeLocal + data.previousJitterDistance;
             uint blend = raycasterData[#{raycaster.id}].blend;
@@ -244,10 +251,13 @@ void raycast(float raycastDepth, uint raycasterMask, inout vec3 accumulatedColor
 bool initRaycasterMask(inout uint raycasterMask) {
     bool insideAnyRaycaster = false;
     raycasterMask = 0;
-#for i in 0..#{resolveData.nRaycasters} {
-    if (insideRaycaster#{i} && raycasterData[#{i}].scale > 0) {
-        raycasterMask |= (1 << #{i});
+#for i in 1..#{resolveData.nRaycasters}
+    {
+    int j = #{i} - 1;
+    if (insideRaycaster#{i} && raycasterData[j].scale > 0) {
+        raycasterMask |= (1 << j);
         insideAnyRaycaster = true;
+    }
     }
 #endfor
     return insideAnyRaycaster;

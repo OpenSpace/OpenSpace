@@ -91,7 +91,7 @@ void main() {
         //raycast to the first fragment
 //        discard;
         float startDepth = 0;
-        float endDepth = _depth_(fragments[0]);
+        float endDepth = min(_depth_(fragments[0]), fboDepth);
         raycast(endDepth - startDepth, raycasterMask, accumulatedColor, accumulatedAlpha);
         //accumulatedColor = vec3(1.0);        
     }
@@ -134,7 +134,10 @@ void main() {
         // Ray cast to next fragment
         if (i + 1 < nFrags && raycasterMask != 0) {
             float startDepth = _depth_(fragments[i]);
-            float endDepth = _depth_(fragments[i + 1]);
+            float endDepth = min(_depth_(fragments[i + 1]), fboDepth);
+            if (endDepth < startDepth) {
+                break;
+            }
             
             raycast(endDepth - startDepth, raycasterMask, accumulatedColor, accumulatedAlpha);
             
@@ -145,9 +148,8 @@ void main() {
 
     accumulatedAlpha = clamp(accumulatedAlpha, 0.0, 1.0);
     //maccumulatedAlpha = vec3(0.0);
-    accumulatedColor += (1 - accumulatedAlpha) * fboRgba.rgb;
+    accumulatedColor += (1 - accumulatedAlpha) * pow(fboRgba.rgb, vec3(gamma));
     
-
     finalColor = vec4(accumulatedColor.rgb, 1.0);
     
     // Gamma correction.
@@ -156,17 +158,24 @@ void main() {
 
     
     finalColor = vec4(finalColor.rgb * blackoutFactor, 1.0);
+
+    //finalColor = vec4(vec3(fboRgba.a), 1.0);
+    //finalColor = fboRgba;
     //finalColor = vec4(0.0);
-    //finalColor = vec4(vec3(acc/1000.0), 1.0);
+
+    //finalColor = vec4(0.0, acc/1000.0, acc/1000.0, 1.0);
+    //finalColor = vec4(acc/1000.0, 0.0, 0.0, 01.0);
     //finalColor = vec4(vec3(float(nFrags) / 10), 1.0);
     //finalColor = vec4(vec3(float(_depth_(fragments[0])) / 10), 1.0);
 
+    
     //finalColor = vec4(vec3(nFilteredFrags - nFrags) * 0.2, 1.0);
-    //finalColor = vec4(vec3(nFrags) * 0.2, 1.0);    
+    //finalColor = vec4(vec3(nFilteredFrags) * 0.2, 1.0);    
+    //finalColor = vec4(vec3(nFrags) * 0.05, 1.0);    
     
     //finalColor = vec4(raycasterData[0].position, 1.0);
     //finalColor = debugColor;
     //finalColor = vec4(gamma * 0.5);
-
+    //finalColor = vec4(fboRgba);
 }
 

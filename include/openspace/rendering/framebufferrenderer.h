@@ -68,6 +68,7 @@ public:
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
+    void setNAaSamples(int nAaSamples) override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -84,6 +85,7 @@ private:
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
+    std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _insideRaycastPrograms;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 

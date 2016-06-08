@@ -363,7 +363,7 @@ bool RenderableMultiresVolume::initialize() {
         }
     };
 
-
+    onEnabledChange(onChange);
 
     return success;
 }

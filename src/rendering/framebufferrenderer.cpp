@@ -125,14 +125,7 @@ void FramebufferRenderer::initialize() {
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
 
-    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
-    if (_nAaSamples == 0) {
-        _nAaSamples = 1;
-    }
-    if (_nAaSamples > 8) {
-        LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
-        _nAaSamples = 8;
-    }
+
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -198,12 +191,23 @@ void FramebufferRenderer::update() {
             }
         }
     }
+
+    for (auto &program : _insideRaycastPrograms) {
+        if (program.second->isDirty()) {
+            try {
+                program.second->rebuildFromFile();
+            }
+            catch (ghoul::RuntimeError e) {
+                LERROR(e.message);
+            }
+        }
+    }
 }
 
 void FramebufferRenderer::updateResolution() {
+    int nSamples = _nAaSamples;
     PerfMeasure("FramebufferRenderer::updateResolution");
 
-    int nSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
     glTexImage2DMultisample(
@@ -263,6 +267,7 @@ void FramebufferRenderer::updateRaycastData() {
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
+    _insideRaycastPrograms.clear();
 
     const std::vector<VolumeRaycaster*>& raycasters = OsEng.renderEngine().raycasterManager().raycasters();
     int nextId = 0;
@@ -297,6 +302,15 @@ void FramebufferRenderer::updateRaycastData() {
         try {
             _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " raycast", vsPath, RaycastFragmentShaderPath, dict);
         } catch (ghoul::RuntimeError e) {
+            LERROR(e.message);
+        }
+        try {
+            _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+                "Volume " + std::to_string(data.id) + " inside raycast",
+                "${SHADERS}/framebuffer/resolveframebuffer.vert",
+                RaycastFragmentShaderPath, dict);
+        }
+        catch (ghoul::RuntimeError e) {
             LERROR(e.message);
         }
     }
@@ -343,9 +357,25 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
 
-        ghoul::opengl::ProgramObject* raycastProgram = _raycastPrograms[raycaster].get();
+        
+        ghoul::opengl::ProgramObject* insideRaycastProgram = _raycastPrograms[raycaster].get();
+
+        glm::vec3 cameraPosition;
+        bool cameraIsInside = raycaster->cameraIsInside(raycasterTask.renderData, cameraPosition);
+        ghoul::opengl::ProgramObject* raycastProgram = nullptr;
+
+        if (cameraIsInside) {
+            raycastProgram = _insideRaycastPrograms[raycaster].get();
+        } else {
+            raycastProgram = _raycastPrograms[raycaster].get();
+        }
+        
         if (raycastProgram) {
             raycastProgram->activate();
+
+            raycastProgram->setUniform("insideRaycaster", cameraIsInside);
+            raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
+
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
@@ -365,11 +395,20 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
 
+
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
-            raycaster->renderEntryPoints(raycasterTask.renderData, *raycastProgram);
+            if (cameraIsInside) {
+                glBindVertexArray(_screenQuad);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                glBindVertexArray(0);
+            } else {
+                raycaster->renderEntryPoints(raycasterTask.renderData, *raycastProgram);
+            }
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
+
+
 
             raycaster->postRaycast(_raycastData[raycaster], *raycastProgram);
             raycastProgram->deactivate();
@@ -390,6 +429,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     _resolveProgram->setUniform("nAaSamples", _nAaSamples);
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
 
     _resolveProgram->deactivate();
 }
@@ -404,6 +444,18 @@ void FramebufferRenderer::setCamera(Camera* camera) {
 
 void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _resolution = res;
+    _dirtyResolution = true;
+}
+
+void FramebufferRenderer::setNAaSamples(int nAaSamples) {
+    _nAaSamples = nAaSamples;
+    if (_nAaSamples == 0) {
+        _nAaSamples = 1;
+    }
+    if (_nAaSamples > 8) {
+        LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
+        _nAaSamples = 8;
+    }
     _dirtyResolution = true;
 }
 

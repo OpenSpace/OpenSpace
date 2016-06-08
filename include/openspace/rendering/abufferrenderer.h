@@ -69,6 +69,7 @@ public:
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
+    void setNAaSamples(int nAaSamples) override;
 
     void preRaycast(ghoul::opengl::ProgramObject& programObject);
     void postRaycast(ghoul::opengl::ProgramObject& programObject);
