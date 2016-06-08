@@ -40,6 +40,7 @@ namespace {
     const std::string _loggerCat = "RenderableGlobe";
 
     // Keys for the dictionary
+    const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
     const std::string keyTextures = "Textures";
@@ -81,6 +82,8 @@ namespace openspace {
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
         renderSmallChunksFirst.setValue(true);
+
+        dictionary.getValue(keyFrame, _frame);
 
         // Read the radii in to its own dictionary
         Vec3 radii;
@@ -161,6 +164,12 @@ namespace openspace {
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
+        // set spice-orientation in accordance to timestamp
+        //_chunkedLodGlobe->setStateMatrix(
+        //    SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time));
+        // We currently do not consider rotation anywhere in the rendering.
+        // @TODO Consider rotation everywhere in the rendering (culling, splitting, camera, etc)
+        _chunkedLodGlobe->setStateMatrix(glm::dmat3(1.0));
         _time = data.time;
         _distanceSwitch.update(data);
 
@@ -189,6 +198,10 @@ namespace openspace {
 
     glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {
         return _ellipsoid.geodeticSurfaceProjection(position);
+    }
+
+    std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {
+        return _chunkedLodGlobe;
     }
 
 

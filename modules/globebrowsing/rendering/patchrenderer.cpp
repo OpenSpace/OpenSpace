@@ -345,10 +345,11 @@ namespace openspace {
         auto patchSize = chunk.surfacePatch().size();
         
         // TODO : Model transform should be fetched as a matrix directly.
-        mat4 modelTransform = translate(mat4(1), data.position.vec3());
-        mat4 viewTransform = data.camera.combinedViewMatrix();
+        dmat4 modelTransform = dmat4(chunk.owner()->stateMatrix()); // Rotation
+        modelTransform = translate(dmat4(1), data.position.dvec3()) * modelTransform; // Translation
+        dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix()
-            * viewTransform * modelTransform;
+            * mat4(viewTransform * modelTransform);
 
         // Upload the uniform variables
         programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
