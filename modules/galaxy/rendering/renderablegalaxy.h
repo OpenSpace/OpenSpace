@@ -56,6 +56,7 @@ private:
     properties::FloatProperty _pointStepSize;
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
+    properties::FloatProperty _enabledPointsRatio;
 
     std::string _volumeFilename;
     glm::ivec3 _volumeDimensions;

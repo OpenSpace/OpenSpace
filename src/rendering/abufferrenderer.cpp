@@ -109,15 +109,7 @@ void ABufferRenderer::initialize() {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-      
-    _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
-    if (_nAaSamples == 0) {
-        _nAaSamples = 1;
-    }
-    if (_nAaSamples > 8) {
-        LERROR("ABuffer renderer does not support more than 8 MSAA samples.");
-        _nAaSamples = 8;
-    }
+
 
     updateResolution();
     updateRendererData();
@@ -335,9 +327,10 @@ void ABufferRenderer::preRaycast(ghoul::opengl::ProgramObject& program) {
 
         glm::vec3 localCameraPosition;
         bool cameraIsInside = raycastData.first->cameraIsInside(*_renderData, localCameraPosition);
-        program.setUniform("insideRaycaster" + std::to_string(raycastData.second.id), cameraIsInside);
+        int uniformIndex = raycastData.second.id + 1; // uniforms are indexed from 1 (not from 0)
+        program.setUniform("insideRaycaster" + std::to_string(uniformIndex), cameraIsInside);
         if (cameraIsInside) {
-            program.setUniform("cameraPosInRaycaster" + std::to_string(raycastData.second.id), localCameraPosition);
+            program.setUniform("cameraPosInRaycaster" + std::to_string(uniformIndex), localCameraPosition);
         }
     }
 
@@ -365,6 +358,18 @@ void ABufferRenderer::setResolution(glm::ivec2 res) {
         _resolution = res;
         _dirtyResolution = true;
     }
+}
+
+void ABufferRenderer::setNAaSamples(int nAaSamples) {
+    _nAaSamples = nAaSamples;
+    if (_nAaSamples == 0) {
+        _nAaSamples = 1;
+    }
+    if (_nAaSamples > 8) {
+        LERROR("Framebuffer renderer does not support more than 8 MSAA samples.");
+        _nAaSamples = 8;
+    }
+    _dirtyResolution = true;
 }
 
 void ABufferRenderer::clear() {
@@ -406,12 +411,11 @@ void ABufferRenderer::updateResolution() {
 
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32UI);
 
-    int nSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
-        nSamples,
+        _nAaSamples,
         GL_RGBA,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
@@ -420,7 +424,7 @@ void ABufferRenderer::updateResolution() {
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
-        nSamples,
+        _nAaSamples,
         GL_DEPTH_COMPONENT32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),

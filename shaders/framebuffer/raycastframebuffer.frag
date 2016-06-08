@@ -28,10 +28,15 @@ uniform sampler2D exitColorTexture;
 uniform sampler2D exitDepthTexture;
 uniform sampler2DMS mainDepthTexture;
 
+uniform bool insideRaycaster;
+uniform vec3 cameraPosInRaycaster;
+
+
 #include "blending.glsl"
 #include "rand.glsl"
 #include "PowerScaling/powerScalingMath.hglsl"
 #include <#{fragmentPath}>
+
 
 #for id, helperPath in helperPaths
 #include <#{helperPath}>
@@ -68,10 +73,18 @@ void main() {
 
     float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 
-    // fetch entry point from rendered fragment
-    Fragment f = getFragment();
-    vec3 entryPos = f.color.xyz;
-    float entryDepth = f.depth;
+    vec3 entryPos; 
+    float entryDepth;
+
+    if (insideRaycaster) {
+        entryPos = cameraPosInRaycaster;
+        entryDepth = 0;
+    } else {
+        // fetch entry point from rendered fragment
+        Fragment f = getFragment();
+        entryPos = f.color.xyz;
+        entryDepth = f.depth;
+    } 
 
     vec3 position = entryPos;
     vec3 diff = exitPos - entryPos;

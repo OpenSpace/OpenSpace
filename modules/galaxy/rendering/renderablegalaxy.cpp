@@ -55,10 +55,11 @@ namespace openspace {
 
     RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _stepSize("stepSize", "Step Size", 0.001, 0.0005, 0.05)
+    , _stepSize("stepSize", "Step Size", 0.012, 0.0005, 0.05)
     , _pointStepSize("pointStepSize", "Point Step Size", 0.01, 0.01, 0.1)
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28)) {
+    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
+    , _enabledPointsRatio("nEnabledPointsRatio", "Enabled points", 0.2, 0, 1) {
 
     float stepSize;
     glm::vec3 scaling, translation, rotation;
@@ -160,6 +161,7 @@ bool RenderableGalaxy::initialize() {
     addProperty(_pointStepSize);
     addProperty(_translation);
     addProperty(_rotation);
+    addProperty(_enabledPointsRatio);
     
     // initialize points.
     std::ifstream pointFile(_pointsFilename, std::ios::in | std::ios::binary);
@@ -271,9 +273,13 @@ void RenderableGalaxy::update(const UpdateData& data) {
         glm::mat4 volumeTransform = glm::scale(transform, static_cast<glm::vec3>(_volumeSize));
         _pointTransform = glm::scale(transform, static_cast<glm::vec3>(_pointScaling));
        
+        glm::vec4 translation = glm::vec4(static_cast<glm::vec3>(_translation), 0.0);
+
         // Todo: handle floating point overflow, to actually support translation.
-        volumeTransform = glm::translate(volumeTransform, static_cast<glm::vec3>(_translation));
-        _pointTransform = glm::translate(_pointTransform, static_cast<glm::vec3>(_translation));
+
+        volumeTransform[3] += translation;
+        _pointTransform[3] += translation;
+
 
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
@@ -349,7 +355,7 @@ void RenderableGalaxy::postRender(const RenderData& data) {
     glDisable(GL_DEPTH_TEST);
     glDepthMask(false);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    glDrawArrays(GL_POINTS, 0, _nPoints);
+    glDrawArrays(GL_POINTS, 0, _nPoints * _enabledPointsRatio);
     glBindVertexArray(0);
     glDepthMask(true);
     glEnable(GL_DEPTH_TEST);

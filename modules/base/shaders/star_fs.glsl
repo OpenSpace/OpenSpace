@@ -58,7 +58,7 @@ vec4 bv2rgb(float bv) {
 Fragment getFragment() {
     // Something in the color calculations need to be changed because before it was dependent
     // on the gl blend functions since the abuffer was not involved
-
+        
     vec4 color = vec4(0.0);
     switch (colorOption) {
         case COLOROPTION_COLOR: 
@@ -79,7 +79,7 @@ Fragment getFragment() {
 
     vec4 position = vs_position;
     // This has to be fixed when the scale graph is in place ---emiax
-    position.w = 19;
+    position.w = 15;
 
     Fragment frag;
     frag.color = fullColor;

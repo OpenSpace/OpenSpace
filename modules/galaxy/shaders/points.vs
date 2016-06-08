@@ -38,13 +38,16 @@ out vec3 vsColor;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() { 
-    vec4 p = vec4(inPosition, 0.0);
+    vec4 p = vec4(inPosition, 1.0);
 
-    vec4 tmp = p;
-    vec4 position = pscTransform(tmp, model);
+	vec4 worldPosition = model * p;
+    worldPosition.w = 0.0;
+	vec4 position = worldPosition; //pscTransform(worldPosition, model);
+
+
+    position = pscTransform(position, mat4(1.0));
     vsPosition = position.xyz;    
     position = projection * view * position;
     gl_Position =  z_normalization(position);
-
     vsColor = inColor;
 }

@@ -43,10 +43,6 @@ void main() {
 
     Fragment newFrag = getFragment();
     int sampleMask = gl_SampleMaskIn[0];
-    
-    if (newFrag.depth < 0) {
-        discard;
-    }
 
     float fboDepth = denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), 0).x);
     vec4 fboRgba = texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);
@@ -122,11 +118,10 @@ void main() {
 #endif
     }
 */
+
+    
     vec4 newColor = newFrag.color;
     vec3 contribution =  newColor.rgb * blackoutFactor;
-    //vec3 contribution = newColor.rgb * blackoutFactor;    
-
-
     
     _out_color_ = vec4(contribution, 1.0);
     //    _out_color_ = vec4(1.0);

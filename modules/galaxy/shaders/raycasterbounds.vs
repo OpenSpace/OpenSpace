@@ -37,8 +37,9 @@ out vec4 worldPosition;
 void main() {
 	vPosition = vertPosition.xyz;
 
-	worldPosition = vec4(vertPosition.xyz, 0.0);
-	vec4 position = pscTransform(worldPosition, modelTransform);
+	worldPosition = modelTransform * vec4(vertPosition.xyz, 1.0);
+    worldPosition.w = 0.0;
+	vec4 position = pscTransform(worldPosition, mat4(1.0));
 
 
     

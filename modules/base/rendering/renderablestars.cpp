@@ -316,10 +316,12 @@ void RenderableStars::update(const UpdateData& data) {
         _pointSpreadFunctionTexture = nullptr;
         if (_pointSpreadFunctionTexturePath.value() != "") {
             _pointSpreadFunctionTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath)));
+            
             if (_pointSpreadFunctionTexture) {
                 LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
                 _pointSpreadFunctionTexture->uploadTexture();
             }
+            _pointSpreadFunctionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
             delete _psfTextureFile;
             _psfTextureFile = new ghoul::filesystem::File(_pointSpreadFunctionTexturePath);

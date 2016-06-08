@@ -59,6 +59,23 @@ int setRenderer(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* setNAaSamples(int):
+* set the number of anti-aliasing samples (msaa)
+*/
+int setNAaSamples(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double t = luaL_checknumber(L, -1);
+
+    OsEng.renderEngine().setNAaSamples(static_cast<int>(t));
+    return 0;
+}
+
+
+/**
+* \ingroup LuaScripts
 * visualizeABuffer(bool):
 * Toggle the visualization of the ABuffer
 */

@@ -105,6 +105,8 @@ public:
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
+    void setNAaSamples(int nAaSamples);
+
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -203,6 +205,7 @@ private:
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
+    int _nAaSamples;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
