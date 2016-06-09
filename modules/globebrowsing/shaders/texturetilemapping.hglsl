@@ -25,7 +25,7 @@
 #ifndef TEXTURETILEMAPPING_HGLSL
 #define TEXTURETILEMAPPING_HGLSL
 
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
 // First layer type from LayeredTextureShaderProvider is height map
@@ -101,9 +101,9 @@
 float calculateHeight(
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile heightTiles[NUMLAYERS_HEIGHTMAP],
-	const TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
-	const TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -137,9 +137,9 @@ float calculateHeight(
 vec4 calculateColor(
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile colorTiles[NUMLAYERS_COLORTEXTURE],
-	const TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
-	const TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
+	const Tile colorTiles[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
 
 	vec4 color = vec4(0);
 
@@ -173,9 +173,9 @@ vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile nightTiles[NUMLAYERS_NIGHTTEXTURE],
-	const TextureTile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
-	const TextureTile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
 	const vec3 ellipsoidNormalCameraSpace) {
 
 	vec3 lightDirection = normalize(vec3(-1,-1,-1));
@@ -216,9 +216,9 @@ vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile overlayTiles[NUMLAYERS_OVERLAY],
-	const TextureTile overlayTilesParent1[NUMLAYERS_OVERLAY],
-	const TextureTile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
+	const Tile overlayTiles[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent1[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
 
 	vec4 color = currentColor;
 
@@ -252,9 +252,9 @@ vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile waterTiles[NUMLAYERS_WATERMASK],
-	const TextureTile waterTilesParent1[NUMLAYERS_WATERMASK],
-	const TextureTile waterTilesParent2[NUMLAYERS_WATERMASK]) {
+	const Tile waterTiles[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
 
 	vec4 waterColor = vec4(0,0,0,0);
 

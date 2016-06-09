@@ -26,7 +26,7 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
 uniform mat4 modelViewProjectionTransform;
@@ -40,9 +40,9 @@ uniform int xSegments;
 uniform float skirtLength;
 
 #if USE_HEIGHTMAP
-uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTiles[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform vec3 cameraPosition;

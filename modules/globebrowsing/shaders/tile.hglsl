@@ -35,7 +35,7 @@ struct TileUvTransform {
     vec2 uvScale;
 };
 
-struct TextureTile {
+struct Tile {
 	sampler2D textureSampler;
 	
 	TileDepthTransform depthTransform;
@@ -50,7 +50,7 @@ vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
 	return vec4(color, 0);
 }
 
-vec4 getTexVal(const TextureTile tile, const vec2 tileUV){
+vec4 getTexVal(const Tile tile, const vec2 tileUV){
 	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
 	vec4 texVal = texture(tile.textureSampler, samplePos);
 	return texVal;
