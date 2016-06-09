@@ -780,7 +780,7 @@ void RenderablePlanet::render(const RenderData& data)
 
         // Object Space (in Km)
         glm::mat4 obj2World = glm::translate(glm::mat4(1.0), data.position.vec3() / 1000.0f);
-        glm::mat4 M = data.camera.viewMatrix() * scaleCamTrans * data.camera.viewRotationMatrix() *
+        glm::mat4 M = data.camera.viewMatrix() * scaleCamTrans * glm::mat4(data.camera.viewRotationMatrix()) *
             translateCamTrans * obj2World * transform;
 
         glm::mat4 completeInverse = glm::inverse(M);
