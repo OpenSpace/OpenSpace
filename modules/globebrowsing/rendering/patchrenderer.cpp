@@ -503,11 +503,13 @@ namespace openspace {
 
         // Upload the uniform variables
         programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
-        programObject->setUniform("modelViewTransform", modelViewTransform);
         programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
+        if (nightTextureProviders.size() > 0) {
+            programObject->setUniform("modelViewTransform", modelViewTransform);
+        }
 
         
         // OpenGL rendering settings

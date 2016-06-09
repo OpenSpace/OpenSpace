@@ -33,6 +33,24 @@ uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
 uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
+#if USE_NIGHTTEXTURE
+uniform TextureTile nightTiles[NUMLAYERS_NIGHTTEXTURE];
+uniform TextureTile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
+uniform TextureTile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
+#endif // USE_NIGHTTEXTURE
+
+#if USE_OVERLAY
+uniform TextureTile overlayTiles[NUMLAYERS_OVERLAY];
+uniform TextureTile overlayTilesParent1[NUMLAYERS_OVERLAY];
+uniform TextureTile overlayTilesParent2[NUMLAYERS_OVERLAY];
+#endif // USE_OVERLAY
+
+#if USE_WATERMASK
+uniform TextureTile waterTiles[NUMLAYERS_WATERMASK];
+uniform TextureTile waterTilesParent1[NUMLAYERS_WATERMASK];
+uniform TextureTile waterTilesParent2[NUMLAYERS_WATERMASK];
+#endif // USE_WATERMASK
+
 // tileInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
 in float tileInterpolationParameter;
