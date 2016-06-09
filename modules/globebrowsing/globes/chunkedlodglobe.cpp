@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
+#include <modules/globebrowsing/rendering/culling.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -70,6 +71,9 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
 
+        _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
+        _chunkCullers.push_back(new HorizonCuller());
+
         _patchRenderer.reset(new ChunkRenderer(geometry, tileProviderManager));
     }
 
@@ -93,6 +97,17 @@ namespace openspace {
     ChunkRenderer& ChunkedLodGlobe::getPatchRenderer() const{
         return *_patchRenderer;
     }
+
+    bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) {
+        if (doFrustumCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
+            return true;
+        }
+        if (doHorizonCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
+            return true;
+        }
+        return false;
+    }
+
 
     void ChunkedLodGlobe::render(const RenderData& data){
         minDistToCamera = INFINITY;

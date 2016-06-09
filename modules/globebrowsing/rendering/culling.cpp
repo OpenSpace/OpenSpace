@@ -24,9 +24,9 @@
 
 
 #include <modules/globebrowsing/rendering/culling.h>
-
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
-
+#include <modules/globebrowsing/globes/chunk.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
 namespace {
@@ -38,7 +38,8 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //							FRUSTUM CULLER											//
     //////////////////////////////////////////////////////////////////////////////////////
-    FrustumCuller::FrustumCuller() {
+    FrustumCuller::FrustumCuller(const AABB3 viewFrustum)
+    : _viewFrustum(viewFrustum){
 
     }
 
@@ -46,9 +47,9 @@ namespace openspace {
 
     }
 
-
-    const AABB3 FrustumCuller::viewFrustum(vec3(-1, -1, 0), vec3(1, 1, 1e35));
-
+    bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
+        return !isVisible(renderData, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
+    }
 
     bool FrustumCuller::isVisible(
         const RenderData& data,
@@ -68,12 +69,6 @@ namespace openspace {
     bool FrustumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch,
         const Ellipsoid& ellipsoid) 
     {
-        // An axis aligned bounding box based on the patch's minimum boudning sphere is
-        // used for testnig
-
-        //mat4 viewTransform = glm::lookAt(vec3(6378137.0 + 1000, 0, 0), vec3(0, 5e6, 1e7), vec3(0, 0, 1)); //data.camera.combinedViewMatrix
-        //Vec3 cameraPosition = vec3(inverse(viewTransform) * vec4(0, 0, 0, 1));// data.camera.position().dvec3();
-
 
         // Calculate the MVP matrix
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
@@ -132,9 +127,7 @@ namespace openspace {
             bounds.expand(cornerScreenSpace);
         }
 
-        
-        return bounds.intersects(FrustumCuller::viewFrustum);
-
+        return bounds.intersects(_viewFrustum);
     }
 
 
@@ -183,6 +176,10 @@ namespace openspace {
 
     HorizonCuller::~HorizonCuller() {
 
+    }
+
+    bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
+        return !isVisible(renderData, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
     }
 
     bool HorizonCuller::isVisible(

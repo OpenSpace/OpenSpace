@@ -40,7 +40,7 @@
 
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/globes/chunknode.h>
-#include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/other/tileprovider.h>
 
 namespace ghoul {
@@ -70,6 +70,8 @@ namespace openspace {
         void update(const UpdateData& data) override;
 
         void setStateMatrix(const glm::dmat3& stateMatrix);
+
+        bool testIfCullable(const Chunk& chunk, const RenderData& renderData);
 
         double minDistToCamera;
 
@@ -123,6 +125,8 @@ namespace openspace {
 
         static const ChunkIndex LEFT_HEMISPHERE_INDEX;
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
+
+        std::vector<ChunkCuller*> _chunkCullers;
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;

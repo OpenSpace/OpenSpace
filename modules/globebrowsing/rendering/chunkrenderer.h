@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LATLONPATCH_H__
-#define __LATLONPATCH_H__
+#ifndef __CHUNK_RENDERER_H__
+#define __CHUNK_RENDERER_H__
 
 #include <memory>
 #include <glm/glm.hpp>
@@ -33,11 +33,12 @@
 
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/meshes/grid.h>
-//#include <modules/globebrowsing/rendering/frustumculler.h>
-#include <modules/globebrowsing/other/tileprovidermanager.h>
 
+#include <modules/globebrowsing/meshes/grid.h>
+
+#include <modules/globebrowsing/other/tileprovidermanager.h>
 #include <modules/globebrowsing/other/layeredtextureshaderprovider.h>
+
 #include <modules/globebrowsing/globes/chunknode.h>
 
 namespace ghoul {
@@ -46,48 +47,20 @@ namespace opengl {
 }
 }
 
-
 namespace openspace {
-
-    class TriangleSoup;
     
-    using std::shared_ptr;
-    using std::unique_ptr;
-    using ghoul::opengl::ProgramObject;
-
-    class PatchRenderer {
+    class ChunkRenderer {
     public:
-        
-        PatchRenderer(std::shared_ptr<TileProviderManager> _tileProviderManager);
-        ~PatchRenderer();
-
-        void update();
-
-    protected:
-        std::shared_ptr<TileProviderManager> _tileProviderManager;
-    };
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //							PATCH RENDERER SUBCLASSES								//
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    class ChunkRenderer : public PatchRenderer {
-    public:
-        ChunkRenderer(shared_ptr<Grid> grid, 
-                      shared_ptr<TileProviderManager> tileProviderManager);
+        ChunkRenderer(std::shared_ptr<Grid> grid,
+            std::shared_ptr<TileProviderManager> tileProviderManager);
 
         void renderChunk(const Chunk& chunk, const RenderData& data);
+        void update();
 
     private:
-        void renderChunkGlobally(
-            const Chunk& chunk, const RenderData& data);
-        void renderChunkLocally(
-            const Chunk& chunk, const RenderData& data);
 
-      
-        unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
-        unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
+        void renderChunkGlobally(const Chunk& chunk, const RenderData& data);
+        void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
         void setDepthTransformUniforms(
             ProgramObject* programObject, 
@@ -104,14 +77,18 @@ namespace openspace {
             LayeredTextureShaderProvider* layeredTextureShaderProvider, 
             const Chunk& chunk);
 
-        shared_ptr<Grid> _grid;
+        //////////////////////////////////////////////////////////////////////////////////
+        //                              Member variables                                //
+        //////////////////////////////////////////////////////////////////////////////////
+
+        std::shared_ptr<Grid> _grid;
+        std::shared_ptr<TileProviderManager> _tileProviderManager;
+
+        std::unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
+        std::unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
+
     };
-
-
-
-
-
 
 }  // namespace openspace
 
-#endif  // __LATLONPATCH_H__
+#endif  // __CHUNK_RENDERER_H__

@@ -77,36 +77,14 @@ namespace openspace {
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
-        //In the current implementation of the horizon culling and the distance to the
-        //camera, the closer the ellipsoid is to a
-        //sphere, the better this will make the splitting. Using the minimum radius to
-        //be safe. This means that if the ellipsoid has high difference between radii,
-        //splitting might accur even though it is not needed.
-        
-        
 
         _isVisible = true;
-
-        const Ellipsoid& ellipsoid = _owner->ellipsoid();
-
-        
-        
-        const int maxHeight = _owner->chunkHeight; // should be read from gdal dataset or mod file
-
-
-        if (_owner->doFrustumCulling) {
-            _isVisible &= FrustumCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
-        }
-
-        if (_owner->doHorizonCulling) {
-            _isVisible &= HorizonCuller::isVisible(myRenderData, _surfacePatch, ellipsoid, maxHeight);
-        }
-
-        if (!_isVisible && owner()->mergeInvisible) {
+        if (_owner->testIfCullable(*this, myRenderData)) {
+            _isVisible = false;
             return Status::WANT_MERGE;
         }
 
-
+        const Ellipsoid& ellipsoid = _owner->ellipsoid();
         Vec3 cameraPosition = myRenderData.camera.positionVec3();
         Geodetic2 pointOnPatch = _surfacePatch.closestPoint(
                 ellipsoid.cartesianToGeodetic2(cameraPosition));

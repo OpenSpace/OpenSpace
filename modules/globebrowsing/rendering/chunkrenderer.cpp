@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 
-#include <modules/globebrowsing/rendering/patchrenderer.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 // open space includes
@@ -54,39 +54,19 @@ namespace {
 
 namespace openspace {
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //							PATCH RENDERER											//
-    //////////////////////////////////////////////////////////////////////////////////////
-    PatchRenderer::PatchRenderer(shared_ptr<TileProviderManager> tileProviderManager)
-        : _tileProviderManager(tileProviderManager)
-    {
-
-    }
-
-    PatchRenderer::~PatchRenderer() {
-
-    }
-
-    void PatchRenderer::update() {
-
-    }
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //								LATLON PATCH RENDERER								//
-    //////////////////////////////////////////////////////////////////////////////////////
     ChunkRenderer::ChunkRenderer(
-        shared_ptr<Grid> grid,
-        shared_ptr<TileProviderManager> tileProviderManager)
-        : PatchRenderer(tileProviderManager)
+        std::shared_ptr<Grid> grid,
+        std::shared_ptr<TileProviderManager> tileProviderManager)
+        : _tileProviderManager(tileProviderManager)
         , _grid(grid)
     {
-        _globalRenderingShaderProvider = unique_ptr<LayeredTextureShaderProvider>
+        _globalRenderingShaderProvider = std::unique_ptr<LayeredTextureShaderProvider>
             (new LayeredTextureShaderProvider(
                 "GlobalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"));
 
-        _localRenderingShaderProvider = unique_ptr<LayeredTextureShaderProvider>
+        _localRenderingShaderProvider = std::unique_ptr<LayeredTextureShaderProvider>
             (new LayeredTextureShaderProvider(
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
@@ -101,6 +81,11 @@ namespace openspace {
             renderChunkLocally(chunk, data);
         }
     }
+
+    void ChunkRenderer::update() {
+        // unued atm. Could be used for caching or precalculating
+    }
+
 
     void ChunkRenderer::setDepthTransformUniforms(
         ProgramObject* programObject, const std::string& indexedTileKey, const TileDepthTransform& tileDepthTransform) 

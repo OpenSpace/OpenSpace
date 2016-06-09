@@ -31,7 +31,6 @@
 // open space includes
 
 #include <openspace/rendering/renderable.h>
-
 #include <modules/globebrowsing/geodetics/geodetic2.h>
 #include <modules/globebrowsing/geodetics/ellipsoid.h>
 #include <modules/globebrowsing/rendering/aabb.h>
@@ -43,6 +42,13 @@ namespace openspace {
     using namespace glm;
 
 
+    class Chunk;
+
+    class ChunkCuller {
+    public:
+        virtual void update() { }
+        virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
+    };
 
     enum PointLocation {
         AboveLeft = 0, Above, AboveRight, // 0, 1, 2
@@ -53,13 +59,13 @@ namespace openspace {
 
 
 
-    class FrustumCuller {
+    class FrustumCuller : public ChunkCuller {
     public:
 
-        FrustumCuller();
+        FrustumCuller(const AABB3 viewFrustum);
         ~FrustumCuller();
 
-        static const AABB3 viewFrustum;
+        virtual bool isCullable(const Chunk& chunk, const RenderData& renderData);
 
         /**
         Returns true if the point is inside the view frustrum defined in RenderData.
@@ -67,7 +73,7 @@ namespace openspace {
         boundaries. E.g. for marginScreenSpace = {0.2, 0.2}, all points with
         1.2 < x,y < 1.2 would cause isVisible to return true.
         */
-        static bool isVisible(
+        bool isVisible(
             const RenderData& data,
             const dvec3& point);
 
@@ -76,52 +82,64 @@ namespace openspace {
         Returns false if the patch element is guaranteed to be outside the view
         frustrum, and true is the patch element MAY be inside the view frustrum.
         */
-        static bool isVisible(
+        bool isVisible(
             const RenderData& data,
             const GeodeticPatch& patch,
             const Ellipsoid& ellipsoid);
 
 
-        static bool isVisible(
+        bool isVisible(
             const RenderData& data,
             const GeodeticPatch& patch,
             const Ellipsoid& ellipsoid,
             const Scalar maxHeight);
 
-    private:
 
         /**
         The optional screen space margin vector is used to resize area defining
         what is considered to be inside the view frustrum.
         */
-        static PointLocation testPoint(
+        PointLocation testPoint(
             const glm::vec2& pointScreenSpace,
             const glm::vec2& marginScreenSpace = dvec2(0));
 
-        static bool testPoint(
+        bool testPoint(
             const glm::vec3& pointScreenSpace,
             const glm::vec3& marginScreenSpace = dvec3(0));
 
 
-        static glm::vec2 transformToScreenSpace(
+        glm::vec2 transformToScreenSpace(
             const dvec3& point,
             const dmat4x4& modelViewProjection);
 
+
+
+    private:
+        const AABB3 _viewFrustum;
+
     };
 
-    class HorizonCuller {
+
+    //In the current implementation of the horizon culling and the distance to the
+    //camera, the closer the ellipsoid is to a
+    //sphere, the better this will make the splitting. Using the minimum radius to
+    //be safe. This means that if the ellipsoid has high difference between radii,
+    //splitting might accur even though it is not needed.
+    class HorizonCuller : public ChunkCuller {
     public:
         HorizonCuller();
         ~HorizonCuller();
 
-        static bool isVisible(
+        virtual bool isCullable(const Chunk& chunk, const RenderData& renderData);
+
+        bool isVisible(
             const Vec3& cameraPosition,
             const Vec3& globePosition,
             const Vec3& objectPosition,
             Scalar objectBoundingSphereRadius,
             Scalar minimumGlobeRadius);
 
-        static bool isVisible(
+        bool isVisible(
             const RenderData& data,
             const GeodeticPatch& patch,
             const Ellipsoid& ellipsoid,
