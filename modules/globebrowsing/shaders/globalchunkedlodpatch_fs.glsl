@@ -60,18 +60,20 @@ in vec3 ellipsoidNormalCameraSpace;
 in vec4 fs_position;
 in vec2 fs_uv;
 
-in float tileInterpolationParameter;
+in float levelInterpolationParameter;
 
 Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = vec4(0.1,0.1,0.1,1);
 
+	
+
 #if USE_COLORTEXTURE
 
 	frag.color = calculateColor(
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -83,7 +85,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -95,7 +97,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -112,7 +114,7 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);

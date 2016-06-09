@@ -51,9 +51,9 @@ uniform Tile waterTilesParent1[NUMLAYERS_WATERMASK];
 uniform Tile waterTilesParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
-// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
-in float tileInterpolationParameter;
+in float levelInterpolationParameter;
 
 in vec4 fs_position;
 in vec2 fs_uv;
@@ -68,7 +68,7 @@ Fragment getFragment() {
 
 	frag.color = calculateColor(
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -81,7 +81,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -94,7 +94,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -111,7 +111,7 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelInterpolationParameter,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);

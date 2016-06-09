@@ -100,7 +100,7 @@
 
 float calculateHeight(
 	const vec2 uv,
-	const float tileInterpolationParameter,
+	const float levelInterpolationParameter,
 	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
 	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
 	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
@@ -109,22 +109,19 @@ float calculateHeight(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
+	LevelWeights levelWeights;
 #if HEIGHTMAP_BLENDING_ENABLED
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 #else // HEIGHTMAP_BLENDING_ENABLED
-	float w1 = 1;
-	float w2 = 0;
-	float w3 = 0;
+	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
 
 	#for i in 0..#{lastLayerIndexHeight}
 	{
 		float untransformedHeight = 
-			w1 * getTexVal(heightTiles[#{i}], uv).r +
-			w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
-			w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
+			levelWeights.w1 * getTexVal(heightTiles[#{i}], uv).r +
+			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
+			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
 
 		// OBS! Only the values from the last height map will be used!
 		height = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
@@ -136,7 +133,7 @@ float calculateHeight(
 
 vec4 calculateColor(
 	const vec2 uv,
-	const float tileInterpolationParameter,
+	const float levelInterpolationParameter,
 	const Tile colorTiles[NUMLAYERS_COLORTEXTURE],
 	const Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
 	const Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
@@ -145,22 +142,19 @@ vec4 calculateColor(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
+	LevelWeights levelWeights;
 #if COLORTEXTURE_BLENDING_ENABLED
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 #else // COLORTEXTURE_BLENDING_ENABLED
-	float w1 = 1;
-	float w2 = 0;
-	float w3 = 0;
+	levelWeights = getDefaultLevelWeights();
 #endif // COLORTEXTURE_BLENDING_ENABLED
 
 	#for i in 0..#{lastLayerIndexColor}
 	{
 		vec4 colorSample = 
-			w1 * getTexVal(colorTiles[#{i}], uv) + 
-			w2 * getTexVal(colorTilesParent1[#{i}], uv) + 
-			w3 * getTexVal(colorTilesParent2[#{i}], uv);
+			levelWeights.w1 * getTexVal(colorTiles[#{i}], uv) + 
+			levelWeights.w2 * getTexVal(colorTilesParent1[#{i}], uv) + 
+			levelWeights.w3 * getTexVal(colorTilesParent2[#{i}], uv);
 
 		color = blendOver(color, colorSample);
 	}
@@ -172,7 +166,7 @@ vec4 calculateColor(
 vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float tileInterpolationParameter,
+	const float levelInterpolationParameter,
 	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
@@ -185,22 +179,19 @@ vec4 calculateNight(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
+	LevelWeights levelWeights;
 #if NIGHTTEXTURE_BLENDING_ENABLED
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+	levelWeights = getLevelWeights(levelInterpolationParameter)
 #else // NIGHTTEXTURE_BLENDING_ENABLED
-	float w1 = 1;
-	float w2 = 0;
-	float w3 = 0;
+	levelWeights = getDefaultLevelWeights();
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
 	#for i in 0..#{lastLayerIndexNight}
 	{
 		vec4 colorSample =
-			w1 * getTexVal(nightTiles[#{i}], uv) +
-			w2 * getTexVal(nightTilesParent1[#{i}], uv) +
-			w3 * getTexVal(nightTilesParent2[#{i}], uv);
+			levelWeights.w1 * getTexVal(nightTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(nightTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(nightTilesParent2[#{i}], uv);
 
 		nightColor = blendOver(nightColor, colorSample);
 	}
@@ -215,7 +206,7 @@ vec4 calculateNight(
 vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float tileInterpolationParameter,
+	const float levelInterpolationParameter,
 	const Tile overlayTiles[NUMLAYERS_OVERLAY],
 	const Tile overlayTilesParent1[NUMLAYERS_OVERLAY],
 	const Tile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
@@ -224,22 +215,19 @@ vec4 calculateOverlay(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
+	LevelWeights levelWeights;
 #if OVERLAY_BLENDING_ENABLED
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 #else // OVERLAY_BLENDING_ENABLED
-	float w1 = 1;
-	float w2 = 0;
-	float w3 = 0;
+	levelWeights = getDefaultLevelWeights();
 #endif // OVERLAY_BLENDING_ENABLED
 
 	#for i in 0..#{lastLayerIndexOverlay}
 	{
 		vec4 colorSample =
-			w1 * getTexVal(overlayTiles[#{i}], uv) +
-			w2 * getTexVal(overlayTilesParent1[#{i}], uv) +
-			w3 * getTexVal(overlayTilesParent2[#{i}], uv);
+			levelWeights.w1 * getTexVal(overlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(overlayTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(overlayTilesParent2[#{i}], uv);
 
 		color = blendOver(color, colorSample);
 	}
@@ -251,7 +239,7 @@ vec4 calculateOverlay(
 vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float tileInterpolationParameter,
+	const float levelInterpolationParameter,
 	const Tile waterTiles[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
@@ -260,22 +248,19 @@ vec4 calculateWater(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
+	LevelWeights levelWeights;
 #if WATERMASK_BLENDING_ENABLED
-	float w1 = clamp(1 - tileInterpolationParameter, 0 , 1);
-	float w2 = (clamp(tileInterpolationParameter, 0 , 1) - clamp(tileInterpolationParameter - 1, 0 , 1));
-	float w3 = clamp(tileInterpolationParameter - 1, 0 , 1);
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 #else // WATERMASK_BLENDING_ENABLED
-	float w1 = 1;
-	float w2 = 0;
-	float w3 = 0;
+	levelWeights = getDefaultLevelWeights();
 #endif // WATERMASK_BLENDING_ENABLED
 
 	#for i in 0..#{lastLayerIndexWater}
 	{
 		vec4 colorSample =
-			w1 * getTexVal(waterTiles[#{i}], uv) +
-			w2 * getTexVal(waterTilesParent1[#{i}], uv) +
-			w3 * getTexVal(waterTilesParent2[#{i}], uv);
+			levelWeights.w1 * getTexVal(waterTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(waterTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(waterTilesParent2[#{i}], uv);
 
 		waterColor = blendOver(waterColor, colorSample);
 	}

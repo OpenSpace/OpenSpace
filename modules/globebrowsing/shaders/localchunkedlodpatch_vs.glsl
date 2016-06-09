@@ -59,9 +59,9 @@ out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 
-// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
-out float tileInterpolationParameter;
+out float levelInterpolationParameter;
 
 vec3 bilinearInterpolation(vec2 uv) {
 	// Bilinear interpolation
@@ -84,7 +84,7 @@ void main()
     float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
 	float desiredLevel = log2(projectedScaleFactor);
 
-	tileInterpolationParameter = chunkLevel - desiredLevel;
+	levelInterpolationParameter = chunkLevel - desiredLevel;
 
 	#if USE_HEIGHTMAP
 	
@@ -92,7 +92,7 @@ void main()
     // Before any heightmapping is done
 	height = calculateHeight(
 		in_uv,
-		tileInterpolationParameter, 							// Variable to determine which texture to sample from
+		levelInterpolationParameter, 							// Variable to determine which texture to sample from
 		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
 
 	#endif // USE_HEIGHTMAP
