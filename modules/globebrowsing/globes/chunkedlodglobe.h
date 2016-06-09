@@ -51,8 +51,7 @@ namespace ghoul {
 
 namespace openspace {
 
-    class ChunkedLodGlobe : 
-        public Renderable, public std::enable_shared_from_this<ChunkedLodGlobe>{
+    class ChunkedLodGlobe : public Renderable {
     public:
         ChunkedLodGlobe(
             const Ellipsoid& ellipsoid,
@@ -82,6 +81,8 @@ namespace openspace {
         const int minSplitDepth;
         const int maxSplitDepth;
 
+
+        std::shared_ptr<TileProviderManager> getTileProviderManager() const;
 
 
         Camera* getSavedCamera() const { return _savedCamera; }
@@ -129,6 +130,7 @@ namespace openspace {
 
         Camera* _savedCamera;
         
+        std::shared_ptr<TileProviderManager> _tileProviderManager;
     };
 
 }  // namespace openspace

@@ -44,19 +44,12 @@ namespace openspace {
 
     class Chunk;
 
+
     class ChunkCuller {
     public:
         virtual void update() { }
         virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
     };
-
-    enum PointLocation {
-        AboveLeft = 0, Above, AboveRight, // 0, 1, 2
-        Left, Inside, Right,      // 3, 4, 5
-        BelowLeft, Below, BelowRight  // 6, 7, 8
-    };
-
-
 
 
     class FrustumCuller : public ChunkCuller {
@@ -66,53 +59,6 @@ namespace openspace {
         ~FrustumCuller();
 
         virtual bool isCullable(const Chunk& chunk, const RenderData& renderData);
-
-        /**
-        Returns true if the point is inside the view frustrum defined in RenderData.
-        The third argument marginScreenSpace is added to the default screen space
-        boundaries. E.g. for marginScreenSpace = {0.2, 0.2}, all points with
-        1.2 < x,y < 1.2 would cause isVisible to return true.
-        */
-        bool isVisible(
-            const RenderData& data,
-            const dvec3& point);
-
-
-        /**
-        Returns false if the patch element is guaranteed to be outside the view
-        frustrum, and true is the patch element MAY be inside the view frustrum.
-        */
-        bool isVisible(
-            const RenderData& data,
-            const GeodeticPatch& patch,
-            const Ellipsoid& ellipsoid);
-
-
-        bool isVisible(
-            const RenderData& data,
-            const GeodeticPatch& patch,
-            const Ellipsoid& ellipsoid,
-            const Scalar maxHeight);
-
-
-        /**
-        The optional screen space margin vector is used to resize area defining
-        what is considered to be inside the view frustrum.
-        */
-        PointLocation testPoint(
-            const glm::vec2& pointScreenSpace,
-            const glm::vec2& marginScreenSpace = dvec2(0));
-
-        bool testPoint(
-            const glm::vec3& pointScreenSpace,
-            const glm::vec3& marginScreenSpace = dvec3(0));
-
-
-        glm::vec2 transformToScreenSpace(
-            const dvec3& point,
-            const dmat4x4& modelViewProjection);
-
-
 
     private:
         const AABB3 _viewFrustum;
@@ -125,6 +71,7 @@ namespace openspace {
     //sphere, the better this will make the splitting. Using the minimum radius to
     //be safe. This means that if the ellipsoid has high difference between radii,
     //splitting might accur even though it is not needed.
+
     class HorizonCuller : public ChunkCuller {
     public:
         HorizonCuller();
@@ -132,20 +79,10 @@ namespace openspace {
 
         virtual bool isCullable(const Chunk& chunk, const RenderData& renderData);
 
-        bool isVisible(
-            const Vec3& cameraPosition,
-            const Vec3& globePosition,
-            const Vec3& objectPosition,
-            Scalar objectBoundingSphereRadius,
+        bool isCullable(const Vec3& cameraPosition, const Vec3& globePosition,
+            const Vec3& objectPosition, Scalar objectBoundingSphereRadius,
             Scalar minimumGlobeRadius);
 
-        bool isVisible(
-            const RenderData& data,
-            const GeodeticPatch& patch,
-            const Ellipsoid& ellipsoid,
-            float height);
-
-    private:
     };
 
 

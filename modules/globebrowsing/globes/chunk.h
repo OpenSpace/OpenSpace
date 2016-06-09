@@ -40,9 +40,12 @@ namespace openspace {
 
     class ChunkedLodGlobe;
 
-
     class Chunk {
     public:
+        struct BoundingHeights {
+            float min, max;
+            bool available;
+        };
 
         enum class Status{
             DO_NOTHING,
@@ -60,6 +63,7 @@ namespace openspace {
         ChunkedLodGlobe* const owner() const;
         const ChunkIndex index() const;
         bool isVisible() const;
+        BoundingHeights getBoundingHeights() const;
 
         void setIndex(const ChunkIndex& index);
         void setOwner(ChunkedLodGlobe* newOwner);
