@@ -70,7 +70,7 @@ Fragment getFragment() {
 	//LevelWeights levelWeights = getLevelWeights(levelInterpolationParameter);
 
 #if USE_COLORTEXTURE
-
+	
 	frag.color = calculateColor(
 		fs_uv,
 		levelWeights,//levelInterpolationParameter,

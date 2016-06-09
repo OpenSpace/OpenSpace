@@ -25,21 +25,68 @@
 #ifndef TEXTURETILE_HGLSL
 #define TEXTURETILE_HGLSL
 
+vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+	vec2 uvOffset = uv - vec2(0.5);
+	float thres = 0.5 - borderSize/2;
+	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+	vec3 color = isBorder ? borderColor : vec3(0);
+	return vec4(color, 0);
+}
+
+
+/////////////////////////////////////////////////////////////////////
+//                       Tile Depth Transform                      //
+/////////////////////////////////////////////////////////////////////
+
 struct TileDepthTransform {
     float depthScale;
     float depthOffset;
 };
+
+float getTransformedTexVal(const TileDepthTransform transform, const float val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
+vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
+/////////////////////////////////////////////////////////////////////
+//                        Tile UV Transform                        //
+/////////////////////////////////////////////////////////////////////
 
 struct TileUvTransform {
     vec2 uvOffset;
     vec2 uvScale;
 };
 
+
+/////////////////////////////////////////////////////////////////////
+//                              Tile                               //
+/////////////////////////////////////////////////////////////////////
 struct Tile {
 	sampler2D textureSampler;
 	
 	TileDepthTransform depthTransform;
 	TileUvTransform uvTransform;
+};
+
+
+vec4 getTexVal(const Tile tile, const vec2 tileUV){
+	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
+	vec4 texVal = texture(tile.textureSampler, samplePos);
+	return texVal;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+//                       Multi Level Tile                          //
+/////////////////////////////////////////////////////////////////////
+struct MultiLevelTile {
+	Tile tile0;
+	Tile tile1;
+	Tile tile2;
 };
 
 struct LevelWeights {
@@ -65,26 +112,12 @@ LevelWeights getDefaultLevelWeights(){
 }
 
 
-vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
-	vec2 uvOffset = uv - vec2(0.5);
-	float thres = 0.5 - borderSize/2;
-	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-	vec3 color = isBorder ? borderColor : vec3(0);
-	return vec4(color, 0);
+vec4 getTexVal(const MultiLevelTile multiLevelTile, const LevelWeights w, const vec2 uv){
+	return w.w1 * getTexVal(multiLevelTile.tile0, uv) + 
+		w.w2 * getTexVal(multiLevelTile.tile1, uv) + 
+		w.w3 * getTexVal(multiLevelTile.tile2, uv);
 }
 
-vec4 getTexVal(const Tile tile, const vec2 tileUV){
-	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	vec4 texVal = texture(tile.textureSampler, samplePos);
-	return texVal;
-}
 
-vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val){
-	return transform.depthOffset + transform.depthScale * val;
-}
-
-float getTransformedTexVal(const TileDepthTransform transform, const float val){
-	return transform.depthOffset + transform.depthScale * val;
-}
 
 #endif // TEXTURETILE_HGLSL
