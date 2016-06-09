@@ -125,11 +125,11 @@ namespace openspace {
     {
         const ChunkIndex& chunkIndex = chunk.index();
 
-        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
-        auto nightTextureProviders = _tileProviderManager->getActiveNightTextureProviders();
-        auto overlayProviders = _tileProviderManager->getActiveOverlayProviders();
-        auto waterMaskProviders = _tileProviderManager->getActiveWaterMaskProviders();
+        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
+        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
+        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
+        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
+        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
 
         // TODO: This does not need to be updated every time. Maybe flag as dirty when
         // needing update instead.
@@ -456,11 +456,11 @@ namespace openspace {
             return;
         }
 
-        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
-        auto nightTextureProviders = _tileProviderManager->getActiveNightTextureProviders();
-        auto overlayProviders = _tileProviderManager->getActiveOverlayProviders();
-        auto waterMaskProviders = _tileProviderManager->getActiveWaterMaskProviders();
+        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
+        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
+        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
+        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
+        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         // This information is only needed when doing blending
@@ -520,11 +520,11 @@ namespace openspace {
 
         using namespace glm;
 
-        auto heightMapProviders = _tileProviderManager->getActiveHeightMapProviders();
-        auto colorTextureProviders = _tileProviderManager->getActiveColorTextureProviders();
-        auto nightTextureProviders = _tileProviderManager->getActiveNightTextureProviders();
-        auto overlayProviders = _tileProviderManager->getActiveOverlayProviders();
-        auto waterMaskProviders = _tileProviderManager->getActiveWaterMaskProviders();
+        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
+        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
+        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
+        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
+        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         if ((heightMapProviders.size() > 0 && chunk.owner()->blendHeightMap) ||

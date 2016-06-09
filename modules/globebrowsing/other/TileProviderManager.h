@@ -48,22 +48,16 @@ namespace openspace {
             bool isActive;
         };
 
+        typedef std::vector<TileProviderWithName> LayerCategory;
+
         TileProviderManager(const ghoul::Dictionary& dict);
         ~TileProviderManager();
 
         static ThreadPool tileRequestThreadPool;
 
-        const std::vector<std::shared_ptr<TileProvider> > getActiveHeightMapProviders();
-        const std::vector<std::shared_ptr<TileProvider> > getActiveColorTextureProviders();
-        const std::vector<std::shared_ptr<TileProvider> > getActiveNightTextureProviders();
-        const std::vector<std::shared_ptr<TileProvider> > getActiveOverlayProviders();
-        const std::vector<std::shared_ptr<TileProvider> > getActiveWaterMaskProviders();
-
-        std::vector<TileProviderWithName>& heightMapProviders();
-        std::vector<TileProviderWithName>& colorTextureProviders();
-        std::vector<TileProviderWithName>& nightTextureProviders();
-        std::vector<TileProviderWithName>& overlayProviders();
-        std::vector<TileProviderWithName>& waterMaskProviders();
+        LayerCategory& getLayerCategory(std::string categoryKey);
+        const std::vector<std::shared_ptr<TileProvider> >
+            getActivatedLayerCategory(std::string categoryKey);
 
         void prerender();
 
@@ -74,11 +68,7 @@ namespace openspace {
         static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
             const TileProviderInitData& initData);
 
-        std::vector<TileProviderWithName> _heightMapProviders;
-        std::vector<TileProviderWithName> _colorTextureProviders;
-        std::vector<TileProviderWithName> _nightTextureProviders;
-        std::vector<TileProviderWithName> _overlayProviders;
-        std::vector<TileProviderWithName> _waterMaskProviders;
+        std::map<std::string, LayerCategory > _layerCategories;
     };
 
 } // namespace openspace

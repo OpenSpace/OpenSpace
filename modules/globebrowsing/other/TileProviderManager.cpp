@@ -43,9 +43,9 @@ namespace openspace {
 
     ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
-
     TileProviderManager::TileProviderManager(const ghoul::Dictionary& texDict){
-
+        // Color Texture
+        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyColorTextures, LayerCategory()));
         ghoul::Dictionary colorTexturesDict;
         texDict.getValue(keyColorTextures, colorTexturesDict);
 
@@ -56,8 +56,10 @@ namespace openspace {
         colorInitData.framesUntilRequestQueueFlush = 60;
         colorInitData.preprocessTiles = false;
 
-        initTexures(_colorTextureProviders, colorTexturesDict, colorInitData);
+        initTexures(_layerCategories[keyColorTextures], colorTexturesDict, colorInitData);
 
+        // Night Texture
+        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyNightTextures, LayerCategory()));
         ghoul::Dictionary nightTexturesDict;
         texDict.getValue(keyNightTextures, nightTexturesDict);
 
@@ -68,9 +70,10 @@ namespace openspace {
         nightInitData.framesUntilRequestQueueFlush = 60;
         nightInitData.preprocessTiles = false;
 
-        initTexures(_nightTextureProviders, nightTexturesDict, nightInitData);
+        initTexures(_layerCategories[keyNightTextures], nightTexturesDict, nightInitData);
 
-
+        // Overlays
+        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyOverlays, LayerCategory()));
         ghoul::Dictionary overlaysDict;
         texDict.getValue(keyOverlays, overlaysDict);
 
@@ -81,9 +84,10 @@ namespace openspace {
         overlayInitData.framesUntilRequestQueueFlush = 60;
         overlayInitData.preprocessTiles = false;
 
-        initTexures(_overlayProviders, overlaysDict, overlayInitData);
+        initTexures(_layerCategories[keyOverlays], overlaysDict, overlayInitData);
 
-
+        // Height maps
+        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyHeightMaps, LayerCategory()));
         ghoul::Dictionary heightTexturesDict;
         texDict.getValue(keyHeightMaps, heightTexturesDict);
 
@@ -94,8 +98,10 @@ namespace openspace {
         heightInitData.framesUntilRequestQueueFlush = 60;
         heightInitData.preprocessTiles = true;
 
-        initTexures(_heightMapProviders, heightTexturesDict, heightInitData);
+        initTexures(_layerCategories[keyHeightMaps], heightTexturesDict, heightInitData);
 
+        // Water masks
+        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyWaterMasks, LayerCategory()));
         ghoul::Dictionary waterMaskDict;
         texDict.getValue(keyWaterMasks, waterMaskDict);
 
@@ -106,7 +112,7 @@ namespace openspace {
         waterInitData.framesUntilRequestQueueFlush = 60;
         waterInitData.preprocessTiles = false;
 
-        initTexures(_waterMaskProviders, waterMaskDict, waterInitData);
+        initTexures(_layerCategories[keyWaterMasks], waterMaskDict, waterInitData);
     }
 
     TileProviderManager::~TileProviderManager()
@@ -116,8 +122,7 @@ namespace openspace {
     void TileProviderManager::initTexures(std::vector<TileProviderWithName>& dest,
         const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
-
-        // Create TileProviders for all color textures
+        // Create TileProviders for all textures within this category
         for (size_t i = 0; i < texturesDict.size(); i++) {
             std::string name, path;
             std::string dictKey = std::to_string(i + 1);
@@ -162,134 +167,31 @@ namespace openspace {
         return tileProvider;
     }
 
-    std::vector<TileProviderManager::TileProviderWithName>&
-        TileProviderManager::heightMapProviders()
+    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(std::string categoryKey)
     {
-        return _heightMapProviders;
-    }
-
-    std::vector<TileProviderManager::TileProviderWithName>&
-        TileProviderManager::colorTextureProviders()
-    {
-        return _colorTextureProviders;
-    }
-
-    std::vector<TileProviderManager::TileProviderWithName>&
-        TileProviderManager::nightTextureProviders()
-    {
-        return _nightTextureProviders;
-    }
-
-    std::vector<TileProviderManager::TileProviderWithName>&
-        TileProviderManager::overlayProviders()
-    {
-        return _overlayProviders;
-    }
-
-    std::vector<TileProviderManager::TileProviderWithName>&
-        TileProviderManager::waterMaskProviders()
-    {
-        return _waterMaskProviders;
+        return _layerCategories[categoryKey];
     }
 
     void TileProviderManager::prerender() {
-        for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++) {
-            if (it->isActive) {
-                it->tileProvider->prerender();
+        for each (auto layerCategoryPair in _layerCategories) {
+            for each (auto tileProviderWithName in layerCategoryPair.second) {
+                if (tileProviderWithName.isActive) {
+                    tileProviderWithName.tileProvider->prerender();
+                }
             }
         }
-
-        for (auto it = _nightTextureProviders.begin(); it != _nightTextureProviders.end(); it++) {
-            if (it->isActive) {
-                it->tileProvider->prerender();
-            }
-        }
-
-        for (auto it = _overlayProviders.begin(); it != _overlayProviders.end(); it++) {
-            if (it->isActive) {
-                it->tileProvider->prerender();
-            }
-        }
-
-        for (auto it = _heightMapProviders.begin(); it != _heightMapProviders.end(); it++){
-            if (it->isActive) {
-                it->tileProvider->prerender();
-            }
-        }
-
-        for (auto it = _waterMaskProviders.begin(); it != _waterMaskProviders.end(); it++) {
-            if (it->isActive) {
-                it->tileProvider->prerender();
-            }
-        }
-
     }
 
-
     const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActiveHeightMapProviders()
+        TileProviderManager::getActivatedLayerCategory(std::string categoryKey)
     {
         std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto it = _heightMapProviders.begin(); it != _heightMapProviders.end(); it++)
-        {
-            if (it->isActive) {
-                tileProviders.push_back(it->tileProvider);
+        for each (auto tileProviderWithName in _layerCategories[categoryKey]) {
+            if (tileProviderWithName.isActive) {
+                tileProviders.push_back(tileProviderWithName.tileProvider);
             }
         }
         return tileProviders;
     }
-
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActiveColorTextureProviders()
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++)
-        {
-            if (it->isActive) {
-                tileProviders.push_back(it->tileProvider);
-            }
-        }
-        return tileProviders;
-    }
-
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActiveNightTextureProviders()
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto it = _nightTextureProviders.begin(); it != _nightTextureProviders.end(); it++)
-        {
-            if (it->isActive) {
-                tileProviders.push_back(it->tileProvider);
-            }
-        }
-        return tileProviders;
-    }
-
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActiveOverlayProviders()
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto it = _overlayProviders.begin(); it != _overlayProviders.end(); it++)
-        {
-            if (it->isActive) {
-                tileProviders.push_back(it->tileProvider);
-            }
-        }
-        return tileProviders;
-    }
-
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActiveWaterMaskProviders()
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto it = _waterMaskProviders.begin(); it != _waterMaskProviders.end(); it++)
-        {
-            if (it->isActive) {
-                tileProviders.push_back(it->tileProvider);
-            }
-        }
-        return tileProviders;
-    }
-
 
 }  // namespace openspace

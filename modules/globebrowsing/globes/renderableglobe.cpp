@@ -110,11 +110,11 @@ namespace openspace {
         _tileProviderManager = std::shared_ptr<TileProviderManager>(
             new TileProviderManager(texturesDictionary));
 
-        auto colorProviders = _tileProviderManager->colorTextureProviders();
-        auto nightProviders = _tileProviderManager->nightTextureProviders();
-        auto overlayProviders = _tileProviderManager->overlayProviders();
-        auto heightProviders = _tileProviderManager->heightMapProviders();
-        auto waterProviders = _tileProviderManager->waterMaskProviders();
+        auto colorProviders = _tileProviderManager->getLayerCategory("ColorTextures");
+        auto nightProviders = _tileProviderManager->getLayerCategory("NightTextures");
+        auto overlayProviders = _tileProviderManager->getLayerCategory("Overlays");
+        auto heightProviders = _tileProviderManager->getLayerCategory("HeightMaps");
+        auto waterProviders = _tileProviderManager->getLayerCategory("WaterMasks");
 
         addToggleLayerProperties(colorProviders, _activeColorLayers);
         addToggleLayerProperties(nightProviders, _activeNightLayers);
@@ -202,15 +202,15 @@ namespace openspace {
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
-            _tileProviderManager->colorTextureProviders();
+            _tileProviderManager->getLayerCategory("ColorTextures");
         std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
-            _tileProviderManager->nightTextureProviders();
+            _tileProviderManager->getLayerCategory("NightTextures");
         std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
-            _tileProviderManager->overlayProviders();
+            _tileProviderManager->getLayerCategory("OverlaysTextures");
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
-            _tileProviderManager->heightMapProviders();
+            _tileProviderManager->getLayerCategory("HeightMaps");
         std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
-            _tileProviderManager->waterMaskProviders();
+            _tileProviderManager->getLayerCategory("WaterMasks");
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();
