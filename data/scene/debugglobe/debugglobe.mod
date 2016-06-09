@@ -41,10 +41,6 @@ return {
                         FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml"
                     },
                     {
-                        Name = "Temporal Aqua Orbit Asc",
-                        FilePath = "map_service_configs/Temporal_Aqua_Orbit_Asc.xml"
-                    },
-                    {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
                     },
@@ -52,10 +48,26 @@ return {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                     },
+                },
+                NightTextures = {
+                    {
+                        Name = "Earth at Night  2012",
+                        FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+                    },
+                },
+                HeightMaps = {
+                    {
+                        Name = "Terrain tileset",
+                        FilePath = "map_service_configs/TERRAIN.wms",
+                    },
+                },
+                WaterMasks = {
                     {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/MODIS_Water_Mask.xml"
                     },
+                },
+                Overlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
@@ -67,12 +79,6 @@ return {
                     {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/Reference_Labels.xml",
-                    },
-                },
-                HeightMaps = {
-                    {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/TERRAIN.wms",
                     },
                 },
             },

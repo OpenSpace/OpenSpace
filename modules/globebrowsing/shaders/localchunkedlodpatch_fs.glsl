@@ -39,6 +39,7 @@ in float tileInterpolationParameter;
 
 in vec4 fs_position;
 in vec2 fs_uv;
+in vec3 ellipsoidNormalCameraSpace;
 
 Fragment getFragment() {
 	Fragment frag;
@@ -55,6 +56,49 @@ Fragment getFragment() {
 		colorTilesParent2);
 
 #endif // USE_COLORTEXTURE
+
+#if USE_WATERMASK
+	// TODO: Jonathas magic goes here here
+	// TODO: This function needs more parameters and should update the fragment color for water
+	frag.color = calculateWater(
+		frag.color,
+		fs_uv,
+		tileInterpolationParameter,
+		waterTiles,
+		waterTilesParent1,
+		waterTilesParent2);
+
+#endif // USE_WATERMASK
+
+#if USE_NIGHTTEXTURE
+	// TODO: Jonathas magic goes here here
+	// TODO: This function needs more parameters and should update the fragment color for night texture
+	frag.color = calculateNight(
+		frag.color,
+		fs_uv,
+		tileInterpolationParameter,
+		nightTiles,
+		nightTilesParent1,
+		nightTilesParent2,
+		ellipsoidNormalCameraSpace);
+
+#endif // USE_NIGHTTEXTURE
+
+#if USE_ATMOSPHERE
+	// TODO: Jonathas magic goes here here
+	frag.color = frag.color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
+#endif // USE_ATMOSPHERE
+
+#if USE_OVERLAY
+	frag.color = calculateOverlay(
+		frag.color,
+		fs_uv,
+		tileInterpolationParameter,
+		overlayTiles,
+		overlayTilesParent1,
+		overlayTilesParent2);
+
+#endif // USE_OVERLAY
 
 	//frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
 

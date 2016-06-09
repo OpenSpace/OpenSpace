@@ -55,9 +55,15 @@ namespace openspace {
 
         const std::vector<std::shared_ptr<TileProvider> > getActiveHeightMapProviders();
         const std::vector<std::shared_ptr<TileProvider> > getActiveColorTextureProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveNightTextureProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveOverlayProviders();
+        const std::vector<std::shared_ptr<TileProvider> > getActiveWaterMaskProviders();
 
         std::vector<TileProviderWithName>& heightMapProviders();
         std::vector<TileProviderWithName>& colorTextureProviders();
+        std::vector<TileProviderWithName>& nightTextureProviders();
+        std::vector<TileProviderWithName>& overlayProviders();
+        std::vector<TileProviderWithName>& waterMaskProviders();
 
         void prerender();
 
@@ -70,6 +76,9 @@ namespace openspace {
 
         std::vector<TileProviderWithName> _heightMapProviders;
         std::vector<TileProviderWithName> _colorTextureProviders;
+        std::vector<TileProviderWithName> _nightTextureProviders;
+        std::vector<TileProviderWithName> _overlayProviders;
+        std::vector<TileProviderWithName> _waterMaskProviders;
     };
 
 } // namespace openspace

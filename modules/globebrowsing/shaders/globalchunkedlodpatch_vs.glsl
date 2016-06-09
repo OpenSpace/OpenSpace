@@ -30,6 +30,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
 uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewTransform;
 uniform vec3 radiiSquared;
 
 uniform vec2 minLatLon;
@@ -52,6 +53,7 @@ layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
+out vec3 ellipsoidNormalCameraSpace;
 // tileInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
 out float tileInterpolationParameter;
@@ -106,4 +108,5 @@ void main()
 	fs_uv = in_uv;
 	fs_position = z_normalization(positionClippingSpace);
 	gl_Position = fs_position;
+	ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
 }

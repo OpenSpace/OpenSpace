@@ -32,7 +32,10 @@ namespace {
     const std::string _loggerCat = "TileProviderManager";
 
     const std::string keyColorTextures = "ColorTextures";
+    const std::string keyNightTextures = "NightTextures";
+    const std::string keyOverlays = "Overlays";
     const std::string keyHeightMaps = "HeightMaps";
+    const std::string keyWaterMasks = "WaterMasks";
 }
 
 
@@ -55,6 +58,31 @@ namespace openspace {
 
         initTexures(_colorTextureProviders, colorTexturesDict, colorInitData);
 
+        ghoul::Dictionary nightTexturesDict;
+        texDict.getValue(keyNightTextures, nightTexturesDict);
+
+        TileProviderInitData nightInitData;
+        nightInitData.minimumPixelSize = 1024;
+        nightInitData.threads = 1;
+        nightInitData.cacheSize = 500;
+        nightInitData.framesUntilRequestQueueFlush = 60;
+        nightInitData.preprocessTiles = false;
+
+        initTexures(_nightTextureProviders, nightTexturesDict, nightInitData);
+
+
+        ghoul::Dictionary overlaysDict;
+        texDict.getValue(keyOverlays, overlaysDict);
+
+        TileProviderInitData overlayInitData;
+        overlayInitData.minimumPixelSize = 1024;
+        overlayInitData.threads = 1;
+        overlayInitData.cacheSize = 500;
+        overlayInitData.framesUntilRequestQueueFlush = 60;
+        overlayInitData.preprocessTiles = false;
+
+        initTexures(_overlayProviders, overlaysDict, overlayInitData);
+
 
         ghoul::Dictionary heightTexturesDict;
         texDict.getValue(keyHeightMaps, heightTexturesDict);
@@ -67,6 +95,18 @@ namespace openspace {
         heightInitData.preprocessTiles = true;
 
         initTexures(_heightMapProviders, heightTexturesDict, heightInitData);
+
+        ghoul::Dictionary waterMaskDict;
+        texDict.getValue(keyWaterMasks, waterMaskDict);
+
+        TileProviderInitData waterInitData;
+        waterInitData.minimumPixelSize = 2048;
+        waterInitData.threads = 1;
+        waterInitData.cacheSize = 500;
+        waterInitData.framesUntilRequestQueueFlush = 60;
+        waterInitData.preprocessTiles = false;
+
+        initTexures(_waterMaskProviders, waterMaskDict, waterInitData);
     }
 
     TileProviderManager::~TileProviderManager()
@@ -134,8 +174,38 @@ namespace openspace {
         return _colorTextureProviders;
     }
 
+    std::vector<TileProviderManager::TileProviderWithName>&
+        TileProviderManager::nightTextureProviders()
+    {
+        return _nightTextureProviders;
+    }
+
+    std::vector<TileProviderManager::TileProviderWithName>&
+        TileProviderManager::overlayProviders()
+    {
+        return _overlayProviders;
+    }
+
+    std::vector<TileProviderManager::TileProviderWithName>&
+        TileProviderManager::waterMaskProviders()
+    {
+        return _waterMaskProviders;
+    }
+
     void TileProviderManager::prerender() {
         for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++) {
+            if (it->isActive) {
+                it->tileProvider->prerender();
+            }
+        }
+
+        for (auto it = _nightTextureProviders.begin(); it != _nightTextureProviders.end(); it++) {
+            if (it->isActive) {
+                it->tileProvider->prerender();
+            }
+        }
+
+        for (auto it = _overlayProviders.begin(); it != _overlayProviders.end(); it++) {
             if (it->isActive) {
                 it->tileProvider->prerender();
             }
@@ -146,6 +216,13 @@ namespace openspace {
                 it->tileProvider->prerender();
             }
         }
+
+        for (auto it = _waterMaskProviders.begin(); it != _waterMaskProviders.end(); it++) {
+            if (it->isActive) {
+                it->tileProvider->prerender();
+            }
+        }
+
     }
 
 
@@ -167,6 +244,45 @@ namespace openspace {
     {
         std::vector<std::shared_ptr<TileProvider> > tileProviders;
         for (auto it = _colorTextureProviders.begin(); it != _colorTextureProviders.end(); it++)
+        {
+            if (it->isActive) {
+                tileProviders.push_back(it->tileProvider);
+            }
+        }
+        return tileProviders;
+    }
+
+    const std::vector<std::shared_ptr<TileProvider> >
+        TileProviderManager::getActiveNightTextureProviders()
+    {
+        std::vector<std::shared_ptr<TileProvider> > tileProviders;
+        for (auto it = _nightTextureProviders.begin(); it != _nightTextureProviders.end(); it++)
+        {
+            if (it->isActive) {
+                tileProviders.push_back(it->tileProvider);
+            }
+        }
+        return tileProviders;
+    }
+
+    const std::vector<std::shared_ptr<TileProvider> >
+        TileProviderManager::getActiveOverlayProviders()
+    {
+        std::vector<std::shared_ptr<TileProvider> > tileProviders;
+        for (auto it = _overlayProviders.begin(); it != _overlayProviders.end(); it++)
+        {
+            if (it->isActive) {
+                tileProviders.push_back(it->tileProvider);
+            }
+        }
+        return tileProviders;
+    }
+
+    const std::vector<std::shared_ptr<TileProvider> >
+        TileProviderManager::getActiveWaterMaskProviders()
+    {
+        std::vector<std::shared_ptr<TileProvider> > tileProviders;
+        for (auto it = _waterMaskProviders.begin(); it != _waterMaskProviders.end(); it++)
         {
             if (it->isActive) {
                 tileProviders.push_back(it->tileProvider);

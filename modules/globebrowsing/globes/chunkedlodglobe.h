@@ -100,6 +100,10 @@ namespace openspace {
         // Layered rendering
         bool blendHeightMap;
         bool blendColorMap;
+        bool blendNightTexture;
+        bool blendWaterMask;
+        bool blendOverlay;
+        bool atmosphereEnabled;
 
     private:
 

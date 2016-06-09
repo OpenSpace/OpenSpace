@@ -78,6 +78,10 @@ public:
     // Layered rendering
     properties::BoolProperty blendHeightMap;
     properties::BoolProperty blendColorMap;
+    properties::BoolProperty blendNightTexture;
+    properties::BoolProperty blendOverlay;
+    properties::BoolProperty blendWaterMask;
+    properties::BoolProperty atmosphereEnabled;
 
 private:
     std::string _frame;
@@ -100,7 +104,10 @@ private:
     properties::BoolProperty _saveOrThrowCamera;
 
     std::vector<properties::BoolProperty> _activeColorLayers;
+    std::vector<properties::BoolProperty> _activeNightLayers;
+    std::vector<properties::BoolProperty> _activeOverlays;
     std::vector<properties::BoolProperty> _activeHeightMapLayers;
+    std::vector<properties::BoolProperty> _activeWaterMaskLayers;
 
     DistanceSwitch _distanceSwitch;
 };

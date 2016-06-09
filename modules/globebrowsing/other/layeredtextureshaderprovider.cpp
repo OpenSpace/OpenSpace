@@ -51,16 +51,18 @@ namespace openspace {
         const LayeredTexturePreprocessingData& other) const
     {
         
-        if (layeredTextureInfo.size() != other.layeredTextureInfo.size())
-        {
+        if (layeredTextureInfo.size() != other.layeredTextureInfo.size() ||
+            keyValuePairs.size() != other.keyValuePairs.size()) {
             return false;
         }
         else
         {
             bool equal = true;
-            for (size_t i = 0; i < layeredTextureInfo.size(); i++)
-            {
+            for (size_t i = 0; i < layeredTextureInfo.size(); i++) {
                 equal = equal && (layeredTextureInfo[i] == other.layeredTextureInfo[i]);
+            }
+            for (size_t i = 0; i < keyValuePairs.size(); i++) {
+                equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
             }
             return equal;
         }
@@ -116,7 +118,12 @@ namespace openspace {
             shaderDictionary.setValue(
                 textureTypes[i].keyLayerBlendingEnabled, textureTypes[i].layerBlendingEnabled);
         }
-        
+
+        // Other settings such as "useAtmosphere"
+        auto keyValuePairs = _preprocessingData.keyValuePairs;
+        for (size_t i = 0; i < keyValuePairs.size(); i++) {
+            shaderDictionary.setValue(keyValuePairs[i].first, keyValuePairs[i].second);
+        }
         // Remove old program
         _programObject.release();
 

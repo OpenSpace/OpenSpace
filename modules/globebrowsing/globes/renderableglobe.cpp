@@ -64,6 +64,10 @@ namespace openspace {
         , chunkHeight(properties::FloatProperty("chunkHeight", "chunkHeight", 8700.0f, 0.0f, 8700.0f))
         , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
         , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
+        , blendNightTexture(properties::BoolProperty("blendNightTexture", "blendNightTexture", true))
+        , blendOverlay(properties::BoolProperty("blendOverlay", "blendOverlay", true))
+        , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
+        , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
     {
         setName("RenderableGlobe");
         
@@ -78,6 +82,10 @@ namespace openspace {
 
         addProperty(blendHeightMap);
         addProperty(blendColorMap);
+        addProperty(blendNightTexture);
+        addProperty(blendOverlay);
+        addProperty(blendWaterMask);
+        addProperty(atmosphereEnabled);
 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
@@ -103,10 +111,16 @@ namespace openspace {
             new TileProviderManager(texturesDictionary));
 
         auto colorProviders = _tileProviderManager->colorTextureProviders();
+        auto nightProviders = _tileProviderManager->nightTextureProviders();
+        auto overlayProviders = _tileProviderManager->overlayProviders();
         auto heightProviders = _tileProviderManager->heightMapProviders();
+        auto waterProviders = _tileProviderManager->waterMaskProviders();
 
         addToggleLayerProperties(colorProviders, _activeColorLayers);
+        addToggleLayerProperties(nightProviders, _activeNightLayers);
+        addToggleLayerProperties(overlayProviders, _activeOverlays);
         addToggleLayerProperties(heightProviders, _activeHeightMapLayers);
+        addToggleLayerProperties(waterProviders, _activeWaterMaskLayers);
 
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
@@ -182,17 +196,36 @@ namespace openspace {
 
         _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
         _chunkedLodGlobe->blendColorMap = blendColorMap.value();
+        _chunkedLodGlobe->blendNightTexture = blendNightTexture.value();
+        _chunkedLodGlobe->blendOverlay = blendOverlay.value();
+        _chunkedLodGlobe->blendWaterMask = blendWaterMask.value();
+        _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
             _tileProviderManager->colorTextureProviders();
+        std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
+            _tileProviderManager->nightTextureProviders();
+        std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
+            _tileProviderManager->overlayProviders();
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
             _tileProviderManager->heightMapProviders();
+        std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
+            _tileProviderManager->waterMaskProviders();
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();
         }
+        for (size_t i = 0; i < nightTextureProviders.size(); i++) {
+            nightTextureProviders[i].isActive = _activeNightLayers[i].value();
+        }
+        for (size_t i = 0; i < overlayProviders.size(); i++) {
+            overlayProviders[i].isActive = _activeOverlays[i].value();
+        }
         for (size_t i = 0; i < heightMapProviders.size(); i++) {
             heightMapProviders[i].isActive = _activeHeightMapLayers[i].value();
+        }
+        for (size_t i = 0; i < waterMaskProviders.size(); i++) {
+            waterMaskProviders[i].isActive = _activeWaterMaskLayers[i].value();
         }
 
         // Update this after active layers have been updated

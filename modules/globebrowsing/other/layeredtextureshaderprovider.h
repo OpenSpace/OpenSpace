@@ -51,7 +51,7 @@ namespace openspace {
     struct LayeredTexturePreprocessingData
     {
         std::vector<LayeredTextureInfo> layeredTextureInfo;
-
+        std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayeredTexturePreprocessingData& other) const;
     };
 
