@@ -25,7 +25,7 @@
 #ifndef TEXTURETILEMAPPING_HGLSL
 #define TEXTURETILEMAPPING_HGLSL
 
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
 // First layer type from LayeredTextureShaderProvider is height map
@@ -101,9 +101,9 @@
 float calculateHeight(
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile heightTiles[NUMLAYERS_HEIGHTMAP],
-	const TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
-	const TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -121,38 +121,13 @@ float calculateHeight(
 
 	#for i in 0..#{lastLayerIndexHeight}
 	{
-		vec2 samplePos =
-			heightTiles[#{i}].uvTransform.uvScale * uv +
-			heightTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			heightTilesParent1[#{i}].uvTransform.uvScale * uv +
-			heightTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			heightTilesParent2[#{i}].uvTransform.uvScale * uv +
-			heightTilesParent2[#{i}].uvTransform.uvOffset;
+		float untransformedHeight = 
+			w1 * getTexVal(heightTiles[#{i}], uv).r +
+			w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
+			w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
 
-		/*
-		float sampledValue =
-			w1 * textureLod(heightTiles[#{i}].textureSampler, samplePos, 0).r +
-			w2 * textureLod(heightTilesParent1[#{i}].textureSampler, samplePosParent1, 0).r +
-			w3 * textureLod(heightTilesParent2[#{i}].textureSampler, samplePosParent2, 0).r;
-		*/
-		/*
-		float sampledValue =
-			w1 * textureGrad(heightTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)).r +
-			w2 * textureGrad(heightTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)).r +
-			w3 * textureGrad(heightTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0)).r;
-		*/
-
-		float sampledValue =
-			w1 * texture(heightTiles[#{i}].textureSampler, samplePos).r +
-			w2 * texture(heightTilesParent1[#{i}].textureSampler, samplePosParent1).r +
-			w3 * texture(heightTilesParent2[#{i}].textureSampler, samplePosParent2).r;
-
-		// TODO : Some kind of blending here. Now it just writes over
-		height = (sampledValue *
-			heightTiles[#{i}].depthTransform.depthScale +
-			heightTiles[#{i}].depthTransform.depthOffset);
+		// OBS! Only the values from the last height map will be used!
+		height = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
 	}
 	#endfor
 
@@ -162,9 +137,9 @@ float calculateHeight(
 vec4 calculateColor(
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile colorTiles[NUMLAYERS_COLORTEXTURE],
-	const TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
-	const TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
+	const Tile colorTiles[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
 
 	vec4 color = vec4(0);
 
@@ -182,33 +157,10 @@ vec4 calculateColor(
 
 	#for i in 0..#{lastLayerIndexColor}
 	{
-		vec2 samplePos =
-			colorTiles[#{i}].uvTransform.uvScale * uv +
-			colorTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			colorTilesParent1[#{i}].uvTransform.uvScale * uv +
-			colorTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			colorTilesParent2[#{i}].uvTransform.uvScale * uv +
-			colorTilesParent2[#{i}].uvTransform.uvOffset;
-		
-		/*
-		vec4 colorSample =
-			w1 * textureLod(colorTiles[#{i}].textureSampler, samplePos, 0) +
-			w2 * textureLod(colorTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
-			w3 * textureLod(colorTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
-		*/
-		/*
-		vec4 colorSample =
-			w1 * textureGrad(colorTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
-			w2 * textureGrad(colorTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
-			w3 * textureGrad(colorTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
-		*/
-		
-		vec4 colorSample =
-			w1 * texture(colorTiles[#{i}].textureSampler, samplePos) +
-			w2 * texture(colorTilesParent1[#{i}].textureSampler, samplePosParent1) +
-			w3 * texture(colorTilesParent2[#{i}].textureSampler, samplePosParent2);
+		vec4 colorSample = 
+			w1 * getTexVal(colorTiles[#{i}], uv) + 
+			w2 * getTexVal(colorTilesParent1[#{i}], uv) + 
+			w3 * getTexVal(colorTilesParent2[#{i}], uv);
 
 		color = blendOver(color, colorSample);
 	}
@@ -221,9 +173,9 @@ vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile nightTiles[NUMLAYERS_NIGHTTEXTURE],
-	const TextureTile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
-	const TextureTile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
 	const vec3 ellipsoidNormalCameraSpace) {
 
 	vec3 lightDirection = normalize(vec3(-1,-1,-1));
@@ -245,33 +197,10 @@ vec4 calculateNight(
 
 	#for i in 0..#{lastLayerIndexNight}
 	{
-		vec2 samplePos =
-			nightTiles[#{i}].uvTransform.uvScale * uv +
-			nightTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			nightTilesParent1[#{i}].uvTransform.uvScale * uv +
-			nightTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			nightTilesParent2[#{i}].uvTransform.uvScale * uv +
-			nightTilesParent2[#{i}].uvTransform.uvOffset;
-		
-		/*
 		vec4 colorSample =
-			w1 * textureLod(nightTiles[#{i}].textureSampler, samplePos, 0) +
-			w2 * textureLod(nightTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
-			w3 * textureLod(nightTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
-		*/
-		/*
-		vec4 colorSample =
-			w1 * textureGrad(nightTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
-			w2 * textureGrad(nightTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
-			w3 * textureGrad(nightTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
-		*/
-		
-		vec4 colorSample =
-			w1 * texture(nightTiles[#{i}].textureSampler, samplePos) +
-			w2 * texture(nightTilesParent1[#{i}].textureSampler, samplePosParent1) +
-			w3 * texture(nightTilesParent2[#{i}].textureSampler, samplePosParent2);
+			w1 * getTexVal(nightTiles[#{i}], uv) +
+			w2 * getTexVal(nightTilesParent1[#{i}], uv) +
+			w3 * getTexVal(nightTilesParent2[#{i}], uv);
 
 		nightColor = blendOver(nightColor, colorSample);
 	}
@@ -287,9 +216,9 @@ vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile overlayTiles[NUMLAYERS_OVERLAY],
-	const TextureTile overlayTilesParent1[NUMLAYERS_OVERLAY],
-	const TextureTile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
+	const Tile overlayTiles[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent1[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
 
 	vec4 color = currentColor;
 
@@ -307,33 +236,10 @@ vec4 calculateOverlay(
 
 	#for i in 0..#{lastLayerIndexOverlay}
 	{
-		vec2 samplePos =
-			overlayTiles[#{i}].uvTransform.uvScale * uv +
-			overlayTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			overlayTilesParent1[#{i}].uvTransform.uvScale * uv +
-			overlayTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			overlayTilesParent2[#{i}].uvTransform.uvScale * uv +
-			overlayTilesParent2[#{i}].uvTransform.uvOffset;
-		
-		/*
 		vec4 colorSample =
-			w1 * textureLod(overlayTiles[#{i}].textureSampler, samplePos, 0) +
-			w2 * textureLod(overlayTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
-			w3 * textureLod(overlayTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
-		*/
-		/*
-		vec4 colorSample =
-			w1 * textureGrad(overlayTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
-			w2 * textureGrad(overlayTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
-			w3 * textureGrad(overlayTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
-		*/
-		
-		vec4 colorSample =
-			w1 * texture(overlayTiles[#{i}].textureSampler, samplePos) +
-			w2 * texture(overlayTilesParent1[#{i}].textureSampler, samplePosParent1) +
-			w3 * texture(overlayTilesParent2[#{i}].textureSampler, samplePosParent2);
+			w1 * getTexVal(overlayTiles[#{i}], uv) +
+			w2 * getTexVal(overlayTilesParent1[#{i}], uv) +
+			w3 * getTexVal(overlayTilesParent2[#{i}], uv);
 
 		color = blendOver(color, colorSample);
 	}
@@ -346,9 +252,9 @@ vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
 	const float tileInterpolationParameter,
-	const TextureTile waterTiles[NUMLAYERS_WATERMASK],
-	const TextureTile waterTilesParent1[NUMLAYERS_WATERMASK],
-	const TextureTile waterTilesParent2[NUMLAYERS_WATERMASK]) {
+	const Tile waterTiles[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
 
 	vec4 waterColor = vec4(0,0,0,0);
 
@@ -366,33 +272,10 @@ vec4 calculateWater(
 
 	#for i in 0..#{lastLayerIndexWater}
 	{
-		vec2 samplePos =
-			waterTiles[#{i}].uvTransform.uvScale * uv +
-			waterTiles[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent1 =
-			waterTilesParent1[#{i}].uvTransform.uvScale * uv +
-			waterTilesParent1[#{i}].uvTransform.uvOffset;
-		vec2 samplePosParent2 =
-			waterTilesParent2[#{i}].uvTransform.uvScale * uv +
-			waterTilesParent2[#{i}].uvTransform.uvOffset;
-		
-		/*
 		vec4 colorSample =
-			w1 * textureLod(waterTiles[#{i}].textureSampler, samplePos, 0) +
-			w2 * textureLod(waterTilesParent1[#{i}].textureSampler, samplePosParent1, 0) +
-			w3 * textureLod(waterTilesParent2[#{i}].textureSampler, samplePosParent2, 0);
-		*/
-		/*
-		vec4 colorSample =
-			w1 * textureGrad(waterTiles[#{i}].textureSampler, samplePos, vec2(0), vec2(0)) +
-			w2 * textureGrad(waterTilesParent1[#{i}].textureSampler, samplePosParent1, vec2(0), vec2(0)) +
-			w3 * textureGrad(waterTilesParent2[#{i}].textureSampler, samplePosParent2, vec2(0), vec2(0));
-		*/
-		
-		vec4 colorSample =
-			w1 * texture(waterTiles[#{i}].textureSampler, samplePos) +
-			w2 * texture(waterTilesParent1[#{i}].textureSampler, samplePosParent1) +
-			w3 * texture(waterTilesParent2[#{i}].textureSampler, samplePosParent2);
+			w1 * getTexVal(waterTiles[#{i}], uv) +
+			w2 * getTexVal(waterTilesParent1[#{i}], uv) +
+			w3 * getTexVal(waterTilesParent2[#{i}], uv);
 
 		waterColor = blendOver(waterColor, colorSample);
 	}

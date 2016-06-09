@@ -26,7 +26,7 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
@@ -42,9 +42,9 @@ uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 
 #if USE_HEIGHTMAP
-uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTiles[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform int xSegments;
