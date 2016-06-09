@@ -50,4 +50,18 @@ vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
 	return vec4(color, 0);
 }
 
+vec4 getTexVal(const TextureTile tile, const vec2 tileUV){
+	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
+	vec4 texVal = texture(tile.textureSampler, samplePos);
+	return texVal;
+}
+
+vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
+float getTransformedTexVal(const TileDepthTransform transform, const float val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
 #endif // TEXTURETILE_HGLSL
