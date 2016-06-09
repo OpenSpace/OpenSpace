@@ -109,6 +109,32 @@ namespace openspace {
         else return Status::DO_NOTHING;
     }
 
+    Chunk::BoundingHeights Chunk::getBoundingHeights() const {
+        BoundingHeights boundingHeights;       
+        boundingHeights.max = _owner->chunkHeight;
+        boundingHeights.min = 0;
+        boundingHeights.available = false;
+
+        // In the future, this should be abstracted away and more easily queryable.
+        // One must also handle how to sample pick one out of multiplte heightmaps
+        auto tileProvidermanager = owner()->getTileProviderManager();
+        auto heightMapProviders = tileProvidermanager->getActiveHeightMapProviders();
+        if (heightMapProviders.size() > 0) {
+            TileAndTransform tileAndTransform = heightMapProviders[0]->getHighestResolutionTile(_index);
+            if (tileAndTransform.tile.status == Tile::Status::OK) {
+                std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
+                if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
+                    boundingHeights.max = preprocessData->maxValues[0];
+                    boundingHeights.min = preprocessData->minValues[0];
+                    boundingHeights.available = true;
+                }
+            }
+        }
+
+        return boundingHeights;
+    }
+
+
     void Chunk::render(const RenderData& data) const {
         _owner->getPatchRenderer().renderChunk(*this, data);
     }

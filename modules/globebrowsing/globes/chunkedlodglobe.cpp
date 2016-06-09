@@ -62,6 +62,7 @@ namespace openspace {
         , minSplitDepth(2)
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
+        , _tileProviderManager(tileProviderManager)
     {
 
         auto geometry = std::shared_ptr<SkirtedGrid>(new SkirtedGrid(
@@ -71,8 +72,9 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No));
 
-        _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
         _chunkCullers.push_back(new HorizonCuller());
+        _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
+        
 
         _patchRenderer.reset(new ChunkRenderer(geometry, tileProviderManager));
     }
@@ -94,15 +96,20 @@ namespace openspace {
         return ready;
     }
 
+    std::shared_ptr<TileProviderManager> ChunkedLodGlobe::getTileProviderManager() const {
+        return _tileProviderManager;
+    }
+
+
     ChunkRenderer& ChunkedLodGlobe::getPatchRenderer() const{
         return *_patchRenderer;
     }
 
     bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) {
-        if (doFrustumCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
+        if (doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
             return true;
         }
-        if (doHorizonCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
+        if (doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
             return true;
         }
         return false;

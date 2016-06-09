@@ -47,123 +47,47 @@ namespace openspace {
 
     }
 
-    bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
-        return !isVisible(renderData, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
-    }
-
-    bool FrustumCuller::isVisible(
-        const RenderData& data,
-        const dvec3& point) {
-
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
-        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
-            * viewTransform * modelTransform;
-
-        vec2 pointScreenSpace =
-            transformToScreenSpace(point, modelViewProjectionTransform);
-        return testPoint(pointScreenSpace, vec2(0));
-    }
-
-
-    bool FrustumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch,
-        const Ellipsoid& ellipsoid) 
-    {
-
-        // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
-        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
-            * viewTransform * modelTransform;
-
-        // Calculate the patch's center point in screen space
-        dvec4 patchCenterModelSpace =
-            dvec4(ellipsoid.cartesianSurfacePosition(patch.center()), 1);
-        vec4 patchCenterClippingSpace =
-            modelViewProjectionTransform * patchCenterModelSpace;
-        vec2 pointScreenSpace =
-            (1.0f / patchCenterClippingSpace.w) * patchCenterClippingSpace.xy();
-
-        // Calculate the screen space margin that represents an axis aligned bounding 
-        // box based on the patch's minimum boudning sphere
-        float boundingRadius = patch.minimalBoundingRadius(ellipsoid);
-        vec4 marginClippingSpace =
-            vec4(vec3(boundingRadius), 0) * mat4(data.camera.projectionMatrix());
-        vec2 marginScreenSpace =
-            (1.0f / patchCenterClippingSpace.w) * marginClippingSpace.xy();
-
-        // Test the bounding box by testing the center point and the corresponding margin
-        PointLocation res = testPoint(pointScreenSpace, marginScreenSpace);
-        return res == PointLocation::Inside;
-    }
-
-    bool FrustumCuller::isVisible(const RenderData& data, const GeodeticPatch& patch,
-        const Ellipsoid& ellipsoid, const Scalar maxHeight)
-    {
-        // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
-        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
-            * viewTransform * modelTransform;
-
-        double centerRadius = ellipsoid.maximumRadius();
-        //double centerRadius = glm::length(ellipsoid.cartesianSurfacePosition(patch.center()));
-        double maxCenterRadius = centerRadius + maxHeight;
+    bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
+        const GeodeticPatch& patch = chunk.surfacePatch();
         
+
+        // Calculate the MVP matrix
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
+            * viewTransform * modelTransform;
+
+        Chunk::BoundingHeights boundingHeight = chunk.getBoundingHeights();
+
+
+        double patchCenterRadius = ellipsoid.maximumRadius(); // assume worst case
+        
+        // As the patch is curved, the maximum height offsets at the corners must be long 
+        // enough to cover large enough to cover a boundingHeight.max at the center of the 
+        // patch. 
+        double maxCenterRadius = patchCenterRadius + boundingHeight.max;
         double maximumPatchSide = max(patch.halfSize().lat, patch.halfSize().lon);
-        double maxHeightOffset = maxCenterRadius / cos(maximumPatchSide) - centerRadius;
-        double minHeightOffset = 0; // for now
+        double maxCornerHeight = maxCenterRadius / cos(maximumPatchSide) - patchCenterRadius;
+
+        // The minimum height offset, however, we can simply 
+        double minCornerHeight = boundingHeight.min;
+        
 
         // Create a bounding box that fits the patch corners
         AABB3 bounds; // in screen space
         int numPositiveZ = 0;
         for (size_t i = 0; i < 8; i++) {
-            Quad q = (Quad) (i%4);
-            double offset = i < 4 ? minHeightOffset : maxHeightOffset;
-            Geodetic3 cornerGeodetic = { patch.getCorner(q), offset };
+            Quad q = (Quad)(i % 4);
+            double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
+            const Geodetic3& cornerGeodetic = { patch.getCorner(q), cornerHeight };
             dvec4 cornerModelSpace = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
             vec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
             vec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
             bounds.expand(cornerScreenSpace);
         }
 
-        return bounds.intersects(_viewFrustum);
-    }
-
-
-    PointLocation FrustumCuller::testPoint(const glm::vec2& pointScreenSpace,
-        const glm::vec2& marginScreenSpace)
-    {
-        const vec2& p = pointScreenSpace;
-
-        vec2 cullBounds = vec2(1) + marginScreenSpace;
-        int x = p.x <= -cullBounds.x ? 0 : p.x < cullBounds.x ? 1 : 2;
-        int y = p.y <= -cullBounds.y ? 0 : p.y < cullBounds.y ? 1 : 2;
-        PointLocation res = (PointLocation) (3 * y + x);
-
-        return res;
-    }
-
-    bool FrustumCuller::testPoint(const glm::vec3& pointScreenSpace,
-        const glm::vec3& marginScreenSpace) 
-    {
-
-        const vec3& p = pointScreenSpace;
-
-        vec3 cullBounds = vec3(1) + marginScreenSpace;
-        int x = p.x <= -cullBounds.x ? 0 : p.x < cullBounds.x ? 1 : 2;
-        int y = p.y <= -cullBounds.y ? 0 : p.y < cullBounds.y ? 1 : 2;
-        int z = p.z <= -cullBounds.z ? 0 : p.z < cullBounds.z ? 1 : 2;
-        return x == 1 && y == 1 && z == 1;
-    }
-
-    glm::vec2 FrustumCuller::transformToScreenSpace(const dvec3& point,
-        const dmat4x4& modelViewProjection)
-    {
-        vec4 pointProjectionSpace = modelViewProjection * dvec4(point, 1.0);
-        vec2 pointScreenSpace =
-            (1.0f / pointProjectionSpace.w) * pointProjectionSpace.xy();
-        return pointScreenSpace;
+        return !bounds.intersects(_viewFrustum);
     }
 
 
@@ -178,11 +102,28 @@ namespace openspace {
 
     }
 
-    bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& renderData) {
-        return !isVisible(renderData, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
+    bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+        //return !isVisible(data, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
+        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
+        const GeodeticPatch& patch = chunk.surfacePatch();
+        float maxHeight = chunk.getBoundingHeights().max;
+        Vec3 globePosition = data.position.dvec3();
+        Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
+
+        Vec3 cameraPosition = data.camera.positionVec3();
+
+        Vec3 globeToCamera = cameraPosition - globePosition;
+
+        Geodetic2 cameraPositionOnGlobe =
+            ellipsoid.cartesianToGeodetic2(globeToCamera);
+        Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
+        const Vec3& objectPosition = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
+
+        return isCullable(cameraPosition, globePosition, objectPosition,
+            maxHeight, minimumGlobeRadius);
     }
 
-    bool HorizonCuller::isVisible(
+    bool HorizonCuller::isCullable(
         const Vec3& cameraPosition,
         const Vec3& globePosition,
         const Vec3& objectPosition,
@@ -199,32 +140,7 @@ namespace openspace {
             pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
             + pow(objectBoundingSphereRadius, 2);
         Scalar distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
-        return distanceToObjectSquared < minimumAllowedDistanceToObjectSquared;
-    }
-
-    bool HorizonCuller::isVisible(
-        const RenderData& data,
-        const GeodeticPatch& patch,
-        const Ellipsoid& ellipsoid,
-        float height)
-    {
-        Vec3 globePosition = data.position.dvec3();
-        Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
-
-        Vec3 cameraPosition = data.camera.positionVec3();
-
-        Vec3 globeToCamera = cameraPosition - globePosition;
-
-        Geodetic2 cameraPositionOnGlobe =
-            ellipsoid.cartesianToGeodetic2(globeToCamera);
-        Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
-
-        return HorizonCuller::isVisible(
-            cameraPosition,
-            globePosition,
-            ellipsoid.cartesianSurfacePosition(closestPatchPoint),
-            height,
-            minimumGlobeRadius);
+        return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
     }
 
 }  // namespace openspace
