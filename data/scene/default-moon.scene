@@ -1,0 +1,89 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    --YYYY-MM-DDTHH:MN:SS
+    --openspace.time.setTime(openspace.time.currentWallTime())
+     --[[
+     --   March 9, 2016 total eclipse times from land
+     --   Palembang, South Sumatra, Indonesia
+     --   Partial solar eclipse begins: 6:20 a.m. local Western Indonesian Time
+     --   Total solar eclipse begins: 7:20 a.m. local time
+     --   Maximum eclipse: 7:21 a.m. local time
+     --   Total solar eclipse ends: 7:22 a.m. local time
+     --   Partial solar eclipse ends: 8:31 a.m. local time
+
+     --   6:20 -> 23:20 day before in UTC
+    ]]--
+    openspace.time.setTime("2016-03-08T22:45:00")
+
+
+    -- Total Lunar Eclipse Jan 31, 2018 at 10:51:13 UTC
+    -- Regions seeing, at least, some parts of the eclipse: North/East Europe,
+    -- Asia, Australia, North/East Africa, North America, North/East South America,
+    -- Pacific, Atlantic, Indian Ocean, Arctic, Antarctica.
+    --openspace.time.setTime("2018-01-31T10:30:00")
+
+    --openspace.time.setDeltaTime(200.0)
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
+    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.printInfo("Done setting default values")
+end
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Earth",
+        --Focus = "Moon",
+        Position = {1, 0, 0, 5},
+    },
+    Modules = {
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "moon",
+        "mars",
+        --"jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        "stars",
+        -- "stars-denver",
+        "milkyway",
+        -- "milkyway-eso",
+        --"constellationbounds",
+        -- "fieldlines",
+        --"io",
+        --"europa",
+        --"ganymede",
+        --"callisto",
+        --"gridGalactic",
+        --"gridEcliptic",
+        --"gridEquatorial",
+    }
+}
+
