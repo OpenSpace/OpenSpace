@@ -769,14 +769,14 @@ void RenderablePlanet::render(const RenderData& data)
     // Atmosphere Data
     if (_atmosphereEnabled) {
 
-        GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errorString = gluErrorString(err);
-            std::stringstream ss;
-            ss << "Error setting up atmosphere framebuffer. OpenGL error: "
-                << err << " - " << errorString << std::endl;
-            LERROR(ss.str());
-        }
+//        GLenum err;
+//        while ((err = glGetError()) != GL_NO_ERROR) {
+//            const GLubyte * errorString = gluErrorString(err);
+//            std::stringstream ss;
+//            ss << "Error setting up atmosphere framebuffer. OpenGL error: "
+//                << err << " - " << errorString << std::endl;
+//            LERROR(ss.str());
+//        }
 
         // Object Space (in Km)
         glm::mat4 obj2World = glm::translate(glm::mat4(1.0), data.position.vec3() / 1000.0f);
@@ -1156,12 +1156,12 @@ void RenderablePlanet::loadTexture() {
         }
     }
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Error after reading memory 4. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
+//    while ((err = glGetError()) != GL_NO_ERROR) {
+//        const GLubyte * errString = gluErrorString(err);
+//        std::stringstream ss;
+//        ss << "Error after reading memory 4. OpenGL error: " << errString << std::endl;
+//        LERROR(ss.str());
+//    }
 
     if (_hasCloudsTexture) {
         _cloudsTexture = nullptr;
@@ -1176,12 +1176,12 @@ void RenderablePlanet::loadTexture() {
         }
     }
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Error after reading memory 5. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
+//    while ((err = glGetError()) != GL_NO_ERROR) {
+//        const GLubyte * errString = gluErrorString(err);
+//        std::stringstream ss;
+//        ss << "Error after reading memory 5. OpenGL error: " << errString << std::endl;
+//        LERROR(ss.str());
+//    }
 }
 
 void RenderablePlanet::loadComputationPrograms() {
