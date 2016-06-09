@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,33 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+uniform float exposure;
 
-#ifndef TEXTURETILE_HGLSL
-#define TEXTURETILE_HGLSL
-
-struct TileDepthTransform {
-    float depthScale;
-    float depthOffset;
-};
-
-struct TileUvTransform {
-    vec2 uvOffset;
-    vec2 uvScale;
-};
-
-struct TextureTile {
-	sampler2D textureSampler;
-	
-	TileDepthTransform depthTransform;
-	TileUvTransform uvTransform;
-};
-
-vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
-	vec2 uvOffset = uv - vec2(0.5);
-	float thres = 0.5 - borderSize/2;
-	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
-	vec3 color = isBorder ? borderColor : vec3(0);
-	return vec4(color, 0);
+vec4 HDR(vec4 color) {
+    color *= exposure;
+    
+    color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.r);
+    color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.g);
+    color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.b);
+    
+    return color;
 }
-
-#endif // TEXTURETILE_HGLSL

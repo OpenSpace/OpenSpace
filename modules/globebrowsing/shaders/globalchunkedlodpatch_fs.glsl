@@ -22,34 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 #include "fragment.glsl"
 
 #if USE_COLORTEXTURE
-uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
-uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
-uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTiles[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
 #if USE_NIGHTTEXTURE
-uniform TextureTile nightTiles[NUMLAYERS_NIGHTTEXTURE];
-uniform TextureTile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
-uniform TextureTile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTiles[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
-uniform TextureTile overlayTiles[NUMLAYERS_OVERLAY];
-uniform TextureTile overlayTilesParent1[NUMLAYERS_OVERLAY];
-uniform TextureTile overlayTilesParent2[NUMLAYERS_OVERLAY];
+uniform Tile overlayTiles[NUMLAYERS_OVERLAY];
+uniform Tile overlayTilesParent1[NUMLAYERS_OVERLAY];
+uniform Tile overlayTilesParent2[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
 #if USE_WATERMASK
-uniform TextureTile waterTiles[NUMLAYERS_WATERMASK];
-uniform TextureTile waterTilesParent1[NUMLAYERS_WATERMASK];
-uniform TextureTile waterTilesParent2[NUMLAYERS_WATERMASK];
+uniform Tile waterTiles[NUMLAYERS_WATERMASK];
+uniform Tile waterTilesParent1[NUMLAYERS_WATERMASK];
+uniform Tile waterTilesParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
 #if USE_ATMOSPHERE
@@ -60,18 +60,20 @@ in vec3 ellipsoidNormalCameraSpace;
 in vec4 fs_position;
 in vec2 fs_uv;
 
-in float tileInterpolationParameter;
+in LevelWeights levelWeights;
 
 Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = vec4(0.1,0.1,0.1,1);
 
-#if USE_COLORTEXTURE
+	//LevelWeights levelWeights = getLevelWeights(levelInterpolationParameter);
 
+#if USE_COLORTEXTURE
+	
 	frag.color = calculateColor(
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,//levelInterpolationParameter,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -83,7 +85,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -95,7 +97,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -112,14 +114,16 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);
 
 #endif // USE_OVERLAY
 
-	//frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
+#if SHOW_CHUNK_EDGES
+	frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
+#endif // SHOW_CHUNK_EDGES
 
 	frag.depth = fs_position.w;
 

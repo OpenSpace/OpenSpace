@@ -187,6 +187,12 @@ namespace openspace {
                 "useAtmosphere",
                 std::to_string(chunk.owner()->atmosphereEnabled)));
 
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "showChunkEdges",
+                std::to_string(chunk.owner()->showChunkEdges)));
+
+
         // Now the shader program can be accessed
         ProgramObject* programObject =
             layeredTextureShaderProvider->getUpdatedShaderProgram(
