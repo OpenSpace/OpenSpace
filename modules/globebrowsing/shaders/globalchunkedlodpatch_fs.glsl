@@ -60,20 +60,20 @@ in vec3 ellipsoidNormalCameraSpace;
 in vec4 fs_position;
 in vec2 fs_uv;
 
-in float levelInterpolationParameter;
+in LevelWeights levelWeights;
 
 Fragment getFragment() {
 	Fragment frag;
 
 	frag.color = vec4(0.1,0.1,0.1,1);
 
-	
+	//LevelWeights levelWeights = getLevelWeights(levelInterpolationParameter);
 
 #if USE_COLORTEXTURE
 
 	frag.color = calculateColor(
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,//levelInterpolationParameter,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -85,7 +85,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -97,7 +97,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -114,14 +114,16 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);
 
 #endif // USE_OVERLAY
 
-	//frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
+#if SHOW_CHUNK_EDGES
+	frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
+#endif // SHOW_CHUNK_EDGES
 
 	frag.depth = fs_position.w;
 

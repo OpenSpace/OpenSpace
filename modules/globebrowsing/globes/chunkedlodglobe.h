@@ -107,6 +107,7 @@ namespace openspace {
         bool blendWaterMask;
         bool blendOverlay;
         bool atmosphereEnabled;
+        bool showChunkEdges;
 
     private:
 

@@ -54,9 +54,8 @@ layout(location = 1) in vec2 in_uv;
 out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
-// levelInterpolationParameter is used to interpolate between a tile and its parent tiles
-// The value increases with the distance from the vertex (or fragment) to the camera
-out float levelInterpolationParameter;
+
+out LevelWeights levelWeights;
 
 PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
@@ -74,8 +73,8 @@ void main()
     float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
 	float desiredLevel = log2(projectedScaleFactor);
 
-	levelInterpolationParameter = chunkLevel - desiredLevel;
-
+	float levelInterpolationParameter = chunkLevel - desiredLevel;
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 	float height = 0;
 
 #if USE_HEIGHTMAP
@@ -84,7 +83,7 @@ void main()
     // Before any heightmapping is done
 	height = calculateHeight(
 		in_uv,
-		levelInterpolationParameter, 							// Variable to determine which texture to sample from
+		levelWeights, 							// Variable to determine which texture to sample from
 		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP

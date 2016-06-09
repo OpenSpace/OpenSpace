@@ -29,78 +29,37 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
 // First layer type from LayeredTextureShaderProvider is height map
-#ifndef NUMLAYERS_HEIGHTMAP
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
-#endif // NUMLAYERS_HEIGHTMAP
-
-#ifndef USE_HEIGHTMAP 
 #define USE_HEIGHTMAP #{useHeightMap}
-#endif // USE_HEIGHTMAP
-
-#ifndef HEIGHTMAP_BLENDING_ENABLED 
 #define HEIGHTMAP_BLENDING_ENABLED #{heightMapBlendingEnabled}
-#endif // HEIGHTMAP_BLENDING_ENABLED
 
 // Second layer type from LayeredTextureShaderProvider is color texture
-#ifndef NUMLAYERS_COLORTEXTURE
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
-#endif // NUMLAYERS_COLORTEXTURE
-
-#ifndef USE_COLORTEXTURE 
 #define USE_COLORTEXTURE #{useColorTexture}
-#endif // USE_COLORTEXTURE
-
-#ifndef COLORTEXTURE_BLENDING_ENABLED 
 #define COLORTEXTURE_BLENDING_ENABLED #{colorTextureBlendingEnabled}
-#endif // COLORTEXTURE_BLENDING_ENABLED
 
  // Third layer type from LayeredTextureShaderProvider is water mask
-#ifndef NUMLAYERS_WATERMASK
 #define NUMLAYERS_WATERMASK #{lastLayerIndexWater} + 1
-#endif // NUMLAYERS_WATERMASK
-
-#ifndef USE_WATERMASK 
 #define USE_WATERMASK #{useWaterMask}
-#endif // USE_WATERMASK
-
-#ifndef WATERMASK_BLENDING_ENABLED 
 #define WATERMASK_BLENDING_ENABLED #{waterMaskBlendingEnabled}
-#endif // WATERMASK_BLENDING_ENABLED
 
 // Fourth layer type from LayeredTextureShaderProvider is night texture
-#ifndef NUMLAYERS_NIGHTTEXTURE
 #define NUMLAYERS_NIGHTTEXTURE #{lastLayerIndexNight} + 1
-#endif // NUMLAYERS_NIGHTTEXTURE
-
-#ifndef USE_NIGHTTEXTURE 
 #define USE_NIGHTTEXTURE #{useNightTexture}
-#endif // USE_NIGHTTEXTURE
-
-#ifndef NIGHTTEXTURE_BLENDING_ENABLED 
 #define NIGHTTEXTURE_BLENDING_ENABLED #{nightTextureBlendingEnabled}
-#endif // NIGHTTEXTURE_BLENDING_ENABLED
 
 // Fifth layer type from LayeredTextureShaderProvider is overlay
-#ifndef NUMLAYERS_OVERLAY
 #define NUMLAYERS_OVERLAY #{lastLayerIndexOverlay} + 1
-#endif // NUMLAYERS_OVERLAY
-
-#ifndef USE_OVERLAY 
 #define USE_OVERLAY #{useOverlay}
-#endif // USE_OVERLAY
-
-#ifndef OVERLAY_BLENDING_ENABLED 
 #define OVERLAY_BLENDING_ENABLED #{overlayBlendingEnabled}
-#endif // OVERLAY_BLENDING_ENABLED
 
 // Other key value pairs used for settings
-#ifndef USE_ATMOSPHERE
 #define USE_ATMOSPHERE #{useAtmosphere}
-#endif // USE_ATMOSPHERE
+#define SHOW_CHUNK_EDGES #{showChunkEdges}
 
 float calculateHeight(
 	const vec2 uv,
-	const float levelInterpolationParameter,
+	LevelWeights levelWeights,
 	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
 	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
 	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
@@ -109,10 +68,7 @@ float calculateHeight(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
-	LevelWeights levelWeights;
-#if HEIGHTMAP_BLENDING_ENABLED
-	levelWeights = getLevelWeights(levelInterpolationParameter);
-#else // HEIGHTMAP_BLENDING_ENABLED
+#if !HEIGHTMAP_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
 
@@ -133,7 +89,7 @@ float calculateHeight(
 
 vec4 calculateColor(
 	const vec2 uv,
-	const float levelInterpolationParameter,
+	LevelWeights levelWeights,
 	const Tile colorTiles[NUMLAYERS_COLORTEXTURE],
 	const Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
 	const Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
@@ -142,10 +98,7 @@ vec4 calculateColor(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
-	LevelWeights levelWeights;
-#if COLORTEXTURE_BLENDING_ENABLED
-	levelWeights = getLevelWeights(levelInterpolationParameter);
-#else // COLORTEXTURE_BLENDING_ENABLED
+#if !COLORTEXTURE_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // COLORTEXTURE_BLENDING_ENABLED
 
@@ -166,7 +119,7 @@ vec4 calculateColor(
 vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float levelInterpolationParameter,
+	LevelWeights levelWeights,
 	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
@@ -179,10 +132,7 @@ vec4 calculateNight(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
-	LevelWeights levelWeights;
-#if NIGHTTEXTURE_BLENDING_ENABLED
-	levelWeights = getLevelWeights(levelInterpolationParameter)
-#else // NIGHTTEXTURE_BLENDING_ENABLED
+#if !NIGHTTEXTURE_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
@@ -206,7 +156,7 @@ vec4 calculateNight(
 vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float levelInterpolationParameter,
+	LevelWeights levelWeights,
 	const Tile overlayTiles[NUMLAYERS_OVERLAY],
 	const Tile overlayTilesParent1[NUMLAYERS_OVERLAY],
 	const Tile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
@@ -215,10 +165,7 @@ vec4 calculateOverlay(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
-	LevelWeights levelWeights;
-#if OVERLAY_BLENDING_ENABLED
-	levelWeights = getLevelWeights(levelInterpolationParameter);
-#else // OVERLAY_BLENDING_ENABLED
+#if !OVERLAY_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // OVERLAY_BLENDING_ENABLED
 
@@ -239,7 +186,7 @@ vec4 calculateOverlay(
 vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
-	const float levelInterpolationParameter,
+	LevelWeights levelWeights,
 	const Tile waterTiles[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
@@ -248,10 +195,7 @@ vec4 calculateWater(
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
-	LevelWeights levelWeights;
-#if WATERMASK_BLENDING_ENABLED
-	levelWeights = getLevelWeights(levelInterpolationParameter);
-#else // WATERMASK_BLENDING_ENABLED
+#if !WATERMASK_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // WATERMASK_BLENDING_ENABLED
 

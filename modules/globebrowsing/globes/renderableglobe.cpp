@@ -68,6 +68,7 @@ namespace openspace {
         , blendOverlay(properties::BoolProperty("blendOverlay", "blendOverlay", true))
         , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
+        , showChunkEdges(properties::BoolProperty("showChunkEdges", "showChunkEdges", false))
     {
         setName("RenderableGlobe");
         
@@ -86,6 +87,7 @@ namespace openspace {
         addProperty(blendOverlay);
         addProperty(blendWaterMask);
         addProperty(atmosphereEnabled);
+        addProperty(showChunkEdges);
 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
@@ -200,6 +202,7 @@ namespace openspace {
         _chunkedLodGlobe->blendOverlay = blendOverlay.value();
         _chunkedLodGlobe->blendWaterMask = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
+        _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
             _tileProviderManager->colorTextureProviders();

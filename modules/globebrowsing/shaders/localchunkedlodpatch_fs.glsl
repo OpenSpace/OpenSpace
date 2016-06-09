@@ -53,7 +53,7 @@ uniform Tile waterTilesParent2[NUMLAYERS_WATERMASK];
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
-in float levelInterpolationParameter;
+in LevelWeights levelWeights;
 
 in vec4 fs_position;
 in vec2 fs_uv;
@@ -64,11 +64,13 @@ Fragment getFragment() {
 
 	frag.color = vec4(1,1,1,1);
 
+	//LevelWeights levelWeights = getLevelWeights(levelInterpolationParameter);
+
 #if USE_COLORTEXTURE
 
 	frag.color = calculateColor(
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -81,7 +83,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -94,7 +96,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -111,14 +113,17 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		levelInterpolationParameter,
+		levelWeights,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);
 
 #endif // USE_OVERLAY
 
-	//frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
+#if SHOW_CHUNK_EDGES
+	frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
+#endif // SHOW_CHUNK_EDGES
+
 
 	frag.depth = fs_position.w;
 
