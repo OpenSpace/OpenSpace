@@ -350,7 +350,7 @@ vec4 calculateWater(
 	const TextureTile waterTilesParent1[NUMLAYERS_WATERMASK],
 	const TextureTile waterTilesParent2[NUMLAYERS_WATERMASK]) {
 
-	vec4 color = currentColor;
+	vec4 waterColor = vec4(0,0,0,0);
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -394,11 +394,11 @@ vec4 calculateWater(
 			w2 * texture(waterTilesParent1[#{i}].textureSampler, samplePosParent1) +
 			w3 * texture(waterTilesParent2[#{i}].textureSampler, samplePosParent2);
 
-		color = blendOver(color, colorSample);
+		waterColor = blendOver(waterColor, colorSample);
 	}
 	#endfor
 
-	return color;
+	return blendOver(currentColor, waterColor);
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL
