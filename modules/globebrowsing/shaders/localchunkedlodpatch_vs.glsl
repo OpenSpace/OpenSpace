@@ -26,7 +26,7 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
@@ -42,9 +42,9 @@ uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 
 #if USE_HEIGHTMAP
-uniform TextureTile heightTiles[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
-uniform TextureTile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTiles[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform int xSegments;
@@ -59,9 +59,7 @@ out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 
-// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
-// The value increases with the distance from the vertex (or fragment) to the camera
-out float tileInterpolationParameter;
+out LevelWeights levelWeights;
 
 vec3 bilinearInterpolation(vec2 uv) {
 	// Bilinear interpolation
@@ -84,7 +82,8 @@ void main()
     float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
 	float desiredLevel = log2(projectedScaleFactor);
 
-	tileInterpolationParameter = chunkLevel - desiredLevel;
+	float levelInterpolationParameter = chunkLevel - desiredLevel;
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 
 	#if USE_HEIGHTMAP
 	
@@ -92,7 +91,7 @@ void main()
     // Before any heightmapping is done
 	height = calculateHeight(
 		in_uv,
-		tileInterpolationParameter, 							// Variable to determine which texture to sample from
+		levelWeights, 							// Variable to determine which texture to sample from
 		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
 
 	#endif // USE_HEIGHTMAP

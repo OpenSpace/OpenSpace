@@ -22,38 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 #if USE_COLORTEXTURE
-uniform TextureTile colorTiles[NUMLAYERS_COLORTEXTURE];
-uniform TextureTile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
-uniform TextureTile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTiles[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
+uniform Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
 #if USE_NIGHTTEXTURE
-uniform TextureTile nightTiles[NUMLAYERS_NIGHTTEXTURE];
-uniform TextureTile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
-uniform TextureTile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTiles[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
-uniform TextureTile overlayTiles[NUMLAYERS_OVERLAY];
-uniform TextureTile overlayTilesParent1[NUMLAYERS_OVERLAY];
-uniform TextureTile overlayTilesParent2[NUMLAYERS_OVERLAY];
+uniform Tile overlayTiles[NUMLAYERS_OVERLAY];
+uniform Tile overlayTilesParent1[NUMLAYERS_OVERLAY];
+uniform Tile overlayTilesParent2[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
 #if USE_WATERMASK
-uniform TextureTile waterTiles[NUMLAYERS_WATERMASK];
-uniform TextureTile waterTilesParent1[NUMLAYERS_WATERMASK];
-uniform TextureTile waterTilesParent2[NUMLAYERS_WATERMASK];
+uniform Tile waterTiles[NUMLAYERS_WATERMASK];
+uniform Tile waterTilesParent1[NUMLAYERS_WATERMASK];
+uniform Tile waterTilesParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
-// tileInterpolationParameter is used to interpolate between a tile and its parent tiles
+// levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
-in float tileInterpolationParameter;
+in LevelWeights levelWeights;
 
 in vec4 fs_position;
 in vec2 fs_uv;
@@ -68,7 +68,7 @@ Fragment getFragment() {
 
 	frag.color = calculateColor(
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		colorTiles,
 		colorTilesParent1,
 		colorTilesParent2);
@@ -81,7 +81,7 @@ Fragment getFragment() {
 	frag.color = calculateWater(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		waterTiles,
 		waterTilesParent1,
 		waterTilesParent2);
@@ -94,7 +94,7 @@ Fragment getFragment() {
 	frag.color = calculateNight(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		nightTiles,
 		nightTilesParent1,
 		nightTilesParent2,
@@ -111,14 +111,17 @@ Fragment getFragment() {
 	frag.color = calculateOverlay(
 		frag.color,
 		fs_uv,
-		tileInterpolationParameter,
+		levelWeights,
 		overlayTiles,
 		overlayTilesParent1,
 		overlayTilesParent2);
 
 #endif // USE_OVERLAY
 
-	//frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
+#if SHOW_CHUNK_EDGES
+	frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
+#endif // SHOW_CHUNK_EDGES
+
 
 	frag.depth = fs_position.w;
 

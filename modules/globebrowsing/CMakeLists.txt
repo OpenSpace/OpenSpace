@@ -27,70 +27,74 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunk.h
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkindex.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovidermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/layeredtextureshaderprovider.h
+    
 
 )
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/globemesh.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunknode.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunk.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkindex.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/geodetic2.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/angle.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/geodetics/ellipsoid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/culling.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/aabb.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/temporaltileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tiledataset.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/tileprovidermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/layeredtextureshaderprovider.cpp
+    
    
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -98,7 +102,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/blending.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetile.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_vs.glsl

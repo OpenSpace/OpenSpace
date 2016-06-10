@@ -89,6 +89,9 @@ data/scene/earth/textures/earth_bluemarble.jpg
 data/scene/earth/textures/earth_bluemarble_height.jpg
 data/scene/earth/textures/earth_night.jpg
 data/scene/earth/textures/marker.png
+data/scene/earth/textures/earth_clouds.jpg
+data/scene/earth/textures/earth_reflectance.png
+data/scene/moon/textures/Moon16k.dds
 data/scene/newhorizons/jupiter/europa/textures/europa.jpg
 data/scene/newhorizons/jupiter/ganymede/textures/ganymede.jpg
 data/scene/newhorizons/jupiter/io/textures/io.jpg
