@@ -140,15 +140,15 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
-            std::stringstream ss(line);
+            std::stringstream ss(line); 
             copy(
-                std::istream_iterator<float> (ss),
+                std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
                 std::istream_iterator<float> (),
                 back_inserter(values)
             );
 
             for(int option : selectedOptions){
-                value = values[option+3]; //+3 because options x, y and z in the file
+                value = values[option]; 
                 dataOptions[option][numValues] = processDataPoint(value, option);
             }
             numValues++;

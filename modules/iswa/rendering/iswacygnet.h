@@ -64,7 +64,6 @@ struct Metadata {
 
 
 class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
-    friend class IswaBaseGroup;
 
 public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
@@ -134,6 +133,20 @@ protected:
 
     std::shared_ptr<Metadata> _data;
 
+    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
+    std::future<DownloadManager::MemoryFile> _futureObject;
+
+    std::shared_ptr<IswaBaseGroup> _group;
+
+    bool _textureDirty;
+
+    // Must be set by children.
+    std::string _vsPath;
+    std::string _fsPath;
+    std::string _programName;
+
+private:
+    bool destroyShader();
     glm::dmat3 _stateMatrix;
 
     double _openSpaceTime;
@@ -142,21 +155,6 @@ protected:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
-
-    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
-    std::future<DownloadManager::MemoryFile> _futureObject;
-
-    std::shared_ptr<IswaBaseGroup> _group;
-
-    bool _textureDirty;
-
-    std::string _vsPath;
-    std::string _fsPath;
-    std::string _programName;
-
-private:
-    bool destroyShader();
-
 };
 
 }//namespace openspace
