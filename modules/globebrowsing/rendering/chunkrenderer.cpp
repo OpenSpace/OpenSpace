@@ -28,7 +28,7 @@
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/openspaceengine.h> 
 #include <openspace/rendering/renderengine.h>
 
 // ghoul includes
@@ -443,7 +443,7 @@ namespace openspace {
         }
 
         // The length of the skirts is proportional to its size
-        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+        programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
         return programObject;

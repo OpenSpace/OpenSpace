@@ -206,7 +206,7 @@ namespace openspace {
         std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
             _tileProviderManager->getLayerCategory("NightTextures");
         std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
-            _tileProviderManager->getLayerCategory("OverlaysTextures");
+            _tileProviderManager->getLayerCategory("Overlays");
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
             _tileProviderManager->getLayerCategory("HeightMaps");
         std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
