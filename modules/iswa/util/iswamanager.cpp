@@ -305,6 +305,15 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             spatialScale.w = 6;
         }
 
+        float xOffset = 0.0f;
+        if(data->id == -7)
+            xOffset = -10.0f;
+        if(data->id == -8)
+            xOffset = -20.0f;
+        if(data->id == -9)
+            xOffset = -30.0f;
+
+        std::cout << xOffset << std::endl;
 
         std::string table = "{"
         "Name = '" + data->name +"' , "
@@ -319,6 +328,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = '"+ data->group + "',"
+            "XOffset = "+ std::to_string(xOffset) + ","
             "}"
         "}";
         

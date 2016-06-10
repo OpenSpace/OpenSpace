@@ -52,6 +52,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     // dict.getValue can only set strings in _data directly
     float renderableId;
     float updateTime;
+    float xOffset;
     glm::vec3 min, max;
     glm::vec4 spatialScale;
 
@@ -62,6 +63,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("GridMax", max);
     dictionary.getValue("Frame",_data->frame);
     dictionary.getValue("CoordinateType", _data->coordinateType);
+    dictionary.getValue("XOffset", xOffset);
     
     _data->id = (int) renderableId;
     _data->updateTime = (int) updateTime;
@@ -79,8 +81,10 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
         (max.z - min.z)
     );
 
+    std::cout << xOffset << std::endl;
+
     offset = glm::vec3(
-        (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
+        (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f)+xOffset,
         (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
         (min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
     );
