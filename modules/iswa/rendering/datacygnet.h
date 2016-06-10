@@ -60,6 +60,17 @@ protected:
      * shader program, this includes both the data and transferfunctions.
      */
     void setTextureUniforms();
+
+    /**
+     * Sets and defines the on-change handlers for the gui properties.
+     */
+    void setPropertyCallbacks();
+
+    /**
+     * Subscribes to the group events that are shared by all DataCygnets
+     */
+    void subscribeToGroup();
+
     /**
      * Optional interface method. this has an implementation
      * in datacygnet.cpp, but needs to be overriden for kameleonplane
@@ -80,6 +91,13 @@ protected:
     virtual void setUniforms() = 0;
 
     properties::SelectionProperty _dataOptions;
+    properties::StringProperty _transferFunctionsFile;
+    properties::Vec2Property _backgroundValues;
+    properties::Vec2Property _normValues;
+    properties::BoolProperty _useLog;
+    properties::BoolProperty _useHistogram;
+    properties::BoolProperty _autoFilter;
+
     std::shared_ptr<DataProcessor> _dataProcessor; 
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
