@@ -34,6 +34,7 @@
 
 #include <modules/globebrowsing/globes/chunkindex.h>
 #include <modules/globebrowsing/geodetics/geodetic2.h>
+#include <modules/globebrowsing/geodetics/angle.h>
 
 
 namespace openspace {
@@ -70,6 +71,9 @@ namespace openspace {
 
 
     private:
+        int desiredLevelByDistance(const RenderData& data) const;
+        int desiredLevelByProjectedArea(const RenderData& data) const;
+
         ChunkedLodGlobe* _owner;
         ChunkIndex _index;
         bool _isVisible;
