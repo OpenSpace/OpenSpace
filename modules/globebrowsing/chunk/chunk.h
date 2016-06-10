@@ -22,46 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#ifndef __CHUNK_H__
+#define __CHUNK_H__
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <memory>
+#include <ostream>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/chunkindex.h>
 
-#include <ghoul/misc/assert.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/angle.h>
 
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
+    class ChunkedLodGlobe;
 
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+    class Chunk {
+    public:
+        struct BoundingHeights {
+            float min, max;
+            bool available;
+        };
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
+        enum class Status{
+            DO_NOTHING,
+            WANT_MERGE,
+            WANT_SPLIT,
+        };
+        
+        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
 
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
+        /// Updates chunk internally and returns a desired level
+        Status update(const RenderData& data);
+        void render(const RenderData& data) const;
 
-	*/
+        const GeodeticPatch& surfacePatch() const;
+        ChunkedLodGlobe* const owner() const;
+        const ChunkIndex index() const;
+        bool isVisible() const;
+        BoundingHeights getBoundingHeights() const;
+
+        void setIndex(const ChunkIndex& index);
+        void setOwner(ChunkedLodGlobe* newOwner);
 
 
+    private:
+        int desiredLevelByDistance(const RenderData& data) const;
+        int desiredLevelByProjectedArea(const RenderData& data) const;
 
+        ChunkedLodGlobe* _owner;
+        ChunkIndex _index;
+        bool _isVisible;
+        GeodeticPatch _surfacePatch;
 
+    };
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 }
 
-} // namespace openspace
+
+
+#endif // __CHUNK_H__

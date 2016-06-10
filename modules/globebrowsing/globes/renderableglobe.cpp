@@ -23,9 +23,9 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/globemesh.h>
+
 #include <modules/globebrowsing/other/threadpool.h>
-#include <modules/globebrowsing/other/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/temporaltileprovider.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>

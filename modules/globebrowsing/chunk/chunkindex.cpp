@@ -22,46 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
+namespace {
+    const std::string _loggerCat = "ChunkIndex";
+}
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
+    /**
+    Creates the geodetic tile index for the Geodetic patch that covers the
+    point p at the specified level
+    */
+    ChunkIndex::ChunkIndex(const Geodetic2& point, int level)
+    : level(level) {
+        int numIndicesAtLevel = 1 << level;
+        double u = 0.5 + point.lon / (2 * M_PI);
+        double v = 0.25 - point.lat / (2 * M_PI);
+        double xIndexSpace = u * numIndicesAtLevel;
+        double yIndexSpace = v * numIndicesAtLevel;
 
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+        x = floor(xIndexSpace);
+        y = floor(yIndexSpace);
+    }
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
+    ChunkIndex ChunkIndex::child(Quad q) const {
+        return ChunkIndex(2 * x + q % 2, 2 * y + q / 2, level + 1);
+    }
 
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
+    ChunkIndex ChunkIndex::parent() const {
+        //ghoul_assert(level > 0, "tile at level 0 has no parent!");
+        return ChunkIndex(x / 2, y / 2, level - 1);
+    }
 
 
+    /**
+    Gets the tile at a specified offset from this tile.
+    Accepts delta indices ranging from [-2^level, Infinity[
+    */
+    ChunkIndex ChunkIndex::getRelatedTile(int deltaX, int deltaY) const {
+        int indicesAtThisLevel = 1 << level;
+        int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
+        int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
+        return ChunkIndex(newX, newY, level);
+    }
 
+    int ChunkIndex::manhattan(const ChunkIndex& other) const {
+        ghoul_assert(level == other.level, "makes no sense if not on same level");
+        return std::abs(x - other.x) + std::abs(y - other.y);
+    }
 
+    HashKey ChunkIndex::hashKey() const {
+        return x ^ (y << 16) ^ (level << 24);
+    }
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+    bool ChunkIndex::operator==(const ChunkIndex& other) const {
+        return x == other.x && y == other.y && level == other.level;
+    }
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
-}
+    std::ostream& operator<<(std::ostream& os, const ChunkIndex& ci) {
+        os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
+        return os;
+    }
+
 
 } // namespace openspace

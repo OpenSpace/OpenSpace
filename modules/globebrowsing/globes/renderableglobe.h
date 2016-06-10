@@ -35,13 +35,15 @@
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <modules/globebrowsing/globes/globemesh.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <modules/globebrowsing/other/tileprovidermanager.h>
+#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+
+#include <modules/globebrowsing/geometry/ellipsoid.h>
+
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
+
 #include <modules/globebrowsing/other/threadpool.h>
+#include <modules/globebrowsing/other/distanceswitch.h>
 
 namespace ghoul {
 namespace opengl {

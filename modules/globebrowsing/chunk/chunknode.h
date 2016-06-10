@@ -22,46 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
+#ifndef __QUADTREE_H__
+#define __QUADTREE_H__
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/other/distanceswitch.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <stack>
+#include <memory>
+#include <ostream>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
+#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/chunk/chunkrenderer.h>
 
-#include <ghoul/misc/assert.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+
+
+
+
+// forward declaration
+namespace openspace {
+    class ChunkedLodGlobe;
+}
 
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
-{}
-
-void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
-
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
-
-	*/
 
 
 
 
+class ChunkNode {
+public:
+    ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
+    ~ChunkNode();
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
-}
+    void split(int depth = 1);
+    void merge();
+
+    bool isRoot() const;
+    bool isLeaf() const;
+    
+    
+    const ChunkNode& getChild(Quad quad) const;
+
+    void renderDepthFirst(const RenderData& data);
+
+    void renderReversedBreadthFirst(const RenderData& data);
+    void renderThisChunk(const RenderData& data);
+    bool updateChunkTree(const RenderData& data);
+
+    static int chunkNodeCount;
+    static int renderedChunks;
+
+
+private:
+    
+    ChunkNode* _parent;
+    std::unique_ptr<ChunkNode> _children[4];    
+
+    Chunk _chunk;
+};
 
 } // namespace openspace
+
+
+
+#endif // __QUADTREE_H__
