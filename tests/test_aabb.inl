@@ -25,7 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <openspace/scene/scenegraphnode.h>
-#include <modules/globebrowsing/rendering/aabb.h>
+#include <modules/globebrowsing/geometry/aabb.h>
 
 #include <fstream>
 #include <glm/glm.hpp>
