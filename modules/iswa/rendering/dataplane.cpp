@@ -191,8 +191,8 @@ std::vector<float*> DataPlane::textureData(){
             return std::vector<float*>();
         }
     }
-    _textureDimensions = _dataProcessor->dimensions();
-    return _dataProcessor->processData(_dataBuffer, _dataOptions);
+    // _textureDimensions = _dataProcessor->dimensions();
+    return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
 void DataPlane::subscribeToGroup(){

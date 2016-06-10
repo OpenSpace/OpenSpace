@@ -159,8 +159,8 @@ std::vector<float*> DataSphere::textureData(){
             return std::vector<float*>();
         }
     }
-    _textureDimensions = _dataProcessor->dimensions();
-    return _dataProcessor->processData(_dataBuffer, _dataOptions);
+    // _textureDimensions = _dataProcessor->dimensions();
+    return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
 void DataSphere::setUniforms(){
