@@ -37,7 +37,7 @@ DataProcessorText::DataProcessorText()
 
 DataProcessorText::~DataProcessorText(){}
 
-std::vector<std::string> DataProcessorText::readMetadata(std::string data){
+std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::size3_t& dimensions){
     //The intresting part of the file looks like this:
     //# Output data: field with 61x61=3721 elements
     //# x           y           z           N           V_x         B_x
@@ -60,7 +60,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data){
                 getline(ss, token, '=');
                 int y = std::stoi(token);
 
-                _dimensions = glm::size3_t(x, y, 1);
+                dimensions = glm::size3_t(x, y, 1);
 
                 getline(memorystream, line);
                 line = line.substr(1); //because of the # char
@@ -74,6 +74,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data){
             }
         }
     }
+
     return options;
 }
 
@@ -118,7 +119,7 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions){
+std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions){
     if(!data.empty()){
         std::string line;
         std::stringstream memorystream(data);
@@ -132,7 +133,7 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
 
         std::vector<float*> dataOptions(numOptions, nullptr);
         for(int option : selectedOptions){
-            dataOptions[option] = new float[_dimensions.x*_dimensions.y]{0.0f};
+            dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
         }
 
         int numValues = 0;

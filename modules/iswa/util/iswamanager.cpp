@@ -157,7 +157,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
 void IswaManager::addKameleonCdf(std::string groupName, int pos){
     // auto info = _cdfInformation[group][pos];
-    // std::cout << group << " " << pos << std::endl;
     auto group = iswaGroup(groupName);
     if(group){
         std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
@@ -312,8 +311,6 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             xOffset = -20.0f;
         if(data->id == -9)
             xOffset = -30.0f;
-
-        std::cout << xOffset << std::endl;
 
         std::string table = "{"
         "Name = '" + data->name +"' , "

@@ -81,7 +81,6 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
         (max.z - min.z)
     );
 
-    std::cout << xOffset << std::endl;
 
     offset = glm::vec3(
         (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f)+xOffset,

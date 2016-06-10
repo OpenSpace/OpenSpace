@@ -48,7 +48,6 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
 DataCygnet::~DataCygnet(){}
 
 bool DataCygnet::updateTexture(){
-
     std::vector<float*> data = textureData();
 
     if(data.empty())
@@ -202,7 +201,7 @@ void DataCygnet::readTransferFunctions(std::string tfPath){
 }
 
 void DataCygnet::fillOptions(std::string& source){
-    std::vector<std::string> options = _dataProcessor->readMetadata(source);
+    std::vector<std::string> options = _dataProcessor->readMetadata(source, _textureDimensions);
      
     for(int i=0; i<options.size(); i++){
         _dataOptions.addOption({i, options[i]});

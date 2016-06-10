@@ -249,7 +249,7 @@ void KameleonPlane::renderGeometry() const {
 }
 
 std::vector<float*> KameleonPlane::textureData() {
-    return std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->processData(_kwPath,  _dataOptions, _slice, _dimensions);
+    return std::dynamic_pointer_cast<DataProcessorKameleon>(_dataProcessor)->processData(_kwPath,  _dataOptions, _dimensions, _slice);
 };
 
 bool KameleonPlane::updateTextureResource(){
