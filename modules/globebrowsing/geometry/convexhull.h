@@ -25,6 +25,9 @@
 #ifndef __CONVEX_HULL_H__
 #define __CONVEX_HULL_H__
 
+#include <modules/globebrowsing/geometry/aabb.h>
+
+
 #include <vector>
 #include <stack>
 
@@ -48,13 +51,18 @@ namespace openspace {
     public: 
         ConvexHull2();
 
-        
-
         static ConvexHull2 grahamScan_NOT_THREAD_SAFE(std::vector<Point2>& points, int yMinIndex = -1);
 
         const std::vector<Point2> points() const;
+
+        bool intersects(const ConvexHull2& o) const;
+
+        AABB1 projectedRegion(glm::vec2 direction) const;
+        
     
     private:
+        bool hasPerpendicularLineWhereProjectedPointsOverlap(const ConvexHull2& other) const;
+
         static int compare(const void *vp1, const void *vp2);
 
         static Point2 oneBelowTop(std::stack<Point2>&);

@@ -97,6 +97,49 @@ namespace openspace {
         return hull;
     }
 
+    bool ConvexHull2::intersects(const ConvexHull2& other) const {
+        // uses Separating Axis Theorem
+        // ref: http://stackoverflow.com/questions/753140/how-do-i-determine-if-two-convex-polygons-intersect
+        return this->hasPerpendicularLineWhereProjectedPointsOverlap(other) ||
+            other.hasPerpendicularLineWhereProjectedPointsOverlap(*this);
+    }
+
+
+    bool ConvexHull2::hasPerpendicularLineWhereProjectedPointsOverlap(const ConvexHull2& other) const {
+        for (size_t i = 1; i < _points.size(); i++) {
+            glm::vec2 dividingAxis = _points[i] - _points[i - 1];
+            // project all points onto the vector perpendicular to the dividing axis
+            glm::vec2 projAxis(glm::normalize(glm::vec2(-dividingAxis.y, dividingAxis.x)));
+            const AABB1& myBounds = projectedRegion(projAxis);
+            const AABB1& otherBounds = other.projectedRegion(projAxis);
+            if (!myBounds.intersects(otherBounds)) {
+                return false;
+            }
+        }
+
+        // test line defined by last-to-first point
+        glm::vec2 dividingAxis = _points[0] - _points.back();
+        glm::vec2 projAxis(glm::normalize(glm::vec2(-dividingAxis.y, dividingAxis.x)));
+        const AABB1& myBounds = projectedRegion(projAxis);
+        const AABB1& otherBounds = other.projectedRegion(projAxis);
+        if (!myBounds.intersects(otherBounds)) {
+            return false;
+        }
+
+        return true;
+    }
+
+
+    AABB1 ConvexHull2::projectedRegion(glm::vec2 direction) const {
+        AABB1 projectedRegion;
+        for (size_t i = 0; i < _points.size(); i++) {
+            projectedRegion.expand(glm::dot(_points[i], direction));
+        }
+        return projectedRegion;
+    }
+
+
+
     Point2 ConvexHull2::oneBelowTop(std::stack<Point2>& S) {
         Point2 p = S.top();
         S.pop();
@@ -106,7 +149,7 @@ namespace openspace {
     }
 
     void ConvexHull2::swap(Point2& p1, Point2& p2) {
-        Point2& temp = p1;
+        Point2 temp = p1;
         p1 = p2;
         p2 = temp;
     }
