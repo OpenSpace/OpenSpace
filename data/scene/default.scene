@@ -30,6 +30,8 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
     openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
+
+    --openspace.iswa.addCygnet(7);
 end
 
 
