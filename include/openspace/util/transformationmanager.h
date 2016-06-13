@@ -51,8 +51,7 @@ public:
 
 private:
 	glm::dmat3 kameleonTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
-	std::shared_ptr<ccmc::Kameleon> _kameleon;
-	
+
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     std::shared_ptr<ccmc::Kameleon> _kameleon;
 #endif
