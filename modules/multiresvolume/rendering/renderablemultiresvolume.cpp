@@ -68,6 +68,7 @@
 namespace {
     const std::string _loggerCat = "RenderableMultiresVolume";
     const std::string KeyDataSource = "Source";
+    const std::string KeyErrorHistogramsSource = "ErrorHistogramsSource";
     const std::string KeyHints = "Hints";
     const std::string KeyTransferFunction = "TransferFunction";
 
@@ -124,6 +125,13 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
         return;
     }
 
+    _errorHistogramsPath = "";
+    if (dictionary.getValue(KeyErrorHistogramsSource, _errorHistogramsPath)) {
+        _errorHistogramsPath = absPath(_errorHistogramsPath);
+    }
+
+
+
     float scalingExponent, stepSizeCoefficient;
     glm::vec3 scaling, translation, rotation;
 
@@ -142,6 +150,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     if (dictionary.getValue("StepSizeCoefficient", stepSizeCoefficient)) {
         _stepSizeCoefficient = stepSizeCoefficient;
     }
+
 
     std::string startTimeString, endTimeString;
     bool hasTimeData = true;
@@ -354,7 +363,7 @@ bool RenderableMultiresVolume::initialize() {
         }
     };
 
-
+    onEnabledChange(onChange);
 
     return success;
 }
@@ -384,11 +393,16 @@ bool RenderableMultiresVolume::initializeSelector() {
                 cacheFilename = FileSys.cacheManager()->cachedFilename(
                     cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
                 std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+                std::string errorHistogramsPath = _errorHistogramsPath;
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO("Loading histograms from " << cacheFilename);
+                    LINFO("Loading histograms from cache: " << cacheFilename);
                     success &= _errorHistogramManager->loadFromFile(cacheFilename);
+                } else if (_errorHistogramsPath != "") {
+                    // Read histograms from scene data.
+                    LINFO("Loading histograms from scene data: " << _errorHistogramsPath);
+                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);

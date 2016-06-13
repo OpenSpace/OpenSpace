@@ -58,6 +58,18 @@ public:
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
+    virtual void setNAaSamples(int nAaSamples) = 0;
+
+    /**
+    * Set raycasting uniforms on the program object, and setup raycasting.
+    */
+    virtual void preRaycast(ghoul::opengl::ProgramObject& programObject) {};
+
+    /**
+    * Tear down raycasting for the specified program object.
+    */
+    virtual void postRaycast(ghoul::opengl::ProgramObject& programObject) {};
+
 
     virtual void update() = 0;
     virtual void render(float blackoutFactor, bool doPerformanceMeasurements) = 0;

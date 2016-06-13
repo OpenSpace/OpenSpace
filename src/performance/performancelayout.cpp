@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,23 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <openspace/performance/performancelayout.h>
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
+#include <cstring>
 
-layout(location = 0) in vec4 in_position;
+namespace openspace {
+namespace performance {
 
-uniform vec3 boresight;
-uniform vec2 radius;
+PerformanceLayout::PerformanceLayout()
+    : nScaleGraphEntries(0)
+    , nFunctionEntries(0)
+{
+    std::memset(
+        sceneGraphEntries,
+        0,
+        MaxValues * sizeof(SceneGraphPerformanceLayout)
+    );
 
-out vec4 vs_position;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {
-    vs_position  = in_position;
-    gl_Position  = vec4(in_position.xy, 0.0, 1.0);
-
+    std::memset(
+        functionEntries,
+        0,
+        MaxValues * sizeof(FunctionPerformanceLayout)
+    );
 }
+
+} // namespace performance
+} // namespace openspace

@@ -22,40 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
+in vec4 vs_position;
+in vec4 vs_normal;
+in vec2 vs_st;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+uniform vec4 campos;
+uniform vec4 objpos;
+uniform vec3 camdir;
 
-uniform vec3 boresight;
+uniform sampler2D baseTexture;
+uniform sampler2D projectionTexture;
+uniform bool _performShading;
+uniform float _projectionFading;
+uniform vec3 sun_pos;
 
-out vec4 vs_position;
-out vec4 ProjTexCoord;
-out vec2 vs_uv;
-out vec4 vs_normal;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {
-    vs_position  = in_position;
+Fragment getFragment() {
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
     
-    vec4 tmp    = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-
-    vec4 raw_pos = psc_to_meter(in_position, _scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+    // directional lighting
+    vec3 origin = vec3(0.0);
+    vec4 spec = vec4(0.0);
     
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    vec3 n = normalize(vs_normal.xyz);
+    vec3 e = normalize(camdir);
+    vec3 l_pos = sun_pos;
+    vec3 l_dir = normalize(l_pos-objpos.xyz);
+    float intensity = 1;
     
-    //match clipping plane
-    vec2 texco = (in_st * 2) - 1; 
-    vs_uv = texco;
-    gl_Position = vec4(texco, 0.0, 1.0);
+    if (_performShading) {
+        const float terminatorBrightness = 0.4;
+        intensity = min(max(5*dot(n,l_dir), terminatorBrightness), 1.0);
+    }
+    
+    float shine = 0.0001;
+    vec4 specular = vec4(0.1);
+    vec4 ambient = vec4(vec3(0.0), 1.0);
+     //Specular
+    if (intensity > 0.0) {
+        vec3 h = normalize(l_dir + e);
+        float intSpec = max(dot(h,n),0.0);
+        spec = specular * pow(intSpec, shine);
+    }
+    
+    vec4 textureColor  = texture(baseTexture, vs_st);
+    vec4 projectionColor = texture(projectionTexture, vs_st);
+    if (projectionColor.a != 0.0) {
+        textureColor.rgb = mix(
+            textureColor.rgb,
+            projectionColor.rgb,
+            min(_projectionFading, projectionColor.a)
+        );
+    }
 
+    Fragment frag;
+    frag.color = max(intensity * textureColor, ambient);
+    frag.depth = depth;
+    return frag;
 }

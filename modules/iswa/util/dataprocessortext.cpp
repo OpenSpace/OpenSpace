@@ -25,6 +25,13 @@
 #include <algorithm>
 #include <iterator>
 #include <boost/iostreams/device/mapped_file.hpp>
+
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
+
 namespace {
     const std::string _loggerCat = "DataProcessorText";
 }
@@ -115,12 +122,14 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
             }
         }
 
+
         add(optionValues, sum);
     }
 }
 
 std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions){
     if(!data.empty()){
+
         std::string line;
         std::stringstream memorystream(data);
 
@@ -141,21 +150,33 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
-            std::stringstream ss(line); 
-            copy(
-                std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
-                std::istream_iterator<float> (),
-                back_inserter(values)
-            );
+            
+            int first = 0; 
+            int last = 0;
+            int option = -3;
+            int lineSize = line.size();
 
-            for(int option : selectedOptions){
-                value = values[option]; 
-                dataOptions[option][numValues] = processDataPoint(value, option);
+            while(last < lineSize){
+
+                first = line.find_first_not_of(" \t", last);
+                last =  line.find_first_of(" \t", first);
+                if(option >= 0){
+                    last = (last > 0)? last : lineSize;
+                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::double_, value);                
+                    value = std::stof(line.substr(first, last));
+
+                    if(std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())
+                        dataOptions[option][numValues] = processDataPoint(value, option);
+                }
+
+                option++;
             }
+
             numValues++;
         }
 
         calculateFilterValues(selectedOptions);
+
         return dataOptions;
     }
     return std::vector<float*>();

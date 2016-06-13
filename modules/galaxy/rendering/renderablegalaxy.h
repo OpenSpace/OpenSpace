@@ -22,63 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __RENDERABLEGALAXY_H__
+#define __RENDERABLEGALAXY_H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/rendering/renderable.h>
+#include <modules/galaxy/rendering/galaxyraycaster.h>
+#include <modules/volume/rawvolume.h>
 
-layout(location = 0) in vec4 in_position;
-//in vec3 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace {
 
-uniform vec3 boresight;
-
-out vec2 vs_st;
-out vec4 vs_normal;
-out vec4 vs_position;
-out float s;
-out vec4 ProjTexCoord;
-
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
-//texture projection matrix
-
-uniform mat4 ProjectorMatrix;
-
-uniform bool _hasHeightMap;
-uniform float _heightExaggeration;
-uniform sampler2D heightTex;
-
-
-void main() {
-    // Radius = 0.71492 *10^8; 
-    // set variables
-    vs_st = in_st;
-    //vs_stp = in_position.xyz;
-    // vs_position = in_position;
-    vec4 tmp    = in_position;
+struct RenderData;
     
-    // this is wrong for the normal. 
-    // The normal transform is the transposed inverse of the model transform
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+class RenderableGalaxy : public Renderable {
+public:
+    RenderableGalaxy(const ghoul::Dictionary& dictionary);
+    ~RenderableGalaxy();
     
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void postRender(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
-    if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        // float height = 0.00005;
-        vec3 displacementDirection = (normalize(tmp.xyz));
-        float displacementFactor = height * _heightExaggeration / 2500.0;
-        tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
-    }
+private:
+    float safeLength(const glm::vec3& vector);
 
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
+    glm::vec3 _volumeSize;
+    glm::vec3 _pointScaling;
+    properties::FloatProperty _stepSize;
+    properties::FloatProperty _pointStepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+    properties::FloatProperty _enabledPointsRatio;
 
-    vec4 raw_pos = psc_to_meter(tmp, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
+    std::string _volumeFilename;
+    glm::ivec3 _volumeDimensions;
+    std::string _pointsFilename;
 
-    position = ViewProjection * position;
+    std::unique_ptr<GalaxyRaycaster> _raycaster;
+    std::unique_ptr<RawVolume<glm::tvec4<GLfloat>>> _volume;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    glm::mat4 _pointTransform;
+    glm::vec3 _aspect;
+    float _opacityCoefficient;
 
-    gl_Position =  z_normalization(position);
+    std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
+    size_t _nPoints;
+    GLuint _pointsVao;
+    GLuint _positionVbo;
+    GLuint _colorVbo;
+};
 }
+
+#endif // __RENDERABLEGALAXY_H__

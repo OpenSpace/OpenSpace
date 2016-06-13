@@ -40,9 +40,9 @@ Fragment getFragment()
     float alpha = 1-length(gs_normal)*length(gs_normal);
     vec4 fragColor;
     if (classification)
-        fragColor = vec4(gs_color.rgb, alpha);
+        fragColor = vec4(gs_color.rgb * alpha, 1.0);
     else
-        fragColor = vec4(fieldLineColor.rgb, fieldLineColor.a * alpha);
+        fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
 
     float depth = pscDepth(gs_position);
 

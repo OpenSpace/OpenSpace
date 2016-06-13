@@ -31,24 +31,38 @@ out vec4 _out_color_;
 
 void main() {
     Fragment frag = getFragment();
-
     int sampleMask = gl_SampleMaskIn[0];
 
-    uint newHead = atomicCounterIncrement(atomicCounterBuffer);
-    if (newHead >= #{rendererData.maxTotalFragments}) {
-        discard; // ABuffer is full!
+    if (frag.depth < 0) {
+//         discard;
     }
-    uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
-        
-    ABufferFragment aBufferFrag;
-    _color_(aBufferFrag, frag.color);
-    _depth_(aBufferFrag, frag.depth);
-    _blend_(aBufferFrag, frag.blend);
+    
+    //frag.forceFboRendering = true;
+    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
+    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
+        uint newHead = atomicCounterIncrement(atomicCounterBuffer);
+        if (newHead >= #{rendererData.maxTotalFragments}) {
+            discard; // ABuffer is full!
+        }
+        uint prevHead = imageAtomicExchange(anchorPointerTexture, ivec2(gl_FragCoord.xy), newHead);
 
-    _type_(aBufferFrag, 0); // 0 = geometry type
-    _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
-    _next_(aBufferFrag, prevHead);
+        ABufferFragment aBufferFrag;
+        _color_(aBufferFrag, frag.color);
+        _depth_(aBufferFrag, frag.depth);
+        _blend_(aBufferFrag, frag.blend);
 
-    storeFragment(newHead, aBufferFrag);
-    discard;
+        _type_(aBufferFrag, 0); // 0 = geometry type
+        _msaa_(aBufferFrag, gl_SampleMaskIn[0]);
+        _next_(aBufferFrag, prevHead);
+
+        storeFragment(newHead, aBufferFrag);
+        discard;
+    } else {
+        _out_color_ = frag.color;
+        gl_FragDepth = normalizeFloat(frag.depth);
+    }
+
+    //gl_FragDepth = 1;
+
 }
+
