@@ -25,6 +25,13 @@
 #include <algorithm>
 #include <iterator>
 #include <boost/iostreams/device/mapped_file.hpp>
+
+#include <boost/config/warning_disable.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
+
 namespace {
     const std::string _loggerCat = "DataProcessorText";
 }
@@ -115,12 +122,14 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
             }
         }
 
+
         add(optionValues, sum);
     }
 }
 
 std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions){
     if(!data.empty()){
+
         std::string line;
         std::stringstream memorystream(data);
 
@@ -136,26 +145,50 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
         }
 
+        // FOR TESTING
+        // ===========
+        // std::chrono::time_point<std::chrono::system_clock> start, end;
+        // start = std::chrono::system_clock::now();
+        // ===========
+
         int numValues = 0;
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
-            std::stringstream ss(line);
-            copy(
-                std::istream_iterator<float> (ss),
-                std::istream_iterator<float> (),
-                back_inserter(values)
-            );
 
-            for(int option : selectedOptions){
-                value = values[option+3]; //+3 because options x, y and z in the file
-                dataOptions[option][numValues] = processDataPoint(value, option);
+            int first = 0; 
+            int last = 0;
+            int option = -3;
+            int lineSize = line.size();
+
+            while(last < lineSize){
+
+                first = line.find_first_not_of(" \t", last);
+                last =  line.find_first_of(" \t", first);
+                last = (last > 0)? last : lineSize;
+                // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::double_, value);                
+                value = std::stof(line.substr(first, last));
+
+                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())
+                    dataOptions[option][numValues] = processDataPoint(value, option);
+
+                option++;
             }
+
             numValues++;
         }
 
         calculateFilterValues(selectedOptions);
+
+        // FOR TESTING
+        // ===========
+        // end = std::chrono::system_clock::now();
+        // std::chrono::duration<double> elapsed_seconds = end-start;
+        // std::cout << "time: " << elapsed_seconds.count() << "\n";
+        // ===========
+
+
         return dataOptions;
     }
     return std::vector<float*>();

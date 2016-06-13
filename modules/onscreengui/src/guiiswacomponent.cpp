@@ -88,9 +88,9 @@ void GuiIswaComponent::render() {
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-1,'Data','GMData');";
-            std::string y = "openspace.iswa.addCygnet(-2,'Data','GMData');";
-            std::string z = "openspace.iswa.addCygnet(-3,'Data','GMData');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Data','GMData');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Data','GMData');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Data','GMData');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
@@ -99,9 +99,9 @@ void GuiIswaComponent::render() {
 
     if(_gmimage != gmimagevalue){
         if(_gmimage){
-            std::string x = "openspace.iswa.addCygnet(-1,'Texture','GMImage');";
-            std::string y = "openspace.iswa.addCygnet(-2,'Texture','GMImage');";
-            std::string z = "openspace.iswa.addCygnet(-3,'Texture','GMImage');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Texture','GMImage');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Texture','GMImage');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Texture','GMImage');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMImage');");
