@@ -42,9 +42,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
 #include <modules/iswa/ext/json/json.hpp>
-
-// #include <modules/iswa/rendering/iswacygnet.h>
-// #include <modules/iswa/rendering/iswagroup.h>
+#include <openspace/util/time.h>
 
 
 namespace openspace {
@@ -91,9 +89,9 @@ public:
     void addKameleonCdf(std::string group, int pos);
     void createFieldline(std::string name, std::string cdfPath, std::string seedPath);
 
-    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id);
-    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id);
-    std::string iswaUrl(int id, std::string type = "image");
+    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
+    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
+    std::string iswaUrl(int id, double timestamp = Time::ref().currentTime(), std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     

@@ -100,11 +100,11 @@ bool DataCygnet::updateTexture(){
     return texturesReady;
 }
 
-bool DataCygnet::downloadTextureResource(){
+bool DataCygnet::downloadTextureResource(double timestamp){
     if(_futureObject.valid())
         return false;
 
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchDataCygnet(_data->id, timestamp);
 
     if(future.valid()){
         _futureObject = std::move(future);
