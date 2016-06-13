@@ -133,15 +133,19 @@ namespace openspace {
         Vec3 cameraPosition = data.camera.positionVec3();
         Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
             ellipsoid.cartesianToGeodetic2(cameraPosition));
+        
+        Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+
         Vec3 globePosition = data.position.dvec3();
         Vec3 patchPosition = globePosition + ellipsoid.cartesianSurfacePosition(pointOnPatch);
         Vec3 cameraToChunk = patchPosition - cameraPosition;
 
 
         // Calculate desired level based on distance
-        Scalar distance = glm::length(cameraToChunk);
+        Scalar distanceToPatch = glm::length(cameraToChunk);
+        Scalar distance = distanceToPatch - heights.min; // distance to actual minimum heights
 
-        Scalar scaleFactor = globe->lodScaleFactor * ellipsoid.minimumRadius();;
+        Scalar scaleFactor = globe->lodScaleFactor * ellipsoid.minimumRadius();
         Scalar projectedScaleFactor = scaleFactor / distance;
         int desiredLevel = ceil(log2(projectedScaleFactor));
         return desiredLevel;
