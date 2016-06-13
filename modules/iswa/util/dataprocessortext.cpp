@@ -195,12 +195,10 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
                 last =  line.find_first_of(" \t", first);
                 last = (last > 0)? last : lineSize;
                 
-                if(option >= 0){
+                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
                     // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
                     value = std::stof(line.substr(first, last));
-
-                    if(std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())
-                        dataOptions[option][numValues] = processDataPoint(value, option);
+                    dataOptions[option][numValues] = processDataPoint(value, option);
                 }
 
                 option++;
