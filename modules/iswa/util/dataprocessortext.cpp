@@ -99,21 +99,24 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
         std::vector<float> values;
         float value;
 
+        int first, last, option, lineSize;
+
+
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
             std::stringstream ss(line);
             copy(
-                std::istream_iterator<float> (ss),
+                std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
                 std::istream_iterator<float> (),
                 back_inserter(values)
             );
 
-          if(values.size() <= 0) continue;
+            if(values.size() <= 0) continue;
 
             for(int i=0; i<numOptions; i++){
-                value = values[i+3];
+                value = values[i];
 
                 optionValues[i].push_back(value);
                 _min[i] = std::min(_min[i], value);
@@ -140,6 +143,8 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         std::vector<float> values;
         float value;
 
+        int first, last, option, lineSize;
+        
         std::vector<float*> dataOptions(numOptions, nullptr);
         for(int option : selectedOptions){
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
@@ -149,20 +154,47 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
 
-            values = std::vector<float>();
             
-            int first = 0; 
-            int last = 0;
-            int option = -3;
-            int lineSize = line.size();
+            // ----------- OLD METHODS ------------------------
+            // values = std::vector<float>();
+            // std::stringstream ss(line);
+            // float v;
+            // while(ss >> v){
+            //     values.push_back(v);
+            // }
+
+            // copy(
+            //     std::istream_iterator<float> (ss),
+            //     std::istream_iterator<float> (),
+            //     back_inserter(values)
+            // );
+
+            // copy(
+            //     std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
+            //     std::istream_iterator<float> (),
+            //     back_inserter(values)
+            // );
+
+            // for(int option : selectedOptions){
+            //     value = values[option]; 
+            //     //value = values[option+3]; //+3 because options x, y and z in the file
+            //     dataOptions[option][numValues] = processDataPoint(value, option);
+            // }
+            // ----------- OLD METHODS ------------------------
+
+            first = 0; 
+            last = 0;
+            option = -3;
+            lineSize = line.size();
 
             while(last < lineSize){
 
                 first = line.find_first_not_of(" \t", last);
                 last =  line.find_first_of(" \t", first);
+                last = (last > 0)? last : lineSize;
+                
                 if(option >= 0){
-                    last = (last > 0)? last : lineSize;
-                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::double_, value);                
+                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
                     value = std::stof(line.substr(first, last));
 
                     if(std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())

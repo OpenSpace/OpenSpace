@@ -102,6 +102,10 @@ protected:
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
 
+    //FOR TESTING
+    int _numOfBenchmarks;
+    double _avgBenchmarkTime;
+
 private:
     bool readyToRender() const override;
     bool downloadTextureResource() override;
