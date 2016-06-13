@@ -26,23 +26,34 @@
 #define __LAYERED_TEXTURE_SHADER_PROVIDER__
 
 #include <vector>
+#include <array>
 #include <string>
 #include "ghoul/opengl/programobject.h"
+
+#include <modules/globebrowsing/tile/layeredtextures.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //							  LAYERED TEXTURE SHADER PROVIDER						    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-
     using namespace ghoul::opengl;
+
+    class LayeredTextureShaderUniformIdHandler;
 
     struct LayeredTextureInfo
     {
-        std::string keyLastLayerIndex;
-        std::string keyUseThisLayerType;
-        std::string keyLayerBlendingEnabled;
-        int lastLayerIndex;
+        static const size_t NUM_SETTINGS_PER_CATEGORY = 3;
+        enum GlslKeyPrefixes
+        {
+            lastLayerIndex,
+            use,
+            blend,
+        };
+        static const std::string glslKeyPrefixes[NUM_SETTINGS_PER_CATEGORY];
+  
+        LayeredTextures::TextureCategory category;
+        int lastLayerIdx;
         bool layerBlendingEnabled;
 
         bool operator==(const LayeredTextureInfo& other) const;
@@ -50,7 +61,7 @@ namespace openspace {
 
     struct LayeredTexturePreprocessingData
     {
-        std::vector<LayeredTextureInfo> layeredTextureInfo;
+        std::array<LayeredTextureInfo, LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES> layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayeredTexturePreprocessingData& other) const;
     };
@@ -67,7 +78,9 @@ namespace openspace {
         ProgramObject* getUpdatedShaderProgram(
             LayeredTexturePreprocessingData preprocessingData);
 
+        bool updatedOnLastCall();
     private:
+        friend class LayeredTextureShaderUniformIdHandler;
         void recompileShaderProgram(LayeredTexturePreprocessingData preprocessingData);
 
         std::unique_ptr<ProgramObject> _programObject;
@@ -76,6 +89,65 @@ namespace openspace {
         const std::string _shaderName;
         const std::string _vsPath;
         const std::string _fsPath;
+
+        bool _updatedOnLastCall;
+    };
+
+
+
+
+
+
+
+    class LayeredTextureShaderUniformIdHandler
+    {
+
+    public:
+
+        static const size_t NUM_TILE_DATA_VARIABLES = 5;
+        static const size_t NUM_BLEND_TEXTURES = 3;
+
+        enum GlslTileDataId {
+            textureSampler,
+            depthTransform_depthScale,
+            depthTransform_depthOffset,
+            uvTransform_uvOffset,
+            uvTransform_uvScale,
+        };
+
+        enum BlendLayerSuffix {
+            none,
+            Parent1,
+            Parent2,
+        };
+
+        LayeredTextureShaderUniformIdHandler();
+        ~LayeredTextureShaderUniformIdHandler();
+        void updateIds(LayeredTextureShaderProvider* shaderProvider);
+
+        GLint getId(
+            LayeredTextures::TextureCategory category,
+            size_t blendLayer,
+            size_t layerIndex,
+            GlslTileDataId tileDataId);
+        ProgramObject& programObject();
+    private:
+        static const std::string glslTileDataNames[NUM_TILE_DATA_VARIABLES];
+        static const std::string blendLayerSuffixes[NUM_BLEND_TEXTURES];
+
+        std::array<
+            std::array<
+            std::array<
+            std::array<
+            GLint,
+            LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES>,
+            LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
+            NUM_BLEND_TEXTURES>,
+            NUM_TILE_DATA_VARIABLES>
+            _tileUniformIds;
+
+        LayeredTextureShaderProvider* _shaderProvider;
+
     };
 
 }  // namespace openspace

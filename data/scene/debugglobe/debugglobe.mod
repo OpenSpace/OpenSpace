@@ -32,54 +32,59 @@ return {
             SegmentsPerPatch = 64,
             Textures = {
                 ColorTextures = {
-                    {
-                        Name = "Temporal VIIRS SNPP",
-                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
-                    },
-                    {
-                        Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
-                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml"
-                    },
-                    {
-                        Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
-                    },
-                    {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
-                    },
+                        {
+                            Name = "Temporal VIIRS SNPP",
+                            FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
+                        },
+                        {
+                            Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
+                            FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml"
+                        },
+                        {
+                            Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
+                            FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
+                        },
+                        
+                        {
+                            Name = "ESRI Imagery World 2D",
+                            FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        },
                 },
                 NightTextures = {
-                    {
-                        Name = "Earth at Night  2012",
-                        FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+
+                        {
+                            Name = "Earth at Night  2012",
+                            FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+                        },
                     },
-                },
                 HeightMaps = {
-                    {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/TERRAIN.wms",
-                    },
+
+                        {
+                            Name = "Terrain tileset",
+                            FilePath = "map_service_configs/TERRAIN.wms",
+                        },
                 },
                 WaterMasks = {
-                    {
-                        Name = "MODIS_Water_Mask",
-                        FilePath = "map_service_configs/MODIS_Water_Mask.xml"
+
+                        {
+                            Name = "MODIS_Water_Mask",
+                            FilePath = "map_service_configs/MODIS_Water_Mask.xml"
+                        },
                     },
-                },
                 Overlays = {
-                    {
-                        Name = "Coastlines",
-                        FilePath = "map_service_configs/Coastlines.xml",
-                    },
-                    {
-                        Name = "Reference_Features",
-                        FilePath = "map_service_configs/Reference_Features.xml",
-                    },
-                    {
-                        Name = "Reference_Labels",
-                        FilePath = "map_service_configs/Reference_Labels.xml",
-                    },
+
+                        {
+                            Name = "Coastlines",
+                            FilePath = "map_service_configs/Coastlines.xml",
+                        },
+                        {
+                            Name = "Reference_Features",
+                            FilePath = "map_service_configs/Reference_Features.xml",
+                        },
+                        {
+                            Name = "Reference_Labels",
+                            FilePath = "map_service_configs/Reference_Labels.xml",
+                        },
                 },
             },
         },

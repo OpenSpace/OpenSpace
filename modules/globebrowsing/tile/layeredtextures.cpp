@@ -22,57 +22,27 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
-
-
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 
-#include <modules/globebrowsing/other/threadpool.h>
 
-#include <ghoul/misc/dictionary.h>
-
-
-#include <memory>
-#include <vector>
-#include <string>
+namespace {
+    const std::string _loggerCat = "LayeredTextures";
+}
 
 
 namespace openspace {
 
-    class TileProviderManager {
-    public:
 
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
+    const size_t LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES;
+    const size_t LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
 
-        typedef std::vector<TileProviderWithName> LayerCategory;
-
-        TileProviderManager(const ghoul::Dictionary& dict);
-        ~TileProviderManager();
-
-        static ThreadPool tileRequestThreadPool;
-
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
-
-        void prerender();
-
-    private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
-
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
-
-        std::array<LayerCategory, LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES> _layerCategories;
+    const std::string LayeredTextures::TEXTURE_CATEGORY_NAMES[] =
+    {
+        "ColorTextures",
+        "NightTextures",
+        "HeightMaps",
+        "WaterMasks",
+        "Overlays"
     };
 
-} // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+}  // namespace openspace

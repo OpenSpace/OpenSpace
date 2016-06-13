@@ -112,17 +112,17 @@ namespace openspace {
         _tileProviderManager = std::shared_ptr<TileProviderManager>(
             new TileProviderManager(texturesDictionary));
 
-        auto colorProviders = _tileProviderManager->getLayerCategory("ColorTextures");
-        auto nightProviders = _tileProviderManager->getLayerCategory("NightTextures");
-        auto overlayProviders = _tileProviderManager->getLayerCategory("Overlays");
-        auto heightProviders = _tileProviderManager->getLayerCategory("HeightMaps");
-        auto waterProviders = _tileProviderManager->getLayerCategory("WaterMasks");
+        auto& colorTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
+        auto& nightTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
+        auto& heightMapProviders = _tileProviderManager->getLayerCategory(LayeredTextures::HeightMaps);
+        auto& overlayProviders = _tileProviderManager->getLayerCategory(LayeredTextures::Overlays);
+        auto& waterMaskProviders =_tileProviderManager->getLayerCategory(LayeredTextures::WaterMasks);
 
-        addToggleLayerProperties(colorProviders, _activeColorLayers);
-        addToggleLayerProperties(nightProviders, _activeNightLayers);
+        addToggleLayerProperties(colorTextureProviders, _activeColorLayers);
+        addToggleLayerProperties(nightTextureProviders, _activeNightLayers);
         addToggleLayerProperties(overlayProviders, _activeOverlays);
-        addToggleLayerProperties(heightProviders, _activeHeightMapLayers);
-        addToggleLayerProperties(waterProviders, _activeWaterMaskLayers);
+        addToggleLayerProperties(heightMapProviders, _activeHeightMapLayers);
+        addToggleLayerProperties(waterMaskProviders, _activeWaterMaskLayers);
 
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
@@ -205,15 +205,15 @@ namespace openspace {
         _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
-            _tileProviderManager->getLayerCategory("ColorTextures");
+            _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
         std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
-            _tileProviderManager->getLayerCategory("NightTextures");
+            _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
         std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
-            _tileProviderManager->getLayerCategory("Overlays");
+            _tileProviderManager->getLayerCategory(LayeredTextures::Overlays);
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
-            _tileProviderManager->getLayerCategory("HeightMaps");
+            _tileProviderManager->getLayerCategory(LayeredTextures::HeightMaps);
         std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
-            _tileProviderManager->getLayerCategory("WaterMasks");
+            _tileProviderManager->getLayerCategory(LayeredTextures::WaterMasks);
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();
