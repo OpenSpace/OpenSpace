@@ -145,12 +145,6 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
         }
 
-        // FOR TESTING
-        // ===========
-        // std::chrono::time_point<std::chrono::system_clock> start, end;
-        // start = std::chrono::system_clock::now();
-        // ===========
-
         int numValues = 0;
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
@@ -166,12 +160,14 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
 
                 first = line.find_first_not_of(" \t", last);
                 last =  line.find_first_of(" \t", first);
-                last = (last > 0)? last : lineSize;
-                // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::double_, value);                
-                value = std::stof(line.substr(first, last));
+                if(option >= 0){
+                    last = (last > 0)? last : lineSize;
+                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::double_, value);                
+                    value = std::stof(line.substr(first, last));
 
-                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())
-                    dataOptions[option][numValues] = processDataPoint(value, option);
+                    if(std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end())
+                        dataOptions[option][numValues] = processDataPoint(value, option);
+                }
 
                 option++;
             }
@@ -180,14 +176,6 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         }
 
         calculateFilterValues(selectedOptions);
-
-        // FOR TESTING
-        // ===========
-        // end = std::chrono::system_clock::now();
-        // std::chrono::duration<double> elapsed_seconds = end-start;
-        // std::cout << "time: " << elapsed_seconds.count() << "\n";
-        // ===========
-
 
         return dataOptions;
     }
