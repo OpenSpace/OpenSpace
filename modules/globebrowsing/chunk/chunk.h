@@ -84,6 +84,7 @@ namespace openspace {
     class DesiredChunkLevelEvaluator {
     public:
         virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
+        static const int UNKNOWN_DESIRED_LEVEL = -1;
     };
 
 

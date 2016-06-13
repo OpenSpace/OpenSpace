@@ -60,7 +60,7 @@ namespace openspace {
         , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
         , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
-        , maxSplitDepth(15)
+        , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
     {
@@ -76,8 +76,10 @@ namespace openspace {
         _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
         
-        //_chunkEvaluater = std::make_unique<EvaluateChunkByArea>();
-        _chunkEvaluater = std::make_unique<EvaluateChunkLevelByDistance>();
+        
+        _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
+        _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
 
         _patchRenderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
     }
@@ -119,7 +121,19 @@ namespace openspace {
     }
 
     int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
-        int desiredLevel = _chunkEvaluater->getDesiredLevel(chunk, renderData);
+        int desiredLevel = 0;
+        if (levelByProjArea) {
+            desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
+        }
+        else {
+            desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
+        }
+
+        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+        if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
+        }
+
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
         return desiredLevel;
     }

@@ -222,7 +222,21 @@ namespace openspace {
 
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        return -1;
+        auto tileProvidermanager = chunk.owner()->getTileProviderManager();
+        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory("HeightMaps");
+        int currLevel = chunk.index().level;
+
+        // simply check the first heigtmap
+        if (heightMapProviders.size() > 0) {
+            Tile::Status heightTileStatus = heightMapProviders[0]->getTileStatus(chunk.index());
+            if (heightTileStatus == Tile::Status::IOError || heightTileStatus == Tile::Status::OutOfRange) {
+                return currLevel-1;
+            }
+
+            return UNKNOWN_DESIRED_LEVEL;
+        }
+
+        return UNKNOWN_DESIRED_LEVEL;
     }
 
 } // namespace openspace

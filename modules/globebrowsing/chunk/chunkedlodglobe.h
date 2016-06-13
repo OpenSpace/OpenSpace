@@ -111,6 +111,7 @@ namespace openspace {
         bool blendOverlay;
         bool atmosphereEnabled;
         bool showChunkEdges;
+        bool levelByProjArea;
 
     private:
 
@@ -133,7 +134,9 @@ namespace openspace {
 
         std::vector<ChunkCuller*> _chunkCullers;
 
-        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluater;
+        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
+        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
+        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;
