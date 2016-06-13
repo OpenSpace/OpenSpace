@@ -64,11 +64,15 @@
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
-        return  glm::dmat3(
+        glm::dmat3 out = glm::dmat3(
                     out0.c0 , out0.c1   , out0.c2,
                     out1.c0 , out1.c1   , out1.c2,
                     out2.c0 , out2.c1   , out2.c2
                 );
+
+        // Need to rotate 90 degrees around x-axis becuase kameleon is flipped
+        out = glm::dmat3(glm::rotate(glm::mat4(out), (float)M_PI_2, glm::vec3(1.0f, 0.0f, 0.0f)));
+        return out;
     }
 
     glm::dmat3 TransformationManager::frameTransformationMatrix(std::string from,

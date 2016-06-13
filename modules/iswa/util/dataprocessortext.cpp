@@ -156,7 +156,7 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
-
+            
             int first = 0; 
             int last = 0;
             int option = -3;
