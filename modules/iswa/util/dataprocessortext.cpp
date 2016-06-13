@@ -106,9 +106,11 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
             if(line.find("#") == 0) continue;
 
             values = std::vector<float>();
-            std::stringstream ss(line);
+            std::istringstream ss(line);
+			std::istream_iterator<float> it(ss);
+			std::advance(it, 3); //+3 because options x, y and z in the file
             copy(
-                std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
+                it,
                 std::istream_iterator<float> (),
                 back_inserter(values)
             );
