@@ -25,6 +25,8 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
  namespace {
     const std::string _loggerCat = "TransformationManager";

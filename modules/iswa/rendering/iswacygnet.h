@@ -25,10 +25,6 @@
 #ifndef __ISWACYGNET_H__
 #define __ISWACYGNET_H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <memory>
 #include <chrono>
 #include <modules/iswa/util/iswamanager.h>
 #include <ghoul/designpattern/event.h>
