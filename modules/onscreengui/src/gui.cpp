@@ -273,6 +273,7 @@ void GUI::deinitializeGL() {
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
+                     const glm::vec2& mousePosCorrectionFactor,
                      const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
@@ -280,11 +281,14 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
     io.DeltaTime = deltaTime;
-#ifdef __APPLE__
-    io.MousePos = ImVec2(mousePos.x * 2, mousePos.y * 2);
-#else
-    io.MousePos = ImVec2(mousePos.x, mousePos.y);
-#endif
+
+    io.MousePos = ImVec2(mousePos.x * mousePosCorrectionFactor.x, mousePos.y * mousePosCorrectionFactor.y);
+
+//#ifdef __APPLE__
+//    io.MousePos = ImVec2(mousePos.x * 2, mousePos.y * 2);
+//#else
+//    io.MousePos = ImVec2(mousePos.x, mousePos.y);
+//#endif
     io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
     io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
 

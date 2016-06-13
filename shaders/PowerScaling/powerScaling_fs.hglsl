@@ -53,7 +53,11 @@ float pscDepth(vec4 position) {
     // For now: simply convert power scaled coordinates to a linear scale.
     // TODO: get rid of power scaled coordinates and use scale graph instead.
     //        return (position.w + log(abs(position.z) + 1/pow(k, position.w))/log(k)) / 27.0;
-    return safeLength(pscToLinear(position));
+    if (position.z < 0) {
+        return safeLength(pscToLinear(position));
+    } else {
+        return -safeLength(pscToLinear(position));
+    }
 }
 
 

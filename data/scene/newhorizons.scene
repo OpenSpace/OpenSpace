@@ -1,4 +1,7 @@
 UseAccurateNewHorizonsKernels = false
+-- TextureResolution = "low"
+TextureResolution = "med"
+-- TextureResolution = "high"
 
 function preInitialization()
     --[[
@@ -7,6 +10,8 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+
+    -- openspace.time.setTime("2007-02-28T11:40:00.000")
 
     -- openspace.time.setTime("2015-07-08T15:57:45.00")
     -- openspace.time.setTime("2015-07-12T07:41:00.00")

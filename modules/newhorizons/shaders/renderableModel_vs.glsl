@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2016                                                                   *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,70 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-uniform vec3 camdir;
+#version __CONTEXT__
 
-uniform float time;
-uniform sampler2D currentTexture;
-uniform sampler2D projectedTexture;
-uniform bool _performShading;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-in vec2 vs_st;
-in vec4 vs_normal;
-in vec4 vs_position;
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
+layout(location = 2) in vec3 in_normal;
 
-in vec4 ProjTexCoord;
-uniform vec3 boresight;
-uniform vec3 sun_pos;
+out vec4 vs_position;
+out vec4 vs_normal;
+out vec2 vs_st;
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+uniform mat4 ViewProjection;
+uniform mat4 ModelTransform;
 
-Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-    vec4 diffuse = texture(currentTexture, vs_st);
+uniform float _magnification;
+
+void main() {
+    vec4 pos = in_position;
+    pos.w += _magnification;
+
+    vs_st = in_st;
+    vs_position = pos;
+    vec4 tmp    = pos;
     
-    // directional lighting
-    vec3 origin = vec3(0.0);
-    vec4 spec = vec4(0.0);
-    
-    vec3 n = normalize(vs_normal.xyz);
-    vec3 e = normalize(camdir);
-    vec3 l_pos = sun_pos;
-    vec3 l_dir = normalize(l_pos-objpos.xyz);
-    float intensity = 1;
-    
-    if (_performShading) {
-        float terminatorBright = 0.4;
-        intensity = min(max(5*dot(n,l_dir), terminatorBright), 1);
-    }
-    
-    float shine = 0.0001;
-    vec4 specular = vec4(0.1);
-    vec4 ambient = vec4(0.f,0.f,0.f,1);
-     //Specular
-    if (intensity > 0.f) {
-        vec3 h = normalize(l_dir + e);
-        float intSpec = max(dot(h,n),0.0);
-        spec = specular * pow(intSpec, shine);
-    }
-    
-    vec4 projTexColor = textureProj(projectedTexture, ProjTexCoord);
-    vec4 shaded = max(intensity * diffuse, ambient);
-    if (ProjTexCoord[0] > 0.0 || ProjTexCoord[1] > 0.0 ||
-        ProjTexCoord[0] < ProjTexCoord[2] || 
-        ProjTexCoord[1] < ProjTexCoord[2]) {
-        diffuse = shaded;
-    } else if (dot(n, boresight) < 0 && projTexColor.w != 0) {// frontfacing
-        diffuse = projTexColor;
-    } else {
-        diffuse = shaded;
-    }
+    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    vec4 position = pscTransform(tmp, ModelTransform);
+    vs_position = tmp;
 
-    Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
-    return frag;
+    position = ViewProjection * position;
+    gl_Position =  z_normalization(position);
 }

@@ -36,12 +36,13 @@ namespace openspace {
 class Decoder;
 
 struct Image {
-    double startTime;
-    double stopTime;
+    double startTime = 0.0;
+    double stopTime = 0.0;
     std::string path;
     std::vector<std::string> activeInstruments;
     std::string target;
-    bool projected;
+    bool isPlaceholder = false;
+    bool projected = false;
 };
 
 struct TimeRange {
@@ -53,7 +54,7 @@ struct TimeRange {
     bool inRange(double min, double max){
         return (min >= _min && max <= _max);
     }
-    bool inRange(double val){
+    bool inRange(double val) const {
         return (val >= _min && val <= _max);
     }
     double _min;

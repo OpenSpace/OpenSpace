@@ -27,18 +27,6 @@ namespace openspace {
 namespace luascriptfunctions {
 
 /**
-int changeCoordinateSystem(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    std::string newCenter = std::string(lua_tostring(L, -1));
-    OsEng.renderEngine()->changeViewPoint(newCenter);
-    return 1;
-}
-*/
-
-/**
     * \ingroup LuaScripts
     * takeScreenshot():
     * Save the rendering to an image file
@@ -63,11 +51,28 @@ int setRenderer(lua_State* L) {
 
     const int type = lua_type(L, -1);
     if (type != LUA_TSTRING)
-        return luaL_error(L, "Expected argument of type 'bool'");
+        return luaL_error(L, "Expected argument of type 'string'");
     std::string r = lua_tostring(L, -1);
     OsEng.renderEngine().setRendererFromString(r);
     return 0;
 }
+
+/**
+* \ingroup LuaScripts
+* setNAaSamples(int):
+* set the number of anti-aliasing samples (msaa)
+*/
+int setNAaSamples(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double t = luaL_checknumber(L, -1);
+
+    OsEng.renderEngine().setNAaSamples(static_cast<int>(t));
+    return 0;
+}
+
 
 /**
 * \ingroup LuaScripts

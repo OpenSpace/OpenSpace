@@ -28,10 +28,15 @@ uniform sampler2D exitColorTexture;
 uniform sampler2D exitDepthTexture;
 uniform sampler2DMS mainDepthTexture;
 
+uniform bool insideRaycaster;
+uniform vec3 cameraPosInRaycaster;
+
+
 #include "blending.glsl"
 #include "rand.glsl"
 #include "PowerScaling/powerScalingMath.hglsl"
 #include <#{fragmentPath}>
+
 
 #for id, helperPath in helperPaths
 #include <#{helperPath}>
@@ -68,10 +73,18 @@ void main() {
 
     float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 
-    // fetch entry point from rendered fragment
-    Fragment f = getFragment();
-    vec3 entryPos = f.color.xyz;
-    float entryDepth = f.depth;
+    vec3 entryPos; 
+    float entryDepth;
+
+    if (insideRaycaster) {
+        entryPos = cameraPosInRaycaster;
+        entryDepth = 0;
+    } else {
+        // fetch entry point from rendered fragment
+        Fragment f = getFragment();
+        entryPos = f.color.xyz;
+        entryDepth = f.depth;
+    } 
 
     vec3 position = entryPos;
     vec3 diff = exitPos - entryPos;
@@ -99,7 +112,6 @@ void main() {
     }
 
 
-    finalColor = vec4(0.0);
     float currentDepth = 0.0;
     // todo: shorten depth if geometry is intersecting!
     float nextStepSize = stepSize#{id}(position, direction);
@@ -112,7 +124,11 @@ void main() {
     int sampleIndex = 0;
     float opacityDecay = 1.0 / nAaSamples;
 
-    for (steps = 0; finalColor.a < ALPHA_LIMIT && steps < RAYCAST_MAX_STEPS; ++steps) {
+    vec3 accumulatedColor = vec3(0.0);
+    vec3 accumulatedAlpha = vec3(0.0);
+        
+    
+    for (steps = 0; (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT || accumulatedAlpha.b < ALPHA_LIMIT) && steps < RAYCAST_MAX_STEPS; ++steps) {
 
         
         while (sampleIndex < nAaSamples && currentDepth + nextStepSize * jitterFactor > raycastDepths[sampleIndex]) {
@@ -132,11 +148,13 @@ void main() {
         vec3 jitteredPosition = position + direction*jitteredStepSize;
         position += direction * currentStepSize;
 
-        vec4 raycasterContribution = sample#{id}(jitteredPosition, direction, finalColor, nextStepSize);
+        
+        sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
 
         float sampleDistance = aaOpacity * (jitteredStepSize + previousJitterDistance);
 
-        blendStep(finalColor, raycasterContribution, sampleDistance);
+        //blendStep(finalColor, raycasterContribution, sampleDistance);
+        //finalColor 
 
         previousJitterDistance = currentStepSize - jitteredStepSize;
         
@@ -146,6 +164,8 @@ void main() {
 
     }
 
+    finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3);
+    
     finalColor.rgb /= finalColor.a;
     gl_FragDepth = normalizeFloat(entryDepth);
 }

@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __SCREENLOG_H__
+#define __SCREENLOG_H__
+
 #include <ghoul/logging/log.h>
 
 #include <chrono>
@@ -111,3 +114,5 @@ private:
 };
     
 } // namespace openspace
+
+#endif // __SCREENLOG_H__

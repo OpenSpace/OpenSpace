@@ -45,7 +45,9 @@
     }
 
     TransformationManager::~TransformationManager(){
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
         _kameleon = nullptr;
+#endif
     }
 
     glm::dmat3 TransformationManager::kameleonTransformationMatrix( std::string from,
@@ -79,6 +81,7 @@
                                                                 std::string to,
                                                                 double ephemerisTime) const
     {
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
         auto fromit = _dipoleFrames.find(from);
         auto toit   = _dipoleFrames.find(to);
 
@@ -110,7 +113,6 @@
             return  SpiceManager::ref().frameTransformationMatrix(from, to, ephemerisTime);
         }
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
         if(fromKameleon && toKameleon){
             return kameleonTransformationMatrix(from, to, ephemerisTime);
 

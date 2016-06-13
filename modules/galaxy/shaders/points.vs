@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                                   *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,40 +24,30 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-uniform mat4 ProjectorMatrix;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+in vec3 inPosition;
+in vec3 inColor;
 
-uniform vec3 boresight;
-
-uniform float _magnification;
-
-out vec2 vs_st;
-out vec4 vs_normal;
-out vec4 vs_position;
-out float s;
-out vec4 ProjTexCoord;
+out vec3 vsPosition;
+out vec3 vsColor;
 
 
 #include "PowerScaling/powerScaling_vs.hglsl"
-void main() {
-    vec4 pos = in_position;
-    pos.w += _magnification;
 
-    vs_st = in_st;
-    vs_position = pos;
-    vec4 tmp    = pos;
-    
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
+void main() { 
+    vec4 p = vec4(inPosition, 1.0);
 
-    vec4 raw_pos = psc_to_meter(pos, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
-    position = ViewProjection * position;
+	vec4 worldPosition = model * p;
+    worldPosition.w = 0.0;
+	vec4 position = worldPosition; //pscTransform(worldPosition, model);
+
+
+    position = pscTransform(position, mat4(1.0));
+    vsPosition = position.xyz;    
+    position = projection * view * position;
     gl_Position =  z_normalization(position);
+    vsColor = inColor;
 }

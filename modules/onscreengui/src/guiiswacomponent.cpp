@@ -116,6 +116,7 @@ void GuiIswaComponent::render() {
         }
     }
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     if(ImGui::CollapsingHeader("Cdf files")){
         auto cdfInfo = IswaManager::ref().cdfInformation();
 
@@ -151,6 +152,7 @@ void GuiIswaComponent::render() {
             }
         }
     }
+#endif
 
     for (const auto& p : _propertiesByOwner) {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
@@ -209,6 +211,7 @@ void GuiIswaComponent::render() {
     }
 
 
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {
 
         auto map = IswaManager::ref().cygnetInformation();
@@ -237,7 +240,8 @@ void GuiIswaComponent::render() {
 
         }
     }
-
+#endif
+    
     ImGui::End();
 }
 

@@ -22,63 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <openspace/performance/performancelayout.h>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <cstring>
 
-layout(location = 0) in vec4 in_position;
-//in vec3 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
+namespace openspace {
+namespace performance {
 
-uniform vec3 boresight;
+PerformanceLayout::PerformanceLayout()
+    : nScaleGraphEntries(0)
+    , nFunctionEntries(0)
+{
+    std::memset(
+        sceneGraphEntries,
+        0,
+        MaxValues * sizeof(SceneGraphPerformanceLayout)
+    );
 
-out vec2 vs_st;
-out vec4 vs_normal;
-out vec4 vs_position;
-out float s;
-out vec4 ProjTexCoord;
-
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
-//texture projection matrix
-
-uniform mat4 ProjectorMatrix;
-
-uniform bool _hasHeightMap;
-uniform float _heightExaggeration;
-uniform sampler2D heightTex;
-
-
-void main() {
-    // Radius = 0.71492 *10^8; 
-    // set variables
-    vs_st = in_st;
-    //vs_stp = in_position.xyz;
-    // vs_position = in_position;
-    vec4 tmp    = in_position;
-    
-    // this is wrong for the normal. 
-    // The normal transform is the transposed inverse of the model transform
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    
-
-    if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        // float height = 0.00005;
-        vec3 displacementDirection = (normalize(tmp.xyz));
-        float displacementFactor = height * _heightExaggeration / 2500.0;
-        tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
-    }
-
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-
-    vec4 raw_pos = psc_to_meter(tmp, scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
-
-    position = ViewProjection * position;
-
-    gl_Position =  z_normalization(position);
+    std::memset(
+        functionEntries,
+        0,
+        MaxValues * sizeof(FunctionPerformanceLayout)
+    );
 }
+
+} // namespace performance
+} // namespace openspace

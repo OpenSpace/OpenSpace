@@ -31,11 +31,13 @@ set(application_path ${OPENSPACE_APPS_DIR}/DataConverter)
 
 set(SOURCE_FILES
   ${application_path}/main.cpp
-  ${application_path}/milkywayconversiontask.cpp  
+  ${application_path}/milkywayconversiontask.cpp
+  ${application_path}/milkywaypointsconversiontask.cpp    
 )
 set(HEADER_FILES
   ${application_path}/conversiontask.h
-  ${application_path}/milkywayconversiontask.h  
+  ${application_path}/milkywayconversiontask.h
+  ${application_path}/milkywaypointsconversiontask.h    
 )
 
 add_executable(${APPLICATION_NAME} MACOSX_BUNDLE

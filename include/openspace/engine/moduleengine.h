@@ -26,6 +26,7 @@
 #define __MODULEENGINE_H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <memory>
 #include <vector>
@@ -73,6 +74,12 @@ public:
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
+
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * modules.
+    */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
     /// The list of all registered OpenSpaceModule%s

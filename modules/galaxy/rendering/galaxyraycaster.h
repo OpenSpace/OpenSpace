@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,74 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __GALAXYRAYCASTER_H__
+#define __GALAXYRAYCASTER_H__
 
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
-uniform vec4 _radius;
-uniform int _segments;
+#include <ghoul/glm.h>
+#include <string>
+#include <vector>
+#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/blockplaneintersectiongeometry.h>
 
-uniform float projectionFading;
-
-in vec4 vs_position;
-
-uniform vec3 boresight;
-
-out vec4 color;
-
-#define M_PI 3.14159265358979323846
-
-vec4 uvToModel(vec2 uv, vec4 radius, float segments){
-    float fj = uv.x * segments;
-    float fi = (1.0 - uv.y) * segments;
-
-    float theta = fi * float(M_PI) / segments;  // 0 -> PI
-    float phi   = fj * float(M_PI) * 2.0f / segments;
-
-    float x = radius[0] * sin(phi) * sin(theta);  //
-    float y = radius[1] * cos(theta);             // up 
-    float z = radius[2] * cos(phi) * sin(theta);  //
-    
-    return vec4(x, y, z, radius[3]);
-
-    return vec4(0.0); 
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+        class TextureUnit;
+        class ProgramObject;
+    }
 }
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace openspace {
 
-bool inRange(float x, float a, float b){
-    return (x >= a && x <= b);
-} 
+class RenderData;
+class RaycastData;
 
-void main() {
-  vec2 uv = (vs_position.xy + vec2(1.0)) / vec2(2.0);
-  
-  vec4 vertex = uvToModel(uv, _radius, _segments);
-  
-  vec4 raw_pos   = psc_to_meter(vertex, _scaling);
-  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
-    
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  
-  vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
-  
-  vec3 v_b = normalize(boresight);
-  
-  if((inRange(projected.x, 0, 1) &&  
-      inRange(projected.y, 0, 1)) &&
-      dot(v_b, normal) < 0 )
-  {
-    // The 1-x is in this texture call because of flipped textures
-    // to be fixed soon ---abock
-        color = texture(texture1, vec2(projected.x, 1-projected.y));
-  }else{
-      color = texture(texture2, uv);
-     color.a = projectionFading;
-  }
-  
-  // color.a  = 0.1f;//1.f - abs(uv.x - 0.55) / (0.6 - 0.5); // blending
-}
+class GalaxyRaycaster : public VolumeRaycaster {
+public:
+
+    GalaxyRaycaster(ghoul::opengl::Texture& texture);
+
+    virtual ~GalaxyRaycaster();
+    void initialize();
+    void deinitialize();
+    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
+
+
+    std::string getBoundsVsPath() const override;
+    std::string getBoundsFsPath() const override;
+    std::string getRaycastPath() const override;
+    std::string getHelperPath() const override;
+
+    void setAspect(const glm::vec3& aspect);
+    void setModelTransform(glm::mat4 transform);
+    void setTime(double time);
+    void setStepSize(float stepSize);
+    void setOpacityCoefficient(float opacityCoefficient);
+private:
+    BoxGeometry _boundingBox;
+    float _stepSize;
+    glm::mat4 _modelTransform;
+    glm::vec3 _aspect;
+    double _time;
+    float _opacityCoefficient;
+    ghoul::opengl::Texture& _texture;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+
+}; // GalaxyRaycaster
+
+} // openspace
+
+#endif  // __GALAXYRRAYCASTER_H__
