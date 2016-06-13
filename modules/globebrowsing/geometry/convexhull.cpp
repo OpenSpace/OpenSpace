@@ -81,7 +81,7 @@ namespace openspace {
         {
             // Keep removing top while the angle formed by points next-to-top,
             // top, and points[i] makes a non-left turn
-            while (orientation(oneBelowTop(S), S.top(), points[i]) != 2)
+            while (orientation(oneBelowTop(S), S.top(), points[i]) == 1)
                 S.pop();
             S.push(points[i]);
         }

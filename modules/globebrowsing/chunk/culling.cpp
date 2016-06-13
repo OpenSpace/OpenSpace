@@ -32,6 +32,7 @@
 
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <modules/globebrowsing/geometry/convexhull.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
@@ -83,6 +84,7 @@ namespace openspace {
         // Create a bounding box that fits the patch corners
         AABB3 bounds; // in screen space
         int numPositiveZ = 0;
+        std::vector<vec2> screenSpaceCorners(8);
         for (size_t i = 0; i < 8; i++) {
             Quad q = (Quad)(i % 4);
             double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
@@ -90,10 +92,11 @@ namespace openspace {
             dvec4 cornerModelSpace = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
             vec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
             vec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
+            screenSpaceCorners[i] = vec2(cornerScreenSpace);
             bounds.expand(cornerScreenSpace);
         }
-
-        return !bounds.intersects(_viewFrustum);
+        
+        return !_viewFrustum.intersects(bounds);
     }
 
 

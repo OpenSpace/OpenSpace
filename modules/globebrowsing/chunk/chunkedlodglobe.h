@@ -72,7 +72,8 @@ namespace openspace {
 
         void setStateMatrix(const glm::dmat3& stateMatrix);
 
-        bool testIfCullable(const Chunk& chunk, const RenderData& renderData);
+        bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+        int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
         double minDistToCamera;
 
@@ -131,6 +132,8 @@ namespace openspace {
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
         std::vector<ChunkCuller*> _chunkCullers;
+
+        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluater;
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;

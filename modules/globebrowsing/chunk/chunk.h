@@ -48,7 +48,7 @@ namespace openspace {
             bool available;
         };
 
-        enum class Status{
+        enum class Status {
             DO_NOTHING,
             WANT_MERGE,
             WANT_SPLIT,
@@ -71,14 +71,36 @@ namespace openspace {
 
 
     private:
-        int desiredLevelByDistance(const RenderData& data) const;
-        int desiredLevelByProjectedArea(const RenderData& data) const;
 
         ChunkedLodGlobe* _owner;
         ChunkIndex _index;
         bool _isVisible;
         GeodeticPatch _surfacePatch;
 
+    };
+
+
+
+    class DesiredChunkLevelEvaluator {
+    public:
+        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
+    };
+
+
+
+    class EvaluateChunkLevelByDistance : public DesiredChunkLevelEvaluator {
+    public:
+        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
+    };
+
+    class EvaluateChunkLevelByProjectedArea : public DesiredChunkLevelEvaluator {
+    public:
+        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
+    };
+
+    class EvaluateChunkLevelByAvailableTileData : public DesiredChunkLevelEvaluator {
+    public:
+        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
     };
 
 }

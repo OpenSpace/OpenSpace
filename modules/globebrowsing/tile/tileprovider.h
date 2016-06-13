@@ -75,6 +75,7 @@ namespace openspace {
         virtual ~TileProvider() { }
 
         virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0) = 0;
+        //virtual Tile getTile(ChunkIndex chunkIndex) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void prerender() = 0;
     };
