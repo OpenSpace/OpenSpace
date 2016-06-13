@@ -40,7 +40,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -168,9 +168,9 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
     return std::move( DlManager.fetchFile(
-            iswaUrl(id, "image"),
+            iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
             },
@@ -180,9 +180,9 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
     return std::move( DlManager.fetchFile(
-            iswaUrl(id, "data"),
+            iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
             },
@@ -192,7 +192,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, std::string type){
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
@@ -201,7 +201,8 @@ std::string IswaManager::iswaUrl(int id, std::string type){
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
-    std::string t = Time::ref().currentTimeUTC(); 
+    //std::string t = Time::ref().currentTimeUTC(); 
+    std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
 

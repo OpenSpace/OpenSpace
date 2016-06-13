@@ -174,6 +174,10 @@ void IswaCygnet::render(const RenderData& data){
 }
 
 void IswaCygnet::update(const UpdateData& data){
+
+    // the texture resource is downloaded ahead of time, so we need to
+    // now if we are going backwards or forwards
+    double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
@@ -181,22 +185,19 @@ void IswaCygnet::update(const UpdateData& data){
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
-    if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
-        downloadTextureResource();
-
-        _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
         if(success)
             _textureDirty = true;
     }
-    
-    if(_textureDirty) {
+
+    if(_textureDirty && _data->updateTime != 0 && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
+
+        downloadTextureResource(_openSpaceTime + clockwiseSign*_data->updateTime);
+        _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime =_openSpaceTime;
     }
 
     if(!_transferFunctions.empty())
@@ -225,7 +226,7 @@ void IswaCygnet::unregisterProperties(){
 
 void IswaCygnet::initializeTime(){
     _openSpaceTime = Time::ref().currentTime();
-    _lastUpdateOpenSpaceTime = _openSpaceTime;
+    _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;

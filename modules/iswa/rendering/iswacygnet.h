@@ -38,6 +38,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/time.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
@@ -118,7 +119,7 @@ protected:
      * this should be the data file.
      * @return true if update was successfull
      */
-    virtual bool downloadTextureResource() = 0;
+    virtual bool downloadTextureResource(double timestamp = Time::ref().currentTime()) = 0;
     virtual bool readyToRender() const = 0;
      /**
      * should set all uniforms needed to render
