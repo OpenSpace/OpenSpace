@@ -201,11 +201,11 @@ namespace openspace {
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
         _chunkedLodGlobe->chunkHeight = chunkHeight.value();
 
-        _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
-        _chunkedLodGlobe->blendColorMap = blendColorMap.value();
-        _chunkedLodGlobe->blendNightTexture = blendNightTexture.value();
-        _chunkedLodGlobe->blendOverlay = blendOverlay.value();
-        _chunkedLodGlobe->blendWaterMask = blendWaterMask.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::HeightMaps] = blendHeightMap.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::ColorTextures] = blendColorMap.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::NightTextures] = blendNightTexture.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::Overlays] = blendOverlay.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::WaterMasks] = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
         _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
         _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();

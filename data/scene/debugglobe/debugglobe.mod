@@ -32,7 +32,7 @@ return {
             SegmentsPerPatch = 64,
             TextureInitData = {
                 ColorTextureMinimumSize = 1024,
-                OverlayMinimumSize = 1024,
+                OverlayMinimumSize = 4096,
                 HeightMapMinimumSize = 64,
             },
             Textures = {

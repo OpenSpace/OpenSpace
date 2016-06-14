@@ -37,11 +37,6 @@ namespace {
 
 namespace openspace {
 
-
-
-
-
-
     const std::string LayeredTextureInfo::glslKeyPrefixes[NUM_SETTINGS_PER_CATEGORY] =
     {
         "lastLayerIndex",
@@ -49,12 +44,10 @@ namespace openspace {
         "blend",
     };
 
-
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {
         return
             lastLayerIdx == other.lastLayerIdx &&
-            category == other.category &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
@@ -160,18 +153,6 @@ namespace openspace {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     const std::string LayeredTextureShaderUniformIdHandler::glslTileDataNames[NUM_TILE_DATA_VARIABLES] =
     {
         "textureSampler",
@@ -197,13 +178,13 @@ namespace openspace {
     {
     }
 
-    void LayeredTextureShaderUniformIdHandler::updateIds(LayeredTextureShaderProvider* shaderProvider)
+    void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider)
     {
         if (shaderProvider->updatedOnLastCall())
         {
             _shaderProvider = shaderProvider;
             _shaderProvider->_programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
-            for (size_t i = 0; i < LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES; i++)
+            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
             {
                 for (size_t j = 0; j < NUM_BLEND_TEXTURES; j++)
                 {
@@ -239,7 +220,4 @@ namespace openspace {
         return *_shaderProvider->_programObject;
     }
     
-
-
-
 }  // namespace openspace

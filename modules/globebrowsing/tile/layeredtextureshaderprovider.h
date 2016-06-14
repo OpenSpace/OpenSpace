@@ -52,7 +52,6 @@ namespace openspace {
         };
         static const std::string glslKeyPrefixes[NUM_SETTINGS_PER_CATEGORY];
   
-        LayeredTextures::TextureCategory category;
         int lastLayerIdx;
         bool layerBlendingEnabled;
 
@@ -61,7 +60,7 @@ namespace openspace {
 
     struct LayeredTexturePreprocessingData
     {
-        std::array<LayeredTextureInfo, LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES> layeredTextureInfo;
+        std::array<LayeredTextureInfo, LayeredTextures::NUM_TEXTURE_CATEGORIES> layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayeredTexturePreprocessingData& other) const;
     };
@@ -93,12 +92,6 @@ namespace openspace {
         bool _updatedOnLastCall;
     };
 
-
-
-
-
-
-
     class LayeredTextureShaderUniformIdHandler
     {
 
@@ -123,7 +116,7 @@ namespace openspace {
 
         LayeredTextureShaderUniformIdHandler();
         ~LayeredTextureShaderUniformIdHandler();
-        void updateIds(LayeredTextureShaderProvider* shaderProvider);
+        void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider);
 
         GLint getId(
             LayeredTextures::TextureCategory category,
@@ -140,7 +133,7 @@ namespace openspace {
             std::array<
             std::array<
             GLint,
-            LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES>,
+            LayeredTextures::NUM_TEXTURE_CATEGORIES>,
             LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
             NUM_BLEND_TEXTURES>,
             NUM_TILE_DATA_VARIABLES>

@@ -73,7 +73,7 @@ namespace openspace {
         static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
             const TileProviderInitData& initData);
 
-        std::array<LayerCategory, LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES> _layerCategories;
+        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 
 } // namespace openspace

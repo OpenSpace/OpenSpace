@@ -104,11 +104,8 @@ namespace openspace {
         float chunkHeight;
 
         // Layered rendering
-        bool blendHeightMap;
-        bool blendColorMap;
-        bool blendNightTexture;
-        bool blendWaterMask;
-        bool blendOverlay;
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES>
+            blendProperties;
         bool atmosphereEnabled;
         bool showChunkEdges;
         bool levelByProjArea;

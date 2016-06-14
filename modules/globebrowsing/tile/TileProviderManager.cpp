@@ -148,10 +148,11 @@ namespace openspace {
     }
 
     const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActivatedLayerCategory(LayeredTextures::TextureCategory category)
+        TileProviderManager::getActivatedLayerCategory(
+            LayeredTextures::TextureCategory textureCategory)
     {
         std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for each (auto tileProviderWithName in _layerCategories[category]) {
+        for each (auto tileProviderWithName in _layerCategories[textureCategory]) {
             if (tileProviderWithName.isActive) {
                 tileProviders.push_back(tileProviderWithName.tileProvider);
             }
