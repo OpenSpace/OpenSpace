@@ -25,10 +25,11 @@
 
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/tile/layeredtextures.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/openspaceengine.h> 
 #include <openspace/rendering/renderengine.h>
 
 // ghoul includes
@@ -60,17 +61,24 @@ namespace openspace {
         : _tileProviderManager(tileProviderManager)
         , _grid(grid)
     {
-        _globalRenderingShaderProvider = std::unique_ptr<LayeredTextureShaderProvider>
+        _globalRenderingShaderProvider = std::shared_ptr<LayeredTextureShaderProvider>
             (new LayeredTextureShaderProvider(
                 "GlobalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"));
 
-        _localRenderingShaderProvider = std::unique_ptr<LayeredTextureShaderProvider>
+        _localRenderingShaderProvider = std::shared_ptr<LayeredTextureShaderProvider>
             (new LayeredTextureShaderProvider(
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"));
+
+        _globalProgramUniformHandler = std::shared_ptr<LayeredTextureShaderUniformIdHandler>
+            (new LayeredTextureShaderUniformIdHandler());
+
+        _localProgramUniformHandler = std::shared_ptr<LayeredTextureShaderUniformIdHandler>
+            (new LayeredTextureShaderUniformIdHandler());
+
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -88,20 +96,36 @@ namespace openspace {
 
 
     void ChunkRenderer::setDepthTransformUniforms(
-        ProgramObject* programObject, const std::string& indexedTileKey, const TileDepthTransform& tileDepthTransform) 
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
+        LayeredTextures::TextureCategory textureCategory,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        size_t layerIndex,
+        const TileDepthTransform& tileDepthTransform)
     {   
-        programObject->setUniform(
-            indexedTileKey + ".depthTransform.depthScale",
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getId(
+                textureCategory,
+                blendLayerSuffix,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::GlslTileDataId::depthTransform_depthScale),
             tileDepthTransform.depthScale);
-        programObject->setUniform(
-            indexedTileKey + ".depthTransform.depthOffset",
+
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getId(
+                textureCategory,
+                blendLayerSuffix,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::GlslTileDataId::depthTransform_depthOffset),
             tileDepthTransform.depthOffset);
+
     }
 
     void ChunkRenderer::activateTileAndSetTileUniforms(
-        ProgramObject* programObject,
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
+        LayeredTextures::TextureCategory textureCategory,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
-        const std::string indexedTileKey,
         const TileAndTransform& tileAndTransform)
     {
 
@@ -109,78 +133,53 @@ namespace openspace {
         // The texture needs a unit to sample from
         texUnit.activate();
         tileAndTransform.tile.texture->bind();
-        programObject->setUniform(indexedTileKey + ".textureSampler", texUnit);
-        programObject->setUniform(
-            indexedTileKey + ".uvTransform.uvScale",
+
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getId(
+                textureCategory,
+                blendLayerSuffix,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::GlslTileDataId::textureSampler),
+            texUnit);
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getId(
+                textureCategory,
+                blendLayerSuffix,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::GlslTileDataId::uvTransform_uvScale),
             tileAndTransform.uvTransform.uvScale);
-        programObject->setUniform(
-            indexedTileKey + ".uvTransform.uvOffset",
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getId(
+                textureCategory,
+                blendLayerSuffix,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::GlslTileDataId::uvTransform_uvOffset),
             tileAndTransform.uvTransform.uvOffset);
     }
 
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         LayeredTextureShaderProvider* layeredTextureShaderProvider,
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
         const Chunk& chunk)
     {
         const ChunkIndex& chunkIndex = chunk.index();
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
-
-        // TODO: This does not need to be updated every time. Maybe flag as dirty when
-        // needing update instead.
-        // Create information for the shader provider
-        LayeredTextureInfo layeredTextureInfoHeight;
-        LayeredTextureInfo layeredTextureInfoColor;
-        LayeredTextureInfo layeredTextureInfoNight;
-        LayeredTextureInfo layeredTextureInfoOverlay;
-        LayeredTextureInfo layeredTextureInfoWater;
-
-        layeredTextureInfoHeight.keyLastLayerIndex = "lastLayerIndexHeight";
-        layeredTextureInfoHeight.lastLayerIndex = heightMapProviders.size() - 1;
-        layeredTextureInfoHeight.keyUseThisLayerType = "useHeightMap";
-        layeredTextureInfoHeight.keyLayerBlendingEnabled = "heightMapBlendingEnabled";
-        layeredTextureInfoHeight.layerBlendingEnabled = chunk.owner()->blendHeightMap;
-
-        layeredTextureInfoColor.keyLastLayerIndex = "lastLayerIndexColor";
-        layeredTextureInfoColor.lastLayerIndex = colorTextureProviders.size() - 1;
-        layeredTextureInfoColor.keyUseThisLayerType = "useColorTexture";
-        layeredTextureInfoColor.keyLayerBlendingEnabled = "colorTextureBlendingEnabled";
-        layeredTextureInfoColor.layerBlendingEnabled = chunk.owner()->blendColorMap;
-
-        layeredTextureInfoNight.keyLastLayerIndex = "lastLayerIndexNight";
-        layeredTextureInfoNight.lastLayerIndex = nightTextureProviders.size() - 1;
-        layeredTextureInfoNight.keyUseThisLayerType = "useNightTexture";
-        layeredTextureInfoNight.keyLayerBlendingEnabled = "nightTextureBlendingEnabled";
-        layeredTextureInfoNight.layerBlendingEnabled = chunk.owner()->blendNightTexture;
-
-        layeredTextureInfoOverlay.keyLastLayerIndex = "lastLayerIndexOverlay";
-        layeredTextureInfoOverlay.lastLayerIndex = overlayProviders.size() - 1;
-        layeredTextureInfoOverlay.keyUseThisLayerType = "useOverlay";
-        layeredTextureInfoOverlay.keyLayerBlendingEnabled = "overlayBlendingEnabled";
-        layeredTextureInfoOverlay.layerBlendingEnabled = chunk.owner()->blendOverlay;
-
-        layeredTextureInfoWater.keyLastLayerIndex = "lastLayerIndexWater";
-        layeredTextureInfoWater.lastLayerIndex = waterMaskProviders.size() - 1;
-        layeredTextureInfoWater.keyUseThisLayerType = "useWaterMask";
-        layeredTextureInfoWater.keyLayerBlendingEnabled = "waterMaskBlendingEnabled";
-        layeredTextureInfoWater.layerBlendingEnabled = chunk.owner()->blendWaterMask;
-
+        std::array<std::vector<std::shared_ptr<TileProvider> >,
+            LayeredTextures::NUM_TEXTURE_CATEGORIES> tileProviders;
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
-        layeredTexturePreprocessingData.layeredTextureInfo.push_back(
-            layeredTextureInfoHeight);
-        layeredTexturePreprocessingData.layeredTextureInfo.push_back(
-            layeredTextureInfoColor);
-        layeredTexturePreprocessingData.layeredTextureInfo.push_back(
-            layeredTextureInfoNight);
-        layeredTexturePreprocessingData.layeredTextureInfo.push_back(
-            layeredTextureInfoOverlay);
-        layeredTexturePreprocessingData.layeredTextureInfo.push_back(
-            layeredTextureInfoWater);
+
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++)
+        {
+            tileProviders[category] = _tileProviderManager->getActivatedLayerCategory(
+                LayeredTextures::TextureCategory(category));
+
+            LayeredTextureInfo layeredTextureInfo;
+            layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
+            layeredTextureInfo.layerBlendingEnabled = chunk.owner()->blendProperties[category];
+
+            layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
+        }
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
@@ -198,258 +197,96 @@ namespace openspace {
             layeredTextureShaderProvider->getUpdatedShaderProgram(
                 layeredTexturePreprocessingData);
 
+        programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider);
+
         // Activate the shader program
         programObject->activate();
 
+        // Initialize all texture units
+        struct BlendTexUnits {
+            ghoul::opengl::TextureUnit blendTexture0;
+            ghoul::opengl::TextureUnit blendTexture1;
+            ghoul::opengl::TextureUnit blendTexture2;
+        };
+        std::array<std::vector<BlendTexUnits>,
+            LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
+            texUnits[category].resize(tileProviders[category].size());
+        }
 
-
-        // Create all the texture units
-        std::vector<ghoul::opengl::TextureUnit> texUnitHeight;
-        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent1;
-        std::vector<ghoul::opengl::TextureUnit> texUnitHeightParent2;
-
-        texUnitHeight.resize(heightMapProviders.size());
-        texUnitHeightParent1.resize(heightMapProviders.size());
-        texUnitHeightParent2.resize(heightMapProviders.size());
-
-        std::vector<ghoul::opengl::TextureUnit> texUnitColor;
-        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent1;
-        std::vector<ghoul::opengl::TextureUnit> texUnitColorParent2;
-
-        texUnitColor.resize(colorTextureProviders.size());
-        texUnitColorParent1.resize(colorTextureProviders.size());
-        texUnitColorParent2.resize(colorTextureProviders.size());
-
-        std::vector<ghoul::opengl::TextureUnit> texUnitNight;
-        std::vector<ghoul::opengl::TextureUnit> texUnitNightParent1;
-        std::vector<ghoul::opengl::TextureUnit> texUnitNightParent2;
-
-        texUnitNight.resize(nightTextureProviders.size());
-        texUnitNightParent1.resize(nightTextureProviders.size());
-        texUnitNightParent2.resize(nightTextureProviders.size());
-
-        std::vector<ghoul::opengl::TextureUnit> texUnitOverlay;
-        std::vector<ghoul::opengl::TextureUnit> texUnitOverlayParent1;
-        std::vector<ghoul::opengl::TextureUnit> texUnitOverlayParent2;
-
-        texUnitOverlay.resize(overlayProviders.size());
-        texUnitOverlayParent1.resize(overlayProviders.size());
-        texUnitOverlayParent2.resize(overlayProviders.size());
-
-        std::vector<ghoul::opengl::TextureUnit> texUnitWater;
-        std::vector<ghoul::opengl::TextureUnit> texUnitWaterParent1;
-        std::vector<ghoul::opengl::TextureUnit> texUnitWaterParent2;
-
-        texUnitWater.resize(waterMaskProviders.size());
-        texUnitWaterParent1.resize(waterMaskProviders.size());
-        texUnitWaterParent2.resize(waterMaskProviders.size());
-
-
-
-        // Go through all the height map providers
-        int i = 0;
-        for (auto it = heightMapProviders.begin(); it != heightMapProviders.end(); it++)
+        // Go through all the categories
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++)
         {
-            auto tileProvider = *it;
+            // Go through all the providers in this category
+            int i = 0;
+            for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++)
+            {
+                auto tileProvider = *it;
 
-            // Get the texture that should be used for rendering
-            TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
-            if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                // don't render if no tile was available
-                programObject->deactivate();
-                return nullptr;
+                // Get the texture that should be used for rendering
+                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
+                    // don't render if no tile was available
+                    programObject->deactivate();
+                    return nullptr;
+                }
+
+                activateTileAndSetTileUniforms(
+                    programUniformHandler,
+                    LayeredTextures::TextureCategory(category),
+                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                    i,
+                    texUnits[category][i].blendTexture0,
+                    tileAndTransform);
+
+                // If blending is enabled, two more textures are needed
+                if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
+                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent1 = tileAndTransform;
+                    }
+                    activateTileAndSetTileUniforms(
+                        programUniformHandler,
+                        LayeredTextures::TextureCategory(category),
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent1,
+                        i,
+                        texUnits[category][i].blendTexture1,
+                        tileAndTransformParent1);
+
+                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
+                        tileAndTransformParent2 = tileAndTransformParent1;
+                    }
+                    activateTileAndSetTileUniforms(
+                        programUniformHandler,
+                        LayeredTextures::TextureCategory(category),
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent2,
+                        i,
+                        texUnits[category][i].blendTexture2,
+                        tileAndTransformParent2);
+                }
+                i++;
             }
+        }
+
+        // Go through all the height maps and set depth tranforms
+        int i = 0;
+        for (auto it = tileProviders[LayeredTextures::HeightMaps].begin();
+            it != tileProviders[LayeredTextures::HeightMaps].end(); it++) {
+            auto tileProvider = *it;
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
-            std::string indexedTileKey = "heightTiles[" + std::to_string(i) + "]";
-
-            setDepthTransformUniforms(programObject, indexedTileKey, depthTransform);
-            activateTileAndSetTileUniforms(programObject, texUnitHeight[i], indexedTileKey, tileAndTransform);
-
-            // If blending is enabled, two more textures are needed
-            if (layeredTextureInfoHeight.layerBlendingEnabled) {
-                TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
-                if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent1 = tileAndTransform;
-                }
-                std::string indexedTileKeyParent1 = "heightTilesParent1[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitHeightParent1[i], indexedTileKeyParent1, tileAndTransformParent1);
-
-                TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
-                if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent2 = tileAndTransformParent1;
-                }
-                std::string indexedTileKeyParent2 = "heightTilesParent2[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitHeightParent2[i], indexedTileKeyParent2, tileAndTransformParent2);
-            }
-            i++;
-        }
-
-
-        // Go through all the color texture providers
-        i = 0;
-        for (auto it = colorTextureProviders.begin(); it != colorTextureProviders.end(); it++)
-        {
-            auto tileProvider = *it;
-
-            TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
-            if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                // don't render if no tile was available
-                programObject->deactivate();
-                return nullptr;
-            }
-
-            std::string indexedTileKey = "colorTiles[" + std::to_string(i) + "]";
-
-            // Blend tile with two parents
-            // The texture needs a unit to sample from
-            activateTileAndSetTileUniforms(programObject, texUnitColor[i], indexedTileKey, tileAndTransform);
-
-            // If blending is enabled, two more textures are needed
-            if (layeredTextureInfoColor.layerBlendingEnabled) {
-                TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
-                if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent1 = tileAndTransform;
-                }
-
-                std::string indexedTileKeyParent1 = "colorTilesParent1[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitColorParent1[i], indexedTileKeyParent1, tileAndTransformParent1);
-
-
-                TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
-                if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent2 = tileAndTransformParent1;
-                }
-                std::string indexedTileKeyParent2 = "colorTilesParent2[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitColorParent2[i], indexedTileKeyParent2, tileAndTransformParent2);
-
-            }
-            i++;
-        }
-        
-        // Go through all the night texture providers
-        i = 0;
-        for (auto it = nightTextureProviders.begin(); it != nightTextureProviders.end(); it++)
-        {
-            auto tileProvider = *it;
-
-            TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
-            if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                // don't render if no tile was available
-                programObject->deactivate();
-                return nullptr;
-            }
-
-            std::string indexedTileKey = "nightTiles[" + std::to_string(i) + "]";
-
-            // Blend tile with two parents
-            // The texture needs a unit to sample from
-            activateTileAndSetTileUniforms(programObject, texUnitNight[i], indexedTileKey, tileAndTransform);
-
-            // If blending is enabled, two more textures are needed
-            if (layeredTextureInfoNight.layerBlendingEnabled) {
-                TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
-                if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent1 = tileAndTransform;
-                }
-
-                std::string indexedTileKeyParent1 = "nightTilesParent1[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitNightParent1[i], indexedTileKeyParent1, tileAndTransformParent1);
-
-
-                TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
-                if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent2 = tileAndTransformParent1;
-                }
-                std::string indexedTileKeyParent2 = "nightTilesParent2[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitNightParent2[i], indexedTileKeyParent2, tileAndTransformParent2);
-
-            }
-            i++;
-        }
-        
-        // Go through all the overlay providers
-        i = 0;
-        for (auto it = overlayProviders.begin(); it != overlayProviders.end(); it++)
-        {
-            auto tileProvider = *it;
-
-            TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
-            if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                // don't render if no tile was available
-                programObject->deactivate();
-                return nullptr;
-            }
-
-            std::string indexedTileKey = "overlayTiles[" + std::to_string(i) + "]";
-
-            // Blend tile with two parents
-            // The texture needs a unit to sample from
-            activateTileAndSetTileUniforms(programObject, texUnitOverlay[i], indexedTileKey, tileAndTransform);
-
-            // If blending is enabled, two more textures are needed
-            if (layeredTextureInfoOverlay.layerBlendingEnabled) {
-                TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
-                if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent1 = tileAndTransform;
-                }
-
-                std::string indexedTileKeyParent1 = "overlayTilesParent1[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitOverlayParent1[i], indexedTileKeyParent1, tileAndTransformParent1);
-
-
-                TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
-                if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent2 = tileAndTransformParent1;
-                }
-                std::string indexedTileKeyParent2 = "overlayTilesParent2[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitOverlayParent2[i], indexedTileKeyParent2, tileAndTransformParent2);
-            }
-            i++;
-        }
-
-        // Go through all the water mask providers
-        i = 0;
-        for (auto it = waterMaskProviders.begin(); it != waterMaskProviders.end(); it++)
-        {
-            auto tileProvider = *it;
-
-            TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
-            if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                // don't render if no tile was available
-                programObject->deactivate();
-                return nullptr;
-            }
-
-            std::string indexedTileKey = "waterTiles[" + std::to_string(i) + "]";
-
-            // Blend tile with two parents
-            // The texture needs a unit to sample from
-            activateTileAndSetTileUniforms(programObject, texUnitWater[i], indexedTileKey, tileAndTransform);
-
-            // If blending is enabled, two more textures are needed
-            if (layeredTextureInfoWater.layerBlendingEnabled) {
-                TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
-                if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent1 = tileAndTransform;
-                }
-
-                std::string indexedTileKeyParent1 = "waterTilesParent1[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitWaterParent1[i], indexedTileKeyParent1, tileAndTransformParent1);
-
-
-                TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
-                if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransformParent2 = tileAndTransformParent1;
-                }
-                std::string indexedTileKeyParent2 = "waterTilesParent2[" + std::to_string(i) + "]";
-                activateTileAndSetTileUniforms(programObject, texUnitWaterParent2[i], indexedTileKeyParent2, tileAndTransformParent2);
-            }
+            setDepthTransformUniforms(
+                programUniformHandler,
+                LayeredTextures::TextureCategory::HeightMaps,
+                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                i,
+                depthTransform);
             i++;
         }
 
         // The length of the skirts is proportional to its size
-        programObject->setUniform("skirtLength", static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000));
+        programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
         return programObject;
@@ -457,24 +294,32 @@ namespace openspace {
 
     void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
 
-        ProgramObject* programObject = getActivatedProgramWithTileData(_globalRenderingShaderProvider.get(), chunk);
+        ProgramObject* programObject = getActivatedProgramWithTileData(
+            _globalRenderingShaderProvider.get(),
+            _globalProgramUniformHandler,
+            chunk);
         if (programObject == nullptr) {
             return;
         }
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
+        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
+        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
+        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
+        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         // This information is only needed when doing blending
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendHeightMap) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendColorMap) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendNightTexture) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendOverlay) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendWaterMask)) {
+        bool blendAny = false;
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
+            blendAny |= chunk.owner()->blendProperties[category];
+        }
+        if (blendAny &&
+            ((heightMapProviders.size() > 0 ) ||
+            (colorTextureProviders.size() > 0 ) ||
+            (nightTextureProviders.size() > 0 ) ||
+            (overlayProviders.size() > 0 ) ||
+            (waterMaskProviders.size() > 0))) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -519,25 +364,34 @@ namespace openspace {
 
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
         
-        ProgramObject* programObject = getActivatedProgramWithTileData(_localRenderingShaderProvider.get(), chunk);
+        ProgramObject* programObject = getActivatedProgramWithTileData(
+            _localRenderingShaderProvider.get(),
+            _localProgramUniformHandler,
+            chunk);
         if (programObject == nullptr) {
             return;
         }
 
         using namespace glm;
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory("HeightMaps");
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory("ColorTextures");
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory("NightTextures");
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory("Overlays");
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory("WaterMasks");
+        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
+        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
+        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
+        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendHeightMap) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendColorMap) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendNightTexture) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendOverlay) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendWaterMask)) {
+        // This information is only needed when doing blending
+        bool blendAny = false;
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
+            blendAny |= chunk.owner()->blendProperties[category];
+        }
+        if (blendAny &&
+            ((heightMapProviders.size() > 0) ||
+                (colorTextureProviders.size() > 0) ||
+                (nightTextureProviders.size() > 0) ||
+                (overlayProviders.size() > 0) ||
+                (waterMaskProviders.size() > 0))) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);

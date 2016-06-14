@@ -29,27 +29,27 @@
 #include "fragment.glsl"
 
 #if USE_COLORTEXTURE
-uniform Tile colorTiles[NUMLAYERS_COLORTEXTURE];
-uniform Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE];
-uniform Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE];
+uniform Tile ColorTextures[NUMLAYERS_COLORTEXTURE];
+uniform Tile ColorTexturesParent1[NUMLAYERS_COLORTEXTURE];
+uniform Tile ColorTexturesParent2[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
 #if USE_NIGHTTEXTURE
-uniform Tile nightTiles[NUMLAYERS_NIGHTTEXTURE];
-uniform Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE];
-uniform Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile NightTextures[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile NightTexturesParent1[NUMLAYERS_NIGHTTEXTURE];
+uniform Tile NightTexturesParent2[NUMLAYERS_NIGHTTEXTURE];
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
-uniform Tile overlayTiles[NUMLAYERS_OVERLAY];
-uniform Tile overlayTilesParent1[NUMLAYERS_OVERLAY];
-uniform Tile overlayTilesParent2[NUMLAYERS_OVERLAY];
+uniform Tile Overlays[NUMLAYERS_OVERLAY];
+uniform Tile OverlaysParent1[NUMLAYERS_OVERLAY];
+uniform Tile OverlaysParent2[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
 #if USE_WATERMASK
-uniform Tile waterTiles[NUMLAYERS_WATERMASK];
-uniform Tile waterTilesParent1[NUMLAYERS_WATERMASK];
-uniform Tile waterTilesParent2[NUMLAYERS_WATERMASK];
+uniform Tile WaterMasks[NUMLAYERS_WATERMASK];
+uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
+uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
 #if USE_ATMOSPHERE
@@ -74,9 +74,9 @@ Fragment getFragment() {
 	frag.color = calculateColor(
 		fs_uv,
 		levelWeights,//levelInterpolationParameter,
-		colorTiles,
-		colorTilesParent1,
-		colorTilesParent2);
+		ColorTextures,
+		ColorTexturesParent1,
+		ColorTexturesParent2);
 
 #endif // USE_COLORTEXTURE
 
@@ -86,9 +86,9 @@ Fragment getFragment() {
 		frag.color,
 		fs_uv,
 		levelWeights,
-		waterTiles,
-		waterTilesParent1,
-		waterTilesParent2);
+		WaterMasks,
+		WaterMasksParent1,
+		WaterMasksParent2);
 
 #endif // USE_WATERMASK
 
@@ -98,9 +98,9 @@ Fragment getFragment() {
 		frag.color,
 		fs_uv,
 		levelWeights,
-		nightTiles,
-		nightTilesParent1,
-		nightTilesParent2,
+		NightTextures,
+		NightTexturesParent1,
+		NightTexturesParent2,
 		ellipsoidNormalCameraSpace);
 
 #endif // USE_NIGHTTEXTURE
@@ -115,9 +115,9 @@ Fragment getFragment() {
 		frag.color,
 		fs_uv,
 		levelWeights,
-		overlayTiles,
-		overlayTilesParent1,
-		overlayTilesParent2);
+		Overlays,
+		OverlaysParent1,
+		OverlaysParent2);
 
 #endif // USE_OVERLAY
 

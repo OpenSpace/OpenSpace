@@ -31,12 +31,6 @@
 
 namespace {
     const std::string _loggerCat = "TileProviderManager";
-
-    const std::string keyColorTextures = "ColorTextures";
-    const std::string keyNightTextures = "NightTextures";
-    const std::string keyOverlays = "Overlays";
-    const std::string keyHeightMaps = "HeightMaps";
-    const std::string keyWaterMasks = "WaterMasks";
 }
 
 
@@ -44,76 +38,46 @@ namespace openspace {
 
     ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
-    TileProviderManager::TileProviderManager(const ghoul::Dictionary& texDict){
-        // Color Texture
-        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyColorTextures, LayerCategory()));
-        ghoul::Dictionary colorTexturesDict;
-        texDict.getValue(keyColorTextures, colorTexturesDict);
+    TileProviderManager::TileProviderManager(
+        const ghoul::Dictionary& textureCategoriesDictionary,
+        const ghoul::Dictionary& textureInitDictionary){
+        // Create all the categories of tile providers
+        for (size_t i = 0; i < textureCategoriesDictionary.size(); i++) {
+            ghoul::Dictionary texturesDict = textureCategoriesDictionary.value<ghoul::Dictionary>(
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i]);
 
-        TileProviderInitData colorInitData;
-        colorInitData.minimumPixelSize = 1024;
-        colorInitData.threads = 1;
-        colorInitData.cacheSize = 500;
-        colorInitData.framesUntilRequestQueueFlush = 60;
-        colorInitData.preprocessTiles = false;
+            ghoul_assert(texturesDict.size() <=
+                LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY,
+                "Too many textures! Number of textures per category must be less than or equal to "
+                << LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY);
 
-        initTexures(_layerCategories[keyColorTextures], colorTexturesDict, colorInitData);
+            TileProviderInitData initData;
 
-        // Night Texture
-        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyNightTextures, LayerCategory()));
-        ghoul::Dictionary nightTexturesDict;
-        texDict.getValue(keyNightTextures, nightTexturesDict);
+            if (i == LayeredTextures::ColorTextures ||
+                i == LayeredTextures::NightTextures ||
+                i == LayeredTextures::WaterMasks) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
+            }
+            else if (i == LayeredTextures::Overlays) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
+            }
+            else if (i == LayeredTextures::HeightMaps) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
+            }
+            else {
+                initData.minimumPixelSize = 512;
+            }
 
-        TileProviderInitData nightInitData;
-        nightInitData.minimumPixelSize = 1024;
-        nightInitData.threads = 1;
-        nightInitData.cacheSize = 500;
-        nightInitData.framesUntilRequestQueueFlush = 60;
-        nightInitData.preprocessTiles = false;
+            initData.threads = 1;
+            initData.cacheSize = 500;
+            initData.framesUntilRequestQueueFlush = 60;
+            initData.preprocessTiles = i == LayeredTextures::HeightMaps; // Only preprocess height maps.
 
-        initTexures(_layerCategories[keyNightTextures], nightTexturesDict, nightInitData);
-
-        // Overlays
-        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyOverlays, LayerCategory()));
-        ghoul::Dictionary overlaysDict;
-        texDict.getValue(keyOverlays, overlaysDict);
-
-        TileProviderInitData overlayInitData;
-        overlayInitData.minimumPixelSize = 1024;
-        overlayInitData.threads = 1;
-        overlayInitData.cacheSize = 500;
-        overlayInitData.framesUntilRequestQueueFlush = 60;
-        overlayInitData.preprocessTiles = false;
-
-        initTexures(_layerCategories[keyOverlays], overlaysDict, overlayInitData);
-
-        // Height maps
-        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyHeightMaps, LayerCategory()));
-        ghoul::Dictionary heightTexturesDict;
-        texDict.getValue(keyHeightMaps, heightTexturesDict);
-
-        TileProviderInitData heightInitData;
-        heightInitData.minimumPixelSize = 64;
-        heightInitData.threads = 1;
-        heightInitData.cacheSize = 500;
-        heightInitData.framesUntilRequestQueueFlush = 60;
-        heightInitData.preprocessTiles = true;
-
-        initTexures(_layerCategories[keyHeightMaps], heightTexturesDict, heightInitData);
-
-        // Water masks
-        _layerCategories.insert(std::pair<std::string, LayerCategory>(keyWaterMasks, LayerCategory()));
-        ghoul::Dictionary waterMaskDict;
-        texDict.getValue(keyWaterMasks, waterMaskDict);
-
-        TileProviderInitData waterInitData;
-        waterInitData.minimumPixelSize = 2048;
-        waterInitData.threads = 1;
-        waterInitData.cacheSize = 500;
-        waterInitData.framesUntilRequestQueueFlush = 60;
-        waterInitData.preprocessTiles = false;
-
-        initTexures(_layerCategories[keyWaterMasks], waterMaskDict, waterInitData);
+            initTexures(
+                _layerCategories[i],
+                texturesDict,
+                initData);
+        }
     }
 
     TileProviderManager::~TileProviderManager()
@@ -168,14 +132,14 @@ namespace openspace {
         return tileProvider;
     }
 
-    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(std::string categoryKey)
+    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)
     {
-        return _layerCategories[categoryKey];
+        return _layerCategories[category];
     }
 
     void TileProviderManager::prerender() {
-        for each (auto layerCategoryPair in _layerCategories) {
-            for each (auto tileProviderWithName in layerCategoryPair.second) {
+        for each (auto layerCategory in _layerCategories) {
+            for each (auto tileProviderWithName in layerCategory) {
                 if (tileProviderWithName.isActive) {
                     tileProviderWithName.tileProvider->prerender();
                 }
@@ -184,10 +148,11 @@ namespace openspace {
     }
 
     const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActivatedLayerCategory(std::string categoryKey)
+        TileProviderManager::getActivatedLayerCategory(
+            LayeredTextures::TextureCategory textureCategory)
     {
         std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for each (auto tileProviderWithName in _layerCategories[categoryKey]) {
+        for each (auto tileProviderWithName in _layerCategories[textureCategory]) {
             if (tileProviderWithName.isActive) {
                 tileProviders.push_back(tileProviderWithName.tileProvider);
             }

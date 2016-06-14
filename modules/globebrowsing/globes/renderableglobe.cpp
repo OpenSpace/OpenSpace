@@ -43,6 +43,7 @@ namespace {
     const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
+    const std::string keyTextureInitData = "TextureInitData";
     const std::string keyTextures = "Textures";
     const std::string keyColorTextures = "ColorTextures";
     const std::string keyHeightMaps = "HeightMaps";
@@ -111,22 +112,24 @@ namespace openspace {
         int patchSegments = patchSegmentsd;
         
         // Init tile provider manager
+        ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
+        dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
         _tileProviderManager = std::shared_ptr<TileProviderManager>(
-            new TileProviderManager(texturesDictionary));
+            new TileProviderManager(texturesDictionary, textureInitDataDictionary));
 
-        auto colorProviders = _tileProviderManager->getLayerCategory("ColorTextures");
-        auto nightProviders = _tileProviderManager->getLayerCategory("NightTextures");
-        auto overlayProviders = _tileProviderManager->getLayerCategory("Overlays");
-        auto heightProviders = _tileProviderManager->getLayerCategory("HeightMaps");
-        auto waterProviders = _tileProviderManager->getLayerCategory("WaterMasks");
+        auto& colorTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
+        auto& nightTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
+        auto& heightMapProviders = _tileProviderManager->getLayerCategory(LayeredTextures::HeightMaps);
+        auto& overlayProviders = _tileProviderManager->getLayerCategory(LayeredTextures::Overlays);
+        auto& waterMaskProviders =_tileProviderManager->getLayerCategory(LayeredTextures::WaterMasks);
 
-        addToggleLayerProperties(colorProviders, _activeColorLayers);
-        addToggleLayerProperties(nightProviders, _activeNightLayers);
+        addToggleLayerProperties(colorTextureProviders, _activeColorLayers);
+        addToggleLayerProperties(nightTextureProviders, _activeNightLayers);
         addToggleLayerProperties(overlayProviders, _activeOverlays);
-        addToggleLayerProperties(heightProviders, _activeHeightMapLayers);
-        addToggleLayerProperties(waterProviders, _activeWaterMaskLayers);
+        addToggleLayerProperties(heightMapProviders, _activeHeightMapLayers);
+        addToggleLayerProperties(waterMaskProviders, _activeWaterMaskLayers);
 
         _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));
@@ -200,26 +203,26 @@ namespace openspace {
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
         _chunkedLodGlobe->chunkHeight = chunkHeight.value();
 
-        _chunkedLodGlobe->blendHeightMap = blendHeightMap.value();
-        _chunkedLodGlobe->blendColorMap = blendColorMap.value();
-        _chunkedLodGlobe->blendNightTexture = blendNightTexture.value();
-        _chunkedLodGlobe->blendOverlay = blendOverlay.value();
-        _chunkedLodGlobe->blendWaterMask = blendWaterMask.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::HeightMaps] = blendHeightMap.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::ColorTextures] = blendColorMap.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::NightTextures] = blendNightTexture.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::Overlays] = blendOverlay.value();
+        _chunkedLodGlobe->blendProperties[LayeredTextures::WaterMasks] = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
         _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
         _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
         _chunkedLodGlobe->limitLevelByAvailableHeightData = limitLevelByAvailableHeightData.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
-            _tileProviderManager->getLayerCategory("ColorTextures");
+            _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
         std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
-            _tileProviderManager->getLayerCategory("NightTextures");
+            _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
         std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
-            _tileProviderManager->getLayerCategory("OverlaysTextures");
+            _tileProviderManager->getLayerCategory(LayeredTextures::Overlays);
         std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
-            _tileProviderManager->getLayerCategory("HeightMaps");
+            _tileProviderManager->getLayerCategory(LayeredTextures::HeightMaps);
         std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
-            _tileProviderManager->getLayerCategory("WaterMasks");
+            _tileProviderManager->getLayerCategory(LayeredTextures::WaterMasks);
         
         for (size_t i = 0; i < colorTextureProviders.size(); i++) {
             colorTextureProviders[i].isActive = _activeColorLayers[i].value();

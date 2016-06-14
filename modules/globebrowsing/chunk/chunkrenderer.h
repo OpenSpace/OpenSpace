@@ -63,18 +63,23 @@ namespace openspace {
         void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
         void setDepthTransformUniforms(
-            ProgramObject* programObject, 
-            const std::string& indexedTileKey,
+            std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
+            LayeredTextures::TextureCategory textureCategory,
+            LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+            size_t layerIndex,
             const TileDepthTransform& tileDepthTransform);
 
         void activateTileAndSetTileUniforms(
-            ProgramObject* programObject,
-            ghoul::opengl::TextureUnit& texUnit, 
-            const std::string indexedTileKey,
+            std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
+            LayeredTextures::TextureCategory textureCategory,
+            LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+            size_t layerIndex,
+            ghoul::opengl::TextureUnit& texUnit,
             const TileAndTransform& tileAndTransform);
 
         ProgramObject* getActivatedProgramWithTileData(
-            LayeredTextureShaderProvider* layeredTextureShaderProvider, 
+            LayeredTextureShaderProvider* layeredTextureShaderProvider,
+            std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
             const Chunk& chunk);
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -84,9 +89,11 @@ namespace openspace {
         std::shared_ptr<Grid> _grid;
         std::shared_ptr<TileProviderManager> _tileProviderManager;
 
-        std::unique_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
-        std::unique_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
+        std::shared_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
+        std::shared_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
 
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> _globalProgramUniformHandler;
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> _localProgramUniformHandler;
     };
 
 }  // namespace openspace

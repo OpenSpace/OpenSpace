@@ -37,13 +37,17 @@ namespace {
 
 namespace openspace {
 
+    const std::string LayeredTextureInfo::glslKeyPrefixes[NUM_SETTINGS_PER_CATEGORY] =
+    {
+        "lastLayerIndex",
+        "use",
+        "blend",
+    };
+
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {
         return
-            lastLayerIndex == other.lastLayerIndex &&
-            keyLastLayerIndex == other.keyLastLayerIndex &&
-            keyUseThisLayerType == other.keyUseThisLayerType &&
-            keyLayerBlendingEnabled == other.keyLayerBlendingEnabled &&
+            lastLayerIdx == other.lastLayerIdx &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
@@ -75,6 +79,7 @@ namespace openspace {
         : _shaderName(shaderName)
         , _vsPath(vsPath)
         , _fsPath(fsPath)
+        , _updatedOnLastCall(false)
     {
     
     }
@@ -91,9 +96,11 @@ namespace openspace {
     ProgramObject* LayeredTextureShaderProvider::getUpdatedShaderProgram(
         LayeredTexturePreprocessingData preprocessingData)
     {
+        _updatedOnLastCall = false;
         if (!(preprocessingData == _preprocessingData) || _programObject == nullptr)
         { // No need to recompile shader. Shader is up to date and can be returned.
             recompileShaderProgram(preprocessingData);
+            _updatedOnLastCall = true;
         }
         return _programObject.get();
     }
@@ -112,11 +119,14 @@ namespace openspace {
             // lastLayerIndex must be at least 0 for the shader to compile,
             // the layer type is inactivated by setting useThisLayerType to false
             shaderDictionary.setValue(
-                textureTypes[i].keyLastLayerIndex, glm::max(textureTypes[i].lastLayerIndex, 0));
+                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::lastLayerIndex] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], glm::max(textureTypes[i].lastLayerIdx, 0));
             shaderDictionary.setValue(
-                textureTypes[i].keyUseThisLayerType, textureTypes[i].lastLayerIndex >= 0);
+                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::use] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], textureTypes[i].lastLayerIdx >= 0);
             shaderDictionary.setValue(
-                textureTypes[i].keyLayerBlendingEnabled, textureTypes[i].layerBlendingEnabled);
+                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::blend] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], textureTypes[i].layerBlendingEnabled);
         }
 
         // Other settings such as "useAtmosphere"
@@ -138,4 +148,76 @@ namespace openspace {
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
+    bool LayeredTextureShaderProvider::updatedOnLastCall() {
+        return _updatedOnLastCall;
+    }
+
+
+    const std::string LayeredTextureShaderUniformIdHandler::glslTileDataNames[NUM_TILE_DATA_VARIABLES] =
+    {
+        "textureSampler",
+        "depthTransform.depthScale",
+        "depthTransform.depthOffset",
+        "uvTransform.uvOffset",
+        "uvTransform.uvScale"
+    };
+
+    const std::string LayeredTextureShaderUniformIdHandler::blendLayerSuffixes[NUM_BLEND_TEXTURES] =
+    {
+        "",
+        "Parent1",
+        "Parent2",
+    };
+
+    LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler()
+    {
+
+    }
+
+    LayeredTextureShaderUniformIdHandler::~LayeredTextureShaderUniformIdHandler()
+    {
+    }
+
+    void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider)
+    {
+        if (shaderProvider->updatedOnLastCall())
+        {
+            _shaderProvider = shaderProvider;
+            _shaderProvider->_programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
+            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
+            {
+                for (size_t j = 0; j < NUM_BLEND_TEXTURES; j++)
+                {
+                    for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY; k++)
+                    {
+                        for (size_t l = 0; l < NUM_TILE_DATA_VARIABLES; l++)
+                        {
+                            _tileUniformIds[i][j][k][l] = _shaderProvider->_programObject->uniformLocation(
+                                LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
+                                blendLayerSuffixes[j] +
+                                "[" + std::to_string(k) + "]." +
+                                glslTileDataNames[l]);
+                        }
+                    }
+                }
+            }
+            _shaderProvider->_programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
+        }
+    }
+
+    GLint LayeredTextureShaderUniformIdHandler::getId(
+        LayeredTextures::TextureCategory category,
+        size_t blendLayer,
+        size_t layerIndex,
+        GlslTileDataId tileDataId)
+    {
+        return _tileUniformIds[category][blendLayer][layerIndex][tileDataId];
+    }
+
+    
+    ProgramObject& LayeredTextureShaderUniformIdHandler::programObject()
+    {
+        return *_shaderProvider->_programObject;
+    }
+    
 }  // namespace openspace

@@ -53,6 +53,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
@@ -91,6 +92,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl

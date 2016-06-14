@@ -30,6 +30,11 @@ return {
             Body = "EARTH",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             SegmentsPerPatch = 64,
+            TextureInitData = {
+                ColorTextureMinimumSize = 1024,
+                OverlayMinimumSize = 4096,
+                HeightMapMinimumSize = 64,
+            },
             Textures = {
                 ColorTextures = {
                     {

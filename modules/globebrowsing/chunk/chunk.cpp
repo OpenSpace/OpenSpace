@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/tile/layeredtextures.h>
 
 #include <algorithm>
 
@@ -100,7 +101,7 @@ namespace openspace {
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
         auto tileProvidermanager = owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory("HeightMaps");
+        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
         if (heightMapProviders.size() > 0) {
             TileAndTransform tileAndTransform = heightMapProviders[0]->getHighestResolutionTile(_index);
             if (tileAndTransform.tile.status == Tile::Status::OK) {
@@ -232,11 +233,9 @@ namespace openspace {
         return chunk.index().level + round(scaledArea - 1);
     }
 
-
-
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         auto tileProvidermanager = chunk.owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory("HeightMaps");
+        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
         int currLevel = chunk.index().level;
 
         // simply check the first heigtmap

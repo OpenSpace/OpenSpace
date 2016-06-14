@@ -40,9 +40,9 @@ uniform int xSegments;
 uniform float skirtLength;
 
 #if USE_HEIGHTMAP
-uniform Tile heightTiles[NUMLAYERS_HEIGHTMAP];
-uniform Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform vec3 cameraPosition;
@@ -84,7 +84,7 @@ void main()
 	height = calculateHeight(
 		in_uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
+		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 

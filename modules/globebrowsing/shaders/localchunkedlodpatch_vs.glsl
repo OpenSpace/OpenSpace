@@ -29,9 +29,6 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 
-#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColor} + 1
-#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeight} + 1
-
 uniform mat4 projectionTransform;
 
 // Input points in camera space
@@ -42,9 +39,9 @@ uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 
 #if USE_HEIGHTMAP
-uniform Tile heightTiles[NUMLAYERS_HEIGHTMAP];
-uniform Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform int xSegments;
@@ -92,7 +89,7 @@ void main()
 	height = calculateHeight(
 		in_uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		heightTiles, heightTilesParent1, heightTilesParent2);	// Three textures to sample from
+		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
 	#endif // USE_HEIGHTMAP
 	
