@@ -1,0 +1,216 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef TEXTURETILEMAPPING_HGLSL
+#define TEXTURETILEMAPPING_HGLSL
+
+#include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
+
+// First layer type from LayeredTextureShaderProvider is height map
+#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightMaps} + 1
+#define USE_HEIGHTMAP #{useHeightMaps}
+#define HEIGHTMAP_BLENDING_ENABLED #{blendHeightMaps}
+
+// Second layer type from LayeredTextureShaderProvider is color texture
+#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColorTextures} + 1
+#define USE_COLORTEXTURE #{useColorTextures}
+#define COLORTEXTURE_BLENDING_ENABLED #{blendColorTextures}
+
+ // Third layer type from LayeredTextureShaderProvider is water mask
+#define NUMLAYERS_WATERMASK #{lastLayerIndexWaterMasks} + 1
+#define USE_WATERMASK #{useWaterMasks}
+#define WATERMASK_BLENDING_ENABLED #{blendWaterMasks}
+
+// Fourth layer type from LayeredTextureShaderProvider is night texture
+#define NUMLAYERS_NIGHTTEXTURE #{lastLayerIndexNightTextures} + 1
+#define USE_NIGHTTEXTURE #{useNightTextures}
+#define NIGHTTEXTURE_BLENDING_ENABLED #{blendNightTextures}
+
+// Fifth layer type from LayeredTextureShaderProvider is overlay
+#define NUMLAYERS_OVERLAY #{lastLayerIndexOverlays} + 1
+#define USE_OVERLAY #{useOverlays}
+#define OVERLAY_BLENDING_ENABLED #{blendOverlays}
+
+// Other key value pairs used for settings
+#define USE_ATMOSPHERE #{useAtmosphere}
+#define SHOW_CHUNK_EDGES #{showChunkEdges}
+
+float calculateHeight(
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+
+	float height = 0;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !HEIGHTMAP_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // HEIGHTMAP_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexHeightMaps}
+	{
+		float untransformedHeight = 
+			levelWeights.w1 * getTexVal(heightTiles[#{i}], uv).r +
+			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
+			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
+
+		// OBS! Only the values from the last height map will be used!
+		height = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
+	}
+	#endfor
+
+	return height;
+}
+
+vec4 calculateColor(
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile colorTiles[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent1[NUMLAYERS_COLORTEXTURE],
+	const Tile colorTilesParent2[NUMLAYERS_COLORTEXTURE]) {
+
+	vec4 color = vec4(0);
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !COLORTEXTURE_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // COLORTEXTURE_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexColorTextures}
+	{
+		vec4 colorSample = 
+			levelWeights.w1 * getTexVal(colorTiles[#{i}], uv) + 
+			levelWeights.w2 * getTexVal(colorTilesParent1[#{i}], uv) + 
+			levelWeights.w3 * getTexVal(colorTilesParent2[#{i}], uv);
+
+		color = blendOver(color, colorSample);
+	}
+	#endfor
+
+	return color;
+}
+
+vec4 calculateNight(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
+	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
+	const vec3 ellipsoidNormalCameraSpace) {
+
+	vec3 lightDirection = normalize(vec3(-1,-1,-1));
+	float cosineFactor = clamp(dot(-lightDirection, ellipsoidNormalCameraSpace), 0, 1);
+
+	vec4 nightColor = vec4(0,0,0,0);
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !NIGHTTEXTURE_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // NIGHTTEXTURE_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexNightTextures}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(nightTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(nightTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(nightTilesParent2[#{i}], uv);
+
+		nightColor = blendOver(nightColor, colorSample);
+	}
+	#endfor
+
+	// Blend night color with base color
+	vec4 color = vec4(cosineFactor * vec3(currentColor) + (1 - cosineFactor) * vec3(nightColor), currentColor.a);
+
+	return color;
+}
+
+vec4 calculateOverlay(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile overlayTiles[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent1[NUMLAYERS_OVERLAY],
+	const Tile overlayTilesParent2[NUMLAYERS_OVERLAY]) {
+
+	vec4 color = currentColor;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !OVERLAY_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // OVERLAY_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexOverlays}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(overlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(overlayTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(overlayTilesParent2[#{i}], uv);
+
+		color = blendOver(color, colorSample);
+	}
+	#endfor
+
+	return color;
+}
+
+vec4 calculateWater(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile waterTiles[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
+	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
+
+	vec4 waterColor = vec4(0,0,0,0);
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !WATERMASK_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // WATERMASK_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexWaterMasks}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(waterTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(waterTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(waterTilesParent2[#{i}], uv);
+
+		waterColor = blendOver(waterColor, colorSample);
+	}
+	#endfor
+
+	return blendOver(currentColor, waterColor);
+}
+
+#endif // TEXTURETILEMAPPING_HGLSL

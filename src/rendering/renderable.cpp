@@ -70,6 +70,17 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
     return result;
 }
 
+Renderable::Renderable()
+	: _enabled("enabled", "Is Enabled", true)
+	, _startTime("")
+	, _endTime("")
+	, _targetBody("")
+	, _hasBody(false)
+	, _hasTimeInterval(false)
+{
+
+}
+
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)
     , _startTime("")
@@ -133,7 +144,7 @@ void Renderable::setPscUniforms(
 {
     program.setUniform("campos", camera.position().vec4());
     program.setUniform("objpos", position.vec4());
-    program.setUniform("camrot", camera.viewRotationMatrix());
+    program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
     program.setUniform("scaling", camera.scaling());
 }
 

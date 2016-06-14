@@ -241,7 +241,7 @@ void RenderableFieldlines::render(const RenderData& data) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
-    _program->setUniform("cameraViewDir", data.camera.viewDirection());
+    _program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
     glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 

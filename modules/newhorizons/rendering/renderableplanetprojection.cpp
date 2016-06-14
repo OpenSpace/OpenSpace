@@ -288,7 +288,6 @@ void RenderablePlanetProjection::render(const RenderData& data) {
         clearAllProjections();
 
     _camScaling = data.camera.scaling();
-    _up = data.camera.lookUpVector();
 
     if (_capture && _performProjection) {
         for (const Image& img : _imageTimes) {

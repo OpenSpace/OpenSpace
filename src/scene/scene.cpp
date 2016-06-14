@@ -240,6 +240,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         }
     }
 
+
     // update the position of all nodes
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
@@ -287,19 +288,22 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         // this part is full of magic!
         glm::vec2 boundf = bound.vec2();
         //glm::vec2 scaling{1.0f, -boundf[1]};
-        cameraScaling = glm::vec2(1.f, -boundf[1]);
-        boundf[0] *= 5.0f;
+
+		cameraScaling = glm::vec2(1.f, -boundf[1]);
+        //boundf[0] *= 5.0f;
+
         
         //psc cameraPosition = focusNode->position();
         //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
 
         //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
-        cameraPosition = focusNode->position();
-        cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
-        
-        //why this line? (JK)
-        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+		cameraPosition = focusNode->position();
+		cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
+		
+		//why this line? (JK)
+		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+
 
         //c->setPosition(cameraPosition);
        // c->setCameraDirection(glm::vec3(0, 0, -1));
@@ -334,11 +338,12 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     if (!fn) {
         throw ghoul::RuntimeError("Could not find focus node");
     }
+
     // Check crash for when fn == nullptr
+    glm::vec3 target = glm::normalize(fn->worldPosition().vec3() - cameraPosition.vec3());
+    glm::mat4 la = glm::lookAt(glm::vec3(0, 0, 0), target, glm::vec3(c->lookUpVectorCameraSpace()));
 
-    glm::mat4 la = glm::lookAt(cameraPosition.vec3(), fn->worldPosition().vec3(), c->lookUpVector());
-
-    c->setRotation(la);
+    c->setRotation(glm::quat_cast(la));
     c->setPosition(cameraPosition);
     c->setScaling(cameraScaling);
 
@@ -348,6 +353,10 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         glm::quat rot = glm::quat(viewOffset);
         c->rotate(rot);
     }
+
+    // explicitly update and sync the camera
+    c->preSynchronization();
+    c->postSynchronizationPreDraw();
 
 
     for (SceneGraphNode* node : _graph.nodes()) {

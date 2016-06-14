@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+
+//#define USE_OLD_INTERACTIONHANDLER
+#ifdef USE_OLD_INTERACTIONHANDLER
+
 #ifndef __MOUSECONTROLLER_H__
 #define __MOUSECONTROLLER_H__
 
@@ -102,3 +106,6 @@ private:
 } // namespace openspace
 
 #endif // __MOUSECONTROLLER_H__
+
+
+#endif // USE_OLD_INTERACTIONHANDLER

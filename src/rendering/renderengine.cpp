@@ -192,8 +192,6 @@ bool RenderEngine::initialize() {
 
     // init camera and set temporary position and scaling
     _mainCamera = new Camera();
-    _mainCamera->setScaling(glm::vec2(1.0, -8.0));
-    _mainCamera->setPosition(psc(0.5f, 0.f, 1.499823f, 11.f));
 
     OsEng.interactionHandler().setCamera(_mainCamera);
     if (_renderer) {
@@ -285,10 +283,11 @@ bool RenderEngine::initializeGL() {
         //const glm::vec3 upVector = corners[0] - corners[1];
 
         
+
         //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
-     _mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+     //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
         //_mainCamera->setLookUpVector(glm::normalize(upVector));
-        _mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
+        //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
         // set the initial fov to be 0.0 which means everything will be culled
         //float maxFov = 0.0f;
@@ -350,10 +349,6 @@ void RenderEngine::postSynchronizationPreDraw() {
         ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
     }
 
-    // converts the quaternion used to rotation matrices
-    if (_mainCamera)
-        _mainCamera->compileViewRotationMatrix();
-
     // update and evaluate the scene starting from the root node
     _sceneGraph->update({
         Time::ref().currentTime(),
@@ -388,9 +383,8 @@ void RenderEngine::postSynchronizationPreDraw() {
 }
 
 void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-    _mainCamera->setViewMatrix(viewMatrix);
-    _mainCamera->setProjectionMatrix(projectionMatrix);
-
+    _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
+    _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
     if (!(OsEng.isMaster() && _disableMasterRendering)) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
