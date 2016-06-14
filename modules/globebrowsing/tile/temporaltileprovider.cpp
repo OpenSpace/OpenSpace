@@ -111,6 +111,16 @@ namespace openspace {
         return _currentTileProvider->depthTransform();
     }
 
+    Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from getTileStatus()");
+            prerender();
+        }
+
+        return _currentTileProvider->getTileStatus(chunkIndex);
+    }
+
+
     void TemporalTileProvider::prerender() {
         _currentTileProvider = getTileProvider();
         _currentTileProvider->prerender();

@@ -51,6 +51,7 @@ namespace openspace {
         bool doPreprocessing, GLuint dataType)
         : _minimumPixelSize(minimumPixelSize)
         , _doPreprocessing(doPreprocessing)
+        , _maxLevel(-1)
     {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
@@ -63,7 +64,7 @@ namespace openspace {
 
         _depthTransform = calculateTileDepthTransform();
         _tileLevelDifference = calculateTileLevelDifference(_dataset, minimumPixelSize);
-
+        _maxLevel = calculateMaxLevel(_tileLevelDifference);
     }
 
 
@@ -76,6 +77,12 @@ namespace openspace {
         int numOverviews = firstBand->GetOverviewCount();
         int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
         return log2(minimumPixelSize) - log2(sizeLevel0);
+    }
+
+    int TileDataset::calculateMaxLevel(int calculateMaxLevel) {
+        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+        _maxLevel = numOverviews - 1 - _tileLevelDifference;
+        return _maxLevel;
     }
 
     TileDepthTransform TileDataset::calculateTileDepthTransform() {
@@ -92,9 +99,7 @@ namespace openspace {
     }
 
     int TileDataset::getMaximumLevel() const {
-        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int maximumLevel = numOverviews - 1 - _tileLevelDifference;
-        return maximumLevel;
+        return _maxLevel;
     }
 
     TileDepthTransform TileDataset::getDepthTransform() const {

@@ -65,18 +65,23 @@ namespace openspace {
         , _tileProviderManager(tileProviderManager)
     {
 
-        auto geometry = std::shared_ptr<SkirtedGrid>(new SkirtedGrid(
-            segmentsPerPatch,
-            segmentsPerPatch,
+        auto geometry = std::make_shared<SkirtedGrid>(
+            (unsigned int) segmentsPerPatch,
+            (unsigned int) segmentsPerPatch,
             TriangleSoup::Positions::No,
             TriangleSoup::TextureCoordinates::Yes,
-            TriangleSoup::Normals::No));
+            TriangleSoup::Normals::No);
 
         _chunkCullers.push_back(new HorizonCuller());
         _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
-        
 
-        _patchRenderer.reset(new ChunkRenderer(geometry, tileProviderManager));
+        
+        
+        _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
+        _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
+
+        _patchRenderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -105,7 +110,7 @@ namespace openspace {
         return *_patchRenderer;
     }
 
-    bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) {
+    bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) const {
         if (doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
             return true;
         }
@@ -113,6 +118,24 @@ namespace openspace {
             return true;
         }
         return false;
+    }
+
+    int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
+        int desiredLevel = 0;
+        if (levelByProjArea) {
+            desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
+        }
+        else {
+            desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
+        }
+
+        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+        if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
+        }
+
+        desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
+        return desiredLevel;
     }
 
 

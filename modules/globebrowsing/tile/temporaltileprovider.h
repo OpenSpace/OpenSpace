@@ -122,6 +122,7 @@ namespace openspace {
         // These methods implements TileProvider
 
         virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void prerender();
 

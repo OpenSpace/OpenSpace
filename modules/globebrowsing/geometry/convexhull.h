@@ -22,59 +22,63 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __CONVEX_HULL_H__
+#define __CONVEX_HULL_H__
+
+#include <modules/globebrowsing/geometry/aabb.h>
 
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
-
-#include <ghoul/misc/dictionary.h>
-
+#include <vector>
+#include <stack>
 
 #include <memory>
-#include <vector>
-#include <string>
+#include <glm/glm.hpp>
+
+// open space includes
+
 
 
 namespace openspace {
 
-    class TileProviderManager {
-    public:
+    using namespace glm;
+    
+    // Implementation based on 
+    // http://www.sanfoundry.com/cpp-program-implement-graham-scan-algorithm-find-convex-hull/
 
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
+    typedef glm::vec2 Point2;
 
-        typedef std::vector<TileProviderWithName> LayerCategory;
+    class ConvexHull2 {
+    public: 
+        ConvexHull2();
 
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
+        static ConvexHull2 grahamScan_NOT_THREAD_SAFE(std::vector<Point2>& points, int yMinIndex = -1);
 
-        static ThreadPool tileRequestThreadPool;
+        const std::vector<Point2> points() const;
 
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
+        bool intersects(const ConvexHull2& o) const;
 
-        void prerender();
+        AABB1 projectedRegion(glm::vec2 direction) const;
+        
+    
+    private:
+        bool hasPerpendicularLineWhereProjectedPointsOverlap(const ConvexHull2& other) const;
+
+        static int compare(const void *vp1, const void *vp2);
+
+        static Point2 oneBelowTop(std::stack<Point2>&);
+        static void swap(Point2& p1, Point2& p2);
+
+        // returns 0 = colinear, 1 = clockwise, 2 = counterclockwise
+        static int orientation(const Point2& p, const Point2& q, const Point2& r);
+        static float dist(const Point2& p1, const Point2& p2);
+
 
     private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
-
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
-
-        std::array<LayerCategory, LayeredTextures::MAX_NUM_TEXTURE_CATEGORIES> _layerCategories;
+        static Point2 p0;
+        std::vector<Point2> _points;
     };
 
-} // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+   
+}  // namespace openspace
+
+#endif  // __CONVEX_HULL_H__

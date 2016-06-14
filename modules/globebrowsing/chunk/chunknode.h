@@ -49,9 +49,6 @@ namespace openspace {
 namespace openspace {
 
 
-
-
-
 class ChunkNode {
 public:
     ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);

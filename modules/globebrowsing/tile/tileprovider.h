@@ -59,7 +59,7 @@ namespace openspace {
         std::shared_ptr<Texture> texture;
         std::shared_ptr<TilePreprocessData> preprocessData;
 
-        enum class Status { Unavailable, IOError, OK } status;
+        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
 
         static const Tile TileUnavailable;
     };
@@ -75,6 +75,7 @@ namespace openspace {
         virtual ~TileProvider() { }
 
         virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0) = 0;
+        virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void prerender() = 0;
     };
@@ -99,6 +100,7 @@ namespace openspace {
         virtual ~CachingTileProvider();
         
         virtual TileAndTransform getHighestResolutionTile(ChunkIndex chunkIndex, int parents = 0);
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void prerender();
 

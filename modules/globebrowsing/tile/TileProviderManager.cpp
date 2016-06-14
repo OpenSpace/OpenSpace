@@ -38,93 +38,46 @@ namespace openspace {
 
     ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
-    TileProviderManager::TileProviderManager(const ghoul::Dictionary& texDict){
-        // Color Texture
-        ghoul::Dictionary colorTexturesDict;
-        texDict.getValue(
-            LayeredTextures::TEXTURE_CATEGORY_NAMES[LayeredTextures::ColorTextures], 
-            colorTexturesDict);
+    TileProviderManager::TileProviderManager(
+        const ghoul::Dictionary& textureCategoriesDictionary,
+        const ghoul::Dictionary& textureInitDictionary){
+        // Create all the categories of tile providers
+        for (size_t i = 0; i < textureCategoriesDictionary.size(); i++) {
+            ghoul::Dictionary texturesDict = textureCategoriesDictionary.value<ghoul::Dictionary>(
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i]);
 
-        TileProviderInitData colorInitData;
-        colorInitData.minimumPixelSize = 1024;
-        colorInitData.threads = 1;
-        colorInitData.cacheSize = 500;
-        colorInitData.framesUntilRequestQueueFlush = 60;
-        colorInitData.preprocessTiles = false;
+            ghoul_assert(texturesDict.size() <=
+                LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY,
+                "Too many textures! Number of textures per category must be less than or equal to "
+                << LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY);
 
-        initTexures(
-            _layerCategories[LayeredTextures::ColorTextures],
-            colorTexturesDict, colorInitData);
+            TileProviderInitData initData;
 
-        // Night Texture
-        ghoul::Dictionary nightTexturesDict;
-        texDict.getValue(
-            LayeredTextures::TEXTURE_CATEGORY_NAMES[LayeredTextures::NightTextures],
-            nightTexturesDict);
+            if (i == LayeredTextures::ColorTextures ||
+                i == LayeredTextures::NightTextures ||
+                i == LayeredTextures::WaterMasks) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
+            }
+            else if (i == LayeredTextures::Overlays) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
+            }
+            else if (i == LayeredTextures::HeightMaps) {
+                initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
+            }
+            else {
+                initData.minimumPixelSize = 512;
+            }
 
-        TileProviderInitData nightInitData;
-        nightInitData.minimumPixelSize = 1024;
-        nightInitData.threads = 1;
-        nightInitData.cacheSize = 500;
-        nightInitData.framesUntilRequestQueueFlush = 60;
-        nightInitData.preprocessTiles = false;
+            initData.threads = 1;
+            initData.cacheSize = 500;
+            initData.framesUntilRequestQueueFlush = 60;
+            initData.preprocessTiles = i == LayeredTextures::HeightMaps; // Only preprocess height maps.
 
-        initTexures(
-            _layerCategories[LayeredTextures::NightTextures],
-            nightTexturesDict, nightInitData);
-
-        // Overlays
-        ghoul::Dictionary overlaysDict;
-        texDict.getValue(
-            LayeredTextures::TEXTURE_CATEGORY_NAMES[LayeredTextures::Overlays],
-            overlaysDict);
-
-        TileProviderInitData overlayInitData;
-        overlayInitData.minimumPixelSize = 1024;
-        overlayInitData.threads = 1;
-        overlayInitData.cacheSize = 500;
-        overlayInitData.framesUntilRequestQueueFlush = 60;
-        overlayInitData.preprocessTiles = false;
-
-        initTexures(
-            _layerCategories[LayeredTextures::Overlays],
-            overlaysDict,
-            overlayInitData);
-
-        // Height maps
-        ghoul::Dictionary heightTexturesDict;
-        texDict.getValue(
-            LayeredTextures::TEXTURE_CATEGORY_NAMES[LayeredTextures::HeightMaps],
-            heightTexturesDict);
-
-        TileProviderInitData heightInitData;
-        heightInitData.minimumPixelSize = 64;
-        heightInitData.threads = 1;
-        heightInitData.cacheSize = 500;
-        heightInitData.framesUntilRequestQueueFlush = 60;
-        heightInitData.preprocessTiles = true;
-
-        initTexures(
-            _layerCategories[LayeredTextures::HeightMaps],
-            heightTexturesDict,
-            heightInitData);
-
-        // Water masks
-        ghoul::Dictionary waterMaskDict;
-        texDict.getValue(
-            LayeredTextures::TEXTURE_CATEGORY_NAMES[LayeredTextures::WaterMasks],
-            waterMaskDict);
-
-        TileProviderInitData waterInitData;
-        waterInitData.minimumPixelSize = 2048;
-        waterInitData.threads = 1;
-        waterInitData.cacheSize = 500;
-        waterInitData.framesUntilRequestQueueFlush = 60;
-        waterInitData.preprocessTiles = false;
-
-        initTexures(
-            _layerCategories[LayeredTextures::WaterMasks],
-            waterMaskDict, waterInitData);
+            initTexures(
+                _layerCategories[i],
+                texturesDict,
+                initData);
+        }
     }
 
     TileProviderManager::~TileProviderManager()

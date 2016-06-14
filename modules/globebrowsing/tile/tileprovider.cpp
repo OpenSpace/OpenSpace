@@ -107,6 +107,22 @@ namespace openspace {
         return getOrEnqueueHighestResolutionTile(chunkIndex, uvTransform);
     }
 
+    Tile::Status CachingTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+        auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
+        if (chunkIndex.level > tileDataset->getMaximumLevel()) {
+            return Tile::Status::OutOfRange;
+        }
+
+        HashKey key = chunkIndex.hashKey();
+
+        if (_tileCache->exist(key)) {
+            return _tileCache->get(key).status;
+        }
+
+        return Tile::Status::Unavailable;
+    }
+
+
     TileAndTransform CachingTileProvider::getOrEnqueueHighestResolutionTile(const ChunkIndex& chunkIndex, 
         TileUvTransform& uvTransform) 
     {

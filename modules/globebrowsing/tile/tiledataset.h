@@ -139,6 +139,8 @@ namespace openspace {
         //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
+        int calculateMaxLevel(int calculateMaxLevel);
+
         TileDepthTransform calculateTileDepthTransform();
 
 
@@ -176,6 +178,7 @@ namespace openspace {
         static bool GdalHasBeenInitialized;
 
         int _minimumPixelSize;
+        int _maxLevel;
         double _tileLevelDifference;
 
         TileDepthTransform _depthTransform;

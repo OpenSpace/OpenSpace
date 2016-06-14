@@ -32,6 +32,46 @@ namespace {
 }
 
 namespace openspace {
+    AABB1::AABB1() : min(1e35), max(-1e35) { }
+    AABB1::AABB1(float min, float max) : min(min), max(max) { }
+
+    void AABB1::expand(float p) {
+        min = glm::min(min, p);
+        max = glm::max(max, p);
+    }
+
+    float AABB1::center() const {
+        return 0.5f * (min + max);
+    }
+
+    float AABB1::size() const {
+        return max - min;
+    }
+
+    bool AABB1::contains(float  p) const {
+        return (min <= p) && (p <= max);
+    }
+
+    bool AABB1::contains(const AABB1& o) const {
+        return (min <= o.min) && (o.max <= max);
+    }
+
+    bool AABB1::intersects(const AABB1& o) const {
+        return (min <= o.max) && (o.min <= max);
+    }
+
+    AABBSpatialRelation AABB1::relationTo(const AABB1& o) const {
+        if (intersects(o)) {
+            if (contains(o)) return AABBSpatialRelation::Containing;
+            if (o.contains(*this)) return AABBSpatialRelation::Contained;
+            return AABBSpatialRelation::Intersecting;
+        }
+        return AABBSpatialRelation::None;
+    }
+
+
+
+
 
 
     AABB2::AABB2() : min(1e35), max(-1e35) { }

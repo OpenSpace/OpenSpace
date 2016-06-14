@@ -43,6 +43,7 @@ namespace {
     const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
+    const std::string keyTextureInitData = "TextureInitData";
     const std::string keyTextures = "Textures";
     const std::string keyColorTextures = "ColorTextures";
     const std::string keyHeightMaps = "HeightMaps";
@@ -69,6 +70,7 @@ namespace openspace {
         , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
         , showChunkEdges(properties::BoolProperty("showChunkEdges", "showChunkEdges", false))
+        , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
     {
         setName("RenderableGlobe");
         
@@ -88,6 +90,7 @@ namespace openspace {
         addProperty(blendWaterMask);
         addProperty(atmosphereEnabled);
         addProperty(showChunkEdges);
+        addProperty(levelByProjArea);
 
         doFrustumCulling.setValue(true);
         doHorizonCulling.setValue(true);
@@ -107,10 +110,12 @@ namespace openspace {
         int patchSegments = patchSegmentsd;
         
         // Init tile provider manager
+        ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
+        dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
         _tileProviderManager = std::shared_ptr<TileProviderManager>(
-            new TileProviderManager(texturesDictionary));
+            new TileProviderManager(texturesDictionary, textureInitDataDictionary));
 
         auto& colorTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
         auto& nightTextureProviders = _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
@@ -203,6 +208,7 @@ namespace openspace {
         _chunkedLodGlobe->blendWaterMask = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
         _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
+        _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
 
         std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
             _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);

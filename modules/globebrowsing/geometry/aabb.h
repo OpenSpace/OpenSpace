@@ -43,6 +43,22 @@ namespace openspace {
         Containing
     };
 
+    struct AABB1 {
+        AABB1();
+        AABB1(float min, float max);
+
+        void expand(float p);
+        float center() const;
+        float size() const;
+        bool contains(float p) const;
+        bool contains(const AABB1& o) const;
+        bool intersects(const AABB1& o) const;
+        AABBSpatialRelation relationTo(const AABB1& o) const;
+
+        float min;
+        float max;
+    };
+
 
     struct AABB2 {
         AABB2();

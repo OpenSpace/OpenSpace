@@ -85,6 +85,7 @@ public:
     properties::BoolProperty blendWaterMask;
     properties::BoolProperty atmosphereEnabled;
     properties::BoolProperty showChunkEdges;
+    properties::BoolProperty levelByProjArea;
 
 private:
     std::string _frame;
