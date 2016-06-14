@@ -159,7 +159,7 @@ namespace openspace {
         Vec3 cameraToEllipseCenter = globePosition - cameraPosition;
 
         Geodetic2 camPos = ellipsoid.cartesianToGeodetic2(cameraPosition);
-
+        /*
         struct CornerDist {
             Geodetic2 corner;
             float dist;
@@ -189,6 +189,14 @@ namespace openspace {
         const Geodetic3 c1 = { cornerDists[1].corner, heights.min };
         const Geodetic3 c2 = { cornerDists[2].corner, heights.max };
         const Geodetic3 c3 = { cornerDists[3].corner, heights.max };
+        */
+
+        Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+
+        const Geodetic3 c0 = { chunk.surfacePatch().getCorner((Quad)0), heights.min };
+        const Geodetic3 c1 = { chunk.surfacePatch().getCorner((Quad)1), heights.min };
+        const Geodetic3 c2 = { chunk.surfacePatch().getCorner((Quad)2), heights.min };
+        const Geodetic3 c3 = { chunk.surfacePatch().getCorner((Quad)3), heights.min };
 
         Vec3 A = cameraToEllipseCenter + ellipsoid.cartesianPosition(c0);
         Vec3 B = cameraToEllipseCenter + ellipsoid.cartesianPosition(c1);
