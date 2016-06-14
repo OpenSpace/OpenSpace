@@ -129,10 +129,14 @@ namespace openspace {
         
         HashKey key = chunkIndex.hashKey();
         
-        if (_tileCache->exist(key) && _tileCache->get(key).status == Tile::Status::OK) {
-            return { _tileCache->get(key), uvTransform };
+        if (_tileCache->exist(key)) {
+            auto tile = _tileCache->get(key);
+            if (tile.status == Tile::Status::OK) {
+                return{ _tileCache->get(key), uvTransform };
+            }
+
         }
-        else if (chunkIndex.level < 1) {
+        if (chunkIndex.level < 1) {
             return{ Tile::TileUnavailable, uvTransform };
         }
         else {

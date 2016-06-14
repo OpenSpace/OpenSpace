@@ -129,9 +129,11 @@ namespace openspace {
             desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
         }
 
-        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-        if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
-            desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
+        if (limitLevelByAvailableHeightData) {
+            int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+            if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+                desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
+            }
         }
 
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);

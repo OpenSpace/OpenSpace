@@ -109,6 +109,7 @@ namespace openspace {
         bool atmosphereEnabled;
         bool showChunkEdges;
         bool levelByProjArea;
+        bool limitLevelByAvailableHeightData;
 
     private:
 
