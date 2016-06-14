@@ -86,6 +86,7 @@ public:
     properties::BoolProperty atmosphereEnabled;
     properties::BoolProperty showChunkEdges;
     properties::BoolProperty levelByProjArea;
+    properties::BoolProperty limitLevelByAvailableHeightData;
 
 private:
     std::string _frame;
