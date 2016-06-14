@@ -26,6 +26,8 @@
 
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -131,7 +133,7 @@ namespace openspace {
 
         if (limitLevelByAvailableHeightData) {
             int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-            if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
                 desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
             }
         }
