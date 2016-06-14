@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.h
 
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
@@ -60,6 +61,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/debugrenderer.h
     
 
 )
@@ -73,6 +75,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.cpp
 
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
@@ -98,6 +101,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/debugrenderer.cpp
     
    
 )

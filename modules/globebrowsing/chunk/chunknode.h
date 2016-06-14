@@ -37,6 +37,7 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
+#include <functional>
 
 
 
@@ -60,6 +61,8 @@ public:
 
     bool isRoot() const;
     bool isLeaf() const;
+
+    void depthFirst(const std::function<void(const Chunk&)>& f) const;
     
     
     const ChunkNode& getChild(Quad quad) const;

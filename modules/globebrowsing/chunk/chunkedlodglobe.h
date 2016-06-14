@@ -52,6 +52,10 @@ namespace ghoul {
 }
 
 namespace openspace {
+    class ChunkLevelEvaluator;
+}
+
+namespace openspace {
 
     class ChunkedLodGlobe : public Renderable {
     public:
@@ -132,9 +136,9 @@ namespace openspace {
 
         std::vector<ChunkCuller*> _chunkCullers;
 
-        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
-        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
-        std::unique_ptr<DesiredChunkLevelEvaluator> _chunkEvaluatorByDistance;
+        std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
+        std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
+        std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;

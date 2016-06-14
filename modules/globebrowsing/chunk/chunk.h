@@ -32,6 +32,8 @@
 
 #include <modules/globebrowsing/chunk/culling.h>
 #include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/angle.h>
@@ -79,30 +81,6 @@ namespace openspace {
 
     };
 
-
-
-    class DesiredChunkLevelEvaluator {
-    public:
-        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
-        static const int UNKNOWN_DESIRED_LEVEL = -1;
-    };
-
-
-
-    class EvaluateChunkLevelByDistance : public DesiredChunkLevelEvaluator {
-    public:
-        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-    };
-
-    class EvaluateChunkLevelByProjectedArea : public DesiredChunkLevelEvaluator {
-    public:
-        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-    };
-
-    class EvaluateChunkLevelByAvailableTileData : public DesiredChunkLevelEvaluator {
-    public:
-        virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-    };
 
 }
 

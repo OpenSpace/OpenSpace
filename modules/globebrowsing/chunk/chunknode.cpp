@@ -98,6 +98,16 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
+void ChunkNode::depthFirst(const std::function<void(const Chunk&)>& f) const {
+    f(_chunk);
+    if (!isLeaf()) {
+        for (int i = 0; i < 4; ++i) {
+            _children[i]->depthFirst(f);
+        }
+    }
+}
+
+
 
 void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
     std::stack<ChunkNode*> S;

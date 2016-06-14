@@ -26,6 +26,8 @@
 
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -131,7 +133,7 @@ namespace openspace {
 
         if (limitLevelByAvailableHeightData) {
             int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-            if (desiredLevelByAvailableData != DesiredChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
                 desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
             }
         }
@@ -140,10 +142,15 @@ namespace openspace {
         return desiredLevel;
     }
 
-
+    
     void ChunkedLodGlobe::render(const RenderData& data){
+
+
         minDistToCamera = INFINITY;
         ChunkNode::renderedChunks = 0;
+
+        _leftRoot->updateChunkTree(data);
+        _rightRoot->updateChunkTree(data);
 
         renderChunkTree(_leftRoot.get(), data);
         renderChunkTree(_rightRoot.get(), data);
@@ -159,7 +166,6 @@ namespace openspace {
     }
 
     void ChunkedLodGlobe::renderChunkTree(ChunkNode* node, const RenderData& data) const {
-        node->updateChunkTree(data);
         if (renderSmallChunksFirst) {
             node->renderReversedBreadthFirst(data);
         }
