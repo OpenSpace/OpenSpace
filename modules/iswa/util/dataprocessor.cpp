@@ -184,6 +184,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         _numValues[i] += numValues;
 
         _histograms[i]->generateEqualizer();
+        // _histograms[i]->print();
     }
 }
 

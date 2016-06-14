@@ -34,10 +34,10 @@ public:
     DataProcessorKameleon();
     ~DataProcessorKameleon();
 
-    virtual std::vector<std::string> readMetadata(std::string path) override;
+    virtual std::vector<std::string> readMetadata(std::string path, glm::size3_t& dimensions) override;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, float slice, glm::size3_t& dimensions);
+    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
+    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice);
     void dimensions(glm::size3_t dimensions){_dimensions = dimensions;}
 
 private:

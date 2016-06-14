@@ -304,14 +304,37 @@ void Histogram::print() const {
         std::cout << i << " [" << low << ", " << high << "]"
                   << "   " << _data[i] << std::endl;
     }
-    std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
+    // std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
-float Histogram::highestBinValue(bool equalized){
+float Histogram::highestBinValue(bool equalized, int overBins){
     int highestBin = 0;
+    float highestValue = 0;
+
     for(int i=0; i<_numBins; i++){
-        if(_data[i] > _data[highestBin])
+        float value = 0;
+        int num = 0;
+        for(int j=0; j<overBins; j++){
+            if(i-j>0){
+                value += _data[i-j];
+                num++;
+            }
+            if(i+j<_numBins){
+                value += _data[i+j];
+                num++;
+            }
+        }
+
+        value += _data[i];
+        value /= (float)++num;
+
+        if(value > highestValue){
             highestBin = i;
+            highestValue = value;
+        }
+
+        // if(_data[i] > _data[highestBin])
+            // highestBin = i;
     }
 
     float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);

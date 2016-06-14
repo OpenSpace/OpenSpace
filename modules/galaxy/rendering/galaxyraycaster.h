@@ -25,6 +25,8 @@
 #ifndef __GALAXYRAYCASTER_H__
 #define __GALAXYRAYCASTER_H__
 
+#include <memory>
+
 #include <ghoul/glm.h>
 #include <string>
 #include <vector>

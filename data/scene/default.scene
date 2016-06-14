@@ -6,7 +6,8 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime(openspace.time.currentWallTime())
+    --openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime('2015-03-15T11:00:00.00')
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end
 
@@ -17,9 +18,10 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
@@ -27,8 +29,20 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
+    openspace.setPerformanceMeasurement(true)
+
     if openspace.modules.isLoaded("ISWA") then
+    
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
+
+        --openspace.iswa.addCygnet(7);
+
+        --openspace.iswa.addCygnet(-4,"Data","Gm");
+        --openspace.iswa.addCygnet(-5,"Data","Gm");
+        --openspace.iswa.addCygnet(-6,"Data","Gm");
+        --openspace.iswa.addCygnet(-7,"Data","Gm");
+        --openspace.iswa.addCygnet(-8,"Data","Gm");
+        --openspace.iswa.addCygnet(-9,"Data","Gm");
     end
 end
 
@@ -42,18 +56,25 @@ return {
     },
     Modules = {
         "sun",
-        "mercury",
-        "venus",
+        --"mercury",
+        --"venus",
         "earth",
-        "mars",
-        "jupiter",
-        "saturn",
-        "uranus",
-        "neptune",
+        --"mars",
+        --"jupiter",
+        --"saturn",
+        --"uranus",
+        --"neptune",
         "stars",
         --"stars-denver",
         "milkyway",
-        -- "milkyway-eso",
+        --"milkyway-eso",
         "constellationbounds",
+        --"io",
+        --"europa",
+        --"ganymede",
+        --"callisto",
+        --"gridGalactic",
+        --"gridEcliptic",
+        --"gridEquatorial",
     }
 }

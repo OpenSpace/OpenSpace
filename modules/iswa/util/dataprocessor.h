@@ -40,9 +40,9 @@ public:
     DataProcessor();
     ~DataProcessor();
 
-    virtual std::vector<std::string> readMetadata(std::string data) = 0;
+    virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions) = 0;
+    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);

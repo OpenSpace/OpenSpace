@@ -55,7 +55,7 @@ Fragment getFragment() {
 
     if((numTransferFunctions == 1) || (numTextures > numTransferFunctions)){
         for(int i=0; i<numTextures; i++){
-            v += texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            v += texture(textures[i], vs_st).r;
         }
         v /= numTextures;
         
@@ -67,7 +67,7 @@ Fragment getFragment() {
         diffuse = color;
     }else{
         for(int i=0; i<numTextures; i++){
-            v = texture(textures[i], vec2(vs_st.s, 1-vs_st.t)).r;
+            v = texture(textures[i], vs_st).r;
             vec4 color = texture(transferFunctions[i], vec2(v,0));
             if((v<(x+y)) && v>(x-y))
                 color = transparent;

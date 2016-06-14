@@ -26,8 +26,6 @@
 #define __DATASPHERE_H__
 
 #include <modules/iswa/rendering/datacygnet.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
 class PowerScaledSphere;
@@ -53,14 +51,6 @@ protected:
     void renderGeometry() const override;
     void setUniforms() override;
     std::vector<float*> textureData() override;
-    void subscribeToGroup();
-
-    properties::StringProperty _transferFunctionsFile;
-    properties::Vec2Property _backgroundValues;
-    properties::Vec2Property _normValues;
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
 
     std::shared_ptr<PowerScaledSphere> _sphere;
     float _radius;

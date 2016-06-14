@@ -40,7 +40,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -157,7 +157,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
 void IswaManager::addKameleonCdf(std::string groupName, int pos){
     // auto info = _cdfInformation[group][pos];
-    // std::cout << group << " " << pos << std::endl;
     auto group = iswaGroup(groupName);
     if(group){
         std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
@@ -169,9 +168,9 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
     return std::move( DlManager.fetchFile(
-            iswaUrl(id, "image"),
+            iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
             },
@@ -181,9 +180,9 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
     return std::move( DlManager.fetchFile(
-            iswaUrl(id, "data"),
+            iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
             },
@@ -193,7 +192,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, std::string type){
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
         url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
@@ -202,7 +201,8 @@ std::string IswaManager::iswaUrl(int id, std::string type){
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
-    std::string t = Time::ref().currentTimeUTC(); 
+    //std::string t = Time::ref().currentTimeUTC(); 
+    std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
 
@@ -305,6 +305,13 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             spatialScale.w = 6;
         }
 
+        float xOffset = 0.0f;
+        if(data->id == -7)
+            xOffset = -10.0f;
+        if(data->id == -8)
+            xOffset = -20.0f;
+        if(data->id == -9)
+            xOffset = -30.0f;
 
         std::string table = "{"
         "Name = '" + data->name +"' , "
@@ -319,6 +326,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = '"+ data->group + "',"
+            "XOffset = "+ std::to_string(xOffset) + ","
             "}"
         "}";
         
@@ -393,7 +401,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     parent[0] = toupper(parent[0]);
     std::string frame = j["standard_grid_target"];
     std::string coordinateType = j["grid_1_type"];
-    std::string updateTime = j["output_time_interval"];
+    float updateTime = j["output_time_interval"];
     float radius = j["radius"];
 
     glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
@@ -419,7 +427,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
         "GridMax = " + std::to_string(max) + ", "
-        "UpdateTime = " + updateTime + ", "
+        "UpdateTime = " + std::to_string(updateTime) + ", "
         "Radius = " + std::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data->group + "',"
