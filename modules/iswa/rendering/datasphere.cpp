@@ -43,12 +43,17 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     _programName = "DataSphereProgram";
     _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
+
+
 }
 
 DataSphere::~DataSphere(){}
 
 bool DataSphere::initialize(){
     IswaCygnet::initialize();
+
+    //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
+    _rotation = glm::rotate(_rotation, (float)M_PI_2, glm::vec3(1.0, 0.0, 0.0));
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
