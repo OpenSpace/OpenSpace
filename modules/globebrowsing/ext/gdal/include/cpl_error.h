@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_error.h 33842 2016-04-01 08:37:32Z rouault $
  *
  * Name:     cpl_error.h
  * Project:  CPL - Common Portability Library
