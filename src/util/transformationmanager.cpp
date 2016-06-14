@@ -39,11 +39,9 @@
 #else
         LWARNING("Kameleon module needed for transformations with dynamic frames");
 #endif
-
         _kameleonFrames =   { "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ",   //geocentric
                               "HEE", "HAE", "HEEQ"                                              //heliocentric
                             };
-        // _dipoleFrames = {"GSM", "MAG"};
     }
 
     TransformationManager::~TransformationManager(){
@@ -68,15 +66,11 @@
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
-        glm::dmat3 out = glm::dmat3(
+        return glm::dmat3(
                     out0.c0 , out0.c1   , out0.c2,
                     out1.c0 , out1.c1   , out1.c2,
                     out2.c0 , out2.c1   , out2.c2
-                );
-
-        // Need to rotate 90 degrees around x-axis becuase kameleon is flipped
-        out = glm::dmat3(glm::rotate(glm::mat4(out), (float)M_PI_2, glm::vec3(1.0f, 0.0f, 0.0f)));
-        return out;
+                );;
     }
 
     glm::dmat3 TransformationManager::frameTransformationMatrix(std::string from,
@@ -84,32 +78,11 @@
                                                                 double ephemerisTime) const
     {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-        auto fromit = _dipoleFrames.find(from);
-        auto toit   = _dipoleFrames.find(to);
-
-        // //diopole frame to J200 makes the frame rotate.
-        // if(fromit != _dipoleFrames.end()) from = "GSE";
-        // if(toit   != _dipoleFrames.end()) to   = "GSE";
-
-        fromit = _kameleonFrames.find(from);
-        toit   = _kameleonFrames.find(to);
+        auto fromit = _kameleonFrames.find(from);
+        auto toit   = _kameleonFrames.find(to);
 
         bool fromKameleon   = (fromit != _kameleonFrames.end());
         bool toKameleon     = (toit   != _kameleonFrames.end());
-        
-        ccmc::Position in0 = {1.f, 0.f, 0.f};
-        ccmc::Position in1 = {0.f, 1.f, 0.f};
-        ccmc::Position in2 = {0.f, 0.f, 1.f};
-
-        glm::dmat3 in(
-            in0.c0, in0.c1, in0.c2,
-            in1.c0, in1.c1, in1.c2,
-            in2.c0, in2.c1, in2.c2
-        );
-
-        ccmc::Position out0;
-        ccmc::Position out1;
-        ccmc::Position out2;
 
         if(!fromKameleon && !toKameleon){
             return  SpiceManager::ref().frameTransformationMatrix(from, to, ephemerisTime);

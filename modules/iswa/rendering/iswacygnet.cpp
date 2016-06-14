@@ -42,6 +42,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
+    , _rotation(glm::mat4(1.0f))
 {
     std::string name;
     dictionary.getValue("Name", name);
@@ -146,12 +147,12 @@ void IswaCygnet::render(const RenderData& data){
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
 
-    glm::mat4 rot = glm::mat4(1.0);
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
+    transform = transform*_rotation;
 
     position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
     
