@@ -175,6 +175,9 @@ void IswaCygnet::render(const RenderData& data){
 
 void IswaCygnet::update(const UpdateData& data){
 
+	if (!_enabled)
+		return;
+
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
     double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
