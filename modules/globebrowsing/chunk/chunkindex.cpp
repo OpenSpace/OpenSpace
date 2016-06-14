@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/chunk/chunkindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
+#include <sstream>
 
 namespace {
     const std::string _loggerCat = "ChunkIndex";
@@ -76,6 +77,23 @@ namespace openspace {
 
     HashKey ChunkIndex::hashKey() const {
         return x ^ (y << 16) ^ (level << 24);
+    }
+
+    std::string ChunkIndex::toString() const {
+        std::stringstream ss;
+        for (int i = level; i > 0; i--){
+            char digit = '0';
+            int mask = 1 << (i - 1);
+            if ((x & mask) != 0) {
+                digit++;
+            }
+            if ((y & mask) != 0) {
+                digit++;
+                digit++;
+            }
+            ss << digit;
+        }
+        return ss.str();
     }
 
     bool ChunkIndex::operator==(const ChunkIndex& other) const {

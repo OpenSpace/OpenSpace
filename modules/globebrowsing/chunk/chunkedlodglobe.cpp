@@ -140,10 +140,15 @@ namespace openspace {
         return desiredLevel;
     }
 
-
+    
     void ChunkedLodGlobe::render(const RenderData& data){
+
+
         minDistToCamera = INFINITY;
         ChunkNode::renderedChunks = 0;
+
+        _leftRoot->updateChunkTree(data);
+        _rightRoot->updateChunkTree(data);
 
         renderChunkTree(_leftRoot.get(), data);
         renderChunkTree(_rightRoot.get(), data);
@@ -159,7 +164,6 @@ namespace openspace {
     }
 
     void ChunkedLodGlobe::renderChunkTree(ChunkNode* node, const RenderData& data) const {
-        node->updateChunkTree(data);
         if (renderSmallChunksFirst) {
             node->renderReversedBreadthFirst(data);
         }

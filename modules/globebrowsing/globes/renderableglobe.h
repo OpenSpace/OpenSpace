@@ -88,6 +88,7 @@ public:
     properties::BoolProperty levelByProjArea;
     properties::BoolProperty limitLevelByAvailableHeightData;
 
+
 private:
     std::string _frame;
 

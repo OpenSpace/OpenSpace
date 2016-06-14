@@ -77,6 +77,7 @@ namespace openspace {
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
+
         _isVisible = true;
         if (_owner->testIfCullable(*this, myRenderData)) {
             _isVisible = false;

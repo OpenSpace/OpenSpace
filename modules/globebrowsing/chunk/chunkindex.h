@@ -83,6 +83,8 @@ struct ChunkIndex {
 
     ChunkIndex child(Quad q) const;
 
+    std::string toString() const;
+
     /**
     Gets the tile at a specified offset from this tile.
     Accepts delta indices ranging from [-2^level, Infinity[
