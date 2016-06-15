@@ -117,6 +117,39 @@ namespace openspace {
         return boundingHeights;
     }
 
+    std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
+        // OBS!
+        // This implementation needs to be fixed! Its not completely bounding
+        // See DebugRenderer::renderBoxFaces to see whats wrong
+
+        const Ellipsoid& ellipsoid = owner()->ellipsoid();
+        const GeodeticPatch& patch = surfacePatch();
+
+        BoundingHeights boundingHeight = getBoundingHeights();
+
+        // assume worst case
+        double patchCenterRadius = ellipsoid.maximumRadius(); 
+
+        // As the patch is curved, the maximum height offsets at the corners must be long 
+        // enough to cover large enough to cover a boundingHeight.max at the center of the 
+        // patch. 
+        double maxCenterRadius = patchCenterRadius + boundingHeight.max;
+        double maximumPatchSide = max(patch.halfSize().lat, patch.halfSize().lon);
+        double maxCornerHeight = maxCenterRadius / cos(maximumPatchSide) - patchCenterRadius;
+
+        // The minimum height offset, however, we can simply 
+        double minCornerHeight = boundingHeight.min;
+        std::vector<glm::dvec4> corners(8);
+
+        for (size_t i = 0; i < 8; i++) {
+            Quad q = (Quad)(i % 4);
+            double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
+            const Geodetic3& cornerGeodetic = { patch.getCorner(q), cornerHeight };
+            corners[i] = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
+        }
+        return corners;
+    }
+
 
     void Chunk::render(const RenderData& data) const {
         _owner->getPatchRenderer().renderChunk(*this, data);

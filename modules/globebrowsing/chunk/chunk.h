@@ -62,6 +62,9 @@ namespace openspace {
         Status update(const RenderData& data);
         void render(const RenderData& data) const;
 
+
+        std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
+
         const GeodeticPatch& surfacePatch() const;
         ChunkedLodGlobe* const owner() const;
         const ChunkIndex index() const;
