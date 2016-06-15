@@ -84,7 +84,9 @@ public:
     properties::BoolProperty blendOverlay;
     properties::BoolProperty blendWaterMask;
     properties::BoolProperty atmosphereEnabled;
+
     properties::BoolProperty showChunkEdges;
+    properties::BoolProperty showChunkBounds;
     properties::BoolProperty levelByProjArea;
     properties::BoolProperty limitLevelByAvailableHeightData;
 

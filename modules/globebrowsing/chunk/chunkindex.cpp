@@ -79,6 +79,7 @@ namespace openspace {
         return x ^ (y << 16) ^ (level << 24);
     }
 
+
     std::string ChunkIndex::toString() const {
         std::stringstream ss;
         for (int i = level; i > 0; i--){

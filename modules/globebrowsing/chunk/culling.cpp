@@ -30,11 +30,12 @@
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/geometry/convexhull.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
+
+#include <modules/debugging/rendering/debugrenderer.h>
 
 namespace {
     const std::string _loggerCat = "FrustrumCuller";
@@ -55,44 +56,23 @@ namespace openspace {
     }
 
     bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
-        const GeodeticPatch& patch = chunk.surfacePatch();
-        
-
         // Calculate the MVP matrix
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        mat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
+        dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
 
-        Chunk::BoundingHeights boundingHeight = chunk.getBoundingHeights();
-
-
-        double patchCenterRadius = ellipsoid.maximumRadius(); // assume worst case
-        
-        // As the patch is curved, the maximum height offsets at the corners must be long 
-        // enough to cover large enough to cover a boundingHeight.max at the center of the 
-        // patch. 
-        double maxCenterRadius = patchCenterRadius + boundingHeight.max;
-        double maximumPatchSide = max(patch.halfSize().lat, patch.halfSize().lon);
-        double maxCornerHeight = maxCenterRadius / cos(maximumPatchSide) - patchCenterRadius;
-
-        // The minimum height offset, however, we can simply 
-        double minCornerHeight = boundingHeight.min;
+        const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
         
 
         // Create a bounding box that fits the patch corners
         AABB3 bounds; // in screen space
-        int numPositiveZ = 0;
-        std::vector<vec2> screenSpaceCorners(8);
+        std::vector<vec4> clippingSpaceCorners(8);
         for (size_t i = 0; i < 8; i++) {
-            Quad q = (Quad)(i % 4);
-            double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
-            const Geodetic3& cornerGeodetic = { patch.getCorner(q), cornerHeight };
-            dvec4 cornerModelSpace = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
-            vec4 cornerClippingSpace = modelViewProjectionTransform * cornerModelSpace;
-            vec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
-            screenSpaceCorners[i] = vec2(cornerScreenSpace);
+            dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+            clippingSpaceCorners[i] = cornerClippingSpace;
+
+            dvec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
             bounds.expand(cornerScreenSpace);
         }
         

@@ -83,6 +83,7 @@ struct ChunkIndex {
 
     ChunkIndex child(Quad q) const;
 
+
     std::string toString() const;
 
     /**
