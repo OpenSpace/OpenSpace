@@ -45,11 +45,11 @@ namespace openspace {
 
 
     DebugRenderer::DebugRenderer()  {
-        _programObject = OsEng.renderEngine().buildRenderProgram(
+        _programObject = std::shared_ptr<ProgramObject>(OsEng.renderEngine().buildRenderProgram(
             "BasicDebugShader", 
             "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
             "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
-            );
+            ));
 
     }
 
@@ -65,7 +65,7 @@ namespace openspace {
         return _singleton;
     }
 
-    void DebugRenderer::renderScreenSpace(const std::vector<glm::vec3>& clippingSpacePoints, GLenum mode, glm::vec4 rgba) const {
+    void DebugRenderer::renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba) const {
         if (clippingSpacePoints.size() == 0) {
             return;
         }
@@ -94,7 +94,7 @@ namespace openspace {
             GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
 
         // uniforms
 
@@ -105,8 +105,6 @@ namespace openspace {
         if (error != GL_NO_ERROR) {
             LERROR(error);
         }
-
-
         
         glBindVertexArray(0);
 
@@ -115,5 +113,50 @@ namespace openspace {
         _programObject->deactivate();
 
     }
+
+    void DebugRenderer::renderBoxFaces(const std::vector<glm::vec4>& clippingSpaceBoxCorners, glm::vec4 rgba) const {
+        const std::vector<glm::vec4>& V = clippingSpaceBoxCorners;
+        std::vector<glm::vec4> T;
+
+        // add "sides"
+        T.push_back(V[0]); T.push_back(V[1]); T.push_back(V[4]);
+        T.push_back(V[5]); T.push_back(V[4]); T.push_back(V[1]);
+
+        T.push_back(V[1]); T.push_back(V[3]); T.push_back(V[5]);
+        T.push_back(V[7]); T.push_back(V[5]); T.push_back(V[3]);
+
+        T.push_back(V[3]); T.push_back(V[6]); T.push_back(V[7]);
+        T.push_back(V[6]); T.push_back(V[3]); T.push_back(V[2]);
+
+        T.push_back(V[2]); T.push_back(V[4]); T.push_back(V[6]);
+        T.push_back(V[4]); T.push_back(V[2]); T.push_back(V[0]);
+
+        // add "top"
+        T.push_back(V[5]); T.push_back(V[6]); T.push_back(V[7]);
+        T.push_back(V[6]); T.push_back(V[5]); T.push_back(V[4]);
+
+        // add bottom
+        T.push_back(V[0]); T.push_back(V[1]); T.push_back(V[2]);
+        T.push_back(V[3]); T.push_back(V[2]); T.push_back(V[1]);
+
+        renderVertices(T, GL_TRIANGLES, rgba);
+    }
+
+    void DebugRenderer::renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba) const {
+        const std::vector<glm::vec4>& V = clippingSpacePoints;
+        std::vector<glm::vec4> lineVertices;
+        for (size_t i = 0; i < 4; i++) {
+            lineVertices.push_back(V[2 * i]);
+            lineVertices.push_back(V[2 * i + 1]);
+            lineVertices.push_back(V[i]);
+            lineVertices.push_back(V[i + 4]);
+        }
+        lineVertices.push_back(V[0]); lineVertices.push_back(V[2]);
+        lineVertices.push_back(V[1]); lineVertices.push_back(V[3]);
+        lineVertices.push_back(V[4]); lineVertices.push_back(V[6]);
+        lineVertices.push_back(V[5]); lineVertices.push_back(V[7]);
+        DebugRenderer::ref()->renderVertices(lineVertices, GL_LINES, rgba);
+    }
+
     
 } // namespace openspace

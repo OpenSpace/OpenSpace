@@ -23,11 +23,14 @@
  ****************************************************************************************/
 #version __CONTEXT__
 
-layout(location = 0) in vec3 vertexPosition;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-out vec3 fs_vertexPosition;
+layout(location = 0) in vec4 vertexPositionClippingSpace;
+
+
+out vec4 fs_vertexPosition;
 
 void main(){
-	fs_vertexPosition = vertexPosition;
-	gl_Position = vec4(vertexPosition, 1);
+	fs_vertexPosition = z_normalization(vertexPositionClippingSpace);
+	gl_Position = fs_vertexPosition;
 }

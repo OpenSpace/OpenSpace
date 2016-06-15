@@ -22,17 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-in vec3 fs_vertexPosition;
+#include "fragment.glsl"
+
+in vec4 fs_vertexPosition;
 
 uniform vec4 color;
 
 Fragment getFragment(){
 	Fragment frag;
 	frag.color = color;
-	vec4 p = z_normalization(vec4(fs_vertexPosition, 1));
-	frag.depth = p.z;
+	frag.depth = fs_vertexPosition.w;
 	return frag;
 }

@@ -40,7 +40,9 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
-    
+    /**
+        A helper class for quick rendering of vertices clipping space
+    */
     class DebugRenderer {
     public:
         DebugRenderer();
@@ -48,14 +50,15 @@ namespace openspace {
         static std::shared_ptr<DebugRenderer> ref();
 
 
-        void renderScreenSpace(const std::vector<glm::vec3>& clippingSpacePoints, GLenum mode, glm::vec4 rgb = {1,0,0,1}) const;
-
+        void renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba = {1, 0, 0, 1}) const;
+        void renderBoxFaces(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
+        void renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
 
     private:
 
 
         
-        std::unique_ptr<ProgramObject> _programObject;
+        std::shared_ptr<ProgramObject> _programObject;
 
 
         static std::shared_ptr<DebugRenderer> _singleton;
