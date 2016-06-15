@@ -32,58 +32,68 @@ return {
             SegmentsPerPatch = 64,
             TextureInitData = {
                 ColorTextureMinimumSize = 1024,
-                OverlayMinimumSize = 4096,
+                OverlayMinimumSize = 2048,
                 HeightMapMinimumSize = 64,
             },
             Textures = {
                 ColorTextures = {
                     {
                         Name = "Temporal VIIRS SNPP",
-                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml"
+                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                        Enabled = false,
                     },
                     {
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
-                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml"
+                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
+                        Enabled = false,
                     },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml"
+                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
+                        Enabled = false,
                     },
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        Enabled = true,
                     },
                 },
                 NightTextures = {
                     {
-                        Name = "Earth at Night  2012",
+                        Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+                        Enabled = false,
                     },
                 },
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
+                        Enabled = true,
                     },
                 },
                 WaterMasks = {
                     {
                         Name = "MODIS_Water_Mask",
-                        FilePath = "map_service_configs/MODIS_Water_Mask.xml"
+                        FilePath = "map_service_configs/MODIS_Water_Mask.xml",
+                        Enabled = false,
                     },
                 },
                 Overlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
+                        Enabled = false,
                     },
                     {
                         Name = "Reference_Features",
                         FilePath = "map_service_configs/Reference_Features.xml",
+                        Enabled = false,
                     },
                     {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/Reference_Labels.xml",
+                        Enabled = false,
                     },
                 },
             },

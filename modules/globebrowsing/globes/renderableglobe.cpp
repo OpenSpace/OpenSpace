@@ -149,7 +149,7 @@ namespace openspace {
         std::vector<properties::BoolProperty>& dest)
     {
         for (size_t i = 0; i < tileProviders.size(); i++) {
-            bool enabled = i == 0; // Only enable first layer
+            bool enabled = tileProviders[i].isActive;
             std::string name = tileProviders[i].name;
             dest.push_back(properties::BoolProperty(name, name, enabled));
         }
