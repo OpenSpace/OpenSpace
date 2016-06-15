@@ -222,8 +222,8 @@ std::vector<float*> KameleonPlane::textureData() {
 bool KameleonPlane::updateTextureResource(){
 
     _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
-    _textureDirty = true;
-
+    // _textureDirty = true;
+    updateTexture();
     return true;
 }
 
