@@ -68,7 +68,7 @@ set(SHADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_fs.glsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/dataplane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/textureplane_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tetureplane_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/textureplane_vs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
