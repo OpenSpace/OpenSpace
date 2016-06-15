@@ -118,18 +118,19 @@ namespace openspace {
         const std::vector<glm::vec4>& V = clippingSpaceBoxCorners;
         std::vector<glm::vec4> T;
 
-        // add "sides"
-        T.push_back(V[0]); T.push_back(V[1]); T.push_back(V[4]);
-        T.push_back(V[5]); T.push_back(V[4]); T.push_back(V[1]);
+        // add "sides";
 
-        T.push_back(V[1]); T.push_back(V[3]); T.push_back(V[5]);
-        T.push_back(V[7]); T.push_back(V[5]); T.push_back(V[3]);
+        T.push_back(V[1]); T.push_back(V[0]); T.push_back(V[4]);
+        T.push_back(V[4]); T.push_back(V[5]); T.push_back(V[1]);
 
-        T.push_back(V[3]); T.push_back(V[6]); T.push_back(V[7]);
-        T.push_back(V[6]); T.push_back(V[3]); T.push_back(V[2]);
+        T.push_back(V[3]); T.push_back(V[1]); T.push_back(V[5]);
+        T.push_back(V[5]); T.push_back(V[7]); T.push_back(V[3]);
 
-        T.push_back(V[2]); T.push_back(V[4]); T.push_back(V[6]);
-        T.push_back(V[4]); T.push_back(V[2]); T.push_back(V[0]);
+        T.push_back(V[6]); T.push_back(V[3]); T.push_back(V[7]);
+        T.push_back(V[3]); T.push_back(V[6]); T.push_back(V[2]);
+
+        T.push_back(V[4]); T.push_back(V[2]); T.push_back(V[6]);
+        T.push_back(V[2]); T.push_back(V[4]); T.push_back(V[0]);
 
         // add "top"
         T.push_back(V[5]); T.push_back(V[6]); T.push_back(V[7]);
