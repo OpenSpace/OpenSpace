@@ -54,6 +54,7 @@ public:
 protected:
     float processDataPoint(float value, int option);
     float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+    float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(std::vector<int> selectedOptions);
