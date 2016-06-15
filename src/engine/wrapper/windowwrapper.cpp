@@ -77,6 +77,8 @@ glm::mat4 WindowWrapper::viewProjectionMatrix() const {
 }
     
 void WindowWrapper::setNearFarClippingPlane(float near, float far) {}
+
+void WindowWrapper::setEyeSeparationDistance(float distance) {}
     
 glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     return glm::ivec4(

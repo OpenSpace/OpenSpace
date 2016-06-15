@@ -30,6 +30,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/settingsengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
@@ -109,6 +110,10 @@ namespace {
 
 namespace openspace {
 
+namespace properties {
+    class Property;
+}
+    
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
@@ -123,6 +128,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
       ))
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
+    , _settingsEngine(new SettingsEngine)
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     , _gui(new gui::GUI)
 #endif
@@ -135,6 +141,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
+    _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>()
@@ -165,6 +172,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     _commandlineParser = nullptr;
     _console = nullptr;
     _moduleEngine = nullptr;
+    _settingsEngine = nullptr;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui = nullptr;
 #endif
@@ -429,6 +437,8 @@ bool OpenSpaceEngine::initialize() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
     _gui->initialize();
+    for (properties::Property* p : _settingsEngine->propertiesRecursive())
+    	_gui->_globalProperty.registerProperty(p);
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
