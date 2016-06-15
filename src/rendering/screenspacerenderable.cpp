@@ -263,10 +263,10 @@ void ScreenSpaceRenderable::createShaders() {
         };
 
         dict.setValue("rendererData", rendererData);
-        dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screnspace_fs.glsl");
+        dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
         _shader = ghoul::opengl::ProgramObject::Build(
             "ScreenSpaceProgram",
-            "${MODULE_BASE}/shaders/screnspace_vs.glsl",
+            "${MODULE_BASE}/shaders/screenspace_vs.glsl",
             "${SHADERS}/render.frag",
             dict
         );
