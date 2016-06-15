@@ -24,6 +24,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
+#include <sgct.h>
 
 namespace {
     const std::string _loggerCat = "ScreenSpaceRenderable";
@@ -243,7 +244,8 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix(){
 }
 
 glm::mat4 ScreenSpaceRenderable::rotationMatrix(){
-    glm::mat4 rotation(1.0);
+    // Get the scene transform
+    glm::mat4 rotation = sgct::Engine::instance()->getModelMatrix();
     if(!_useEuclideanCoordinates){
         glm::vec2 position = _sphericalPosition.value();
 
