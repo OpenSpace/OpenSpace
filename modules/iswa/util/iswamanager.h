@@ -106,6 +106,7 @@ public:
     }
 
     void addCdfFiles(std::string path);
+    void setBaseUrl(std::string bUrl);
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);

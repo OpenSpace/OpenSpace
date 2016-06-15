@@ -51,6 +51,8 @@
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "IswaManager";
+    std::string baseUrl = "https://iswa-demo-server.herokuapp.com/";
+    //const std::string baseUrl = "http://128.183.168.116:3000/";
 }
 
 namespace openspace{
@@ -145,8 +147,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
         // Download metadata
         DlManager.fetchFile(
-            "http://128.183.168.116:3000/" + std::to_string(-id),
-            // "http://localhost:3000/" + std::to_string(-id),
+            baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
@@ -195,8 +196,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
 std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
-        url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
-        // url = "http://localhost:3000/"+type+"/" + std::to_string(-id) + "/";
+        url = baseUrl+type+"/" + std::to_string(-id) + "/";
     } else{
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
@@ -262,8 +262,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
 
     metaFuture->id = id;
     DlManager.fetchFile(
-        "http://128.183.168.116:3000/" + std::to_string(-id),
-        // "http://localhost:3000/" + std::to_string(-id),
+        baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file){
             metaFuture->json = std::string(file.buffer, file.size);
             metaFuture->isFinished = true;
@@ -648,6 +647,11 @@ void IswaManager::addCdfFiles(std::string path){
     }
 }
 
+void IswaManager::setBaseUrl(std::string bUrl){
+    LDEBUG("Swapped baseurl to: " + bUrl);
+    baseUrl = bUrl;
+}
+
 scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
@@ -706,6 +710,13 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_removeGroup,
                 "int",
                 "Remove a group of Cygnets",
+                true
+            },
+            {
+                "setBaseUrl",
+                &luascriptfunctions::iswa_setBaseUrl,
+                "string",
+                "sets the base url",
                 true
             }
         }
