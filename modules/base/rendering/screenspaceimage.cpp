@@ -25,6 +25,12 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem>
 
+#include <openspace/engine/openspaceengine.h>
+
+#include <modules/onscreengui/include/gui.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/renderengine.h>
+
 namespace {
     const std::string _loggerCat = "ScreenSpaceImage";
 }

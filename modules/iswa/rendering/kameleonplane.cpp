@@ -30,6 +30,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
+#include <modules/onscreengui/include/gui.h>
+
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";

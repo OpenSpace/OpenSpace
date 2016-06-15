@@ -33,6 +33,7 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/onscreengui/include/gui.h>
 
 namespace {
     const std::string _loggerCat = "IswaDataGroup";

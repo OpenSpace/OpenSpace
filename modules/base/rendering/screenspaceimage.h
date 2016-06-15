@@ -28,6 +28,8 @@
 #include <ghoul/opengl/texture.h>
 #include <openspace/engine/downloadmanager.h>
 
+#include <openspace/properties/stringproperty.h>
+
  
 namespace openspace {
 /**
