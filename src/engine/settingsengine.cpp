@@ -24,6 +24,9 @@
 
 #include <openspace/engine/settingsengine.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+
 namespace openspace {
 
 SettingsEngine::SettingsEngine() :
@@ -31,6 +34,8 @@ SettingsEngine::SettingsEngine() :
 {
     addProperty(_eyeSeparation);
     setName("Global");
+    _eyeSeparation.onChange(
+        [this](){ OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
 }
 
 }
