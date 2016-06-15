@@ -407,7 +407,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
     }
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
-        if(screenSpaceRenderable->isEnabled())
+        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
             screenSpaceRenderable->render();
     }
 }
