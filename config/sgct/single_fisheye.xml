@@ -1,5 +1,10 @@
 <?xml version="1.0" ?>
 <Cluster masterAddress="localhost">
+<!-- 	<Scene>
+		<Orientation yaw="0.0" pitch="-27.0" roll="0.0" />
+		<Offset x="0.0" y="0.0" z="0.0" />
+		<Scale value="1.0" />
+	</Scene> -->
 	<Node address="localhost" port="20401">
 		<Window fullScreen="false" numberOfSamples="8" name="OpenSpace">
 			<Stereo type="none" />
@@ -20,7 +25,7 @@
 			<Viewport name="fisheye">
 				<Pos x="0.0" y="0.0" />
 				<Size x="1.0" y="1.0" />
-				<FisheyeProjection fov="180" quality="1k" tilt="27.0">
+				<FisheyeProjection fov="180" quality="1k"  tilt="27.0">
 					<Background r="0.1" g="0.1" b="0.1" a="1.0" />
 				</FisheyeProjection>
 			</Viewport>
