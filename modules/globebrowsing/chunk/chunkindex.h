@@ -42,6 +42,13 @@ enum Quad {
     SOUTH_EAST
 };
 
+enum CardinalDirection {
+    WEST = 0,
+    EAST,
+    NORTH,
+    SOUTH,
+};
+
 
 
 using HashKey = unsigned long;
