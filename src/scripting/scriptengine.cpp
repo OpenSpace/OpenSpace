@@ -24,12 +24,15 @@
 
 #include <openspace/scripting/scriptengine.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/syncbuffer.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
+
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/network/parallelconnection.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/util/syncbuffer.h>
+
 #include <fstream>
 #include <iomanip>
 
@@ -140,7 +143,12 @@ bool ScriptEngine::runScript(const std::string& script) {
         LWARNING("Script was empty");
         return false;
     }
-    
+
+    if (_logScripts) {
+        // Write command to log before it's executed
+        writeLog(script);
+    }
+
     try {
         ghoul::lua::runScript(_state, script);
     }
@@ -560,6 +568,68 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         return false;
     }
 }
+
+bool ScriptEngine::writeLog(const std::string& script) {
+    // Check that logging is enabled and initialize if necessary
+    if (!_logFileExists) {
+        // If a ScriptLogFile was specified, generate it now
+        const bool hasType = OsEng.configurationManager()
+            .hasKey(ConfigurationManager::KeyScriptLogType);
+        const bool hasFile = OsEng.configurationManager()
+            .hasKey(ConfigurationManager::KeyScriptLogFile);
+        if (hasType && hasFile) {
+            OsEng.configurationManager()
+                .getValue(ConfigurationManager::KeyScriptLogType, _logType);
+            OsEng.configurationManager()
+                .getValue(ConfigurationManager::KeyScriptLogFile, _logFilename);
+
+            _logFilename = absPath(_logFilename);
+            _logFileExists = true;
+
+            LDEBUG("Using script log of type '" << _logType <<
+                   "' to file '" << _logFilename << "'");
+
+            // Test file and clear previous input
+            std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
+
+            if (!file.good()) {
+                LERROR("Could not open file '" << _logFilename
+                       << "' for logging scripts");
+
+                return false;
+            }
+        } else {
+            LDEBUG("No script log specified in 'openspace.cfg.' To log, set '"
+                   << ConfigurationManager::KeyScriptLogType << " and "
+                   << ConfigurationManager::KeyScriptLogFile
+                   << " in configuration table.");
+            _logScripts = false;
+            return false;
+        }
+    }
+
+    if (_logType == "text") {
+        // Simple text output to logfile
+        std::ofstream file(_logFilename, std::ofstream::app);
+        if (!file.good()) {
+            LERROR("Could not open file '" << _logFilename << "' for logging scripts");
+            return false;
+        }
+
+
+        LDEBUG("Writing " << script);
+        file << script << std::endl;
+        file.close();
+    }
+    else {
+        LERROR("Undefined type '" << _logType << "' for script documentation");
+        _logScripts = false;
+        return false;
+    }
+
+    return true;
+}
+
 
 void ScriptEngine::serialize(SyncBuffer* syncBuffer){
     syncBuffer->encode(_currentSyncedScript);

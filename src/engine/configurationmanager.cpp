@@ -45,6 +45,8 @@ const string ConfigurationManager::KeyFonts = "Fonts";
 const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
 const string ConfigurationManager::KeyLuaDocumentationType = "LuaDocumentationFile.Type";
 const string ConfigurationManager::KeyLuaDocumentationFile = "LuaDocumentationFile.File";
+const string ConfigurationManager::KeyScriptLogType = "ScriptLogFile.Type";
+const string ConfigurationManager::KeyScriptLogFile = "ScriptLogFile.File";
 const string ConfigurationManager::KeyPropertyDocumentationType =
     "PropertyDocumentationFile.Type";
 const string ConfigurationManager::KeyPropertyDocumentationFile =
