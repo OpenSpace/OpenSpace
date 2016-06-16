@@ -117,6 +117,60 @@ namespace openspace {
         return boundingHeights;
     }
 
+    std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
+        // OBS!
+        // This implementation needs to be fixed! Its not completely bounding
+        // See DebugRenderer::renderBoxFaces to see whats wrong
+
+        const Ellipsoid& ellipsoid = owner()->ellipsoid();
+        const GeodeticPatch& patch = surfacePatch();
+
+        BoundingHeights boundingHeight = getBoundingHeights();
+
+        // assume worst case
+        double patchCenterRadius = ellipsoid.maximumRadius();
+
+        double maxCenterRadius = patchCenterRadius + boundingHeight.max;
+        Geodetic2 halfSize = patch.halfSize();
+
+        // As the patch is curved, the maximum height offsets at the corners must be long 
+        // enough to cover large enough to cover a boundingHeight.max at the center of the 
+        // patch. Below this is done by an approximation.
+        double scaleToCoverCenter = 1 / cos(halfSize.lat) + 1 / cos(halfSize.lon) - 1; 
+        double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
+
+        bool chunkIsNorthOfEquator = patch.isNorthern();
+
+        // The minimum height offset, however, we can simply 
+        double minCornerHeight = boundingHeight.min;
+        std::vector<glm::dvec4> corners(8);
+        
+        Scalar latCloseToEquator = patch.edgeLatitudeNearestEquator();
+        Geodetic3 p1Geodetic = { { latCloseToEquator, patch.minLon() }, maxCornerHeight };
+        Geodetic3 p2Geodetic = { { latCloseToEquator, patch.maxLon() }, maxCornerHeight };
+        
+        glm::vec3 p1 = ellipsoid.cartesianPosition(p1Geodetic);
+        glm::vec3 p2 = ellipsoid.cartesianPosition(p2Geodetic);
+        glm::vec3 p = 0.5f * (p1 + p2);
+        Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
+        Scalar latDiff = latCloseToEquator - pGeodetic.lat;
+
+        for (size_t i = 0; i < 8; i++) {
+            Quad q = (Quad)(i % 4);
+            double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
+            Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
+            
+            bool cornerIsNorthern = i < 2;
+            bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
+            if (cornerCloseToEquator) {
+                cornerGeodetic.geodetic2.lat += latDiff;
+            }
+
+            corners[i] = dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
+        }
+        return corners;
+    }
+
 
     void Chunk::render(const RenderData& data) const {
         _owner->getPatchRenderer().renderChunk(*this, data);

@@ -112,8 +112,10 @@ namespace openspace {
             blendProperties;
         bool atmosphereEnabled;
         bool showChunkEdges;
+        bool showChunkBounds;
         bool levelByProjArea;
         bool limitLevelByAvailableHeightData;
+        
 
     private:
 

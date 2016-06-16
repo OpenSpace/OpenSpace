@@ -441,8 +441,8 @@ namespace openspace {
         // at overview 0
         GeodeticPatch patch = GeodeticPatch(chunkIndex);
 
-        glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.northWestCorner());
-        glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.southEastCorner());
+        glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.getCorner(Quad::NORTH_WEST));
+        glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.getCorner(Quad::SOUTH_EAST));
         glm::uvec2 numPixels0 = pixelEnd0 - pixelStart0;
 
         // Calculate a suitable overview to choose from the GDAL dataset

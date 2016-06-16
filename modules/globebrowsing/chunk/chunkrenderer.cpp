@@ -327,7 +327,7 @@ namespace openspace {
         }
         
         // Calculate other uniform variables needed for rendering
-        Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
+        Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
         auto patchSize = chunk.surfacePatch().size();
         
         // TODO : Model transform should be fetched as a matrix directly.
@@ -404,10 +404,10 @@ namespace openspace {
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
-        Geodetic2 sw = chunk.surfacePatch().southWestCorner();
-        Geodetic2 se = chunk.surfacePatch().southEastCorner();
-        Geodetic2 nw = chunk.surfacePatch().northWestCorner();
-        Geodetic2 ne = chunk.surfacePatch().northEastCorner();
+        Geodetic2 sw = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
+        Geodetic2 se = chunk.surfacePatch().getCorner(Quad::SOUTH_EAST);
+        Geodetic2 nw = chunk.surfacePatch().getCorner(Quad::NORTH_WEST);
+        Geodetic2 ne = chunk.surfacePatch().getCorner(Quad::NORTH_EAST);
 
         // Get model space positions of the four control points
         Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);

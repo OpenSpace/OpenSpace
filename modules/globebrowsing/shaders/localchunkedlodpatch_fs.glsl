@@ -119,7 +119,7 @@ Fragment getFragment() {
 #endif // USE_OVERLAY
 
 #if SHOW_CHUNK_EDGES
-	frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.02);
+	frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
 #endif // SHOW_CHUNK_EDGES
 
 

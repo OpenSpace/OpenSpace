@@ -111,26 +111,22 @@ public:
     void setHalfSize(const Geodetic2&);	
 
     /**
-        Returns the minimal bounding radius that together with the LatLonPatch's
-        center point represents a sphere in which the patch is completely contained.
-        
-        TODO : THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
-        A PART OF AN ELLIPSOID AND NOT A SPHERE! MUST CHECK IF THIS FUNCTION IS STILL
-        VALID.
+        returns the latitude boundary which is closest to the equator
     */
-    Scalar minimalBoundingRadius(const Ellipsoid& ellipsoid) const;
+    Scalar edgeLatitudeNearestEquator() const;
 
     /**
-        Returns the area of the patch with unit radius
+        Returns true if the center above the equator
     */
-    // Scalar unitArea() const;
+    Scalar isNorthern() const;
 
     Geodetic2 getCorner(Quad q) const;
 
-    Geodetic2 northWestCorner() const;
-    Geodetic2 northEastCorner() const;
-    Geodetic2 southWestCorner() const;
-    Geodetic2 southEastCorner() const;
+    Scalar minLat() const;
+    Scalar maxLat() const;
+    Scalar minLon() const;
+    Scalar maxLon() const;
+
 
     /**
      * Clamps a point to the patch region
