@@ -51,6 +51,7 @@ public:
     bool isRegularRendering() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
+    glm::mat4 modelMatrix() const override;
     void setNearFarClippingPlane(float near, float far) override;
     
     glm::ivec4 viewportPixelCoordinates() const override;

@@ -26,6 +26,13 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 
+#include <modules/onscreengui/include/gui.h>
+
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
+
 namespace {
     const std::string _loggerCat = "DataSphere";
 }

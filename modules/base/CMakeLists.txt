@@ -89,8 +89,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_ge.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screnspace_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screnspace_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screenspace_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/screenspace_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
