@@ -24,6 +24,8 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
+#include <modules/onscreengui/include/gui.h>
+
 namespace {
     const std::string _loggerCat = "DataPlane";
 }

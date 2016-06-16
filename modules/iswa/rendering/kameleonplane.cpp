@@ -30,6 +30,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
+#include <modules/onscreengui/include/gui.h>
+
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
@@ -222,8 +224,8 @@ std::vector<float*> KameleonPlane::textureData() {
 bool KameleonPlane::updateTextureResource(){
 
     _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
-    _textureDirty = true;
-
+    // _textureDirty = true;
+    updateTexture();
     return true;
 }
 

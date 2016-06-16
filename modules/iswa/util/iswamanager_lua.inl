@@ -164,6 +164,12 @@ int iswa_addKameleonPlanes(lua_State* L){
     return 0;
 }
 
+int iswa_setBaseUrl(lua_State* L){
+    std::string url = luaL_checkstring(L, 1);
+    IswaManager::ref().setBaseUrl(url);
+    return 0;
+}
+
 }// namespace luascriptfunctions
 
 }// namespace openspace

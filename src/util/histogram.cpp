@@ -296,14 +296,16 @@ float Histogram::entropy(){
 }
 
 void Histogram::print() const {
-    std::cout << "number of bins: " << _numBins << std::endl
-              << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
+    // std::cout << "number of bins: " << _numBins << std::endl
+    //           << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
         float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / float(_numBins);
-        std::cout << i << " [" << low << ", " << high << "]"
-                  << "   " << _data[i] << std::endl;
+        // std::cout << i << " [" << low << ", " << high << "]"
+        //           << "   " << _data[i] << std::endl;
+        std::cout << _data[i]/(float)_numValues << ", ";
     }
+    std::cout << std::endl;
     // std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
@@ -332,18 +334,16 @@ float Histogram::highestBinValue(bool equalized, int overBins){
             highestBin = i;
             highestValue = value;
         }
-
-        // if(_data[i] > _data[highestBin])
-            // highestBin = i;
     }
 
-    float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
-    float high = low + (_maxValue - _minValue) / float(_numBins);
 
     if(!equalized){
+        float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
+        float high = low + (_maxValue - _minValue) / float(_numBins);
         return (high+low)/2.0;
     }else{
-        return equalize((high+low)/2.0);
+        return highestBin/(float)_numBins;
+        // return equalize((high+low)/2.0);
     }
 }
 

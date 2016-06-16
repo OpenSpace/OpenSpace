@@ -26,6 +26,7 @@
 
 #include <modules/base/rendering/planetgeometry.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
@@ -35,6 +36,11 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
+
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";

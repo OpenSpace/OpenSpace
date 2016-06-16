@@ -54,6 +54,7 @@
                                                                     std::string to,
                                                                     double ephemerisTime) const
     {
+#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
         ccmc::Position in0 = {1.f, 0.f, 0.f};
         ccmc::Position in1 = {0.f, 1.f, 0.f};
         ccmc::Position in2 = {0.f, 0.f, 1.f};
@@ -70,7 +71,10 @@
                     out0.c0 , out0.c1   , out0.c2,
                     out1.c0 , out1.c1   , out1.c2,
                     out2.c0 , out2.c1   , out2.c2
-                );;
+                );
+#else
+        return glm::dmat3(0.0);
+#endif 
     }
 
     glm::dmat3 TransformationManager::frameTransformationMatrix(std::string from,
