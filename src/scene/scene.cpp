@@ -357,7 +357,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         }
     }
 
-    // If a LuaDocumentationFile was specified, generate it now
+    // If a PropertyDocumentationFile was specified, generate it now
     const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
     const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
