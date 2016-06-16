@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,18 +102,30 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
         int first, last, option, lineSize;
 
 
+        // for each data point
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
-
             values = std::vector<float>();
             std::istringstream ss(line);
-			std::istream_iterator<float> it(ss);
-			std::advance(it, 3); //+3 because options x, y and z in the file
-            copy(
-                it,
-                std::istream_iterator<float> (),
-                back_inserter(values)
-            );
+            std::string val;
+            int skip = 0;
+            //for each data option (variable)
+            while(ss >> val){
+                // first three values are coordinates
+                if( skip < 3 ){
+                    skip++;
+                    continue;
+                }
+
+                float v = std::stof(val);
+                // Some values are "NaN", use 0 instead
+                if(!std::isnan(v)){
+                    values.push_back(v);
+                } else {
+                    values.push_back(0.0f);
+                }
+                val.clear();
+            }
 
             if(values.size() <= 0) continue;
 
@@ -126,7 +138,6 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
                 sum[i] += value;
             }
         }
-
 
         add(optionValues, sum);
     }
