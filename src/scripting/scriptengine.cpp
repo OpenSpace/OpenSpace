@@ -616,8 +616,6 @@ bool ScriptEngine::writeLog(const std::string& script) {
             return false;
         }
 
-
-        LDEBUG("Writing " << script);
         file << script << std::endl;
         file.close();
     }
