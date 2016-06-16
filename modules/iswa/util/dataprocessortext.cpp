@@ -22,8 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessortext.h>
-#include <algorithm>
-#include <iterator>
+//#include <algorithm>
 //#include <boost/iostreams/device/mapped_file.hpp>
 //
 //#include <boost/config/warning_disable.hpp>
@@ -159,13 +158,13 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         int first, last, option, lineSize;
         
         std::vector<float*> dataOptions(numOptions, nullptr);
-        for(int option : selectedOptions){
+        for (int option : selectedOptions) {
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
         }
 
         int numValues = 0;
-        while(getline(memorystream, line)){
-            if(line.find("#") == 0) continue;
+        while (getline(memorystream, line)) {
+            if (line.find("#") == 0) continue;
 
             
             // ----------- OLD METHODS ------------------------

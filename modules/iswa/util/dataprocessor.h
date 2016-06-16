@@ -25,11 +25,9 @@
 #ifndef __DATAPROCESSOR_H__
 #define __DATAPROCESSOR_H__
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
+#include <glm/gtx/std_based_type.hpp>
 #include <set>
 #include <openspace/util/histogram.h>
 
