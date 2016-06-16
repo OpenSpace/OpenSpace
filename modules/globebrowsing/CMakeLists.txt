@@ -50,6 +50,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
@@ -90,6 +91,7 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp

@@ -103,7 +103,7 @@ namespace openspace {
         auto tileProvidermanager = owner()->getTileProviderManager();
         auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
         if (heightMapProviders.size() > 0) {
-            TileAndTransform tileAndTransform = heightMapProviders[0]->getHighestResolutionTile(_index);
+            TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
             if (tileAndTransform.tile.status == Tile::Status::OK) {
                 std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
                 if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
