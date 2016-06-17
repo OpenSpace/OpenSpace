@@ -32,10 +32,10 @@
 
 // test files
 #include <test_common.inl>
-//#include <test_spicemanager.inl>
+#include <test_spicemanager.inl>
 #include <test_scenegraphloader.inl>
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
+#include <test_luaconversions.inl>
+#include <test_powerscalecoordinates.inl>
 #include <test_screenspaceimage.inl>
 #include <test_iswamanager.inl>
 
@@ -60,5 +60,17 @@ int main(int argc, char** argv) {
     openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    //testing::internal::CaptureStdout();
+    //testing::internal::CaptureStderr();
+    bool b = RUN_ALL_TESTS();
+    //std::string output = testing::internal::GetCapturedStdout();
+    //std::string error = testing::internal::GetCapturedStderr();
+
+    //std::ofstream o("output.txt");
+    //o << output;
+
+    //std::ofstream e("error.txt");
+    //e << error;
+
+    return b;
 }
