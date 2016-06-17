@@ -79,8 +79,18 @@ namespace openspace {
             end.setTime(timeEnd);
         }
 
-        _timeQuantizer = TimeQuantizer(start, end, timeResolution);
+        try {
+            _timeQuantizer = TimeQuantizer(start, end, timeResolution);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            throw ghoul::RuntimeError(
+                "Could not create time quantizer for Temporal GDAL dataset '" +
+                _datasetFile + "'. " + e.message);
+        }
         _timeFormat = TimeIdProviderFactory::getProvider(timeIdFormat);
+        if (!_timeFormat) {
+            throw ghoul::RuntimeError("Invalid Time Format " + timeIdFormat + " in " + _datasetFile);
+        }
 
         CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
         return CPLSerializeXMLTree(gdalNode);
@@ -89,6 +99,10 @@ namespace openspace {
 
     std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key, const std::string& defaultVal) {
         CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
+        if (!n) {
+            throw ghoul::RuntimeError("Unable to parse file " + _datasetFile + ". " + key + " missing.");
+        }
+
         bool hasValue = (n != nullptr && n->psChild != nullptr && n->psChild->pszValue != nullptr);
         return hasValue ? std::string(n->psChild->pszValue) : defaultVal;
     }
@@ -141,7 +155,13 @@ namespace openspace {
         Time tCopy(t);
         if (_timeQuantizer.quantize(tCopy)) {
             TimeKey timekey = _timeFormat->stringify(tCopy);
-            return getTileProvider(timekey);
+            try {
+                return getTileProvider(timekey);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.message);
+                return nullptr;
+            }
         }
         return nullptr;
     }
@@ -257,23 +277,29 @@ namespace openspace {
 
     double TimeQuantizer::parseTimeResolutionStr(const std::string& resoltutionStr) {
         const char unit = resoltutionStr.back();
-        double value = std::stod(resoltutionStr);
-
-        // convert value to seconds, based on unit.
-        // The switch statment has intentional fall throughs
-        switch (unit) {
-        case 'y': value *= 365;
-        case 'd': value *= 24.0;
-        case 'h': value *= 60.0;
-        case 'm': value *= 60.0;
-        case 's': value *= 1.0;
-            break;
-        default:
-            ghoul_assert(false, "Invalid unit format. Using default value 1 d");
-            value = 60 * 60 * 24;
+        std::string numberString = resoltutionStr.substr(0, resoltutionStr.length() - 1);
+        
+        char* p;
+        double value = strtol(numberString.c_str(), &p, 10);
+        if (*p) { // not a number
+            throw ghoul::RuntimeError("Cannot convert " + numberString + " to number");
         }
-
-        return value;
+        else {
+            // convert value to seconds, based on unit.
+            // The switch statment has intentional fall throughs
+            switch (unit) {
+            case 'y': value *= 365;
+            case 'd': value *= 24.0;
+            case 'h': value *= 60.0;
+            case 'm': value *= 60.0;
+            case 's': value *= 1.0;
+                break;
+            default:
+                throw ghoul::RuntimeError("Invalid unit format '" + std::string(1, unit) +
+                    "'. Expected 'y', 'd', 'h', 'm' or 's'.");
+            }
+            return value;
+        }
     }
 
     bool TimeQuantizer::quantize(Time& t) const {

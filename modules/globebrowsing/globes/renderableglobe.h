@@ -32,6 +32,8 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/selectionproperty.h>
+
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
@@ -78,6 +80,12 @@ public:
     properties::FloatProperty chunkHeight;
 
     // Layered rendering
+    properties::SelectionProperty _baseLayersSelection;
+    properties::SelectionProperty _nightLayersSelection;
+    properties::SelectionProperty _heightMapsSelection;
+    properties::SelectionProperty _waterMasksSelection;
+    properties::SelectionProperty _overlaysSelection;
+    
     properties::BoolProperty blendHeightMap;
     properties::BoolProperty blendColorMap;
     properties::BoolProperty blendNightTexture;
@@ -95,9 +103,14 @@ private:
     std::string _frame;
 
     void addToggleLayerProperties(
-        std::vector<TileProviderManager::TileProviderWithName>&,
-        std::vector<properties::BoolProperty>& dest
+        LayeredTextures::TextureCategory category,
+        properties::SelectionProperty& dest
     );
+
+    void initializeToggleLayerProperties(
+        LayeredTextures::TextureCategory category,
+        properties::SelectionProperty& dest
+        );
 
     double _time;
 
@@ -116,6 +129,15 @@ private:
     std::vector<properties::BoolProperty> _activeOverlays;
     std::vector<properties::BoolProperty> _activeHeightMapLayers;
     std::vector<properties::BoolProperty> _activeWaterMaskLayers;
+
+    void selectionChanged(
+        properties::SelectionProperty selectionProperty,
+        LayeredTextures::TextureCategory textureCategory);
+    void baseLayerSelectionChanged();
+    void nightLayersSelectionChanged();
+    void heightMapsSelectionChanged();
+    void waterMasksSelectionChanged();
+    void overlaysSelectionChanged();
 
     DistanceSwitch _distanceSwitch;
 };
