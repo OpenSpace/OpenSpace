@@ -54,8 +54,6 @@ vec4 uvToModel(vec2 uv, vec4 radius, float segments){
     float z = radius[2] * cos(phi) * sin(theta);  //
     
     return vec4(x, y, z, radius[3]);
-
-    return vec4(0.0); 
 }
 
 bool inRange(float x, float a, float b){
