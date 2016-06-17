@@ -289,7 +289,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         glm::vec2 boundf = bound.vec2();
         //glm::vec2 scaling{1.0f, -boundf[1]};
 
-		cameraScaling = glm::vec2(1.f, -boundf[1]);
+        cameraScaling = glm::vec2(1.f, -boundf[1]);
         //boundf[0] *= 5.0f;
 
         
@@ -298,11 +298,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
         //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
 
-		cameraPosition = focusNode->position();
-		cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
-		
-		//why this line? (JK)
-		//cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
+        cameraPosition = focusNode->position();
+        cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
+        
+        //why this line? (JK)
+        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
 
 
         //c->setPosition(cameraPosition);
