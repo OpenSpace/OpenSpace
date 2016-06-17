@@ -55,6 +55,8 @@ namespace openspace {
     {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
+            CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
+
             GdalHasBeenInitialized = true;
         }
 
