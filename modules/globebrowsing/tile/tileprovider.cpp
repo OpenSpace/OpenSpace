@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tilediskcache.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
@@ -34,6 +35,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+
 
 #include <sstream>
 
@@ -144,7 +146,7 @@ namespace openspace {
     }
 
 
-    void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {      
+    void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
         HashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(

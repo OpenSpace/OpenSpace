@@ -53,8 +53,8 @@ namespace openspace {
         std::vector<float> maxValues;
         std::vector<float> minValues;
 
-        void serialize(std::stringstream& s);
-        static TilePreprocessData deserialize(std::stringstream& s);
+        void serialize(std::ostream& s);
+        static TilePreprocessData deserialize(std::istream& s);
     };
 
     struct TextureFormat {
@@ -73,8 +73,8 @@ namespace openspace {
         CPLErr error;
         size_t nBytesImageData;
 
-        void serialize(std::stringstream& s);
-        static TileIOResult deserialize(std::stringstream& s);
+        void serialize(std::ostream& s);
+        static TileIOResult deserialize(std::istream& s);
 
     };
 

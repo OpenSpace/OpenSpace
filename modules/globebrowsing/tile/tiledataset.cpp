@@ -47,29 +47,29 @@ namespace {
 
 
 namespace openspace {
-    void TilePreprocessData::serialize(std::stringstream& s) {
-        s << maxValues.size() << std::endl;
+    void TilePreprocessData::serialize(std::ostream& os) {
+        os << maxValues.size() << std::endl;
         for (float f : maxValues) {
-            s << f << " ";
+            os << f << " ";
         }
-        s << std::endl;
+        os << std::endl;
         for (float f : minValues) {
-            s << f << " ";
+            os << f << " ";
         }
-        s << std::endl;
+        os << std::endl;
     }
 
 
-    TilePreprocessData TilePreprocessData::deserialize(std::stringstream& s) {
+    TilePreprocessData TilePreprocessData::deserialize(std::istream& is) {
         TilePreprocessData res;
-        int n; s >> n;
+        int n; is >> n;
         res.maxValues.resize(n);
         for (int i = 0; i < n; i++) {
-            s >> res.maxValues[i];
+            is >> res.maxValues[i];
         }
         res.minValues.resize(n);
         for (int i = 0; i < n; i++) {
-            s >> res.minValues[i];
+            is >> res.minValues[i];
         }
 
         return std::move(res);
@@ -87,51 +87,56 @@ namespace openspace {
     }
 
 
-    void TileIOResult::serialize(std::stringstream& s) {
-        s << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
-        s << chunkIndex.x << " " << chunkIndex.y << " " << chunkIndex.level << std::endl;
-        s << error << std::endl;
+    void TileIOResult::serialize(std::ostream& os) {
+        os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
+        os << chunkIndex.x << " " << chunkIndex.y << " " << chunkIndex.level << std::endl;
+        os << error << std::endl;
 
         // preprocess data
-        s << (preprocessData != nullptr) << std::endl;
+        os << (preprocessData != nullptr) << std::endl;
         if (preprocessData != nullptr) {    
-            preprocessData->serialize(s);
+            preprocessData->serialize(os);
         }
         
-        s << nBytesImageData << std::endl;
-
+        os << nBytesImageData << std::endl;
+        /*
         char binaryDataSeparator = 'Ö'; // sweden represent!
-        s << binaryDataSeparator;
+        os << binaryDataSeparator;
+
         if (nBytesImageData) {
             char* buffer = reinterpret_cast<char*>(imageData);
-            s.write(buffer, nBytesImageData);
+            os.write(buffer, nBytesImageData);
         }
+        */
     }
 
 
-    TileIOResult TileIOResult::deserialize(std::stringstream& s) {
+    TileIOResult TileIOResult::deserialize(std::istream& is) {
         TileIOResult res;
-        s >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
-        s >> res.chunkIndex.x >> res.chunkIndex.y >> res.chunkIndex.level;
-        int err; s >> err; res.error = (CPLErr) err;
+        is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
+        is >> res.chunkIndex.x >> res.chunkIndex.y >> res.chunkIndex.level;
+        int err; is >> err; res.error = (CPLErr) err;
         
         res.preprocessData = nullptr;
         bool hasPreprocessData; 
-        s >> hasPreprocessData;
+        is >> hasPreprocessData;
         if (hasPreprocessData) {
-            TilePreprocessData preprocessData = TilePreprocessData::deserialize(s);
+            TilePreprocessData preprocessData = TilePreprocessData::deserialize(is);
             res.preprocessData = std::make_shared<TilePreprocessData>(preprocessData);
         }
         
-        s >> res.nBytesImageData;
+        is >> res.nBytesImageData;
 
         char binaryDataSeparator;
-        s >> binaryDataSeparator; // not used
+        is >> binaryDataSeparator; // not used
         
         char* buffer = new char[res.nBytesImageData]();
-        s.read(buffer, res.nBytesImageData);
+        /*is.read(buffer, res.nBytesImageData);
+        for (size_t i = 0; i < res.nBytesImageData; i++){
+            is.get(buffer[i]);
+        }
         res.imageData = reinterpret_cast<void*>(buffer);
-        
+        */
         return std::move(res);
     }
 
