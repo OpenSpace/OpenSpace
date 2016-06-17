@@ -29,8 +29,6 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    openspace.setPerformanceMeasurement(true)
-
     if openspace.modules.isLoaded("ISWA") then
     
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
