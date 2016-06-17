@@ -164,6 +164,7 @@ void RenderableModelProjection::render(const RenderData& data) {
         clearAllProjections();
 
     _camScaling = data.camera.scaling();
+    _up = data.camera.lookUpVectorCameraSpace();
 
     if (_capture && _performProjection)
         project();
