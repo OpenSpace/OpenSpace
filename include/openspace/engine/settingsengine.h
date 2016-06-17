@@ -22,48 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWWRAPPER_H__
-#define __SGCTWINDOWWRAPPER_H__
+#ifndef __SETTINGSENGINE_H__
+#define __SETTINGSENGINE_H__
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
 
-/**
- * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
- * method calls to the specific functions in the Engine and SGCTWindow classes.
- * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
- */
-class SGCTWindowWrapper : public WindowWrapper {
+class SettingsEngine : public properties::PropertyOwner {
 public:
-    void setBarrier(bool enabled) override;
-    void clearAllWindows(const glm::vec4& clearColor) override;
-    bool windowHasResized() const override;
+  SettingsEngine();
 
-    double averageDeltaTime() const override;
-    glm::vec2 mousePosition() const override;
-    uint32_t mouseButtons(int maxNumber) const override;
-    glm::ivec2 currentWindowSize() const override;
-    glm::ivec2 currentWindowResolution() const override;
-    glm::ivec2 currentDrawBufferResolution() const override;
-    int currentNumberOfAaSamples() const override;
-
-    bool isRegularRendering() const override;
-    
-    glm::mat4 viewProjectionMatrix() const override;
-    void setNearFarClippingPlane(float near, float far) override;
-    void setEyeSeparationDistance(float distance) override;
-    
-    glm::ivec4 viewportPixelCoordinates() const override;
-    
-    bool isExternalControlConnected() const override;
-    void sendMessageToExternalControl(const std::vector<char>& message) const override;
-
-    bool isSimpleRendering() const override;
-
-    void takeScreenshot() const override;
+private:
+  properties::FloatProperty _eyeSeparation;
 };
 
 } // namespace openspace
 
-#endif // __SGCTWINDOWWRAPPER_H__
+
+#endif //#ifndef __SETTINGSENGINE_H__
