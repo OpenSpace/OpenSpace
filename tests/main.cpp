@@ -31,6 +31,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 // test files
+<<<<<<< HEAD
 //#include <test_common.inl>
 //#include <test_spicemanager.inl>
 //#include <test_scenegraphloader.inl>
@@ -52,6 +53,15 @@
 //#include <test_concurrentjobmanager.inl>
 //#include <test_screenspaceimage.inl>
 //#include <test_iswamanager.inl>
+=======
+#include <test_common.inl>
+#include <test_spicemanager.inl>
+#include <test_scenegraphloader.inl>
+#include <test_luaconversions.inl>
+#include <test_powerscalecoordinates.inl>
+#include <test_screenspaceimage.inl>
+#include <test_iswamanager.inl>
+>>>>>>> develop
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -66,19 +76,26 @@ using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
 namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+    std::string _loggerCat = "OpenSpaceTest";
 }
 
 int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    std::vector<std::string> args;
+    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
+    //testing::internal::CaptureStdout();
+    //testing::internal::CaptureStderr();
+    bool b = RUN_ALL_TESTS();
+    //std::string output = testing::internal::GetCapturedStdout();
+    //std::string error = testing::internal::GetCapturedStderr();
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+    //std::ofstream o("output.txt");
+    //o << output;
 
-	return returnVal;
+    //std::ofstream e("error.txt");
+    //e << error;
+
+    return b;
 }

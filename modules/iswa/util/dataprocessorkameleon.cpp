@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <algorithm>
+//#include <algorithm>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {

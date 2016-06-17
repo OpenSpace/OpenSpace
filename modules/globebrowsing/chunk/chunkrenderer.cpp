@@ -55,6 +55,7 @@ namespace {
 
 namespace openspace {
 
+
     ChunkRenderer::ChunkRenderer(
         std::shared_ptr<Grid> grid,
         std::shared_ptr<TileProviderManager> tileProviderManager)
@@ -221,10 +222,10 @@ namespace openspace {
             int i = 0;
             for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++)
             {
-                auto tileProvider = *it;
+                auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
-                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
+                TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
                 if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
@@ -241,7 +242,7 @@ namespace openspace {
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
-                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
+                    TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 1);
                     if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent1 = tileAndTransform;
                     }
@@ -253,7 +254,7 @@ namespace openspace {
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
 
-                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
+                    TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 2);
                     if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent2 = tileAndTransformParent1;
                     }

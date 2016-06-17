@@ -191,6 +191,7 @@ void MainWindow::initialize() {
 
     ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
     LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
+    // TODO: This can crash the system in cases where the logfile can't be created ---abock
     LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );
     LogMgr.addLog( std::make_unique< QLog >() );
 

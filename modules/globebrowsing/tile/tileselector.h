@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __DATAPROCESSOR_H__
-#define __DATAPROCESSOR_H__
+#ifndef __TILE_SELECTOR_H__
+#define __TILE_SELECTOR_H__
 
-#include <openspace/properties/selectionproperty.h>
-#include <ghoul/glm.h>
-#include <glm/gtx/std_based_type.hpp>
-#include <set>
-#include <openspace/util/histogram.h>
+#include "gdal_priv.h"
 
-namespace openspace{
-class DataProcessor{
-    friend class IswaBaseGroup;
-public:
-    DataProcessor();
-    ~DataProcessor();
+#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
 
-    virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
-    void useLog(bool useLog);
-    void useHistogram(bool useHistogram);
-    void normValues(glm::vec2 normValues);
-    glm::size3_t dimensions();
-    glm::vec2 filterValues();
 
-    void clear();
-protected:
-    float processDataPoint(float value, int option);
-    float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
-    float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+namespace openspace {
 
-    void initializeVectors(int numOptions);
-    void calculateFilterValues(std::vector<int> selectedOptions);
-    void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
+    struct TileUvTransform {
+        glm::vec2 uvOffset;
+        glm::vec2 uvScale;
+    };
 
-    glm::size3_t _dimensions;
-    bool _useLog;
-    bool _useHistogram;
-    glm::vec2 _normValues;
-    glm::vec2 _filterValues;
+    struct TileAndTransform {
+        Tile tile;
+        TileUvTransform uvTransform;
+    };
 
-    std::vector<float> _min; 
-    std::vector<float> _max;
-    std::vector<float> _sum;
-    std::vector<float> _standardDeviation;
-    std::vector<float> _numValues;
-    std::vector<std::shared_ptr<Histogram>> _histograms;
-    std::set<std::string> _coordinateVariables;
 
-    glm::vec2 _histNormValues;
-};
+    class TileSelector {
+    public:
+        static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents = 0);
+    private:
+        static void ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv);
+    };
 
-} // namespace openspace
-#endif //__DATAPROCESSOR_H__
+    
+
+
+}  // namespace openspace
+
+
+#endif  // __TILE_SELECTOR_H__

@@ -25,21 +25,9 @@
 #include <openspace/util/histogram.h>
 
 #include <fstream>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureunit.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <modules/iswa/util/iswamanager.h>
-#include <modules/iswa/ext/json/json.hpp>
 
 namespace {
 	const std::string _loggerCat = "DataProcessor";
-    using json = nlohmann::json;
 }
 
 namespace openspace {

@@ -158,7 +158,7 @@ std::string Time::currentTimeUTC() const {
 }
 
 std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
     std::string month = datetime.substr(5, 3);
 
     std::string MM = "";
