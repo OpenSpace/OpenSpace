@@ -93,15 +93,6 @@ namespace openspace {
         return hasValue ? std::string(n->psChild->pszValue) : defaultVal;
     }
 
-    TileAndTransform TemporalTileProvider::getHighestResolutionTile(ChunkIndex chunkIndex, int parents) {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getHighestResolutionTile()");
-            prerender();
-        }
-
-        return _currentTileProvider->getHighestResolutionTile(chunkIndex, parents);
-    }
-
     TileDepthTransform TemporalTileProvider::depthTransform() {
         if (_currentTileProvider == nullptr) {
             LDEBUG("Warning: had to call prerender from depthTransform()");
@@ -120,10 +111,29 @@ namespace openspace {
         return _currentTileProvider->getTileStatus(chunkIndex);
     }
 
+    Tile TemporalTileProvider::getTile(const ChunkIndex& chunkIndex) {
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from getTile()");
+            prerender();
+        }
+
+        return _currentTileProvider->getTile(chunkIndex);
+    }
+
+
 
     void TemporalTileProvider::prerender() {
         _currentTileProvider = getTileProvider();
         _currentTileProvider->prerender();
+    }
+
+    std::shared_ptr<AsyncTileDataProvider> TemporalTileProvider::getAsyncTileReader() {
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: had to call prerender from getAsyncTileReader()");
+            prerender();
+        }
+
+        return _currentTileProvider->getAsyncTileReader();
     }
 
 

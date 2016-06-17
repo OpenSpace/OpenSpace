@@ -42,6 +42,13 @@ enum Quad {
     SOUTH_EAST
 };
 
+enum CardinalDirection {
+    WEST = 0,
+    EAST,
+    NORTH,
+    SOUTH,
+};
+
 
 
 using HashKey = unsigned long;
@@ -64,6 +71,11 @@ struct ChunkIndex {
     }
 
     ChunkIndex parent() const;
+    
+    ChunkIndex& operator--();
+    ChunkIndex operator--(int);
+
+    ChunkIndex& operator-=(unsigned int levels);
 
     bool isWestChild() const {
         return x % 2 == 0;
@@ -81,7 +93,9 @@ struct ChunkIndex {
         return y % 2 == 1;
     }
 
+
     ChunkIndex child(Quad q) const;
+
 
     std::string toString() const;
 

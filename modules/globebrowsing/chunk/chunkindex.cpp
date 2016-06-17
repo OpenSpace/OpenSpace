@@ -58,6 +58,26 @@ namespace openspace {
         return ChunkIndex(x / 2, y / 2, level - 1);
     }
 
+    ChunkIndex& ChunkIndex::operator--() {
+        x /= 2;
+        y /= 2;
+        level--;
+        return *this;
+    }
+
+    ChunkIndex ChunkIndex::operator--(int) {
+        ChunkIndex tmp(*this);
+        --(*this);
+        return tmp;
+    }
+
+    ChunkIndex& ChunkIndex::operator-=(unsigned int levels) {
+        x <<= levels;
+        y <<= levels;
+        level -= levels;
+        return *this;
+    }
+
 
     /**
     Gets the tile at a specified offset from this tile.
@@ -78,6 +98,7 @@ namespace openspace {
     HashKey ChunkIndex::hashKey() const {
         return x ^ (y << 16) ^ (level << 24);
     }
+
 
     std::string ChunkIndex::toString() const {
         std::stringstream ss;

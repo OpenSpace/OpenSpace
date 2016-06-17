@@ -22,23 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __DEBUG_RENDERER_H__
+#define __DEBUG_RENDERER_H__
+
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 
 
 #include <glm/glm.hpp>
 #include <memory>
-#include <ostream>
-#include <thread>
-#include <queue>
+#include <vector>
 
-#include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
+
 
 #include <ghoul/misc/assert.h>
-#include <iostream>
-
-
 
 namespace openspace {
+    using namespace ghoul::opengl;
 
+    /**
+        A helper class for quick rendering of vertices clipping space
+    */
+    class DebugRenderer {
+    public:
+        DebugRenderer();
+
+        static std::shared_ptr<DebugRenderer> ref();
+
+
+        void renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba = {1, 0, 0, 1}) const;
+        void renderBoxFaces(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
+        void renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
+
+    private:
+
+
+        
+        std::shared_ptr<ProgramObject> _programObject;
+
+
+        static std::shared_ptr<DebugRenderer> _singleton;
+
+    };
 
 } // namespace openspace
+
+
+
+#endif // __DEBUG_RENDERER_H__

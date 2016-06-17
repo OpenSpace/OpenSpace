@@ -55,6 +55,7 @@ namespace {
 
 namespace openspace {
 
+
     ChunkRenderer::ChunkRenderer(
         std::shared_ptr<Grid> grid,
         std::shared_ptr<TileProviderManager> tileProviderManager)
@@ -221,10 +222,10 @@ namespace openspace {
             int i = 0;
             for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++)
             {
-                auto tileProvider = *it;
+                auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
-                TileAndTransform tileAndTransform = tileProvider->getHighestResolutionTile(chunkIndex);
+                TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
                 if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
@@ -241,7 +242,7 @@ namespace openspace {
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
-                    TileAndTransform tileAndTransformParent1 = tileProvider->getHighestResolutionTile(chunkIndex, 1);
+                    TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 1);
                     if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent1 = tileAndTransform;
                     }
@@ -253,7 +254,7 @@ namespace openspace {
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
 
-                    TileAndTransform tileAndTransformParent2 = tileProvider->getHighestResolutionTile(chunkIndex, 2);
+                    TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 2);
                     if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent2 = tileAndTransformParent1;
                     }
@@ -327,7 +328,7 @@ namespace openspace {
         }
         
         // Calculate other uniform variables needed for rendering
-        Geodetic2 swCorner = chunk.surfacePatch().southWestCorner();
+        Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
         auto patchSize = chunk.surfacePatch().size();
         
         // TODO : Model transform should be fetched as a matrix directly.
@@ -404,10 +405,10 @@ namespace openspace {
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
-        Geodetic2 sw = chunk.surfacePatch().southWestCorner();
-        Geodetic2 se = chunk.surfacePatch().southEastCorner();
-        Geodetic2 nw = chunk.surfacePatch().northWestCorner();
-        Geodetic2 ne = chunk.surfacePatch().northEastCorner();
+        Geodetic2 sw = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
+        Geodetic2 se = chunk.surfacePatch().getCorner(Quad::SOUTH_EAST);
+        Geodetic2 nw = chunk.surfacePatch().getCorner(Quad::NORTH_WEST);
+        Geodetic2 ne = chunk.surfacePatch().getCorner(Quad::NORTH_EAST);
 
         // Get model space positions of the four control points
         Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);

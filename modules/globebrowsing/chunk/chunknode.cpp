@@ -98,8 +98,8 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
-void ChunkNode::depthFirst(const std::function<void(const Chunk&)>& f) const {
-    f(_chunk);
+void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
+    f(*this);
     if (!isLeaf()) {
         for (int i = 0; i < 4; ++i) {
             _children[i]->depthFirst(f);
@@ -180,6 +180,10 @@ void ChunkNode::merge() {
 
 const ChunkNode& ChunkNode::getChild(Quad quad) const {
     return *_children[quad];
+}
+
+const Chunk& ChunkNode::getChunk() const {
+    return _chunk;
 }
 
 

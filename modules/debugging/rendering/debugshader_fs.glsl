@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,71 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_H__
-#define __CHUNK_H__
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <ostream>
+#include "fragment.glsl"
 
-#include <modules/globebrowsing/chunk/culling.h>
-#include <modules/globebrowsing/chunk/chunkindex.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+in vec4 fs_vertexPosition;
 
+uniform vec4 color;
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/angle.h>
-
-
-namespace openspace {
-
-    class ChunkedLodGlobe;
-
-    class Chunk {
-    public:
-        struct BoundingHeights {
-            float min, max;
-            bool available;
-        };
-
-        enum class Status {
-            DO_NOTHING,
-            WANT_MERGE,
-            WANT_SPLIT,
-        };
-        
-        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
-
-        /// Updates chunk internally and returns a desired level
-        Status update(const RenderData& data);
-        void render(const RenderData& data) const;
-
-
-        std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
-
-        const GeodeticPatch& surfacePatch() const;
-        ChunkedLodGlobe* const owner() const;
-        const ChunkIndex index() const;
-        bool isVisible() const;
-        BoundingHeights getBoundingHeights() const;
-
-        void setIndex(const ChunkIndex& index);
-        void setOwner(ChunkedLodGlobe* newOwner);
-
-
-    private:
-
-        ChunkedLodGlobe* _owner;
-        ChunkIndex _index;
-        bool _isVisible;
-        GeodeticPatch _surfacePatch;
-
-    };
-
-
+Fragment getFragment(){
+	Fragment frag;
+	frag.color = color;
+	frag.depth = fs_vertexPosition.w;
+	return frag;
 }
-
-
-
-#endif // __CHUNK_H__

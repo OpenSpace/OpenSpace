@@ -38,8 +38,11 @@
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 #include <modules/globebrowsing/tile/layeredtextureshaderprovider.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 
 #include <modules/globebrowsing/chunk/chunknode.h>
+
+
 
 namespace ghoul {
 namespace opengl {
@@ -94,6 +97,7 @@ namespace openspace {
 
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> _globalProgramUniformHandler;
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> _localProgramUniformHandler;
+
     };
 
 }  // namespace openspace

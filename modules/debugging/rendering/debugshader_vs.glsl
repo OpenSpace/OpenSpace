@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,28 +21,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version __CONTEXT__
 
-#ifndef __DEBUG_RENDERER_H__
-#define __DEBUG_RENDERER_H__
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <glm/glm.hpp>
-#include <memory>
-#include <ostream>
-#include <thread>
-#include <queue>
-
-#include <modules/globebrowsing/other/concurrentqueue.h>
-
-#include <ghoul/misc/assert.h>
-
-namespace openspace {
-    
-    class DebugRenderer {
-        
-    }    
-
-} // namespace openspace
+layout(location = 0) in vec4 vertexPositionClippingSpace;
 
 
+out vec4 fs_vertexPosition;
 
-#endif // __DEBUG_RENDERER_H__
+void main(){
+	fs_vertexPosition = z_normalization(vertexPositionClippingSpace);
+	gl_Position = fs_vertexPosition;
+}

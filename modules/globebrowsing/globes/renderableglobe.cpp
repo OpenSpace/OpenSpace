@@ -70,6 +70,7 @@ namespace openspace {
         , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
         , showChunkEdges(properties::BoolProperty("showChunkEdges", "showChunkEdges", false))
+        , showChunkBounds(properties::BoolProperty("showChunkBounds", "showChunkBounds", false))
         , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
         , limitLevelByAvailableHeightData(properties::BoolProperty("limitLevelByAvailableHeightData", "limitLevelByAvailableHeightData", true))
     {
@@ -90,7 +91,9 @@ namespace openspace {
         addProperty(blendOverlay);
         addProperty(blendWaterMask);
         addProperty(atmosphereEnabled);
+
         addProperty(showChunkEdges);
+        addProperty(showChunkBounds);
         addProperty(levelByProjArea);
         addProperty(limitLevelByAvailableHeightData);
 
@@ -209,7 +212,9 @@ namespace openspace {
         _chunkedLodGlobe->blendProperties[LayeredTextures::Overlays] = blendOverlay.value();
         _chunkedLodGlobe->blendProperties[LayeredTextures::WaterMasks] = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
+
         _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
+        _chunkedLodGlobe->showChunkBounds = showChunkBounds.value();
         _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
         _chunkedLodGlobe->limitLevelByAvailableHeightData = limitLevelByAvailableHeightData.value();
 

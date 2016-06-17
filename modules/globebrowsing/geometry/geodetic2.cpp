@@ -134,22 +134,6 @@ namespace openspace {
         _halfSize = halfSize;
     }
 
-    Scalar GeodeticPatch::minimalBoundingRadius(const Ellipsoid& ellipsoid) const {
-        // TODO: THIS FUNCTION IS CURRENTLY ERROR PRONE SINCE THE PATCH IS NOW COVERING
-        // A PART OF AN ELLIPSOID AND NOT A SPHERE!MUST CHECK IF THIS FUNCTION IS STILL
-        // VALID.
-        const Geodetic2& cornerNearEquator = _center.lat > 0 ? southWestCorner() : northWestCorner();
-        return glm::length(ellipsoid.cartesianSurfacePosition(_center) - ellipsoid.cartesianSurfacePosition(cornerNearEquator));
-    }
-    /*
-    Scalar GeodeticPatch::unitArea() const {
-        Scalar deltaTheta = 2 * _halfSize.lon;
-        Scalar phiMin = _center.lat - _halfSize.lat;
-        Scalar phiMax = _center.lat + _halfSize.lat;
-        return deltaTheta * (sin(phiMax) - sin(phiMin));
-    }
-    */
-
     Scalar GeodeticPatch::maximumTileLevel() const {
         // Numerator is just pi, not 2*pi, since we are dealing with HALF sizes
         return log2(M_PI / glm::min(_halfSize.lat, _halfSize.lon));
@@ -174,27 +158,37 @@ namespace openspace {
 
     Geodetic2 GeodeticPatch::getCorner(Quad q) const {
         switch (q) {
-        case NORTH_WEST: return northWestCorner();
-        case NORTH_EAST: return northEastCorner();
-        case SOUTH_WEST: return southWestCorner();
-        case SOUTH_EAST: return southEastCorner();
+        case NORTH_WEST: return Geodetic2(maxLat(), minLon());// northWestCorner();
+        case NORTH_EAST: return Geodetic2(maxLat(), maxLon());// northEastCorner();
+        case SOUTH_WEST: return Geodetic2(minLat(), minLon());// southWestCorner();
+        case SOUTH_EAST: return Geodetic2(minLat(), maxLon());// southEastCorner();
         }
     }
 
-    Geodetic2 GeodeticPatch::northWestCorner() const{
-        return Geodetic2(_center.lat + _halfSize.lat, _center.lon - _halfSize.lon);
+    Scalar GeodeticPatch::minLat() const {
+        return _center.lat - _halfSize.lat;
     }
-    
-    Geodetic2 GeodeticPatch::northEastCorner() const{
-        return Geodetic2(_center.lat + _halfSize.lat, _center.lon + _halfSize.lon);
+
+    Scalar GeodeticPatch::maxLat() const {
+        return _center.lat + _halfSize.lat;
     }
-    
-    Geodetic2 GeodeticPatch::southWestCorner() const{
-        return Geodetic2(_center.lat - _halfSize.lat, _center.lon - _halfSize.lon);
+
+    Scalar GeodeticPatch::minLon() const {
+        return _center.lon - _halfSize.lon;
     }
-    
-    Geodetic2 GeodeticPatch::southEastCorner() const{
-        return Geodetic2(_center.lat - _halfSize.lat, _center.lon + _halfSize.lon);
+
+    Scalar GeodeticPatch::maxLon() const {
+        return _center.lon + _halfSize.lon;
+    }
+
+     
+
+    Scalar GeodeticPatch::edgeLatitudeNearestEquator() const {
+        return _center.lat + _halfSize.lat * (isNorthern() ? -1 : 1);
+    }
+
+    Scalar GeodeticPatch::isNorthern() const {
+        return _center.lat > 0.0;
     }
 
 
@@ -217,13 +211,9 @@ namespace openspace {
         pointLat.normalizeAround(centerLat);
         pointLon.normalizeAround(centerLon);
 
-        // get clamp bounds
-        Geodetic2 max = northEastCorner();
-        Geodetic2 min = southWestCorner();
-
         return Geodetic2(
-            glm::clamp(pointLat.asRadians(), min.lat, max.lat),
-            glm::clamp(pointLon.asRadians(), min.lon, max.lon)
+            glm::clamp(pointLat.asRadians(), minLat(), maxLat()),
+            glm::clamp(pointLon.asRadians(), minLon(), maxLon())
             );
     }
 
@@ -303,19 +293,15 @@ namespace openspace {
         // Calculate the longitudinal distance to the closest patch edge 
         Ang longitudeDistanceToClosestPatchEdge = centerToPointLon.abs() - Ang::fromRadians(_halfSize.lon);
 
-        // get clamp bounds
-        Geodetic2 max = northEastCorner();
-        Geodetic2 min = southWestCorner();
-
         // If the longitude distance to the closest patch edge is larger than 90 deg
         // the latitude will have to be clamped to its closest corner, as explained in
         // the example above.
         Scalar clampedLat = longitudeDistanceToClosestPatchEdge > Ang::QUARTER  ?
-            clampedLat = glm::clamp((Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(), min.lat, max.lat) :
-            clampedLat = glm::clamp(pointLat.asRadians(), min.lat, max.lat);
+            clampedLat = glm::clamp((Ang::HALF - pointLat).normalizeAround(centerLat).asRadians(), minLat(), maxLat()) :
+            clampedLat = glm::clamp(pointLat.asRadians(), minLat(), maxLat());
 
         // Longitude is just clamped normally
-        Scalar clampedLon = glm::clamp(pointLon.asRadians(), min.lon, max.lon);
+        Scalar clampedLon = glm::clamp(pointLon.asRadians(), minLon(), maxLon());
 
         return Geodetic2(clampedLat, clampedLon);
     }
