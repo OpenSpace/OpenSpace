@@ -6,7 +6,7 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime("2015 JAN 01 12:00:00.000")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end
 
@@ -18,8 +18,8 @@ function postInitialization()
     ]]--
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
