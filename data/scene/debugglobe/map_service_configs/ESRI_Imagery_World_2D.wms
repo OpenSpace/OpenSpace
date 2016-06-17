@@ -13,4 +13,12 @@
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>3</BandsCount>
     <MaxConnections>5</MaxConnections>
+    <!--
+    <Cache>
+        <Path>./gdalwmscache</Path>
+        <Depth>2</Depth>
+        <Extension>.jpg</Extension>
+    </Cache>
+    <OfflineMode>true</OfflineMode>
+    -->
 </GDAL_WMS>
