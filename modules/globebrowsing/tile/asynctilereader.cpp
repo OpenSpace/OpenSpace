@@ -42,6 +42,16 @@ namespace openspace {
 
 
 
+    void TileLoadJob::execute() {
+        _uninitedTexture = _tileDataset->readTileData(_chunkIndex);
+    }
+
+    void DiskCachedTileLoadJob::execute() {
+
+    }
+
+
+
     AsyncTileDataProvider::AsyncTileDataProvider(
         std::shared_ptr<TileDataset> tileDataset,
         std::shared_ptr<ThreadPool> pool)

@@ -40,14 +40,20 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <sstream>
 
 
 
 namespace openspace {
+
+    struct LoadJob : public Job<TileIOResult> {
+        virtual void execute() = 0;
+        virtual std::shared_ptr<TileIOResult> product() = 0;
+    };
    
 
+    struct TileLoadJob : LoadJob {
 
-    struct TileLoadJob : public Job<TileIOResult> {
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
             const ChunkIndex& chunkIndex)
             : _tileDataset(textureDataProvider)
@@ -58,25 +64,25 @@ namespace openspace {
 
         virtual ~TileLoadJob() { }
 
-        virtual void execute() {
-            _uninitedTexture = _tileDataset->readTileData(_chunkIndex);
-        }
-
-
+        virtual void execute();
 
         virtual std::shared_ptr<TileIOResult> product() {
             return _uninitedTexture;
         }
 
 
-    private:
+    protected:
+
+
         ChunkIndex _chunkIndex;
         std::shared_ptr<TileDataset> _tileDataset;
         std::shared_ptr<TileIOResult> _uninitedTexture;
     };
 
 
-
+    struct DiskCachedTileLoadJob : public TileLoadJob {
+        virtual void execute();
+    };
 
 
     class AsyncTileDataProvider {
@@ -106,7 +112,6 @@ namespace openspace {
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
         std::unordered_map<HashKey, ChunkIndex> _enqueuedTileRequests;
-
 
     };
 

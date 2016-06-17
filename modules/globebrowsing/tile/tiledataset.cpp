@@ -34,6 +34,10 @@
 
 #include <float.h>
 
+#include <sstream>
+
+
+
 
 
 namespace {
@@ -43,6 +47,95 @@ namespace {
 
 
 namespace openspace {
+    void TilePreprocessData::serialize(std::stringstream& s) {
+        s << maxValues.size() << std::endl;
+        for (float f : maxValues) {
+            s << f << " ";
+        }
+        s << std::endl;
+        for (float f : minValues) {
+            s << f << " ";
+        }
+        s << std::endl;
+    }
+
+
+    TilePreprocessData TilePreprocessData::deserialize(std::stringstream& s) {
+        TilePreprocessData res;
+        int n; s >> n;
+        res.maxValues.resize(n);
+        for (int i = 0; i < n; i++) {
+            s >> res.maxValues[i];
+        }
+        res.minValues.resize(n);
+        for (int i = 0; i < n; i++) {
+            s >> res.minValues[i];
+        }
+
+        return std::move(res);
+    }
+
+    TileIOResult::TileIOResult()
+        : imageData(nullptr)
+        , dimensions(0, 0, 0)
+        , preprocessData(nullptr)
+        , chunkIndex(0, 0, 0)
+        , error(CE_None)
+        , nBytesImageData(0)
+    {
+
+    }
+
+
+    void TileIOResult::serialize(std::stringstream& s) {
+        s << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
+        s << chunkIndex.x << " " << chunkIndex.y << " " << chunkIndex.level << std::endl;
+        s << error << std::endl;
+
+        // preprocess data
+        s << (preprocessData != nullptr) << std::endl;
+        if (preprocessData != nullptr) {    
+            preprocessData->serialize(s);
+        }
+        
+        s << nBytesImageData << std::endl;
+
+        char binaryDataSeparator = 'Ö'; // sweden represent!
+        s << binaryDataSeparator;
+        if (nBytesImageData) {
+            char* buffer = reinterpret_cast<char*>(imageData);
+            s.write(buffer, nBytesImageData);
+        }
+    }
+
+
+    TileIOResult TileIOResult::deserialize(std::stringstream& s) {
+        TileIOResult res;
+        s >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
+        s >> res.chunkIndex.x >> res.chunkIndex.y >> res.chunkIndex.level;
+        int err; s >> err; res.error = (CPLErr) err;
+        
+        res.preprocessData = nullptr;
+        bool hasPreprocessData; 
+        s >> hasPreprocessData;
+        if (hasPreprocessData) {
+            TilePreprocessData preprocessData = TilePreprocessData::deserialize(s);
+            res.preprocessData = std::make_shared<TilePreprocessData>(preprocessData);
+        }
+        
+        s >> res.nBytesImageData;
+
+        char binaryDataSeparator;
+        s >> binaryDataSeparator; // not used
+        
+        char* buffer = new char[res.nBytesImageData]();
+        s.read(buffer, res.nBytesImageData);
+        res.imageData = reinterpret_cast<void*>(buffer);
+        
+        return std::move(res);
+    }
+
+
 
     // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
     bool TileDataset::GdalHasBeenInitialized = false; 
@@ -142,6 +235,7 @@ namespace openspace {
         result->chunkIndex = chunkIndex;
         result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
         result->dimensions = glm::uvec3(region.numPixels, 1);
+        result->nBytesImageData = _dataLayout.bytesPerPixel * region.numPixels.x * region.numPixels.y;
         if (_doPreprocessing) {
             result->preprocessData = preprocess(imageData, region, _dataLayout);
         }
@@ -214,7 +308,7 @@ namespace openspace {
             }
         }
 
-        return std::shared_ptr < TilePreprocessData>(preprocessData);
+        return std::shared_ptr<TilePreprocessData>(preprocessData);
     }
 
 
