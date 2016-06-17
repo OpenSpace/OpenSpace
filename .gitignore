@@ -132,3 +132,16 @@ data/scene/milkyway-eso/textures/eso0932a_blend.png
 data/scene/stars-denver/denver_colorbv.cmap
 data/scene/stars-denver/speck/stars.speck
 data/scene/stars-denver/textures/halo.png
+data/scene/newhorizons/pluto/pluto/full_images/
+data/scene/rosetta/67P/rosettaimages/
+data/spice/RosettaKernels_New/
+data/scene/newhorizons/pluto/charon/utcEvents.txt
+data/scene/volumetricmilkyway/milkyway_512_512_64_RGBA32F.volume
+data/scene/volumetricmilkyway/milkyway_512_512_64_RGBA32F_old.volume
+data/scene/volumetricmilkyway/milkyway_points.binary
+data/scene/volumetricmilkyway/milkyway_points.off
+data/scene/rosetta/67P/obj/67P_HD_2015-05-09.obj
+data/scene/rosetta/67P/obj/may9_map.jpg
+data/scene/rosetta/67P/textures/may9_map.jpg
+data/scene/newhorizons/pluto/charon/textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg
+data/scene/newhorizons/pluto/charon/textures/cpmap_cyl_HR_0e.jpg
