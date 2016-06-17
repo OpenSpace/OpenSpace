@@ -52,6 +52,7 @@ protected:
     std::string _url;
     bool _downloadImage;
     std::future<DownloadManager::MemoryFile> _futureImage;
+    bool _textureDirty;
     
 private:
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(std::string url);

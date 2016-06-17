@@ -47,6 +47,7 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _texturePath("texturePath", "Texture path", "")
     , _downloadImage(false)
+    , _textureDirty(false)
 {
     std::string name;
     if (dictionary.getValue(KeyName, name)) {
@@ -109,10 +110,13 @@ void ScreenSpaceImage::render() {
 }
 
 void ScreenSpaceImage::update() {
-    if(!_downloadImage) return;
-
-    if (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
+    if (!_downloadImage) {
+        if (_futureImage.valid() && DownloadManager::futureReady(_futureImage))
+            _textureDirty = true;
+    }
+    if (_textureDirty) {
         loadTexture();
+        _textureDirty = false;
     }
 }
 
@@ -128,7 +132,7 @@ void ScreenSpaceImage::loadTexture() {
         texture = std::move(loadFromMemory());
 
     if (texture) {
-        // LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+        LDEBUG("Loaded texture for '" << name() << "'");
         texture->uploadTexture();
 
         // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
@@ -140,7 +144,7 @@ void ScreenSpaceImage::loadTexture() {
 
 void ScreenSpaceImage::updateTexture() {
     if (!_downloadImage) {
-        loadTexture();
+        _textureDirty = true;
     } else {
         if (_futureImage.valid())
             return;
