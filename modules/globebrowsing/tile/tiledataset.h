@@ -75,6 +75,8 @@ namespace openspace {
 
         void serialize(std::ostream& s);
         static TileIOResult deserialize(std::istream& s);
+   
+        static TileIOResult createDefaultRes();
 
     };
 

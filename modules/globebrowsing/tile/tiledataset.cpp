@@ -35,6 +35,7 @@
 #include <float.h>
 
 #include <sstream>
+#include <algorithm>
 
 
 
@@ -85,6 +86,20 @@ namespace openspace {
     {
 
     }
+
+
+        
+    TileIOResult TileIOResult::createDefaultRes() {
+        TileIOResult defaultRes;
+        int w = 8;
+        int h = 8;
+        defaultRes.dimensions = glm::uvec3(w, h, 1);
+        defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
+        defaultRes.imageData = new char[defaultRes.nBytesImageData];
+        std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
+        return std::move(defaultRes);
+    }
+
 
 
     void TileIOResult::serialize(std::ostream& os) {
