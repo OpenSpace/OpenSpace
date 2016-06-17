@@ -43,7 +43,7 @@ return {
     -- EarthTrail module
     {   
         Name = "EarthTrail",
-        Parent = "EarthBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "EARTH",
