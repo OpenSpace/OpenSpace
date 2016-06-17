@@ -71,6 +71,7 @@ protected:
     std::vector<float> _sum;
     std::vector<float> _standardDeviation;
     std::vector<float> _numValues;
+    std::vector<float> _fitValues;
     std::vector<std::shared_ptr<Histogram>> _histograms;
     std::set<std::string> _coordinateVariables;
 

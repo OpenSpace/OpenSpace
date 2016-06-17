@@ -137,7 +137,7 @@ bool IswaCygnet::deinitialize(){
 bool IswaCygnet::isReady() const{
     bool ready = true;
     if (!_shader)
-        ready &= false;
+        ready &= false; 
     return ready;
 }
 

@@ -104,6 +104,10 @@ bool Histogram::isValid() const {
     return _numBins != -1;
 }
 
+int Histogram::numValues() const {
+    return _numValues;
+}
+
 
 bool Histogram::add(float value, float repeat) {
     if (value < _minValue || value > _maxValue) {

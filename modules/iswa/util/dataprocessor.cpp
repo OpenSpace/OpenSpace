@@ -48,7 +48,7 @@ DataProcessor::DataProcessor()
     ,_useHistogram(false)
     ,_normValues(glm::vec2(1.0))
     ,_filterValues(glm::vec2(0.0))
-    ,_histNormValues(glm::vec2(10.f, 10.f))
+    ,_histNormValues(glm::vec2(4.f, 4.f))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 }
@@ -82,6 +82,7 @@ void DataProcessor::clear(){
     _standardDeviation.clear();
     _histograms.clear();
     _numValues.clear();
+    _fitValues.clear();
 }
 
 
@@ -93,19 +94,18 @@ float DataProcessor::processDataPoint(float value, int option){
 
     float v;
     if(_useHistogram){
-        v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, _histNormValues))/(float)512;
+        v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option],_fitValues[option])))/(float)512;
+        // v = histogram->equalize(value)/(float)512;
     }else{
         v = normalizeWithStandardScore(value, mean, sd, _normValues);
     }
-
-    // float v = normalizeWithStandardScore(value, mean, sd, _normValues);
     return v;
 }
 
 float DataProcessor::normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues){
     
-    float zScoreMin = normalizationValues.x; //10.0f;//_normValues.x;
-    float zScoreMax = normalizationValues.y; //10.0f;//_normValues.y;
+    float zScoreMin = normalizationValues.x;
+    float zScoreMax = normalizationValues.y;
     float standardScore = ( value - mean ) / sd;
     // Clamp intresting values
     standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
@@ -120,13 +120,7 @@ float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mea
     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
     value = value*sd+mean; 
     
-    // std::cout << value << std::endl; 
-    return value;
-    // float standardScore = ( value - mean ) / sd;
-    // // Clamp intresting values
-    // standardScore = glm::clamp(standardScore, -zScoreMin, zScoreMax);
-    // //return and normalize
-    // return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
+    return value; 
 }
 
 void DataProcessor::initializeVectors(int numOptions){
@@ -135,6 +129,7 @@ void DataProcessor::initializeVectors(int numOptions){
     if(_sum.empty()) _sum = std::vector<float>(numOptions, 0.0f);
     if(_standardDeviation.empty())  _standardDeviation = std::vector<float>(numOptions, 0.0f);
     if(_numValues.empty()) _numValues  = std::vector<float>(numOptions, 0.0f);
+    if(_fitValues.empty()) _fitValues  = std::vector<float>(numOptions, 0.0f);
     if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
 }
 
@@ -200,9 +195,22 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         _numValues[i] += numValues;
         
 
+        float fit = 100.0f*pow(_standardDeviation[i]/(_max[i]-_min[i]),2);
+        float oldFit = _fitValues[i];
+        _fitValues[i] = fit;
+
+        // std::cout << "Fit: " << fit << std::endl;
+        // std::cout << "Old fit: " << oldFit << std::endl << std::endl;
+
         mean = (1.0f/_numValues[i])*_sum[i];
-        float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], _histNormValues);
-        float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], _histNormValues);
+        // float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], _histNormValues);
+        // float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], _histNormValues);
+
+        float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i]));
+        float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i]));
+        
+        // float max = _max[i];
+        // float min = _min[i];
 
         if(!_histograms[i]){
              _histograms[i] = std::make_shared<Histogram>(min, max, 512);
@@ -214,38 +222,71 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
             float histMax = _histograms[i]->maxValue();
             int numBins = _histograms[i]->numBins();
 
-            float unNormHistMin = unnormalizeWithStandardScore(histMin, oldMean, oldStandardDeviation, _histNormValues);
-            float unNormHistMax = unnormalizeWithStandardScore(histMax, oldMean, oldStandardDeviation, _histNormValues);
-            //unnormalize histMin, histMax
-            // min = std::min(min, histMin)
+            // float unNormHistMin = unnormalizeWithStandardScore(histMin, oldMean, oldStandardDeviation, _histNormValues);
+            // float unNormHistMax = unnormalizeWithStandardScore(histMax, oldMean, oldStandardDeviation, _histNormValues);
+            
+            float unNormHistMin = unnormalizeWithStandardScore(histMin, oldMean, oldStandardDeviation, glm::vec2(oldFit, oldFit));
+            float unNormHistMax = unnormalizeWithStandardScore(histMax, oldMean, oldStandardDeviation, glm::vec2(oldFit, oldFit));
+
             std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(
-                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], _histNormValues)), 
-                std::min(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], _histNormValues)),
+                // std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], _histNormValues)), 
+                // std::min(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], _histNormValues)),
+                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i]))), 
+                std::min(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i]))),
+                // std::min(min, histMin),
+                // std::max(max, histMax),
                 numBins
             );
 
             for(int j=0; j<numBins; j++){
                 value = j*(histMax-histMin)+histMin;
-                value = unnormalizeWithStandardScore(value, oldMean, oldStandardDeviation, _histNormValues);
-                _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], _histNormValues), histData[j]);
+                value = unnormalizeWithStandardScore(value, oldMean, oldStandardDeviation, glm::vec2(oldFit, oldFit));
+                _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i])), histData[j]);
+                // _histograms[i]->add(value, histData[j]);
             }
-            // _histograms[i]->changeRange(min, max);
             _histograms[i] = newHist;
         }
 
         for(int j=0; j<numValues; j++){
             value = values[j];
-            _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], _histNormValues), 1);
+            _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], glm::vec2(_fitValues[i],_fitValues[i])), 1);
+            // _histograms[i]->add(value, 1);
         }
 
         _histograms[i]->generateEqualizer();
         
-        std::cout << std::endl;
+        // std::cout << std::endl;
+
+        // float histMin = _histograms[i]->minValue();
+        // float histMax = _histograms[i]->maxValue();
+        // int numBins = _histograms[i]->numBins();
+        // int numValues = _histograms[i]->numValues();
+
+        // float normalizedMean = (mean - histMin) / (histMax - histMin);      // [0.0, 1.0]
+        // int binMeanIndex = std::min( (float)floor(normalizedMean * numBins), numBins - 1.0f ); // [0, _numBins - 1]
+
+        // float normalizedSd = (_standardDeviation[i] - histMin) / (histMax - histMin);      // [0.0, 1.0]
+        // int binSpanSd = std::min( (float)floor(normalizedSd * numBins), numBins - 1.0f ); // [0, _numBins - 1]
+
+        // std::cout << binSpanSd << ", " << binMeanIndex << std::endl;
+        // std::cout << std::endl;
+
+        std::cout << "Normal Histogram: " << std::endl;
         _histograms[i]->print();
-        std::cout << std::endl;
-        std::cout << "Eq: ";
+        std::cout << std::endl << std::endl;
+
+        std::cout << "Equalized Histogram: " << std::endl;
         Histogram hist = _histograms[i]->equalize();
         hist.print();
+        std::cout << std::endl;
+
+        std::cout << "Norm value: " << _fitValues[i] << std::endl << std::endl;  
+        // std::cout << "Min: " << histMin;   
+        // std::cout << ", Max: " << histMax;   
+        // std::cout << ", Sd: " << _standardDeviation[i];
+        // std::cout << ", Mean: " << mean;
+        // std::cout << ", Num: " << numValues;
+        // std::cout << ", Bins: " << numBins << std::endl << std::endl;
     }
 }
 

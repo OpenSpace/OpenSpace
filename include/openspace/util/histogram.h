@@ -44,6 +44,7 @@ public:
     float minValue() const;
     float maxValue() const;
     bool isValid() const;
+    int numValues() const;
 
     /**
      * Enter value into the histogram. The add method takes the given

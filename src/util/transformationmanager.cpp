@@ -66,11 +66,15 @@
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
+        float size0 = sqrt(out0.c0*out0.c0 + out0.c1*out0.c1 + out0.c2*out0.c2);
+        float size1 = sqrt(out1.c0*out1.c0 + out1.c1*out1.c1 + out1.c2*out1.c2);
+        float size2 = sqrt(out2.c0*out2.c0 + out2.c1*out2.c1 + out2.c2*out2.c2);
+
         return glm::dmat3(
-                    out0.c0 , out0.c1   , out0.c2,
-                    out1.c0 , out1.c1   , out1.c2,
-                    out2.c0 , out2.c1   , out2.c2
-                );;
+                    out0.c0/size0 , out0.c1/size0  , out0.c2/size0,
+                    out1.c0/size1 , out1.c1/size1  , out1.c2/size1,
+                    out2.c0/size2 , out2.c1/size2  , out2.c2/size2
+                );
     }
 
     glm::dmat3 TransformationManager::frameTransformationMatrix(std::string from,
