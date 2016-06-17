@@ -115,6 +115,10 @@ bool SGCTWindowWrapper::isRegularRendering() const {
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
 }
+
+glm::mat4 SGCTWindowWrapper::modelMatrix() const {
+    return sgct::Engine::instance()->getModelMatrix();
+}
     
 void SGCTWindowWrapper::setNearFarClippingPlane(float nearPlane, float farPlane) {
     sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);

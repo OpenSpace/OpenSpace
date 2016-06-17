@@ -75,6 +75,10 @@ bool WindowWrapper::isRegularRendering() const {
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
 }
+
+glm::mat4 WindowWrapper::modelMatrix() const {
+    return glm::mat4(1.f);
+}
     
 void WindowWrapper::setNearFarClippingPlane(float near, float far) {}
 

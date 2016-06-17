@@ -131,6 +131,13 @@ public:
      * \return The currently employed view-projection matrix
      */
     virtual glm::mat4 viewProjectionMatrix() const;
+
+    /**
+     * Returns the currently employed model matrix. On default, this method will return
+     * the identity matrix.
+     * \return The currently employed model matrix
+     */
+    virtual glm::mat4 modelMatrix() const;
     
     /**
      * Sets the near and far clipping planes of the rendering window. This method defaults

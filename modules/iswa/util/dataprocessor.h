@@ -25,11 +25,9 @@
 #ifndef __DATAPROCESSOR_H__
 #define __DATAPROCESSOR_H__
 
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
+#include <glm/gtx/std_based_type.hpp>
 #include <set>
 #include <openspace/util/histogram.h>
 
@@ -53,7 +51,8 @@ public:
     void clear();
 protected:
     float processDataPoint(float value, int option);
-    float normalizeWithStandardScore(float value, float mean, float sd);
+    float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+    float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
 
     void initializeVectors(int numOptions);
     void calculateFilterValues(std::vector<int> selectedOptions);
@@ -72,6 +71,8 @@ protected:
     std::vector<float> _numValues;
     std::vector<std::shared_ptr<Histogram>> _histograms;
     std::set<std::string> _coordinateVariables;
+
+    glm::vec2 _histNormValues;
 };
 
 } // namespace openspace
