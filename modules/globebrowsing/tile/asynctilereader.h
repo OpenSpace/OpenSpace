@@ -55,8 +55,7 @@ namespace openspace {
 
     struct TileLoadJob : LoadJob {
 
-        TileLoadJob(const TileLoadJob&);
-
+        
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
             const ChunkIndex& chunkIndex)
             : _tileDataset(textureDataProvider)
@@ -82,14 +81,17 @@ namespace openspace {
     };
 
 
+
+
     class TileDiskCache;
 
-    struct DiskCachedTileLoadJob : public LoadJob {
+    struct DiskCachedTileLoadJob : public TileLoadJob {
         enum CacheMode {
             Disabled,
             ReadOnly,
             ReadAndWrite,
-            WriteOnly
+            WriteOnly,
+            CacheHitsOnly,
         };
         
         DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
@@ -102,19 +104,14 @@ namespace openspace {
 
         virtual void execute();
 
-        virtual std::shared_ptr<TileIOResult> product() {
-            return _tileIOResult;
-        }
-
     protected:
 
-        ChunkIndex _chunkIndex;
-        std::shared_ptr<TileDataset> _tileDataset;
-        std::shared_ptr<TileIOResult> _tileIOResult;
         std::shared_ptr<TileDiskCache> _tileDiskCache;
         CacheMode _mode;
 
     };
+
+
 
 
     class AsyncTileDataProvider {
