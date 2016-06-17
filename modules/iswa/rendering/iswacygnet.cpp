@@ -177,11 +177,11 @@ void IswaCygnet::render(const RenderData& data){
 
 void IswaCygnet::update(const UpdateData& data){
 
-	if (!_enabled)
-		return;
+    if (!_enabled)
+        return;
 
     // the texture resource is downloaded ahead of time, so we need to
-    // now if we are going backwards or forwards
+    // know if we are going backwards or forwards in time
     double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
