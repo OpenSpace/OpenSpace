@@ -98,9 +98,14 @@ namespace openspace {
             texDict.getValue("FilePath", path);
             texDict.getValue("Enabled", enabled);
 
-            std::shared_ptr<TileProvider> tileProvider = initProvider(path, initData);
-
-            //bool enabled = dest.size() == 0; // Only enable first layer
+            std::shared_ptr<TileProvider> tileProvider;
+            try {
+                tileProvider = initProvider(path, initData);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.message);
+                continue;
+            }
             dest.push_back({ name, tileProvider, enabled });
         }
     }
@@ -111,6 +116,9 @@ namespace openspace {
     {
         std::shared_ptr<TileProvider> tileProvider;
         CPLXMLNode * node = CPLParseXMLFile(file.c_str());
+        if (!node) {
+            throw ghoul::RuntimeError("Unable to parse XML:\n" + file);
+        }
         if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
             tileProvider = std::shared_ptr<TileProvider>(
                 new TemporalTileProvider(file, initData));

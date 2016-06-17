@@ -59,7 +59,10 @@ namespace openspace {
         }
 
         _dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
-        ghoul_assert(_dataset != nullptr, "Failed to load dataset:\n" << gdalDatasetDesc);
+        if (!_dataset) {
+            throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
+        }
+        //ghoul_assert(_dataset != nullptr, "Failed to load dataset:\n" << gdalDatasetDesc);
         _dataLayout = DataLayout(_dataset, dataType);
 
         _depthTransform = calculateTileDepthTransform();
