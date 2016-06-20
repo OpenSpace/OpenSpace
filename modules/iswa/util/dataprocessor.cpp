@@ -24,8 +24,6 @@
 #include <modules/iswa/util/dataprocessor.h>
 #include <openspace/util/histogram.h>
 
-#include <fstream>
-
 namespace {
 	const std::string _loggerCat = "DataProcessor";
     const int NumBins = 512;
@@ -86,7 +84,7 @@ float DataProcessor::processDataPoint(float value, int option){
         v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option])))/(float)NumBins;
         // v = histogram->equalize(value)/(float)512;
     }else{
-        v = normalizeWithStandardScore(value, mean, sd, _normValues);
+        v = normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option]));
     }
     return v;
 }
@@ -139,23 +137,16 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 histogram = _histograms[option];
                 
                 filterMid = histogram->highestBinValue(_useHistogram);
-                filterWidth = mean+histogram->binWidth();
-                //filterWidth = histogram->binWidth();
+                filterWidth = histogram->binWidth();
 
-                filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues));
-                //filterWidth = fabs(normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues));
                 //atleast one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
-                filterWidth = std::min(filterWidth, 1.0f/512.0f);
-                filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
-                //filterMid += filterWidth;
+                filterWidth = std::max(filterWidth, 1.0f/512.0f);
             }else{
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
                 filterWidth = std::min(1.f / (float)NumBins, 1.0f/512.0f);
             }
-            std::cout << "filtermid: " << filterMid << std::endl;
-            std::cout << "filterwidth: " << filterWidth << std::endl;
-             _filterValues += glm::vec2(filterMid, filterWidth);
+            _filterValues += glm::vec2(filterMid, filterWidth);
 
         }
         _filterValues /= numSelected;   
@@ -233,17 +224,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         }
 
         _histograms[i]->generateEqualizer();
-<<<<<<< Updated upstream
 
-=======
-        
-        // std::cout << std::endl;
-        // _histograms[i]->print();
-        // std::cout << std::endl;
-        // std::cout << "Eq: ";
-        Histogram hist = _histograms[i]->equalize();
-        hist.print();
->>>>>>> Stashed changes
     }
 }
 
