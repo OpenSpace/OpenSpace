@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,15 +22,14 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessortext.h>
-#include <algorithm>
-#include <iterator>
-#include <boost/iostreams/device/mapped_file.hpp>
-
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+//#include <algorithm>
+//#include <boost/iostreams/device/mapped_file.hpp>
+//
+//#include <boost/config/warning_disable.hpp>
+//#include <boost/spirit/include/qi.hpp>
+//#include <boost/spirit/include/phoenix_core.hpp>
+//#include <boost/spirit/include/phoenix_operator.hpp>
+//#include <boost/spirit/include/phoenix_stl.hpp>
 
 namespace {
     const std::string _loggerCat = "DataProcessorText";
@@ -102,18 +101,30 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
         int first, last, option, lineSize;
 
 
+        // for each data point
         while(getline(memorystream, line)){
             if(line.find("#") == 0) continue;
-
             values = std::vector<float>();
             std::istringstream ss(line);
-			std::istream_iterator<float> it(ss);
-			std::advance(it, 3); //+3 because options x, y and z in the file
-            copy(
-                it,
-                std::istream_iterator<float> (),
-                back_inserter(values)
-            );
+            std::string val;
+            int skip = 0;
+            //for each data option (variable)
+            while(ss >> val){
+                // first three values are coordinates
+                if( skip < 3 ){
+                    skip++;
+                    continue;
+                }
+
+                float v = std::stof(val);
+                // Some values are "NaN", use 0 instead
+                if(!std::isnan(v)){
+                    values.push_back(v);
+                } else {
+                    values.push_back(0.0f);
+                }
+                val.clear();
+            }
 
             if(values.size() <= 0) continue;
 
@@ -126,7 +137,6 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
                 sum[i] += value;
             }
         }
-
 
         add(optionValues, sum);
     }
@@ -148,13 +158,13 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         int first, last, option, lineSize;
         
         std::vector<float*> dataOptions(numOptions, nullptr);
-        for(int option : selectedOptions){
+        for (int option : selectedOptions) {
             dataOptions[option] = new float[dimensions.x*dimensions.y]{0.0f};
         }
 
         int numValues = 0;
-        while(getline(memorystream, line)){
-            if(line.find("#") == 0) continue;
+        while (getline(memorystream, line)) {
+            if (line.find("#") == 0) continue;
 
             
             // ----------- OLD METHODS ------------------------

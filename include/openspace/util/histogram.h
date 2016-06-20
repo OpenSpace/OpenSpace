@@ -77,6 +77,7 @@ public:
 
     void changeRange(float minValue, float maxValue);
 
+    friend std::ostream& operator<<(std::ostream& os, const Histogram& hist);
 private:
     int _numBins;
     float _minValue;
@@ -86,6 +87,7 @@ private:
     float* _data;
     std::vector<float> _equalizer;
     int _numValues;
+
 
 }; // class Histogram
 }  // namespace openspace

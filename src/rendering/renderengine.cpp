@@ -407,7 +407,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
     }
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
-        if(screenSpaceRenderable->isEnabled())
+        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
             screenSpaceRenderable->render();
     }
 }
@@ -1482,11 +1482,14 @@ void RenderEngine::renderScreenLog() {
     }
 }
 
-void RenderEngine::sortScreenspaceRenderables(){
-    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
-              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
-                  return i->depth() > j->depth();
-              });
+void RenderEngine::sortScreenspaceRenderables() {
+    std::sort(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        [](auto j, auto i) {
+            return i->depth() > j->depth();
+        }
+    );
 }
 
 }// namespace openspace

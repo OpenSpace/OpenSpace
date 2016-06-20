@@ -30,6 +30,7 @@
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 namespace openspace {
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 

@@ -42,11 +42,15 @@ TextureCygnet::~TextureCygnet(){}
 
 bool TextureCygnet::updateTexture() {
 
-    std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-                                                        (void*) _imageFile.buffer,
-                                                        _imageFile.size, 
-                                                        _imageFile.format);
-
+    std::unique_ptr<ghoul::opengl::Texture> texture;
+    try{ // in case the loaded file is not supported, catch exception.
+    texture = ghoul::io::TextureReader::ref().loadTexture(
+                                                    (void*) _imageFile.buffer,
+                                                    _imageFile.size, 
+                                                    _imageFile.format);
+    } catch (std::exception& e) {
+        LWARNING(e.what());
+    }
     if (texture) {
         LDEBUG("Loaded texture from image iswa cygnet with id: '" << _data->id << "'");
         texture->uploadTexture();

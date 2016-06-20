@@ -138,7 +138,7 @@ namespace openspace {
             LWARNING("Could not find image '" << filepath << "'");
             return;
         }
-        std::string luaTable = "{Type = 'ScreenSpaceImage', TexturePath = '+" + filepath + " ' }";
+        std::string luaTable = "{Type = 'ScreenSpaceImage', TexturePath = '" + filepath + "' }";
         std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
         // OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));

@@ -112,6 +112,7 @@ int Histogram::numValues() const {
 bool Histogram::add(float value, float repeat) {
     if (value < _minValue || value > _maxValue) {
         // Out of range
+        std::cout << value << ", " << _minValue << ", " << _maxValue << std::endl; 
         return false;
     }
 
@@ -355,4 +356,20 @@ float Histogram::binWidth(){
     return (_maxValue-_minValue)/_numBins;
 }
 
+std::ostream& operator<<(std::ostream& os, const Histogram& hist){
+    const float* data = hist.data();
+    float max = hist.maxValue();
+    float min = hist.minValue();
+    int numBins = hist.numBins();
+    int numValues = hist.numValues();
+
+    for (int i = 0; i < numBins; i++) {
+        float low = min + float(i) / numBins * (max - min);
+        float high = low + (max - min) / float(numBins);
+        // std::cout << i << " [" << low << ", " << high << "]"
+        //           << "   " << _data[i] << std::endl;
+        os << data[i]/numValues << ", ";
+    }
+    os << std::endl;
+}
 }
