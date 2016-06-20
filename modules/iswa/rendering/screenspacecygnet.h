@@ -45,7 +45,7 @@ public:
 private:
     int _cygnetId;
 
-    int _updateTime;
+    int _updateInterval;
     double _openSpaceTime;
     double _lastUpdateOpenSpaceTime;
 
