@@ -29,6 +29,8 @@
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tilediskcache.h>
+
 
 #include <modules/globebrowsing/geometry/angle.h>
 
@@ -39,6 +41,77 @@ namespace {
 
 
 namespace openspace {
+
+    void TileLoadJob::execute() {
+        _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+    }
+
+
+
+
+    DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
+        const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, CacheMode m)
+        : TileLoadJob(textureDataProvider, chunkIndex)
+        , _tileDiskCache(tdc)
+        , _mode(m)
+    {
+
+    }
+
+    DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
+        const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, const std::string cacheMode)
+        : TileLoadJob(textureDataProvider, chunkIndex)
+        , _tileDiskCache(tdc)
+    {
+        if (cacheMode == "Disabled") _mode = CacheMode::Disabled;
+        else if (cacheMode == "ReadOnly") _mode = CacheMode::ReadOnly;
+        else if (cacheMode == "ReadAndWrite") _mode = CacheMode::ReadAndWrite;
+        else if (cacheMode == "WriteOnly") _mode = CacheMode::WriteOnly;
+        else if (cacheMode == "CacheHitsOnly") _mode = CacheMode::CacheHitsOnly;
+    }
+
+
+
+    void DiskCachedTileLoadJob::execute() {
+        _tileIOResult = nullptr;
+
+        switch (_mode) {
+        case CacheMode::Disabled: 
+            _tileIOResult = _tileDataset->readTileData(_chunkIndex); 
+            break;
+
+        case CacheMode::ReadOnly:
+            _tileIOResult = _tileDiskCache->get(_chunkIndex);
+            if (_tileIOResult == nullptr) {
+                _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+            }
+            break;
+
+        case CacheMode::ReadAndWrite:
+            _tileIOResult = _tileDiskCache->get(_chunkIndex);
+            if (_tileIOResult == nullptr) {
+                _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+                _tileDiskCache->put(_chunkIndex, _tileIOResult);
+            }
+            break;
+
+        case CacheMode::WriteOnly:
+            _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+            _tileDiskCache->put(_chunkIndex, _tileIOResult);
+            break;
+
+        case CacheMode::CacheHitsOnly:
+            _tileIOResult = _tileDiskCache->get(_chunkIndex);
+            if (_tileIOResult == nullptr) {
+                TileIOResult res = TileIOResult::createDefaultRes();
+                res.chunkIndex = _chunkIndex;
+                _tileIOResult = std::make_shared<TileIOResult>(res);
+            }
+            break;
+        }
+
+        
+    }
 
 
 
@@ -61,10 +134,10 @@ namespace openspace {
     }
 
     bool AsyncTileDataProvider::enqueueTextureData(const ChunkIndex& chunkIndex) {
+        //auto tileDiskCache = std::make_shared<TileDiskCache>("test");
         if (satisfiesEnqueueCriteria(chunkIndex)) {
-            std::shared_ptr<TileLoadJob> job = std::shared_ptr<TileLoadJob>(
-                new TileLoadJob(_tileDataset, chunkIndex));
-
+            auto job = std::make_shared<TileLoadJob>(_tileDataset, chunkIndex);
+            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, chunkIndex, tileDiskCache, "ReadAndWrite");
             _concurrentJobManager.enqueueJob(job);
             _enqueuedTileRequests[chunkIndex.hashKey()] = chunkIndex;
             return true;
