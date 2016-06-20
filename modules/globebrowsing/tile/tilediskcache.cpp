@@ -55,19 +55,19 @@ namespace openspace {
     }
 
     bool TileDiskCache::has(const ChunkIndex& chunkIndex) const {
-        File metaFile = getMetaFile(chunkIndex);
+        File metaFile = getMetaDataFile(chunkIndex);
         return FileSys.fileExists(metaFile);
     }
 
 
     std::shared_ptr<TileIOResult> TileDiskCache::get(const ChunkIndex& chunkIndex) {
-        File metaFile = getMetaFile(chunkIndex);
+        File metaDataFile = getMetaDataFile(chunkIndex);
         File dataFile = getDataFile(chunkIndex);
-        if (FileSys.fileExists(metaFile) && FileSys.fileExists(dataFile)) {
+        if (FileSys.fileExists(metaDataFile) && FileSys.fileExists(dataFile)) {
             // read meta
             std::ifstream ifsMeta;
-            ifsMeta.open(metaFile.path(), std::ifstream::in);
-            TileIOResult res = TileIOResult::deserialize(ifsMeta);
+            ifsMeta.open(metaDataFile.path(), std::ifstream::in);
+            TileIOResult res = TileIOResult::deserializeMetaData(ifsMeta);
             ifsMeta.close();
 
             // read data
@@ -83,11 +83,11 @@ namespace openspace {
     }
 
     bool TileDiskCache::put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult) {
-        File metaFile = getMetaFile(chunkIndex);
-        if (!FileSys.fileExists(metaFile)) {
+        File metaDataFile = getMetaDataFile(chunkIndex);
+        if (!FileSys.fileExists(metaDataFile)) {
             std::ofstream ofsMeta;
-            ofsMeta.open(metaFile.path());
-            tileIOResult->serialize(ofsMeta);
+            ofsMeta.open(metaDataFile.path());
+            tileIOResult->serializeMetaData(ofsMeta);
             ofsMeta.close();
 
             std::ofstream ofsData;
@@ -110,7 +110,7 @@ namespace openspace {
         return filePath;
     }
 
-    File TileDiskCache::getMetaFile(const ChunkIndex& chunkIndex) const {
+    File TileDiskCache::getMetaDataFile(const ChunkIndex& chunkIndex) const {
         return File(getFilePath(chunkIndex) + ".meta");
     }
 

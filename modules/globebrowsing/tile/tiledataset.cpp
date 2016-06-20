@@ -102,7 +102,7 @@ namespace openspace {
 
 
 
-    void TileIOResult::serialize(std::ostream& os) {
+    void TileIOResult::serializeMetaData(std::ostream& os) {
         os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
         os << chunkIndex.x << " " << chunkIndex.y << " " << chunkIndex.level << std::endl;
         os << error << std::endl;
@@ -114,19 +114,10 @@ namespace openspace {
         }
         
         os << nBytesImageData << std::endl;
-        /*
-        char binaryDataSeparator = 'Ö'; // sweden represent!
-        os << binaryDataSeparator;
-
-        if (nBytesImageData) {
-            char* buffer = reinterpret_cast<char*>(imageData);
-            os.write(buffer, nBytesImageData);
-        }
-        */
     }
 
 
-    TileIOResult TileIOResult::deserialize(std::istream& is) {
+    TileIOResult TileIOResult::deserializeMetaData(std::istream& is) {
         TileIOResult res;
         is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
         is >> res.chunkIndex.x >> res.chunkIndex.y >> res.chunkIndex.level;
@@ -146,12 +137,6 @@ namespace openspace {
         is >> binaryDataSeparator; // not used
         
         char* buffer = new char[res.nBytesImageData]();
-        /*is.read(buffer, res.nBytesImageData);
-        for (size_t i = 0; i < res.nBytesImageData; i++){
-            is.get(buffer[i]);
-        }
-        res.imageData = reinterpret_cast<void*>(buffer);
-        */
         return std::move(res);
     }
 

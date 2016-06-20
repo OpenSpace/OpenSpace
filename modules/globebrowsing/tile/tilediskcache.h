@@ -53,7 +53,7 @@ namespace openspace {
         Directory _cacheDir;
         
         std::string getFilePath(const ChunkIndex& chunkIndex) const;
-        File getMetaFile(const ChunkIndex& chunkIndex) const;
+        File getMetaDataFile(const ChunkIndex& chunkIndex) const;
         File getDataFile(const ChunkIndex& chunkIndex) const;
 
     };

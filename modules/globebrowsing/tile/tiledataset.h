@@ -73,8 +73,8 @@ namespace openspace {
         CPLErr error;
         size_t nBytesImageData;
 
-        void serialize(std::ostream& s);
-        static TileIOResult deserialize(std::istream& s);
+        void serializeMetaData(std::ostream& s);
+        static TileIOResult deserializeMetaData(std::istream& s);
    
         static TileIOResult createDefaultRes();
 
