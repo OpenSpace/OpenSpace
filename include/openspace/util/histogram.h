@@ -70,7 +70,12 @@ public:
     void generateEqualizer();
     Histogram equalize();
     float equalize (float);
-    float entropy();
+
+    /**
+     * Entropy is a measure of histogram dispersion.
+     * @return entropy value
+     */
+    float entropy() const;
 
     float highestBinValue(bool equalized, int overBins=0);
     float binWidth();
