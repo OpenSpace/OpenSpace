@@ -58,6 +58,7 @@ namespace openspace {
         int framesUntilFlushRequestQueue)
         : _asyncTextureDataProvider(tileReader)
         , _tileCache(tileCache)
+        , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
         , _framesSinceLastRequestFlush(0)
     {
         
