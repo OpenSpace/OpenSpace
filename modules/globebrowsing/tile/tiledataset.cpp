@@ -22,6 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <ogr_featurestyle.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
@@ -64,7 +65,6 @@ namespace openspace {
         if (!_dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
         }
-        //ghoul_assert(_dataset != nullptr, "Failed to load dataset:\n" << gdalDatasetDesc);
         _dataLayout = DataLayout(_dataset, dataType);
 
         _depthTransform = calculateTileDepthTransform();
@@ -112,7 +112,7 @@ namespace openspace {
     }
 
     std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
-    {               
+    {
         GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
