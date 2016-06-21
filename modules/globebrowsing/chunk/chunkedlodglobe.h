@@ -120,6 +120,8 @@ namespace openspace {
     private:
 
         void renderChunkTree(ChunkNode* node, const RenderData& data) const;
+        void renderChunkBounds(const RenderData& data) const;
+
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
