@@ -56,6 +56,46 @@ namespace opengl {
 
 namespace openspace {
 
+    struct ReferencedBoolSelection : public properties::SelectionProperty {
+        ReferencedBoolSelection::ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
+            : properties::SelectionProperty(identifier, guiName) { }
+
+        void addOption(const std::string& name, bool* ref) {
+            int optionId= options().size();
+            _referenceMap.insert({ optionId, ref });
+            properties::SelectionProperty::addOption({ optionId, name});
+        }
+
+        void initialize() {
+            // Set values in GUI to the current values of the references
+            int nOptions = options().size();
+            std::vector<int> selected;
+            for (int i = 0; i < nOptions; ++i) {
+                if (*_referenceMap[i]) {
+                    selected.push_back(i);
+                }
+            }
+            setValue(selected);
+
+            onChange([this]() {
+                int nOptions = this->options().size();
+                for (int i = 0; i < nOptions; ++i) {
+                    (*_referenceMap[i]) = false;
+                }
+
+                const std::vector<int>& selectedIndices = (*this);
+                for (auto selectedIndex : selectedIndices) {
+                    (*_referenceMap[selectedIndex]) = true;
+                }
+            });
+        }
+
+        std::unordered_map<int, bool* const> _referenceMap;
+    };
+
+
+
+
 class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -71,8 +111,7 @@ public:
     glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
-    properties::BoolProperty doFrustumCulling;
-    properties::BoolProperty doHorizonCulling;
+    
     properties::BoolProperty mergeInvisible;
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
@@ -93,15 +132,15 @@ public:
     properties::BoolProperty blendWaterMask;
     properties::BoolProperty atmosphereEnabled;
 
-    properties::SelectionProperty debugSelection;
-    void setDebugOption(size_t index, bool value);
+    ReferencedBoolSelection debugSelection;
 
     properties::BoolProperty levelByProjArea;
     properties::BoolProperty limitLevelByAvailableHeightData;
 
+    
+
 
 private:
-    void addDebugOptions();
 
     std::string _frame;
 

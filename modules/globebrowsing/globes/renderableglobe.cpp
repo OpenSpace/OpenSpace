@@ -56,8 +56,6 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
-        , doFrustumCulling(properties::BoolProperty("doFrustumCulling", "doFrustumCulling"))
-        , doHorizonCulling(properties::BoolProperty("doHorizonCulling", "doHorizonCulling"))
         , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
@@ -70,7 +68,7 @@ namespace openspace {
         , _waterMasksSelection(properties::SelectionProperty("Water Masks", "Water Masks"))
         , _overlaysSelection(properties::SelectionProperty("Overlays", "Overlays"))
 
-        , debugSelection(properties::SelectionProperty("Debug", "Debug"))
+        , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
 
         , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
         , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
@@ -84,8 +82,6 @@ namespace openspace {
         setName("RenderableGlobe");
         
         addProperty(_saveOrThrowCamera);
-        addProperty(doFrustumCulling);
-        addProperty(doHorizonCulling);
         addProperty(mergeInvisible);
         addProperty(lodScaleFactor);
         addProperty(initChunkVisible);
@@ -98,7 +94,6 @@ namespace openspace {
         addProperty(_waterMasksSelection);
         addProperty(_overlaysSelection);
 
-        addDebugOptions();
 
         addProperty(blendHeightMap);
         addProperty(blendColorMap);
@@ -111,8 +106,6 @@ namespace openspace {
         addProperty(levelByProjArea);
         addProperty(limitLevelByAvailableHeightData);
 
-        doFrustumCulling.setValue(true);
-        doHorizonCulling.setValue(true);
         renderSmallChunksFirst.setValue(true);
 
         dictionary.getValue(keyFrame, _frame);
@@ -152,6 +145,15 @@ namespace openspace {
             new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));        
 
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
+
+        // Add debug options - must be after chunkedLodGlobe has been created as it 
+        // references its members
+        addProperty(debugSelection);
+        debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->showChunkEdges);
+        debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->showChunkBounds);
+        debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->showChunkAABB);
+        debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->doFrustumCulling);
+        debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->doHorizonCulling);
     }
 
     RenderableGlobe::~RenderableGlobe() {
@@ -189,7 +191,7 @@ namespace openspace {
         initializeToggleLayerProperties(LayeredTextures::HeightMaps, _heightMapsSelection);
         initializeToggleLayerProperties(LayeredTextures::WaterMasks, _waterMasksSelection);
         initializeToggleLayerProperties(LayeredTextures::Overlays, _overlaysSelection);
-
+        debugSelection.initialize();
         return _distanceSwitch.initialize();
     }
 
@@ -229,8 +231,6 @@ namespace openspace {
         _time = data.time;
         _distanceSwitch.update(data);
 
-        _chunkedLodGlobe->doFrustumCulling = doFrustumCulling.value();
-        _chunkedLodGlobe->doHorizonCulling = doHorizonCulling.value();
         _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
@@ -298,34 +298,5 @@ namespace openspace {
         selectionChanged(_overlaysSelection, LayeredTextures::Overlays);
     }
 
-    void RenderableGlobe::addDebugOptions() {
-        addProperty(debugSelection);
-
-        // Add options (GUI value initialized to false)
-        debugSelection.addOption({ 0, "Show chunk edges" });
-        debugSelection.addOption({ 1, "Show chunk bounds" });
-        debugSelection.addOption({ 2, "Show chunk AABB" });
-        
-
-        // Add callback
-        debugSelection.onChange([this]() {
-            int nOptions = this->debugSelection.options().size();
-            for (int i = 0; i < nOptions; ++i) {
-                this->setDebugOption(i, false);
-            }
-
-            const std::vector<int>& selectedIndices = this->debugSelection;
-            for (auto selectedIndex : selectedIndices) {
-                this->setDebugOption(selectedIndex, true);
-            }
-        });
-    }
-
-    void RenderableGlobe::setDebugOption(size_t index, bool value) {
-        switch (index) {
-        case 0: _chunkedLodGlobe->showChunkEdges = value; break;
-        case 1: _chunkedLodGlobe->showChunkBounds = value; break;
-        case 2: _chunkedLodGlobe->showChunkAABB = value; break;
-        }
-    }
 }  // namespace openspace
+
