@@ -124,12 +124,14 @@ public:
     properties::SelectionProperty _heightMapsSelection;
     properties::SelectionProperty _waterMasksSelection;
     properties::SelectionProperty _overlaysSelection;
-    
+    properties::SelectionProperty _grayScaleOverlaysSelection;
+
     properties::BoolProperty blendHeightMap;
     properties::BoolProperty blendColorMap;
     properties::BoolProperty blendNightTexture;
     properties::BoolProperty blendOverlay;
     properties::BoolProperty blendWaterMask;
+    properties::BoolProperty blendGrayScaleOverlay;
     properties::BoolProperty atmosphereEnabled;
 
     ReferencedBoolSelection debugSelection;
@@ -181,6 +183,7 @@ private:
     void heightMapsSelectionChanged();
     void waterMasksSelectionChanged();
     void overlaysSelectionChanged();
+    void grayScaleOverlaysSelectionChanged();
 
     DistanceSwitch _distanceSwitch;
 };

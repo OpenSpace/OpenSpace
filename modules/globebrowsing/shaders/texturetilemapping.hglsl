@@ -53,6 +53,11 @@
 #define USE_OVERLAY #{useOverlays}
 #define OVERLAY_BLENDING_ENABLED #{blendOverlays}
 
+// Sixth layer type from LayeredTextureShaderProvider is grayscale overlay
+#define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleOverlays} + 1
+#define USE_GRAYSCALE_OVERLAY #{useGrayScaleOverlays}
+#define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleOverlays}
+
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
@@ -109,7 +114,6 @@ vec4 calculateColor(
 			levelWeights.w2 * getTexVal(colorTilesParent1[#{i}], uv) + 
 			levelWeights.w3 * getTexVal(colorTilesParent2[#{i}], uv);
 
-		//colorSample =  vec4(colorSample.r, colorSample.r, colorSample.r , colorSample.g);
 		color = blendOver(color, colorSample);
 	}
 	#endfor
@@ -180,6 +184,52 @@ vec4 calculateOverlay(
 		color = blendOver(color, colorSample);
 	}
 	#endfor
+
+	return color;
+}
+
+vec4 calculateGrayScaleOverlay(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile grayscaleOverlayTiles[NUMLAYERS_OVERLAY],
+	const Tile grayscaleOverlayTilesParent1[NUMLAYERS_OVERLAY],
+	const Tile grayscaleOverlayTilesParent2[NUMLAYERS_OVERLAY]) {
+
+	vec4 colorGrayScale = vec4(0);
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !GRAYSCALE_OVERLAY_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexGrayScaleOverlays}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(grayscaleOverlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(grayscaleOverlayTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(grayscaleOverlayTilesParent2[#{i}], uv);
+
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
+		colorGrayScale = blendOver(colorGrayScale, colorSample);
+	}
+	#endfor
+
+/*
+	// HSV blending
+	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
+	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, colorGrayScale.r);
+	vec3 rgbNew = hsv2rgb(hsvNew);
+
+	// HSL blending
+	vec3 hslCurrent = rgb2hsl(currentColor.rgb);
+	vec3 hslNew = vec3(hslCurrent.x, hslCurrent.y, colorGrayScale.r);
+	vec3 rgbNew = hsl2rgb(hslNew);
+*/
+	// No color blending, use grayscale
+	vec3 rgbNew = colorGrayScale.rgb;
+	vec4 color = blendOver(currentColor, vec4(rgbNew, colorGrayScale.a));
 
 	return color;
 }

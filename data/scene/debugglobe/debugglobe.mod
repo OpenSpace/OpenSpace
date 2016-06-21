@@ -30,7 +30,7 @@ return {
             Body = "EARTH",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             --Radii = {3396190.0, 3396190.0, 3396190.0}, -- Mars as a spheroid
-            SegmentsPerPatch = 64,
+            SegmentsPerPatch = 90,
             TextureInitData = {
                 ColorTextureMinimumSize = 1024,
                 OverlayMinimumSize = 2048,
@@ -58,6 +58,8 @@ return {
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                         Enabled = true,
                     },
+                },
+                GrayScaleOverlays = {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",

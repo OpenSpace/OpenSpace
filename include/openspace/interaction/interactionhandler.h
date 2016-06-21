@@ -206,14 +206,15 @@ protected:
         will be updates as soon as it is set to a value (calling the set() function).
     */
     template <typename T, typename ScaleType>
-    class delayedVariable {
+    class DelayedVariable {
     public:
-        delayedVariable(ScaleType scale) {
+        DelayedVariable(ScaleType scale) {
             _scale = scale;
         }
-        void set(T value) {
+        void set(T value, double dt) {
             _targetValue = value;
-            _currentValue = _currentValue + (_targetValue - _currentValue) * _scale;
+            _currentValue = _currentValue + (_targetValue - _currentValue) *
+                min(_scale * dt, 1.0); // less or equal to 1.0 keeps it stable
         }
         T get() {
             return _currentValue;
@@ -229,7 +230,7 @@ protected:
             : velocity(scale)
             , previousPosition(0.0, 0.0) {}
         glm::dvec2 previousPosition;
-        delayedVariable<glm::dvec2, double> velocity;
+        DelayedVariable<glm::dvec2, double> velocity;
     };
 
     std::shared_ptr<InputState> _inputState;
@@ -251,6 +252,12 @@ private:
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
+    /*!
+        \param inputState
+        \param sensitivity
+        \param velocityScalefactor can be set to 60 to remove the inertia of the
+            interaction. Lower value will make it harder to move the camera.
+    */
     OrbitalInteractionMode(
         std::shared_ptr<InputState> inputState,
         double sensitivity,
