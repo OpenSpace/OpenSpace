@@ -778,44 +778,44 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(double deltaTime) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+            _localRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
 
             _globalRotationMouseState.previousPosition = mousePosition;
-            _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
+            _globalRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
         }
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+            _globalRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
 
             _localRotationMouseState.previousPosition = mousePosition;
-            _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
+            _localRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
         }
     }
     else { // !button1Pressed
         _localRotationMouseState.previousPosition = mousePosition;
-        _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
+        _localRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
 
         _globalRotationMouseState.previousPosition = mousePosition;
-        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
+        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
     }
     if (button2Pressed) {
         glm::dvec2 mousePositionDelta =
             _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+        _truckMovementMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
     }
     else { // !button2Pressed
         _truckMovementMouseState.previousPosition = mousePosition;
-        _truckMovementMouseState.velocity.set(glm::dvec2(0, 0));
+        _truckMovementMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
     }
     if (button3Pressed) {
         glm::dvec2 mousePositionDelta =
             _rollMouseState.previousPosition - mousePosition;
-        _rollMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity);
+        _rollMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
     }
     else { // !button3Pressed
         _rollMouseState.previousPosition = mousePosition;
-        _rollMouseState.velocity.set(glm::dvec2(0, 0));
+        _rollMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
     }
 }
 
@@ -1013,9 +1013,9 @@ InteractionHandler::InteractionHandler()
     // Create the interactionModes
     _inputState = std::shared_ptr<InputState>(new InputState());
     _orbitalInteractionMode = std::shared_ptr<OrbitalInteractionMode>(
-        new OrbitalInteractionMode(_inputState, 0.002, 0.02));
+        new OrbitalInteractionMode(_inputState, 0.002, 1));
     _globebrowsingInteractionMode = std::shared_ptr<GlobeBrowsingInteractionMode>(
-        new GlobeBrowsingInteractionMode(_inputState, 0.002, 0.02));
+        new GlobeBrowsingInteractionMode(_inputState, 0.002, 1));
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
