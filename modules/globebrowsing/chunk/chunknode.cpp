@@ -108,6 +108,36 @@ void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const
 }
 
 
+void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const {
+    std::stack<const ChunkNode*> S;
+    std::queue<const ChunkNode*> Q;
+
+    // Loop through nodes in breadths first order
+    Q.push(this);
+    while (Q.size() > 0) {
+        const ChunkNode* node = Q.front(); 
+        Q.pop();
+
+        // Add node to future stack
+        S.push(node);
+
+        // Add children to queue, if any
+        if (!node->isLeaf()) {
+            for (int i = 0; i < 4; ++i) {
+                Q.push(node->_children[i].get());
+            }
+        }
+        
+    }
+
+    // Loop through all nodes in stack, this this will be reversed breadth first 
+    while (S.size() > 0) {
+        f(*S.top());
+        S.pop();
+    }
+}
+
+
 
 void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
     std::stack<ChunkNode*> S;

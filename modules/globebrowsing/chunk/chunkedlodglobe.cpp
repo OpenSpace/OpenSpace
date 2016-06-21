@@ -211,8 +211,8 @@ namespace openspace {
             }
         };
 
-        _leftRoot->depthFirst(chunkDebugRenderer);
-        _rightRoot->depthFirst(chunkDebugRenderer);
+        _leftRoot->reverseBreadthFirst(chunkDebugRenderer);
+        _rightRoot->reverseBreadthFirst(chunkDebugRenderer);
     }
 
 
