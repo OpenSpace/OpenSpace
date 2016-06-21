@@ -208,4 +208,31 @@ namespace openspace {
         glEnable(GL_CULL_FACE);
     }
     
+    void DebugRenderer::renderAABB2(const AABB2& screenSpaceAABB, glm::vec4 rgba) const {
+        std::vector<vec4> vertices(4);
+        vertices[0] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
+        vertices[1] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
+        vertices[2] = vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1);
+        vertices[3] = vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1);
+
+        renderVertices(vertices, GL_LINES, rgba);
+    }
+
+    const std::vector<glm::vec4> DebugRenderer::screenSpacePointsFor(const AABB3& screenSpaceAABB) const {
+        std::vector<vec4> vertices(8);
+        for (size_t i = 0; i < 8; i++) {
+            bool cornerIsRight = i % 2 == 0;
+            bool cornerIsUp = i > 3;
+            bool cornerIsFar = (i / 2) % 2 == 1;
+
+            double x = cornerIsRight ? screenSpaceAABB.max.x : screenSpaceAABB.min.x;
+            double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
+            double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
+
+            vertices[i] = vec4(x, y, z, 1);
+        }
+        return std::move(vertices);
+    }
+
+
 } // namespace openspace

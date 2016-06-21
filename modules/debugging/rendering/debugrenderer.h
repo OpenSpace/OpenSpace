@@ -29,6 +29,7 @@
 #include <ghoul/opengl/programobject.h>
 
 #include <openspace/util/updatestructures.h>
+#include <modules/globebrowsing/geometry/aabb.h>
 
 
 #include <glm/glm.hpp>
@@ -52,11 +53,17 @@ namespace openspace {
         static std::shared_ptr<DebugRenderer> ref();
 
 
+        
         void renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba = {1, 0, 0, 1}) const;
         void renderBoxFaces(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
         void renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
         void renderNiceBox(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 0.3 }) const;
+
         void renderCameraFrustum(const RenderData& data, const Camera& otherCamera) const;
+        void renderAABB2(const AABB2& screenSpaceAABB, glm::vec4 rgba = { 1, 1, 1, 0.3 }) const;
+
+        const std::vector<glm::vec4> screenSpacePointsFor(const AABB3& screenSpaceAABB) const;
+        
         
 
     private:
