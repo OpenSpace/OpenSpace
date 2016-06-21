@@ -159,8 +159,8 @@ namespace openspace {
         // Calculate the MVP matrix
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 mvp = dmat4(data.camera.projectionMatrix())
-            * viewTransform * modelTransform;
+        dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
+        dmat4 mvp = vp * modelTransform;
 
         if (showChunkBounds) {
             std::function<void(const ChunkNode&)> chunkDebugRenderer = [&data, &mvp](const ChunkNode& chunkNode) {
@@ -179,7 +179,7 @@ namespace openspace {
                     glLineWidth(4.0f);
                     DebugRenderer::ref()->renderBoxEdges(clippingSpaceCorners, color);
 
-                    glPointSize(20.0f);
+                    glPointSize(10.0f);
                     DebugRenderer::ref()->renderVertices(clippingSpaceCorners, GL_POINTS, color);
                 }
             };
@@ -187,6 +187,45 @@ namespace openspace {
             _leftRoot->depthFirst(chunkDebugRenderer);
             _rightRoot->depthFirst(chunkDebugRenderer);
         }
+
+        if (_savedCamera != nullptr) {
+            dmat4 inverseSavedV = glm::inverse(_savedCamera->combinedViewMatrix());
+            dmat4 inverseSavedP = glm::inverse(_savedCamera->projectionMatrix());
+            std::vector<glm::vec4> clippingSpaceFrustumCorners(8);
+            // loop through the corners of the saved camera frustum
+            for (size_t i = 0; i < 8; i++) {
+                bool cornerIsRight = i % 2 == 0;
+                bool cornerIsUp = i > 3;
+                bool cornerIsFar = (i / 2) % 2 == 1;
+
+                double x = cornerIsRight ? 1 : -1;
+                double y = cornerIsUp ? 1 : -1;
+                double z = cornerIsFar ? 1 : 0;
+
+                // p represents a corner in the frustum of the saved camera
+                dvec4 pSavedClippingSpace(x, y, z, 1);
+                dvec4 pSavedCameraSpace = inverseSavedP * pSavedClippingSpace;
+                if (cornerIsFar) {
+                    pSavedCameraSpace.w *= 1e-7;
+                }
+                pSavedCameraSpace = glm::abs(1.0 / pSavedCameraSpace.w) * pSavedCameraSpace;
+
+                dvec4 pWorldSpace = inverseSavedV * pSavedCameraSpace;
+                dvec4 pCurrentClippingSpace = vp * pWorldSpace;
+                clippingSpaceFrustumCorners[i] = pCurrentClippingSpace;
+            }
+
+
+            glDisable(GL_CULL_FACE);
+            vec4 color(1, 1, 1, 0.3);
+            DebugRenderer::ref()->renderBoxFaces(clippingSpaceFrustumCorners, color);
+            glEnable(GL_CULL_FACE);
+
+            color.a = 0.7;
+            glLineWidth(4.0f);
+            DebugRenderer::ref()->renderBoxEdges(clippingSpaceFrustumCorners, color);
+        }
+        
        
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
