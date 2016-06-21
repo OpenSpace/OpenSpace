@@ -29,6 +29,7 @@ return {
             Frame = "IAU_EARTH",
             Body = "EARTH",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            --Radii = {3396190.0, 3396190.0, 3396190.0}, -- Mars as a spheroid
             SegmentsPerPatch = 64,
             TextureInitData = {
                 ColorTextureMinimumSize = 1024,
@@ -57,6 +58,11 @@ return {
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                         Enabled = true,
                     },
+                    {
+                        Name = "CTX Mosaic",
+                        FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        Enabled = false,
+                    },
                 },
                 NightTextures = {
                     {
@@ -70,6 +76,11 @@ return {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
                         Enabled = true,
+                    },
+                    {
+                        Name = "Mola Elevation",
+                        FilePath = "map_service_configs/Mola_Elevation.xml",
+                        Enabled = false,
                     },
                 },
                 WaterMasks = {

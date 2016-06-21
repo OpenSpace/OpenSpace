@@ -1,0 +1,14 @@
+<GDAL_WMS>
+  <Service name="TiledWMS">
+    <ServerUrl>http://192.168.1.167/OnMars/wms.cgi?</ServerUrl>
+    <TiledGroupName>Mola Elevation</TiledGroupName>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <YOrigin>bottom</YOrigin>
+  </DataWindow>
+    <BandsCount>1</BandsCount>
+</GDAL_WMS>

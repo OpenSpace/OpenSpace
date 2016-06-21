@@ -38,7 +38,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 // STL includes
-#include <sstream>
+#include <sstream> 
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -83,7 +83,7 @@ namespace openspace {
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
-        if (chunk.index().level < 9) {
+        if (chunk.index().level < 10) {
             renderChunkGlobally(chunk, data);
         }
         else {
