@@ -310,17 +310,11 @@ namespace openspace {
         auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        // This information is only needed when doing blending
-        bool blendAny = false;
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            blendAny |= chunk.owner()->blendProperties[category];
-        }
-        if (blendAny &&
-            ((heightMapProviders.size() > 0 ) ||
-            (colorTextureProviders.size() > 0 ) ||
-            (nightTextureProviders.size() > 0 ) ||
-            (overlayProviders.size() > 0 ) ||
-            (waterMaskProviders.size() > 0))) {
+        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
+            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
+            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
+            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
+            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -383,16 +377,11 @@ namespace openspace {
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         // This information is only needed when doing blending
-        bool blendAny = false;
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            blendAny |= chunk.owner()->blendProperties[category];
-        }
-        if (blendAny &&
-            ((heightMapProviders.size() > 0) ||
-                (colorTextureProviders.size() > 0) ||
-                (nightTextureProviders.size() > 0) ||
-                (overlayProviders.size() > 0) ||
-                (waterMaskProviders.size() > 0))) {
+        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
+            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
+            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
+            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
+            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
