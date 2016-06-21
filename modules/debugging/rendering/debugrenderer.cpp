@@ -65,7 +65,7 @@ namespace openspace {
         return _singleton;
     }
 
-    void DebugRenderer::renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba) const {
+    void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA rgba) const {
         if (clippingSpacePoints.size() == 0) {
             return;
         }
@@ -114,7 +114,7 @@ namespace openspace {
 
     }
 
-    void DebugRenderer::renderBoxFaces(const std::vector<glm::vec4>& clippingSpaceBoxCorners, glm::vec4 rgba) const {
+    void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
         const std::vector<glm::vec4>& V = clippingSpaceBoxCorners;
         std::vector<glm::vec4> T;
 
@@ -143,7 +143,7 @@ namespace openspace {
         renderVertices(T, GL_TRIANGLES, rgba);
     }
 
-    void DebugRenderer::renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba) const {
+    void DebugRenderer::renderBoxEdges(const Vertices& clippingSpacePoints, RGBA rgba) const {
         const std::vector<glm::vec4>& V = clippingSpacePoints;
         std::vector<glm::vec4> lineVertices;
         for (size_t i = 0; i < 4; i++) {
@@ -159,7 +159,7 @@ namespace openspace {
         DebugRenderer::ref()->renderVertices(lineVertices, GL_LINES, rgba);
     }
 
-    void DebugRenderer::renderNiceBox(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba) const {
+    void DebugRenderer::renderNiceBox(const Vertices& clippingSpacePoints, RGBA rgba) const {
         renderBoxFaces(clippingSpacePoints, rgba);
 
         glLineWidth(4.0f);
@@ -208,7 +208,7 @@ namespace openspace {
         glEnable(GL_CULL_FACE);
     }
     
-    void DebugRenderer::renderAABB2(const AABB2& screenSpaceAABB, glm::vec4 rgba) const {
+    void DebugRenderer::renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba) const {
         std::vector<vec4> vertices(4);
         vertices[0] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
         vertices[1] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
@@ -218,7 +218,7 @@ namespace openspace {
         renderVertices(vertices, GL_LINES, rgba);
     }
 
-    const std::vector<glm::vec4> DebugRenderer::screenSpacePointsFor(const AABB3& screenSpaceAABB) const {
+    const DebugRenderer::Vertices DebugRenderer::verticesFor(const AABB3& screenSpaceAABB) const {
         std::vector<vec4> vertices(8);
         for (size_t i = 0; i < 8; i++) {
             bool cornerIsRight = i % 2 == 0;
