@@ -24,14 +24,14 @@
 
 #include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
+#include <modules/iswa/util/dataprocessorkameleon.h>
+#include <modules/iswa/rendering/iswakameleongroup.h>
+#include <modules/onscreengui/include/gui.h>
+#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/iswa/util/dataprocessorkameleon.h>
-#include <ghoul/filesystem/filesystem>
-#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/scene/scene.h>
-
-#include <modules/onscreengui/include/gui.h>
+#include <ghoul/filesystem/filesystem>
 
 namespace {
     using json = nlohmann::json;

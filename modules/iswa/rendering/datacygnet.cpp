@@ -29,6 +29,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace {
     const std::string _loggerCat = "DataCygnet";

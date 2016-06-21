@@ -27,6 +27,8 @@
 
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/util/dataprocessor.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace {
     const int MAX_TEXTURES = 6;
