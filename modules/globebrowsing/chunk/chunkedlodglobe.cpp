@@ -155,78 +155,14 @@ namespace openspace {
         renderChunkTree(_leftRoot.get(), data);
         renderChunkTree(_rightRoot.get(), data);
 
-
-        // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
-        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
-        dmat4 mvp = vp * modelTransform;
-
         if (showChunkBounds) {
-            std::function<void(const ChunkNode&)> chunkDebugRenderer = [&data, &mvp](const ChunkNode& chunkNode) {
-                const Chunk& chunk = chunkNode.getChunk();
-                if (chunkNode.isLeaf() && chunk.isVisible()) {
-                    const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
-                    std::vector<glm::vec4> clippingSpaceCorners(8);
-                    for (size_t i = 0; i < 8; i++) {
-                        clippingSpaceCorners[i] = mvp * modelSpaceCorners[i];
-                    }
-
-                    unsigned int colorBits = 1 + chunk.index().level % 6;
-                    vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
-                    DebugRenderer::ref()->renderBoxFaces(clippingSpaceCorners, color);
-
-                    glLineWidth(4.0f);
-                    DebugRenderer::ref()->renderBoxEdges(clippingSpaceCorners, color);
-
-                    glPointSize(10.0f);
-                    DebugRenderer::ref()->renderVertices(clippingSpaceCorners, GL_POINTS, color);
-                }
-            };
-
-            _leftRoot->depthFirst(chunkDebugRenderer);
-            _rightRoot->depthFirst(chunkDebugRenderer);
+            renderChunkBounds(data);
         }
 
         if (_savedCamera != nullptr) {
-            dmat4 inverseSavedV = glm::inverse(_savedCamera->combinedViewMatrix());
-            dmat4 inverseSavedP = glm::inverse(_savedCamera->projectionMatrix());
-            std::vector<glm::vec4> clippingSpaceFrustumCorners(8);
-            // loop through the corners of the saved camera frustum
-            for (size_t i = 0; i < 8; i++) {
-                bool cornerIsRight = i % 2 == 0;
-                bool cornerIsUp = i > 3;
-                bool cornerIsFar = (i / 2) % 2 == 1;
-
-                double x = cornerIsRight ? 1 : -1;
-                double y = cornerIsUp ? 1 : -1;
-                double z = cornerIsFar ? 1 : 0;
-
-                // p represents a corner in the frustum of the saved camera
-                dvec4 pSavedClippingSpace(x, y, z, 1);
-                dvec4 pSavedCameraSpace = inverseSavedP * pSavedClippingSpace;
-                if (cornerIsFar) {
-                    pSavedCameraSpace.w *= 1e-7;
-                }
-                pSavedCameraSpace = glm::abs(1.0 / pSavedCameraSpace.w) * pSavedCameraSpace;
-
-                dvec4 pWorldSpace = inverseSavedV * pSavedCameraSpace;
-                dvec4 pCurrentClippingSpace = vp * pWorldSpace;
-                clippingSpaceFrustumCorners[i] = pCurrentClippingSpace;
-            }
-
-
-            glDisable(GL_CULL_FACE);
-            vec4 color(1, 1, 1, 0.3);
-            DebugRenderer::ref()->renderBoxFaces(clippingSpaceFrustumCorners, color);
-            glEnable(GL_CULL_FACE);
-
-            color.a = 0.7;
-            glLineWidth(4.0f);
-            DebugRenderer::ref()->renderBoxEdges(clippingSpaceFrustumCorners, color);
+            DebugRenderer::ref()->renderCameraFrustum(data, *_savedCamera);
         }
         
-       
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 
@@ -245,12 +181,36 @@ namespace openspace {
         else {
             node->renderDepthFirst(data);
         }
-        
+    }
+
+    void ChunkedLodGlobe::renderChunkBounds(const RenderData& data) const {
+        // Calculate the MVP matrix
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
+        dmat4 mvp = vp * modelTransform;
+
+        std::function<void(const ChunkNode&)> chunkDebugRenderer = [&data, &mvp](const ChunkNode& chunkNode) {
+            const Chunk& chunk = chunkNode.getChunk();
+            if (chunkNode.isLeaf() && chunk.isVisible()) {
+                const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
+                std::vector<glm::vec4> clippingSpaceCorners(8);
+                for (size_t i = 0; i < 8; i++) {
+                    clippingSpaceCorners[i] = mvp * modelSpaceCorners[i];
+                }
+
+                unsigned int colorBits = 1 + chunk.index().level % 6;
+                vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
+                DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+            }
+        };
+
+        _leftRoot->depthFirst(chunkDebugRenderer);
+        _rightRoot->depthFirst(chunkDebugRenderer);
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
-        _patchRenderer->update();
-        
+        _patchRenderer->update();   
     }
 
     void ChunkedLodGlobe::setStateMatrix(const glm::dmat3& stateMatrix)

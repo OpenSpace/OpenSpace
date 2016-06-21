@@ -159,5 +159,53 @@ namespace openspace {
         DebugRenderer::ref()->renderVertices(lineVertices, GL_LINES, rgba);
     }
 
+    void DebugRenderer::renderNiceBox(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba) const {
+        renderBoxFaces(clippingSpacePoints, rgba);
+
+        glLineWidth(4.0f);
+        DebugRenderer::ref()->renderBoxEdges(clippingSpacePoints, rgba);
+
+        glPointSize(10.0f);
+        DebugRenderer::ref()->renderVertices(clippingSpacePoints, GL_POINTS, rgba);
+    }
+
+    void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& otherCamera) const {
+        using namespace glm;
+        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
+        dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
+
+        dmat4 inverseSavedV = glm::inverse(otherCamera.combinedViewMatrix());
+        dmat4 inverseSavedP = glm::inverse(otherCamera.projectionMatrix());
+        std::vector<glm::vec4> clippingSpaceFrustumCorners(8);
+        // loop through the corners of the saved camera frustum
+        for (size_t i = 0; i < 8; i++) {
+            bool cornerIsRight = i % 2 == 0;
+            bool cornerIsUp = i > 3;
+            bool cornerIsFar = (i / 2) % 2 == 1;
+
+            double x = cornerIsRight ? 1 : -1;
+            double y = cornerIsUp ? 1 : -1;
+            double z = cornerIsFar ? 1 : 0;
+
+            // p represents a corner in the frustum of the saved camera
+            dvec4 pSavedClippingSpace(x, y, z, 1);
+            dvec4 pSavedCameraSpace = inverseSavedP * pSavedClippingSpace;
+            if (cornerIsFar) {
+                pSavedCameraSpace.w *= 1e-7;
+            }
+            pSavedCameraSpace = glm::abs(1.0 / pSavedCameraSpace.w) * pSavedCameraSpace;
+
+            dvec4 pWorldSpace = inverseSavedV * pSavedCameraSpace;
+            dvec4 pCurrentClippingSpace = vp * pWorldSpace;
+            clippingSpaceFrustumCorners[i] = pCurrentClippingSpace;
+        }
+
+
+        glDisable(GL_CULL_FACE);
+        vec4 color(1, 1, 1, 0.3);
+        renderNiceBox(clippingSpaceFrustumCorners, color);
+        glEnable(GL_CULL_FACE);
+    }
     
 } // namespace openspace

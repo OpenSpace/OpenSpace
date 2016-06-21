@@ -28,6 +28,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 
+#include <openspace/util/updatestructures.h>
+
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -53,6 +55,9 @@ namespace openspace {
         void renderVertices(const std::vector<glm::vec4>& clippingSpacePoints, GLenum mode, glm::vec4 rgba = {1, 0, 0, 1}) const;
         void renderBoxFaces(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
         void renderBoxEdges(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 1 }) const;
+        void renderNiceBox(const std::vector<glm::vec4>& clippingSpacePoints, glm::vec4 rgba = { 1, 0, 0, 0.3 }) const;
+        void renderCameraFrustum(const RenderData& data, const Camera& otherCamera) const;
+        
 
     private:
 
@@ -70,3 +75,4 @@ namespace openspace {
 
 
 #endif // __DEBUG_RENDERER_H__
+
