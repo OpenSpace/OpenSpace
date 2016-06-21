@@ -307,6 +307,7 @@ namespace openspace {
         auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
         auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
         auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
+        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
         auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
@@ -314,6 +315,7 @@ namespace openspace {
             (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
             (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
             (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
+            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
             (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
@@ -373,6 +375,7 @@ namespace openspace {
         auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
         auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
         auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
+        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
         auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
@@ -381,6 +384,7 @@ namespace openspace {
             (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
             (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
             (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
+            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
             (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);

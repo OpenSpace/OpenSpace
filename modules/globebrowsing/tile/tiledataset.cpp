@@ -212,6 +212,7 @@ namespace openspace {
     std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
     {
         GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
+
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
         char* imageData = new char[totalNumBytes];
@@ -224,12 +225,17 @@ namespace openspace {
             
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
             
+            int pixelStartX = region.pixelStart.x;// glm::max(int(region.pixelStart.x) - 1, 0);
+            int pixelStartY = region.pixelStart.y;// glm::max(int(region.pixelStart.y) - 1, 0);
+            int pixelWidthX = region.numPixels.x;// glm::min(pixelStartX + int(region.numPixels.x) + 2, rasterBand->GetXSize()) - pixelStartX;
+            int pixelWidthY = region.numPixels.y;// glm::min(pixelStartY + int(region.numPixels.y) + 2, rasterBand->GetYSize()) - pixelStartY;
+
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
-                region.pixelStart.x,           // Begin read x
-                region.pixelStart.y,           // Begin read y
-                region.numPixels.x,            // width to read x
-                region.numPixels.y,            // width to read y
+                pixelStartX,           // Begin read x
+                pixelStartY,           // Begin read y
+                pixelWidthX,            // width to read x
+                pixelWidthY,            // width to read y
                 dataDestination,               // Where to put data
                 region.numPixels.x,            // width to write x in destination
                 region.numPixels.y,            // width to write y in destination
@@ -565,6 +571,8 @@ namespace openspace {
         pixelStart = glm::uvec2(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
         pixelEnd = glm::uvec2(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
         numPixels = pixelEnd - pixelStart;
+        if (numPixels.x < 1000 && (pixelStart.x % 2 || pixelStart.y % 2))
+            int hej = 0;
     }
 
     TileDataset::DataLayout::DataLayout() {

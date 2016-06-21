@@ -10,5 +10,4 @@
     <LowerRightY>-90.0</LowerRightY>
     <YOrigin>bottom</YOrigin>
   </DataWindow>
-    <BandsCount>1</BandsCount>
 </GDAL_WMS>
