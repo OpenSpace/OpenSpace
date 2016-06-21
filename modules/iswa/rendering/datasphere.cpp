@@ -30,6 +30,11 @@
 
 #include <modules/onscreengui/include/gui.h>
 
+#ifdef WIN32        
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
+
 namespace {
     const std::string _loggerCat = "DataSphere";
 }
