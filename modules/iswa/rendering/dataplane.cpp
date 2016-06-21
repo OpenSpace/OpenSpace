@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/iswa/rendering/dataplane.h>
+#include <openspace/engine/openspaceengine.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
 #include <modules/onscreengui/include/gui.h>
@@ -53,9 +54,10 @@ bool DataPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        if(!_autoFilter.value())
+            OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden

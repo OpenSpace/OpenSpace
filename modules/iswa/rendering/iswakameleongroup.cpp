@@ -26,14 +26,11 @@
 #include <fstream>
 #include <modules/iswa/ext/json/json.hpp>
 
-#include <modules/iswa/util/dataprocessortext.h>
-#include <modules/iswa/util/dataprocessorjson.h>
-#include <modules/iswa/util/dataprocessorkameleon.h>
-
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
 #include <modules/onscreengui/include/gui.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
     const std::string _loggerCat = "IswaDataGroup";
@@ -100,23 +97,15 @@ void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){
     if (!seedFile.good())
         LERROR("Could not open seed points file '" << indexFile << "'");
     else {
-        std::string line;
-        std::string fileContent;
-        while (std::getline(seedFile, line)) {
-            fileContent += line;
-        }
-
         try{
             //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(fileContent);
+            json fieldlines = json::parse(seedFile);
             int i = 0;
-
             for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
                 _fieldlines.addOption({i, it.key()});
                 _fieldlineState[i] = std::make_tuple(name()+"/"+it.key(), it.value(), false);
                 i++;
             }
-
         } catch(const std::exception& e) {
             LERROR("Error when reading json file with paths to seedpoints: " + std::string(e.what()));
         }
@@ -160,5 +149,14 @@ void IswaKameleonGroup::changeCdf(std::string path){
 
     _groupEvent->publish("cdfChanged", ghoul::Dictionary({{"path", path}}));
 }
+
+std::unique_ptr<ghoul::Dictionary> IswaKameleonGroup::propertyValues() const{
+    std::unique_ptr<ghoul::Dictionary> properties = IswaDataGroup::propertyValues();
+
+    properties->setValue("resolution", _resolution.value());
+    properties->setValue("fieldlineSeedsIndexFile", _fieldlines.value());
+    return std::move(properties);
+}
+
 
 }//namespace openspace

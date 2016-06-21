@@ -122,6 +122,12 @@ protected:
      */
     virtual void setUniforms() = 0;
 
+    /**
+     * Optional override. should get the initial property values needed from the group
+     * and set its own.
+     */
+    virtual void getGroupPropertyValues();
+
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 

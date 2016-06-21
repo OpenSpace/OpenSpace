@@ -27,13 +27,8 @@
 
 #include <ghoul/designpattern/event.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-// #include <modules/iswa/rendering/iswacygnet.h>
 #include <openspace/properties/triggerproperty.h>
-#include <modules/iswa/util/iswamanager.h>
+//#include <modules/iswa/util/iswamanager.h>
 #include <modules/iswa/util/dataprocessor.h>
 
 
@@ -48,6 +43,7 @@ public:
 
 	void updateGroup();
 	virtual void clearGroup();
+	virtual ghoul::Dictionary& propertyValues() const;
 
 	std::shared_ptr<DataProcessor> dataProcessor();
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();

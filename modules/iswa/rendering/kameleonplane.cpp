@@ -24,10 +24,11 @@
 
 #include <fstream>
 #include <modules/iswa/rendering/kameleonplane.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <ghoul/filesystem/filesystem>
 #include <modules/iswa/ext/json/json.hpp>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
 #include <modules/onscreengui/include/gui.h>
@@ -108,11 +109,12 @@ bool KameleonPlane::initialize(){
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_resolution);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_fieldlines);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        if(!_autoFilter.value())
+            OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
         //If autofiler is on, background values property should be hidden

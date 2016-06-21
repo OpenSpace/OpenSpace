@@ -105,5 +105,4 @@ bool TextureCygnet::readyToRender() const {
     return (isReady() && ((!_textures.empty()) && (_textures[0] != nullptr)));
 }
 
-
 } //namespace openspace
