@@ -394,32 +394,20 @@ namespace openspace {
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
-        Geodetic2 sw = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
-        Geodetic2 se = chunk.surfacePatch().getCorner(Quad::SOUTH_EAST);
-        Geodetic2 nw = chunk.surfacePatch().getCorner(Quad::NORTH_WEST);
-        Geodetic2 ne = chunk.surfacePatch().getCorner(Quad::NORTH_EAST);
-
-        // Get model space positions of the four control points
-        Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);
-        Vec3 patchSeModelSpace = ellipsoid.cartesianSurfacePosition(se);
-        Vec3 patchNwModelSpace = ellipsoid.cartesianSurfacePosition(nw);
-        Vec3 patchNeModelSpace = ellipsoid.cartesianSurfacePosition(ne);
-
-        // Transform all control points to camera space
-        Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
-        Vec3 patchSeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSeModelSpace, 1));
-        Vec3 patchNwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNwModelSpace, 1));
-        Vec3 patchNeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNeModelSpace, 1));
-
-        // Send control points to shader
-        programObject->setUniform("p00", vec3(patchSwCameraSpace));
-        programObject->setUniform("p10", vec3(patchSeCameraSpace));
-        programObject->setUniform("p01", vec3(patchNwCameraSpace));
-        programObject->setUniform("p11", vec3(patchNeCameraSpace));
+        std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
+        std::vector<Vec3> cornersCameraSpace(4);
+        for (int i = 0; i < 4; ++i) {
+            Quad q = (Quad)i;
+            Geodetic2 corner = chunk.surfacePatch().getCorner(q);
+            Vec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+            Vec3 cornerCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            cornersCameraSpace[i] = cornerCameraSpace;
+            programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
+        }
 
         vec3 patchNormalCameraSpace = normalize(
-            cross(patchSeCameraSpace - patchSwCameraSpace,
-                patchNwCameraSpace - patchSwCameraSpace));
+            cross(cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
+                cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]));
 
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
