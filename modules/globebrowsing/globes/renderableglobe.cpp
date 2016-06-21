@@ -57,25 +57,12 @@ namespace openspace {
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
-        , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
-        , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
-        , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
-        , limitLevelByAvailableHeightData(properties::BoolProperty("limitLevelByAvailableHeightData", "limitLevelByAvailableHeightData", true))
+        , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
     {
         setName("RenderableGlobe");
         
-        addProperty(_saveOrThrowCamera);
-        addProperty(lodScaleFactor);
-        addProperty(renderSmallChunksFirst);
-
-        addProperty(atmosphereEnabled);
-
-
-        addProperty(levelByProjArea);
-        addProperty(limitLevelByAvailableHeightData);
-
-        renderSmallChunksFirst.setValue(true);
+        
 
         dictionary.getValue(keyFrame, _frame);
 
@@ -106,11 +93,15 @@ namespace openspace {
         // Add debug options - must be after chunkedLodGlobe has been created as it 
         // references its members
         addProperty(debugSelection);
-        debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->showChunkEdges);
-        debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->showChunkBounds);
-        debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->showChunkAABB);
-        debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->doFrustumCulling);
-        debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->doHorizonCulling);
+        debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->debugOptions.showChunkEdges);
+        debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->debugOptions.showChunkBounds);
+        debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->debugOptions.showChunkAABB);
+
+        debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->debugOptions.doFrustumCulling);
+        debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);
+
+        debugSelection.addOption("Level by proj area (else distance)", &_chunkedLodGlobe->debugOptions.levelByProjAreaElseDistance);
+        debugSelection.addOption("Level limited by available data", &_chunkedLodGlobe->debugOptions.limitLevelByAvailableHeightData);
 
         // Add all tile layers as being toggleable for each category
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
@@ -127,6 +118,10 @@ namespace openspace {
             addProperty(selection.get());
             _categorySelections.push_back(std::move(selection));
         }
+
+        addProperty(atmosphereEnabled);
+        addProperty(_saveOrThrowCamera);
+        addProperty(lodScaleFactor);
     }
 
     RenderableGlobe::~RenderableGlobe() {
@@ -179,14 +174,8 @@ namespace openspace {
         _distanceSwitch.update(data);
 
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
-
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
-        _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
-        _chunkedLodGlobe->limitLevelByAvailableHeightData = limitLevelByAvailableHeightData.value();
-
-
-        // Update this after active layers have been updated
         _tileProviderManager->prerender();
     }
 

@@ -96,27 +96,30 @@ namespace openspace {
         void setSaveCamera(std::shared_ptr<Camera> c) { 
             _savedCamera = c; 
         }
-        
 
-        bool doHorizonCulling = true;
-        bool doFrustumCulling = true;
+        
         float lodScaleFactor;
-        bool renderSmallChunksFirst = true;
 
         // Layered rendering
         std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;
 
         bool atmosphereEnabled;
-        bool showChunkEdges = false;
-        bool showChunkBounds = false;
-        bool showChunkAABB = false;
-        bool levelByProjArea;
-        bool limitLevelByAvailableHeightData;
-        
+
+        struct DebugOptions {
+            bool showChunkEdges = false;
+            bool showChunkBounds = false;
+            bool showChunkAABB = false;
+
+            bool doHorizonCulling = true;
+            bool doFrustumCulling = true;
+
+            bool limitLevelByAvailableHeightData = true;
+            bool levelByProjAreaElseDistance = true;
+        } debugOptions;
+
 
     private:
 
-        void renderChunkTree(ChunkNode* node, const RenderData& data) const;
         void debugRenderChunks(const RenderData& data) const;
 
 

@@ -115,10 +115,10 @@ namespace openspace {
     }
 
     bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) const {
-        if (doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
+        if (debugOptions.doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
             return true;
         }
-        if (doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
+        if (debugOptions.doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
             return true;
         }
         return false;
@@ -126,14 +126,14 @@ namespace openspace {
 
     int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
         int desiredLevel = 0;
-        if (levelByProjArea) {
+        if (debugOptions.levelByProjAreaElseDistance) {
             desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
         }
         else {
             desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
         }
 
-        if (limitLevelByAvailableHeightData) {
+        if (debugOptions.limitLevelByAvailableHeightData) {
             int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
             if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
                 desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
@@ -152,10 +152,10 @@ namespace openspace {
         _leftRoot->updateChunkTree(data);
         _rightRoot->updateChunkTree(data);
 
-        renderChunkTree(_leftRoot.get(), data);
-        renderChunkTree(_rightRoot.get(), data);
+        _leftRoot->renderReversedBreadthFirst(data);
+        _rightRoot->renderReversedBreadthFirst(data);
 
-        if (showChunkBounds || showChunkAABB) {
+        if (debugOptions.showChunkBounds || debugOptions.showChunkAABB) {
             debugRenderChunks(data);
         }
 
@@ -174,15 +174,6 @@ namespace openspace {
         //LDEBUG("ChunkNode count: " << ChunkNode::chunkNodeCount);
         //LDEBUG("RenderedPatches count: " << ChunkNode::renderedChunks);
         //LDEBUG(ChunkNode::renderedChunks << " / " << ChunkNode::chunkNodeCount << " chunks rendered");
-    }
-
-    void ChunkedLodGlobe::renderChunkTree(ChunkNode* node, const RenderData& data) const {
-        if (renderSmallChunksFirst) {
-            node->renderReversedBreadthFirst(data);
-        }
-        else {
-            node->renderDepthFirst(data);
-        }
     }
 
     void ChunkedLodGlobe::debugRenderChunks(const RenderData& data) const {
@@ -209,11 +200,11 @@ namespace openspace {
                 unsigned int colorBits = 1 + chunk.index().level % 6;
                 vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
 
-                if (showChunkBounds) {
+                if (debugOptions.showChunkBounds) {
                     DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
                 }
 
-                if (showChunkAABB) {
+                if (debugOptions.showChunkAABB) {
                     auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
                     DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
                 }

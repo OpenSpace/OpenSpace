@@ -77,6 +77,7 @@ struct ReferencedBoolSelection : public properties::SelectionProperty {
         }
         setValue(selected);
 
+
         onChange([this]() {
             int nOptions = this->options().size();
             for (int i = 0; i < nOptions; ++i) {
@@ -115,7 +116,6 @@ public:
     
     // Properties 
     properties::FloatProperty lodScaleFactor;
-    properties::BoolProperty renderSmallChunksFirst;
 
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
 
@@ -123,8 +123,6 @@ public:
 
     ReferencedBoolSelection debugSelection;
 
-    properties::BoolProperty levelByProjArea;
-    properties::BoolProperty limitLevelByAvailableHeightData;
     properties::BoolProperty _saveOrThrowCamera;
 
     

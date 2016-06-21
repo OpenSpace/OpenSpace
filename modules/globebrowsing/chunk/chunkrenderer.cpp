@@ -190,7 +190,7 @@ namespace openspace {
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "showChunkEdges",
-                std::to_string(chunk.owner()->showChunkEdges)));
+                std::to_string(chunk.owner()->debugOptions.showChunkEdges)));
 
 
         // Now the shader program can be accessed
