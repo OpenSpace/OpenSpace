@@ -81,7 +81,7 @@ namespace openspace {
         static TimeFormat* getProvider(const std::string& format);
         static void init();
 
-        static std::unordered_map<std::string, TimeFormat*> _timeIdProviderMap;
+        static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
         static bool initialized;
     };
 

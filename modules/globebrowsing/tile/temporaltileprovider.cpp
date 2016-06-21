@@ -183,22 +183,13 @@ namespace openspace {
     std::shared_ptr<CachingTileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
         
-        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(gdalDatasetXml,
-                _tileProviderInitData.minimumPixelSize,
-                _tileProviderInitData.preprocessTiles));
-
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(_tileProviderInitData.threads));
-
-        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-            new AsyncTileDataProvider(tileDataset, threadPool));
-
-        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(_tileProviderInitData.cacheSize));
-
-        std::shared_ptr<CachingTileProvider> tileProvider= std::shared_ptr<CachingTileProvider>(
-            new CachingTileProvider(tileReader, tileCache,
-                _tileProviderInitData.framesUntilRequestQueueFlush));
+        auto tileDataset = std::make_shared<TileDataset>(gdalDatasetXml,
+                _tileProviderInitData.minimumPixelSize, _tileProviderInitData.preprocessTiles);
+        auto threadPool = std::make_shared<ThreadPool>(_tileProviderInitData.threads);
+        auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
+        auto tileCache = std::make_shared<TileCache>(_tileProviderInitData.cacheSize);
+        auto tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache,
+                _tileProviderInitData.framesUntilRequestQueueFlush);
 
         return tileProvider;
     }
@@ -240,11 +231,11 @@ namespace openspace {
 
     bool TimeIdProviderFactory::initialized = false;
 
-    std::unordered_map<std::string, TimeFormat*> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, TimeFormat*>();
+    std::unordered_map<std::string, std::unique_ptr<TimeFormat>> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, std::unique_ptr<TimeFormat>>();
 
     void TimeIdProviderFactory::init() {
-        _timeIdProviderMap.insert({ "YYYY-MM-DD", new YYYY_MM_DD });
-        _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", new YYYY_MM_DDThh_mm_ssZ });
+        _timeIdProviderMap.insert({ "YYYY-MM-DD", std::make_unique<YYYY_MM_DD>() });
+        _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() });
         initialized = true;
     }
 
@@ -252,7 +243,9 @@ namespace openspace {
         if (!initialized) {
             init();
         }
-        return _timeIdProviderMap[format];
+        ghoul_assert(_timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
+            "Unsupported Time format: " << format);
+        return _timeIdProviderMap[format].get();
     }
 
 
