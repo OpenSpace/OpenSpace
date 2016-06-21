@@ -70,14 +70,14 @@ namespace openspace {
         , _waterMasksSelection(properties::SelectionProperty("Water Masks", "Water Masks"))
         , _overlaysSelection(properties::SelectionProperty("Overlays", "Overlays"))
 
+        , debugSelection(properties::SelectionProperty("Debug", "Debug"))
+
         , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
         , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
         , blendNightTexture(properties::BoolProperty("blendNightTexture", "blendNightTexture", true))
         , blendOverlay(properties::BoolProperty("blendOverlay", "blendOverlay", true))
         , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
-        , showChunkEdges(properties::BoolProperty("showChunkEdges", "showChunkEdges", false))
-        , showChunkBounds(properties::BoolProperty("showChunkBounds", "showChunkBounds", false))
         , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
         , limitLevelByAvailableHeightData(properties::BoolProperty("limitLevelByAvailableHeightData", "limitLevelByAvailableHeightData", true))
     {
@@ -98,6 +98,8 @@ namespace openspace {
         addProperty(_waterMasksSelection);
         addProperty(_overlaysSelection);
 
+        addDebugOptions();
+
         addProperty(blendHeightMap);
         addProperty(blendColorMap);
         addProperty(blendNightTexture);
@@ -105,8 +107,7 @@ namespace openspace {
         addProperty(blendWaterMask);
         addProperty(atmosphereEnabled);
 
-        addProperty(showChunkEdges);
-        addProperty(showChunkBounds);
+
         addProperty(levelByProjArea);
         addProperty(limitLevelByAvailableHeightData);
 
@@ -242,40 +243,9 @@ namespace openspace {
         _chunkedLodGlobe->blendProperties[LayeredTextures::WaterMasks] = blendWaterMask.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
-        _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
-        _chunkedLodGlobe->showChunkBounds = showChunkBounds.value();
         _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
         _chunkedLodGlobe->limitLevelByAvailableHeightData = limitLevelByAvailableHeightData.value();
-        /*
-        std::vector<TileProviderManager::TileProviderWithName>& colorTextureProviders =
-            _tileProviderManager->getLayerCategory(LayeredTextures::ColorTextures);
-        std::vector<TileProviderManager::TileProviderWithName>& nightTextureProviders =
-            _tileProviderManager->getLayerCategory(LayeredTextures::NightTextures);
-        std::vector<TileProviderManager::TileProviderWithName>& overlayProviders =
-            _tileProviderManager->getLayerCategory(LayeredTextures::Overlays);
-        std::vector<TileProviderManager::TileProviderWithName>& heightMapProviders =
-            _tileProviderManager->getLayerCategory(LayeredTextures::HeightMaps);
-        std::vector<TileProviderManager::TileProviderWithName>& waterMaskProviders =
-            _tileProviderManager->getLayerCategory(LayeredTextures::WaterMasks);
-        
-        
-        for (size_t i = 0; i < colorTextureProviders.size(); i++) {
-            colorTextureProviders[i].isActive = _activeColorLayers[i].value();
-        }
-        for (size_t i = 0; i < nightTextureProviders.size(); i++) {
-            nightTextureProviders[i].isActive = _activeNightLayers[i].value();
-        }
-        for (size_t i = 0; i < overlayProviders.size(); i++) {
-            overlayProviders[i].isActive = _activeOverlays[i].value();
-        }
-        for (size_t i = 0; i < heightMapProviders.size(); i++) {
-            heightMapProviders[i].isActive = _activeHeightMapLayers[i].value();
-        }
-        for (size_t i = 0; i < waterMaskProviders.size(); i++) {
-            waterMaskProviders[i].isActive = _activeWaterMaskLayers[i].value();
-        }
-        */
-        // Update this after active layers have been updated
+
         _tileProviderManager->prerender();
     }
 
@@ -328,4 +298,34 @@ namespace openspace {
         selectionChanged(_overlaysSelection, LayeredTextures::Overlays);
     }
 
+    void RenderableGlobe::addDebugOptions() {
+        addProperty(debugSelection);
+
+        // Add options (GUI value initialized to false)
+        debugSelection.addOption({ 0, "Show chunk edges" });
+        debugSelection.addOption({ 1, "Show chunk bounds" });
+        debugSelection.addOption({ 2, "Show chunk AABB" });
+        
+
+        // Add callback
+        debugSelection.onChange([this]() {
+            int nOptions = this->debugSelection.options().size();
+            for (int i = 0; i < nOptions; ++i) {
+                this->setDebugOption(i, false);
+            }
+
+            const std::vector<int>& selectedIndices = this->debugSelection;
+            for (auto selectedIndex : selectedIndices) {
+                this->setDebugOption(selectedIndex, true);
+            }
+        });
+    }
+
+    void RenderableGlobe::setDebugOption(size_t index, bool value) {
+        switch (index) {
+        case 0: _chunkedLodGlobe->showChunkEdges = value; break;
+        case 1: _chunkedLodGlobe->showChunkBounds = value; break;
+        case 2: _chunkedLodGlobe->showChunkAABB = value; break;
+        }
+    }
 }  // namespace openspace

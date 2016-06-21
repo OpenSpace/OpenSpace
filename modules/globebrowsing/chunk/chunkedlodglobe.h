@@ -108,11 +108,11 @@ namespace openspace {
         float chunkHeight;
 
         // Layered rendering
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES>
-            blendProperties;
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;
         bool atmosphereEnabled;
-        bool showChunkEdges;
-        bool showChunkBounds;
+        bool showChunkEdges = false;
+        bool showChunkBounds = false;
+        bool showChunkAABB = false;
         bool levelByProjArea;
         bool limitLevelByAvailableHeightData;
         
@@ -120,7 +120,7 @@ namespace openspace {
     private:
 
         void renderChunkTree(ChunkNode* node, const RenderData& data) const;
-        void renderChunkBounds(const RenderData& data) const;
+        void debugRenderChunks(const RenderData& data) const;
 
 
         // Covers all negative longitudes

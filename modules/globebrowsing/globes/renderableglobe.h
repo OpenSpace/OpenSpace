@@ -93,13 +93,16 @@ public:
     properties::BoolProperty blendWaterMask;
     properties::BoolProperty atmosphereEnabled;
 
-    properties::BoolProperty showChunkEdges;
-    properties::BoolProperty showChunkBounds;
+    properties::SelectionProperty debugSelection;
+    void setDebugOption(size_t index, bool value);
+
     properties::BoolProperty levelByProjArea;
     properties::BoolProperty limitLevelByAvailableHeightData;
 
 
 private:
+    void addDebugOptions();
+
     std::string _frame;
 
     void addToggleLayerProperties(
@@ -129,6 +132,7 @@ private:
     std::vector<properties::BoolProperty> _activeOverlays;
     std::vector<properties::BoolProperty> _activeHeightMapLayers;
     std::vector<properties::BoolProperty> _activeWaterMaskLayers;
+
 
     void selectionChanged(
         properties::SelectionProperty selectionProperty,

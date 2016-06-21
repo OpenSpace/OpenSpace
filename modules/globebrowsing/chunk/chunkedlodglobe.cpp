@@ -155,9 +155,11 @@ namespace openspace {
         renderChunkTree(_leftRoot.get(), data);
         renderChunkTree(_rightRoot.get(), data);
 
-        if (showChunkBounds) {
-            renderChunkBounds(data);
+        if (showChunkBounds || showChunkAABB) {
+            debugRenderChunks(data);
         }
+
+
 
         if (_savedCamera != nullptr) {
             DebugRenderer::ref()->renderCameraFrustum(data, *_savedCamera);
@@ -183,31 +185,46 @@ namespace openspace {
         }
     }
 
-    void ChunkedLodGlobe::renderChunkBounds(const RenderData& data) const {
+    void ChunkedLodGlobe::debugRenderChunks(const RenderData& data) const {
         // Calculate the MVP matrix
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
         dmat4 mvp = vp * modelTransform;
 
-        std::function<void(const ChunkNode&)> chunkDebugRenderer = [&data, &mvp](const ChunkNode& chunkNode) {
+        std::function<void(const ChunkNode&)> chunkDebugRenderer = [this, &data, &mvp](const ChunkNode& chunkNode) {
             const Chunk& chunk = chunkNode.getChunk();
             if (chunkNode.isLeaf() && chunk.isVisible()) {
                 const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
                 std::vector<glm::vec4> clippingSpaceCorners(8);
+                AABB3 screenSpaceBounds;
                 for (size_t i = 0; i < 8; i++) {
-                    clippingSpaceCorners[i] = mvp * modelSpaceCorners[i];
+                    const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
+                    clippingSpaceCorners[i] = clippingSpaceCorner;
+                    
+                    vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
+                    screenSpaceBounds.expand(screenSpaceCorner);
                 }
 
                 unsigned int colorBits = 1 + chunk.index().level % 6;
                 vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
-                DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+
+                if (showChunkBounds) {
+                    DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+                }
+
+                if (showChunkAABB) {
+                    auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
+                    DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
+                }
             }
         };
 
         _leftRoot->depthFirst(chunkDebugRenderer);
         _rightRoot->depthFirst(chunkDebugRenderer);
     }
+
+
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _patchRenderer->update();   
