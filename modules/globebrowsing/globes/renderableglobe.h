@@ -56,42 +56,43 @@ namespace opengl {
 
 namespace openspace {
 
-    struct ReferencedBoolSelection : public properties::SelectionProperty {
-        ReferencedBoolSelection::ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
-            : properties::SelectionProperty(identifier, guiName) { }
+struct ReferencedBoolSelection : public properties::SelectionProperty {
+    ReferencedBoolSelection::ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
+        : properties::SelectionProperty(identifier, guiName) { }
 
-        void addOption(const std::string& name, bool* ref) {
-            int optionId= options().size();
-            _referenceMap.insert({ optionId, ref });
-            properties::SelectionProperty::addOption({ optionId, name});
-        }
+    void addOption(const std::string& name, bool* ref) {
+        int optionId= options().size();
+        _referenceMap.insert({ optionId, ref });
+        properties::SelectionProperty::addOption({ optionId, name});
+    }
 
-        void initialize() {
-            // Set values in GUI to the current values of the references
-            int nOptions = options().size();
-            std::vector<int> selected;
-            for (int i = 0; i < nOptions; ++i) {
-                if (*_referenceMap[i]) {
-                    selected.push_back(i);
-                }
+    void initialize() {
+        // Set values in GUI to the current values of the references
+        int nOptions = options().size();
+        std::vector<int> selected;
+        for (int i = 0; i < nOptions; ++i) {
+            if (*_referenceMap[i]) {
+                selected.push_back(i);
             }
-            setValue(selected);
-
-            onChange([this]() {
-                int nOptions = this->options().size();
-                for (int i = 0; i < nOptions; ++i) {
-                    (*_referenceMap[i]) = false;
-                }
-
-                const std::vector<int>& selectedIndices = (*this);
-                for (auto selectedIndex : selectedIndices) {
-                    (*_referenceMap[selectedIndex]) = true;
-                }
-            });
         }
+        setValue(selected);
 
-        std::unordered_map<int, bool* const> _referenceMap;
-    };
+        onChange([this]() {
+            int nOptions = this->options().size();
+            for (int i = 0; i < nOptions; ++i) {
+                (*_referenceMap[i]) = false;
+            }
+
+            const std::vector<int>& selectedIndices = (*this);
+            for (auto selectedIndex : selectedIndices) {
+                (*_referenceMap[selectedIndex]) = true;
+            }
+        });
+    }
+
+    std::unordered_map<int, bool* const> _referenceMap;
+};
+
 
 
 
@@ -112,32 +113,24 @@ public:
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
     
+    // Properties 
+
     properties::BoolProperty mergeInvisible;
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
     properties::BoolProperty renderSmallChunksFirst;
     properties::FloatProperty chunkHeight;
 
-    // Layered rendering
-    properties::SelectionProperty _baseLayersSelection;
-    properties::SelectionProperty _nightLayersSelection;
-    properties::SelectionProperty _heightMapsSelection;
-    properties::SelectionProperty _waterMasksSelection;
-    properties::SelectionProperty _overlaysSelection;
-    properties::SelectionProperty _grayScaleOverlaysSelection;
 
-    properties::BoolProperty blendHeightMap;
-    properties::BoolProperty blendColorMap;
-    properties::BoolProperty blendNightTexture;
-    properties::BoolProperty blendOverlay;
-    properties::BoolProperty blendWaterMask;
-    properties::BoolProperty blendGrayScaleOverlay;
+    std::vector<ReferencedBoolSelection*> _categorySelections;
+
     properties::BoolProperty atmosphereEnabled;
 
     ReferencedBoolSelection debugSelection;
 
     properties::BoolProperty levelByProjArea;
     properties::BoolProperty limitLevelByAvailableHeightData;
+    properties::BoolProperty _saveOrThrowCamera;
 
     
 
@@ -145,45 +138,13 @@ public:
 private:
 
     std::string _frame;
-
-    void addToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& dest
-    );
-
-    void initializeToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& dest
-        );
-
     double _time;
 
     Ellipsoid _ellipsoid;
 
-    //std::vector<std::string> _heightMapKeys;
-    //std::vector<std::string> _colorTextureKeys;
-
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     
-    properties::BoolProperty _saveOrThrowCamera;
-
-    std::vector<properties::BoolProperty> _activeColorLayers;
-    std::vector<properties::BoolProperty> _activeNightLayers;
-    std::vector<properties::BoolProperty> _activeOverlays;
-    std::vector<properties::BoolProperty> _activeHeightMapLayers;
-    std::vector<properties::BoolProperty> _activeWaterMaskLayers;
-
-
-    void selectionChanged(
-        properties::SelectionProperty selectionProperty,
-        LayeredTextures::TextureCategory textureCategory);
-    void baseLayerSelectionChanged();
-    void nightLayersSelectionChanged();
-    void heightMapsSelectionChanged();
-    void waterMasksSelectionChanged();
-    void overlaysSelectionChanged();
-    void grayScaleOverlaysSelectionChanged();
 
     DistanceSwitch _distanceSwitch;
 };
