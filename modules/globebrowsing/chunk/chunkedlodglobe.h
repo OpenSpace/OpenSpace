@@ -104,7 +104,6 @@ namespace openspace {
         float lodScaleFactor;
         bool initChunkVisible;
         bool renderSmallChunksFirst = true;
-        float chunkHeight;
 
         // Layered rendering
         std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;

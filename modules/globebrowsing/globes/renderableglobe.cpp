@@ -60,7 +60,6 @@ namespace openspace {
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
         , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
-        , chunkHeight(properties::FloatProperty("chunkHeight", "chunkHeight", 8700.0f, 0.0f, 8700.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
         , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
@@ -73,7 +72,6 @@ namespace openspace {
         addProperty(lodScaleFactor);
         addProperty(initChunkVisible);
         addProperty(renderSmallChunksFirst);
-        addProperty(chunkHeight);
 
         addProperty(atmosphereEnabled);
 
@@ -187,7 +185,6 @@ namespace openspace {
         _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
-        _chunkedLodGlobe->chunkHeight = chunkHeight.value();
 
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 

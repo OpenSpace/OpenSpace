@@ -119,8 +119,6 @@ public:
     properties::FloatProperty lodScaleFactor;
     properties::BoolProperty initChunkVisible;
     properties::BoolProperty renderSmallChunksFirst;
-    properties::FloatProperty chunkHeight;
-
 
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
 

@@ -94,7 +94,7 @@ namespace openspace {
 
     Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         BoundingHeights boundingHeights;
-        boundingHeights.max = _owner->chunkHeight;
+        boundingHeights.max = 0;
         boundingHeights.min = 0;
         boundingHeights.available = false;
 
