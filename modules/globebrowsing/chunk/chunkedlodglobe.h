@@ -92,9 +92,8 @@ namespace openspace {
         std::shared_ptr<TileProviderManager> getTileProviderManager() const;
 
 
-        Camera* getSavedCamera() const { return _savedCamera; }
-        void setSaveCamera(Camera* c) { 
-            if (_savedCamera != nullptr) delete _savedCamera;
+        const std::shared_ptr<const Camera> getSavedCamera() const { return _savedCamera; }
+        void setSaveCamera(std::shared_ptr<Camera> c) { 
             _savedCamera = c; 
         }
         
@@ -109,6 +108,7 @@ namespace openspace {
 
         // Layered rendering
         std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;
+
         bool atmosphereEnabled;
         bool showChunkEdges = false;
         bool showChunkBounds = false;
@@ -138,7 +138,7 @@ namespace openspace {
         static const ChunkIndex LEFT_HEMISPHERE_INDEX;
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
-        std::vector<ChunkCuller*> _chunkCullers;
+        std::vector<std::unique_ptr<ChunkCuller>> _chunkCullers;
 
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
@@ -147,7 +147,7 @@ namespace openspace {
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;
 
-        Camera* _savedCamera;
+        std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
     };

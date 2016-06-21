@@ -76,8 +76,8 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No);
 
-        _chunkCullers.push_back(new HorizonCuller());
-        _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
+        _chunkCullers.push_back(std::make_unique<HorizonCuller>());
+        _chunkCullers.push_back(std::make_unique<FrustumCuller>(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
         
         

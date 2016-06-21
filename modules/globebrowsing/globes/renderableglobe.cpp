@@ -101,12 +101,12 @@ namespace openspace {
         ghoul::Dictionary texturesDictionary;
         dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
-        _tileProviderManager = std::shared_ptr<TileProviderManager>(
-            new TileProviderManager(texturesDictionary, textureInitDataDictionary));
 
-        _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
-            new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));        
+        _tileProviderManager = std::make_shared<TileProviderManager>(
+            texturesDictionary, textureInitDataDictionary);
 
+        _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
+            _ellipsoid, patchSegments, _tileProviderManager);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
 
         // Add debug options - must be after chunkedLodGlobe has been created as it 
@@ -122,14 +122,16 @@ namespace openspace {
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
             std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
-            ReferencedBoolSelection* selection = new ReferencedBoolSelection(categoryName, categoryName);
-            _categorySelections.push_back(selection);
-            addProperty(selection);
+            auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
+            
             auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
             for (auto& provider : categoryProviders) {
                 selection->addOption(provider.name, &provider.isActive);
             }
             selection->addOption(" - Blend tile levels - ", &_chunkedLodGlobe->blendProperties[category]);
+
+            addProperty(selection.get());
+            _categorySelections.push_back(std::move(selection));
         }
     }
 
@@ -160,7 +162,7 @@ namespace openspace {
 
             if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
                 LDEBUG("Saving snapshot of camera!");
-                _chunkedLodGlobe->setSaveCamera(new Camera(data.camera));
+                _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
             }
             else { // throw camera
                 LDEBUG("Throwing away saved camera!");

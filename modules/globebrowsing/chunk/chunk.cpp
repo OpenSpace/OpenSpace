@@ -74,7 +74,7 @@ namespace openspace {
     }
 
     Chunk::Status Chunk::update(const RenderData& data) {
-        Camera* savedCamera = _owner->getSavedCamera();
+        auto savedCamera = _owner->getSavedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 

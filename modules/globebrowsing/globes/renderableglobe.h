@@ -122,7 +122,7 @@ public:
     properties::FloatProperty chunkHeight;
 
 
-    std::vector<ReferencedBoolSelection*> _categorySelections;
+    std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
 
     properties::BoolProperty atmosphereEnabled;
 
