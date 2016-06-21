@@ -303,20 +303,18 @@ namespace openspace {
             return;
         }
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
-        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
-            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
+        bool performAnyBlending = false;
+        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
+        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
+            if(categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
+                performAnyBlending = true; 
+                break;
+            }
+        }
+        if(performAnyBlending) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -340,7 +338,7 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (nightTextureProviders.size() > 0) {
+        if (_tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures).size() > 0) {
             programObject->setUniform("modelViewTransform", modelViewTransform);
         }
 
@@ -371,21 +369,19 @@ namespace openspace {
 
         using namespace glm;
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
-        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        // This information is only needed when doing blending
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
-            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
+
+        bool performAnyBlending = false;
+        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
+        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
+            if (categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
+                performAnyBlending = true;
+                break;
+            }
+        }
+        if (performAnyBlending) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
