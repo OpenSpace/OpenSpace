@@ -114,10 +114,7 @@ public:
 
     
     // Properties 
-
-    properties::BoolProperty mergeInvisible;
     properties::FloatProperty lodScaleFactor;
-    properties::BoolProperty initChunkVisible;
     properties::BoolProperty renderSmallChunksFirst;
 
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;

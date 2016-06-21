@@ -100,9 +100,7 @@ namespace openspace {
 
         bool doHorizonCulling = true;
         bool doFrustumCulling = true;
-        bool mergeInvisible;
         float lodScaleFactor;
-        bool initChunkVisible;
         bool renderSmallChunksFirst = true;
 
         // Layered rendering

@@ -56,9 +56,7 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
-        , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
-        , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
         , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
         , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
@@ -68,9 +66,7 @@ namespace openspace {
         setName("RenderableGlobe");
         
         addProperty(_saveOrThrowCamera);
-        addProperty(mergeInvisible);
         addProperty(lodScaleFactor);
-        addProperty(initChunkVisible);
         addProperty(renderSmallChunksFirst);
 
         addProperty(atmosphereEnabled);
@@ -182,9 +178,7 @@ namespace openspace {
         _time = data.time;
         _distanceSwitch.update(data);
 
-        _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
-        _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
 
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
