@@ -51,8 +51,6 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
-
-
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
@@ -101,7 +99,6 @@ namespace openspace {
         
         return tile;
     }
-
 
     void CachingTileProvider::initTexturesFromLoadedData() {
         while (_asyncTextureDataProvider->hasLoadedTextureData()) {

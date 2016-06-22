@@ -460,12 +460,12 @@ namespace openspace {
             format.ghoulFormat = Texture::Format::Red;
             switch (gdalType) {
             case GDT_Byte:      format.glFormat = GL_R8; break;
-            case GDT_UInt16:    format.glFormat = GL_R16; break;
-            case GDT_Int16:     format.glFormat = GL_R16; break;
+            case GDT_UInt16:    format.glFormat = GL_R16UI; break;
+            case GDT_Int16:     format.glFormat = GL_R16_SNORM; break;
             case GDT_UInt32:    format.glFormat = GL_R32UI; break;
             case GDT_Int32:     format.glFormat = GL_R32I; break;
             case GDT_Float32:   format.glFormat = GL_R32F; break;
-            //case GDT_Float64:   format.glFormat = GL_RED; break; // No representation of 64 bit float?  
+            //case GDT_Float64:   format.glFormat = GL_RED; break; // No representation of 64 bit float?
             default: LERROR("GDAL data type unknown to OpenGL: " << gdalType);
             }
             break;
@@ -473,8 +473,8 @@ namespace openspace {
             format.ghoulFormat = Texture::Format::RG;
             switch (gdalType) {
             case GDT_Byte: format.glFormat = GL_RG8; break;
-            case GDT_UInt16: format.glFormat = GL_RG16; break;
-            case GDT_Int16: format.glFormat = GL_RG16; break;
+            case GDT_UInt16: format.glFormat = GL_RG16UI; break;
+            case GDT_Int16: format.glFormat = GL_RG16_SNORM; break;
             case GDT_UInt32: format.glFormat = GL_RG32UI; break;
             case GDT_Int32: format.glFormat = GL_RG32I; break;
             case GDT_Float32: format.glFormat = GL_RG32F; break;    
@@ -486,8 +486,8 @@ namespace openspace {
             format.ghoulFormat = Texture::Format::RGB;
             switch (gdalType) {
             case GDT_Byte: format.glFormat = GL_RGB8; break;
-            case GDT_UInt16: format.glFormat = GL_RGB16; break;
-            case GDT_Int16: format.glFormat = GL_RGB16; break;
+            case GDT_UInt16: format.glFormat = GL_RGB16UI; break;
+            case GDT_Int16: format.glFormat = GL_RGB16_SNORM; break;
             case GDT_UInt32: format.glFormat = GL_RGB32UI; break;
             case GDT_Int32: format.glFormat = GL_RGB32I; break;
             case GDT_Float32: format.glFormat = GL_RGB32F; break;    
@@ -499,8 +499,8 @@ namespace openspace {
             format.ghoulFormat = Texture::Format::RGBA;
             switch (gdalType) {
             case GDT_Byte: format.glFormat = GL_RGBA8; break;
-            case GDT_UInt16: format.glFormat = GL_RGBA16; break;
-            case GDT_Int16: format.glFormat = GL_RGBA16; break;
+            case GDT_UInt16: format.glFormat = GL_RGBA16UI; break;
+            case GDT_Int16: format.glFormat = GL_RGB16_SNORM; break;
             case GDT_UInt32: format.glFormat = GL_RGBA32UI; break;
             case GDT_Int32: format.glFormat = GL_RGBA32I; break;
             case GDT_Float32: format.glFormat = GL_RGBA32F; break;
@@ -590,8 +590,6 @@ namespace openspace {
         pixelStart = glm::uvec2(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
         pixelEnd = glm::uvec2(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
         numPixels = pixelEnd - pixelStart;
-        if (numPixels.x < 1000 && (pixelStart.x % 2 || pixelStart.y % 2))
-            int hej = 0;
     }
 
     TileDataset::DataLayout::DataLayout() {

@@ -30,7 +30,7 @@ return {
             Body = "EARTH",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             --Radii = {3396190.0, 3396190.0, 3396190.0}, -- Mars as a spheroid
-            SegmentsPerPatch = 90,
+            SegmentsPerPatch = 64,
             TextureInitData = {
                 ColorTextureMinimumSize = 1024,
                 OverlayMinimumSize = 2048,

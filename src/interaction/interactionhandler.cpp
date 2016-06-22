@@ -616,7 +616,6 @@ void InteractionHandler::clearKeyframes(){
 #else // USE_OLD_INTERACTIONHANDLER
 
 
-
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
@@ -764,6 +763,7 @@ void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
 
         _camera->setPositionVec3(p);
         _camera->setRotation(r);
+        _currentInteractionMode->initialize(*_camera);
         _cameraUpdatedFromScript = true;
     }
 }
