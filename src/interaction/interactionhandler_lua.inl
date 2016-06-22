@@ -143,6 +143,39 @@ int setInteractionMode(lua_State* L) {
     return 0;
 }
 
+int restoreCameraPosition(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.setCameraPosition";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string cameraPosFilePath = luaL_checkstring(L, -1);
+
+    if (cameraPosFilePath.empty())
+        return luaL_error(L, "filepath string is empty");
+
+    OsEng.interactionHandler().restoreCameraPosition(cameraPosFilePath);
+    return 0;
+}
+
+int saveCameraPosition(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.setCameraPosition";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string cameraPosFilePath = luaL_checkstring(L, -1);
+
+    if (cameraPosFilePath.empty())
+        return luaL_error(L, "filepath string is empty");
+
+    OsEng.interactionHandler().saveCameraPosition(cameraPosFilePath);
+}
+
 #ifdef USE_OLD_INTERACTIONHANDLER
 
 /**

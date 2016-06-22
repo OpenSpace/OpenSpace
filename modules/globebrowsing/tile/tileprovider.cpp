@@ -68,7 +68,7 @@ namespace openspace {
     }
 
 
-    void CachingTileProvider::prerender() {
+    void CachingTileProvider::update() {
         initTexturesFromLoadedData();
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();

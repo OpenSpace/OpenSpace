@@ -36,6 +36,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#include <fstream>
+
 namespace {
     const std::string _loggerCat = "InteractionHandler";
 }
@@ -613,380 +615,6 @@ void InteractionHandler::clearKeyframes(){
 
 #else // USE_OLD_INTERACTIONHANDLER
 
-// InputState
-InputState::InputState() {
-
-}
-
-InputState::~InputState() {
-
-}
-
-void InputState::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
-    _keyframeMutex.lock();
-
-    //save a maximum of 10 samples (1 seconds of buffer)
-    if (_keyframes.size() >= 10) {
-        _keyframes.erase(_keyframes.begin());
-    }
-    _keyframes.push_back(kf);
-
-    _keyframeMutex.unlock();
-}
-
-void InputState::clearKeyframes() {
-    _keyframeMutex.lock();
-    _keyframes.clear();
-    _keyframeMutex.unlock();
-}
-
-void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
-    if (action == KeyAction::Press) {
-        _keysDown.push_back(std::pair<Key, KeyModifier>(key, modifier));
-    }
-    else if (action == KeyAction::Release) {
-        // Remove all key pressings for 'key'
-        _keysDown.remove_if([key](std::pair<Key, KeyModifier> keyModPair)
-        { return keyModPair.first == key; });
-    }
-}
-
-void InputState::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (action == MouseAction::Press) {
-        _mouseButtonsDown.push_back(button);
-    }
-    else if (action == MouseAction::Release) {
-        // Remove all key pressings for 'button'
-        _mouseButtonsDown.remove_if([button](MouseButton buttonInList)
-        { return button == buttonInList; });
-    }
-}
-
-void InputState::mousePositionCallback(double mouseX, double mouseY) {
-    _mousePosition = glm::dvec2(mouseX, mouseY);
-}
-
-void InputState::mouseScrollWheelCallback(double mouseScrollDelta) {
-    _mouseScrollDelta = mouseScrollDelta;
-}
-
-const std::list<std::pair<Key, KeyModifier> >& InputState::getPressedKeys() const {
-    return _keysDown;
-}
-
-const std::list<MouseButton>& InputState::getPressedMouseButtons() const {
-    return _mouseButtonsDown;
-}
-
-glm::dvec2 InputState::getMousePosition() const{
-    return _mousePosition;
-}
-
-double InputState::getMouseScrollDelta() const{
-    return _mouseScrollDelta;
-}
-
-bool InputState::isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const{
-    for (auto it = _keysDown.begin(); it != _keysDown.end(); it++) {
-        if (*it == keyModPair) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
-    for (auto it = _mouseButtonsDown.begin(); it != _mouseButtonsDown.end(); it++) {
-        if (*it == mouseButton) {
-            return true;
-        }
-    }
-    return false;
-}
-
-InteractionMode::InteractionMode() {
-
-}
-
-
-InteractionMode::~InteractionMode() {
-
-}
-
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-}
-
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-// KeyframeInteractionMode
-KeyframeInteractionMode::KeyframeInteractionMode(){
-
-}
-
-KeyframeInteractionMode::~KeyframeInteractionMode() {
-
-}
-
-void KeyframeInteractionMode::update(double deltaTime) {
-    // TODO : Get keyframes from input state and use them to position and rotate the camera
-}
-
-// OrbitalInteractionMode
-OrbitalInteractionMode::OrbitalInteractionMode(double sensitivity, double velocityScaleFactor)
-    : _sensitivity(sensitivity)
-    , _globalRotationMouseState(velocityScaleFactor)
-    , _localRotationMouseState(velocityScaleFactor)
-    , _truckMovementMouseState(velocityScaleFactor)
-    , _rollMouseState(velocityScaleFactor) {
-
-}
-
-OrbitalInteractionMode::~OrbitalInteractionMode() {
-
-}
-
-void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-    glm::dvec2 mousePosition = inputState.getMousePosition();
-
-    bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
-    bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
-    bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(
-        std::pair<Key, KeyModifier>(Key::LeftControl, KeyModifier::Control));
-
-    // Update the mouse states
-    if (button1Pressed) {
-        if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta =
-                _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
-
-            _globalRotationMouseState.previousPosition = mousePosition;
-            _globalRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-        }
-        else {
-            glm::dvec2 mousePositionDelta =
-                _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
-
-            _localRotationMouseState.previousPosition = mousePosition;
-            _localRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-        }
-    }
-    else { // !button1Pressed
-        _localRotationMouseState.previousPosition = mousePosition;
-        _localRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-
-        _globalRotationMouseState.previousPosition = mousePosition;
-        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-    }
-    if (button2Pressed) {
-        glm::dvec2 mousePositionDelta =
-            _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
-    }
-    else { // !button2Pressed
-        _truckMovementMouseState.previousPosition = mousePosition;
-        _truckMovementMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-    }
-    if (button3Pressed) {
-        glm::dvec2 mousePositionDelta =
-            _rollMouseState.previousPosition - mousePosition;
-        _rollMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
-    }
-    else { // !button3Pressed
-        _rollMouseState.previousPosition = mousePosition;
-        _rollMouseState.velocity.set(glm::dvec2(0, 0), deltaTime);
-    }
-}
-
-void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
-    if (_focusNode) {
-        // Declare variables to use in interaction calculations
-        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = camera.positionVec3();
-        glm::dvec3 posDiff = camPos - centerPos;
-        glm::dvec3 newPosition = camPos;
-
-        { // Do local rotation
-            glm::dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
-
-            _localCameraRotation = _localCameraRotation * rotationDiff;
-        }
-        { // Do global rotation
-            glm::dvec3 eulerAngles(
-                -_globalRotationMouseState.velocity.get().y,
-                -_globalRotationMouseState.velocity.get().x,
-                0);
-            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
-
-            glm::dquat newRotationCamspace =
-                _globalCameraRotation * rotationDiffCamSpace;
-            glm::dquat rotationDiffWorldSpace =
-                newRotationCamspace * glm::inverse(_globalCameraRotation);
-
-            glm::dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
-
-            newPosition = camPos + rotationDiffVec3;
-
-            glm::dvec3 directionToCenter = glm::normalize(centerPos - newPosition);
-
-            glm::dvec3 lookUpWhenFacingCenter =
-                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
-            glm::dmat4 lookAtMat = glm::lookAt(
-                glm::dvec3(0, 0, 0),
-                directionToCenter,
-                lookUpWhenFacingCenter);
-            _globalCameraRotation =
-                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
-        }
-        { // Move position towards or away from focus node
-            double boundingSphere = _focusNode->boundingSphere().lengthf();
-            glm::dvec3 centerToBoundingSphere =
-                glm::normalize(posDiff) *
-                static_cast<double>(_focusNode->boundingSphere().lengthf());
-            newPosition += -(posDiff - centerToBoundingSphere) *
-                _truckMovementMouseState.velocity.get().y;
-        }
-        { // Do roll
-            glm::dquat cameraRollRotation =
-                glm::angleAxis(_rollMouseState.velocity.get().x, glm::normalize(posDiff));
-            _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
-        }
-
-        // Update the camera state
-        camera.setRotation(_globalCameraRotation * _localCameraRotation);
-        camera.setPositionVec3(newPosition);
-    }
-}
-
-void OrbitalInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
-    updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates(camera);
-}
-
-GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor)
-    : OrbitalInteractionMode(sensitivity, velocityScaleFactor) 
-{
-
-}
-
-GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
-
-}
-
-void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    Renderable* baseRenderable = _focusNode->renderable();
-    if (RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(baseRenderable)) {
-        _globe = globe;
-    }
-    else {
-        LWARNING("Focus node is not a renderable globe. GlobeBrowsingInteraction is not possible");
-        _globe = nullptr;
-    }
-
-}
-
-
-void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
-    if (_focusNode && _globe) {
-        // Declare variables to use in interaction calculations
-        // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = 10000.0;
-        double minHeightAboveGround = 100.0;
-
-        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = camera.positionVec3();
-        glm::dvec3 posDiff = camPos - centerPos;
-
-        glm::dvec3 directionFromSurfaceToCamera =
-            _globe->ellipsoid().geodeticSurfaceNormal(
-                _globe->ellipsoid().cartesianToGeodetic2(camPos));
-        glm::dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
-            directionFromSurfaceToCamera * ellipsoidShrinkTerm;
-        glm::dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-
-        double distFromCenterToSurface =
-            glm::length(centerToEllipsoidSurface);
-        double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-        double distFromCenterToCamera = glm::length(posDiff);
-
-        { // Do local rotation
-            glm::dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
-
-            _localCameraRotation = _localCameraRotation * rotationDiff;
-        }
-        { // Do global rotation
-            glm::dvec3 eulerAngles = glm::dvec3(
-                -_globalRotationMouseState.velocity.get().y,
-                -_globalRotationMouseState.velocity.get().x,
-                0) * glm::clamp(distFromEllipsoidSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
-            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
-
-            glm::dquat rotationDiffWorldSpace =
-                _globalCameraRotation *
-                rotationDiffCamSpace *
-                glm::inverse(_globalCameraRotation);
-
-            glm::dvec3 rotationDiffVec3 =
-                (distFromCenterToCamera * directionFromSurfaceToCamera)
-                * rotationDiffWorldSpace
-                - (distFromCenterToCamera * directionFromSurfaceToCamera);
-
-            camPos = camPos + rotationDiffVec3;
-
-            directionFromSurfaceToCamera =
-                _globe->ellipsoid().geodeticSurfaceNormal(
-                    _globe->ellipsoid().cartesianToGeodetic2(camPos));
-            centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
-                directionFromSurfaceToCamera * ellipsoidShrinkTerm;
-            ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-
-            glm::dvec3 lookUpWhenFacingSurface =
-                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
-            glm::dmat4 lookAtMat = glm::lookAt(
-                glm::dvec3(0, 0, 0),
-                -directionFromSurfaceToCamera,
-                lookUpWhenFacingSurface);
-            _globalCameraRotation =
-                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
-        }
-        { // Move position towards or away from focus node
-            distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            camPos += -directionFromSurfaceToCamera * distFromEllipsoidSurfaceToCamera *
-                _truckMovementMouseState.velocity.get().y;
-        }
-        { // Do roll
-            glm::dquat cameraRollRotation =
-                glm::angleAxis(_rollMouseState.velocity.get().x, directionFromSurfaceToCamera);
-            _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
-        }
-        { // Push up to surface
-            ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-
-            distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface = _globe->getHeight(camPos) + ellipsoidShrinkTerm;
-            double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
-            camPos += directionFromSurfaceToCamera *
-                glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);
-        }
-        // Update the camera state
-        camera.setRotation(_globalCameraRotation * _localCameraRotation);
-        camera.setPositionVec3(camPos);
-    }
-}
-
-void GlobeBrowsingInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
-    updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates(camera);
-}
 
 // InteractionHandler
 InteractionHandler::InteractionHandler()
@@ -1060,7 +688,13 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) { 
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-    _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
+
+    if (_cameraUpdatedFromScript) {
+        _cameraUpdatedFromScript = false;
+    }
+    else {
+        _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
+    }
 }
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -1101,6 +735,39 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
+void InteractionHandler::saveCameraPosition(const std::string& filepath) {
+    if (!filepath.empty()) {
+        auto fullpath = absPath(filepath);
+        LDEBUG("Saving camera position: " << fullpath);
+        std::ofstream ofs(fullpath.c_str());
+        _camera->serialize(ofs);
+        ofs.close();
+    }
+}
+
+void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
+    if (!filepath.empty()) {
+        auto fullpath = absPath(filepath);
+        LDEBUG("Reading camera position: " << fullpath);
+        std::ifstream ifs(fullpath.c_str());
+        Camera c;
+        c.deserialize(ifs);
+        ifs.close();
+
+        // uff, need to do this ... 
+        c.preSynchronization();
+        c.postSynchronizationPreDraw();
+
+        auto p = c.positionVec3();
+        auto r = c.rotationQuaternion();
+
+        _camera->setPositionVec3(p);
+        _camera->setRotation(r);
+        _currentInteractionMode->initialize(*_camera);
+        _cameraUpdatedFromScript = true;
+    }
+}
+
 void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
 }
@@ -1133,6 +800,18 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 &luascriptfunctions::setInteractionMode,
                 "string",
                 "Set the interaction mode for the camera"
+            },
+            {
+                "saveCameraPosition",
+                &luascriptfunctions::saveCameraPosition,
+                "string",
+                "Save the current camera position to file"
+            },
+            {
+                "restoreCameraPosition",
+                &luascriptfunctions::restoreCameraPosition,
+                "string",
+                "Restore the camera position from file"
             }
         }
     };

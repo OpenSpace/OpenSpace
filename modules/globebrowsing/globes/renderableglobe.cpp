@@ -177,7 +177,7 @@ namespace openspace {
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
-        _tileProviderManager->prerender();
+        _tileProviderManager->update();
     }
 
     glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
