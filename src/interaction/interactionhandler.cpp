@@ -717,16 +717,8 @@ void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
 }
 
-void InteractionMode::setCamera(Camera* camera) {
-    _camera = camera;
-}
-
 SceneGraphNode* InteractionMode::focusNode() {
     return _focusNode;
-}
-
-Camera* InteractionMode::camera() {
-    return _camera;
 }
 
 // KeyframeInteractionMode
@@ -811,11 +803,11 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputS
     }
 }
 
-void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
+void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     if (_focusNode) {
         // Declare variables to use in interaction calculations
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = _camera->positionVec3();
+        glm::dvec3 camPos = camera.positionVec3();
         glm::dvec3 posDiff = camPos - centerPos;
         glm::dvec3 newPosition = camPos;
 
@@ -844,7 +836,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
             glm::dvec3 directionToCenter = glm::normalize(centerPos - newPosition);
 
             glm::dvec3 lookUpWhenFacingCenter =
-                _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
+                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
             glm::dmat4 lookAtMat = glm::lookAt(
                 glm::dvec3(0, 0, 0),
                 directionToCenter,
@@ -867,14 +859,14 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates() {
         }
 
         // Update the camera state
-        _camera->setRotation(_globalCameraRotation * _localCameraRotation);
-        _camera->setPositionVec3(newPosition);
+        camera.setRotation(_globalCameraRotation * _localCameraRotation);
+        camera.setPositionVec3(newPosition);
     }
 }
 
-void OrbitalInteractionMode::update(const InputState& inputState, double deltaTime) {
+void OrbitalInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
     updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates();
+    updateCameraStateFromMouseStates(camera);
 }
 
 GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor)
@@ -902,11 +894,11 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 
-void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
+void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = _camera->positionVec3();
+        glm::dvec3 camPos = camera.positionVec3();
         glm::dvec3 posDiff = camPos - centerPos;
         glm::dvec3 newPosition = camPos;
 
@@ -950,7 +942,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
             glm::dvec3 newDirectionFromSurfaceToCamera = glm::normalize(newSurfaceToCamera);
 
             glm::dvec3 lookUpWhenFacingSurface =
-                _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
+                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
             glm::dmat4 lookAtMat = glm::lookAt(
                 glm::dvec3(0, 0, 0),
                 -newDirectionFromSurfaceToCamera,
@@ -969,14 +961,14 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
         }
 
         // Update the camera state
-        _camera->setRotation(_globalCameraRotation * _localCameraRotation);
-        _camera->setPositionVec3(newPosition);
+        camera.setRotation(_globalCameraRotation * _localCameraRotation);
+        camera.setPositionVec3(newPosition);
     }
 }
 
-void GlobeBrowsingInteractionMode::update(const InputState& inputState, double deltaTime) {
+void GlobeBrowsingInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
     updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates();
+    updateCameraStateFromMouseStates(camera);
 }
 
 // InteractionHandler
@@ -1018,19 +1010,17 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 }
 
 void InteractionHandler::setCamera(Camera* camera) {
-    _currentInteractionMode->setCamera(camera);
+    _camera = camera;
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
-    // Camera and focus node is passed over from the previous interaction mode
-    Camera* camera = _currentInteractionMode->camera();
+    // Focus node is passed over from the previous interaction mode
     SceneGraphNode* focusNode = _currentInteractionMode->focusNode();
 
     // Set the interaction mode
     _currentInteractionMode = interactionMode;
 
-    // Update the camera and focusnode for the new interaction mode
-    _currentInteractionMode->setCamera(camera);
+    // Update the focusnode for the new interaction mode
     _currentInteractionMode->setFocusNode(focusNode);
 }
 
@@ -1051,8 +1041,9 @@ void InteractionHandler::unlockControls() {
 }
 
 void InteractionHandler::update(double deltaTime) { 
-    ghoul_assert(_inputState != nullptr, "InputState cannot is null!");
-    _currentInteractionMode->update(*_inputState, deltaTime);
+    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
+    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
+    _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
 }
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -1060,7 +1051,7 @@ SceneGraphNode* const InteractionHandler::focusNode() const {
 }
 
 Camera* const InteractionHandler::camera() const {
-    return _currentInteractionMode->camera();
+    return _camera;
 }
 
 const InputState& InteractionHandler::inputState() const {

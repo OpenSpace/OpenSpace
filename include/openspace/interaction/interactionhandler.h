@@ -192,13 +192,11 @@ public:
 
     // Mutators
     virtual void setFocusNode(SceneGraphNode* focusNode);
-    void setCamera(Camera* camera);
 
     // Accessors
     SceneGraphNode* focusNode();
-    Camera* camera();
 
-    virtual void update(const InputState& inputState, double deltaTime) = 0;
+    virtual void update(Camera& camera, const InputState& inputState, double deltaTime) = 0;
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -234,7 +232,6 @@ protected:
     };
 
     SceneGraphNode* _focusNode = nullptr;
-    Camera* _camera = nullptr;
 };
 
 class KeyframeInteractionMode : public InteractionMode
@@ -260,10 +257,10 @@ public:
     OrbitalInteractionMode(double sensitivity, double velocityScaleFactor);
     ~OrbitalInteractionMode();
 
-    virtual void update(const InputState& inputState, double deltaTime);
+    virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 protected:
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    void updateCameraStateFromMouseStates();
+    void updateCameraStateFromMouseStates(Camera& camera);
 
     double _sensitivity;
 
@@ -283,9 +280,9 @@ public:
     ~GlobeBrowsingInteractionMode();
 
     virtual void setFocusNode(SceneGraphNode* focusNode);
-    virtual void update(const InputState& inputState, double deltaTime);
+    virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 private:
-    void updateCameraStateFromMouseStates();
+    void updateCameraStateFromMouseStates(Camera& camera);
     RenderableGlobe* _globe;
 };
 
@@ -341,6 +338,7 @@ private:
     std::multimap<KeyWithModifier, std::string > _keyLua;
 
     std::unique_ptr<InputState> _inputState;
+    Camera* _camera;
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
@@ -350,6 +348,7 @@ private:
     // Properties
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
+    
 };
 
 #endif // USE_OLD_INTERACTIONHANDLER
