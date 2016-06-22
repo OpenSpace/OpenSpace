@@ -96,6 +96,8 @@ public:
     SceneGraphNode* focusNode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime) = 0;
+    virtual void initialize(const Camera& camera) = 0;
+
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -140,6 +142,8 @@ public:
     ~KeyframeInteractionMode();
 
     virtual void update(double deltaTime);
+    virtual void initialize(const Camera& camera);
+
 private:
     double _currentKeyframeTime;
 };
@@ -157,6 +161,8 @@ public:
     ~OrbitalInteractionMode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
+    virtual void initialize(const Camera& camera);
+
 protected:
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromMouseStates(Camera& camera);

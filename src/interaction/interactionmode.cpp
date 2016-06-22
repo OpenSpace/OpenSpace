@@ -169,6 +169,10 @@ KeyframeInteractionMode::~KeyframeInteractionMode() {
 void KeyframeInteractionMode::update(double deltaTime) {
     // TODO : Get keyframes from input state and use them to position and rotate the camera
 }
+void KeyframeInteractionMode::initialize(const Camera& camera) {
+    LWARNING("KeyframeInteractionMode::initialize not implemented yet");
+}
+
 
 // OrbitalInteractionMode
 OrbitalInteractionMode::OrbitalInteractionMode(double sensitivity, double velocityScaleFactor)
@@ -240,57 +244,52 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputS
 }
 
 void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    using namespace glm;
     if (_focusNode) {
         // Declare variables to use in interaction calculations
-        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = camera.positionVec3();
-        glm::dvec3 posDiff = camPos - centerPos;
-        glm::dvec3 newPosition = camPos;
-
+        dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        dvec3 camPos = camera.positionVec3();
+        dvec3 posDiff = camPos - centerPos;
+        dvec3 newPosition = camPos;
+        
         { // Do local rotation
-            glm::dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+            dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
+            dquat rotationDiff = dquat(eulerAngles);
 
             _localCameraRotation = _localCameraRotation * rotationDiff;
         }
         { // Do global rotation
-            glm::dvec3 eulerAngles(
-                -_globalRotationMouseState.velocity.get().y,
-                -_globalRotationMouseState.velocity.get().x,
-                0);
-            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+            dvec2 smoothMouseVelocity = _globalRotationMouseState.velocity.get();
+            dvec3 eulerAngles(smoothMouseVelocity.x, smoothMouseVelocity.y, 0);
+            dquat rotationDiffCamSpace = dquat(eulerAngles);
 
-            glm::dquat newRotationCamspace =
-                _globalCameraRotation * rotationDiffCamSpace;
-            glm::dquat rotationDiffWorldSpace =
-                newRotationCamspace * glm::inverse(_globalCameraRotation);
-
-            glm::dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
+            dquat newRotationCamspace = _globalCameraRotation * rotationDiffCamSpace;
+            dquat rotationDiffWorldSpace = newRotationCamspace * inverse(_globalCameraRotation); 
+            dvec3 rotationDiffVec3 = posDiff * rotationDiffWorldSpace - posDiff;
 
             newPosition = camPos + rotationDiffVec3;
 
-            glm::dvec3 directionToCenter = glm::normalize(centerPos - newPosition);
+            dvec3 directionToCenter = normalize(centerPos - newPosition);
 
-            glm::dvec3 lookUpWhenFacingCenter =
-                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
-            glm::dmat4 lookAtMat = glm::lookAt(
-                glm::dvec3(0, 0, 0),
+            dvec3 lookUpWhenFacingCenter =
+                _globalCameraRotation * dvec3(camera.lookUpVectorCameraSpace());
+            dmat4 lookAtMat = lookAt(
+                dvec3(0, 0, 0),
                 directionToCenter,
                 lookUpWhenFacingCenter);
-            _globalCameraRotation =
-                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+            _globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
         }
         { // Move position towards or away from focus node
             double boundingSphere = _focusNode->boundingSphere().lengthf();
-            glm::dvec3 centerToBoundingSphere =
-                glm::normalize(posDiff) *
+            dvec3 centerToBoundingSphere =
+                normalize(posDiff) *
                 static_cast<double>(_focusNode->boundingSphere().lengthf());
             newPosition += -(posDiff - centerToBoundingSphere) *
                 _truckMovementMouseState.velocity.get().y;
         }
         { // Do roll
-            glm::dquat cameraRollRotation =
-                glm::angleAxis(_rollMouseState.velocity.get().x, glm::normalize(posDiff));
+            dquat cameraRollRotation =
+                angleAxis(_rollMouseState.velocity.get().x, normalize(posDiff));
             _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
         }
 
@@ -303,6 +302,14 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
 void OrbitalInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
     updateMouseStatesFromInput(inputState, deltaTime);
     updateCameraStateFromMouseStates(camera);
+}
+
+void OrbitalInteractionMode::initialize(const Camera& camera) {
+    LWARNING("Interaction has not implemented sync to camera. I.e. interaction \
+        mode may contain staate that is not transferred when reading camera state from disk");
+
+    // @Todo : extract _localCameraRotation and _globalCameraRotation from camera state
+
 }
 
 GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor)
@@ -331,68 +338,57 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    using namespace glm;
+
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
-        glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        glm::dvec3 camPos = camera.positionVec3();
-        glm::dvec3 posDiff = camPos - centerPos;
-        glm::dvec3 newPosition = camPos;
+        dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        dvec3 camPos = camera.positionVec3();
+        dvec3 posDiff = camPos - centerPos;
+        dvec3 newPosition = camPos;
 
-        glm::dvec3 centerToSurface = _globe->geodeticSurfaceProjection(camPos);
-        glm::dvec3 surfaceToCamera = camPos - (centerPos + centerToSurface);
-        glm::dvec3 directionFromSurfaceToCamera = glm::normalize(surfaceToCamera);
-        double distFromCenterToSurface =
-            glm::length(centerToSurface);
-        double distFromSurfaceToCamera = glm::length(surfaceToCamera);
-        double distFromCenterToCamera = glm::length(posDiff);
+        dvec3 centerToSurface = _globe->geodeticSurfaceProjection(camPos);
+        dvec3 surfaceToCamera = camPos - (centerPos + centerToSurface);
+        dvec3 directionFromSurfaceToCamera = normalize(surfaceToCamera);
+        double distFromCenterToSurface = length(centerToSurface);
+        double distFromSurfaceToCamera = length(surfaceToCamera);
+        double distFromCenterToCamera = length(posDiff);
 
         { // Do local rotation
-            glm::dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+            dvec3 eulerAngles(_localRotationMouseState.velocity.get().y, 0, 0);
+            dquat rotationDiff = dquat(eulerAngles);
 
             _localCameraRotation = _localCameraRotation * rotationDiff;
         }
         { // Do global rotation
-            glm::dvec3 eulerAngles(
-                -_globalRotationMouseState.velocity.get().y,
-                -_globalRotationMouseState.velocity.get().x,
-                0);
-            glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+            dvec2 smoothMouseVel = _globalRotationMouseState.velocity.get();
+            dvec3 eulerAngles(smoothMouseVel.y, -smoothMouseVel.x, 0);
+            dquat rotationDiffCamSpace = dquat(eulerAngles);
 
 
-            glm::dquat rotationDiffWorldSpace =
-                _globalCameraRotation *
-                rotationDiffCamSpace *
-                glm::inverse(_globalCameraRotation);
+            dquat rotationDiffWorldSpace = _globalCameraRotation * rotationDiffCamSpace 
+                * inverse(_globalCameraRotation);
 
-            glm::dvec3 rotationDiffVec3 =
-                (distFromCenterToCamera * directionFromSurfaceToCamera)
-                * rotationDiffWorldSpace
-                - (distFromCenterToCamera * directionFromSurfaceToCamera);
-            rotationDiffVec3 *= glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
+            dvec3 rotationDiffVec3 = (distFromCenterToCamera * directionFromSurfaceToCamera)
+                * rotationDiffWorldSpace - (distFromCenterToCamera * directionFromSurfaceToCamera);
+            rotationDiffVec3 *= clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
 
             newPosition = camPos + rotationDiffVec3;
 
-            glm::dvec3 newCenterToSurface = _globe->geodeticSurfaceProjection(newPosition);
-            glm::dvec3 newSurfaceToCamera = newPosition - (centerPos + newCenterToSurface);
-            glm::dvec3 newDirectionFromSurfaceToCamera = glm::normalize(newSurfaceToCamera);
+            dvec3 newCenterToSurface = _globe->geodeticSurfaceProjection(newPosition);
+            dvec3 newSurfaceToCamera = newPosition - (centerPos + newCenterToSurface);
+            dvec3 newDirectionFromSurfaceToCamera = normalize(newSurfaceToCamera);
 
-            glm::dvec3 lookUpWhenFacingSurface =
-                _globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
-            glm::dmat4 lookAtMat = glm::lookAt(
-                glm::dvec3(0, 0, 0),
-                -newDirectionFromSurfaceToCamera,
-                lookUpWhenFacingSurface);
-            _globalCameraRotation =
-                glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
+            dvec3 lookUpWhenFacingSurface = _globalCameraRotation * dvec3(camera.lookUpVectorCameraSpace());
+            dmat4 lookAtMat = lookAt(dvec3(0, 0, 0), -newDirectionFromSurfaceToCamera, lookUpWhenFacingSurface);
+            _globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
         }
         { // Move position towards or away from focus node
-            newPosition += -(posDiff - centerToSurface) *
-                _truckMovementMouseState.velocity.get().y;
+            newPosition += -(posDiff - centerToSurface) * _truckMovementMouseState.velocity.get().y;
         }
         { // Do roll
-            glm::dquat cameraRollRotation =
-                glm::angleAxis(_rollMouseState.velocity.get().x, directionFromSurfaceToCamera);
+            dquat cameraRollRotation =
+                angleAxis(_rollMouseState.velocity.get().x, directionFromSurfaceToCamera);
             _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
         }
 
