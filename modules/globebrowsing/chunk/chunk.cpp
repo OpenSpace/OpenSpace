@@ -74,7 +74,7 @@ namespace openspace {
     }
 
     Chunk::Status Chunk::update(const RenderData& data) {
-        Camera* savedCamera = _owner->getSavedCamera();
+        auto savedCamera = _owner->getSavedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
@@ -94,7 +94,7 @@ namespace openspace {
 
     Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         BoundingHeights boundingHeights;
-        boundingHeights.max = _owner->chunkHeight;
+        boundingHeights.max = 0;
         boundingHeights.min = 0;
         boundingHeights.available = false;
 
@@ -170,12 +170,6 @@ namespace openspace {
         }
         return corners;
     }
-
-
-    void Chunk::render(const RenderData& data) const {
-        _owner->getPatchRenderer().renderChunk(*this, data);
-    }
-
 
 
 } // namespace openspace

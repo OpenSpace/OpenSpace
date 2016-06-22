@@ -65,8 +65,6 @@ namespace openspace {
             std::shared_ptr<TileProviderManager> tileProviderManager);
         virtual ~ChunkedLodGlobe();
 
-        ChunkRenderer& getPatchRenderer() const;
-
         bool initialize() override;
         bool deinitialize() override;
         bool isReady() const override;
@@ -92,36 +90,35 @@ namespace openspace {
         std::shared_ptr<TileProviderManager> getTileProviderManager() const;
 
 
-        Camera* getSavedCamera() const { return _savedCamera; }
-        void setSaveCamera(Camera* c) { 
-            if (_savedCamera != nullptr) delete _savedCamera;
+        const std::shared_ptr<const Camera> getSavedCamera() const { return _savedCamera; }
+        void setSaveCamera(std::shared_ptr<Camera> c) { 
             _savedCamera = c; 
         }
-        
 
-        bool doHorizonCulling = true;
-        bool doFrustumCulling = true;
-        bool mergeInvisible;
+        
         float lodScaleFactor;
-        bool initChunkVisible;
-        bool renderSmallChunksFirst = true;
-        float chunkHeight;
 
         // Layered rendering
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES>
-            blendProperties;
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;
+
         bool atmosphereEnabled;
-        bool showChunkEdges;
-        bool showChunkBounds;
-        bool levelByProjArea;
-        bool limitLevelByAvailableHeightData;
-        
+
+        struct DebugOptions {
+            bool showChunkEdges = false;
+            bool showChunkBounds = false;
+            bool showChunkAABB = false;
+
+            bool doHorizonCulling = true;
+            bool doFrustumCulling = true;
+
+            bool limitLevelByAvailableHeightData = true;
+            bool levelByProjAreaElseDistance = true;
+        } debugOptions;
+
 
     private:
 
-        void renderChunkTree(ChunkNode* node, const RenderData& data) const;
-        void renderChunkBounds(const RenderData& data) const;
-
+        void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
@@ -130,7 +127,7 @@ namespace openspace {
         std::unique_ptr<ChunkNode> _rightRoot;
 
         // the patch used for actual rendering
-        std::unique_ptr<ChunkRenderer> _patchRenderer;
+        std::unique_ptr<ChunkRenderer> _renderer;
 
         static const GeodeticPatch LEFT_HEMISPHERE;
         static const GeodeticPatch RIGHT_HEMISPHERE;
@@ -138,7 +135,7 @@ namespace openspace {
         static const ChunkIndex LEFT_HEMISPHERE_INDEX;
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
-        std::vector<ChunkCuller*> _chunkCullers;
+        std::vector<std::unique_ptr<ChunkCuller>> _chunkCullers;
 
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
@@ -147,7 +144,7 @@ namespace openspace {
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;
 
-        Camera* _savedCamera;
+        std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
     };

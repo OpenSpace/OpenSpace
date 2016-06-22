@@ -190,7 +190,7 @@ namespace openspace {
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "showChunkEdges",
-                std::to_string(chunk.owner()->showChunkEdges)));
+                std::to_string(chunk.owner()->debugOptions.showChunkEdges)));
 
 
         // Now the shader program can be accessed
@@ -303,20 +303,18 @@ namespace openspace {
             return;
         }
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
-        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
-            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
+        bool performAnyBlending = false;
+        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
+        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
+            if(categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
+                performAnyBlending = true; 
+                break;
+            }
+        }
+        if(performAnyBlending) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
@@ -340,7 +338,7 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (nightTextureProviders.size() > 0) {
+        if (_tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures).size() > 0) {
             programObject->setUniform("modelViewTransform", modelViewTransform);
         }
 
@@ -371,21 +369,19 @@ namespace openspace {
 
         using namespace glm;
 
-        auto heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        auto colorTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::ColorTextures);
-        auto nightTextureProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures);
-        auto overlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::Overlays);
-        auto grayScaleOverlayProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::GrayScaleOverlays);
-        auto waterMaskProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::WaterMasks);
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
-        // This information is only needed when doing blending
-        if ((heightMapProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::HeightMaps]) ||
-            (colorTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::ColorTextures]) ||
-            (nightTextureProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::NightTextures]) ||
-            (overlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::Overlays]) ||
-            (grayScaleOverlayProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::GrayScaleOverlays]) ||
-            (waterMaskProviders.size() > 0 && chunk.owner()->blendProperties[LayeredTextures::WaterMasks])) {
+
+        bool performAnyBlending = false;
+        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
+        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
+            if (categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
+                performAnyBlending = true;
+                break;
+            }
+        }
+        if (performAnyBlending) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
@@ -398,32 +394,20 @@ namespace openspace {
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
-        Geodetic2 sw = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
-        Geodetic2 se = chunk.surfacePatch().getCorner(Quad::SOUTH_EAST);
-        Geodetic2 nw = chunk.surfacePatch().getCorner(Quad::NORTH_WEST);
-        Geodetic2 ne = chunk.surfacePatch().getCorner(Quad::NORTH_EAST);
-
-        // Get model space positions of the four control points
-        Vec3 patchSwModelSpace = ellipsoid.cartesianSurfacePosition(sw);
-        Vec3 patchSeModelSpace = ellipsoid.cartesianSurfacePosition(se);
-        Vec3 patchNwModelSpace = ellipsoid.cartesianSurfacePosition(nw);
-        Vec3 patchNeModelSpace = ellipsoid.cartesianSurfacePosition(ne);
-
-        // Transform all control points to camera space
-        Vec3 patchSwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSwModelSpace, 1));
-        Vec3 patchSeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchSeModelSpace, 1));
-        Vec3 patchNwCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNwModelSpace, 1));
-        Vec3 patchNeCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(patchNeModelSpace, 1));
-
-        // Send control points to shader
-        programObject->setUniform("p00", vec3(patchSwCameraSpace));
-        programObject->setUniform("p10", vec3(patchSeCameraSpace));
-        programObject->setUniform("p01", vec3(patchNwCameraSpace));
-        programObject->setUniform("p11", vec3(patchNeCameraSpace));
+        std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
+        std::vector<Vec3> cornersCameraSpace(4);
+        for (int i = 0; i < 4; ++i) {
+            Quad q = (Quad)i;
+            Geodetic2 corner = chunk.surfacePatch().getCorner(q);
+            Vec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+            Vec3 cornerCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            cornersCameraSpace[i] = cornerCameraSpace;
+            programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
+        }
 
         vec3 patchNormalCameraSpace = normalize(
-            cross(patchSeCameraSpace - patchSwCameraSpace,
-                patchNwCameraSpace - patchSwCameraSpace));
+            cross(cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
+                cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]));
 
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());

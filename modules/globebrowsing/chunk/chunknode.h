@@ -63,17 +63,15 @@ public:
     bool isLeaf() const;
 
     void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
     
     const ChunkNode& getChild(Quad quad) const;
     const Chunk& getChunk() const;
 
-    void renderDepthFirst(const RenderData& data);
-    void renderReversedBreadthFirst(const RenderData& data);
-    void renderThisChunk(const RenderData& data);
     bool updateChunkTree(const RenderData& data);
 
     static int chunkNodeCount;
-    static int renderedChunks;
 
 
 private:

@@ -120,24 +120,15 @@ namespace openspace {
             throw ghoul::RuntimeError("Unable to parse XML:\n" + file);
         }
         if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
-            tileProvider = std::shared_ptr<TileProvider>(
-                new TemporalTileProvider(file, initData));
+            tileProvider = std::make_shared<TemporalTileProvider>(file, initData);
             return tileProvider;
         }
 
-        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(file, initData.minimumPixelSize, initData.preprocessTiles));
-
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(1));
-
-        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-            new AsyncTileDataProvider(tileDataset, threadPool));
-
-        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(initData.cacheSize));
-
-        tileProvider = std::shared_ptr<TileProvider>(
-            new CachingTileProvider(tileReader, tileCache, initData.framesUntilRequestQueueFlush));
+        auto tileDataset = std::make_shared<TileDataset>(file, initData.minimumPixelSize, initData.preprocessTiles);
+        auto threadPool = std::make_shared<ThreadPool>(1);
+        auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
+        auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
+        tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);
 
         return tileProvider;
     }

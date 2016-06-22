@@ -57,68 +57,13 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
-        , doFrustumCulling(properties::BoolProperty("doFrustumCulling", "doFrustumCulling"))
-        , doHorizonCulling(properties::BoolProperty("doHorizonCulling", "doHorizonCulling"))
-        , mergeInvisible(properties::BoolProperty("mergeInvisible", "mergeInvisible", true))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
-        , initChunkVisible(properties::BoolProperty("initChunkVisible", "initChunkVisible", true))
-        , renderSmallChunksFirst(properties::BoolProperty("renderSmallChunksFirst", "renderSmallChunksFirst", true))
-        , chunkHeight(properties::FloatProperty("chunkHeight", "chunkHeight", 8700.0f, 0.0f, 8700.0f))
-
-        , _baseLayersSelection(properties::SelectionProperty("Base Layers", "Base Layers"))
-        , _nightLayersSelection(properties::SelectionProperty("Night Textures", "Night Textures"))
-        , _heightMapsSelection(properties::SelectionProperty("Height Maps", "Height Maps"))
-        , _waterMasksSelection(properties::SelectionProperty("Water Masks", "Water Masks"))
-        , _overlaysSelection(properties::SelectionProperty("Overlays", "Overlays"))
-        , _grayScaleOverlaysSelection(properties::SelectionProperty("GrayScaleOverlays", "GrayScaleOverlays"))
-
-        , blendHeightMap(properties::BoolProperty("blendHeightMap", "blendHeightMap", true))
-        , blendColorMap(properties::BoolProperty("blendColorMap", "blendColorMap", true))
-        , blendNightTexture(properties::BoolProperty("blendNightTexture", "blendNightTexture", true))
-        , blendOverlay(properties::BoolProperty("blendOverlay", "blendOverlay", true))
-        , blendWaterMask(properties::BoolProperty("blendWaterMask", "blendWaterMask", true))
-        , blendGrayScaleOverlay(properties::BoolProperty("blendGrayScaleOverlay", "blendGrayScaleOverlay", true))
-        , atmosphereEnabled(properties::BoolProperty("atmosphereEnabled", "atmosphereEnabled", false))
-
-        , showChunkEdges(properties::BoolProperty("showChunkEdges", "showChunkEdges", false))
-        , showChunkBounds(properties::BoolProperty("showChunkBounds", "showChunkBounds", false))
-        , levelByProjArea(properties::BoolProperty("levelByProjArea", "levelByProjArea", true))
-        , limitLevelByAvailableHeightData(properties::BoolProperty("limitLevelByAvailableHeightData", "limitLevelByAvailableHeightData", true))
+        , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
+        , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
     {
         setName("RenderableGlobe");
         
-        addProperty(_saveOrThrowCamera);
-        addProperty(doFrustumCulling);
-        addProperty(doHorizonCulling);
-        addProperty(mergeInvisible);
-        addProperty(lodScaleFactor);
-        addProperty(initChunkVisible);
-        addProperty(renderSmallChunksFirst);
-        addProperty(chunkHeight);
-
-        addProperty(_baseLayersSelection);
-        addProperty(_nightLayersSelection);
-        addProperty(_heightMapsSelection);
-        addProperty(_waterMasksSelection);
-        addProperty(_overlaysSelection);
-        addProperty(_grayScaleOverlaysSelection);
-
-        addProperty(blendHeightMap);
-        addProperty(blendColorMap);
-        addProperty(blendNightTexture);
-        addProperty(blendOverlay);
-        addProperty(blendWaterMask);
-        addProperty(blendGrayScaleOverlay);
-        addProperty(atmosphereEnabled);
-
-        addProperty(showChunkEdges);
-        addProperty(showChunkBounds);
-        addProperty(levelByProjArea);
-        addProperty(limitLevelByAvailableHeightData);
-
-        doFrustumCulling.setValue(true);
-        doHorizonCulling.setValue(true);
-        renderSmallChunksFirst.setValue(true);
+        
 
         dictionary.getValue(keyFrame, _frame);
 
@@ -138,65 +83,57 @@ namespace openspace {
         ghoul::Dictionary texturesDictionary;
         dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
-        _tileProviderManager = std::shared_ptr<TileProviderManager>(
-            new TileProviderManager(texturesDictionary, textureInitDataDictionary));
 
-        addToggleLayerProperties(LayeredTextures::ColorTextures, _baseLayersSelection);
-        addToggleLayerProperties(LayeredTextures::NightTextures, _nightLayersSelection);
-        addToggleLayerProperties(LayeredTextures::HeightMaps, _heightMapsSelection);
-        addToggleLayerProperties(LayeredTextures::WaterMasks, _waterMasksSelection);
-        addToggleLayerProperties(LayeredTextures::Overlays, _overlaysSelection);
-        addToggleLayerProperties(LayeredTextures::GrayScaleOverlays, _grayScaleOverlaysSelection);
+        _tileProviderManager = std::make_shared<TileProviderManager>(
+            texturesDictionary, textureInitDataDictionary);
 
-        _baseLayersSelection.onChange(std::bind(&RenderableGlobe::baseLayerSelectionChanged, this));
-        _nightLayersSelection.onChange(std::bind(&RenderableGlobe::nightLayersSelectionChanged, this));
-        _heightMapsSelection.onChange(std::bind(&RenderableGlobe::heightMapsSelectionChanged, this));
-        _waterMasksSelection.onChange(std::bind(&RenderableGlobe::waterMasksSelectionChanged, this));
-        _overlaysSelection.onChange(std::bind(&RenderableGlobe::overlaysSelectionChanged, this));
-        _grayScaleOverlaysSelection.onChange(std::bind(&RenderableGlobe::grayScaleOverlaysSelectionChanged, this));
-
-        _chunkedLodGlobe = std::shared_ptr<ChunkedLodGlobe>(
-            new ChunkedLodGlobe(_ellipsoid, patchSegments, _tileProviderManager));        
-
+        _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
+            _ellipsoid, patchSegments, _tileProviderManager);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
+
+        // Add debug options - must be after chunkedLodGlobe has been created as it 
+        // references its members
+        addProperty(debugSelection);
+        debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->debugOptions.showChunkEdges);
+        debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->debugOptions.showChunkBounds);
+        debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->debugOptions.showChunkAABB);
+
+        debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->debugOptions.doFrustumCulling);
+        debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);
+
+        debugSelection.addOption("Level by proj area (else distance)", &_chunkedLodGlobe->debugOptions.levelByProjAreaElseDistance);
+        debugSelection.addOption("Level limited by available data", &_chunkedLodGlobe->debugOptions.limitLevelByAvailableHeightData);
+
+        // Add all tile layers as being toggleable for each category
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
+            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
+            std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
+            
+            auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
+            for (auto& provider : categoryProviders) {
+                selection->addOption(provider.name, &provider.isActive);
+            }
+            selection->addOption(" - Blend tile levels - ", &_chunkedLodGlobe->blendProperties[category]);
+
+            addProperty(selection.get());
+            _categorySelections.push_back(std::move(selection));
+        }
+
+        addProperty(atmosphereEnabled);
+        addProperty(_saveOrThrowCamera);
+        addProperty(lodScaleFactor);
     }
 
     RenderableGlobe::~RenderableGlobe() {
 
     }
 
-    void RenderableGlobe::addToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& dest)
-    {
-        auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
-        for (size_t i = 0; i < categoryProviders.size(); i++) {
-            std::string name = categoryProviders[i].name;
-            dest.addOption( { static_cast<int>(i), name });
-        }
-    }
-
-    void RenderableGlobe::initializeToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& selectionProperty)
-    {
-        std::vector<int> enabledIndices;
-        auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
-        for (size_t i = 0; i < categoryProviders.size(); i++) {
-            if (categoryProviders[i].isActive)
-                enabledIndices.push_back(i);
-        }
-        selectionProperty.setValue(enabledIndices);
-    }
-
-
     bool RenderableGlobe::initialize() {
-        initializeToggleLayerProperties(LayeredTextures::ColorTextures, _baseLayersSelection);
-        initializeToggleLayerProperties(LayeredTextures::NightTextures, _nightLayersSelection);
-        initializeToggleLayerProperties(LayeredTextures::HeightMaps, _heightMapsSelection);
-        initializeToggleLayerProperties(LayeredTextures::WaterMasks, _waterMasksSelection);
-        initializeToggleLayerProperties(LayeredTextures::Overlays, _overlaysSelection);
-        initializeToggleLayerProperties(LayeredTextures::GrayScaleOverlays, _grayScaleOverlaysSelection);
+        for (auto& selection : _categorySelections) {
+            selection->initialize();
+        }
+        debugSelection.initialize();
 
         return _distanceSwitch.initialize();
     }
@@ -215,7 +152,7 @@ namespace openspace {
 
             if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
                 LDEBUG("Saving snapshot of camera!");
-                _chunkedLodGlobe->setSaveCamera(new Camera(data.camera));
+                _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
             }
             else { // throw camera
                 LDEBUG("Throwing away saved camera!");
@@ -237,27 +174,9 @@ namespace openspace {
         _time = data.time;
         _distanceSwitch.update(data);
 
-        _chunkedLodGlobe->doFrustumCulling = doFrustumCulling.value();
-        _chunkedLodGlobe->doHorizonCulling = doHorizonCulling.value();
-        _chunkedLodGlobe->mergeInvisible = mergeInvisible.value();
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
-        _chunkedLodGlobe->initChunkVisible = initChunkVisible.value();
-        _chunkedLodGlobe->chunkHeight = chunkHeight.value();
-
-        _chunkedLodGlobe->blendProperties[LayeredTextures::HeightMaps] = blendHeightMap.value();
-        _chunkedLodGlobe->blendProperties[LayeredTextures::ColorTextures] = blendColorMap.value();
-        _chunkedLodGlobe->blendProperties[LayeredTextures::NightTextures] = blendNightTexture.value();
-        _chunkedLodGlobe->blendProperties[LayeredTextures::Overlays] = blendOverlay.value();
-        _chunkedLodGlobe->blendProperties[LayeredTextures::WaterMasks] = blendWaterMask.value();
-        _chunkedLodGlobe->blendProperties[LayeredTextures::GrayScaleOverlays] = blendGrayScaleOverlay.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
-        _chunkedLodGlobe->showChunkEdges = showChunkEdges.value();
-        _chunkedLodGlobe->showChunkBounds = showChunkBounds.value();
-        _chunkedLodGlobe->levelByProjArea = levelByProjArea.value();
-        _chunkedLodGlobe->limitLevelByAvailableHeightData = limitLevelByAvailableHeightData.value();
-
-        // Update this after active layers have been updated
         _tileProviderManager->prerender();
     }
 
@@ -317,50 +236,5 @@ namespace openspace {
         return _chunkedLodGlobe;
     }
 
-    void RenderableGlobe::selectionChanged(
-        properties::SelectionProperty selectionProperty,
-        LayeredTextures::TextureCategory textureCategory)
-    {
-        const std::vector<int>& selectedIndices = selectionProperty;
-        auto& category = _tileProviderManager->getLayerCategory(textureCategory);
-        // First inactivate all of them
-        for (size_t i = 0; i < category.size(); i++) {
-            category[i].isActive = false;
-        }
-        // Activate the selected ones
-        for (size_t i = 0; i < selectedIndices.size(); i++){
-            category[selectedIndices[i]].isActive = true;
-        }
-    }
-
-    void RenderableGlobe::baseLayerSelectionChanged()
-    {
-        selectionChanged(_baseLayersSelection, LayeredTextures::ColorTextures);
-    }
-
-    void RenderableGlobe::nightLayersSelectionChanged()
-    {
-        selectionChanged(_nightLayersSelection, LayeredTextures::NightTextures);
-    }
-
-    void RenderableGlobe::heightMapsSelectionChanged()
-    {
-        selectionChanged(_heightMapsSelection, LayeredTextures::HeightMaps);
-    }
-
-    void RenderableGlobe::waterMasksSelectionChanged()
-    {
-        selectionChanged(_waterMasksSelection, LayeredTextures::WaterMasks);
-    }
-
-    void RenderableGlobe::overlaysSelectionChanged()
-    {
-        selectionChanged(_overlaysSelection, LayeredTextures::Overlays);
-    }
-
-    void RenderableGlobe::grayScaleOverlaysSelectionChanged()
-    {
-        selectionChanged(_grayScaleOverlaysSelection, LayeredTextures::GrayScaleOverlays);
-    }
-
 }  // namespace openspace
+

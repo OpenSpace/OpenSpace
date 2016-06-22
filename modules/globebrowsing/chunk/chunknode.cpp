@@ -41,7 +41,6 @@ namespace {
 namespace openspace {
 
 int ChunkNode::chunkNodeCount = 0;
-int ChunkNode::renderedChunks = 0;
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
 : _chunk(chunk)
@@ -107,55 +106,58 @@ void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const
     }
 }
 
+void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) const {
+    std::queue<const ChunkNode*> Q;
 
-
-void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
-    std::stack<ChunkNode*> S;
-    std::queue<ChunkNode*> Q;
+    // Loop through nodes in breadths first order
     Q.push(this);
     while (Q.size() > 0) {
-        ChunkNode* node = Q.front(); 
+        const ChunkNode* node = Q.front();
         Q.pop();
-        if (node->isLeaf()) {
-            if (node->_chunk.isVisible()) {
-                S.push(node);
+
+        f(*node);
+
+        // Add children to queue, if any
+        if (!node->isLeaf()) {
+            for (int i = 0; i < 4; ++i) {
+                Q.push(node->_children[i].get());
             }
         }
-        else {
+    }
+}
+
+void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const {
+    std::stack<const ChunkNode*> S;
+    std::queue<const ChunkNode*> Q;
+
+    // Loop through nodes in breadths first order
+    Q.push(this);
+    while (Q.size() > 0) {
+        const ChunkNode* node = Q.front(); 
+        Q.pop();
+
+        // Add node to future stack
+        S.push(node);
+
+        // Add children to queue, if any
+        if (!node->isLeaf()) {
             for (int i = 0; i < 4; ++i) {
                 Q.push(node->_children[i].get());
             }
         }
     }
 
+    // Loop through all nodes in stack, this will be reversed breadth first 
     while (S.size() > 0) {
-        S.top()->renderThisChunk(data);
+        f(*S.top());
         S.pop();
-    }
-}
-
-void ChunkNode::renderThisChunk(const RenderData& data) {
-    _chunk.render(data);
-    ChunkNode::renderedChunks++;
-}
-
-void ChunkNode::renderDepthFirst(const RenderData& data) {
-    if (isLeaf()) {
-        if (_chunk.isVisible()) {
-            renderThisChunk(data);
-        }
-    }
-    else {
-        for (int i = 0; i < 4; ++i) {
-            _children[i]->renderDepthFirst(data);
-        }
     }
 }
 
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < 4; i++) {
-            Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i), _chunk.owner()->initChunkVisible);
+            Chunk chunk(_chunk.owner(), _chunk.index().child((Quad)i));
             _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
         }
     }
