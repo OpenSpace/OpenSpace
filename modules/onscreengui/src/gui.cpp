@@ -78,12 +78,13 @@ namespace {
         const float width = ImGui::GetIO().DisplaySize.x;
         const float height = ImGui::GetIO().DisplaySize.y;
         const glm::mat4 ortho(
-            2.f / width, 0.0f, 0.0f, 0.0f,
-            0.0f, 2.0f / -height, 0.0f, 0.0f,
+            2.f / width, 0.0f, 0.0f, 0.f,
+            0.0f, 2.0f / -height, 0.0f, 0.f,
             0.0f, 0.0f, -1.0f, 0.0f,
             -1.0f, 1.0f, 0.0f, 1.0f
         );
         _program->activate();
+        
         _program->setUniform("tex", unit);
         _program->setUniform("ortho", ortho);
 
@@ -132,25 +133,25 @@ namespace {
 }
 
 namespace openspace {
-    void addScreenSpaceRenderable(std::string texturePath){
-        std::string filepath ="${OPENSPACE_DATA}/"+texturePath;
-        if( ! FileSys.fileExists(filepath)) {
-            LWARNING("Could not find image '" << filepath << "'");
-            return;
-        }
-        std::string luaTable = "{Type = 'ScreenSpaceImage', TexturePath = '+" + filepath + " ' }";
-        std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
-        // OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));
+
+void addScreenSpaceRenderable(std::string texturePath){
+    std::string filepath ="${OPENSPACE_DATA}/"+texturePath;
+    if( ! FileSys.fileExists(filepath)) {
+        LWARNING("Could not find image '" << filepath << "'");
+        return;
     }
+    std::string luaTable = "{Type = 'ScreenSpaceImage', TexturePath = '+" + filepath + " ' }";
+    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    OsEng.scriptEngine().queueScript(script);
+    // OsEng.renderEngine().registerScreenSpaceRenderable(std::make_shared<ScreenSpaceImage>(filepath));
+}
 
 namespace gui {
 
 GUI::GUI() 
     : _isEnabled(false)
     , _showHelp(false)
-{
-}
+{}
 
 GUI::~GUI() {
     ImGui::Shutdown();
@@ -181,7 +182,6 @@ void GUI::initialize() {
     io.IniFilename = buffer;
     //io.IniSavingRate = 5.f;
     io.DeltaTime = 1.f / 60.f;
-    //io.PixelCenterOffset = 0.5f;
     io.KeyMap[ImGuiKey_Tab] = static_cast<int>(Key::Tab);
     io.KeyMap[ImGuiKey_LeftArrow] = static_cast<int>(Key::Left);
     io.KeyMap[ImGuiKey_RightArrow] = static_cast<int>(Key::Right);
@@ -361,49 +361,6 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
     return consumeEvent;
 }
 
-//void GUI::registerProperty(properties::Property* prop) {
-//    using namespace properties;
-//
-//    std::string className = prop->className();
-//
-//    if (className == "BoolProperty")
-//        _boolProperties.insert(prop);
-//    else if (className == "IntProperty")
-//        _intProperties.insert(prop);
-//    else if (className == "FloatProperty")
-//        _floatProperties.insert(prop);
-//    else if (className == "StringProperty")
-//        _stringProperties.insert(prop);
-//    else if (className == "Vec2Property")
-//        _vec2Properties.insert(prop);
-//    else if (className == "Vec3Property")
-//        _vec3Properties.insert(prop);
-//    else if (className == "Vec4Property")
-//        _vec4Properties.insert(prop);
-//    else if (className == "OptionProperty")
-//        _optionProperty.insert(prop);
-//    else if (className == "TriggerProperty")
-//        _triggerProperty.insert(prop);
-//    else if (className == "SelectionProperty")
-//        _selectionProperty.insert(prop);
-//    else {
-//        LWARNING("Class name '" << className << "' not handled in GUI generation");
-//        return;
-//    }
-//
-//    std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
-//    size_t pos = fullyQualifiedId.find('.');
-//    std::string owner = fullyQualifiedId.substr(0, pos);
-//
-//    auto it =_propertiesByOwner.find(owner);
-//    if (it == _propertiesByOwner.end())
-//        _propertiesByOwner[owner] = { prop };
-//    else
-//        it->second.push_back(prop);
-//
-//}
-
-//>>>>>>> develop
 void GUI::renderMainWindow() {
     ImGui::Begin("OpenSpace GUI", nullptr);
 
@@ -423,14 +380,26 @@ void GUI::renderMainWindow() {
     bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
     bool to67P = ImGui::Button("Coordinate System to 67P");
 
-    if (toSun)
-        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');");
-    if (toPluto)
-        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');");
-    if (toJupiter)
-        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
-    if (to67P)
-        OsEng.scriptEngine().queueScript("openspace.setPropertyValue('Interaction.coordinateSystem', '67P');");
+    if (toSun) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');"
+        );
+    }
+    if (toPluto) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');"
+         );
+    }
+    if (toJupiter) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');"
+        );
+    }
+    if (to67P) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.setPropertyValue('Interaction.coordinateSystem', '67P');"
+        );
+    }
 
     ImGui::Checkbox("Help", &_help._isEnabled);
 
@@ -438,153 +407,18 @@ void GUI::renderMainWindow() {
     static char addImageBuffer[addImageBufferSize];
     ImGui::InputText("addImage", addImageBuffer, addImageBufferSize);
 
-    if(ImGui::SmallButton("Add Image")){
+    if (ImGui::SmallButton("Add Image")){
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
-// #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-//         static const int addCygnetBufferSize = 256;
-//         static char addCygnetBuffer[addCygnetBufferSize];
-//         ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
-
-//         if(ImGui::SmallButton("Add Cygnet"))
-//             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet('"+std::string(addCygnetBuffer)+"');");
-    
-// #endif
+    ImGui::Begin("Style Editor");
+    ImGui::ShowStyleEditor();
+    ImGui::End();
 
     ImGui::End();
 }
-
-//<<<<<<< HEAD
+    
 namespace {
-//=======
-//void GUI::renderPropertyWindow() {
-//    using namespace properties;
-//
-//    ImGui::Begin("Properties", &_showPropertyWindow, size, 0.5f);
-//
-//    //ImGui::ShowUserGuide();
-//    ImGui::Spacing();
-//
-//    for (const auto& p : _propertiesByOwner) {
-//        if (ImGui::CollapsingHeader(p.first.c_str())) {
-//            for (properties::Property* prop : p.second) {
-//                if (_boolProperties.find(prop) != _boolProperties.end()) {
-//                    renderBoolProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_intProperties.find(prop) != _intProperties.end()) {
-//                    renderIntProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_floatProperties.find(prop) != _floatProperties.end()) {
-//                    renderFloatProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-//                    renderVec2Property(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-//                    renderVec3Property(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-//                    renderVec4Property(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_optionProperty.find(prop) != _optionProperty.end()) {
-//                    renderOptionProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_triggerProperty.find(prop) != _triggerProperty.end()) {
-//                    renderTriggerProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_selectionProperty.find(prop) != _selectionProperty.end()) {
-//                    renderSelectionProperty(prop, p.first);
-//                    continue;
-//                }
-//            }
-//        }
-//    }
-//
-//    ImGui::End();
-//}
-//
-//void GUI::renderPerformanceWindow() {
-//    // Copy and paste from renderengine.cpp::storePerformanceMeasurements method
-//    const int8_t Version = 0;
-//    const int nValues = 250;
-//    const int lengthName = 256;
-//    const int maxValues = 50;
-//
-//    struct PerformanceLayout {
-//        int8_t version;
-//        int32_t nValuesPerEntry;
-//        int32_t nEntries;
-//        int32_t maxNameLength;
-//        int32_t maxEntries;
-//
-//        struct PerformanceLayoutEntry {
-//            char name[lengthName];
-//            float renderTime[nValues];
-//            float updateRenderable[nValues];
-//            float updateEphemeris[nValues];
-//
-//            int32_t currentRenderTime;
-//            int32_t currentUpdateRenderable;
-//            int32_t currentUpdateEphemeris;
-//        };
-//
-//        PerformanceLayoutEntry entries[maxValues];
-//    };
-//
-//    ImGui::Begin("Performance", &_showPerformanceWindow);
-//    if (OsEng.renderEngine()->doesPerformanceMeasurements() &&
-//            ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
-//    {
-//        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
-//        _minMaxValues[1] = std::max(_minMaxValues[0], _minMaxValues[1]);
-//
-//        if (!_performanceMemory)
-//            _performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
-//
-//        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
-//
-//        for (int i = 0; i < layout->nEntries; ++i) {
-//            const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
-//
-//            if (ImGui::CollapsingHeader(entry.name)) {
-//                std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
-//                ImGui::PlotLines("UpdateEphemeris", &entry.updateEphemeris[0], layout->nValuesPerEntry, 0, updateEphemerisTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//
-//                std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
-//                ImGui::PlotLines("UpdateRender", &entry.updateRenderable[0], layout->nValuesPerEntry, 0, updateRenderableTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//                
-//                std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
-//                ImGui::PlotLines("RenderTime", &entry.renderTime[0], layout->nValuesPerEntry, 0, renderTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//            }
-//        }
-//    }
-//    else {
-//        ImGui::TextWrapped("Performance monitoring is disabled. Enable with "
-//                           "'openspace.setPerformanceMeasurement(true)'");
-//    }
-//
-//    ImGui::End();
-//}
-//
-//namespace  {
-//>>>>>>> develop
 
 /**
  * \ingroup LuaScripts
@@ -659,406 +493,3 @@ scripting::ScriptEngine::LuaLibrary GUI::luaLibrary() {
 
 } // namespace gui
 } // namespace openspace
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//#include <openspace/gui/gui.h>
-//
-//#include <openspace/engine/openspaceengine.h>
-//#include <openspace/properties/property.h>
-//
-//#include <ghoul/io/texture/texturereader.h>
-//#include <ghoul/opengl/ghoul_gl.h>
-//#include <ghoul/opengl/programobject.h>
-//#include <ghoul/opengl/texture.h>
-//#include <ghoul/opengl/textureunit.h>
-//#include <ghoul/misc/sharedmemory.h>
-//
-//#include <openspace/properties/scalarproperty.h>
-//#include <openspace/properties/vectorproperty.h>
-//#include <openspace/properties/stringproperty.h>
-//#include <openspace/properties/optionproperty.h>
-//#include <openspace/properties/selectionproperty.h>
-//#include <openspace/properties/triggerproperty.h>
-//
-//#include <ghoul/filesystem/filesystem.h>
-//#include <ghoul/filesystem/cachemanager.h>
-//
-//#include <imgui.h>
-//#include <sgct.h>
-//#define STB_IMAGE_IMPLEMENTATION
-//#include <stb_image.h>
-//
-//namespace {
-//    const std::string _loggerCat = "GUI";
-//    const std::string configurationFile = "imgui.ini";
-//
-//
-//namespace openspace {
-//    namespace gui {
-//
-//GUI::GUI()
-//    : _isEnabled(false)
-//    , _showPropertyWindow(false)
-//    , _showHelp(false)
-//    , _performanceMemory(nullptr)
-//{
-//    _minMaxValues[0] = 100.f;
-//    _minMaxValues[1] = 1000.f;
-//}
-//
-//GUI::~GUI() {
-//    delete _performanceMemory;
-//    ImGui::Shutdown();
-//}
-//
-//bool GUI::isEnabled() const {
-//    return _isEnabled;
-//}
-//
-//void GUI::setEnabled(bool enabled) {
-//    _isEnabled = enabled;
-//}
-//
-//void GUI::initialize() {
-//    std::string cachedFile;
-//    FileSys.cacheManager()->getCachedFile(configurationFile, "", cachedFile, true);
-//
-//    char* buffer = new char[cachedFile.size() + 1];
-//
-//#ifdef WIN32
-//    strcpy_s(buffer, cachedFile.size() + 1, cachedFile.c_str());
-//#else
-//    strcpy(buffer, cachedFile.c_str());
-//#endif
-//
-//    ImGuiIO& io = ImGui::GetIO();
-//    io.IniFilename = buffer;
-//    //io.IniSavingRate = 5.f;
-//    io.DeltaTime = 1.f / 60.f;
-//    io.PixelCenterOffset = 0.5f;
-//    io.KeyMap[ImGuiKey_Tab] = SGCT_KEY_TAB;                       // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-//    io.KeyMap[ImGuiKey_LeftArrow] = SGCT_KEY_LEFT;
-//    io.KeyMap[ImGuiKey_RightArrow] = SGCT_KEY_RIGHT;
-//    io.KeyMap[ImGuiKey_UpArrow] = SGCT_KEY_UP;
-//    io.KeyMap[ImGuiKey_DownArrow] = SGCT_KEY_DOWN;
-//    io.KeyMap[ImGuiKey_Home] = SGCT_KEY_HOME;
-//    io.KeyMap[ImGuiKey_End] = SGCT_KEY_END;
-//    io.KeyMap[ImGuiKey_Delete] = SGCT_KEY_DELETE;
-//    io.KeyMap[ImGuiKey_Backspace] = SGCT_KEY_BACKSPACE;
-//    io.KeyMap[ImGuiKey_Enter] = SGCT_KEY_ENTER;
-//    io.KeyMap[ImGuiKey_Escape] = SGCT_KEY_ESCAPE;
-//    io.KeyMap[ImGuiKey_A] = SGCT_KEY_A;
-//    io.KeyMap[ImGuiKey_C] = SGCT_KEY_C;
-//    io.KeyMap[ImGuiKey_V] = SGCT_KEY_V;
-//    io.KeyMap[ImGuiKey_X] = SGCT_KEY_X;
-//    io.KeyMap[ImGuiKey_Y] = SGCT_KEY_Y;
-//    io.KeyMap[ImGuiKey_Z] = SGCT_KEY_Z;
-//
-//    io.RenderDrawListsFn = ImImpl_RenderDrawLists;
-//    //io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock
-//    //io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
-//}
-//
-//void GUI::initializeGL() {
-//    _program = ghoul::opengl::ProgramObject::Build("GUI",
-//        "${SHADERS}/gui_vs.glsl", "${SHADERS}/gui_fs.glsl");
-//        
-//    positionLocation = glGetAttribLocation(*_program, "in_position");
-//    uvLocation = glGetAttribLocation(*_program, "in_uv");
-//    colorLocation = glGetAttribLocation(*_program, "in_color");
-//
-//    glGenTextures(1, &fontTex);
-//    glBindTexture(GL_TEXTURE_2D, fontTex);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//    const void* png_data;
-//    unsigned int png_size;
-//    ImGui::GetDefaultFontData(NULL, NULL, &png_data, &png_size);
-//    int tex_x, tex_y, tex_comp;
-//    void* tex_data = stbi_load_from_memory((const unsigned char*)png_data, (int)png_size, &tex_x, &tex_y, &tex_comp, 0);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
-//    stbi_image_free(tex_data);
-//
-//    glGenBuffers(1, &vbo);
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
-//
-//    glGenVertexArrays(1, &vao);
-//    glBindVertexArray(vao);
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//    glEnableVertexAttribArray(positionLocation);
-//    glEnableVertexAttribArray(uvLocation);
-//    glEnableVertexAttribArray(colorLocation);
-//
-//    glVertexAttribPointer(positionLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, pos));
-//    glVertexAttribPointer(uvLocation, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, uv));
-//    glVertexAttribPointer(colorLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (GLvoid*) offsetof(ImDrawVert, col));
-//    glBindVertexArray(0);
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
-//}
-//
-//void GUI::deinitializeGL() {
-//    if(_program)
-//        delete _program;
-//    _program = nullptr;
-//
-//    if (vao) glDeleteVertexArrays(1, &vao);
-//    if (vbo) glDeleteBuffers(1, &vbo);
-//}
-//
-//void GUI::startFrame(float deltaTime,
-//                const glm::vec2& windowSize,
-//                 const glm::vec2& mousePos,
-//                 bool mouseButtonsPressed[2])
-//{
-//    ImGuiIO& io = ImGui::GetIO();
-//    io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
-//    io.DeltaTime = deltaTime;
-//    io.MousePos = ImVec2(mousePos.x, mousePos.y);
-//    io.MouseDown[0] = mouseButtonsPressed[0];
-//    io.MouseDown[1] = mouseButtonsPressed[1];
-//
-//    ImGui::NewFrame();
-//}
-//
-//void GUI::endFrame() {
-//    static bool show = true;
-//    //ImGui::ShowTestWindow(&show);
-//    renderMainWindow();
-//    if (_showPropertyWindow)
-//        renderPropertyWindow();
-//    if (_showPerformanceWindow)
-//        renderPerformanceWindow();
-//
-//    ImGui::Render();
-//}
-//
-//bool GUI::mouseButtonCallback(int key, int action) {
-//    ImGuiIO& io = ImGui::GetIO();
-//    bool consumeEvent = io.WantCaptureMouse;
-//    return consumeEvent;
-//}
-//
-//bool GUI::mouseWheelCallback(int position) {
-//    ImGuiIO& io = ImGui::GetIO();
-//    bool consumeEvent = io.WantCaptureMouse;
-//    if (consumeEvent)
-//        io.MouseWheel = static_cast<float>(position);
-//
-//    return consumeEvent;
-//}
-//
-//bool GUI::keyCallback(int key, int action) {
-//    ImGuiIO& io = ImGui::GetIO();
-//    bool consumeEvent = io.WantCaptureKeyboard;
-//    if (consumeEvent) {
-//        if (action == SGCT_PRESS)
-//            io.KeysDown[key] = true;
-//        if (action == SGCT_RELEASE)
-//            io.KeysDown[key] = false;
-//    }
-//    return consumeEvent;
-//}
-//
-//bool GUI::charCallback(unsigned int character) {
-//    ImGuiIO& io = ImGui::GetIO();
-//    bool consumeEvent = io.WantCaptureKeyboard;
-//
-//    if (consumeEvent)
-//        io.AddInputCharacter((unsigned short)character);
-//
-//    return consumeEvent;
-//}
-//
-//void GUI::registerProperty(properties::Property* prop) {
-//    using namespace openspace::properties;
-//
-//    std::string className = prop->className();
-//
-//    if (className == "BoolProperty")
-//        _boolProperties.insert(prop);
-//    else if (className == "IntProperty")
-//        _intProperties.insert(prop);
-//    else if (className == "FloatProperty")
-//        _floatProperties.insert(prop);
-//    else if (className == "StringProperty")
-//        _stringProperties.insert(prop);
-//    else if (className == "Vec2Property")
-//        _vec2Properties.insert(prop);
-//    else if (className == "Vec3Property")
-//        _vec3Properties.insert(prop);
-//    else if (className == "OptionProperty")
-//        _optionProperty.insert(prop);
-//    else if (className == "TriggerProperty")
-//        _triggerProperty.insert(prop);
-//    else if (className == "SelectionProperty")
-//        _selectionProperty.insert(prop);
-//    else {
-//        LWARNING("Class name '" << className << "' not handled in GUI generation");
-//        return;
-//    }
-//
-//    std::string fullyQualifiedId = prop->fullyQualifiedIdentifier();
-//    size_t pos = fullyQualifiedId.find('.');
-//    std::string owner = fullyQualifiedId.substr(0, pos);
-//
-//    auto it =_propertiesByOwner.find(owner);
-//    if (it == _propertiesByOwner.end())
-//        _propertiesByOwner[owner] = { prop };
-//    else
-//        it->second.push_back(prop);
-//
-//}
-//
-//void GUI::renderMainWindow() {
-//    ImGui::Begin("OpenSpace GUI", nullptr);
-//
-//    ImGui::Checkbox("Properties", &_showPropertyWindow);
-//    ImGui::Checkbox("Performance", &_showPerformanceWindow);
-//    ImGui::Checkbox("Help", &_showHelp);
-//
-//    if (_showHelp) {
-//        ImGui::Separator();
-//        ImGui::ShowUserGuide();
-//        ImGui::ShowTestWindow();
-//    }
-//
-//    ImGui::End();
-//}
-//
-//void GUI::renderPropertyWindow() {
-//    using namespace properties;
-//
-//    ImGui::Begin("Properties", &_showPropertyWindow, size, 0.5f);
-//
-//    //ImGui::ShowUserGuide();
-//    ImGui::Spacing();
-//
-//    for (const auto& p : _propertiesByOwner) {
-//        if (ImGui::CollapsingHeader(p.first.c_str())) {
-//            for (properties::Property* prop : p.second) {
-//                if (_boolProperties.find(prop) != _boolProperties.end()) {
-//                    renderBoolProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_intProperties.find(prop) != _intProperties.end()) {
-//                    renderIntProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_floatProperties.find(prop) != _floatProperties.end()) {
-//                    renderFloatProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-//                    renderVec2Property(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-//                    renderVec3Property(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_optionProperty.find(prop) != _optionProperty.end()) {
-//                    renderOptionProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_triggerProperty.find(prop) != _triggerProperty.end()) {
-//                    renderTriggerProperty(prop, p.first);
-//                    continue;
-//                }
-//
-//                if (_selectionProperty.find(prop) != _selectionProperty.end()) {
-//                    renderSelectionProperty(prop, p.first);
-//                    continue;
-//                }
-//            }
-//        }
-//    }
-//
-//    ImGui::End();
-//}
-//
-//void GUI::renderPerformanceWindow() {
-//    // Copy and paste from renderengine.cpp::storePerformanceMeasurements method
-//    const int8_t Version = 0;
-//    const int nValues = 250;
-//    const int lengthName = 256;
-//    const int maxValues = 50;
-//
-//    struct PerformanceLayout {
-//        int8_t version;
-//        int32_t nValuesPerEntry;
-//        int32_t nEntries;
-//        int32_t maxNameLength;
-//        int32_t maxEntries;
-//
-//        struct PerformanceLayoutEntry {
-//            char name[lengthName];
-//            float renderTime[nValues];
-//            float updateRenderable[nValues];
-//            float updateEphemeris[nValues];
-//
-//            int32_t currentRenderTime;
-//            int32_t currentUpdateRenderable;
-//            int32_t currentUpdateEphemeris;
-//        };
-//
-//        PerformanceLayoutEntry entries[maxValues];
-//    };
-//
-//    ImGui::Begin("Performance", &_showPerformanceWindow);
-//    if (OsEng.renderEngine().doesPerformanceMeasurements() &&
-//            ghoul::SharedMemory::exists(RenderEngine::PerformanceMeasurementSharedData))
-//    {
-//        ImGui::SliderFloat2("Min values, max Value", _minMaxValues, 0.f, 10000.f);
-//        _minMaxValues[1] = std::max(_minMaxValues[0], _minMaxValues[1]);
-//
-//        if (!_performanceMemory)
-//            _performanceMemory = new ghoul::SharedMemory(RenderEngine::PerformanceMeasurementSharedData);
-//
-//        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(_performanceMemory->pointer());
-//
-//        for (int i = 0; i < layout->nEntries; ++i) {
-//            const PerformanceLayout::PerformanceLayoutEntry& entry = layout->entries[i];
-//
-//            if (ImGui::CollapsingHeader(entry.name)) {
-//                std::string updateEphemerisTime = std::to_string(entry.updateEphemeris[entry.currentUpdateEphemeris - 1]) + "us";
-//                ImGui::PlotLines("UpdateEphemeris", &entry.updateEphemeris[0], layout->nValuesPerEntry, 0, updateEphemerisTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//
-//                std::string updateRenderableTime = std::to_string(entry.updateRenderable[entry.currentUpdateRenderable - 1]) + "us";
-//                ImGui::PlotLines("UpdateRender", &entry.updateRenderable[0], layout->nValuesPerEntry, 0, updateRenderableTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//                
-//                std::string renderTime = std::to_string(entry.renderTime[entry.currentRenderTime - 1]) + "us";
-//                ImGui::PlotLines("RenderTime", &entry.renderTime[0], layout->nValuesPerEntry, 0, renderTime.c_str(), _minMaxValues[0], _minMaxValues[1], ImVec2(0, 40));
-//            }
-//        }
-//    }
-//    else {
-//        ImGui::TextWrapped("Performance monitoring is disabled. Enable with "
-//                           "'openspace.setPerformanceMeasurement(true)'");
-//    }
-//
-//    ImGui::End();
-//}
-//
-//
-//} // namespace openspace
-//} // namespace gui
