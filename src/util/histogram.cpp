@@ -356,7 +356,7 @@ float Histogram::binWidth(){
     return (_maxValue-_minValue)/float(_numBins);
 }
 
-std::ostream& operator<<(std::ostream& os, const Histogram& hist){
+void operator<<(std::ostream& os, const Histogram& hist){
     const float* data = hist.data();
     float max = hist.maxValue();
     float min = hist.minValue();

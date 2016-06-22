@@ -51,7 +51,7 @@
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "IswaManager";
-    std::string baseUrl = "https://iswa-demo-server.herokuapp.com/";
+    std::string baseUrl = "http://iswa-demo-server.herokuapp.com/";
     //const std::string baseUrl = "http://128.183.168.116:3000/";
 }
 

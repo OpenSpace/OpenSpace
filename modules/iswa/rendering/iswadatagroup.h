@@ -27,6 +27,7 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace{
 class IswaDataGroup : public IswaBaseGroup{

@@ -82,7 +82,7 @@ public:
 
     void changeRange(float minValue, float maxValue);
 
-    friend std::ostream& operator<<(std::ostream& os, const Histogram& hist);
+    friend void operator<<(std::ostream& os, const Histogram& hist);
 private:
     int _numBins;
     float _minValue;
