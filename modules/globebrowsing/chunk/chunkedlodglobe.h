@@ -99,7 +99,7 @@ namespace openspace {
         float lodScaleFactor;
 
         // Layered rendering
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties;
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties = { true };
 
         bool atmosphereEnabled;
 
