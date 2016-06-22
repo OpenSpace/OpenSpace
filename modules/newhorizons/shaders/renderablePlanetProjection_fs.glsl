@@ -83,4 +83,7 @@ void main() {
     // to be fixed soon ---abock
         color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
     }
+    else {
+        color = vec4(0.0);
+    }
 }

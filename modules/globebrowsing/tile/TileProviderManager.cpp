@@ -148,8 +148,8 @@ namespace openspace {
     }
 
     void TileProviderManager::prerender() {
-        for each (auto layerCategory in _layerCategories) {
-            for each (auto tileProviderWithName in layerCategory) {
+        for (auto layerCategory : _layerCategories) {
+            for (auto tileProviderWithName : layerCategory) {
                 if (tileProviderWithName.isActive) {
                     tileProviderWithName.tileProvider->prerender();
                 }
@@ -162,7 +162,7 @@ namespace openspace {
             LayeredTextures::TextureCategory textureCategory)
     {
         std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for each (auto tileProviderWithName in _layerCategories[textureCategory]) {
+        for (auto tileProviderWithName : _layerCategories[textureCategory]) {
             if (tileProviderWithName.isActive) {
                 tileProviders.push_back(tileProviderWithName.tileProvider);
             }
