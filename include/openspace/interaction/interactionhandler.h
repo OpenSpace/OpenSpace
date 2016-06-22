@@ -164,14 +164,14 @@ public:
     void clearKeyframes();
 
     // Accessors
-    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys();
-    const std::list<MouseButton>& getPressedMouseButtons();
-    glm::dvec2 getMousePosition();
-    double getMouseScrollDelta();
-    std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames();
+    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
+    const std::list<MouseButton>& getPressedMouseButtons() const;
+    glm::dvec2 getMousePosition() const;
+    double getMouseScrollDelta() const;
+    std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames() const;
 
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair);
-    bool isMouseButtonPressed(MouseButton mouseButton);
+    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
+    bool isMouseButtonPressed(MouseButton mouseButton) const;
 private:
     // Input from keyboard and mouse
     std::list<std::pair<Key, KeyModifier> > _keysDown;
@@ -187,7 +187,7 @@ private:
 class InteractionMode
 {
 public:
-    InteractionMode(std::shared_ptr<InputState> inputState);
+    InteractionMode();
     ~InteractionMode();
 
     // Mutators
@@ -198,7 +198,7 @@ public:
     SceneGraphNode* focusNode();
     Camera* camera();
 
-    virtual void update(double deltaTime) = 0;
+    virtual void update(const InputState& inputState, double deltaTime) = 0;
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -233,15 +233,14 @@ protected:
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
-    std::shared_ptr<InputState> _inputState;
-    SceneGraphNode* _focusNode;
-    Camera* _camera;
+    SceneGraphNode* _focusNode = nullptr;
+    Camera* _camera = nullptr;
 };
 
 class KeyframeInteractionMode : public InteractionMode
 {
 public:
-    KeyframeInteractionMode(std::shared_ptr<InputState> inputState);
+    KeyframeInteractionMode();
     ~KeyframeInteractionMode();
 
     virtual void update(double deltaTime);
@@ -258,15 +257,12 @@ public:
         \param velocityScalefactor can be set to 60 to remove the inertia of the
             interaction. Lower value will make it harder to move the camera.
     */
-    OrbitalInteractionMode(
-        std::shared_ptr<InputState> inputState,
-        double sensitivity,
-        double velocityScaleFactor);
+    OrbitalInteractionMode(double sensitivity, double velocityScaleFactor);
     ~OrbitalInteractionMode();
 
-    virtual void update(double deltaTime);
+    virtual void update(const InputState& inputState, double deltaTime);
 protected:
-    void updateMouseStatesFromInput(double deltaTime);
+    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromMouseStates();
 
     double _sensitivity;
@@ -283,14 +279,11 @@ protected:
 class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
 {
 public:
-    GlobeBrowsingInteractionMode(
-        std::shared_ptr<InputState> inputState,
-        double sensitivity,
-        double velocityScaleFactor);
+    GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor);
     ~GlobeBrowsingInteractionMode();
 
     virtual void setFocusNode(SceneGraphNode* focusNode);
-    virtual void update(double deltaTime);
+    virtual void update(const InputState& inputState, double deltaTime);
 private:
     void updateCameraStateFromMouseStates();
     RenderableGlobe* _globe;
@@ -325,7 +318,7 @@ public:
     // Accessors
     SceneGraphNode* const focusNode() const;
     Camera* const camera() const;
-    std::shared_ptr<InputState> inputState() const;
+    const InputState& inputState() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -347,7 +340,7 @@ private:
 
     std::multimap<KeyWithModifier, std::string > _keyLua;
 
-    std::shared_ptr<InputState> _inputState;
+    std::unique_ptr<InputState> _inputState;
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
