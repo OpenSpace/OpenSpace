@@ -68,13 +68,9 @@ public:
     const ChunkNode& getChild(Quad quad) const;
     const Chunk& getChunk() const;
 
-    void renderDepthFirst(const RenderData& data);
-    void renderReversedBreadthFirst(const RenderData& data);
-    void renderThisChunk(const RenderData& data);
     bool updateChunkTree(const RenderData& data);
 
     static int chunkNodeCount;
-    static int renderedChunks;
 
 
 private:

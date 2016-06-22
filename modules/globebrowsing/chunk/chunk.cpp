@@ -172,10 +172,4 @@ namespace openspace {
     }
 
 
-    void Chunk::render(const RenderData& data) const {
-        _owner->getPatchRenderer().renderChunk(*this, data);
-    }
-
-
-
 } // namespace openspace

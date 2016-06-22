@@ -41,7 +41,6 @@ namespace {
 namespace openspace {
 
 int ChunkNode::chunkNodeCount = 0;
-int ChunkNode::renderedChunks = 0;
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
 : _chunk(chunk)
@@ -134,51 +133,6 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
     while (S.size() > 0) {
         f(*S.top());
         S.pop();
-    }
-}
-
-
-
-void ChunkNode::renderReversedBreadthFirst(const RenderData& data) {
-    std::stack<ChunkNode*> S;
-    std::queue<ChunkNode*> Q;
-    Q.push(this);
-    while (Q.size() > 0) {
-        ChunkNode* node = Q.front(); 
-        Q.pop();
-        if (node->isLeaf()) {
-            if (node->_chunk.isVisible()) {
-                S.push(node);
-            }
-        }
-        else {
-            for (int i = 0; i < 4; ++i) {
-                Q.push(node->_children[i].get());
-            }
-        }
-    }
-
-    while (S.size() > 0) {
-        S.top()->renderThisChunk(data);
-        S.pop();
-    }
-}
-
-void ChunkNode::renderThisChunk(const RenderData& data) {
-    _chunk.render(data);
-    ChunkNode::renderedChunks++;
-}
-
-void ChunkNode::renderDepthFirst(const RenderData& data) {
-    if (isLeaf()) {
-        if (_chunk.isVisible()) {
-            renderThisChunk(data);
-        }
-    }
-    else {
-        for (int i = 0; i < 4; ++i) {
-            _children[i]->renderDepthFirst(data);
-        }
     }
 }
 

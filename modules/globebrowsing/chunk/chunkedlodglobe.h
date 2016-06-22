@@ -65,8 +65,6 @@ namespace openspace {
             std::shared_ptr<TileProviderManager> tileProviderManager);
         virtual ~ChunkedLodGlobe();
 
-        ChunkRenderer& getPatchRenderer() const;
-
         bool initialize() override;
         bool deinitialize() override;
         bool isReady() const override;
@@ -122,7 +120,6 @@ namespace openspace {
 
         void debugRenderChunks(const RenderData& data) const;
 
-
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
 
@@ -130,7 +127,7 @@ namespace openspace {
         std::unique_ptr<ChunkNode> _rightRoot;
 
         // the patch used for actual rendering
-        std::unique_ptr<ChunkRenderer> _patchRenderer;
+        std::unique_ptr<ChunkRenderer> _renderer;
 
         static const GeodeticPatch LEFT_HEMISPHERE;
         static const GeodeticPatch RIGHT_HEMISPHERE;
