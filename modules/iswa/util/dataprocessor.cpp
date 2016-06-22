@@ -35,7 +35,7 @@ DataProcessor::DataProcessor()
     ,_useHistogram(false)
     ,_normValues(glm::vec2(1.0))
     ,_filterValues(glm::vec2(0.0))
-    ,_histNormValues(glm::vec2(4.f, 4.f))
+    //,_histNormValues(glm::vec2(4.f, 4.f))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 }

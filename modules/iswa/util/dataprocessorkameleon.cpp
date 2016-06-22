@@ -100,7 +100,6 @@ void DataProcessorKameleon::addDataValues(const std::string& path, const propert
 }
 std::vector<float*> DataProcessorKameleon::processData(const std::string path, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions, float slice){
     _slice = slice;
-    // _dimensions = dimensions; 
     return processData(path, dataOptions, dimensions);
 }
 
