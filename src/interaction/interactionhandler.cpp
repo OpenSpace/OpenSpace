@@ -36,6 +36,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#include <fstream>
+
 namespace {
     const std::string _loggerCat = "InteractionHandler";
 }
@@ -687,7 +689,13 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::update(double deltaTime) { 
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-    _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
+
+    if (_cameraUpdatedFromScript) {
+        _cameraUpdatedFromScript = false;
+    }
+    else {
+        _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
+    }
 }
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
@@ -728,6 +736,38 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
+void InteractionHandler::saveCameraPosition(const std::string& filepath) {
+    if (!filepath.empty()) {
+        auto fullpath = absPath(filepath);
+        LDEBUG("Saving camera position: " << fullpath);
+        std::ofstream ofs(fullpath.c_str());
+        _camera->serialize(ofs);
+        ofs.close();
+    }
+}
+
+void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
+    if (!filepath.empty()) {
+        auto fullpath = absPath(filepath);
+        LDEBUG("Reading camera position: " << fullpath);
+        std::ifstream ifs(fullpath.c_str());
+        Camera c;
+        c.deserialize(ifs);
+        ifs.close();
+
+        // uff, need to do this ... 
+        c.preSynchronization();
+        c.postSynchronizationPreDraw();
+
+        auto p = c.positionVec3();
+        auto r = c.rotationQuaternion();
+
+        _camera->setPositionVec3(p);
+        _camera->setRotation(r);
+        _cameraUpdatedFromScript = true;
+    }
+}
+
 void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
 }
@@ -760,6 +800,18 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 &luascriptfunctions::setInteractionMode,
                 "string",
                 "Set the interaction mode for the camera"
+            },
+            {
+                "saveCameraPosition",
+                &luascriptfunctions::saveCameraPosition,
+                "string",
+                "Save the current camera position to file"
+            },
+            {
+                "restoreCameraPosition",
+                &luascriptfunctions::restoreCameraPosition,
+                "string",
+                "Restore the camera position from file"
             }
         }
     };

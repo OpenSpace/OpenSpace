@@ -190,6 +190,22 @@ namespace openspace {
         _cachedViewDirection.isDirty = true;
     }
 
+    void Camera::serialize(std::ostream& os) const {
+        Vec3 p = positionVec3();
+        Quat q = rotationQuaternion();
+        os << p.x << " " << p.y << " " << p.z << std::endl;
+        os << q.x << " " << q.y << " " << q.z << " " << q.w << std::endl;
+    }
+
+    void Camera::deserialize(std::istream& is) {
+        Vec3 p;
+        Quat q;
+        is >> p.x >> p.y >> p.z;
+        is >> q.x >> q.y >> q.z >> q.w;
+        setPositionVec3(p);
+        setRotation(q);
+    }
+
     void Camera::preSynchronization() {
         std::lock_guard<std::mutex> _lock(_mutex);
 

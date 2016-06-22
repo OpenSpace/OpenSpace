@@ -194,8 +194,13 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
+    void saveCameraPosition(const std::string& filepath = "");
+    void restoreCameraPosition(const std::string& filepath = "");
+
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
+
+    bool _cameraUpdatedFromScript = false;
 
     std::multimap<KeyWithModifier, std::string > _keyLua;
 
@@ -210,7 +215,6 @@ private:
     // Properties
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
-    
 };
 
 #endif // USE_OLD_INTERACTIONHANDLER
