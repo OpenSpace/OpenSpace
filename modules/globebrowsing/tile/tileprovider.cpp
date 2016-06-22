@@ -61,12 +61,12 @@ namespace openspace {
         }
         glm::vec2 samplePos = uv * glm::vec2(dimensions.xy());
         glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy());
+        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy() - glm::uvec2(1));
         glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy());
-        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy());
-        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy());
+        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy() - glm::uvec2(1));
 
         unsigned int linearSamplePos00 = (dimensions.x * dimensions.z) * samplePos00.y + (samplePos00.x * dimensions.z) + band;
         unsigned int linearSamplePos10 = (dimensions.x * dimensions.z) * samplePos10.y + (samplePos10.x * dimensions.z) + band;
