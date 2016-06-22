@@ -21,24 +21,13 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
-#include <modules/iswa/rendering/iswagroup.h>
-
-#include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
-
-#include <modules/iswa/util/dataprocessortext.h>
-#include <modules/iswa/util/dataprocessorjson.h>
-#include <modules/iswa/util/dataprocessorkameleon.h>
-
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/kameleonplane.h>
-
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/onscreengui/include/gui.h>
+
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
     const std::string _loggerCat = "IswaBaseGroup";
-    using json = nlohmann::json;
 }
 
 namespace openspace {
@@ -113,6 +102,13 @@ void IswaBaseGroup::registerProperties(){
 void IswaBaseGroup::unregisterProperties(){
     OsEng.gui()._iswa.unregisterProperties(name());
     _registered = false;
+}
+
+std::unique_ptr<ghoul::Dictionary> IswaBaseGroup::propertyValues() const{
+    return std::make_unique<ghoul::Dictionary>(ghoul::Dictionary({
+       {"enabled", _enabled.value()},
+       {"alpha", _alpha.value()}
+    }));
 }
 
 } //namespace openspace

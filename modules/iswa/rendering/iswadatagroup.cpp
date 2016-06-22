@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,9 +23,6 @@
 ****************************************************************************************/
 #include <modules/iswa/rendering/iswadatagroup.h>
 
-#include <fstream>
-#include <modules/iswa/ext/json/json.hpp>
-
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
@@ -35,10 +32,10 @@
 #include <modules/iswa/rendering/kameleonplane.h>
 
 #include <modules/onscreengui/include/gui.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
     const std::string _loggerCat = "IswaDataGroup";
-    using json = nlohmann::json;
 }
 
 namespace openspace{
@@ -71,12 +68,11 @@ void IswaDataGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    if(!_autoFilter.value())
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-    // OsEng.gui()._iswa.registerProperty(&_autoFilter);
     OsEng.gui()._iswa.registerProperty(&_normValues);
     OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
     OsEng.gui()._iswa.registerProperty(&_dataOptions);
+    if(!_autoFilter.value())
+        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
 
 
     _useLog.onChange([this]{
@@ -151,6 +147,17 @@ void IswaDataGroup::createDataProcessor(){
 
 std::vector<int> IswaDataGroup::dataOptionsValue(){
     return _dataOptions.value();
+}
+
+std::unique_ptr<ghoul::Dictionary> IswaDataGroup::propertyValues() const{
+    std::unique_ptr<ghoul::Dictionary> properties = IswaBaseGroup::propertyValues();
+
+    properties->setValue("useHistogram", _useHistogram.value());
+    properties->setValue("autoFilter", _autoFilter.value());
+    properties->setValue("normValues", _normValues.value());
+    properties->setValue("backgroundValues", _backgroundValues.value());
+    properties->setValue("transferFunctionsFile", _transferFunctionsFile.value());
+    return std::move(properties);
 }
 
 } //namespace openspace

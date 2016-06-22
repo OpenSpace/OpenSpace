@@ -24,10 +24,9 @@
 #include <modules/iswa/util/dataprocessor.h>
 #include <openspace/util/histogram.h>
 
-#include <fstream>
-
 namespace {
 	const std::string _loggerCat = "DataProcessor";
+    const int NumBins = 512;
 }
 // const float normVal = 1.0;
 namespace openspace {
@@ -84,10 +83,10 @@ float DataProcessor::processDataPoint(float value, int option){
 
     float v;
     if(_useHistogram){
-        v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option])))/(float)512;
+        v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option])))/(float)NumBins;
         // v = histogram->equalize(value)/(float)512;
     }else{
-        v = normalizeWithStandardScore(value, mean, sd, _normValues);
+        v = normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option]));
     }
     return v;
 }
@@ -131,28 +130,26 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
     float mean, standardDeviation, filterMid, filterWidth;
 
     _filterValues = glm::vec2(0.0);
-    if(numSelected <= 0) return;
+    if (numSelected <= 0) return;
 
-    if(!_histograms.empty()){
-        for(int option : selectedOptions){
-            if(!_useHistogram){
+    if (!_histograms.empty()) {
+        for (int option : selectedOptions) {
+            if (!_useHistogram) {
                 mean = (1.0/_numValues[option])*_sum[option];
                 standardDeviation = _standardDeviation[option];
                 histogram = _histograms[option];
                 
                 filterMid = histogram->highestBinValue(_useHistogram);
-                filterWidth = mean+histogram->binWidth();
-                
-                filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
-                filterWidth = fabs(0.5-normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues));
+                filterWidth = histogram->binWidth();
+
+                //atleast one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
+                filterWidth = std::max(filterWidth, 1.0f/512.0f);
             }else{
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
-                std::cout << filterMid << std::endl;
-                filterWidth = 1.f/512.f;
+                filterWidth = std::min(1.f / (float)NumBins, 1.0f/512.0f);
             }
-
-             _filterValues += glm::vec2(filterMid, filterWidth);
+            _filterValues += glm::vec2(filterMid, filterWidth);
 
         }
         _filterValues /= numSelected;   
@@ -206,7 +203,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
 
         if(!_histograms[i]){
-             _histograms[i] = std::make_shared<Histogram>(min, max, 512);
+             _histograms[i] = std::make_shared<Histogram>(min, max, NumBins);
         }
         else{
             //Renormalize all the values in the old histogram

@@ -27,6 +27,8 @@
 
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/util/dataprocessor.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace {
     const int MAX_TEXTURES = 6;
@@ -72,6 +74,12 @@ protected:
     void subscribeToGroup();
 
     /**
+     * If this datacygnet belongs to a group, it must get its 
+     * initial property values with this function
+     */
+    void getGroupPropertyValues() override;
+
+    /**
      * Optional interface method. this has an implementation
      * in datacygnet.cpp, but needs to be overriden for kameleonplane
      */
@@ -82,6 +90,7 @@ protected:
     virtual bool createGeometry() = 0;
     virtual bool destroyGeometry() = 0;
     virtual void renderGeometry() const = 0;
+    
     /**
      * This function should return the processed data that
      * will populate the texture

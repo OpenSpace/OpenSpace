@@ -27,7 +27,7 @@
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/designpattern/event.h>
 
-#include <memory>
+//#include <memory>
 #include <map>
 #include <future>
 #include <ghoul/glm.h>
@@ -35,12 +35,7 @@
 #include <ccmc/Kameleon.h>
 #endif
 #include <openspace/engine/downloadmanager.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/properties/selectionproperty.h>
+//#include <openspace/properties/propertyowner.h>
 #include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/time.h>
 
@@ -75,8 +70,8 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager>, public properties::PropertyOwner {
-    friend class ghoul::Singleton<IswaManager>;
+class IswaManager : public ghoul::Singleton<IswaManager> { //, public properties::PropertyOwner {
+    //friend class ghoul::Singleton<IswaManager>;
 
 public:
     enum CygnetType {Texture, Data, Kameleon, NoType};

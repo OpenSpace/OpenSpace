@@ -23,7 +23,11 @@
 ****************************************************************************************/
 #ifndef __ISWADATAGROUP_H__
 #define __ISWADATAGROUP_H__
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/selectionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace{
 class IswaDataGroup : public IswaBaseGroup{
@@ -33,14 +37,11 @@ public:
 
     void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);
     std::vector<int> dataOptionsValue();
+    virtual std::unique_ptr<ghoul::Dictionary> propertyValues() const;
 
 protected:
     void registerProperties();
     void createDataProcessor();
-
-    // void readFieldlinePaths(std::string indexFile);
-    // void updateFieldlineSeeds();
-    // void clearFieldlines();
 
     properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;

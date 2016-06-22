@@ -29,15 +29,19 @@
 
 namespace openspace {
 
+/**
+* See DataProcessor for documentation. 
+* Instead of data file content as first argument, pass path to cdf file for all overriden functions
+*/
 class DataProcessorKameleon : public DataProcessor {
 public:
     DataProcessorKameleon();
     ~DataProcessorKameleon();
 
-    virtual std::vector<std::string> readMetadata(std::string path, glm::size3_t& dimensions) override;
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;
-    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
-    virtual std::vector<float*> processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice);
+    std::vector<std::string> readMetadata(const std::string& path, glm::size3_t& dimensions) override;
+    void addDataValues(const std::string& path, const properties::SelectionProperty& dataOptions) override;
+    std::vector<float*> processData(const std::string& path, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions) override;
+    std::vector<float*> processData(const std::string path, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions, float slice);
     void dimensions(glm::size3_t dimensions){_dimensions = dimensions;}
 
 private:

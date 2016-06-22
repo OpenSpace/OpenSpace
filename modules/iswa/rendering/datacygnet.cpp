@@ -29,6 +29,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/rendering/iswadatagroup.h>
 
 namespace {
     const std::string _loggerCat = "DataCygnet";
@@ -67,6 +68,9 @@ bool DataCygnet::updateTexture(){
 
     if(data.empty())
         return false;
+
+    if(_autoFilter)
+        _backgroundValues.setValue(_dataProcessor->filterValues());
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
@@ -258,6 +262,12 @@ void DataCygnet::setPropertyCallbacks(){
     _transferFunctionsFile.onChange([this](){
         readTransferFunctions(_transferFunctionsFile.value());
     });
+
+    _autoFilter.onChange([this](){ 
+        if(_autoFilter.value())
+            _backgroundValues.setValue(_dataProcessor->filterValues());
+        updateTexture();
+    });
 }
 
 void DataCygnet::subscribeToGroup(){
@@ -316,6 +326,32 @@ void DataCygnet::subscribeToGroup(){
             _backgroundValues.setValue(_dataProcessor->filterValues());
         updateTexture();
     });
+}
+
+void DataCygnet::getGroupPropertyValues(){
+    if(!_group)
+        return;
+
+    std::unique_ptr<ghoul::Dictionary> properties = _group->propertyValues();
+
+    bool enabled;
+    if(properties->getValue("enabled", enabled))
+        _enabled.setValue(enabled);
+    float alpha;
+    if(properties->getValue("alpha", alpha))
+        _alpha.setValue(alpha); 
+    bool useHistogram;
+    if(properties->getValue("useHistogram", useHistogram))
+        _useHistogram.setValue(useHistogram);
+    glm::vec2 backgroundValues;
+    if(properties->getValue("backgroundValues", backgroundValues))
+        _backgroundValues.setValue(backgroundValues);
+    bool autoFilter;
+    if(properties->getValue("autoFilter", autoFilter))
+        _autoFilter.setValue(autoFilter);
+    glm::vec2 normValues;
+    if(properties->getValue("normValues", normValues))
+        _normValues.setValue(normValues);
 
 }
 

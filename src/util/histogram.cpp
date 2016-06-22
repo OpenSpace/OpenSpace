@@ -308,8 +308,8 @@ float Histogram::equalize(float value){
     return _equalizer[bin];
 }
 
-float Histogram::entropy(){
-    float entropy = 0.0;
+float Histogram::entropy() const {
+    float entropy = 0.f;
 
     for(int i = 0; i < _numBins; i++){
         if(_data[i] != 0)
@@ -334,10 +334,10 @@ void Histogram::print() const {
 
 float Histogram::highestBinValue(bool equalized, int overBins){
     int highestBin = 0;
-    float highestValue = 0;
+    float highestValue = 0.0f;
 
     for(int i=0; i<_numBins; i++){
-        float value = 0;
+        float value = 0.0f;
         int num = 0;
         for(int j=0; j<overBins; j++){
             if(i-j>0){
@@ -352,6 +352,7 @@ float Histogram::highestBinValue(bool equalized, int overBins){
 
         value += _data[i];
         value /= (float)++num;
+        //value = _data[i];
 
         if(value > highestValue){
             highestBin = i;
@@ -359,9 +360,8 @@ float Histogram::highestBinValue(bool equalized, int overBins){
         }
     }
 
-
     if(!equalized){
-        float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
+        float low = _minValue + (float(highestBin) / _numBins) * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / float(_numBins);
         return (high+low)/2.0;
     }else{
@@ -371,10 +371,10 @@ float Histogram::highestBinValue(bool equalized, int overBins){
 }
 
 float Histogram::binWidth(){
-    return (_maxValue-_minValue)/_numBins;
+    return (_maxValue-_minValue)/float(_numBins);
 }
 
-std::ostream& operator<<(std::ostream& os, const Histogram& hist){
+void operator<<(std::ostream& os, const Histogram& hist){
     const float* data = hist.data();
     float max = hist.maxValue();
     float min = hist.minValue();

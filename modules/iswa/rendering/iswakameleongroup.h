@@ -36,8 +36,9 @@ public:
     std::vector<int> fieldlineValue();
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
     void changeCdf(std::string path);
+    std::unique_ptr<ghoul::Dictionary> propertyValues() const;
 
-protected:
+private:
     void registerProperties();
 
     void readFieldlinePaths(std::string indexFile);

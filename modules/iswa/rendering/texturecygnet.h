@@ -46,7 +46,7 @@ protected:
     bool downloadTextureResource(double timestamp = Time::ref().currentTime()) override;
     bool readyToRender() const override;
     bool updateTextureResource() override;
-
+    
     // Interface for concrete subclasses
     virtual void setUniforms() = 0;
     virtual bool createGeometry() = 0;

@@ -27,6 +27,7 @@
 
 #include <chrono>
 #include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <ghoul/designpattern/event.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
@@ -36,9 +37,6 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/time.h>
 
-#include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/iswa/rendering/iswadatagroup.h>
-#include <modules/iswa/rendering/iswakameleongroup.h>
 
 namespace openspace{
 class IswaBaseGroup;
@@ -121,6 +119,12 @@ protected:
      * should set all uniforms needed to render
      */
     virtual void setUniforms() = 0;
+
+    /**
+     * Optional override. should get the initial property values needed from the group
+     * and set its own.
+     */
+    virtual void getGroupPropertyValues();
 
     properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;

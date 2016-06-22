@@ -23,7 +23,8 @@
  ****************************************************************************************/
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/engine/openspaceengine.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/rendering/renderengine.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     const std::string _loggerCat = "TexturePlane";

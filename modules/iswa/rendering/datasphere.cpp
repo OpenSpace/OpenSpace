@@ -24,11 +24,13 @@
 
 #include <modules/iswa/rendering/datasphere.h>
 #include <openspace/util/powerscaledsphere.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 
 #include <modules/onscreengui/include/gui.h>
 
-#ifdef WIN32
+#ifdef WIN32        
 #define _USE_MATH_DEFINES
 #include <math.h>
 #endif
@@ -58,29 +60,32 @@ DataSphere::~DataSphere(){}
 
 bool DataSphere::initialize(){
     IswaCygnet::initialize();
-
+    setPropertyCallbacks();
     //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
     _rotation = glm::rotate(_rotation, (float)M_PI_2, glm::vec3(1.0, 0.0, 0.0));
 
     if(_group){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
+        //getGroupPropertyValues();
     }else{
         OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
         OsEng.gui()._iswa.registerProperty(&_normValues);
         OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
         OsEng.gui()._iswa.registerProperty(&_dataOptions);
+        if(!_autoFilter.value())
+            OsEng.gui()._iswa.registerProperty(&_backgroundValues);
 
         _dataProcessor = std::make_shared<DataProcessorJson>();
-        //If autofiler is on, background values property should be hidden
+        //If autofilter is on, background values property should be hidden
         _autoFilter.onChange([this](){
-            // If autofiler is selected, use _dataProcessor to set backgroundValues 
+            // If autofilter is selected, use _dataProcessor to set backgroundValues 
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
+                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
             // else if autofilter is turned off, register backgroundValues 
             } else {
                 OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
@@ -89,10 +94,6 @@ bool DataSphere::initialize(){
     }
 
     readTransferFunctions(_transferFunctionsFile.value());
-
-    setPropertyCallbacks();
-    // _useHistogram.setValue(true);
-    // _autoFilter.setValue(true);
 
     return true;
 }

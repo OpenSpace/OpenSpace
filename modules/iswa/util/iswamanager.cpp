@@ -28,30 +28,30 @@
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
 
-#include <modules/iswa/rendering/screenspacecygnet.h>
-#include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 #include <fstream>
-#include <algorithm>
+//#include <algorithm>
 
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/script_helper.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
+//#include <openspace/scripting/script_helper.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+//#include <ghoul/lua/ghoul_lua.h>
+//#include <ghoul/lua/lua_helper.h>
 
 #include "iswamanager_lua.inl";
 
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "IswaManager";
-    std::string baseUrl = "https://iswa-demo-server.herokuapp.com/";
+    std::string baseUrl = "http://iswa-demo-server.herokuapp.com/";
     //const std::string baseUrl = "http://128.183.168.116:3000/";
 }
 

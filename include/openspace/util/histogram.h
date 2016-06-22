@@ -70,14 +70,19 @@ public:
     void generateEqualizer(bool withoutHighestBin = false);
     Histogram equalize();
     float equalize (float);
-    float entropy();
+
+    /**
+     * Entropy is a measure of histogram dispersion.
+     * @return entropy value
+     */
+    float entropy() const;
 
     float highestBinValue(bool equalized, int overBins=0);
     float binWidth();
 
     void changeRange(float minValue, float maxValue);
 
-    friend std::ostream& operator<<(std::ostream& os, const Histogram& hist);
+    friend void operator<<(std::ostream& os, const Histogram& hist);
 private:
     int _numBins;
     float _minValue;

@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,9 +38,39 @@ public:
     DataProcessor();
     ~DataProcessor();
 
-    virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
-    virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
-    virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
+    /**
+     * Reads and returns the metadata from the data file.
+     * 
+     * @param data The data file content to read metadata from
+     * @param dimensions the dimensions of the data, will be modified
+     * 
+     * @return An array with data variable options
+     */
+    virtual std::vector<std::string> readMetadata(const std::string& data, glm::size3_t& dimensions) = 0;
+
+    /**
+     * Function that initializes the dataprocessor for a new data variable by 
+     * calculating its min & max value, standard deviation, sum and histogram for a 
+     * given data file. This file will then be used as reference when normalizing, filtering
+     * and give auto-contrast 
+     * 
+     * @param data The data file content to add data from
+     * @param dataOptions a list of dataoptions that you want to pre-process
+     */
+    virtual void addDataValues(const std::string& data, const properties::SelectionProperty& dataOptions) = 0;
+
+    /**
+     * Will take raw input data as a string and return it as a vector of 
+     * float arrays (one float array per data variable that is selected).
+     * Before returning it, the data is processed with normalization and 
+     * an optional histogram equalization. 
+     * 
+     * @param data input data. directly from data file (file contents)
+     * @param dataOptions Pass in the dataOptions property from the Renderable
+     * @param dimensions Dimensions of the data
+     * @return Processed data
+     */
+    virtual std::vector<float*> processData(const std::string& data, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);

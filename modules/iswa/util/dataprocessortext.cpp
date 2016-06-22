@@ -43,7 +43,7 @@ DataProcessorText::DataProcessorText()
 
 DataProcessorText::~DataProcessorText(){}
 
-std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::size3_t& dimensions){
+std::vector<std::string> DataProcessorText::readMetadata(const std::string& data, glm::size3_t& dimensions){
     //The intresting part of the file looks like this:
     //# Output data: field with 61x61=3721 elements
     //# x           y           z           N           V_x         B_x
@@ -84,7 +84,7 @@ std::vector<std::string> DataProcessorText::readMetadata(std::string data, glm::
     return options;
 }
 
-void DataProcessorText::addDataValues(std::string data, properties::SelectionProperty& dataOptions){
+void DataProcessorText::addDataValues(const std::string& data, const properties::SelectionProperty& dataOptions){
     int numOptions = dataOptions.options().size(); 
     initializeVectors(numOptions);
 
@@ -142,7 +142,7 @@ void DataProcessorText::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorText::processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions){
+std::vector<float*> DataProcessorText::processData(const std::string& data, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions){
     if(!data.empty()){
 
         std::string line;

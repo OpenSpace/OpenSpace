@@ -253,6 +253,7 @@ bool IswaCygnet::createShader(){
 
 void IswaCygnet::initializeGroup(){
     _group = IswaManager::ref().iswaGroup(_data->groupName);
+    getGroupPropertyValues();
 
     //Subscribe to enable and delete property
     auto groupEvent = _group->groupEvent();
@@ -270,6 +271,23 @@ void IswaCygnet::initializeGroup(){
         LDEBUG(name() + " Event clearGroup");
         OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
     });
+}
+
+
+void IswaCygnet::getGroupPropertyValues(){
+    //this function is overriden by datacygnet
+
+    if(!_group)
+        return;
+    
+    std::unique_ptr<ghoul::Dictionary> properties = _group->propertyValues();
+
+    bool enabled;
+    if(properties->getValue("enabled", enabled))
+        _enabled.setValue(enabled);
+    float alpha;
+    if(properties->getValue("alpha", alpha))
+        _alpha.setValue(alpha);
 }
 
 }//namespace openspac
