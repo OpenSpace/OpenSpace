@@ -252,10 +252,24 @@ namespace openspace {
         result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
         result->dimensions = glm::uvec3(region.numPixels, 1);
         result->nBytesImageData = _dataLayout.bytesPerPixel * region.numPixels.x * region.numPixels.y;
+        result->error = worstError;
         if (_doPreprocessing) {
             result->preprocessData = preprocess(imageData, region, _dataLayout);
+            int success;
+            auto gdalOverview = _dataset->GetRasterBand(1)->GetOverview(region.overview);
+            double missingDataValue = gdalOverview->GetNoDataValue(&success);
+            if (!success) {
+                missingDataValue = 32767; // missing data value
+            }
+            bool hasMissingData = false;
+            for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+                hasMissingData |= result->preprocessData->maxValues[c] == missingDataValue;
+            }
+            bool onHighLevel = region.chunkIndex.level > 6;
+            if (hasMissingData && onHighLevel) {
+                result->error = CE_Fatal;
+            }
         }
-        result->error = worstError;
 
         delete[] imageData;
         return result;
@@ -321,6 +335,11 @@ namespace openspace {
 
                     i += dataLayout.bytesPerDatum;
                 }
+            }
+        }
+        for (size_t c = 0; c < dataLayout.numRasters; c++) {
+            if (preprocessData->maxValues[c] > 8800.0f) {
+                LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.chunkIndex);
             }
         }
 
