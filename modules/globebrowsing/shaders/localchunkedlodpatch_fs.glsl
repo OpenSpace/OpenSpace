@@ -68,7 +68,7 @@ in vec3 ellipsoidNormalCameraSpace;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = vec4(1,1,1,1);
+	frag.color = vec4(0.1,0.1,0.1,1);
 
 #if USE_COLORTEXTURE
 
