@@ -111,8 +111,7 @@ public:
     void update(const UpdateData& data) override;
 
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    glm::dvec3 projectOnGlobeSurface(glm::dvec3 position);
-    double getHeight(glm::dvec3 position);
+    float getHeight(glm::dvec3 position);
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
     

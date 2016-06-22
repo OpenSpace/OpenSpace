@@ -184,52 +184,59 @@ namespace openspace {
         return _ellipsoid.geodeticSurfaceProjection(position);
     }
 
-    glm::dvec3 RenderableGlobe::projectOnGlobeSurface(glm::dvec3 position) {
-        
+    float RenderableGlobe::getHeight(glm::dvec3 position) {
+        // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        glm::dvec3 ellipsoidNormal = _ellipsoid.geodeticSurfaceNormal(geodeticPosition);
         int chunkLevel = 20;
         ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
         GeodeticPatch patch = GeodeticPatch(chunkIdx);
         Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
         Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
-        glm::vec2 uvPatch = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
+        glm::vec2 patchUV = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
+        // Get the tile provider for the height map
         const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-
-        if (heightMapProviders.size() == 0)
-            return _ellipsoid.geodeticSurfaceProjection(position);
-
-        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), chunkIdx);
-        
-        glm::vec2 transformedUv = tileAndTransform.uvTransform.uvOffset + tileAndTransform.uvTransform.uvScale * uvPatch;
-        double sampledHeight = tileAndTransform.tile.sampleValueAsDouble(transformedUv);
-
-        return _ellipsoid.geodeticSurfaceProjection(position) + ellipsoidNormal * (sampledHeight + 100);
-    }
-
-    double RenderableGlobe::getHeight(glm::dvec3 position) {
-
-        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        glm::dvec3 ellipsoidNormal = _ellipsoid.geodeticSurfaceNormal(geodeticPosition);
-        int chunkLevel = 16;
-        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
-        GeodeticPatch patch = GeodeticPatch(chunkIdx);
-        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
-        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
-        glm::vec2 uvPatch = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
-
-        const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-
         if (heightMapProviders.size() == 0)
             return 0;
+        const auto& tileProvider = heightMapProviders[0];
 
-        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), chunkIdx);
+        // Transform the uv coordinates to the current tile texture
+        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider.get(), chunkIdx);
+        const auto& tile = tileAndTransform.tile;
+        const auto& uvTransform = tileAndTransform.uvTransform;
+        const auto& depthTransform = tileProvider->depthTransform();
+        if (tile.status != Tile::Status::OK) {
+            return 0;
+        }
+        glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;
 
-        glm::vec2 transformedUv = tileAndTransform.uvTransform.uvOffset + tileAndTransform.uvTransform.uvScale * uvPatch;
-        double sampledHeight = tileAndTransform.tile.sampleValueAsDouble(transformedUv);
+        // Sample and do linear interpolation (could possibly be moved as a function in ghoul texture)
+        glm::uvec3 dimensions = tile.texture->dimensions();
+        
+        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions.xy());
+        glm::uvec2 samplePos00 = samplePos;
+        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy() - glm::uvec2(1));
+        glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        return sampledHeight;
+        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy() - glm::uvec2(1));
+
+        float sample00 = tile.texture->texelAsFloat(samplePos00).x;
+        float sample10 = tile.texture->texelAsFloat(samplePos10).x;
+        float sample01 = tile.texture->texelAsFloat(samplePos01).x;
+        float sample11 = tile.texture->texelAsFloat(samplePos11).x;
+
+        float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
+        float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
+
+        float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
+
+        // Perform depth transform to get the value in meters
+        float height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+        
+        // Return the result
+        return height;
     }
 
     std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {

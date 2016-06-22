@@ -903,7 +903,6 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     Renderable* baseRenderable = _focusNode->renderable();
     if (RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(baseRenderable)) {
         _globe = globe;
-        _cameraPosition = _camera->positionVec3();
     }
     else {
         LWARNING("Focus node is not a renderable globe. GlobeBrowsingInteraction is not possible");
@@ -917,13 +916,14 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
-        //glm::dvec3 camPos = _camera->positionVec3();
-        glm::dvec3 posDiff = _cameraPosition - centerPos;
-        glm::dvec3 newPosition = _cameraPosition;
+        glm::dvec3 camPos = _camera->positionVec3();
+        glm::dvec3 posDiff = camPos - centerPos;
+        glm::dvec3 newPosition = camPos;
 
-        glm::dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(_cameraPosition);
-        glm::dvec3 ellipsoidSurfaceToCamera = _cameraPosition - (centerPos + centerToEllipsoidSurface);
+        glm::dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos);
+        glm::dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
         glm::dvec3 directionFromSurfaceToCamera = glm::normalize(ellipsoidSurfaceToCamera);
+
         double distFromCenterToSurface =
             glm::length(centerToEllipsoidSurface);
         double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
@@ -953,7 +953,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 * rotationDiffWorldSpace
                 - (distFromCenterToCamera * directionFromSurfaceToCamera);
 
-            newPosition = _cameraPosition + rotationDiffVec3;
+            newPosition = camPos + rotationDiffVec3;
 
             centerToEllipsoidSurface = _globe->projectOnEllipsoid(newPosition);
             ellipsoidSurfaceToCamera = newPosition - (centerPos + centerToEllipsoidSurface);
@@ -982,17 +982,14 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
             ellipsoidSurfaceToCamera = newPosition - (centerPos + centerToEllipsoidSurface);
             directionFromSurfaceToCamera = glm::normalize(newPosition - (centerPos + centerToEllipsoidSurface));
 
-            glm::dvec3 centerToGlobeSurface = _globe->projectOnGlobeSurface(newPosition);
-            glm::dvec3 ellipsoidSurfaceToGlobeSurface = centerToGlobeSurface - centerToEllipsoidSurface;
             double heightToCam = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface = glm::length(ellipsoidSurfaceToGlobeSurface);
-            newPosition = _globe->projectOnEllipsoid(newPosition) + directionFromSurfaceToCamera * glm::max(heightToCam, heightToSurface);
+            double heightToSurface = _globe->getHeight(newPosition);
+            double heightAboveGround = 1000;
+            newPosition = _globe->projectOnEllipsoid(newPosition) + directionFromSurfaceToCamera * glm::max(heightToCam, heightToSurface + heightAboveGround);
         }
         // Update the camera state
-        _cameraPosition = newPosition;
-
         _camera->setRotation(_globalCameraRotation * _localCameraRotation);
-        _camera->setPositionVec3(_cameraPosition);
+        _camera->setPositionVec3(newPosition);
     }
 }
 
