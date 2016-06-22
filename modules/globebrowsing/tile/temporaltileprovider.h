@@ -123,7 +123,7 @@ namespace openspace {
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
-        virtual void prerender();
+        virtual void update();
         virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
 
 

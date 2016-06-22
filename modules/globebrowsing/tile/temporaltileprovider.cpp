@@ -109,8 +109,8 @@ namespace openspace {
 
     TileDepthTransform TemporalTileProvider::depthTransform() {
         if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from depthTransform()");
-            prerender();
+            LDEBUG("Warning: had to call update from depthTransform()");
+            update();
         }
 
         return _currentTileProvider->depthTransform();
@@ -118,8 +118,8 @@ namespace openspace {
 
     Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
         if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getTileStatus()");
-            prerender();
+            LDEBUG("Warning: had to call update from getTileStatus()");
+            update();
         }
 
         return _currentTileProvider->getTileStatus(chunkIndex);
@@ -127,8 +127,8 @@ namespace openspace {
 
     Tile TemporalTileProvider::getTile(const ChunkIndex& chunkIndex) {
         if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getTile()");
-            prerender();
+            LDEBUG("Warning: had to call update from getTile()");
+            update();
         }
 
         return _currentTileProvider->getTile(chunkIndex);
@@ -136,15 +136,15 @@ namespace openspace {
 
 
 
-    void TemporalTileProvider::prerender() {
+    void TemporalTileProvider::update() {
         _currentTileProvider = getTileProvider();
-        _currentTileProvider->prerender();
+        _currentTileProvider->update();
     }
 
     std::shared_ptr<AsyncTileDataProvider> TemporalTileProvider::getAsyncTileReader() {
         if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getAsyncTileReader()");
-            prerender();
+            LDEBUG("Warning: had to call update from getAsyncTileReader()");
+            update();
         }
 
         return _currentTileProvider->getAsyncTileReader();

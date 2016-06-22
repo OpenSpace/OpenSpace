@@ -138,11 +138,11 @@ namespace openspace {
         return _layerCategories[category];
     }
 
-    void TileProviderManager::prerender() {
+    void TileProviderManager::update() {
         for each (auto layerCategory in _layerCategories) {
             for each (auto tileProviderWithName in layerCategory) {
                 if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->prerender();
+                    tileProviderWithName.tileProvider->update();
                 }
             }
         }

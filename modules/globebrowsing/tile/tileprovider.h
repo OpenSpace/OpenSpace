@@ -70,7 +70,7 @@ namespace openspace {
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
-        virtual void prerender() = 0;
+        virtual void update() = 0;
         virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader() = 0;
     };
 
@@ -96,7 +96,7 @@ namespace openspace {
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
-        virtual void prerender();
+        virtual void update();
         virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
 
 
