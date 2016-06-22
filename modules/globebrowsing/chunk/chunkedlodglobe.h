@@ -118,7 +118,7 @@ namespace openspace {
 
     private:
 
-        void debugRenderChunks(const RenderData& data) const;
+        void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;

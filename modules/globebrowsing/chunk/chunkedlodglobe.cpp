@@ -157,35 +157,12 @@ namespace openspace {
             const Chunk& chunk = chunkNode.getChunk();
             if (chunkNode.isLeaf() && chunk.isVisible()) {
                 _renderer->renderChunk(chunkNode.getChunk(), data);
-
-                const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
-                std::vector<glm::vec4> clippingSpaceCorners(8);
-                AABB3 screenSpaceBounds;
-                for (size_t i = 0; i < 8; i++) {
-                    const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
-                    clippingSpaceCorners[i] = clippingSpaceCorner;
-
-                    vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
-                    screenSpaceBounds.expand(screenSpaceCorner);
-                }
-
-                unsigned int colorBits = 1 + chunk.index().level % 6;
-                vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
-
-                if (debugOptions.showChunkBounds) {
-                    DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
-                }
-
-                if (debugOptions.showChunkAABB) {
-                    auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
-                    DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
-                }
+                debugRenderChunk(chunk, mvp);
             }
         };
         
         _leftRoot->reverseBreadthFirst(renderJob);
         _rightRoot->reverseBreadthFirst(renderJob);
-
 
 
         if (_savedCamera != nullptr) {
@@ -203,6 +180,33 @@ namespace openspace {
         //LDEBUG(ChunkNode::renderedChunks << " / " << ChunkNode::chunkNodeCount << " chunks rendered");
     }
 
+
+    void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
+        if (debugOptions.showChunkBounds || debugOptions.showChunkAABB) {
+            const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
+            std::vector<glm::vec4> clippingSpaceCorners(8);
+            AABB3 screenSpaceBounds;
+            for (size_t i = 0; i < 8; i++) {
+                const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
+                clippingSpaceCorners[i] = clippingSpaceCorner;
+
+                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
+                screenSpaceBounds.expand(screenSpaceCorner);
+            }
+
+            unsigned int colorBits = 1 + chunk.index().level % 6;
+            vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
+
+            if (debugOptions.showChunkBounds) {
+                DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+            }
+
+            if (debugOptions.showChunkAABB) {
+                auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
+                DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
+            }
+        }
+    }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _renderer->update();
