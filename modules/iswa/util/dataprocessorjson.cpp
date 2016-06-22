@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2015                                                               *
+* Copyright (c) 2014-2016                                                            *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,20 +39,21 @@ DataProcessorJson::DataProcessorJson()
 
 DataProcessorJson::~DataProcessorJson(){}
 
-std::vector<std::string> DataProcessorJson::readMetadata(std::string data, glm::size3_t& dimensions){
+std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data, glm::size3_t& dimensions){
     std::vector<std::string> options = std::vector<std::string>();
     if(!data.empty()){
         json j = json::parse(data);
         json variables = j["variables"];
 
-        for(json::iterator it = variables.begin(); it != variables.end(); ++it){
-            std::string option = it.key();
-            if(option == "ep"){
-                json row = it.value();
-                json col = row.at(0);
+        //Setting dimensions
+        json::iterator it = variables.begin();
+        json row = it.value();
+        json col = row.at(0);
+        dimensions = glm::size3_t(col.size(), row.size(), 1);
 
-                dimensions = glm::size3_t(col.size(), row.size(), 1);
-            }
+        //Reading options
+        for(; it != variables.end(); ++it){
+            std::string option = it.key();
 
             if(_coordinateVariables.find(option) == _coordinateVariables.end()){
                 options.push_back(option);
@@ -62,7 +63,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(std::string data, glm::
     return options;
 }
 
-void DataProcessorJson::addDataValues(std::string data, properties::SelectionProperty& dataOptions){
+void DataProcessorJson::addDataValues(const std::string& data, const properties::SelectionProperty& dataOptions){
     int numOptions = dataOptions.options().size();
     initializeVectors(numOptions);
 
@@ -99,7 +100,7 @@ void DataProcessorJson::addDataValues(std::string data, properties::SelectionPro
     }
 }
 
-std::vector<float*> DataProcessorJson::processData(std::string data, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
+std::vector<float*> DataProcessorJson::processData(const std::string& data, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions){
     if(!data.empty()){
         json j = json::parse(data);
         json variables = j["variables"]; 

@@ -42,7 +42,7 @@ DataProcessorKameleon::DataProcessorKameleon()
 DataProcessorKameleon::~DataProcessorKameleon(){}
 
 
-std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path, glm::size3_t& dimensions){
+std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& path, glm::size3_t& dimensions){
 
     if(!path.empty()){
         if(path != _kwPath || !_kw){
@@ -64,7 +64,7 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path, g
     return std::vector<std::string>();
 }
 
-void DataProcessorKameleon::addDataValues(std::string path, properties::SelectionProperty& dataOptions){
+void DataProcessorKameleon::addDataValues(const std::string& path, const properties::SelectionProperty& dataOptions){
     int numOptions = dataOptions.options().size();
     initializeVectors(numOptions);
 
@@ -98,13 +98,13 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         add(optionValues, sum);
     }
 }
-std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice){
+std::vector<float*> DataProcessorKameleon::processData(const std::string path, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions, float slice){
     _slice = slice;
     // _dimensions = dimensions; 
     return processData(path, dataOptions, dimensions);
 }
 
-std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
+std::vector<float*> DataProcessorKameleon::processData(const std::string& path, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions){
     int numOptions =  dataOptions.options().size();
     
     if(!path.empty()){
