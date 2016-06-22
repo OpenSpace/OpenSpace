@@ -915,14 +915,20 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
+        // Shrink interaction ellipsoid to enable interaction below height = 0
+        double ellipsoidShrinkTerm = 10000.0;
+        double minHeightAboveGround = 100.0;
+
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
         glm::dvec3 camPos = _camera->positionVec3();
         glm::dvec3 posDiff = camPos - centerPos;
-        glm::dvec3 newPosition = camPos;
 
-        glm::dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos);
+        glm::dvec3 directionFromSurfaceToCamera =
+            _globe->ellipsoid().geodeticSurfaceNormal(
+                _globe->ellipsoid().cartesianToGeodetic2(camPos));
+        glm::dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
+            directionFromSurfaceToCamera * ellipsoidShrinkTerm;
         glm::dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-        glm::dvec3 directionFromSurfaceToCamera = glm::normalize(ellipsoidSurfaceToCamera);
 
         double distFromCenterToSurface =
             glm::length(centerToEllipsoidSurface);
@@ -942,7 +948,6 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 0) * glm::clamp(distFromEllipsoidSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
-
             glm::dquat rotationDiffWorldSpace =
                 _globalCameraRotation *
                 rotationDiffCamSpace *
@@ -953,11 +958,14 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 * rotationDiffWorldSpace
                 - (distFromCenterToCamera * directionFromSurfaceToCamera);
 
-            newPosition = camPos + rotationDiffVec3;
+            camPos = camPos + rotationDiffVec3;
 
-            centerToEllipsoidSurface = _globe->projectOnEllipsoid(newPosition);
-            ellipsoidSurfaceToCamera = newPosition - (centerPos + centerToEllipsoidSurface);
-            directionFromSurfaceToCamera = glm::normalize(ellipsoidSurfaceToCamera);
+            directionFromSurfaceToCamera =
+                _globe->ellipsoid().geodeticSurfaceNormal(
+                    _globe->ellipsoid().cartesianToGeodetic2(camPos));
+            centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
+                directionFromSurfaceToCamera * ellipsoidShrinkTerm;
+            ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
             glm::dvec3 lookUpWhenFacingSurface =
                 _globalCameraRotation * glm::dvec3(_camera->lookUpVectorCameraSpace());
@@ -969,7 +977,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
                 glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
         }
         { // Move position towards or away from focus node
-            newPosition += -(posDiff - centerToEllipsoidSurface) *
+            distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
+            camPos += -directionFromSurfaceToCamera * distFromEllipsoidSurfaceToCamera *
                 _truckMovementMouseState.velocity.get().y;
         }
         { // Do roll
@@ -978,18 +987,17 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
             _globalCameraRotation = cameraRollRotation * _globalCameraRotation;
         }
         { // Push up to surface
-            centerToEllipsoidSurface = _globe->projectOnEllipsoid(newPosition);
-            ellipsoidSurfaceToCamera = newPosition - (centerPos + centerToEllipsoidSurface);
-            directionFromSurfaceToCamera = glm::normalize(newPosition - (centerPos + centerToEllipsoidSurface));
+            ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
-            double heightToCam = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface = _globe->getHeight(newPosition);
-            double heightAboveGround = 1000;
-            newPosition = _globe->projectOnEllipsoid(newPosition) + directionFromSurfaceToCamera * glm::max(heightToCam, heightToSurface + heightAboveGround);
+            distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
+            double heightToSurface = _globe->getHeight(camPos) + ellipsoidShrinkTerm;
+            double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
+            camPos += directionFromSurfaceToCamera *
+                glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);
         }
         // Update the camera state
         _camera->setRotation(_globalCameraRotation * _localCameraRotation);
-        _camera->setPositionVec3(newPosition);
+        _camera->setPositionVec3(camPos);
     }
 }
 

@@ -184,21 +184,26 @@ namespace openspace {
         return _ellipsoid.geodeticSurfaceProjection(position);
     }
 
-    float RenderableGlobe::getHeight(glm::dvec3 position) {
-        // Get the uv coordinates to sample from
-        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        int chunkLevel = 20;
-        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
-        GeodeticPatch patch = GeodeticPatch(chunkIdx);
-        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
-        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
-        glm::vec2 patchUV = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
+    const Ellipsoid& RenderableGlobe::ellipsoid() {
+        return _ellipsoid;
+    }
 
+    float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
         const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
         if (heightMapProviders.size() == 0)
             return 0;
         const auto& tileProvider = heightMapProviders[0];
+
+        // Get the uv coordinates to sample from
+        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
+        int chunkLevel =
+            tileProvider->getAsyncTileReader()->getTextureDataProvider()->getMaximumLevel();
+        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
+        GeodeticPatch patch = GeodeticPatch(chunkIdx);
+        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
+        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
+        glm::vec2 patchUV = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
         // Transform the uv coordinates to the current tile texture
         TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider.get(), chunkIdx);
