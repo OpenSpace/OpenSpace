@@ -68,7 +68,9 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-    glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
+    glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
+    glm::dvec3 projectOnGlobeSurface(glm::dvec3 position);
+    double getHeight(glm::dvec3 position);
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
     properties::BoolProperty doFrustumCulling;

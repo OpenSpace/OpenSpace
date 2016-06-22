@@ -278,6 +278,8 @@ protected:
 
     glm::dquat _localCameraRotation;
     glm::dquat _globalCameraRotation;
+
+    glm::dvec3 _cameraPosition;
 };
 
 class GlobeBrowsingInteractionMode : public OrbitalInteractionMode

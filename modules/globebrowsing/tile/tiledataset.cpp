@@ -571,8 +571,6 @@ namespace openspace {
         pixelStart = glm::uvec2(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
         pixelEnd = glm::uvec2(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
         numPixels = pixelEnd - pixelStart;
-        if (numPixels.x < 1000 && (pixelStart.x % 2 || pixelStart.y % 2))
-            int hej = 0;
     }
 
     TileDataset::DataLayout::DataLayout() {

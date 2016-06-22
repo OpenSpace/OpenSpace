@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/other/threadpool.h>
 #include <modules/globebrowsing/tile/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -260,8 +261,56 @@ namespace openspace {
         _tileProviderManager->prerender();
     }
 
-    glm::dvec3 RenderableGlobe::geodeticSurfaceProjection(glm::dvec3 position) {
+    glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
         return _ellipsoid.geodeticSurfaceProjection(position);
+    }
+
+    glm::dvec3 RenderableGlobe::projectOnGlobeSurface(glm::dvec3 position) {
+        
+        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
+        glm::dvec3 ellipsoidNormal = _ellipsoid.geodeticSurfaceNormal(geodeticPosition);
+        int chunkLevel = 20;
+        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
+        GeodeticPatch patch = GeodeticPatch(chunkIdx);
+        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
+        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
+        glm::vec2 uvPatch = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
+
+        const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+
+        if (heightMapProviders.size() == 0)
+            return _ellipsoid.geodeticSurfaceProjection(position);
+
+        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), chunkIdx);
+        
+        glm::vec2 transformedUv = tileAndTransform.uvTransform.uvOffset + tileAndTransform.uvTransform.uvScale * uvPatch;
+        double sampledHeight = tileAndTransform.tile.sampleValueAsDouble(transformedUv);
+
+        return _ellipsoid.geodeticSurfaceProjection(position) + ellipsoidNormal * (sampledHeight + 100);
+    }
+
+    double RenderableGlobe::getHeight(glm::dvec3 position) {
+
+        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
+        glm::dvec3 ellipsoidNormal = _ellipsoid.geodeticSurfaceNormal(geodeticPosition);
+        int chunkLevel = 16;
+        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
+        GeodeticPatch patch = GeodeticPatch(chunkIdx);
+        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
+        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
+        glm::vec2 uvPatch = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
+
+        const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+
+        if (heightMapProviders.size() == 0)
+            return 0;
+
+        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), chunkIdx);
+
+        glm::vec2 transformedUv = tileAndTransform.uvTransform.uvOffset + tileAndTransform.uvTransform.uvScale * uvPatch;
+        double sampledHeight = tileAndTransform.tile.sampleValueAsDouble(transformedUv);
+
+        return sampledHeight;
     }
 
     std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {

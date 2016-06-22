@@ -59,6 +59,8 @@ namespace openspace {
         enum class Status { Unavailable, OutOfRange, IOError, OK } status;
     
         static const Tile TileUnavailable;
+        
+        double sampleValueAsDouble(glm::vec2 uv, int band = 0);
     };
 
 
