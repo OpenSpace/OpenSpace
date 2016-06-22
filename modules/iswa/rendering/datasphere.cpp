@@ -91,8 +91,8 @@ bool DataSphere::initialize(){
     readTransferFunctions(_transferFunctionsFile.value());
 
     setPropertyCallbacks();
-    _useHistogram.setValue(true);
-    _autoFilter.setValue(true);
+    // _useHistogram.setValue(true);
+    // _autoFilter.setValue(true);
 
     return true;
 }

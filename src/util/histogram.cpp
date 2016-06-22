@@ -248,12 +248,29 @@ void Histogram::normalize() {
  * Old histogram value is the index of the array, and the new equalized
  * value will be the value at the index.
  */
-void Histogram::generateEqualizer(){
+void Histogram::generateEqualizer(bool withoutHighestBin){
     float previousCdf = 0.0f;
     _equalizer = std::vector<float>(_numBins, 0.0f);
+
+    int highestBin = -1;
+    float highestProbability = 0;
+
+    if(withoutHighestBin){
+        highestBin = 0; 
+        for(int i=0; i<_numBins; i++){
+            if(_data[i] > _data[highestBin]){
+                highestBin = i;
+            }
+        }
+        highestProbability = _data[highestBin] / (float)_numValues;
+    }
+
+
     for(int i = 0; i < _numBins; i++){
-        
-        float probability = _data[i] / (float)_numValues; 
+        float probability = highestProbability/(float)_numBins;
+        if(i != highestBin)
+             probability += _data[i] / (float)_numValues;
+
         float cdf  = previousCdf + probability;
         cdf = std::min(1.0f, cdf);
         _equalizer[i] = cdf * (_numBins-1);
@@ -292,7 +309,8 @@ float Histogram::equalize(float value){
 }
 
 float Histogram::entropy(){
-    float entropy;
+    float entropy = 0.0;
+
     for(int i = 0; i < _numBins; i++){
         if(_data[i] != 0)
             entropy -= ((float)_data[i]/_numValues) * log2((float)_data[i]/_numValues);

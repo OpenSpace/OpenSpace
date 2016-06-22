@@ -71,6 +71,7 @@ protected:
     std::vector<float> _numValues;
     std::vector<float> _fitValues;
     std::vector<std::shared_ptr<Histogram>> _histograms;
+    std::vector<std::shared_ptr<Histogram>> _unNormalizedhistograms;
     std::set<std::string> _coordinateVariables;
 
     glm::vec2 _histNormValues;
