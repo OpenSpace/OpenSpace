@@ -118,10 +118,6 @@ namespace openspace {
     }
 
     std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
-        // OBS!
-        // This implementation needs to be fixed! Its not completely bounding
-        // See DebugRenderer::renderBoxFaces to see whats wrong
-
         const Ellipsoid& ellipsoid = owner()->ellipsoid();
         const GeodeticPatch& patch = surfacePatch();
 
@@ -135,8 +131,18 @@ namespace openspace {
 
         // As the patch is curved, the maximum height offsets at the corners must be long 
         // enough to cover large enough to cover a boundingHeight.max at the center of the 
-        // patch. Below this is done by an approximation.
-        double scaleToCoverCenter = 1 / cos(halfSize.lat) + 1 / cos(halfSize.lon) - 1; 
+        // patch.
+        // Approximating scaleToCoverCenter by assuming the latitude and longitude angles
+        // of "halfSize" are equal to the angles they create from the center of the
+        // globe to the patch corners. This is true for the longitude direction when
+        // the ellipsoid can be approximated as a sphere and for the latitude for patches
+        // close to the equator. Close to the pole this will lead to a bigger than needed
+        // value for scaleToCoverCenter. However, this is a simple calculation and a good
+        // Approximation.
+        double y1 = tan(halfSize.lat);
+        double y2 = tan(halfSize.lon);
+        double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
+        
         double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
 
         bool chunkIsNorthOfEquator = patch.isNorthern();
@@ -160,7 +166,7 @@ namespace openspace {
             double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
             Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
             
-            bool cornerIsNorthern = i < 2;
+            bool cornerIsNorthern = !((i / 2) % 2);
             bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
             if (cornerCloseToEquator) {
                 cornerGeodetic.geodetic2.lat += latDiff;
