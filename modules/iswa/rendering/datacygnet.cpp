@@ -41,18 +41,18 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
     ,_dataProcessor(nullptr)
     ,_dataOptions("dataOptions", "Data Options")
-    ,_useLog("useLog","Use Logarithm", false)
+    // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     //FOR TESTING
-    ,_numOfBenchmarks(0)
-    ,_avgBenchmarkTime(0.0f)
+    // ,_numOfBenchmarks(0)
+    // ,_avgBenchmarkTime(0.0f)
 {
     addProperty(_dataOptions);
-    addProperty(_useLog);
+    // addProperty(_useLog);
     addProperty(_useHistogram);
     addProperty(_autoFilter);
     addProperty(_normValues);
@@ -241,10 +241,10 @@ void DataCygnet::setPropertyCallbacks(){
         updateTexture();
     });
     
-    _useLog.onChange([this](){
-        _dataProcessor->useLog(_useLog.value());
-        updateTexture();
-    });
+    // _useLog.onChange([this](){
+    //     _dataProcessor->useLog(_useLog.value());
+    //     updateTexture();
+    // });
 
     _useHistogram.onChange([this](){
         _dataProcessor->useHistogram(_useHistogram.value());
@@ -266,6 +266,8 @@ void DataCygnet::setPropertyCallbacks(){
     _autoFilter.onChange([this](){ 
         if(_autoFilter.value())
             _backgroundValues.setValue(_dataProcessor->filterValues());
+        else
+            _backgroundValues.setValue(glm::vec2(0.f));
         updateTexture();
     });
 }
@@ -305,10 +307,10 @@ void DataCygnet::subscribeToGroup(){
         _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
     });
 
-    groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
-        LDEBUG(name() + " Event useLogChanged");
-        _useLog.setValue(dict.value<bool>("useLog"));
-    });
+    // groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
+    //     LDEBUG(name() + " Event useLogChanged");
+    //     _useLog.setValue(dict.value<bool>("useLog"));
+    // });
 
     groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event useHistogramChanged");

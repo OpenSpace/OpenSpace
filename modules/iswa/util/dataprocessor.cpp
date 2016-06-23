@@ -85,7 +85,7 @@ float DataProcessor::processDataPoint(float value, int option){
         v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option])))/(float)NumBins;
         // v = histogram->equalize(value)/(float)512;
     }else{
-        v = normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option]));
+        v = normalizeWithStandardScore(value, mean, sd, _normValues);
     }
     return v;
 }
@@ -141,7 +141,7 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = histogram->binWidth();
 
-                //atleast one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
+                //at least one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
                 filterWidth = std::max(filterWidth, 1.0f/512.0f);
             }else{
                 Histogram hist = _histograms[option]->equalize();
