@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2015                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 #include <modules/iswa/util/iswamanager.h>
 
 #include <modules/iswa/rendering/dataplane.h>
@@ -33,18 +33,14 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
 #include <fstream>
-//#include <algorithm>
 
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
-//#include <openspace/scripting/script_helper.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-//#include <ghoul/lua/ghoul_lua.h>
-//#include <ghoul/lua/lua_helper.h>
 
 #include "iswamanager_lua.inl";
 
@@ -58,7 +54,6 @@ namespace {
 namespace openspace{
 
 IswaManager::IswaManager()
-    : _iswaEvent()
 {
     _month["JAN"] = "01";
     _month["FEB"] = "02";
@@ -169,7 +164,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const{
     return std::move( DlManager.fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
@@ -181,7 +176,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) const{
     return std::move( DlManager.fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
@@ -193,7 +188,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) const{
     std::string url;
     if(id < 0){
         url = baseUrl+type+"/" + std::to_string(-id) + "/";
@@ -209,7 +204,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::getline(ss, token, ' ');
     url += token + "-"; 
     std::getline(ss, token, ' ');
-    url += _month[token] + "-";
+    url += _month.at(token) + "-";
     std::getline(ss, token, 'T');
     url += token + "%20";
     std::getline(ss, token, '.');
@@ -231,11 +226,18 @@ void IswaManager::registerGroup(std::string groupName, std::string type){
         }else{
             _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaBaseGroup>(groupName, type)));
         }
-    } else if(!_groups[groupName]->isType(type)){
-        LWARNING("Can't add cygnet to groups with diffent type");
+    } else {
+        LWARNING("Trying to add Group with name: '" + groupName + "' but it already exist.");
     }
 }
 
+void IswaManager::unregisterGroup(std::string groupName){
+    if(_groups.find(groupName) != _groups.end()){
+        _groups.erase(groupName);
+    } else {
+        LWARNING("Trying to erase Group with name: '" + groupName + "' but it does not exist.");
+    }
+}
 
 std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     if(_groups.find(name) != _groups.end()){
@@ -245,15 +247,15 @@ std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     return nullptr;
 }
 
-std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
-        return _cygnetInformation;
+std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation() {
+    return _cygnetInformation;
 }
 
-std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups(){
+std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups() {
     return _groups;
 }
 
-std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation(){
+std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
     return _cdfInformation;
 }
 
@@ -274,7 +276,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json != ""){
         json j = json::parse(data->json);
 
@@ -316,7 +318,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
         "Name = '" + data->name +"' , "
         "Parent = '" + parent + "', "
         "Renderable = {"    
-            "Type = '" + _type[data->type] + _geom[data->geom] + "', "
+            "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
             "GridMin = " + std::to_string(min) + ", "
@@ -334,7 +336,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
-std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
+std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) const {
     if(info.path != ""){
         const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
         if(extension == "cdf"){
@@ -388,7 +390,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
     return "";
 }
 
-std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json == ""){
         LWARNING("jsonSphereToLuaTable: no content in metadata json");
         return "";
@@ -421,7 +423,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     "Name = '" + data->name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"    
-        "Type = '" + _type[data->type] + _geom[data->geom] + "', "
+        "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
@@ -455,7 +457,8 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
             type = typeid(TexturePlane).name();
         }
         
-        registerGroup(data->group, type);
+        if(_groups.find(data->group) == _groups.end())
+            registerGroup(data->group, type);
 
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->isType(type)){
@@ -485,7 +488,9 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
 
     if(!data->group.empty()){
         std::string type = typeid(DataSphere).name();
-        registerGroup(data->group, type);
+
+        if(_groups.find(data->group) == _groups.end())
+            registerGroup(data->group, type);
 
         auto it = _groups.find(data->group);
         if(it == _groups.end() || (*it).second->isType(type)){
@@ -516,7 +521,9 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
 
         if(!info.group.empty()){
             std::string type = typeid(KameleonPlane).name();
-            registerGroup(info.group, type);
+
+            if(_groups.find(info.group) == _groups.end())
+                registerGroup(info.group, type);
 
             auto it = _groups.find(info.group);
             if(it == _groups.end() || (*it).second->isType(type)){
@@ -543,7 +550,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
     }
 }
 
-void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath){
+void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath) const {
     const std::string& extension = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
 
     if(FileSys.fileExists(absPath(cdfPath)) && extension == "cdf"){

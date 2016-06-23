@@ -134,8 +134,8 @@ void IswaDataGroup::registerProperties(){
 }
 
 void IswaDataGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    if(!_registered)
-        registerProperties();
+    // if(!_registered)
+    //     registerProperties();
 
     if(_dataOptions.options().empty()){
         for(auto option : options){

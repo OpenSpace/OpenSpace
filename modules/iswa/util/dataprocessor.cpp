@@ -133,13 +133,16 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
             if (!_useHistogram) {
                 mean = (1.0/_numValues[option])*_sum[option];
                 standardDeviation = _standardDeviation[option];
-                histogram = _histograms[option];
+                histogram = _unNormalizedhistograms[option];
                 
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = histogram->binWidth();
 
                 //at least one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
                 filterWidth = std::max(filterWidth, 1.0f/512.0f);
+
+                filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
+                filterWidth = normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues);
             }else{
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
@@ -163,7 +166,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
 
         //set min, max for the unnormalized histogram
         if(!_unNormalizedhistograms[i]){
-             _unNormalizedhistograms[i] = std::make_shared<Histogram>(_min[i], _max[i], 512);
+             _unNormalizedhistograms[i] = std::make_shared<Histogram>(_min[i], _max[i], NumBins);
         }else{
             _unNormalizedhistograms[i]->changeRange(_min[i], _max[i]);
         }
