@@ -155,13 +155,13 @@ namespace openspace {
             dataLayout.glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
-        
+
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(texturePtr);
-        //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        texture->uploadTexture();
         
+        texture->uploadTexture();
+        // AnisotropicMipMap must be set after texture is uploaded. Why?!
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
         Tile tile = {
             texture,

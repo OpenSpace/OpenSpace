@@ -73,8 +73,6 @@ Fragment getFragment() {
 
 	frag.color = vec4(0.1,0.1,0.1,1);
 
-	//LevelWeights levelWeights = getLevelWeights(levelInterpolationParameter);
-
 #if USE_COLORTEXTURE
 	
 	frag.color = calculateColor(
