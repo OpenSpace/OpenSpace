@@ -58,8 +58,8 @@ namespace openspace {
         size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
-        , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
-        , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
+        , _leftRoot(std::make_unique<ChunkNode>(Chunk(this, LEFT_HEMISPHERE_INDEX)))
+        , _rightRoot(std::make_unique<ChunkNode>(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
