@@ -31,7 +31,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 // test files
-<<<<<<< HEAD
+// <<<<<<< HEAD
 //#include <test_common.inl>
 //#include <test_spicemanager.inl>
 //#include <test_scenegraphloader.inl>
@@ -53,7 +53,7 @@
 //#include <test_concurrentjobmanager.inl>
 //#include <test_screenspaceimage.inl>
 //#include <test_iswamanager.inl>
-=======
+// =======
 #include <test_common.inl>
 #include <test_spicemanager.inl>
 #include <test_scenegraphloader.inl>
@@ -61,7 +61,7 @@
 #include <test_powerscalecoordinates.inl>
 #include <test_screenspaceimage.inl>
 #include <test_iswamanager.inl>
->>>>>>> develop
+// >>>>>>> develop
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>

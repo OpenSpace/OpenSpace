@@ -94,7 +94,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
     
 SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& identifier) {
     const static std::map<std::string, std::pair<Type, Direction>> Mapping =  {
-        { "NONE"  , { Type::None, Direction::Reception } },
+        { "NONE"  , { Type::NoType, Direction::Reception } },
         { "LT"    , { Type::LightTime, Direction::Reception } },
         { "LT+S"  , { Type::LightTimeStellar, Direction::Reception } },
         { "CN"    , { Type::ConvergedNewtonian, Direction::Reception } },
@@ -116,7 +116,7 @@ SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& iden
     
 SpiceManager::AberrationCorrection::operator const char*() const {
     switch (type) {
-        case Type::None:
+        case Type::NoType:
             return "NONE";
         case Type::LightTime:
             return (direction == Direction::Reception) ? "LT" : "XLT";

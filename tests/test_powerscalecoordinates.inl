@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <openspace/scene/Scene.h>
+#include <openspace/scene/scene.h>
 
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>

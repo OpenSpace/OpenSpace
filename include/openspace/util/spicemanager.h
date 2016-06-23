@@ -64,7 +64,7 @@ public:
     public:
         /// The type of the aberration correction
         enum class Type {
-            None = 0, ///< No correction (<code>NONE</code>)
+            NoType = 0, ///< No correction (<code>NONE</code>)
             LightTime, ///< One-way light time (<code>LT</code>)
             LightTimeStellar, ///< One-way light time and stellar (<code>LT+S</code>)
             ConvergedNewtonian, ///< Converged newtonian light time (<code>CN</code>)
@@ -109,7 +109,7 @@ public:
         operator const char*() const;
 
         /// The type of aberration correction
-        Type type = Type::None;
+        Type type = Type::NoType;
         /// The direction of the aberration correction
         Direction direction = Direction::Reception;
     };

@@ -73,11 +73,11 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     //LDEBUG("x: " << patch.x << " y: " << patch.y << " level: " << patch.level << "  lat: " << center.lat << " lon: " << center.lon);
 
     if (isLeaf()) {
-        Chunk::Status status = _chunk.update(data);
-        if (status == Chunk::Status::WANT_SPLIT) {
+        Chunk::State status = _chunk.update(data);
+        if (status == Chunk::State::WANT_SPLIT) {
             split();
         }
-        return status == Chunk::Status::WANT_MERGE;
+        return status == Chunk::State::WANT_MERGE;
     }
     else {
         char requestedMergeMask = 0;
@@ -88,7 +88,7 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
         }
 
         bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WANT_SPLIT;
+        bool thisChunkWantsSplit = _chunk.update(data) == Chunk::State::WANT_SPLIT;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             merge();
