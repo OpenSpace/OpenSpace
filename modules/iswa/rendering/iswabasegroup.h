@@ -57,7 +57,6 @@ protected:
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
-	bool _registered;
 	std::string _type;
 };
 

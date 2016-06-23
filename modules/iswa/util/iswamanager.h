@@ -70,8 +70,7 @@ struct MetadataFuture {
 };
 
 
-class IswaManager : public ghoul::Singleton<IswaManager> { //, public properties::PropertyOwner {
-    //friend class ghoul::Singleton<IswaManager>;
+class IswaManager : public ghoul::Singleton<IswaManager> { 
 
 public:
     enum CygnetType {Texture, Data, Kameleon, NoType};
@@ -96,12 +95,10 @@ public:
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    ghoul::Event<>& iswaEvent(){
-        return _iswaEvent;
-    }
-
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
+    void registerGroup(std::string groupName, std::string type);
+    void unregisterGroup(std::string groupName);
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
@@ -112,9 +109,7 @@ private:
     void createPlane(std::shared_ptr<MetadataFuture> data);
     void createSphere(std::shared_ptr<MetadataFuture> data);
     void createKameleonPlane(CdfInfo info, std::string cut);
-
     void fillCygnetInfo(std::string jsonString);
-    void registerGroup(std::string groupName, std::string type);
     
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _type;
@@ -126,8 +121,6 @@ private:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
-
-    ghoul::Event<> _iswaEvent;
 
 };
 
