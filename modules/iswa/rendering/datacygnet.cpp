@@ -329,8 +329,20 @@ void DataCygnet::subscribeToGroup(){
 }
 
 void DataCygnet::getGroupPropertyValues(){
-    if(!_group)
+    if(!_group){
+        _backgroundValues.onChange([this]{
+            glm::vec2 bv = _backgroundValues.value();
+
+            if(bv.x > bv.y){
+                float y = bv.y;
+                bv.y = bv.x;
+                bv.x = y;
+
+                _backgroundValues.setValue(bv);
+            }
+        });
         return;
+    }
 
     std::unique_ptr<ghoul::Dictionary> properties = _group->propertyValues();
 

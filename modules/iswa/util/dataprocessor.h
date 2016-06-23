@@ -103,8 +103,6 @@ protected:
     std::vector<std::shared_ptr<Histogram>> _histograms;
     std::vector<std::shared_ptr<Histogram>> _unNormalizedhistograms;
     std::set<std::string> _coordinateVariables;
-
-    glm::vec2 _histNormValues;
 };
 
 } // namespace openspace

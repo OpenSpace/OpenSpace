@@ -60,16 +60,16 @@ Fragment getFragment() {
         v /= numTextures;
         
         vec4 color = texture(transferFunctions[0], vec2(v,0));
-        if((v<(x+y)) && v>(x-y))
-            color = mix(transparent, color, clamp(1,0,abs(v-x)));
+        if(v >= x  && v <= y)
+            color = transparent;
 
         diffuse = color;
     }else{
         for(int i=0; i<numTextures; i++){
             v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
             vec4 color = texture(transferFunctions[i], vec2(v,0));
-            if((v<(x+y)) && v>(x-y))
-                color = mix(transparent, color, clamp(1,0,abs(v-x)));
+            if(v >= x  && v <= y)
+                color = transparent;
             diffuse += color;
         }
     }
@@ -79,7 +79,6 @@ Fragment getFragment() {
 
     diffuse.a *= transparency;
     
-    // diffuse = vec4(vs_st.s, 0,0,1);
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;

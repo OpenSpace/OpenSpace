@@ -106,6 +106,16 @@ void IswaDataGroup::registerProperties(){
     });
 
     _backgroundValues.onChange([this]{
+        glm::vec2 bv = _backgroundValues.value();
+
+        if(bv.x > bv.y){
+            float y = bv.y;
+            bv.y = bv.x;
+            bv.x = y;
+
+            _backgroundValues.setValue(bv);
+        }
+
         LDEBUG("Group " + name() + " published backgroundValuesChanged");
         _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}}));
     });

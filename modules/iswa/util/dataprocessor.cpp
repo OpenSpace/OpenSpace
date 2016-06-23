@@ -36,7 +36,6 @@ DataProcessor::DataProcessor()
     // ,_normValues(glm::vec2(normVal))
     ,_normValues(glm::vec2(1.0))
     ,_filterValues(glm::vec2(0.0))
-    ,_histNormValues(glm::vec2(4.f, 4.f))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
 }
@@ -149,7 +148,7 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 filterMid = hist.highestBinValue(true);
                 filterWidth = std::min(1.f / (float)NumBins, 1.0f/512.0f);
             }
-            _filterValues += glm::vec2(filterMid, filterWidth);
+            _filterValues += glm::vec2(filterMid-filterWidth, filterMid+filterWidth);
 
         }
         _filterValues /= numSelected;   
