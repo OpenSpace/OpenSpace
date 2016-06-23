@@ -41,8 +41,7 @@ namespace {
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     :IswaBaseGroup(name, type)    
-    ,_useLog("useLog","Use Logarithm", false)
-
+    // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
@@ -50,7 +49,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
     ,_dataOptions("dataOptions", "Data Options")
 {
-    addProperty(_useLog);
+    // addProperty(_useLog);
     addProperty(_useHistogram);
     addProperty(_autoFilter);
     addProperty(_normValues);
@@ -65,7 +64,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_useLog);
+    // OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
     OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -75,10 +74,10 @@ void IswaDataGroup::registerProperties(){
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
 
 
-    _useLog.onChange([this]{
-        LDEBUG("Group " + name() + " published useLogChanged");
-        _groupEvent->publish("useLogChanged", ghoul::Dictionary({{"useLog", _useLog.value()}}));
-    });
+    // _useLog.onChange([this]{
+    //     LDEBUG("Group " + name() + " published useLogChanged");
+    //     _groupEvent->publish("useLogChanged", ghoul::Dictionary({{"useLog", _useLog.value()}}));
+    // });
 
     _useHistogram.onChange([this]{
         LDEBUG("Group " + name() + " published useHistogramChanged");
@@ -95,6 +94,7 @@ void IswaDataGroup::registerProperties(){
             OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
         // else if autofilter is turned off, register backgroundValues 
         } else {
+            _backgroundValues.setValue(glm::vec2(0.f));
             OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
         }
         _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
@@ -106,6 +106,16 @@ void IswaDataGroup::registerProperties(){
     });
 
     _backgroundValues.onChange([this]{
+        glm::vec2 bv = _backgroundValues.value();
+
+        if(bv.x > bv.y){
+            float y = bv.y;
+            bv.y = bv.x;
+            bv.x = y;
+
+            _backgroundValues.setValue(bv);
+        }
+
         LDEBUG("Group " + name() + " published backgroundValuesChanged");
         _groupEvent->publish("backgroundValuesChanged", ghoul::Dictionary({{"backgroundValues", _backgroundValues.value()}}));
     });

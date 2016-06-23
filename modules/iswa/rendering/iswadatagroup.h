@@ -43,7 +43,7 @@ protected:
     void registerProperties();
     void createDataProcessor();
 
-    properties::BoolProperty _useLog;
+    // properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
     properties::Vec2Property _normValues;

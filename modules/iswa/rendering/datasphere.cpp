@@ -69,7 +69,7 @@ bool DataSphere::initialize(){
         subscribeToGroup();
         //getGroupPropertyValues();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_useLog);
+        // OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);

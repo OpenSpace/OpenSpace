@@ -109,6 +109,7 @@ private:
 
     std::vector<std::shared_ptr<Histogram>> _histograms;
 
+    std::vector<std::shared_ptr<Histogram>> _unNormalizedhistograms;
 };
 
 } // namespace openspace

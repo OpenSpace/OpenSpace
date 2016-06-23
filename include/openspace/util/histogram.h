@@ -67,7 +67,7 @@ public:
 
     void normalize();
     void print() const;
-    void generateEqualizer();
+    void generateEqualizer(bool withoutHighestBin = false);
     Histogram equalize();
     float equalize (float);
 
