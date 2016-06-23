@@ -77,6 +77,9 @@ namespace openspace {
                 _layerCategories[i],
                 texturesDict,
                 initData);
+
+            // init level blending to be true
+            levelBlendingEnabled[i] = true;
         }
     }
 

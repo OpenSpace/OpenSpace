@@ -66,6 +66,9 @@ namespace openspace {
 
         void update();
 
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
+
+
     private:
         static void initTexures(std::vector<TileProviderWithName>& destination,
             const ghoul::Dictionary& dict, const TileProviderInitData& initData);

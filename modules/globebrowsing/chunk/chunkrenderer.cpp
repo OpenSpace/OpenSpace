@@ -177,7 +177,7 @@ namespace openspace {
 
             LayeredTextureInfo layeredTextureInfo;
             layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
-            layeredTextureInfo.layerBlendingEnabled = chunk.owner()->blendProperties[category];
+            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->levelBlendingEnabled[category];
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
@@ -306,10 +306,10 @@ namespace openspace {
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
 
         bool performAnyBlending = false;
-        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
-        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+        
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if(categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
+            if(_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
                 performAnyBlending = true; 
                 break;
             }
@@ -373,10 +373,9 @@ namespace openspace {
 
 
         bool performAnyBlending = false;
-        auto& categoriesBlendingEnabled = chunk.owner()->blendProperties;
-        for (int i = 0; i < categoriesBlendingEnabled.size(); ++i) {
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (categoriesBlendingEnabled[category] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
+            if (_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
                 performAnyBlending = true;
                 break;
             }
