@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2015                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 #ifndef __ISWAMANAGER_H__
 #define __ISWAMANAGER_H__
 
@@ -35,7 +35,6 @@
 #include <ccmc/Kameleon.h>
 #endif
 #include <openspace/engine/downloadmanager.h>
-//#include <openspace/properties/propertyowner.h>
 #include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/time.h>
 
@@ -81,11 +80,11 @@ public:
 
     void addIswaCygnet(int id, std::string type = "Texture", std::string group = "");
     void addKameleonCdf(std::string group, int pos);
-    void createFieldline(std::string name, std::string cdfPath, std::string seedPath);
+    void createFieldline(std::string name, std::string cdfPath, std::string seedPath) const ;
 
-    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
-    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
-    std::string iswaUrl(int id, double timestamp = Time::ref().currentTime(), std::string type = "image");
+    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp) const;
+    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp) const;
+    std::string iswaUrl(int id, double timestamp = Time::ref().currentTime(), std::string type = "image") const;
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     
@@ -101,9 +100,9 @@ public:
     void unregisterGroup(std::string groupName);
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data);
-    std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data);
-    std::string parseKWToLuaTable(CdfInfo info, std::string cut="z");
+    std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const;
+    std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
+    std::string parseKWToLuaTable(CdfInfo info, std::string cut="z") const;
     
     void createScreenSpace(int id);
     void createPlane(std::shared_ptr<MetadataFuture> data);
@@ -121,7 +120,6 @@ private:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
-
 };
 
 } //namespace openspace

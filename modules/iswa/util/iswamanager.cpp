@@ -164,7 +164,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const{
     return std::move( DlManager.fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
@@ -176,7 +176,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) const{
     return std::move( DlManager.fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
@@ -188,7 +188,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) const{
     std::string url;
     if(id < 0){
         url = baseUrl+type+"/" + std::to_string(-id) + "/";
@@ -204,7 +204,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::getline(ss, token, ' ');
     url += token + "-"; 
     std::getline(ss, token, ' ');
-    url += _month[token] + "-";
+    url += _month.at(token) + "-";
     std::getline(ss, token, 'T');
     url += token + "%20";
     std::getline(ss, token, '.');
@@ -247,15 +247,15 @@ std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     return nullptr;
 }
 
-std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
-        return _cygnetInformation;
+std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation() {
+    return _cygnetInformation;
 }
 
-std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups(){
+std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups() {
     return _groups;
 }
 
-std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation(){
+std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
     return _cdfInformation;
 }
 
@@ -276,7 +276,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     return metaFuture;
 }
 
-std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json != ""){
         json j = json::parse(data->json);
 
@@ -318,7 +318,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
         "Name = '" + data->name +"' , "
         "Parent = '" + parent + "', "
         "Renderable = {"    
-            "Type = '" + _type[data->type] + _geom[data->geom] + "', "
+            "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
             "GridMin = " + std::to_string(min) + ", "
@@ -336,7 +336,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
     return "";
 }
 
-std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
+std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) const {
     if(info.path != ""){
         const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
         if(extension == "cdf"){
@@ -390,7 +390,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut){
     return "";
 }
 
-std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data){
+std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json == ""){
         LWARNING("jsonSphereToLuaTable: no content in metadata json");
         return "";
@@ -423,7 +423,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     "Name = '" + data->name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"    
-        "Type = '" + _type[data->type] + _geom[data->geom] + "', "
+        "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
@@ -550,7 +550,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
     }
 }
 
-void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath){
+void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath) const {
     const std::string& extension = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
 
     if(FileSys.fileExists(absPath(cdfPath)) && extension == "cdf"){
