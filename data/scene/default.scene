@@ -30,8 +30,6 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
 
-    openspace.setPerformanceMeasurement(true)
-
     if openspace.modules.isLoaded("ISWA") then
     
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
@@ -57,25 +55,18 @@ return {
     },
     Modules = {
         "sun",
-        --"mercury",
-        --"venus",
+        "mercury",
+        "venus",
         "earth",
-        --"mars",
-        --"jupiter",
-        --"saturn",
-        --"uranus",
-        --"neptune",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
         "stars",
         --"stars-denver",
         "milkyway",
         --"milkyway-eso",
         "constellationbounds",
-        --"io",
-        --"europa",
-        --"ganymede",
-        --"callisto",
-        --"gridGalactic",
-        --"gridEcliptic",
-        --"gridEquatorial",
     }
 }

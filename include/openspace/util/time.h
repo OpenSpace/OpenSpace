@@ -58,6 +58,10 @@ class SyncBuffer;
 
 class Time {
 public:
+    Time(double secondsJ2000 = -1);
+    Time(const Time& other);
+
+
     /**
      * Initializes the Time singleton.
      * \return <code>true</code> if the initialization succeeded, <code>false</code>
@@ -72,6 +76,8 @@ public:
      * \pre The Time singleton must have been initialized
      */
     static void deinitialize();
+
+    static Time now();
 
     /**
      * Returns the reference to the Time singleton object.
@@ -116,6 +122,8 @@ public:
      */
     double currentTime() const;
 
+    double unsyncedJ2000Seconds() const;
+
     /**
      * Returns the current time as a formatted date string compliant with ISO 8601 and
      * thus also compliant with the Spice library.
@@ -123,6 +131,12 @@ public:
      */
     std::string currentTimeUTC() const;
 
+    /**
+    * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
+    * \return The current time as a ISO 8601 formatted string
+    */
+    std::string ISO8601() const;
+    
     /**
      * Sets the delta time value that is the number of seconds that should pass for each
      * real-time second. This value is used in the advanceTime(double) method to easily

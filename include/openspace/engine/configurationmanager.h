@@ -53,6 +53,10 @@ public:
     static const std::string KeyLuaDocumentationType;
     /// The key that stores the save location of the Lua documentation
     static const std::string KeyLuaDocumentationFile;
+    /// The key that stores the type of scripting log that should be stored
+    static const std::string KeyScriptLogType;
+    /// The key that stores the save location of the scripting log
+    static const std::string KeyScriptLogFile;
     /// The key that stores the type of Property documentation that should be stored
     static const std::string KeyPropertyDocumentationType;
     /// The key that stores the save location of the Property documentation

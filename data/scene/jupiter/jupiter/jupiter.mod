@@ -30,11 +30,6 @@ return {
                 Type = "simple",
                 Color = "textures/jupiter.jpg",
             },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            }
         },
         Ephemeris = {
             Type = "Static" -- jupiter is at its barycenter

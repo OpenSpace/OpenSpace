@@ -4,21 +4,15 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        --[[
         Ephemeris = {
-            Type = "Kepler",
-            Inclination = 0.00041,
-            AscendingNode = 349.2,
-            Perihelion = 102.8517,
-            SemiMajorAxis = 1.00002,
-            DailyMotion = 0.9855796,     
-            Eccentricity = 0.0166967,
-            MeanLongitude = 328.40353
-        }
-        --]]
-        Ephemeris = {
-            Type = "Static"
-        }
+            Type = "Spice",
+            Body = "EARTH BARYCENTER",
+            Reference = "ECLIPJ2000",
+            Observer = "SUN",
+            Kernels = {
+                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        },
     },
     -- Earth module
     {   
@@ -27,7 +21,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",
-            Body = "EARTH",
+			Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
@@ -36,30 +30,20 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-                Night = "textures/earth_night.jpg",
-                Height = "textures/earth_bluemarble_height.jpg"
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
+				Night = "textures/earth_night.jpg",
+                --Height = "textures/earth_bluemarble_height.jpg",                
+                -- Depth = "textures/earth_depth.png",
+                Reflectance = "textures/earth_reflectance.png",
+                Clouds = "textures/earth_clouds.jpg"
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
+        
         GuiName = "/Solar/Planets/Earth"
     },
     -- EarthTrail module
     {   
         Name = "EarthTrail",
-        Parent = "EarthBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "EARTH",
@@ -82,7 +66,7 @@ return {
             Billboard = true,
             Texture = "textures/marker.png"
         },
-        Ephemeris = {
+		Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

@@ -54,8 +54,6 @@ vec4 uvToModel(vec2 uv, vec4 radius, float segments){
     float z = radius[2] * cos(phi) * sin(theta);  //
     
     return vec4(x, y, z, radius[3]);
-
-    return vec4(0.0); 
 }
 
 bool inRange(float x, float a, float b){
@@ -84,5 +82,8 @@ void main() {
     // The 1-x is in this texture call because of flipped textures
     // to be fixed soon ---abock
         color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
+    }
+    else {
+        color = vec4(0.0);
     }
 }
