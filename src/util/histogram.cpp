@@ -319,17 +319,16 @@ float Histogram::entropy() const {
 }
 
 void Histogram::print() const {
-    // std::cout << "number of bins: " << _numBins << std::endl
-    //           << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
+    std::cout << "number of bins: " << _numBins << std::endl
+              << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
         float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / float(_numBins);
-        // std::cout << i << " [" << low << ", " << high << "]"
-        //           << "   " << _data[i] << std::endl;
-        std::cout << _data[i]/(float)_numValues << ", ";
+        std::cout << i << " [" << low << ", " << high << "]"
+                  << "   " << _data[i] << std::endl;
+        // std::cout << _data[i]/(float)_numValues << ", ";
     }
-    std::cout << std::endl;
-    // std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
+    std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
 float Histogram::highestBinValue(bool equalized, int overBins){
@@ -352,7 +351,6 @@ float Histogram::highestBinValue(bool equalized, int overBins){
 
         value += _data[i];
         value /= (float)++num;
-        //value = _data[i];
 
         if(value > highestValue){
             highestBin = i;
@@ -366,7 +364,6 @@ float Histogram::highestBinValue(bool equalized, int overBins){
         return (high+low)/2.0;
     }else{
         return highestBin/(float)_numBins;
-        // return equalize((high+low)/2.0);
     }
 }
 
@@ -374,20 +371,4 @@ float Histogram::binWidth(){
     return (_maxValue-_minValue)/float(_numBins);
 }
 
-void operator<<(std::ostream& os, const Histogram& hist){
-    const float* data = hist.data();
-    float max = hist.maxValue();
-    float min = hist.minValue();
-    int numBins = hist.numBins();
-    int numValues = hist.numValues();
-
-    for (int i = 0; i < numBins; i++) {
-        float low = min + float(i) / numBins * (max - min);
-        float high = low + (max - min) / float(numBins);
-        // std::cout << i << " [" << low << ", " << high << "]"
-        //           << "   " << _data[i] << std::endl;
-        os << data[i]/numValues << ", ";
-    }
-    os << std::endl;
-}
 }

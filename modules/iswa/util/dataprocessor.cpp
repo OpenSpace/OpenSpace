@@ -28,12 +28,11 @@ namespace {
 	const std::string _loggerCat = "DataProcessor";
     const int NumBins = 512;
 }
-// const float normVal = 1.0;
+
 namespace openspace {
 DataProcessor::DataProcessor()
     :_useLog(false)
     ,_useHistogram(false)
-    // ,_normValues(glm::vec2(normVal))
     ,_normValues(glm::vec2(1.0))
     ,_filterValues(glm::vec2(0.0))
 {
@@ -83,7 +82,6 @@ float DataProcessor::processDataPoint(float value, int option){
     float v;
     if(_useHistogram){
         v = histogram->equalize(normalizeWithStandardScore(value, mean, sd, glm::vec2(_fitValues[option])))/(float)NumBins;
-        // v = histogram->equalize(value)/(float)512;
     }else{
         v = normalizeWithStandardScore(value, mean, sd, _normValues);
     }
@@ -106,7 +104,6 @@ float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mea
     float zScoreMax = normalizationValues.y; 
 
     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
-    // standardScore -= standardScore*(zScoreMax+zScoreMin)-zScoreMin;
     value = value*sd+mean; 
 
     return value; 
