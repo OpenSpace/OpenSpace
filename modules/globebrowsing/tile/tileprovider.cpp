@@ -88,7 +88,7 @@ namespace openspace {
             return tile;
         }
 
-        HashKey key = chunkIndex.hashKey();
+        ChunkHashKey key = chunkIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key);
@@ -118,7 +118,7 @@ namespace openspace {
             return Tile::Status::OutOfRange;
         }
 
-        HashKey key = chunkIndex.hashKey();
+        ChunkHashKey key = chunkIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key).status;
@@ -129,7 +129,7 @@ namespace openspace {
 
 
     Tile CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
-        HashKey hashkey = chunkIndex.hashKey();
+        ChunkHashKey hashkey = chunkIndex.hashKey();
         if (_tileCache->exist(hashkey)) {
             return _tileCache->get(hashkey);
         }
@@ -145,7 +145,7 @@ namespace openspace {
 
 
     void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
-        HashKey key = tileIOResult->chunkIndex.hashKey();
+        ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
             tileIOResult->imageData,
