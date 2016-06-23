@@ -114,7 +114,7 @@ namespace openspace {
             for (auto& provider : categoryProviders) {
                 selection->addOption(provider.name, &provider.isActive);
             }
-            selection->addOption(" - Blend tile levels - ", &_chunkedLodGlobe->blendProperties[category]);
+            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->levelBlendingEnabled[category]);
 
             addProperty(selection.get());
             _categorySelections.push_back(std::move(selection));

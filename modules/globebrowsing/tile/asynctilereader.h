@@ -140,7 +140,7 @@ namespace openspace {
 
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
-        std::unordered_map<HashKey, ChunkIndex> _enqueuedTileRequests;
+        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
 
     };
 

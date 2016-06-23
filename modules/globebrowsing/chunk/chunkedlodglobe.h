@@ -98,9 +98,6 @@ namespace openspace {
         
         float lodScaleFactor;
 
-        // Layered rendering
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> blendProperties = { true };
-
         bool atmosphereEnabled;
 
         struct DebugOptions {
@@ -128,9 +125,6 @@ namespace openspace {
 
         // the patch used for actual rendering
         std::unique_ptr<ChunkRenderer> _renderer;
-
-        static const GeodeticPatch LEFT_HEMISPHERE;
-        static const GeodeticPatch RIGHT_HEMISPHERE;
 
         static const ChunkIndex LEFT_HEMISPHERE_INDEX;
         static const ChunkIndex RIGHT_HEMISPHERE_INDEX;

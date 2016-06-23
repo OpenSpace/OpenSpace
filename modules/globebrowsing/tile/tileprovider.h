@@ -75,7 +75,7 @@ namespace openspace {
     };
 
 
-    typedef LRUCache<HashKey, Tile> TileCache;
+    typedef LRUCache<ChunkHashKey, Tile> TileCache;
 
 
     /**
