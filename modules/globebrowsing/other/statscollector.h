@@ -61,7 +61,8 @@ namespace openspace {
         ~TemplatedStatsCollector() { };
 
         void startNewRecord() {
-            _data.push_back(StatsRecord<T>());
+            if(_enabled)
+                _data.push_back(StatsRecord<T>());
         }
 
         T& operator[](const std::string& name) {
@@ -73,14 +74,18 @@ namespace openspace {
         }
 
         T previous(const std::string& name) {
-            if (_enabled && _data.size() > 1) {
+            if (_data.size() > 1) {
                 return _data[_data.size() - 2][name];   
             }
             return T();
         }
 
+        bool hasHeaders() {
+            return _data.keys.size() > 0;
+        }
+
         bool hasRecordsToWrite() {
-            return _writePos < _data.size();
+            return _writePos < _data.size() - 1;
         }
 
         void reset() {
@@ -103,9 +108,11 @@ namespace openspace {
 
                 // Access every key. Records with no entry will get a default value
                 auto keyIt = _data.keys.begin();
-                os << record[(*keyIt)];
-                while (++keyIt != _data.keys.end()) {
-                    os << _delimiter << record[(*keyIt)];
+                if (keyIt != _data.keys.end()) {
+                    os << record[(*keyIt)];
+                    while (++keyIt != _data.keys.end()) {
+                        os << _delimiter << record[(*keyIt)];
+                    }
                 }
 
                 _writePos++;
@@ -173,14 +180,29 @@ namespace openspace {
     private:
         void writeHead() {
             std::ofstream ofs(_filename);
-            i.writeHeader(ofs); ofs << _delimiter; d.writeHeader(ofs); ofs << std::endl;
+            if (i.hasHeaders()) {
+                i.writeHeader(ofs);
+                if (d.hasHeaders()) {
+                    ofs << _delimiter;
+                    d.writeHeader(ofs);
+                }
+            }
+            else {
+                d.writeHeader(ofs);
+            }
+            ofs << std::endl;
             ofs.close();
         }
 
         void writeData() {
             std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::app);
             while (i.hasRecordsToWrite() || d.hasRecordsToWrite()) {
-                i.writeNextRecord(ofs); ofs << _delimiter; d.writeNextRecord(ofs);
+                if (i.hasHeaders() && d.hasHeaders()) {
+                    i.writeNextRecord(ofs); ofs << _delimiter; d.writeNextRecord(ofs);
+                }
+                else {
+                    i.writeNextRecord(ofs); d.writeNextRecord(ofs);
+                }
                 ofs << std::endl;
             }
             i.reset(); d.reset();
