@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 #include <modules/iswa/rendering/iswadatagroup.h>
 
 #include <modules/iswa/util/dataprocessortext.h>
@@ -39,7 +39,7 @@ namespace {
 }
 
 namespace openspace{
-IswaDataGroup::IswaDataGroup(std::string name, std::string type)
+IswaDataGroup::IswaDataGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor)
     :IswaBaseGroup(name, type)    
     // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
@@ -57,7 +57,7 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     addProperty(_transferFunctionsFile);
     addProperty(_dataOptions);
 
-    createDataProcessor();
+    _dataProcessor = dataProcessor;
     registerProperties();
 }
  
@@ -134,24 +134,12 @@ void IswaDataGroup::registerProperties(){
 }
 
 void IswaDataGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-    // if(!_registered)
-    //     registerProperties();
 
     if(_dataOptions.options().empty()){
         for(auto option : options){
             _dataOptions.addOption({option.value, option.description});
         }
         _dataOptions.setValue(std::vector<int>(1,0));
-    }
-}
-
-void IswaDataGroup::createDataProcessor(){
-    if(_type == typeid(DataPlane).name()){
-        _dataProcessor = std::make_shared<DataProcessorText>();
-    }else if(_type == typeid(DataSphere).name()){
-        _dataProcessor = std::make_shared<DataProcessorJson>();
-    }else if(_type == typeid(KameleonPlane).name()){
-        _dataProcessor = std::make_shared<DataProcessorKameleon>();
     }
 }
 

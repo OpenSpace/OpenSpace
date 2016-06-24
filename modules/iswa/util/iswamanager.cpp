@@ -23,16 +23,16 @@
  ****************************************************************************************/
 #include <modules/iswa/util/iswamanager.h>
 
-#include <modules/iswa/rendering/dataplane.h>
-#include <modules/iswa/rendering/textureplane.h>
-#include <modules/iswa/rendering/datasphere.h>
-#include <modules/iswa/rendering/kameleonplane.h>
-
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
 #include <modules/iswa/rendering/iswakameleongroup.h>
 
+#include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/util/dataprocessorjson.h>
+#include <modules/iswa/util/dataprocessorkameleon.h>
+
 #include <fstream>
+#include <memory> // for shared_pointer
 
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
@@ -68,16 +68,18 @@ IswaManager::IswaManager()
     _month["NOV"] = "11";
     _month["DEC"] = "12";
 
-    _type[CygnetType::Texture] = "Texture";
-    _type[CygnetType::Data] = "Data";
-    _type[CygnetType::Kameleon] = "Kameleon";
-    // _type[CygnetType::TexturePlane] = "TexturePlane";
-    // _type[CygnetType::DataPlane] = "DataPlane";
-    // _type[CygnetType::KameleonPlane] = "KameleonPlane";
-    // _type[CygnetType::Kameleon] = "DataSphere";
+    _resourceType[ResourceType::Texture] = "Texture";
+    _resourceType[ResourceType::Json] = "Json";
+    _resourceType[ResourceType::Text] = "Text";
+    _resourceType[ResourceType::Cdf] = "Kameleon";
 
-    _geom[CygnetGeometry::Plane] = "Plane";
-    _geom[CygnetGeometry::Sphere] = "Sphere";
+    _cygnetType[CygnetType::TexturePlane] = "TexturePlane";
+    _cygnetType[CygnetType::DataPlane] = "DataPlane";
+    _cygnetType[CygnetType::KameleonPlane] = "KameleonPlane";
+    _cygnetType[CygnetType::DataSphere] = "DataSphere";
+
+    _geometryType[GeometryType::Plane] = "Plane";
+    _geometryType[GeometryType::Sphere] = "Sphere";
 
     DlManager.fetchFile(
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
@@ -102,41 +104,21 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
     }else if(id < 0){
 
-        // create metadata object and assign group and id
-        std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-        metaFuture->id = id;
-        metaFuture->group = group;
-
-        // Assign type of cygnet Texture/Data
-        if(type == _type[CygnetType::Texture]){
-            metaFuture->type = CygnetType::Texture;
-        } else if (type  == _type[CygnetType::Data]) {
-            metaFuture->type = CygnetType::Data;
-        } else {
-            LERROR("\""+ type + "\" is not a valid type");
+        // create metadata object and assign group, id and resourceType
+        std::shared_ptr<IswaManager::Metadata> meta = std::make_shared<IswaManager::Metadata>();
+        meta->id = id;
+        meta->group = group;
+        if(!getResourceType(type, meta->resourceType)){
+            LERROR("\""+ type + "\" is not a valid resource type");
             return;
         }
 
         // This callback determines what geometry should be used and creates the right cygbet
         auto metadataCallback = 
-        [this, metaFuture](const DownloadManager::MemoryFile& file){
-            //Create a string from downloaded file
-            std::string res;
-            res.append(file.buffer, file.size);
-            //add it to the metafuture object
-            metaFuture->json = res;
-
-            //convert to json
-            json j = json::parse(res);
-
-            // Check what kind of geometry here
-            if(j["Coordinate Type"].is_null()){
-                metaFuture->geom = CygnetGeometry::Sphere;
-                createSphere(metaFuture);
-            } else if (j["Coordinate Type"] == "Cartesian"){
-                metaFuture->geom = CygnetGeometry::Plane;
-                createPlane(metaFuture);
-            }
+        [this, meta](const DownloadManager::MemoryFile& file){
+            std::string metadata(file.buffer, file.size);
+            meta->json = metadata;
+            createIswaCygnet(meta);
             LDEBUG("Download to memory finished");
         };
 
@@ -148,6 +130,29 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
             }
         );
+    }
+}
+
+bool IswaManager::getResourceType(const std::string& type, int& enumType){
+    for(int i = 0; i <= ResourceType::NoResourceType; i++){
+        if(i == ResourceType::NoResourceType){
+            return false;           
+        } else if (type == _resourceType.at(i)) {
+            enumType = i;
+            return true;
+        }  
+    }
+}
+
+bool IswaManager::getCygnetType(const std::string& type, int& enumType){
+
+    for(int i = 0; i <= CygnetType::NoCygnetType; i++) {
+         if(i == CygnetType::NoCygnetType){
+            return false;           
+        } else if (type == _cygnetType.at(i)) {
+            enumType = i;
+            return true;
+        }
     }
 }
 
@@ -196,7 +201,6 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) con
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
-    //std::string t = Time::ref().currentTimeUTC(); 
     std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
@@ -213,18 +217,28 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) con
     return url;
 }
 
-void IswaManager::registerGroup(std::string groupName, std::string type){
+// should be private?
+void IswaManager::registerGroup(std::string groupName, int cygnetType, int resourceType){
     if(_groups.find(groupName) == _groups.end()){
-        bool dataGroup =    (type == typeid(DataPlane).name()) ||
-                            (type == typeid(DataSphere).name());
-                            
-        bool kameleonGroup = (type == typeid(KameleonPlane).name());
-        if(dataGroup){
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaDataGroup>(groupName, type)));
-        }else if(kameleonGroup){
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaKameleonGroup>(groupName, type)));
-        }else{
-            _groups.insert(std::pair<std::string, std::shared_ptr<IswaBaseGroup>>(groupName, std::make_shared<IswaBaseGroup>(groupName, type)));
+
+        //separate function ?
+        std::shared_ptr<DataProcessor> dataProcessor;
+        if (ResourceType::Json == resourceType)
+            dataProcessor = std::make_shared<DataProcessorJson>();
+        else if (ResourceType::Text == resourceType)
+            dataProcessor = std::make_shared<DataProcessorText>();
+        else if (ResourceType::Cdf == resourceType)
+            dataProcessor = std::make_shared<DataProcessorKameleon>();
+
+        if(cygnetType == CygnetType::TexturePlane){
+            std::shared_ptr<IswaBaseGroup> group = std::make_shared<IswaBaseGroup>(groupName, _cygnetType[cygnetType]);
+            _groups.insert( std::pair<std::string, std::shared_ptr<IswaBaseGroup> >(groupName, group));
+        } else if(cygnetType == CygnetType::KameleonPlane){
+           std::shared_ptr<IswaBaseGroup> group = std::make_shared<IswaKameleonGroup>(groupName, _cygnetType[cygnetType], dataProcessor);
+            _groups.insert( std::pair<std::string, std::shared_ptr<IswaBaseGroup> >(groupName, group));
+        } else if(cygnetType == CygnetType::DataSphere || cygnetType == CygnetType::DataPlane){
+           std::shared_ptr<IswaBaseGroup> group = std::make_shared<IswaDataGroup>(groupName, _cygnetType[cygnetType], dataProcessor);
+            _groups.insert( std::pair<std::string, std::shared_ptr<IswaBaseGroup> >(groupName, group));
         }
     } else {
         LWARNING("Trying to add Group with name: '" + groupName + "' but it already exist.");
@@ -259,24 +273,24 @@ std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
     return _cdfInformation;
 }
 
-std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
-    std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
+// std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
+//     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
-    metaFuture->id = id;
-    DlManager.fetchFile(
-        baseUrl + std::to_string(-id),
-        [&metaFuture](const DownloadManager::MemoryFile& file){
-            metaFuture->json = std::string(file.buffer, file.size);
-            metaFuture->isFinished = true;
-        },
-        [](const std::string& err){
-            LWARNING("Download Metadata to memory was aborted: " + err);
-        }
-    );
-    return metaFuture;
-}
+//     metaFuture->id = id;
+//     DlManager.fetchFile(
+//         baseUrl + std::to_string(-id),
+//         [&metaFuture](const DownloadManager::MemoryFile& file){
+//             metaFuture->json = std::string(file.buffer, file.size);
+//             metaFuture->isFinished = true;
+//         },
+//         [](const std::string& err){
+//             LWARNING("Download Metadata to memory was aborted: " + err);
+//         }
+//     );
+//     return metaFuture;
+// }
 
-std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const {
+std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<IswaManager::Metadata> data) const {
     if(data->json != ""){
         json j = json::parse(data->json);
 
@@ -318,7 +332,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
         "Name = '" + data->name +"' , "
         "Parent = '" + parent + "', "
         "Renderable = {"    
-            "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
+            "Type = '" + _cygnetType.at(data->cygnetType) + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
             "GridMin = " + std::to_string(min) + ", "
@@ -390,7 +404,7 @@ std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) const 
     return "";
 }
 
-std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const {
+std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<IswaManager::Metadata> data) const {
     if(data->json == ""){
         LWARNING("jsonSphereToLuaTable: no content in metadata json");
         return "";
@@ -423,7 +437,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     "Name = '" + data->name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"    
-        "Type = '" + _type.at(data->type) + _geom.at(data->geom) + "', "
+        "Type = '" + _cygnetType.at(data->cygnetType) + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
@@ -444,69 +458,59 @@ void IswaManager::createScreenSpace(int id){
     OsEng.scriptEngine().queueScript(script);
 }
 
-void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
+void IswaManager::createIswaCygnet(std::shared_ptr<IswaManager::Metadata> metadata){
+    //convert metadata to json
+    json jsondata = json::parse(metadata->json);
+
+    // set geometry type
+    int geometryType;
+    if(jsondata["Coordinate Type"].is_null()){
+        geometryType = GeometryType::Sphere;
+    } else if (jsondata["Coordinate Type"] == "Cartesian"){
+        geometryType = GeometryType::Plane;
+    } else {
+        LERROR("Unknown Coordinate type");
+        return;
+    }
+
+    //hacky, If resource type is either json or text => say it is "Data" so that cygnetType will be correct.
+    std::string resourceType = _resourceType[metadata->resourceType];
+    if(metadata->resourceType == ResourceType::Text || metadata->resourceType == ResourceType::Json)
+        resourceType = "Data";
+
+    //check if cygnet type is valid
+    const std::string cygnetType = resourceType + _geometryType[geometryType];
+    if(!getCygnetType(cygnetType, metadata->cygnetType)){
+        LERROR("Unknown Cygnet type: " + cygnetType);
+        return;
+    }
+
     // check if this plane already exist
-
-    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
-
-    if(!data->group.empty()){
-        std::string type;
-        if(data->type == CygnetType::Data){
-            type = typeid(DataPlane).name();
-        }else{
-            type = typeid(TexturePlane).name();
-        }
-        
-        if(_groups.find(data->group) == _groups.end())
-            registerGroup(data->group, type);
-
-        auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType(type)){
-            name = data->group +"_"+ name;
-        }else{
-            data->group="";
-        }
-    }
-
-    data->name = name;
-
-    if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
-        LERROR("A node with name \"" + name +"\" already exist");
+    metadata->name = cygnetType + std::to_string(metadata->id);
+    if( OsEng.renderEngine().scene()->sceneGraphNode(metadata->name) ){
+        LERROR("A node with name \"" + metadata->name +"\" already exist");
         return;
     }
 
-    std::string luaTable = jsonPlaneToLuaTable(data);
-    if(luaTable != ""){
-        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
-    }
-}
-
-void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
-    // check if this sphere already exist
-    std::string name = _type[data->type] + _geom[data->geom] + std::to_string(data->id);
-
-    if(!data->group.empty()){
-        std::string type = typeid(DataSphere).name();
-
-        if(_groups.find(data->group) == _groups.end())
-            registerGroup(data->group, type);
-
-        auto it = _groups.find(data->group);
-        if(it == _groups.end() || (*it).second->isType(type)){
-            name = data->group +"_"+name;
-        }else{
-            data->group="";
+    //check if group exist
+    if(!metadata->group.empty()){
+        auto it = _groups.find(metadata->group);
+        if(it == _groups.end()){
+            registerGroup(metadata->group, metadata->cygnetType, metadata->resourceType);
+        } else if( !(*it).second->isType(_cygnetType[metadata->cygnetType]) ){
+            LWARNING("Group with name " + metadata->group + " Is not the same type as: " + _cygnetType[metadata->cygnetType]);
+            metadata->group="";
         }
     }
 
-    data->name = name;
+    // create the luaTable for script
+    std::string luaTable;
+    if(ResourceType::Json == metadata->resourceType)
+        luaTable = jsonSphereToLuaTable(metadata);
+    else if(ResourceType::Text == metadata->resourceType || ResourceType::Texture == metadata->resourceType)
+        luaTable = jsonPlaneToLuaTable(metadata);
 
-    if( OsEng.renderEngine().scene()->sceneGraphNode(name) ){
-        LERROR("A node with name \"" + name +"\" already exist");
-        return;
-    }
-    std::string luaTable = jsonSphereToLuaTable(data);
+    //queue the add scene graph node script
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         OsEng.scriptEngine().queueScript(script);
@@ -520,13 +524,14 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
 
 
         if(!info.group.empty()){
-            std::string type = typeid(KameleonPlane).name();
+            int resourceType = ResourceType::Cdf;
+            int cygnetType = CygnetType::KameleonPlane;
 
             if(_groups.find(info.group) == _groups.end())
-                registerGroup(info.group, type);
+                registerGroup(info.group, cygnetType, resourceType);
 
             auto it = _groups.find(info.group);
-            if(it == _groups.end() || (*it).second->isType(type)){
+            if(it == _groups.end() || (*it).second->isType(_cygnetType[cygnetType])){
                 info.name = info.group +"_"+info.name;
             }else{
                 info.group="";

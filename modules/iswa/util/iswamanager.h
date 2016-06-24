@@ -27,7 +27,6 @@
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/designpattern/event.h>
 
-//#include <memory>
 #include <map>
 #include <future>
 #include <ghoul/glm.h>
@@ -58,23 +57,21 @@ struct CygnetInfo {
     bool selected;
 };
 
-struct MetadataFuture {
-    int id;
-    std::string group;
-    std::string name;
-    std::string json;
-    int type;
-    int geom;
-    bool isFinished;
-};
-
-
 class IswaManager : public ghoul::Singleton<IswaManager> { 
-
 public:
-    enum CygnetType {Texture, Data, Kameleon, NoType};
-    enum CygnetGeometry {Plane, Sphere};
 
+    struct Metadata {
+        int id;
+        std::string group;
+        std::string name;
+        int resourceType;
+        int cygnetType;
+        std::string json;
+    };
+
+    enum CygnetType {TexturePlane, DataPlane, DataSphere, KameleonPlane, NoCygnetType};
+    enum ResourceType {Texture, Json, Text, Cdf, NoResourceType};
+    enum GeometryType {Plane, Sphere};
     IswaManager();
     ~IswaManager();
 
@@ -96,23 +93,26 @@ public:
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
-    void registerGroup(std::string groupName, std::string type);
+    void registerGroup(std::string groupName, int cygnetType, int resourceType);
     void unregisterGroup(std::string groupName);
 private:
-    std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const;
-    std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
+    //std::shared_ptr<MetadataFuture> downloadMetadata(int id);
+    std::string jsonPlaneToLuaTable(std::shared_ptr<Metadata> data) const;
+    std::string jsonSphereToLuaTable(std::shared_ptr<Metadata> data) const;
     std::string parseKWToLuaTable(CdfInfo info, std::string cut="z") const;
     
     void createScreenSpace(int id);
-    void createPlane(std::shared_ptr<MetadataFuture> data);
-    void createSphere(std::shared_ptr<MetadataFuture> data);
+    void createIswaCygnet(std::shared_ptr<Metadata> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
+
+    bool getResourceType(const std::string& type, int& enumType);
+    bool getCygnetType(const std::string& type, int& enumType);
     
     std::map<std::string, std::string> _month;
-    std::map<int, std::string> _type;
-    std::map<int, std::string> _geom;
+    std::map<int, std::string> _resourceType;
+    std::map<int, std::string> _geometryType;
+    std::map<int, std::string> _cygnetType;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
