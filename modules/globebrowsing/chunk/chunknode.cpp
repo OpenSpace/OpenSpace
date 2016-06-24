@@ -154,6 +154,40 @@ void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>&
     }
 }
 
+#define CHUNK_NODE_FIND(node, p) \
+     while (!node->isLeaf()) { \
+        const Geodetic2 center = node->_chunk.surfacePatch().center();\
+        int index = 0;\
+        if (center.lon < p.lon) {\
+            ++index;\
+        }\
+        if (p.lat < center.lat) {\
+            ++index;\
+            ++index;\
+        }\
+        node = &(node->getChild((Quad)index));\
+    }
+
+const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
+    const ChunkNode* node = this;
+    CHUNK_NODE_FIND(node, location);
+    return *node;
+}
+
+ChunkNode& ChunkNode::find(const Geodetic2& location) {
+    ChunkNode* node = this;
+    CHUNK_NODE_FIND(node, location);
+    return *node;
+}
+
+const ChunkNode& ChunkNode::getChild(Quad quad) const {
+    return *_children[quad];
+}
+
+ChunkNode& ChunkNode::getChild(Quad quad) {
+    return *_children[quad];
+}
+
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < 4; i++) {
@@ -180,9 +214,6 @@ void ChunkNode::merge() {
     ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
 
-const ChunkNode& ChunkNode::getChild(Quad quad) const {
-    return *_children[quad];
-}
 
 const Chunk& ChunkNode::getChunk() const {
     return _chunk;

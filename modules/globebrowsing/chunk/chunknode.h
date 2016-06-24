@@ -65,8 +65,13 @@ public:
     void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
     void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
     void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+
+    const ChunkNode& find(const Geodetic2& location) const;
+    ChunkNode& find(const Geodetic2& location);
     
     const ChunkNode& getChild(Quad quad) const;
+    ChunkNode& getChild(Quad quad);
+
     const Chunk& getChunk() const;
 
     bool updateChunkTree(const RenderData& data);
