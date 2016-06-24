@@ -72,6 +72,9 @@ namespace openspace {
         void render(const RenderData& data) override;
         void update(const UpdateData& data) override;
 
+        const ChunkNode& findChunkNode(const Geodetic2 location) const;
+        ChunkNode& findChunkNode(const Geodetic2 location);
+
         void setStateMatrix(const glm::dmat3& stateMatrix);
 
         bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
@@ -116,6 +119,8 @@ namespace openspace {
     private:
 
         void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+
+        static const GeodeticPatch COVERAGE;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;

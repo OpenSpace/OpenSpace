@@ -52,6 +52,8 @@ namespace openspace {
     const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
     const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
 
+    const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
+
 
     ChunkedLodGlobe::ChunkedLodGlobe(
         const Ellipsoid& ellipsoid,
@@ -114,6 +116,16 @@ namespace openspace {
             return true;
         }
         return false;
+    }
+
+    const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) const {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    }
+
+    ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
     }
 
     int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
