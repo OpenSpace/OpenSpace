@@ -78,8 +78,7 @@ namespace openspace {
         _chunkCullers.push_back(std::make_unique<HorizonCuller>());
         _chunkCullers.push_back(std::make_unique<FrustumCuller>(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
-        
-        
+
         _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
         _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
         _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();

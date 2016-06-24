@@ -44,6 +44,8 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/other/statscollector.h>
+
 
 namespace ghoul {
     namespace opengl {
@@ -146,6 +148,9 @@ namespace openspace {
         std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
+
+        //std::shared_ptr<StatsTracker<double>> _stats;
+        //StatsTracker<double> stats;
     };
 
 }  // namespace openspace
