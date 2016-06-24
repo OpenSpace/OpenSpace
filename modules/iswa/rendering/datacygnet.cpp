@@ -46,7 +46,7 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${SCENE}/iswa/tfs/default.tf")
+    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
     //FOR TESTING
     // ,_numOfBenchmarks(0)
     // ,_avgBenchmarkTime(0.0f)

@@ -21,12 +21,16 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-#include "gtest/gtest.h"
+
 #define private public
 #include <modules/iswa/util/iswamanager.h>
 #define private private
+
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/util/time.h>
+
 
 /*
  * For each test the following is run:
@@ -35,49 +39,46 @@
 
 namespace openspace {
 
-class IswaManagerTest : public testing::Test{
+class IswaManagerTest : public testing::Test {
 protected:
 
-	IswaManagerTest()
-	{
-		IswaManager::initialize();
-	}
+    IswaManagerTest() {
+        DownloadManager::initialize("", 0);
+        IswaManager::initialize();
+    }
 
-	~IswaManagerTest(){
-		IswaManager::deinitialize();
-	}
+    ~IswaManagerTest() {
+        IswaManager::deinitialize();
+        DownloadManager::deinitialize();
+    }
 
-
-	void reset() {}
-
-	//std::shared_ptr<ISWAManager> iSWAManager;
+    void reset() {}
 };
 
 TEST_F(IswaManagerTest, initialize){
+    IswaManager::deinitialize();
 
-	IswaManager::deinitialize();
+    ASSERT_FALSE(IswaManager::isInitialized()) << "IswaManager is initialized before initialize call";
 
-	ASSERT_TRUE(!IswaManager::isInitialized()) << "IswaManager is initialized before initialize call";
+    IswaManager::initialize();
 
-	IswaManager::initialize();
+    ASSERT_TRUE(IswaManager::isInitialized()) << "IswaManager is not initialized after initialize call";
 
-	ASSERT_TRUE(IswaManager::isInitialized()) << "IswaManager is not initialized after initialize call";
+    ASSERT_NE(&IswaManager::ref(), nullptr) << "IswaManager ref() is not a nullptr";
 
-	ASSERT_NE(&IswaManager::ref(), nullptr) << "IswaManager ref() is not a nullptr";
-
-	EXPECT_EQ(&IswaManager::ref(), &IswaManager::ref()) << "IswaManager ref() returns the same object twice";
+    EXPECT_EQ(&IswaManager::ref(), &IswaManager::ref()) << "IswaManager ref() returns the same object twice";
 }
 
 TEST_F(IswaManagerTest, iswaUrl){
 
-	//OsEng.loadSpiceKernels();
-	//Time::ref().setTime(double(100000.0));
-	//Time::ref().preSynchronization();
-	//Time::ref().postSynchronizationPreDraw();
-	//std::string url = ISWAManager::ref().iSWAurl(7);
-	//std::string expectedUrl = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=2000-01-02%2015:45:35&window=-1&cygnetId=7";
+    //OsEng.loadSpiceKernels();
+    //Time::ref().setTime(double(100000.0));
+    //Time::ref().preSynchronization();
+    //Time::ref().postSynchronizationPreDraw();
+    //std::string url = ISWAManager::ref().iSWAurl(7);
+    //std::string expectedUrl = "http://iswa2.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?timestamp=2000-01-02%2015:45:35&window=-1&cygnetId=7";
 
-	//EXPECT_EQ(expectedUrl, url);
+    //EXPECT_EQ(expectedUrl, url);
 }
 
 }//namespace openspace

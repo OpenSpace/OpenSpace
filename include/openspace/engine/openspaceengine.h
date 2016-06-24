@@ -50,6 +50,7 @@ class RenderEngine;
 class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
+class SettingsEngine;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
@@ -130,13 +131,14 @@ private:
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
+    std::unique_ptr<SettingsEngine> _settingsEngine;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;
 #endif
     std::unique_ptr<network::ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
-    
+
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     std::unique_ptr<SyncBuffer> _syncBuffer;

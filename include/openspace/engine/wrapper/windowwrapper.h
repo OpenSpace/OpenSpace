@@ -148,6 +148,12 @@ public:
     virtual void setNearFarClippingPlane(float near, float far);
     
     /**
+     * Sets the stereo eye separation distance for the render engine.
+     * \param distance The distance between eyes for stereo rendering.
+     */
+    virtual void setEyeSeparationDistance(float distance);
+
+    /**
      * Returns the location and size of the current viewport (<code>x</code>,
      * <code>width</code>, <code>y</code>, and <code>height</code>). If there is only a
      * single viewport, <code>x</code> and <code>y</code> are <code>0</code> whereas

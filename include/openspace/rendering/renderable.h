@@ -54,6 +54,7 @@ public:
     static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
+	Renderable();
     Renderable(const ghoul::Dictionary& dictionary);
     virtual ~Renderable();
 

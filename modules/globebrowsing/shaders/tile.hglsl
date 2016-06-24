@@ -1,0 +1,123 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014                                                                    *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef TEXTURETILE_HGLSL
+#define TEXTURETILE_HGLSL
+
+vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
+	vec2 uvOffset = uv - vec2(0.5);
+	float thres = 0.5 - borderSize/2;
+	bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
+	vec3 color = isBorder ? borderColor : vec3(0);
+	return vec4(color, 0);
+}
+
+
+/////////////////////////////////////////////////////////////////////
+//                       Tile Depth Transform                      //
+/////////////////////////////////////////////////////////////////////
+
+struct TileDepthTransform {
+    float depthScale;
+    float depthOffset;
+};
+
+float getTransformedTexVal(const TileDepthTransform transform, const float val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
+vec4 getTransformedTexVal(const TileDepthTransform transform, const vec4 val){
+	return transform.depthOffset + transform.depthScale * val;
+}
+
+/////////////////////////////////////////////////////////////////////
+//                        Tile UV Transform                        //
+/////////////////////////////////////////////////////////////////////
+
+struct TileUvTransform {
+    vec2 uvOffset;
+    vec2 uvScale;
+};
+
+
+/////////////////////////////////////////////////////////////////////
+//                              Tile                               //
+/////////////////////////////////////////////////////////////////////
+struct Tile {
+	sampler2D textureSampler;
+	
+	TileDepthTransform depthTransform;
+	TileUvTransform uvTransform;
+};
+
+
+vec4 getTexVal(const Tile tile, const vec2 tileUV){
+	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
+	vec4 texVal = texture(tile.textureSampler, samplePos);
+	return texVal;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////
+//                       Multi Level Tile                          //
+/////////////////////////////////////////////////////////////////////
+struct MultiLevelTile {
+	Tile tile0;
+	Tile tile1;
+	Tile tile2;
+};
+
+struct LevelWeights {
+	float w1;
+	float w2;
+	float w3;
+};
+
+LevelWeights getLevelWeights(float levelInterpolationParameter){
+	LevelWeights levelWeights;
+	levelWeights.w1 = clamp(1 - levelInterpolationParameter, 0 , 1);
+	levelWeights.w2 = (clamp(levelInterpolationParameter, 0 , 1) - clamp(levelInterpolationParameter - 1, 0 , 1));
+	levelWeights.w3 = clamp(levelInterpolationParameter - 1, 0 , 1);
+	return levelWeights;
+}
+
+LevelWeights getDefaultLevelWeights(){
+	LevelWeights levelWeights;
+	levelWeights.w1 = 1;
+	levelWeights.w2 = 0;
+	levelWeights.w3 = 0;
+	return levelWeights;
+}
+
+
+vec4 getTexVal(const MultiLevelTile multiLevelTile, const LevelWeights w, const vec2 uv){
+	return w.w1 * getTexVal(multiLevelTile.tile0, uv) + 
+		w.w2 * getTexVal(multiLevelTile.tile1, uv) + 
+		w.w3 * getTexVal(multiLevelTile.tile2, uv);
+}
+
+
+
+#endif // TEXTURETILE_HGLSL

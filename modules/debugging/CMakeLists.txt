@@ -26,16 +26,21 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabledebugplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugrenderer.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/debugshader_fs.glsl
 )
+
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(

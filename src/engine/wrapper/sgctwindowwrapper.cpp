@@ -123,7 +123,11 @@ glm::mat4 SGCTWindowWrapper::modelMatrix() const {
 void SGCTWindowWrapper::setNearFarClippingPlane(float nearPlane, float farPlane) {
     sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
 }
-    
+
+void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
+	sgct::Engine::instance()->setEyeSeparation(distance);
+}
+
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1,

@@ -102,6 +102,8 @@ public:
 
     bool writeDocumentation(const std::string& filename, const std::string& type) const;
 
+    bool writeLog(const std::string& script);
+
     void serialize(SyncBuffer* syncBuffer);
 
     void deserialize(SyncBuffer* syncBuffer);
@@ -111,7 +113,9 @@ public:
     void preSynchronization();
 
     void queueScript(const std::string &script);
-    
+
+    void setLogFile(const std::string& filename, const std::string& type);
+
     std::vector<std::string> cachedScripts();
 
     std::vector<std::string> allLuaFunctions() const;
@@ -122,6 +126,7 @@ public:
     void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
 private:
+
     bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
 
@@ -142,6 +147,14 @@ private:
     //parallel variables
     std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
     std::mutex _cachedScriptsMutex;
+
+    //logging variables
+    bool _logFileExists = false;
+    bool _logScripts = true;
+    std::string _logType;
+    std::string _logFilename;
+
+
 };
 
 } // namespace scripting

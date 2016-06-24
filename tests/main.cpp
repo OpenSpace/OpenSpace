@@ -31,13 +31,37 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 // test files
-#include <test_common.inl>
+// <<<<<<< HEAD
+//#include <test_common.inl>
 //#include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
+//#include <test_scenegraphloader.inl>
+//#include <test_chunknode.inl>
+//#include <test_lrucache.inl>
+//#include <test_threadpool.inl>
+//#include <test_aabb.inl>
+#include <test_convexhull.inl>
+
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
+
+//#include <test_angle.inl>
+//#include <test_latlonpatch.inl>
+//#include <test_gdalwms.inl>
+//#include <test_patchcoverageprovider.inl>
+
+//#include <test_concurrentqueue.inl>
+//#include <test_concurrentjobmanager.inl>
+//#include <test_screenspaceimage.inl>
+//#include <test_iswamanager.inl>
+// =======
+#include <test_common.inl>
+#include <test_spicemanager.inl>
+#include <test_scenegraphloader.inl>
+#include <test_luaconversions.inl>
+#include <test_powerscalecoordinates.inl>
 #include <test_screenspaceimage.inl>
 #include <test_iswamanager.inl>
+// >>>>>>> develop
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -60,5 +84,18 @@ int main(int argc, char** argv) {
     openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
     testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+
+    //testing::internal::CaptureStdout();
+    //testing::internal::CaptureStderr();
+    bool b = RUN_ALL_TESTS();
+    //std::string output = testing::internal::GetCapturedStdout();
+    //std::string error = testing::internal::GetCapturedStderr();
+
+    //std::ofstream o("output.txt");
+    //o << output;
+
+    //std::ofstream e("error.txt");
+    //e << error;
+
+    return b;
 }

@@ -48,9 +48,9 @@ namespace properties {
     template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultMaximumValue<TYPE>();         \
                                                                                          \
-    template <>                                                                             \
-    template <>                                                                             \
-    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>();         \
+    template <>                                                                          \
+    template <>                                                                          \
+    TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>();        \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
@@ -133,12 +133,12 @@ namespace properties {
         return DEFAULT_MAX_VALUE;                                                        \
     }                                                                                    \
                                                                                          \
-    template <>                                                                             \
-    template <>                                                                             \
+    template <>                                                                          \
+    template <>                                                                          \
     TYPE PropertyDelegate<NumericalProperty<TYPE>>::defaultSteppingValue<TYPE>()         \
-    {                                                                                      \
+    {                                                                                    \
         return DEFAULT_STEPPING;                                                         \
-    }                                                                                     \
+    }                                                                                    \
                                                                                          \
     template <>                                                                          \
     template <>                                                                          \
@@ -283,16 +283,20 @@ template <typename T>
 bool NumericalProperty<T>::setLuaValue(lua_State* state)
 {
     bool success = false;
-    T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(state, success);
+    T value = PropertyDelegate<NumericalProperty<T>>::template fromLuaValue<T>(
+        state, success
+    );
     if (success)
-        TemplateProperty<T>::setValue(value);
+        TemplateProperty<T>::setValue(std::move(value));
     return success;
 }
 
 template <typename T>
 bool NumericalProperty<T>::getLuaValue(lua_State* state) const
 {
-    bool success = PropertyDelegate<NumericalProperty<T>>::template toLuaValue<T>(state, TemplateProperty<T>::_value);
+    bool success = PropertyDelegate<NumericalProperty<T>>::template toLuaValue<T>(
+        state, TemplateProperty<T>::_value
+    );
     return success;
 }
 
@@ -303,16 +307,20 @@ int NumericalProperty<T>::typeLua() const {
 
 template <typename T>
 bool NumericalProperty<T>::getStringValue(std::string& value) const {
-    bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(value, TemplateProperty<T>::_value);
+    bool success = PropertyDelegate<NumericalProperty<T>>::template toString<T>(
+        value, TemplateProperty<T>::_value
+    );
     return success;
 }
 
 template <typename T>
 bool NumericalProperty<T>::setStringValue(std::string value) {
     bool success = false;
-    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(value, success);
+    T thisValue = PropertyDelegate<NumericalProperty<T>>::template fromString<T>(
+        value, success
+    );
     if (success)
-        TemplateProperty<T>::set(ghoul::any(thisValue));
+        TemplateProperty<T>::set(ghoul::any(std::move(thisValue)));
     return success;
 }
 

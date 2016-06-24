@@ -160,9 +160,11 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
 
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
-    FILE* fp = fopen(file.path().c_str(), "wb");
+	errno = 0;
+    FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
+	ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
 
-    LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
+    //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
     auto downloadFunction = [url, finishedCallback, progressCallback, future, fp]() {
         CURL* curl = curl_easy_init();
@@ -348,8 +350,11 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     };
     
     if (_useMultithreadedDownload) {
+        using namespace ghoul::thread;
         std::thread t = std::thread(downloadFunction);
-        ghoul::thread::setPriority(t, ghoul::thread::ThreadPriority::Lowest);
+        ghoul::thread::setPriority(
+            t, ThreadPriorityClass::Idle, ThreadPriorityLevel::Lowest
+        );
         t.detach();
     }
     else
@@ -384,16 +389,11 @@ void DownloadManager::getFileExtension(const std::string& url,
         }
     };
     if (_useMultithreadedDownload) {
+        using namespace ghoul::thread;
         std::thread t = std::thread(requestFunction);
-     
-#ifdef WIN32
-        std::thread::native_handle_type h = t.native_handle();
-        SetPriorityClass(h, IDLE_PRIORITY_CLASS);
-        SetThreadPriority(h, THREAD_PRIORITY_LOWEST);
-#else
-        // TODO: Implement thread priority ---abock
-#endif
-        
+        ghoul::thread::setPriority(
+            t, ThreadPriorityClass::Idle, ThreadPriorityLevel::Lowest
+        );
         t.detach();
     }
     else {
