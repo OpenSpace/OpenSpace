@@ -50,38 +50,18 @@ namespace openspace {
     };
 
 
-    template <typename T> class StatsCollector{
+    template <typename T> class TemplatedStatsCollector{
     public:
 
-        StatsCollector() = delete;
+        TemplatedStatsCollector(bool& enabled, const std::string& delimiter) 
+            : _enabled(enabled) 
+            , _delimiter(delimiter)
+            , _writePos(0) { };
 
-        StatsCollector(const std::string& filename, bool enabled = true)
-            : _filename(filename)
-            //, _writer(writer)
-            , _enabled(enabled)
-        {
-            
-        };
-
-        ~StatsCollector() {
-            if (_data.keys.size() > 0) {
-                std::cout << "Saving stats to: " << _filename << std::endl;
-                write();
-            }
-        };
-
-        void disable() {
-            _enabled = false;
-        }
-
-        void enable() {
-            _enabled = true;
-        }
+        ~TemplatedStatsCollector() { };
 
         void startNewRecord() {
-            if (_enabled) {
-                _data.push_back(StatsRecord<T>());
-            }
+            _data.push_back(StatsRecord<T>());
         }
 
         T& operator[](const std::string& name) {
@@ -99,42 +79,119 @@ namespace openspace {
             return T();
         }
 
-
-    private:
-
-        void write() {
-            std::string _delimiter = ",";
-            std::ofstream ofs(_filename);
-
-            // output headers
-            auto keyIt = _data.keys.begin();
-            ofs << *keyIt;
-            while (++keyIt != _data.keys.end()) {
-                ofs << _delimiter << *keyIt;
-            }
-            ofs << std::endl;
-
-            // output line by line
-            for (StatsRecord<T>& record : _data) {
-                // Access every key. Records with no entry will get a default value
-                keyIt = _data.keys.begin();
-                ofs << record[(*keyIt)];
-                while (++keyIt != _data.keys.end()) {
-                    ofs << _delimiter << record[(*keyIt)];
-                }
-                ofs << std::endl;
-            }
-            ofs.close();
+        bool hasRecordsToWrite() {
+            return _writePos < _data.size();
         }
+
+        void reset() {
+            _data.clear();
+            _writePos = 0;
+        }
+
+        void writeHeader(std::ostream& os) {
+            auto keyIt = _data.keys.begin();
+            os << *keyIt;
+            while (++keyIt != _data.keys.end()) {
+                os << _delimiter << *keyIt;
+            }
+        }
+
+        void writeNextRecord(std::ostream& os) {
+            if (hasRecordsToWrite()) {
+                // output line by line
+                StatsRecord<T>& record = _data[_writePos];
+
+                // Access every key. Records with no entry will get a default value
+                auto keyIt = _data.keys.begin();
+                os << record[(*keyIt)];
+                while (++keyIt != _data.keys.end()) {
+                    os << _delimiter << record[(*keyIt)];
+                }
+
+                _writePos++;
+            }
+        }
+
 
     private:
         
-
         StatsCollection<T> _data;
-        const std::string _filename;
-
-        bool _enabled;
         T _dummy; // used when disabled
+        bool& _enabled;
+
+        size_t _writePos;
+        std::string _delimiter;
+
+    };
+
+    class StatsCollector {
+
+    public:
+
+        StatsCollector() = delete;
+
+        StatsCollector(const std::string& filename, const std::string& delimiter = ",", bool enabled = true)
+            : _filename(filename)
+            , _enabled(enabled)
+            , _delimiter(delimiter)
+            , _hasWrittenHead(false)
+            , i(TemplatedStatsCollector<int>(_enabled, delimiter))
+            , d(TemplatedStatsCollector<double>(_enabled, delimiter))
+        {
+
+        };
+
+        ~StatsCollector() {
+            dumpToDisk();
+        }
+        
+        void startNewRecord() {
+            if (_enabled) {
+                i.startNewRecord();
+                d.startNewRecord();
+            }
+        }
+
+        void disable() {
+            _enabled = false;
+        }
+
+        void enable() {
+            _enabled = true;
+        }
+
+        void dumpToDisk() {
+            if (!_hasWrittenHead) {
+                writeHead();
+            }
+            writeData();
+        }
+
+        TemplatedStatsCollector<int> i;
+        TemplatedStatsCollector<double> d;
+
+    private:
+        void writeHead() {
+            std::ofstream ofs(_filename);
+            i.writeHeader(ofs); ofs << _delimiter; d.writeHeader(ofs); ofs << std::endl;
+            ofs.close();
+        }
+
+        void writeData() {
+            std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::app);
+            while (i.hasRecordsToWrite() || d.hasRecordsToWrite()) {
+                i.writeNextRecord(ofs); ofs << _delimiter; d.writeNextRecord(ofs);
+                ofs << std::endl;
+            }
+            i.reset(); d.reset();
+            ofs.close();
+        }
+
+        std::string _filename;
+        std::string _delimiter;
+        bool _enabled;
+        bool _hasWrittenHead;
+
     };
 
     /*
