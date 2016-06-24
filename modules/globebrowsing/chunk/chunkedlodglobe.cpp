@@ -43,6 +43,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <ctime>
+
 namespace {
     const std::string _loggerCat = "ChunkLodGlobe";
 }
@@ -66,6 +68,7 @@ namespace openspace {
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
+        , stats(StatsCollector(absPath("test_stats")))
     {
 
         auto geometry = std::make_shared<SkirtedGrid>(
@@ -84,6 +87,7 @@ namespace openspace {
         _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
 
         _renderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
+
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -146,9 +150,23 @@ namespace openspace {
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
         return desiredLevel;
     }
-
     
     void ChunkedLodGlobe::render(const RenderData& data){
+
+        stats.startNewRecord();
+
+
+        int j2000s = Time::now().unsyncedJ2000Seconds();
+        int lastJ2000s = stats.i.previous("time");
+        if (j2000s == lastJ2000s) {
+            stats.disable();
+        }
+        else {
+            stats.enable();
+        }
+
+        stats.i["time"] = j2000s;
+
         minDistToCamera = INFINITY;
 
         _leftRoot->updateChunkTree(data);
@@ -162,10 +180,16 @@ namespace openspace {
 
         // Render function
         std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+            stats.i["chunks"]++;
             const Chunk& chunk = chunkNode.getChunk();
-            if (chunkNode.isLeaf() && chunk.isVisible()) {
-                _renderer->renderChunk(chunkNode.getChunk(), data);
-                debugRenderChunk(chunk, mvp);
+            if (chunkNode.isLeaf()){
+                stats.i["chunks leafs"]++;
+                if (chunk.isVisible()) {
+                    stats.i["rendered chunks"]++;
+                    double t0 = Time::now().unsyncedJ2000Seconds();
+                    _renderer->renderChunk(chunkNode.getChunk(), data);
+                    debugRenderChunk(chunk, mvp);
+                }
             }
         };
         

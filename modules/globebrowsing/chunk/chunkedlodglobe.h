@@ -117,6 +117,7 @@ namespace openspace {
             bool levelByProjAreaElseDistance = true;
         } debugOptions;
 
+        StatsCollector stats;
 
     private:
 
@@ -149,8 +150,6 @@ namespace openspace {
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
 
-        //std::shared_ptr<StatsTracker<double>> _stats;
-        //StatsTracker<double> stats;
     };
 
 }  // namespace openspace
