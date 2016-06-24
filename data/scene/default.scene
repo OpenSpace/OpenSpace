@@ -32,7 +32,7 @@ function postInitialization()
 
     if openspace.modules.isLoaded("ISWA") then
     
-        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
+        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/iswa/cdflist.json");
 
         --openspace.iswa.addCygnet(7);
 
