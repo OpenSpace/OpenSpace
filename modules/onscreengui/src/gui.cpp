@@ -44,6 +44,8 @@
 
 #include <imgui.h>
 
+#include "gui_lua.inl"
+
 namespace {
     const std::string _loggerCat = "GUI";
     const std::string configurationFile = "imgui.ini";
@@ -459,71 +461,25 @@ void GUI::render() {
     ImGui::End();
 }
     
-namespace {
-
-/**
- * \ingroup LuaScripts
- * show():
- * Shows the GUI
- */
-int show(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.gui().setEnabled(true);
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * hide():
- * Hides the console
- */
-int hide(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.gui().setEnabled(false);
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * toggle():
- * Toggles the console
- */
-int toggle(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
-    return 0;
-}
-
-}
-
 scripting::ScriptEngine::LuaLibrary GUI::luaLibrary() {
     return {
         "gui",
         {
             {
                 "show",
-                &show,
+                &luascriptfunctions::gui::show,
                 "",
                 "Shows the console"
             },
             {
                 "hide",
-                &hide,
+                &luascriptfunctions::gui::hide,
                 "",
                 "Hides the console"
             },
             {
                 "toggle",
-                &toggle,
+                &luascriptfunctions::gui::toggle,
                 "",
                 "Toggles the console"
             }

@@ -39,6 +39,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/gui_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guicomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiorigincomponent.cpp
