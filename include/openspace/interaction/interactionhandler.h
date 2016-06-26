@@ -34,7 +34,10 @@
 #include <openspace/util/keys.h>
 
 #include <list>
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#endif
 
 #include <mutex>
 
@@ -273,6 +276,7 @@ protected:
     glm::dquat _globalCameraRotation;
 };
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
 {
 public:
@@ -288,6 +292,7 @@ private:
     void updateCameraStateFromMouseStates();
     RenderableGlobe* _globe;
 };
+#endif
 
 
 class InteractionHandler : public properties::PropertyOwner
@@ -302,7 +307,9 @@ public:
 
     // Interaction mode setters
     void setInteractionModeToOrbital();
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     void setInteractionModeToGlobeBrowsing();
+#endif
 
     void resetKeyBindings();
 
@@ -345,7 +352,10 @@ private:
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
     std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
+#endif
 
     // Properties
     properties::StringProperty _origin;
