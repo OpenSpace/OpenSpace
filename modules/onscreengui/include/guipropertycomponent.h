@@ -42,7 +42,6 @@ namespace gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-    //void registerProperty(const std::string& propertyDescription);
     void registerProperty(properties::Property* prop, properties::Property* sibling = nullptr);
     void unregisterProperty(properties::Property* prop);
     void unregisterProperties(std::string owner);
@@ -74,8 +73,6 @@ protected:
         PropertyOwner owner;
         std::vector<PropertyInfo> properties;
     };
-
-    void handleProperty(const ghoul::Dictionary& value);
 
     PropertyType toPropertyType(const std::string& name) const;
 
