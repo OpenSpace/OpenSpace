@@ -32,9 +32,9 @@ namespace openspace {
 namespace gui {
 
 struct RadioOption {
-	int value;
-	std::string path;
-	std::string date;
+    int value;
+    std::string path;
+    std::string date;
 };
 
 class GuiIswaComponent : public GuiPropertyComponent {

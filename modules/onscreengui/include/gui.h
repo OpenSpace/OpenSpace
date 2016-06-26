@@ -25,6 +25,7 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
+#include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guihelpcomponent.h>
 #include <modules/onscreengui/include/guiperformancecomponent.h>
 #include <modules/onscreengui/include/guipropertycomponent.h>
@@ -39,13 +40,10 @@
 namespace openspace {
 namespace gui {
 
-class GUI {
+class GUI : public GuiComponent {
 public:
     GUI();
     ~GUI();
-
-    bool isEnabled() const;
-    void setEnabled(bool enabled);
 
     void initialize();
     void deinitialize();
@@ -54,16 +52,14 @@ public:
     void deinitializeGL();
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
-//    bool mouseButtonCallback(int key, int action);
     bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-//    bool keyCallback(int key, int action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
     void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
-    void renderMainWindow();
+    void render();
 
     static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
 
@@ -72,13 +68,10 @@ public:
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
     GuiPropertyComponent _property;
-    // GuiPropertyComponent _iSWAproperty;
     GuiPropertyComponent _screenSpaceProperty;
     GuiPropertyComponent _globalProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
-
-    bool _isEnabled;
 
     bool _showHelp;
 };

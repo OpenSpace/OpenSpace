@@ -36,10 +36,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <modules/base/rendering/screenspaceimage.h>
-// #include <modules/iswa/util/iswamanager.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 #include <imgui.h>
@@ -49,7 +49,7 @@ namespace {
     const std::string configurationFile = "imgui.ini";
     const ImVec2 size = ImVec2(350, 500);
 
-    GLuint fontTex = 0;
+    //GLuint fontTex = 0;
     GLint positionLocation = 0;
     GLint uvLocation = 0;
     GLint colorLocation = 0;
@@ -57,6 +57,9 @@ namespace {
     GLuint vao = 0;
     GLuint vbo = 0;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+
+    std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
+
 
     static void ImImpl_RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
         if (nCommandLists == 0)
@@ -72,7 +75,8 @@ namespace {
 
         ghoul::opengl::TextureUnit unit;
         unit.activate();
-        glBindTexture(GL_TEXTURE_2D, fontTex);
+        _fontTexture->bind();
+        //glBindTexture(GL_TEXTURE_2D, fontTex);
 
         // Setup orthographic projection matrix
         const float width = ImGui::GetIO().DisplaySize.x;
@@ -149,20 +153,12 @@ void addScreenSpaceRenderable(std::string texturePath){
 namespace gui {
 
 GUI::GUI() 
-    : _isEnabled(false)
+    : GuiComponent()
     , _showHelp(false)
 {}
 
 GUI::~GUI() {
     ImGui::Shutdown();
-}
-
-bool GUI::isEnabled() const {
-    return _isEnabled;
-}
-
-void GUI::setEnabled(bool enabled) {
-    _isEnabled = enabled;
 }
 
 void GUI::initialize() {
@@ -204,12 +200,45 @@ void GUI::initialize() {
     //io.SetClipboardTextFn = ImImpl_SetClipboardTextFn; // @TODO implement? ---abock
     //io.GetClipboardTextFn = ImImpl_GetClipboardTextFn; // @TODO implement? ---abock
 
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowPadding = { 4.f, 4.f };
+    style.WindowRounding = 0.f;
+    style.FramePadding = { 3.f, 3.f };
+    style.FrameRounding = 3.f;
+    style.ScrollbarWidth = 15.f;
+    style.ScrollbarRounding = 0.f;
+
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.21f, 0.24f, 1.00f);
+    style.Colors[ImGuiCol_Border] = ImVec4(0.10f, 0.39f, 0.42f, 0.59f);
+    style.Colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.50f, 0.94f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.50f, 0.94f, 1.00f, 0.45f);
+    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.80f, 0.43f);
+    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.40f, 0.75f, 0.80f, 0.65f);
+    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.80f, 0.76f, 1.00f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.00f, 0.36f, 0.67f, 0.60f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.00f, 0.51f, 0.94f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.00f, 0.43f, 0.80f, 1.00f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.34f, 0.50f, 0.90f, 0.45f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.34f, 0.50f, 0.90f, 0.80f);
+    style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.80f);
+    style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_CloseButton] = ImVec4(0.56f, 0.17f, 0.17f, 1.00f);
+    style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(1.00f, 0.29f, 0.29f, 0.60f);
+    style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(1.00f, 0.29f, 0.29f, 1.00f);
+
     _property.initialize();
     _screenSpaceProperty.initialize();
     _globalProperty.initialize();
     _performance.initialize();
     _help.initialize();
     _iswa.initialize();
+}
+
+void GUI::deinitialize() {
+
 }
 
 void GUI::initializeGL() {
@@ -225,19 +254,32 @@ void GUI::initializeGL() {
     uvLocation = glGetAttribLocation(*_program, "in_uv");
     colorLocation = glGetAttribLocation(*_program, "in_color");
     
-    glGenTextures(1, &fontTex);
-    glBindTexture(GL_TEXTURE_2D, fontTex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+    //glGenTextures(1, &fontTex);
+    //glBindTexture(GL_TEXTURE_2D, fontTex);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     unsigned char* png_data;
     int tex_x, tex_y;
     ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&png_data, &tex_x, &tex_y);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, png_data);
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_x, tex_y, 0, GL_RGBA, GL_UNSIGNED_BYTE, png_data);
     //stbi_image_free(tex_data);
+
+    _fontTexture = std::make_unique<ghoul::opengl::Texture>(
+        png_data,
+        glm::uvec3(tex_x, tex_y, 1)
+    );
+    _fontTexture->setName("Gui Text");
+    _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+    _fontTexture->uploadTexture();
+
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
+
+    
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -299,7 +341,7 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 void GUI::endFrame() {
-    renderMainWindow();
+    render();
 
     if (_property.isEnabled())
         _property.render();
@@ -334,7 +376,6 @@ bool GUI::mouseWheelCallback(double position) {
 }
 
 bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
-//bool GUI::keyCallback(int key, int action) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
@@ -361,7 +402,7 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
     return consumeEvent;
 }
 
-void GUI::renderMainWindow() {
+void GUI::render() {
     ImGui::Begin("OpenSpace GUI", nullptr);
 
     ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
