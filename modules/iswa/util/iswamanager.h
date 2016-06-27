@@ -34,7 +34,6 @@
 #include <ccmc/Kameleon.h>
 #endif
 #include <openspace/engine/downloadmanager.h>
-//#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/time.h>
 
 
