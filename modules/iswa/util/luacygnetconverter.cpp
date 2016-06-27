@@ -28,7 +28,7 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 
  namespace {
- 	using json = nlohmann::json;
+    using json = nlohmann::json;
     const std::string _loggerCat = "IswaCygnet";
 }
 
@@ -39,9 +39,9 @@ LuaCygnetConverter::~LuaCygnetConverter(){};
 
 std::string LuaCygnetConverter::toLuaTable(std::shared_ptr<MetadataFuture> metadata) const {
 
-	//get resource type as enum value
-	int resourceType;
-	IswaManager::ref().getResourceType(metadata->resourceType, resourceType);
+    //get resource type as enum value
+    int resourceType;
+    IswaManager::ref().getResourceType(metadata->resourceType, resourceType);
 
     std::string luaTable;
     if (IswaManager::ResourceType::Json == resourceType)
@@ -53,7 +53,7 @@ std::string LuaCygnetConverter::toLuaTable(std::shared_ptr<MetadataFuture> metad
 }
 
 std::string LuaCygnetConverter::toLuaTable(CdfInfo info, std::string cut) const {
-	return kameleonToLuaTable(info, cut); // KameleonPlane
+    return kameleonToLuaTable(info, cut); // KameleonPlane
 }
 
 std::string LuaCygnetConverter::toLuaTable(std::string name, std::string cdfPath, std::string seedPath) const {

@@ -31,6 +31,7 @@
  * used to add a cygnet to the scene.
  */
 #include <memory> // for shared_pointer
+#include <string>
 
 namespace openspace {
 class MetadataFuture;
@@ -41,17 +42,17 @@ public:
     LuaCygnetConverter();
     ~LuaCygnetConverter();
 
-	std::string toLuaTable(std::shared_ptr<MetadataFuture> metadata) const;
-	std::string toLuaTable(CdfInfo info, std::string cut) const;
-	std::string toLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
+    std::string toLuaTable(std::shared_ptr<MetadataFuture> metadata) const;
+    std::string toLuaTable(CdfInfo info, std::string cut) const;
+    std::string toLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
 
 
 private:
 
-	std::string planeToLuaTable(std::shared_ptr<MetadataFuture> data) const;
-	std::string sphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
-	std::string kameleonToLuaTable(CdfInfo info, std::string cut) const;
-	std::string fieldlineToLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
+    std::string planeToLuaTable(std::shared_ptr<MetadataFuture> data) const;
+    std::string sphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
+    std::string kameleonToLuaTable(CdfInfo info, std::string cut) const;
+    std::string fieldlineToLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
 };
 
 } //namespace openspace

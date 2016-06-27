@@ -50,7 +50,7 @@ namespace openspace {
             bool available;
         };
 
-        enum class State {
+        enum class Status {
             DO_NOTHING,
             WANT_MERGE,
             WANT_SPLIT,
@@ -59,7 +59,7 @@ namespace openspace {
         Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
 
         /// Updates chunk internally and returns a desired level
-        State update(const RenderData& data);
+        Status update(const RenderData& data);
         void render(const RenderData& data) const;
 
 

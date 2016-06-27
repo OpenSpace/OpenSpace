@@ -226,7 +226,7 @@ namespace openspace {
 
                 // Get the texture that should be used for rendering
                 TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
-                if (tileAndTransform.tile.status == Tile::State::Unavailable) {
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     // don't render if no tile was available
                     programObject->deactivate();
                     return nullptr;
@@ -243,7 +243,7 @@ namespace openspace {
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
                     TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 1);
-                    if (tileAndTransformParent1.tile.status == Tile::State::Unavailable) {
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent1 = tileAndTransform;
                     }
                     activateTileAndSetTileUniforms(
@@ -255,7 +255,7 @@ namespace openspace {
                         tileAndTransformParent1);
 
                     TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 2);
-                    if (tileAndTransformParent2.tile.status == Tile::State::Unavailable) {
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent2 = tileAndTransformParent1;
                     }
                     activateTileAndSetTileUniforms(

@@ -269,43 +269,43 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
     float rollSpeed = 100.0f;
     
 
-	glm::mat4 transform;
-	transform = glm::rotate(glm::radians(dx * rotationSpeed), cameraUp) * transform;
-	transform = glm::rotate(glm::radians(dy * rotationSpeed), cameraRight) * transform;
-	transform = glm::rotate(glm::radians(dz * rollSpeed), _camera->viewDirection()) * transform;
+    glm::mat4 transform;
+    transform = glm::rotate(glm::radians(dx * rotationSpeed), cameraUp) * transform;
+    transform = glm::rotate(glm::radians(dy * rotationSpeed), cameraRight) * transform;
+    transform = glm::rotate(glm::radians(dz * rollSpeed), _camera->viewDirection()) * transform;
 
-	
-	
-	
-	//// get camera position 
-	//psc relative = _camera->position();
+    
+    
+    
+    //// get camera position 
+    //psc relative = _camera->position();
 
-	// get camera position (UNSYNCHRONIZED)
-	psc relative = _camera->unsynchedPosition();
+    // get camera position (UNSYNCHRONIZED)
+    psc relative = _camera->unsynchedPosition();
 
-	//get relative vector
-	psc relative_focus_coordinate = relative - focusPos;
-	//rotate relative vector
-	relative_focus_coordinate = glm::inverse(transform) * relative_focus_coordinate.vec4();
-	
-	//get new new position of focus node
-	psc origin;
-	if (_focusNode) {
-		origin = _focusNode->worldPosition();
-	}
+    //get relative vector
+    psc relative_focus_coordinate = relative - focusPos;
+    //rotate relative vector
+    relative_focus_coordinate = glm::inverse(transform) * relative_focus_coordinate.vec4();
+    
+    //get new new position of focus node
+    psc origin;
+    if (_focusNode) {
+        origin = _focusNode->worldPosition();
+    }
 
-	//new camera position
-	relative = origin + relative_focus_coordinate; 	
+    //new camera position
+    relative = origin + relative_focus_coordinate; 	
 
 
-	psc target = relative + relative_focus_coordinate * dist * zoomSpeed;
+    psc target = relative + relative_focus_coordinate * dist * zoomSpeed;
 
-	//don't fly into objects
-	if ((target - origin).length() < focusNodeBounds){
-		//target = relative;
-	}
+    //don't fly into objects
+    if ((target - origin).length() < focusNodeBounds){
+        //target = relative;
+    }
 
-	unlockControls();
+    unlockControls();
 
     
     _camera->setFocusPosition(origin);
@@ -885,6 +885,7 @@ void OrbitalInteractionMode::update(double deltaTime) {
     updateCameraStateFromMouseStates();
 }
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(
     std::shared_ptr<InputState> inputState,
     double sensitivity,
@@ -893,9 +894,7 @@ GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(
 
 }
 
-GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
-
-}
+GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {}
 
 void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
@@ -910,7 +909,6 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     }
 
 }
-
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates() {
     if (_focusNode && _globe) {
@@ -989,6 +987,8 @@ void GlobeBrowsingInteractionMode::update(double deltaTime) {
     updateCameraStateFromMouseStates();
 }
 
+#endif
+
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
@@ -1014,8 +1014,11 @@ InteractionHandler::InteractionHandler()
     _inputState = std::shared_ptr<InputState>(new InputState());
     _orbitalInteractionMode = std::shared_ptr<OrbitalInteractionMode>(
         new OrbitalInteractionMode(_inputState, 0.002, 0.02));
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     _globebrowsingInteractionMode = std::shared_ptr<GlobeBrowsingInteractionMode>(
         new GlobeBrowsingInteractionMode(_inputState, 0.002, 0.02));
+#endif
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
@@ -1050,9 +1053,11 @@ void InteractionHandler::setInteractionModeToOrbital() {
     setInteractionMode(_orbitalInteractionMode);
 }
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 void InteractionHandler::setInteractionModeToGlobeBrowsing() {
     setInteractionMode(_globebrowsingInteractionMode);
 }
+#endif
 
 void InteractionHandler::lockControls() {
 
