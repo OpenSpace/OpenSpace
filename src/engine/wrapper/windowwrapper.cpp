@@ -72,6 +72,14 @@ bool WindowWrapper::isRegularRendering() const {
     return true;
 }
 
+bool WindowWrapper::hasGuiWindow() const {
+    return false;
+}
+
+bool WindowWrapper::isGuiWindow() const {
+    return false;
+}
+
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
 }

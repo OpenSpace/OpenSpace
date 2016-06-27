@@ -35,6 +35,7 @@
 
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <openspace/performance/performancemanager.h>
 
@@ -382,11 +383,13 @@ void RenderEngine::postSynchronizationPreDraw() {
 
 }
 
-void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
+void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui) {
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
-    if (!(OsEng.isMaster() && _disableMasterRendering)) {
+
+
+    if (!(OsEng.isMaster() && _disableMasterRendering) && !OsEng.windowWrapper().isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
@@ -395,7 +398,7 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         if (_showInfo) {
             renderInformation();
         }
-        if (_showLog) {
+        if (_showLog && showGui) {
             renderScreenLog();
         }
     }

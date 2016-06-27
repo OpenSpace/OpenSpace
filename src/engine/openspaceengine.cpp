@@ -771,15 +771,19 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LogMgr.resetMessageCounters();
 }
 
-void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-    _renderEngine->render(projectionMatrix, viewMatrix);
+void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+
+    _renderEngine->render(projectionMatrix, viewMatrix, showGui);
 
     if (_isMaster && _windowWrapper->isRegularRendering()) {
-        if (_console->isVisible())
+        if (showGui) {
+            if (_console->isVisible())
                 _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled())
-            _gui->endFrame();
+            if (_gui->isEnabled())
+                _gui->endFrame();
+        }
 #endif
     }
 }
