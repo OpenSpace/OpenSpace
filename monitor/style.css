@@ -2,6 +2,10 @@ body {
   font: 10px sans-serif;
 }
 
+#start-stop{
+	display: block;
+}
+
 .axis path,
 .axis line {
   fill: none;
