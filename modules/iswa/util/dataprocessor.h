@@ -93,7 +93,7 @@ protected:
     //glm::vec2 _histNormValues;
 private:
     float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
-    float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
+    //float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
 
     bool _useLog;
     bool _useHistogram;
@@ -101,6 +101,7 @@ private:
     glm::vec2 _normValues;
     glm::vec2 _filterValues;
     
+    // Using vectors to store each data option seperatly
     std::vector<float> _sum;
     std::vector<float> _standardDeviation;
     std::vector<float> _numValues;

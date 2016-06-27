@@ -334,6 +334,7 @@ void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
         }
     }
     metadata->name = metadata->group + "_" + metadata->name;
+    
     // create the luaTable for script
     std::string luaTable = _luaConverter.toLuaTable(metadata);
 

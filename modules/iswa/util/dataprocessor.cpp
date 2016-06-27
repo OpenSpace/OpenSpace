@@ -101,15 +101,15 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
     return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
 }
 
-float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean, float sd, glm::vec2 normalizationValues){
-    float zScoreMin = normalizationValues.x;
-    float zScoreMax = normalizationValues.y; 
+// float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean, float sd, glm::vec2 normalizationValues){
+//     float zScoreMin = normalizationValues.x;
+//     float zScoreMax = normalizationValues.y; 
 
-    float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
-    value = value*sd+mean; 
+//     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
+//     value = value*sd+mean; 
 
-    return value; 
-}
+//     return value; 
+// }
 
 void DataProcessor::initializeVectors(int numOptions){
     if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
@@ -141,16 +141,16 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = histogram->binWidth();
 
-                //at least one pixel value width. 1/numBins above mid and 1/numBins below mid => 1/(numBins/2) filtered
-                // filterWidth = std::max(filterWidth, 1.0f/(float)NumBins);
-
                 filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
                 filterWidth = fabs(0.5-normalizeWithStandardScore(mean+filterWidth, mean, standardDeviation, _normValues));
+
+                // at least one pixel value width. 1/512 above mid and 1/512 below mid => 1/(numBins/2) filtered
+                // filterWidth = std::max(filterWidth, 1.0f / 512.0f);
 
             }else{
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
-                filterWidth = std::min(1.f / (float)NumBins, 1.0f/(float)NumBins);
+                filterWidth = std::min(1.0f / (float)NumBins, 1.0f / 512.0f);
             }
             _filterValues += glm::vec2(filterMid-filterWidth, filterMid+filterWidth);
 
@@ -203,7 +203,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         _numValues[i] += numValues;
         mean = (1.0f/_numValues[i])*_sum[i];
 
-        const float* histData = _unNormalizedhistograms[i]->data();
+        //const float* histData = _unNormalizedhistograms[i]->data();
         float histMin = _unNormalizedhistograms[i]->minValue();
         float histMax = _unNormalizedhistograms[i]->maxValue();
         int numBins = _unNormalizedhistograms[i]->numBins();
@@ -214,7 +214,6 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         // the E (entropy) method
         float fit = _unNormalizedhistograms[i]->entropy();
         _fitValues[i] = fit;
-
 
         float max = normalizeWithStandardScore(histMax, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
         float min = normalizeWithStandardScore(histMin, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));

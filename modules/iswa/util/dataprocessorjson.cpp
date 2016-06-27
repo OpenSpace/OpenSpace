@@ -67,6 +67,7 @@ void DataProcessorJson::addDataValues(const std::string& data, const properties:
     int numOptions = dataOptions.options().size();
     initializeVectors(numOptions);
 
+    // parse json and calculate min, max and sum
     if(!data.empty()){
         json j = json::parse(data);
         json variables = j["variables"];
