@@ -26,7 +26,7 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/designpattern/event.h>
-
+#include <modules/iswa/util/luacygnetconverter.h>
 #include <map>
 #include <future>
 #include <ghoul/glm.h>
@@ -57,17 +57,18 @@ struct CygnetInfo {
     bool selected;
 };
 
+struct MetadataFuture {
+    int id;
+    std::string group;
+    std::string name;
+    std::string resourceType;
+    std::string cygnetType;
+    std::string json;
+};
+
 class IswaManager : public ghoul::Singleton<IswaManager> { 
 public:
 
-    struct Metadata {
-        int id;
-        std::string group;
-        std::string name;
-        int resourceType;
-        int cygnetType;
-        std::string json;
-    };
 
     enum CygnetType {TexturePlane, DataPlane, DataSphere, KameleonPlane, NoCygnetType};
     enum ResourceType {Texture, Json, Text, Cdf, NoResourceType};
@@ -95,18 +96,14 @@ public:
     void setBaseUrl(std::string bUrl);
     void registerGroup(std::string groupName, int cygnetType, int resourceType);
     void unregisterGroup(std::string groupName);
+    bool getResourceType(const std::string& type, int& enumType);
 private:
-    //std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string jsonPlaneToLuaTable(std::shared_ptr<Metadata> data) const;
-    std::string jsonSphereToLuaTable(std::shared_ptr<Metadata> data) const;
-    std::string parseKWToLuaTable(CdfInfo info, std::string cut="z") const;
     
     void createScreenSpace(int id);
-    void createIswaCygnet(std::shared_ptr<Metadata> metadata);
+    void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
 
-    bool getResourceType(const std::string& type, int& enumType);
     bool getCygnetType(const std::string& type, int& enumType);
     
     std::map<std::string, std::string> _month;
@@ -120,6 +117,8 @@ private:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
+
+    LuaCygnetConverter _luaConverter;
 };
 
 } //namespace openspace

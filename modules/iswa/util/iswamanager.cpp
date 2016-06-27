@@ -35,7 +35,7 @@
 #include <memory> // for shared_pointer
 
 #include <ghoul/filesystem/filesystem>
-#include <modules/kameleon/include/kameleonwrapper.h>
+//#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
@@ -54,6 +54,7 @@ namespace {
 namespace openspace{
 
 IswaManager::IswaManager()
+: _luaConverter()
 {
     _month["JAN"] = "01";
     _month["FEB"] = "02";
@@ -105,13 +106,10 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
     }else if(id < 0){
 
         // create metadata object and assign group, id and resourceType
-        std::shared_ptr<IswaManager::Metadata> meta = std::make_shared<IswaManager::Metadata>();
+        std::shared_ptr<MetadataFuture> meta = std::make_shared<MetadataFuture>();
         meta->id = id;
         meta->group = group;
-        if(!getResourceType(type, meta->resourceType)){
-            LERROR("\""+ type + "\" is not a valid resource type");
-            return;
-        }
+        meta->resourceType = type;
 
         // This callback determines what geometry should be used and creates the right cygbet
         auto metadataCallback = 
@@ -131,6 +129,20 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
             }
         );
     }
+}
+
+
+void IswaManager::addKameleonCdf(std::string groupName, int pos){
+    // auto info = _cdfInformation[group][pos];
+    auto group = iswaGroup(groupName);
+    if(group){
+        std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
+        return;
+    }
+
+    createKameleonPlane(_cdfInformation[groupName][pos], "z");
+    createKameleonPlane(_cdfInformation[groupName][pos], "y");
+    createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
 bool IswaManager::getResourceType(const std::string& type, int& enumType){
@@ -154,19 +166,6 @@ bool IswaManager::getCygnetType(const std::string& type, int& enumType){
             return true;
         }
     }
-}
-
-void IswaManager::addKameleonCdf(std::string groupName, int pos){
-    // auto info = _cdfInformation[group][pos];
-    auto group = iswaGroup(groupName);
-    if(group){
-        std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
-        return;
-    }
-
-    createKameleonPlane(_cdfInformation[groupName][pos], "z");
-    createKameleonPlane(_cdfInformation[groupName][pos], "y");
-    createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const{
@@ -273,220 +272,49 @@ std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
     return _cdfInformation;
 }
 
-// std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
-//     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
-
-//     metaFuture->id = id;
-//     DlManager.fetchFile(
-//         baseUrl + std::to_string(-id),
-//         [&metaFuture](const DownloadManager::MemoryFile& file){
-//             metaFuture->json = std::string(file.buffer, file.size);
-//             metaFuture->isFinished = true;
-//         },
-//         [](const std::string& err){
-//             LWARNING("Download Metadata to memory was aborted: " + err);
-//         }
-//     );
-//     return metaFuture;
-// }
-
-std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<IswaManager::Metadata> data) const {
-    if(data->json != ""){
-        json j = json::parse(data->json);
-
-        std::string parent = j["Central Body"];
-        std::string frame = j["Coordinates"];
-        std::string coordinateType = j["Coordinate Type"];
-        int updateTime = j["ISWA_UPDATE_SECONDS"];
-
-        glm::vec3 max(
-            j["Plot XMAX"],
-            j["Plot YMAX"],
-            j["Plot ZMAX"]
-        );
-
-        glm::vec3 min(
-            j["Plot XMIN"],
-            j["Plot YMIN"],
-            j["Plot ZMIN"]
-        );
-
-        glm::vec4 spatialScale(1, 1, 1, 10);
-        std::string spatial = j["Spatial Scale (Custom)"];
-        if(spatial == "R_E"){
-            spatialScale.x = 6.371f;
-            spatialScale.y = 6.371f;
-            spatialScale.z = 6.371f;
-            spatialScale.w = 6;
-        }
-
-        float xOffset = 0.0f;
-        if(data->id == -7)
-            xOffset = -10.0f;
-        if(data->id == -8)
-            xOffset = -20.0f;
-        if(data->id == -9)
-            xOffset = -30.0f;
-
-        std::string table = "{"
-        "Name = '" + data->name +"' , "
-        "Parent = '" + parent + "', "
-        "Renderable = {"    
-            "Type = '" + _cygnetType.at(data->cygnetType) + "', "
-            "Id = " + std::to_string(data->id) + ", "
-            "Frame = '" + frame + "' , "
-            "GridMin = " + std::to_string(min) + ", "
-            "GridMax = " + std::to_string(max) + ", "
-            "SpatialScale = " + std::to_string(spatialScale) + ", "
-            "UpdateTime = " + std::to_string(updateTime) + ", "
-            "CoordinateType = '" + coordinateType + "', "
-            "Group = '"+ data->group + "',"
-            "XOffset = "+ std::to_string(xOffset) + ","
-            "}"
-        "}";
-        
-        return table;
-    }
-    return "";
-}
-
-std::string IswaManager::parseKWToLuaTable(CdfInfo info, std::string cut) const {
-    if(info.path != ""){
-        const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
-        if(extension == "cdf"){
-            KameleonWrapper kw = KameleonWrapper(absPath(info.path));
-     
-            std::string parent  = kw.getParent();
-            std::string frame   = kw.getFrame();
-            glm::vec3   min     = kw.getGridMin();
-            glm::vec3   max     = kw.getGridMax();
-
-            glm::vec4 spatialScale;
-            std::string coordinateType;
-
-            std::tuple < std::string, std::string, std::string > gridUnits = kw.getGridUnits();
-            if (std::get<0>(gridUnits) == "R" && std::get<1>(gridUnits) == "R" && std::get<2>(gridUnits) == "R") {
-                spatialScale.x = 6.371f;
-                spatialScale.y = 6.371f;
-                spatialScale.z = 6.371f;
-                spatialScale.w = 6;
-
-                coordinateType = "Cartesian";
-            }else{
-                spatialScale = glm::vec4(1.0);
-                spatialScale.w = 1; //-log10(1.0f/max.x);
-                coordinateType = "Polar";
-            }
-
-            std::string table = "{"
-                "Name = '" +info.name+ "',"
-                "Parent = '" + parent + "', " 
-                "Renderable = {"    
-                    "Type = 'KameleonPlane', "
-                    "Id = 0 ,"
-                    "Frame = '" + frame + "' , "
-                    "GridMin = " + std::to_string(min) + ", "
-                    "GridMax = " + std::to_string(max) + ", "
-                    "SpatialScale = " + std::to_string(spatialScale) + ", "
-                    "UpdateTime = 0, "
-                    "kwPath = '" + info.path + "' ," 
-                    "axisCut = '"+cut+"',"
-                    "CoordinateType = '" + coordinateType + "', "
-                    "Group = '"+ info.group + "',"
-                    // "Group = '',"
-                    "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
-                    "}"
-                "}"
-                ; 
-            return table;
-        }
-    }
-    return "";
-}
-
-std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<IswaManager::Metadata> data) const {
-    if(data->json == ""){
-        LWARNING("jsonSphereToLuaTable: no content in metadata json");
-        return "";
-    }
-
-    json j = json::parse(data->json);
-    j = j["metadata"];
-    std::string parent = j["central_body"];
-    parent[0] = toupper(parent[0]);
-    std::string frame = j["standard_grid_target"];
-    std::string coordinateType = j["grid_1_type"];
-    float updateTime = j["output_time_interval"];
-    float radius = j["radius"];
-
-    glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
-
-    glm::vec3 max(
-        j["x"]["actual_max"],
-        j["y"]["actual_max"],
-        j["z"]["actual_max"]
-    );
-
-    glm::vec3 min(
-        j["x"]["actual_min"],
-        j["y"]["actual_min"],
-        j["z"]["actual_min"]
-    );
-
-    std::string table = "{"
-    "Name = '" + data->name +"' , "
-    "Parent = '" + parent + "', "
-    "Renderable = {"    
-        "Type = '" + _cygnetType.at(data->cygnetType) + "', "
-        "Id = " + std::to_string(data->id) + ", "
-        "Frame = '" + frame + "' , "
-        "GridMin = " + std::to_string(min) + ", "
-        "GridMax = " + std::to_string(max) + ", "
-        "UpdateTime = " + std::to_string(updateTime) + ", "
-        "Radius = " + std::to_string(radius) + ", "
-        "CoordinateType = '" + coordinateType + "', "
-        "Group = '"+ data->group + "',"
-        "}"
-    "}";
-    
-    return table;
-}
-
 void IswaManager::createScreenSpace(int id){
     std::string script = "openspace.iswa.addScreenSpaceCygnet("
         "{CygnetId =" + std::to_string(id) + "});";
     OsEng.scriptEngine().queueScript(script);
 }
 
-void IswaManager::createIswaCygnet(std::shared_ptr<IswaManager::Metadata> metadata){
+void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
     //convert metadata to json
     json jsondata = json::parse(metadata->json);
 
     // set geometry type
-    int geometryType;
+    std::string geometryType;
     if(jsondata["Coordinate Type"].is_null()){
-        geometryType = GeometryType::Sphere;
+        geometryType = _geometryType[GeometryType::Sphere];
     } else if (jsondata["Coordinate Type"] == "Cartesian"){
-        geometryType = GeometryType::Plane;
+        geometryType = _geometryType[GeometryType::Plane];
     } else {
         LERROR("Unknown Coordinate type");
         return;
     }
 
+    int resourceType;
+    if(!getResourceType(metadata->resourceType, resourceType )){
+        LERROR("\""+ metadata->resourceType + "\" is not a valid resource type");
+        return;
+    }
+
     //hacky, If resource type is either json or text => say it is "Data" so that cygnetType will be correct.
-    std::string resourceType = _resourceType[metadata->resourceType];
-    if(metadata->resourceType == ResourceType::Text || metadata->resourceType == ResourceType::Json)
-        resourceType = "Data";
+    // (this will be no problem once data format is standardized)
+    std::string resource = metadata->resourceType;
+    if(resourceType == ResourceType::Text || resourceType == ResourceType::Json)
+        resource = "Data";
 
     //check if cygnet type is valid
-    const std::string cygnetType = resourceType + _geometryType[geometryType];
-    if(!getCygnetType(cygnetType, metadata->cygnetType)){
-        LERROR("Unknown Cygnet type: " + cygnetType);
+    metadata->cygnetType = resource + geometryType;
+    int cygnetType;
+    if(!getCygnetType(metadata->cygnetType, cygnetType)){
+        LERROR("Unknown Cygnet type: " + metadata->cygnetType);
         return;
     }
 
     // check if this plane already exist
-    metadata->name = cygnetType + std::to_string(metadata->id);
+    metadata->name = metadata->cygnetType + std::to_string(metadata->id);
     if( OsEng.renderEngine().scene()->sceneGraphNode(metadata->name) ){
         LERROR("A node with name \"" + metadata->name +"\" already exist");
         return;
@@ -496,19 +324,15 @@ void IswaManager::createIswaCygnet(std::shared_ptr<IswaManager::Metadata> metada
     if(!metadata->group.empty()){
         auto it = _groups.find(metadata->group);
         if(it == _groups.end()){
-            registerGroup(metadata->group, metadata->cygnetType, metadata->resourceType);
-        } else if( !(*it).second->isType(_cygnetType[metadata->cygnetType]) ){
-            LWARNING("Group with name " + metadata->group + " Is not the same type as: " + _cygnetType[metadata->cygnetType]);
+            registerGroup(metadata->group, cygnetType, resourceType);
+        } else if( !(*it).second->isType(metadata->cygnetType) ){
+            LWARNING("Group with name " + metadata->group + " Is not the same type as: " + metadata->cygnetType);
             metadata->group="";
         }
     }
 
     // create the luaTable for script
-    std::string luaTable;
-    if(ResourceType::Json == metadata->resourceType)
-        luaTable = jsonSphereToLuaTable(metadata);
-    else if(ResourceType::Text == metadata->resourceType || ResourceType::Texture == metadata->resourceType)
-        luaTable = jsonPlaneToLuaTable(metadata);
+    std::string luaTable = _luaConverter.toLuaTable(metadata);
 
     //queue the add scene graph node script
     if(luaTable != ""){
@@ -545,7 +369,9 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
             return;
         }
 
-        std::string luaTable = parseKWToLuaTable(info, cut);
+        // create the luaTable for script
+        std::string luaTable = _luaConverter.toLuaTable(info, cut);
+
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             OsEng.scriptEngine().queueScript(script);
@@ -617,6 +443,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
     }
 }
 
+// Called from script in scene config
 void IswaManager::addCdfFiles(std::string path){
     path = absPath(path);
     if(FileSys.fileExists(path)){

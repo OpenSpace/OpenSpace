@@ -122,25 +122,30 @@ void GuiIswaComponent::render() {
 
         for(auto group : cdfInfo){
             std::string groupName = group.first;
+
+            //if group does not exist in _cdfOptionsMap yet, create it and set selected to -1
             if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
                 _cdfOptionsMap[groupName] = -1;
             }
 
             if(ImGui::CollapsingHeader(groupName.c_str())){
+                // old selected index
                 int cdfOptionValue = _cdfOptionsMap[groupName];
                 auto cdfs = group.second;
 
+                // get new selected index from radio button
                 for(int i=0; i<cdfs.size(); i++){
                     ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
                 }
 
+                //if different, add kameleon planes
                 int cdfOption = _cdfOptionsMap[groupName];
                 if(cdfOptionValue != cdfOption){
-                   if(cdfOptionValue >= 0){
-                        groupName = cdfs[cdfOptionValue].group;
-                        // std::cout << groupName << std::endl;
-                        // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
-                    }
+                   // if(cdfOptionValue >= 0){
+                   //      groupName = cdfs[cdfOptionValue].group;
+                   //      // std::cout << groupName << std::endl;
+                   //      // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
+                   //  }
 
                     std::string path  = cdfs[cdfOption].path;
                     std::string date  = cdfs[cdfOption].date;

@@ -26,6 +26,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.h
+	${CMAKE_CURRENT_SOURCE_DIR}/util/luacygnetconverter.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.h
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.h
@@ -46,6 +47,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/util/iswamanager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/util/luacygnetconverter.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessor.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessortext.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/util/dataprocessorjson.cpp
