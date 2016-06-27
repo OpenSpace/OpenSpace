@@ -197,8 +197,8 @@ namespace openspace {
 
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        int chunkLevel =
-            tileProvider->getAsyncTileReader()->getTextureDataProvider()->getMaximumLevel();
+        int chunkLevel = _chunkedLodGlobe->findChunkNode(geodeticPosition).getChunk().index().level;
+        
         ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
         GeodeticPatch patch = GeodeticPatch(chunkIdx);
         Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);

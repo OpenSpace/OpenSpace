@@ -44,6 +44,8 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/other/statscollector.h>
+
 
 namespace ghoul {
     namespace opengl {
@@ -71,6 +73,9 @@ namespace openspace {
 
         void render(const RenderData& data) override;
         void update(const UpdateData& data) override;
+
+        const ChunkNode& findChunkNode(const Geodetic2 location) const;
+        ChunkNode& findChunkNode(const Geodetic2 location);
 
         void setStateMatrix(const glm::dmat3& stateMatrix);
 
@@ -112,10 +117,13 @@ namespace openspace {
             bool levelByProjAreaElseDistance = true;
         } debugOptions;
 
+        StatsCollector stats;
 
     private:
 
         void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
+
+        static const GeodeticPatch COVERAGE;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
@@ -141,6 +149,7 @@ namespace openspace {
         std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
+
     };
 
 }  // namespace openspace

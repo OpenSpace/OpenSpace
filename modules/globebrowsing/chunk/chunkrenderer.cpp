@@ -62,23 +62,18 @@ namespace openspace {
         : _tileProviderManager(tileProviderManager)
         , _grid(grid)
     {
-        _globalRenderingShaderProvider = std::shared_ptr<LayeredTextureShaderProvider>
-            (new LayeredTextureShaderProvider(
+        _globalRenderingShaderProvider = std::make_shared<LayeredTextureShaderProvider>(
                 "GlobalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
-                "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl"));
+                "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
 
-        _localRenderingShaderProvider = std::shared_ptr<LayeredTextureShaderProvider>
-            (new LayeredTextureShaderProvider(
+        _localRenderingShaderProvider = std::make_shared<LayeredTextureShaderProvider>(
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
-                "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl"));
+                "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
 
-        _globalProgramUniformHandler = std::shared_ptr<LayeredTextureShaderUniformIdHandler>
-            (new LayeredTextureShaderUniformIdHandler());
-
-        _localProgramUniformHandler = std::shared_ptr<LayeredTextureShaderUniformIdHandler>
-            (new LayeredTextureShaderUniformIdHandler());
+        _globalProgramUniformHandler = std::make_shared<LayeredTextureShaderUniformIdHandler>();
+        _localProgramUniformHandler = std::make_shared<LayeredTextureShaderUniformIdHandler>();
 
     }
 
@@ -170,8 +165,7 @@ namespace openspace {
             LayeredTextures::NUM_TEXTURE_CATEGORIES> tileProviders;
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
 
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++)
-        {
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             tileProviders[category] = _tileProviderManager->getActivatedLayerCategory(
                 LayeredTextures::TextureCategory(category));
 
@@ -209,19 +203,16 @@ namespace openspace {
             ghoul::opengl::TextureUnit blendTexture1;
             ghoul::opengl::TextureUnit blendTexture2;
         };
-        std::array<std::vector<BlendTexUnits>,
-            LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
+        std::array<std::vector<BlendTexUnits>, LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             texUnits[category].resize(tileProviders[category].size());
         }
 
         // Go through all the categories
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++)
-        {
+        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             // Go through all the providers in this category
             int i = 0;
-            for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++)
-            {
+            for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++) {
                 auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
@@ -272,8 +263,9 @@ namespace openspace {
 
         // Go through all the height maps and set depth tranforms
         int i = 0;
-        for (auto it = tileProviders[LayeredTextures::HeightMaps].begin();
-            it != tileProviders[LayeredTextures::HeightMaps].end(); it++) {
+        auto it = tileProviders[LayeredTextures::HeightMaps].begin();
+        auto end = tileProviders[LayeredTextures::HeightMaps].end();
+        for (; it != end; it++) {
             auto tileProvider = *it;
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
@@ -314,7 +306,7 @@ namespace openspace {
                 break;
             }
         }
-        if(performAnyBlending) {
+        if (performAnyBlending) {
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);

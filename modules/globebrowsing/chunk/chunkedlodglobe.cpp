@@ -43,6 +43,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <ctime>
+
 namespace {
     const std::string _loggerCat = "ChunkLodGlobe";
 }
@@ -52,18 +54,21 @@ namespace openspace {
     const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
     const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
 
+    const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
+
 
     ChunkedLodGlobe::ChunkedLodGlobe(
         const Ellipsoid& ellipsoid,
         size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
-        , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
-        , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
+        , _leftRoot(std::make_unique<ChunkNode>(Chunk(this, LEFT_HEMISPHERE_INDEX)))
+        , _rightRoot(std::make_unique<ChunkNode>(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
+        , stats(StatsCollector(absPath("test_stats")))
     {
 
         auto geometry = std::make_shared<SkirtedGrid>(
@@ -76,13 +81,13 @@ namespace openspace {
         _chunkCullers.push_back(std::make_unique<HorizonCuller>());
         _chunkCullers.push_back(std::make_unique<FrustumCuller>(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
-        
-        
+
         _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
         _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
         _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
 
         _renderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
+
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -116,6 +121,16 @@ namespace openspace {
         return false;
     }
 
+    const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) const {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    }
+
+    ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    }
+
     int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
         int desiredLevel = 0;
         if (debugOptions.levelByProjAreaElseDistance) {
@@ -135,9 +150,23 @@ namespace openspace {
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
         return desiredLevel;
     }
-
     
     void ChunkedLodGlobe::render(const RenderData& data){
+
+        stats.startNewRecord();
+
+
+        int j2000s = Time::now().unsyncedJ2000Seconds();
+        int lastJ2000s = stats.i.previous("time");
+        if (j2000s == lastJ2000s) {
+            stats.disable();
+        }
+        else {
+            stats.enable();
+        }
+
+        stats.i["time"] = j2000s;
+
         minDistToCamera = INFINITY;
 
         _leftRoot->updateChunkTree(data);
@@ -151,10 +180,16 @@ namespace openspace {
 
         // Render function
         std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+            stats.i["chunks"]++;
             const Chunk& chunk = chunkNode.getChunk();
-            if (chunkNode.isLeaf() && chunk.isVisible()) {
-                _renderer->renderChunk(chunkNode.getChunk(), data);
-                debugRenderChunk(chunk, mvp);
+            if (chunkNode.isLeaf()){
+                stats.i["chunks leafs"]++;
+                if (chunk.isVisible()) {
+                    stats.i["rendered chunks"]++;
+                    double t0 = Time::now().unsyncedJ2000Seconds();
+                    _renderer->renderChunk(chunkNode.getChunk(), data);
+                    debugRenderChunk(chunk, mvp);
+                }
             }
         };
         

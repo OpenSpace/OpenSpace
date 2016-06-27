@@ -127,6 +127,11 @@ public:
     Scalar minLon() const;
     Scalar maxLon() const;
 
+    /**
+     * returns true if the specified coordinate is contained within the patch
+     */
+    bool contains(const Geodetic2& p) const;
+
 
     /**
      * Clamps a point to the patch region
