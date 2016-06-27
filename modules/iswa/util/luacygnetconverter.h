@@ -43,6 +43,7 @@ public:
 
 	std::string toLuaTable(std::shared_ptr<MetadataFuture> metadata) const;
 	std::string toLuaTable(CdfInfo info, std::string cut) const;
+	std::string toLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
 
 
 private:
@@ -50,6 +51,7 @@ private:
 	std::string planeToLuaTable(std::shared_ptr<MetadataFuture> data) const;
 	std::string sphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
 	std::string kameleonToLuaTable(CdfInfo info, std::string cut) const;
+	std::string fieldlineToLuaTable(std::string name, std::string cdfPath, std::string seedPath) const;
 };
 
 } //namespace openspace

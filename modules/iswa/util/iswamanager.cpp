@@ -30,12 +30,12 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-
+#include <modules/iswa/ext/json/json.hpp>
+ 
 #include <fstream>
 #include <memory> // for shared_pointer
 
 #include <ghoul/filesystem/filesystem>
-//#include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
@@ -216,11 +216,10 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) con
     return url;
 }
 
-// should be private?
 void IswaManager::registerGroup(std::string groupName, int cygnetType, int resourceType){
     if(_groups.find(groupName) == _groups.end()){
 
-        //separate function ?
+        // choose the right dataprocessor depending on resourcetype
         std::shared_ptr<DataProcessor> dataProcessor;
         if (ResourceType::Json == resourceType)
             dataProcessor = std::make_shared<DataProcessorJson>();
@@ -229,6 +228,7 @@ void IswaManager::registerGroup(std::string groupName, int cygnetType, int resou
         else if (ResourceType::Cdf == resourceType)
             dataProcessor = std::make_shared<DataProcessorKameleon>();
 
+        // Factory. Create the right cygnet depending on cygnetType
         if(cygnetType == CygnetType::TexturePlane){
             std::shared_ptr<IswaBaseGroup> group = std::make_shared<IswaBaseGroup>(groupName, _cygnetType[cygnetType]);
             _groups.insert( std::pair<std::string, std::shared_ptr<IswaBaseGroup> >(groupName, group));
@@ -382,36 +382,11 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
 }
 
 void IswaManager::createFieldline(std::string name, std::string cdfPath, std::string seedPath) const {
-    const std::string& extension = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
 
-    if(FileSys.fileExists(absPath(cdfPath)) && extension == "cdf"){
-        std::string luaTable = "{"
-            "Name = '" + name + "',"
-            "Parent = 'Earth',"
-            "Renderable = {"
-                "Type = 'RenderableFieldlines',"
-                "VectorField = {"
-                    "Type = 'VolumeKameleon',"
-                    "File = '" + cdfPath + "',"
-                    "Model = 'BATSRUS',"
-                    "Variables = {'bx', 'by', 'bz'}"
-                "},"
-                "Fieldlines = {"
-                    "Stepsize = 1,"
-                    "Classification = true"
-                "},"
-                "SeedPoints = {"
-                    "Type = 'File',"
-                    "File = '" + seedPath + "'"
-                "}"
-            "}"
-        "}";
-        if(!luaTable.empty()){
-            std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
-        }
-    }else{
-        LWARNING( cdfPath + " is not a cdf file or can't be found.");
+    std::string luaTable = _luaConverter.toLuaTable(name, cdfPath, seedPath);
+    if(!luaTable.empty()){
+        std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
+        OsEng.scriptEngine().queueScript(script);
     }
 }
 

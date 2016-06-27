@@ -34,7 +34,7 @@
 #include <ccmc/Kameleon.h>
 #endif
 #include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/ext/json/json.hpp>
+//#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/time.h>
 
 
@@ -42,14 +42,22 @@ namespace openspace {
 class IswaBaseGroup;
 class IswaCygnet; 
 
+/**
+ * The info needed to create a kameleonplane
+ */
 struct CdfInfo {
     std::string name;
     std::string path;
     std::string group;
     std::string date;
-    std::string fieldlineSeedsIndexFile;
+    std::string fieldlineSeedsIndexFile; // Path to a file that lists all seedpoints files for this cdf 
 };
 
+/**
+ * CygnetInfo is the info we get from each
+ * cygnet we list in the GUI. This is requested
+ * from iSWAs CygnetHealthService.
+ */
 struct CygnetInfo {
     std::string name;
     std::string description;
@@ -57,13 +65,17 @@ struct CygnetInfo {
     bool selected;
 };
 
+/**
+ * Metadata provided by OpenSpace and iSWA that is
+ * needed to create a cygnet.
+ */
 struct MetadataFuture {
     int id;
     std::string group;
     std::string name;
     std::string resourceType;
     std::string cygnetType;
-    std::string json;
+    std::string json; // Metadata from iSWA
 };
 
 class IswaManager : public ghoul::Singleton<IswaManager> { 
@@ -94,17 +106,17 @@ public:
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
-    void registerGroup(std::string groupName, int cygnetType, int resourceType);
     void unregisterGroup(std::string groupName);
     bool getResourceType(const std::string& type, int& enumType);
+    bool getCygnetType(const std::string& type, int& enumType);
 private:
     
+    void registerGroup(std::string groupName, int cygnetType, int resourceType);
     void createScreenSpace(int id);
     void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
 
-    bool getCygnetType(const std::string& type, int& enumType);
     
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _resourceType;

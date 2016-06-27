@@ -56,6 +56,10 @@ std::string LuaCygnetConverter::toLuaTable(CdfInfo info, std::string cut) const 
 	return kameleonToLuaTable(info, cut); // KameleonPlane
 }
 
+std::string LuaCygnetConverter::toLuaTable(std::string name, std::string cdfPath, std::string seedPath) const {
+    return fieldlineToLuaTable(name, cdfPath, seedPath); // Fieldlines
+}
+
 
 std::string LuaCygnetConverter::planeToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json != ""){
@@ -215,6 +219,37 @@ std::string LuaCygnetConverter::sphereToLuaTable(std::shared_ptr<MetadataFuture>
         "}"
     "}";
     
+    return table;
+}
+
+std::string LuaCygnetConverter::fieldlineToLuaTable(std::string name, std::string cdfPath, std::string seedPath) const {
+    const std::string& extension = ghoul::filesystem::File(absPath(cdfPath)).fileExtension();
+    std::string table = "";
+    if(FileSys.fileExists(absPath(cdfPath)) && extension == "cdf"){
+        table = "{"
+            "Name = '" + name + "',"
+            "Parent = 'Earth',"
+            "Renderable = {"
+                "Type = 'RenderableFieldlines',"
+                "VectorField = {"
+                    "Type = 'VolumeKameleon',"
+                    "File = '" + cdfPath + "',"
+                    "Model = 'BATSRUS',"
+                    "Variables = {'bx', 'by', 'bz'}"
+                "},"
+                "Fieldlines = {"
+                    "Stepsize = 1,"
+                    "Classification = true"
+                "},"
+                "SeedPoints = {"
+                    "Type = 'File',"
+                    "File = '" + seedPath + "'"
+                "}"
+            "}"
+        "}";
+    } else {
+        LWARNING( cdfPath + " is not a cdf file or can't be found.");
+    }
     return table;
 }
 
