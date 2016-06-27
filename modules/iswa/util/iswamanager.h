@@ -98,6 +98,13 @@ public:
     void setBaseUrl(std::string bUrl);
     void registerGroup(std::string groupName, std::string type);
     void unregisterGroup(std::string groupName);
+    void clearGroupBuildData(std::string name);
+
+    //for testing
+    void setFit(float fit){_fit = fit;}
+    float fit(){return _fit;}
+
+    
 private:
     std::shared_ptr<MetadataFuture> downloadMetadata(int id);
     std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const;
@@ -120,6 +127,8 @@ private:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
+
+    float _fit;
 };
 
 } //namespace openspace

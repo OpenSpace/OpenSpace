@@ -169,6 +169,12 @@ int iswa_setBaseUrl(lua_State* L){
     return 0;
 }
 
+int iswa_clearGroupBuildData(lua_State* L){
+    std::string name = luaL_checkstring(L, 1);
+    IswaManager::ref().clearGroupBuildData(name);
+    return 0;
+}
+
 }// namespace luascriptfunctions
 
 }// namespace openspace

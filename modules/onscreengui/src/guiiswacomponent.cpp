@@ -70,12 +70,12 @@ void GuiIswaComponent::render() {
     bool iondatavalue = _iondata;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
-    ImGui::Text("Global Magnetosphere");
-    ImGui::Checkbox("Gm From Data", &_gmdata); ImGui::SameLine();
-    ImGui::Checkbox("Gm From Images", &_gmimage);
+    // ImGui::Text("Global Magnetosphere");
+    ImGui::Checkbox("Global Magnetosphere From Data", &_gmdata);
+    ImGui::Checkbox("Global Magnetosphere From Images", &_gmimage);
 
-    ImGui::Text("Ionosphere");
-    ImGui::Checkbox("Ion From Data", &_iondata);
+    // ImGui::Text("Ionosphere");
+    ImGui::Checkbox("Ionosphere From Data", &_iondata);
 
 
     ImGui::Spacing();
@@ -85,32 +85,36 @@ void GuiIswaComponent::render() {
 
     if(ImGui::SmallButton("Add Cygnet"))
         OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
+        // IswaManager::ref().setFit(std::stof(std::string(addCygnetBuffer)));
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-4,'Data','GMData');";
-            std::string y = "openspace.iswa.addCygnet(-5,'Data','GMData');";
-            std::string z = "openspace.iswa.addCygnet(-6,'Data','GMData');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Data','Magnetosphere_Data');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Data','Magnetosphere_Data');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Data','Magnetosphere_Data');";
             OsEng.scriptEngine().queueScript(x+y+z);
+            OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Magnetosphere_Data');");
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Magnetosphere_Data');");
         }
     }
 
     if(_gmimage != gmimagevalue){
         if(_gmimage){
-            std::string x = "openspace.iswa.addCygnet(-4,'Texture','GMImage');";
-            std::string y = "openspace.iswa.addCygnet(-5,'Texture','GMImage');";
-            std::string z = "openspace.iswa.addCygnet(-6,'Texture','GMImage');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Texture','Magnetosphere_Image');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Texture','Magnetosphere_Image');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Texture','Magnetosphere_Image');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMImage');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Magnetosphere_Image');");
         }
     }
 
     if(_iondata != iondatavalue){
         if(_iondata){
             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10,'Data','Ionosphere');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Ionosphere');");
+
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }

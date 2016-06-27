@@ -23,7 +23,8 @@
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessor.h>
 #include <openspace/util/histogram.h>
-
+#include <modules/iswa/util/iswamanager.h>
+#include <fstream> 
 namespace {
 	const std::string _loggerCat = "DataProcessor";
     const int NumBins = 512;
@@ -37,6 +38,7 @@ DataProcessor::DataProcessor()
     ,_filterValues(glm::vec2(0.0))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
+    // _normValues = glm::vec2(IswaManager::ref().fit()); //for testing
 }
 
 DataProcessor::~DataProcessor(){};
@@ -118,6 +120,7 @@ void DataProcessor::initializeVectors(int numOptions){
     if(_fitValues.empty()) _fitValues  = std::vector<float>(numOptions, 0.0f);
     if(_histograms.empty())_histograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
     if(_unNormalizedhistograms.empty())_unNormalizedhistograms = std::vector<std::shared_ptr<Histogram>>(numOptions, nullptr);
+    if(_buildData.empty())_buildData = std::vector<std::vector<float>>(numOptions, std::vector<float>());
 }
 
 void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
@@ -138,27 +141,38 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 filterMid = histogram->highestBinValue(_useHistogram);
                 filterWidth = histogram->binWidth();
 
-                //at least one pixel value width. 1/512 above mid and 1/512 below mid => 1/256 filtered
-                filterWidth = std::max(filterWidth, 1.0f/512.0f);
+                //at least one pixel value width. 1/numBins above mid and 1/numBins below mid => 1/(numBins/2) filtered
+                // filterWidth = std::max(filterWidth, 1.0f/(float)NumBins);
 
                 filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
-                filterWidth = normalizeWithStandardScore(filterWidth, mean, standardDeviation, _normValues);
+                filterWidth = fabs(0.5-normalizeWithStandardScore(mean+filterWidth, mean, standardDeviation, _normValues));
+
             }else{
                 Histogram hist = _histograms[option]->equalize();
                 filterMid = hist.highestBinValue(true);
-                filterWidth = std::min(1.f / (float)NumBins, 1.0f/512.0f);
+                filterWidth = std::min(1.f / (float)NumBins, 1.0f/(float)NumBins);
             }
             _filterValues += glm::vec2(filterMid-filterWidth, filterMid+filterWidth);
 
         }
-        _filterValues /= numSelected;   
+        _filterValues /= numSelected;
     }
 }
 
 void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum){
     int numOptions = optionValues.size();
     int numValues;
-    float mean, value, variance, standardDeviation;
+    float mean, value, variance, standardDeviation, low, high;
+
+    // std::ofstream ofs[4];
+    // ofs[0].open ("norm-entropy_n", std::ofstream::out | std::ofstream::app);
+    // ofs[1].open ("norm-entropy_v", std::ofstream::out | std::ofstream::app);
+    // ofs[2].open ("norm-entropy_bz", std::ofstream::out | std::ofstream::app);
+
+    // ofs[0].open ("norm-entropy_eave", std::ofstream::out | std::ofstream::app);
+    // ofs[1].open ("norm-entropy_eflux", std::ofstream::out | std::ofstream::app);
+    // ofs[2].open ("norm-entropy_ep", std::ofstream::out | std::ofstream::app);
+    // ofs[3].open ("norm-entropy_jr", std::ofstream::out | std::ofstream::app);
 
     for(int i=0; i<numOptions; i++){
         std::vector<float> values = optionValues[i];
@@ -167,7 +181,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         //set min, max for the unnormalized histogram
         if(!_unNormalizedhistograms[i]){
              _unNormalizedhistograms[i] = std::make_shared<Histogram>(_min[i], _max[i], NumBins);
-        }else{
+        }else{   
             _unNormalizedhistograms[i]->changeRange(_min[i], _max[i]);
         }
 
@@ -179,63 +193,61 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
             value = values[j];
             variance +=  pow(value-mean, 2);
             _unNormalizedhistograms[i]->add(value, 1);
+            _buildData[i].push_back(value);
         }
+        _unNormalizedhistograms[i]->generateEqualizer();
 
         standardDeviation = sqrt(variance/ numValues);
-
-        float oldStandardDeviation = _standardDeviation[i];
-        float oldMean = (1.0f/_numValues[i])*_sum[i];
-
         _sum[i] += sum[i];
         _standardDeviation[i] = sqrt(pow(standardDeviation, 2) + pow(_standardDeviation[i], 2));
         _numValues[i] += numValues;
-        
-        _unNormalizedhistograms[i]->generateEqualizer();
+        mean = (1.0f/_numValues[i])*_sum[i];
 
-        //set the normalization fit value
+        const float* histData = _unNormalizedhistograms[i]->data();
+        float histMin = _unNormalizedhistograms[i]->minValue();
+        float histMax = _unNormalizedhistograms[i]->maxValue();
+        int numBins = _unNormalizedhistograms[i]->numBins();
+
+        // float fit = IswaManager::ref().fit();
+        // float fit = _unNormalizedhistograms[i]->entropy()/IswaManager::ref().fit();
+
+        // the E (entropy) method
         float fit = _unNormalizedhistograms[i]->entropy();
-        float oldFit = _fitValues[i];
         _fitValues[i] = fit;
 
-        mean = (1.0f/_numValues[i])*_sum[i];
-        float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
-        float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
 
-        if(!_histograms[i]){
-             _histograms[i] = std::make_shared<Histogram>(min, max, NumBins);
-        }
-        else{
-            //Renormalize all the values in the old histogram
-            const float* histData = _histograms[i]->data();
-            float histMin = _histograms[i]->minValue();
-            float histMax = _histograms[i]->maxValue();
-            int numBins = _histograms[i]->numBins();
-            
-            float unNormHistMin = unnormalizeWithStandardScore(histMin, oldMean, oldStandardDeviation, glm::vec2(oldFit));
-            float unNormHistMax = unnormalizeWithStandardScore(histMax, oldMean, oldStandardDeviation, glm::vec2(oldFit));
+        float max = normalizeWithStandardScore(histMax, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
+        float min = normalizeWithStandardScore(histMin, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
 
-            std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(
-                std::min(min, normalizeWithStandardScore(unNormHistMin, mean, _standardDeviation[i], glm::vec2(_fitValues[i]))), 
-                std::max(max, normalizeWithStandardScore(unNormHistMax, mean, _standardDeviation[i], glm::vec2(_fitValues[i]))),
-                numBins
-            );
+        std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(min, max, numBins);
 
-            for(int j=0; j<numBins; j++){
-                value =  histMin + j*(histMax-histMin)/(float)numBins;
-                value = unnormalizeWithStandardScore(value, oldMean, oldStandardDeviation, glm::vec2(oldFit, oldFit));
-                newHist->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], glm::vec2(_fitValues[i])), histData[j]);
-            }
-            _histograms[i] = newHist;
+        int length = _buildData[i].size();
+        for(int j=0; j<length; j++){
+            newHist->add(normalizeWithStandardScore(_buildData[i][j], mean, _standardDeviation[i], glm::vec2(_fitValues[i])), 1);
         }
 
-        //add the new values to the histogram
-        for(int j=0; j<numValues; j++){
-            value = values[j];
-            _histograms[i]->add(normalizeWithStandardScore(value, mean, _standardDeviation[i], glm::vec2(_fitValues[i])), 1);
-        }
+        _histograms[i] = newHist;
         _histograms[i]->generateEqualizer(true);
+
+        // _unNormalizedhistograms[i]->print();
+        // ofs[i] << _fitValues[i] << " " << _histograms[i]->entropy() << std::endl;
+        // std::cout << _fitValues[i] << " " << _histograms[i]->entropy() << std::endl;
+        
     }
 
+
+    // ofs[0].close();
+    // ofs[1].close();
+    // ofs[2].close();
+    // ofs[3].close();
+
+}
+
+void DataProcessor::clearBuildData(){
+    for(int i=0; _buildData.size(); i++){
+        _buildData[i].clear();
+    }
+    _unNormalizedhistograms.clear();
 }
 
 }

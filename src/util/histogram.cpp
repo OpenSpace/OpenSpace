@@ -112,7 +112,6 @@ int Histogram::numValues() const {
 bool Histogram::add(float value, float repeat) {
     if (value < _minValue || value > _maxValue) {
         // Out of range
-        std::cout << value << ", " << _minValue << ", " << _maxValue << std::endl; 
         return false;
     }
 
@@ -129,24 +128,21 @@ void Histogram::changeRange(float minValue, float maxValue){\
     if(minValue > _minValue && maxValue < _maxValue) return;
 
     float* oldData = _data;
-    float oldMin = _minValue;
-    float oldMax = _maxValue;
-
     float* newData = new float[_numBins]{0.0};
+
     for(int i=0; i<_numBins; i++){
-        float unNormalizedValue = i*(oldMax-oldMin)+oldMin;
-        float normalizedValue = (unNormalizedValue - _minValue) / (_maxValue - _minValue);      // [0.0, 1.0]
+        float unNormalizedValue = minValue + (i+0.5)*(_maxValue-_minValue)/(float)_numBins;
+        float normalizedValue = (unNormalizedValue - minValue) / (maxValue - minValue);      // [0.0, 1.0]
         int binIndex = std::min( (float)floor(normalizedValue * _numBins), _numBins - 1.0f ); // [0, _numBins - 1]
 
         newData[binIndex] = oldData[i];
     }
 
-    _data = newData;
-    delete oldData;
-
     _minValue = minValue;
     _maxValue = maxValue;
 
+    _data = newData;
+    delete oldData;
 }
 
 bool Histogram::add(const Histogram& histogram) {
@@ -322,11 +318,11 @@ void Histogram::print() const {
     std::cout << "number of bins: " << _numBins << std::endl
               << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
-        float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
-        float high = low + (_maxValue - _minValue) / float(_numBins);
-        std::cout << i << " [" << low << ", " << high << "]"
-                  << "   " << _data[i] << std::endl;
-        // std::cout << _data[i]/(float)_numValues << ", ";
+        // float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
+        // float high = low + (_maxValue - _minValue) / float(_numBins);
+        // std::cout << i << " [" << low << ", " << high << "]"
+        //           << "   " << _data[i] << std::endl;
+        std::cout << _data[i]/(float)_numValues << ", ";
     }
     std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }

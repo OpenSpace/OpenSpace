@@ -54,6 +54,7 @@ namespace {
 namespace openspace{
 
 IswaManager::IswaManager()
+    :_fit(1.0)
 {
     _month["JAN"] = "01";
     _month["FEB"] = "02";
@@ -162,6 +163,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "z");
     createKameleonPlane(_cdfInformation[groupName][pos], "y");
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
+    clearGroupBuildData(groupName);
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const{
@@ -659,6 +661,12 @@ void IswaManager::setBaseUrl(std::string bUrl){
     baseUrl = bUrl;
 }
 
+void IswaManager::clearGroupBuildData(std::string name){
+    if(_groups.find(name) != _groups.end()){
+        _groups[name]->dataProcessor()->clearBuildData();
+    }
+}
+
 scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
@@ -724,6 +732,13 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_setBaseUrl,
                 "string",
                 "sets the base url",
+                true
+            },
+            {
+                "clearGroupBuildData",
+                &luascriptfunctions::iswa_clearGroupBuildData,
+                "string",
+                "Clear build data for a group",
                 true
             }
         }

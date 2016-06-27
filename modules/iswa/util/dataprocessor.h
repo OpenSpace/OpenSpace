@@ -79,12 +79,12 @@ public:
     glm::vec2 filterValues();
 
     void clear();
+    void clearBuildData();
 protected:
     float processDataPoint(float value, int option);
     void initializeVectors(int numOptions);
     void calculateFilterValues(std::vector<int> selectedOptions);
     void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
-
 
     std::vector<float> _min; 
     std::vector<float> _max;
@@ -109,7 +109,9 @@ private:
 
     std::vector<std::shared_ptr<Histogram>> _histograms;
 
+    //data to bild a histogram for good auto contrast 
     std::vector<std::shared_ptr<Histogram>> _unNormalizedhistograms;
+    std::vector<std::vector<float>> _buildData;
 };
 
 } // namespace openspace
