@@ -37,7 +37,7 @@ namespace openspace {
     using namespace glm;
 
     enum class AABBSpatialRelation {
-        NoRelation,
+        None,
         Intersecting,
         Contained,
         Containing

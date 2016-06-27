@@ -73,7 +73,7 @@ namespace openspace {
         _owner = newOwner;
     }
 
-    Chunk::State Chunk::update(const RenderData& data) {
+    Chunk::Status Chunk::update(const RenderData& data) {
         Camera* savedCamera = _owner->getSavedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
@@ -82,14 +82,14 @@ namespace openspace {
         _isVisible = true;
         if (_owner->testIfCullable(*this, myRenderData)) {
             _isVisible = false;
-            return State::WANT_MERGE;
+            return Status::WANT_MERGE;
         }
 
         int desiredLevel = _owner->getDesiredLevel(*this, myRenderData);
 
-        if (desiredLevel < _index.level) return State::WANT_MERGE;
-        else if (_index.level < desiredLevel) return State::WANT_SPLIT;
-        else return State::DO_NOTHING;
+        if (desiredLevel < _index.level) return Status::WANT_MERGE;
+        else if (_index.level < desiredLevel) return Status::WANT_SPLIT;
+        else return Status::DO_NOTHING;
     }
 
     Chunk::BoundingHeights Chunk::getBoundingHeights() const {
@@ -104,7 +104,7 @@ namespace openspace {
         auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
         if (heightMapProviders.size() > 0) {
             TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
-            if (tileAndTransform.tile.status == Tile::State::OK) {
+            if (tileAndTransform.tile.status == Tile::Status::OK) {
                 std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
                 if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
                     boundingHeights.max = preprocessData->maxValues[0];

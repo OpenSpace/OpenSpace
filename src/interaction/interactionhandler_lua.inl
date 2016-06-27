@@ -134,7 +134,11 @@ int setInteractionMode(lua_State* L) {
         OsEng.interactionHandler().setInteractionModeToOrbital();
     }
     else if (interactionModeName == "GlobeBrowsingInteractionMode") {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         OsEng.interactionHandler().setInteractionModeToGlobeBrowsing();
+#else
+        return luaL_error(L, "OpenSpace compiled without support for GlobeBrowsing");
+#endif
     }
     else { // Default
         return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");

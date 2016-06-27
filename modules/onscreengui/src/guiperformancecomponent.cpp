@@ -32,7 +32,7 @@
 #include <ghoul/misc/sharedmemory.h>
 
 #include <imgui.h>
-#include <cppformat/format.h>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <numeric>
