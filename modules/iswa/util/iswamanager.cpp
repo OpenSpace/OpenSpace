@@ -31,7 +31,7 @@
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
 #include <modules/iswa/ext/json/json.hpp>
- 
+
 #include <fstream>
 #include <memory> // for shared_pointer
 
@@ -293,6 +293,7 @@ void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
         return;
     }
 
+    // check if resourceType is valid
     int resourceType;
     if(!getResourceType(metadata->resourceType, resourceType )){
         LERROR("\""+ metadata->resourceType + "\" is not a valid resource type");
@@ -330,7 +331,7 @@ void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
             metadata->group="";
         }
     }
-
+    metadata->name = metadata->group + "_" + metadata->name;
     // create the luaTable for script
     std::string luaTable = _luaConverter.toLuaTable(metadata);
 

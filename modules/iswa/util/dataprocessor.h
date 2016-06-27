@@ -33,7 +33,6 @@
 
 namespace openspace{
 class DataProcessor{
-    friend class IswaBaseGroup;
 public:
     DataProcessor();
     ~DataProcessor();
