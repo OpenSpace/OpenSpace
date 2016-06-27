@@ -44,7 +44,7 @@
 #include <math.h>
 
 #include <ctime>
-
+#include <chrono>
 namespace {
     const std::string _loggerCat = "ChunkLodGlobe";
 }
@@ -155,8 +155,9 @@ namespace openspace {
 
         stats.startNewRecord();
 
-
+        
         int j2000s = Time::now().unsyncedJ2000Seconds();
+        /*
         int lastJ2000s = stats.i.previous("time");
         if (j2000s == lastJ2000s) {
             stats.disable();
@@ -164,8 +165,11 @@ namespace openspace {
         else {
             stats.enable();
         }
+        */
 
-        stats.i["time"] = j2000s;
+        auto duration = std::chrono::system_clock::now().time_since_epoch();
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        stats.i["time"] = millis;
 
         minDistToCamera = INFINITY;
 
