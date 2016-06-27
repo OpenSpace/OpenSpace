@@ -224,6 +224,7 @@ vec4 calculateGrayScaleOverlay(
 
 	// HSL blending
 	vec3 hslCurrent = rgb2hsl(currentColor.rgb);
+	hslCurrent.y = hslCurrent.z > 0.7 ? 0 : hslCurrent.y;
 	vec3 hslNew = vec3(hslCurrent.x, hslCurrent.y, colorGrayScale.r);
 	vec3 rgbNew = hsl2rgb(hslNew);
 */

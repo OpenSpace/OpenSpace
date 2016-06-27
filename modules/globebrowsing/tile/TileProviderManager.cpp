@@ -55,7 +55,8 @@ namespace openspace {
 
             if (i == LayeredTextures::ColorTextures ||
                 i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks) {
+                i == LayeredTextures::WaterMasks    ||
+                i == LayeredTextures::GrayScaleOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
             }
             else if (i == LayeredTextures::Overlays) {
