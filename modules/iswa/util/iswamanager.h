@@ -26,8 +26,7 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/designpattern/event.h>
-
-//#include <memory>
+#include <modules/iswa/util/luacygnetconverter.h>
 #include <map>
 #include <future>
 #include <ghoul/glm.h>
@@ -35,7 +34,7 @@
 #include <ccmc/Kameleon.h>
 #endif
 #include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/ext/json/json.hpp>
+//#include <modules/iswa/ext/json/json.hpp>
 #include <openspace/util/time.h>
 
 
@@ -43,14 +42,22 @@ namespace openspace {
 class IswaBaseGroup;
 class IswaCygnet; 
 
+/**
+ * The info needed to create a kameleonplane
+ */
 struct CdfInfo {
     std::string name;
     std::string path;
     std::string group;
     std::string date;
-    std::string fieldlineSeedsIndexFile;
+    std::string fieldlineSeedsIndexFile; // Path to a file that lists all seedpoints files for this cdf 
 };
 
+/**
+ * CygnetInfo is the info we get from each
+ * cygnet we list in the GUI. This is requested
+ * from iSWAs CygnetHealthService.
+ */
 struct CygnetInfo {
     std::string name;
     std::string description;
@@ -58,23 +65,26 @@ struct CygnetInfo {
     bool selected;
 };
 
+/**
+ * Metadata provided by OpenSpace and iSWA that is
+ * needed to create a cygnet.
+ */
 struct MetadataFuture {
     int id;
     std::string group;
     std::string name;
-    std::string json;
-    int type;
-    int geom;
-    bool isFinished;
+    std::string resourceType;
+    std::string cygnetType;
+    std::string json; // Metadata from iSWA
 };
 
-
 class IswaManager : public ghoul::Singleton<IswaManager> { 
-
 public:
-    enum CygnetType {Texture, Data, Kameleon, NoType};
-    enum CygnetGeometry {Plane, Sphere};
 
+
+    enum CygnetType {TexturePlane, DataPlane, DataSphere, KameleonPlane, NoCygnetType};
+    enum ResourceType {Texture, Json, Text, Cdf, NoResourceType};
+    enum GeometryType {Plane, Sphere};
     IswaManager();
     ~IswaManager();
 
@@ -96,30 +106,28 @@ public:
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
-    void registerGroup(std::string groupName, std::string type);
     void unregisterGroup(std::string groupName);
     void clearGroupBuildData(std::string name);
 
+    bool getResourceType(const std::string& type, int& enumType);
+    bool getCygnetType(const std::string& type, int& enumType);
+    
     //for testing
     void setFit(float fit){_fit = fit;}
     float fit(){return _fit;}
-
-    
 private:
-    std::shared_ptr<MetadataFuture> downloadMetadata(int id);
-    std::string jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> data) const;
-    std::string jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> data) const;
-    std::string parseKWToLuaTable(CdfInfo info, std::string cut="z") const;
     
+    void registerGroup(std::string groupName, int cygnetType, int resourceType);
     void createScreenSpace(int id);
-    void createPlane(std::shared_ptr<MetadataFuture> data);
-    void createSphere(std::shared_ptr<MetadataFuture> data);
+    void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
+
     
     std::map<std::string, std::string> _month;
-    std::map<int, std::string> _type;
-    std::map<int, std::string> _geom;
+    std::map<int, std::string> _resourceType;
+    std::map<int, std::string> _geometryType;
+    std::map<int, std::string> _cygnetType;
 
     std::shared_ptr<ccmc::Kameleon> _kameleon;
     std::set<std::string> _kameleonFrames;
@@ -127,6 +135,8 @@ private:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>> _groups;
     std::map<int, std::shared_ptr<CygnetInfo>> _cygnetInformation;
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
+
+    LuaCygnetConverter _luaConverter;
 
     float _fit;
 };

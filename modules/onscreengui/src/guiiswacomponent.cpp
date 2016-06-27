@@ -89,9 +89,9 @@ void GuiIswaComponent::render() {
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-4,'Data','Magnetosphere_Data');";
-            std::string y = "openspace.iswa.addCygnet(-5,'Data','Magnetosphere_Data');";
-            std::string z = "openspace.iswa.addCygnet(-6,'Data','Magnetosphere_Data');";
+            std::string x = "openspace.iswa.addCygnet(-4,'Text','Magnetosphere_Data');";
+            std::string y = "openspace.iswa.addCygnet(-5,'Text','Magnetosphere_Data');";
+            std::string z = "openspace.iswa.addCygnet(-6,'Text','Magnetosphere_Data');";
             OsEng.scriptEngine().queueScript(x+y+z);
             OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Magnetosphere_Data');");
         }else{
@@ -112,9 +112,8 @@ void GuiIswaComponent::render() {
 
     if(_iondata != iondatavalue){
         if(_iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10,'Data','Ionosphere');");
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10,'Json','Ionosphere');");
             OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Ionosphere');");
-
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }
@@ -126,25 +125,30 @@ void GuiIswaComponent::render() {
 
         for(auto group : cdfInfo){
             std::string groupName = group.first;
+
+            //if group does not exist in _cdfOptionsMap yet, create it and set selected to -1
             if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
                 _cdfOptionsMap[groupName] = -1;
             }
 
             if(ImGui::CollapsingHeader(groupName.c_str())){
+                // old selected index
                 int cdfOptionValue = _cdfOptionsMap[groupName];
                 auto cdfs = group.second;
 
+                // get new selected index from radio button
                 for(int i=0; i<cdfs.size(); i++){
                     ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
                 }
 
+                //if different, add kameleon planes
                 int cdfOption = _cdfOptionsMap[groupName];
                 if(cdfOptionValue != cdfOption){
-                   if(cdfOptionValue >= 0){
-                        groupName = cdfs[cdfOptionValue].group;
-                        // std::cout << groupName << std::endl;
-                        // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
-                    }
+                   // if(cdfOptionValue >= 0){
+                   //      groupName = cdfs[cdfOptionValue].group;
+                   //      // std::cout << groupName << std::endl;
+                   //      // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
+                   //  }
 
                     std::string path  = cdfs[cdfOption].path;
                     std::string date  = cdfs[cdfOption].date;
