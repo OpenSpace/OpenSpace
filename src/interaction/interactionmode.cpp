@@ -314,6 +314,9 @@ void OrbitalInteractionMode::initialize(const Camera& camera) {
 
 void OrbitalInteractionMode::stop() {
     _globalRotationMouseState.velocity.set(glm::dvec2(0.0),1.0);
+    _localRotationMouseState.velocity.set(glm::dvec2(0.0),1.0);
+    _truckMovementMouseState.velocity.set(glm::dvec2(0.0),1.0);
+    _rollMouseState.velocity.set(glm::dvec2(0.0),1.0);
 }
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
