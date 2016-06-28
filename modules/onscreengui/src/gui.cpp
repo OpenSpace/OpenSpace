@@ -25,9 +25,7 @@
 #include <modules/onscreengui/include/gui.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/properties/property.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/keys.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -45,6 +43,7 @@ namespace {
 
 const std::string _loggerCat = "GUI";
 const std::string configurationFile = "imgui.ini";
+const std::string GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;
@@ -166,7 +165,9 @@ namespace gui {
 
 GUI::GUI() 
     : GuiComponent()
-    , _showHelp(false)
+    , _property("Properties")
+    , _screenSpaceProperty("ScreenSpace Properties")
+    , _globalProperty("Global")
 {}
 
 GUI::~GUI() {
@@ -208,10 +209,8 @@ void GUI::initialize() {
     io.KeyMap[ImGuiKey_Z] = static_cast<int>(Key::Z);
 
     io.RenderDrawListsFn = RenderDrawLists;
-    //io.SetClipboardTextFn = SetClipboardTextFn_DefaultImpl; // @TODO implement? ---abock
-    //io.GetClipboardTextFn = GetClipboardTextFn_DefaultImpl; // @TODO implement? ---abock
     io.Fonts->AddFontFromFileTTF(
-        absPath("${FONTS}/Roboto/Roboto-Regular.ttf").c_str(),
+        absPath(GuiFont).c_str(),
         16.f
     );
 
@@ -250,10 +249,16 @@ void GUI::initialize() {
     _performance.initialize();
     _help.initialize();
     _iswa.initialize();
-
 }
 
 void GUI::deinitialize() {
+    _iswa.deinitialize();
+    _help.deinitialize();
+    _performance.deinitialize();
+    _globalProperty.deinitialize();
+    _screenSpaceProperty.deinitialize();
+    _property.deinitialize();
+
     delete iniFileBuffer;
 }
 
@@ -335,12 +340,12 @@ void GUI::deinitializeGL() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
 
-    _property.deinitializeGL();
-    _screenSpaceProperty.deinitializeGL();
-    _globalProperty.deinitializeGL();
-    _performance.deinitializeGL();
-    _help.deinitializeGL();
     _iswa.deinitializeGL();
+    _help.deinitializeGL();
+    _performance.deinitializeGL();
+    _globalProperty.deinitializeGL();
+    _screenSpaceProperty.deinitializeGL();
+    _property.deinitializeGL();
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,

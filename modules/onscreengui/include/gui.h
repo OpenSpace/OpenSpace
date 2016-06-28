@@ -72,8 +72,6 @@ public:
     GuiPropertyComponent _globalProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
-
-    bool _showHelp;
 };
 
 } // namespace gui

@@ -25,7 +25,6 @@
 #ifndef __GUIISWACOMPONENT_H__
 #define __GUIISWACOMPONENT_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guipropertycomponent.h>
 
 #include <map>
@@ -52,7 +51,6 @@ private:
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };
-
 
 } // namespace gui
 } // namespace openspace

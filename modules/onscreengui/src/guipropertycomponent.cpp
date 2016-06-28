@@ -48,6 +48,10 @@ namespace {
 namespace openspace {
 namespace gui {
 
+GuiPropertyComponent::GuiPropertyComponent(std::string name) 
+    : _name(std::move(name))
+{}
+
 void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
 }
@@ -61,7 +65,7 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
 //}
 
 void GuiPropertyComponent::render() {
-    ImGui::Begin("Properties", &_isEnabled, size, 0.5f);
+    ImGui::Begin(_name.c_str(), &_isEnabled, size, 0.5f);
 
     ImGui::Spacing();
 

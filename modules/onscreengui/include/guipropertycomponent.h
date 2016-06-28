@@ -43,6 +43,8 @@ class GuiPropertyComponent : public GuiComponent {
 public:
     using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
 
+    GuiPropertyComponent(std::string name);
+
     // This is the function that evaluates to the list of Propertyowners that this
     // component should render
     void setSource(SourceFunction func);
@@ -52,6 +54,7 @@ public:
 protected:
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
+    std::string _name;
     SourceFunction _function;
 };
 
