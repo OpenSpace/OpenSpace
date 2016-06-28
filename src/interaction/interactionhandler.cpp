@@ -35,7 +35,6 @@
 #include <ghoul/misc/interpolator.h>
 
 #include <ghoul/filesystem/filesystem.h>
- 
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -771,6 +770,7 @@ void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
         _camera->setRotation(r);
         _currentInteractionMode->initialize(*_camera);
         _cameraUpdatedFromScript = true;
+        _currentInteractionMode->stop();
     }
 }
 

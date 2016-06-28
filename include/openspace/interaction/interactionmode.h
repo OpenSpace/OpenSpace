@@ -99,7 +99,7 @@ public:
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime) = 0;
     virtual void initialize(const Camera& camera) = 0;
-
+    virtual void stop() = 0;
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -164,6 +164,7 @@ public:
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
     virtual void initialize(const Camera& camera);
+    void stop(){_globalRotationMouseState.velocity.set(glm::dvec2(0.0),1.0);}
 
 protected:
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);

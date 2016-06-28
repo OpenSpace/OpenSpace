@@ -260,7 +260,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         }
         { // Do global rotation
             dvec2 smoothMouseVelocity = _globalRotationMouseState.velocity.get();
-            dvec3 eulerAngles(smoothMouseVelocity.y, smoothMouseVelocity.x, 0);
+            dvec3 eulerAngles(-smoothMouseVelocity.y, -smoothMouseVelocity.x, 0);
             dquat rotationDiffCamSpace = dquat(eulerAngles);
 
             dquat newRotationCamspace = _globalCameraRotation * rotationDiffCamSpace;
