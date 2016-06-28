@@ -25,22 +25,26 @@
 #ifndef __RENDERPROPERTIES_H__
 #define __RENDERPROPERTIES_H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/properties/property.h>
+#include <string>
 
+namespace openspace {
 
-using namespace openspace::properties;
+namespace properties {
+    class Property;
+}
 
 void executeScript(const std::string& id, const std::string& value);
-void renderBoolProperty(Property* prop, const std::string& ownerName);
-void renderOptionProperty(Property* prop, const std::string& ownerName);
-void renderSelectionProperty(Property* prop, const std::string& ownerName);
-void renderStringProperty(Property* prop, const std::string& ownerName);
-void renderIntProperty(Property* prop, const std::string& ownerName);
-void renderFloatProperty(Property* prop, const std::string& ownerName);
-void renderVec2Property(Property* prop, const std::string& ownerName);
-void renderVec3Property(Property* prop, const std::string& ownerName);
-void renderVec4Property(Property* prop, const std::string& ownerName);
-void renderTriggerProperty(Property* prop, const std::string& ownerName);
+void renderBoolProperty(properties::Property* prop, const std::string& ownerName);
+void renderOptionProperty(properties::Property* prop, const std::string& ownerName);
+void renderSelectionProperty(properties::Property* prop, const std::string& ownerName);
+void renderStringProperty(properties::Property* prop, const std::string& ownerName);
+void renderIntProperty(properties::Property* prop, const std::string& ownerName);
+void renderFloatProperty(properties::Property* prop, const std::string& ownerName);
+void renderVec2Property(properties::Property* prop, const std::string& ownerName);
+void renderVec3Property(properties::Property* prop, const std::string& ownerName);
+void renderVec4Property(properties::Property* prop, const std::string& ownerName);
+void renderTriggerProperty(properties::Property* prop, const std::string& ownerName);
+
+} // namespace
 
 #endif __RENDERPROPERTIES_H__

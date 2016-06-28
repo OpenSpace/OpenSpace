@@ -33,7 +33,6 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
-#include <modules/onscreengui/include/gui.h>
 
 namespace {
     const std::string _loggerCat = "IswaDataGroup";
@@ -42,15 +41,15 @@ namespace {
 
 namespace openspace{
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
-	:IswaDataGroup(name, type)
+    :IswaDataGroup(name, type)
     ,_resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
-	,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
+    ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
     ,_fieldlineIndexFile("")
     ,_kameleonPath("")
 {
     addProperty(_resolution);
     addProperty(_fieldlines);
-	registerProperties();
+    registerProperties();
 }
 
 IswaKameleonGroup::~IswaKameleonGroup(){}
@@ -61,7 +60,7 @@ void IswaKameleonGroup::clearGroup(){
 }
 
 std::vector<int> IswaKameleonGroup::fieldlineValue(){
-	return _fieldlines.value();
+    return _fieldlines.value();
 }
 
 void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath){
@@ -79,8 +78,8 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::st
 
 
 void IswaKameleonGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_resolution);
-    OsEng.gui()._iswa.registerProperty(&_fieldlines);
+    //OsEng.gui()._iswa.registerProperty(&_resolution);
+    //OsEng.gui()._iswa.registerProperty(&_fieldlines);
     
     _resolution.onChange([this]{
         LDEBUG("Group " + name() + " published resolutionChanged");
@@ -89,7 +88,7 @@ void IswaKameleonGroup::registerProperties(){
 
     _fieldlines.onChange([this]{
         updateFieldlineSeeds();
-  	});
+    });
 }
 
 void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){

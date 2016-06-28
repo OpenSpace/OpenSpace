@@ -24,8 +24,6 @@
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
-#include <modules/onscreengui/include/gui.h>
-
 namespace {
     const std::string _loggerCat = "DataPlane";
 }
@@ -49,13 +47,6 @@ bool DataPlane::initialize(){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_useLog);
-        OsEng.gui()._iswa.registerProperty(&_useHistogram);
-        OsEng.gui()._iswa.registerProperty(&_autoFilter);
-        OsEng.gui()._iswa.registerProperty(&_normValues);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iswa.registerProperty(&_dataOptions);
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
@@ -64,10 +55,10 @@ bool DataPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
-                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+                _backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
-                OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+                _backgroundValues.setVisible(true);
             }
         });
     }

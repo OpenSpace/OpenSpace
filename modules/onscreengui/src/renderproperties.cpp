@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/engine/openspaceengine.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
@@ -38,187 +40,189 @@
 #include "imgui.h"
 
 
-using namespace openspace::properties;
+namespace openspace {
 
-    void executeScript(const std::string& id, const std::string& value) {
-        std::string script =
-            "openspace.setPropertyValue('" + id + "', " + value + ");";
-        OsEng.scriptEngine().queueScript(script);
+using namespace properties;
+
+void executeScript(const std::string& id, const std::string& value) {
+    std::string script =
+        "openspace.setPropertyValue('" + id + "', " + value + ");";
+    OsEng.scriptEngine().queueScript(script);
+}
+
+void renderBoolProperty(Property* prop, const std::string& ownerName) {
+    BoolProperty* p = static_cast<BoolProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    BoolProperty::ValueType value = *p;
+    ImGui::Checkbox(name.c_str(), &value);
+
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
+    ImGui::PopID();
+}
+
+void renderOptionProperty(Property* prop, const std::string& ownerName) {
+    OptionProperty* p = static_cast<OptionProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    int value = *p;
+    std::vector<OptionProperty::Option> options = p->options();
+    for (const OptionProperty::Option& o : options) {
+        ImGui::RadioButton(name.c_str(), &value, o.value);
+        ImGui::SameLine();
+        ImGui::Text(o.description.c_str());
     }
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    ImGui::PopID();
+}
 
-    void renderBoolProperty(Property* prop, const std::string& ownerName) {
-        BoolProperty* p = static_cast<BoolProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+    SelectionProperty* p = static_cast<SelectionProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-        BoolProperty::ValueType value = *p;
-        ImGui::Checkbox(name.c_str(), &value);
+    if (ImGui::CollapsingHeader(name.c_str())) {
+        const std::vector<SelectionProperty::Option>& options = p->options();
+        std::vector<int> newSelectedIndices;
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(), value ? "true": "false");
-        ImGui::PopID();
-    }
+        std::vector<int> selectedIndices = p->value();
 
-    void renderOptionProperty(Property* prop, const std::string& ownerName) {
-        OptionProperty* p = static_cast<OptionProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+        for (int i = 0; i < options.size(); ++i) {
+            std::string description = options[i].description;
+            bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+            ImGui::Checkbox(description.c_str(), &selected);
 
-        int value = *p;
-        std::vector<OptionProperty::Option> options = p->options();
-        for (const OptionProperty::Option& o : options) {
-            ImGui::RadioButton(name.c_str(), &value, o.value);
-            ImGui::SameLine();
-            ImGui::Text(o.description.c_str());
+            if (selected)
+                newSelectedIndices.push_back(i);
         }
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
-        ImGui::PopID();
-    }
 
-    void renderSelectionProperty(Property* prop, const std::string& ownerName) {
-        SelectionProperty* p = static_cast<SelectionProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
-
-        if (ImGui::CollapsingHeader(name.c_str())) {
-            const std::vector<SelectionProperty::Option>& options = p->options();
-            std::vector<int> newSelectedIndices;
-
-            std::vector<int> selectedIndices = p->value();
-
-            for (int i = 0; i < options.size(); ++i) {
-                std::string description = options[i].description;
-                bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
-                ImGui::Checkbox(description.c_str(), &selected);
-
-                if (selected)
-                    newSelectedIndices.push_back(i);
-            }
-
-            if (newSelectedIndices != p->value()) {
-                std::string parameters = "{";
-                for (int i : newSelectedIndices)
-                    parameters += std::to_string(i) + ",";
-                parameters += "}";
-                executeScript(p->fullyQualifiedIdentifier(), parameters);
-            }
+        if (newSelectedIndices != p->value()) {
+            std::string parameters = "{";
+            for (int i : newSelectedIndices)
+                parameters += std::to_string(i) + ",";
+            parameters += "}";
+            executeScript(p->fullyQualifiedIdentifier(), parameters);
         }
-        ImGui::PopID();
     }
+    ImGui::PopID();
+}
 
-    void renderStringProperty(Property* prop, const std::string& ownerName) {
-        StringProperty* p = static_cast<StringProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+void renderStringProperty(Property* prop, const std::string& ownerName) {
+    StringProperty* p = static_cast<StringProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-        static const int bufferSize = 256;
-        static char buffer[bufferSize];
+    static const int bufferSize = 256;
+    static char buffer[bufferSize];
 #ifdef _MSC_VER
-        strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
+    strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
 #else
-        strcpy(buffer, p->value().c_str());
+    strcpy(buffer, p->value().c_str());
 #endif
-        ImGui::InputText(name.c_str(), buffer, bufferSize);
-        std::string newValue(buffer);
+    ImGui::InputText(name.c_str(), buffer, bufferSize);
+    std::string newValue(buffer);
 
-        if (newValue != p->value() && FileSys.fileExists(newValue))
-            executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
+    if (newValue != p->value() && FileSys.fileExists(newValue))
+        executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
 
-        ImGui::PopID();
-    }
+    ImGui::PopID();
+}
 
-    void renderIntProperty(Property* prop, const std::string& ownerName) {
-        IntProperty* p = static_cast<IntProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+void renderIntProperty(Property* prop, const std::string& ownerName) {
+    IntProperty* p = static_cast<IntProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-        IntProperty::ValueType value = *p;
-        ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
+    IntProperty::ValueType value = *p;
+    ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
-        
-        ImGui::PopID();
-    }
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
 
-    void renderFloatProperty(Property* prop, const std::string& ownerName) {
-        FloatProperty* p = static_cast<FloatProperty*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::PopID();
+}
 
-        FloatProperty::ValueType value = *p;
-        ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
+void renderFloatProperty(Property* prop, const std::string& ownerName) {
+    FloatProperty* p = static_cast<FloatProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
-        
-        ImGui::PopID();
-    }
+    FloatProperty::ValueType value = *p;
+    ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
 
-    void renderVec2Property(Property* prop, const std::string& ownerName) {
-        Vec2Property* p = static_cast<Vec2Property*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
 
-        Vec2Property::ValueType value = *p;
+    ImGui::PopID();
+}
 
-        ImGui::SliderFloat2(name.c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
+void renderVec2Property(Property* prop, const std::string& ownerName) {
+    Vec2Property* p = static_cast<Vec2Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
-        
-        ImGui::PopID();
-    }
+    Vec2Property::ValueType value = *p;
 
-    void renderVec3Property(Property* prop, const std::string& ownerName) {
-        Vec3Property* p = static_cast<Vec3Property*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+    ImGui::SliderFloat2(name.c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
 
-        Vec3Property::ValueType value = *p;
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(),
+                      "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
 
-        ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+    ImGui::PopID();
+}
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                  std::to_string(value.y) + "," +
-                  std::to_string(value.z) + "}");
-        
-        ImGui::PopID();
-    }
+void renderVec3Property(Property* prop, const std::string& ownerName) {
+    Vec3Property* p = static_cast<Vec3Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-    void renderVec4Property(Property* prop, const std::string& ownerName) {
-        Vec4Property* p = static_cast<Vec4Property*>(prop);
-        std::string name = p->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+    Vec3Property::ValueType value = *p;
 
-        Vec4Property::ValueType value = *p;
+    ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
 
-        ImGui::SliderFloat4(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(),
+                      "{" + std::to_string(value.x) + "," +
+                      std::to_string(value.y) + "," +
+                      std::to_string(value.z) + "}");
 
-        if (value != p->value())
-            executeScript(p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," +
-                  std::to_string(value.y) + "," +
-                  std::to_string(value.z) + "," +
-                  std::to_string(value.w) + "}");
+    ImGui::PopID();
+}
 
-        ImGui::PopID();
-    }
+void renderVec4Property(Property* prop, const std::string& ownerName) {
+    Vec4Property* p = static_cast<Vec4Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
 
-    void renderTriggerProperty(Property* prop, const std::string& ownerName) {
-        std::string name = prop->guiName();
-        ImGui::PushID((ownerName + "." + name).c_str());
+    Vec4Property::ValueType value = *p;
 
-        bool pressed = ImGui::Button(name.c_str());
-        if (pressed)
-            executeScript(prop->fullyQualifiedIdentifier(), "nil");
-        
-        ImGui::PopID();
-    }
+    ImGui::SliderFloat4(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+
+    if (value != p->value())
+        executeScript(p->fullyQualifiedIdentifier(),
+                      "{" + std::to_string(value.x) + "," +
+                      std::to_string(value.y) + "," +
+                      std::to_string(value.z) + "," +
+                      std::to_string(value.w) + "}");
+
+    ImGui::PopID();
+}
+
+void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+    std::string name = prop->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    bool pressed = ImGui::Button(name.c_str());
+    if (pressed)
+        executeScript(prop->fullyQualifiedIdentifier(), "nil");
+
+    ImGui::PopID();
+}
 
 //void renderBoolProperty(Property* prop, const std::string& ownerName) {
 //    BoolProperty* p = static_cast<BoolProperty*>(prop);
@@ -311,3 +315,5 @@ using namespace openspace::properties;
 //    if (pressed)
 //        prop->set(0);
 //}
+
+} // namespace openspace

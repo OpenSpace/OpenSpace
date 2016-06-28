@@ -103,34 +103,6 @@ void Scene::update(const UpdateData& data) {
         }
     }
 
-    //if (!ONCE) {
-    //    ghoul::Dictionary d = {
-    //        {"Name", std::string("Earth_Pluto")},
-    //        {"Parent", std::string("PlutoBarycenter")},
-    //        {"Renderable", ghoul::Dictionary{
-    //            {"Type", std::string("RenderablePlanet")},
-    //            {"Frame", std::string("IAU_EARTH")},
-    //            {"Body", std::string("EARTH")},
-    //            {"Geometry", ghoul::Dictionary{
-    //                {"Type", std::string("SimpleSphere")},
-    //                {"Radius", glm::vec2(6.3f, 6.0f)},
-    //                {"Segments", 100.0}
-    //            }},
-    //            {"Textures", ghoul::Dictionary{
-    //                {"Type", std::string("simple")},
-    //                { "Color", std::string("C:/alebo68/OpenSpace/data/scene/earth/textures/earth_bluemarble.jpg") },
-    //                { "Night", std::string("C:/alebo68/OpenSpace/data/scene/earth/textures/earth_night.jpg")}
-    //            }}
-    //        }}
-    //    };
-
-    //    SceneGraphNode* node = SceneGraphNode::createFromDictionary(d);
-    //    node->setParent(sceneGraphNode(d.value<std::string>("Parent")));
-    //    node->initialize();
-    //    _graph.addSceneGraphNode(node);
-    //    ONCE = true;
-    //}
-    
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
             node->update(data);
@@ -357,14 +329,6 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // explicitly update and sync the camera
     c->preSynchronization();
     c->postSynchronizationPreDraw();
-
-
-    for (SceneGraphNode* node : _graph.nodes()) {
-        std::vector<properties::Property*> properties = node->propertiesRecursive();
-        for (properties::Property* p : properties) {
-            OsEng.gui()._property.registerProperty(p);
-        }
-    }
 
     // If a PropertyDocumentationFile was specified, generate it now
     const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);

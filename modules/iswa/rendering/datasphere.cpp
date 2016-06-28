@@ -26,8 +26,6 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 
-#include <modules/onscreengui/include/gui.h>
-
 #ifdef WIN32
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -50,8 +48,6 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     _programName = "DataSphereProgram";
     _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
-
-
 }
 
 DataSphere::~DataSphere(){}
@@ -66,14 +62,6 @@ bool DataSphere::initialize(){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_useLog);
-        OsEng.gui()._iswa.registerProperty(&_useHistogram);
-        OsEng.gui()._iswa.registerProperty(&_autoFilter);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-        OsEng.gui()._iswa.registerProperty(&_normValues);
-        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iswa.registerProperty(&_dataOptions);
-
         _dataProcessor = std::make_shared<DataProcessorJson>();
         //If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this](){
@@ -81,9 +69,10 @@ bool DataSphere::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
+                _backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
-                OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+                _backgroundValues.setVisible(true);
             }
         });
     }

@@ -27,70 +27,32 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <string>
+#include <functional>
 #include <vector>
-#include <set>
 
 namespace openspace {
 
 namespace properties {
     class Property;
+    class PropertyOwner;
 }
 
 namespace gui {
 
 class GuiPropertyComponent : public GuiComponent {
 public:
-    void registerProperty(properties::Property* prop, properties::Property* sibling = nullptr);
-    void unregisterProperty(properties::Property* prop);
-    void unregisterProperties(std::string owner);
+    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
+
+    // This is the function that evaluates to the list of Propertyowners that this
+    // component should render
+    void setSource(SourceFunction func);
+
     void render();
 
 protected:
-    enum class PropertyType {
-        BoolProperty = 0,
-        IntProperty,
-        FloatProperty,
-        Vec2Property,
-        Vec3Property,
-        StringProperty,
-        OptionProperty,
-        SelectionProperty,
-        TriggerProperty,
-        InvalidPropertyType
-    };
+    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    struct PropertyInfo {
-        PropertyType type;
-        std::string identifier;
-        std::string name;
-        std::string group;
-    };
-    typedef std::string PropertyOwner;
-
-    struct Property {
-        PropertyOwner owner;
-        std::vector<PropertyInfo> properties;
-    };
-
-    PropertyType toPropertyType(const std::string& name) const;
-
-    void renderProperty(const PropertyInfo& info) const;
-
-    std::set<properties::Property*> _boolProperties;
-    std::set<properties::Property*> _intProperties;
-    std::set<properties::Property*> _floatProperties;
-    std::set<properties::Property*> _vec2Properties;
-    std::set<properties::Property*> _vec3Properties;
-    std::set<properties::Property*> _vec4Properties;
-    std::set<properties::Property*> _stringProperties;
-    std::set<properties::Property*> _optionProperties;
-    std::set<properties::Property*> _selectionProperties;
-    std::set<properties::Property*> _triggerProperties;
-    std::map<std::string, std::vector<properties::Property*>> _propertiesByOwner;
-
-    //std::vector<Property> _properties;
+    SourceFunction _function;
 };
 
 } // namespace gui

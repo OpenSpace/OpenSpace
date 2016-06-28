@@ -136,6 +136,12 @@ void Property::setVisible(bool state) {
     _metaData.setValue(_metaDataKeyVisible, state);
 }
 
+bool Property::isVisible() const {
+    bool visible = true;
+    _metaData.getValue(_metaDataKeyVisible, visible);
+    return visible;
+}
+
 void Property::setReadOnly(bool state) {
     _metaData.setValue(_metaDataKeyReadOnly, state);
 }

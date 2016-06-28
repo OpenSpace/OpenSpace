@@ -30,8 +30,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
 
-#include <modules/onscreengui/include/gui.h>
-
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "KameleonPlane";
@@ -57,9 +55,6 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
     std::string axis;
     dictionary.getValue("axisCut", axis);
-
-    OsEng.gui()._iswa.registerProperty(&_slice);
-
 
     if(axis == "x")         _cut = 0;
     else if (axis == "y")   _cut = 1;
@@ -104,15 +99,6 @@ bool KameleonPlane::initialize(){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_useLog);
-        OsEng.gui()._iswa.registerProperty(&_useHistogram);
-        OsEng.gui()._iswa.registerProperty(&_autoFilter);
-        OsEng.gui()._iswa.registerProperty(&_normValues);
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-        OsEng.gui()._iswa.registerProperty(&_resolution);
-        OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-        OsEng.gui()._iswa.registerProperty(&_fieldlines);
-        OsEng.gui()._iswa.registerProperty(&_dataOptions);
         _dataProcessor = std::make_shared<DataProcessorKameleon>();
 
         //If autofiler is on, background values property should be hidden
@@ -121,10 +107,10 @@ bool KameleonPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
-                OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+                _backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
-                OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+                _backgroundValues.setVisible(true);
             }
         });
     }
@@ -164,7 +150,7 @@ bool KameleonPlane::initialize(){
     }
     updateTextureResource();
 
-	return true;
+    return true;
 }
 
 bool KameleonPlane::createGeometry() {

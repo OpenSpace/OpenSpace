@@ -114,6 +114,7 @@ public:
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::string name);
     std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+    std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,

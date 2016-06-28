@@ -1155,6 +1155,17 @@ std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::
     return nullptr;
 }
 
+std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
+    std::vector<ScreenSpaceRenderable*> res(_screenSpaceRenderables.size());
+    std::transform(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        res.begin(),
+        [](std::shared_ptr<ScreenSpaceRenderable> p) { return p.get(); }
+    );
+    return res;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },

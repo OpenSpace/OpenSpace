@@ -83,9 +83,6 @@ protected:
     glm::vec2 toSpherical(const glm::vec2& euclidean);
 
 
-    void registerProperties();
-    void unregisterProperties();
-
     void createShaders();
     glm::mat4 scaleMatrix();
     glm::mat4 rotationMatrix();

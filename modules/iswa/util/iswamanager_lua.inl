@@ -140,13 +140,13 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
 
 int iswa_removeGroup(lua_State* L){
     std::string name = luaL_checkstring(L, -1);
-	// IswaManager::ref().unregisterGroup(id);
+    // IswaManager::ref().unregisterGroup(id);
 
     auto groups = IswaManager::ref().groups(); 
     if(groups.find(name) != groups.end())
         groups[name]->clearGroup();
 
-	return 0;
+    return 0;
 }
 
 int iswa_addCdfFiles(lua_State* L){

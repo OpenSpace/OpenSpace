@@ -28,6 +28,8 @@
 #include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guipropertycomponent.h>
 
+#include <map>
+
 namespace openspace {
 namespace gui {
 
@@ -40,7 +42,7 @@ struct RadioOption {
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
     GuiIswaComponent();
-    virtual void render() override;
+    void render() override;
 
 private:
     bool _gmdata;

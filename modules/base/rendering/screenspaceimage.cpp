@@ -31,8 +31,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem>
 
-#include <modules/onscreengui/include/gui.h>
-
 namespace {
     const std::string _loggerCat = "ScreenSpaceImage";
 
@@ -58,12 +56,10 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(_texturePath);
-    registerProperties();
 
     std::string texturePath;
     if (dictionary.getValue(KeyTexturePath, texturePath)) {
         _texturePath = texturePath;
-        OsEng.gui()._screenSpaceProperty.registerProperty(&_texturePath);    
         _texturePath.onChange([this](){ loadTexture(); });
     }
 
@@ -85,7 +81,6 @@ bool ScreenSpaceImage::initialize() {
 }
 
 bool ScreenSpaceImage::deinitialize() {
-    unregisterProperties();
 
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;

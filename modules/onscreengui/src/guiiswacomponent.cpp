@@ -58,10 +58,10 @@ namespace {
 namespace openspace {
 namespace gui {
 GuiIswaComponent::GuiIswaComponent()
-    :GuiPropertyComponent()
-    ,_gmdata(false)
-    ,_gmimage(false)
-    ,_iondata(false)
+    : GuiPropertyComponent()
+    , _gmdata(false)
+    , _gmimage(false)
+    , _iondata(false)
 {}
 
 void GuiIswaComponent::render() {
@@ -154,61 +154,8 @@ void GuiIswaComponent::render() {
     }
 #endif
 
-    for (const auto& p : _propertiesByOwner) {
-        if (ImGui::CollapsingHeader(p.first.c_str())) {
-            for (properties::Property* prop : p.second) {
-                if (_boolProperties.find(prop) != _boolProperties.end()) {
-                    renderBoolProperty(prop, p.first);
-                    continue;
-                }
+    GuiPropertyComponent::render();
 
-                if (_intProperties.find(prop) != _intProperties.end()) {
-                    renderIntProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_floatProperties.find(prop) != _floatProperties.end()) {
-                    renderFloatProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-                    renderVec2Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-                    renderVec3Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-                    renderVec4Property(prop, p.first);
-                    continue;
-                }
-
-                if (_optionProperties.find(prop) != _optionProperties.end()) {
-                    renderOptionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_triggerProperties.find(prop) != _triggerProperties.end()) {
-                    renderTriggerProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_selectionProperties.find(prop) != _selectionProperties.end()) {
-                    renderSelectionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_stringProperties.find(prop) != _stringProperties.end()) {
-                    renderStringProperty(prop, p.first);
-                    continue;
-                }
-            }
-        }
-    }
 
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED

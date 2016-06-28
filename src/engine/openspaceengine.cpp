@@ -437,8 +437,29 @@ bool OpenSpaceEngine::initialize() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
     _gui->initialize();
-    for (properties::Property* p : _settingsEngine->propertiesRecursive())
-    	_gui->_globalProperty.registerProperty(p);
+    _gui->_globalProperty.setSource(
+            [&]() {
+            std::vector<properties::PropertyOwner*> res = { _settingsEngine.get() };
+            return res;
+        }
+    );
+
+    OsEng.gui()._screenSpaceProperty.setSource(
+        [&]() {
+            auto& ssr = renderEngine().screenSpaceRenderables();
+            return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
+        }
+    );
+
+    OsEng.gui()._property.setSource(
+        [&]() {
+            auto& nodes = renderEngine().scene()->allSceneGraphNodes();
+            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+        }
+    );
+
+
+    
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
