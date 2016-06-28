@@ -22,73 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
-
-#include <glm/glm.hpp>
-#include <vector>
-#include <stack>
-#include <memory>
-#include <ostream>
-
-#include <modules/globebrowsing/chunk/chunkindex.h>
-#include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunkrenderer.h>
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
-#include <functional>
 
 
+#include <modules/globebrowsing/other/statscollector.h>
 
-// forward declaration
-namespace openspace {
-    class ChunkedLodGlobe;
-}
 
 
 namespace openspace {
 
-
-class ChunkNode {
-public:
-    ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
-    ~ChunkNode();
-
-
-    void split(int depth = 1);
-    void merge();
-
-    bool isRoot() const;
-    bool isLeaf() const;
-
-    void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
-
-    const ChunkNode& find(const Geodetic2& location) const;
-    ChunkNode& find(const Geodetic2& location);
-    
-    const ChunkNode& getChild(Quad quad) const;
-    ChunkNode& getChild(Quad quad);
-
-    const Chunk& getChunk() const;
-
-    bool updateChunkTree(const RenderData& data);
-
-    static int chunkNodeCount;
-
-
-private:
-    
-    ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
-
-    Chunk _chunk;
-};
 
 } // namespace openspace
-
-
-
-#endif // __QUADTREE_H__

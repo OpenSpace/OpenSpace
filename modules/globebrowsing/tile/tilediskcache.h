@@ -22,28 +22,43 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/layeredtextures.h>
+#ifndef __TILE_DISK_CACHE_H__
+#define __TILE_DISK_CACHE_H__
 
 
-namespace {
-    const std::string _loggerCat = "LayeredTextures";
-}
+#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileprovider.h>
+
+#include <ghoul/filesystem/filesystem>
 
 
 namespace openspace {
 
+    using namespace ghoul::filesystem;
 
-    const size_t LayeredTextures::NUM_TEXTURE_CATEGORIES;
-    const size_t LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
+    class TileDiskCache {
+    public:
+        TileDiskCache(const std::string& name);
+        
+        std::shared_ptr<TileIOResult> get(const ChunkIndex& chunkIndex);
+        bool has(const ChunkIndex& chunkIndex) const;
+        bool TileDiskCache::put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult);
 
-    const std::string LayeredTextures::TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES] =
-    {
-        "ColorTextures",
-        "NightTextures",
-        "HeightMaps",
-        "WaterMasks",
-        "Overlays",
-        "GrayScaleOverlays"
+        
+        static const std::string CACHE_ROOT;
+    
+    private:
+        const std::string _name;
+        
+        Directory _cacheDir;
+        
+        std::string getFilePath(const ChunkIndex& chunkIndex) const;
+        File getMetaDataFile(const ChunkIndex& chunkIndex) const;
+        File getDataFile(const ChunkIndex& chunkIndex) const;
+
     };
 
 }  // namespace openspace
+
+
+#endif  // __TILE_DISK_CACHE_H__

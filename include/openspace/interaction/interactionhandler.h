@@ -27,17 +27,22 @@
 
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/mousecontroller.h>
+#include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+
 #include <list>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#endif
+// // <<<<<<< HEAD
+// #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+// #include <modules/globebrowsing/globes/renderableglobe.h>
+// #endif
+// // =======
+// // >>>>>>> feature/globebrowsing
 
 #include <mutex>
 
@@ -149,152 +154,6 @@ private:
 
 #else // USE_OLD_INTERACTIONHANDLER
 
-
-class InputState
-{
-public:
-    InputState();
-    ~InputState();
-
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double mouseX, double mouseY);
-    void mouseScrollWheelCallback(double mouseScrollDelta);
-
-    // Mutators
-    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
-    void clearKeyframes();
-
-    // Accessors
-    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys();
-    const std::list<MouseButton>& getPressedMouseButtons();
-    glm::dvec2 getMousePosition();
-    double getMouseScrollDelta();
-    std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames();
-
-    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair);
-    bool isMouseButtonPressed(MouseButton mouseButton);
-private:
-    // Input from keyboard and mouse
-    std::list<std::pair<Key, KeyModifier> > _keysDown;
-    std::list<MouseButton> _mouseButtonsDown;
-    glm::dvec2 _mousePosition;
-    double _mouseScrollDelta;
-
-    // Remote input via keyframes
-    std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
-    std::mutex _keyframeMutex;
-};
-
-class InteractionMode
-{
-public:
-    InteractionMode(std::shared_ptr<InputState> inputState);
-    ~InteractionMode();
-
-    // Mutators
-    virtual void setFocusNode(SceneGraphNode* focusNode);
-    void setCamera(Camera* camera);
-
-    // Accessors
-    SceneGraphNode* focusNode();
-    Camera* camera();
-
-    virtual void update(double deltaTime) = 0;
-protected:
-    /**
-        Inner class that acts as a smoothing filter to a variable. The filter has a step
-        response on a form that resembles the function y = 1-e^(-t/scale). The variable
-        will be updates as soon as it is set to a value (calling the set() function).
-    */
-    template <typename T, typename ScaleType>
-    class delayedVariable {
-    public:
-        delayedVariable(ScaleType scale) {
-            _scale = scale;
-        }
-        void set(T value) {
-            _targetValue = value;
-            _currentValue = _currentValue + (_targetValue - _currentValue) * _scale;
-        }
-        T get() {
-            return _currentValue;
-        }
-    private:
-        ScaleType _scale;
-        T _targetValue;
-        T _currentValue;
-    };
-
-    struct MouseState {
-        MouseState(double scale)
-            : velocity(scale)
-            , previousPosition(0.0, 0.0) {}
-        glm::dvec2 previousPosition;
-        delayedVariable<glm::dvec2, double> velocity;
-    };
-
-    std::shared_ptr<InputState> _inputState;
-    SceneGraphNode* _focusNode;
-    Camera* _camera;
-};
-
-class KeyframeInteractionMode : public InteractionMode
-{
-public:
-    KeyframeInteractionMode(std::shared_ptr<InputState> inputState);
-    ~KeyframeInteractionMode();
-
-    virtual void update(double deltaTime);
-private:
-    double _currentKeyframeTime;
-};
-
-class OrbitalInteractionMode : public InteractionMode
-{
-public:
-    OrbitalInteractionMode(
-        std::shared_ptr<InputState> inputState,
-        double sensitivity,
-        double velocityScaleFactor);
-    ~OrbitalInteractionMode();
-
-    virtual void update(double deltaTime);
-protected:
-    void updateMouseStatesFromInput(double deltaTime);
-    void updateCameraStateFromMouseStates();
-
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _rollMouseState;
-
-    glm::dquat _localCameraRotation;
-    glm::dquat _globalCameraRotation;
-};
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
-{
-public:
-    GlobeBrowsingInteractionMode(
-        std::shared_ptr<InputState> inputState,
-        double sensitivity,
-        double velocityScaleFactor);
-    ~GlobeBrowsingInteractionMode();
-
-    virtual void setFocusNode(SceneGraphNode* focusNode);
-    virtual void update(double deltaTime);
-private:
-    void updateCameraStateFromMouseStates();
-    RenderableGlobe* _globe;
-};
-#endif
-
-
 class InteractionHandler : public properties::PropertyOwner
 {
 public:
@@ -325,7 +184,7 @@ public:
     // Accessors
     SceneGraphNode* const focusNode() const;
     Camera* const camera() const;
-    std::shared_ptr<InputState> inputState() const;
+    const InputState& inputState() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -342,12 +201,18 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
+    void saveCameraPosition(const std::string& filepath = "");
+    void restoreCameraPosition(const std::string& filepath = "");
+
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 
+    bool _cameraUpdatedFromScript = false;
+
     std::multimap<KeyWithModifier, std::string > _keyLua;
 
-    std::shared_ptr<InputState> _inputState;
+    std::unique_ptr<InputState> _inputState;
+    Camera* _camera;
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 

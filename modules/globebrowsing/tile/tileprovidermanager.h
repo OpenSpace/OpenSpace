@@ -64,7 +64,10 @@ namespace openspace {
         const std::vector<std::shared_ptr<TileProvider> >
             getActivatedLayerCategory(LayeredTextures::TextureCategory);
 
-        void prerender();
+        void update();
+
+        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
+
 
     private:
         static void initTexures(std::vector<TileProviderWithName>& destination,
