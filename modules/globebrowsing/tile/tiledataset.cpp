@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <ogr_featurestyle.h>
+#include <ogr_spatialref.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
@@ -155,7 +156,7 @@ namespace openspace {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
             CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
-
+            
             GdalHasBeenInitialized = true;
         }
 
@@ -177,15 +178,27 @@ namespace openspace {
 
     int TileDataset::calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
         GDALRasterBand* firstBand = dataset->GetRasterBand(1);
+        GDALRasterBand* maxOverview;
         int numOverviews = firstBand->GetOverviewCount();
-        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
+        int sizeLevel0;
+        if (numOverviews <= 0) { // No overviews. Use first band.
+            maxOverview = firstBand;
+        }
+        else { // Pick the highest overview.
+            maxOverview = firstBand->GetOverview(numOverviews - 1);
+        }
+        sizeLevel0 = maxOverview->GetXSize();
         return log2(minimumPixelSize) - log2(sizeLevel0);
     }
 
-    int TileDataset::calculateMaxLevel(int calculateMaxLevel) {
+    const int TileDataset::calculateMaxLevel(int tileLevelDifference) {
         int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        _maxLevel = numOverviews - 1 - _tileLevelDifference;
-        return _maxLevel;
+        if (numOverviews <= 0) { // No overviews.
+            return - tileLevelDifference;
+        }
+        else { // Use the overview to get the maximum level.
+            return numOverviews - 1 - tileLevelDifference;
+        }
     }
 
     TileDepthTransform TileDataset::calculateTileDepthTransform() {
@@ -221,14 +234,29 @@ namespace openspace {
 
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < _dataLayout.numRasters; i++) {
-            GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
+            GDALRasterBand* rasterBand;
+            int pixelSourceScale = 1;
+            if (_dataset->GetRasterBand(i + 1)->GetOverviewCount() <= 0){
+                rasterBand = _dataset->GetRasterBand(i + 1);
+                pixelSourceScale = pow(2, region.overview + 1);
+            }
+            else {
+                rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
+                pixelSourceScale = 1;
+            }
             
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
             
-            int pixelStartX = region.pixelStart.x;// glm::max(int(region.pixelStart.x) - 1, 0);
-            int pixelStartY = region.pixelStart.y;// glm::max(int(region.pixelStart.y) - 1, 0);
-            int pixelWidthX = region.numPixels.x;// glm::min(pixelStartX + int(region.numPixels.x) + 2, rasterBand->GetXSize()) - pixelStartX;
-            int pixelWidthY = region.numPixels.y;// glm::min(pixelStartY + int(region.numPixels.y) + 2, rasterBand->GetYSize()) - pixelStartY;
+            int pixelStartX = region.pixelStart.x * pixelSourceScale;
+            int pixelStartY = region.pixelStart.y * pixelSourceScale;
+            int pixelWidthX = region.numPixels.x * pixelSourceScale;
+            int pixelWidthY = region.numPixels.y * pixelSourceScale;
+
+            // Clamp to be inside dataset
+            pixelStartX = glm::max(pixelStartX, 0);
+            pixelStartY = glm::max(pixelStartY, 0);
+            pixelWidthX = glm::min(pixelStartX + pixelWidthX, rasterBand->GetXSize()) - pixelStartX;
+            pixelWidthY = glm::min(pixelStartY + pixelWidthY, rasterBand->GetYSize()) - pixelStartY;
 
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
@@ -413,6 +441,7 @@ namespace openspace {
 
     
     glm::uvec2 TileDataset::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
+
         double padfTransform[6];
         CPLErr err = dataSet->GetGeoTransform(padfTransform);
 
@@ -420,7 +449,7 @@ namespace openspace {
 
         Scalar Y = Angle<Scalar>::fromRadians(geo.lat).asDegrees();
         Scalar X = Angle<Scalar>::fromRadians(geo.lon).asDegrees();
-        
+
         // convert from pixel and line to geodetic coordinates
         // Xp = padfTransform[0] + P*padfTransform[1] + L*padfTransform[2];
         // Yp = padfTransform[3] + P*padfTransform[4] + L*padfTransform[5];
@@ -576,9 +605,22 @@ namespace openspace {
 
         // Calculate a suitable overview to choose from the GDAL dataset
         int minNumPixels0 = glm::min(numPixels0.x, numPixels0.y);
-        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
+        GDALRasterBand* maxOverview;
+        if (numOverviews <= 0) {
+            maxOverview = firstBand;
+        }
+        else {
+            maxOverview = firstBand->GetOverview(numOverviews - 1);
+        }
+        int sizeLevel0 = maxOverview->GetXSize();
+        // The dataset itself may not have overviews but even if it does not, an overview
+        // for the data region can be calculated and possibly be used to sample greater
+        // Regions of the original dataset.
         int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) - tileLevelDifference;
-        ov = glm::clamp(ov, 0, numOverviews - 1);
+
+        if (numOverviews > 0) {
+            ov = glm::clamp(ov, 0, numOverviews - 1);
+        }
 
         // Convert the interval [pixelStart0, pixelEnd0] to pixel space at 
         // the calculated suitable overview, ov. using a >> b = a / 2^b

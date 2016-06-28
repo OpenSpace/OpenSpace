@@ -55,7 +55,8 @@ namespace openspace {
 
             if (i == LayeredTextures::ColorTextures ||
                 i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks) {
+                i == LayeredTextures::WaterMasks    ||
+                i == LayeredTextures::GrayScaleOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
             }
             else if (i == LayeredTextures::Overlays) {
@@ -118,22 +119,30 @@ namespace openspace {
         const TileProviderInitData& initData)
     {
         std::shared_ptr<TileProvider> tileProvider;
-        CPLXMLNode * node = CPLParseXMLFile(file.c_str());
-        if (!node) {
-            throw ghoul::RuntimeError("Unable to parse XML:\n" + file);
-        }
-        if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
-            tileProvider = std::make_shared<TemporalTileProvider>(file, initData);
+
+        try
+        {   // First try reading normally
+            auto tileDataset = std::make_shared<TileDataset>(file, initData.minimumPixelSize, initData.preprocessTiles);
+            auto threadPool = std::make_shared<ThreadPool>(1);
+            auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
+            auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
+            tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);
+
             return tileProvider;
         }
-
-        auto tileDataset = std::make_shared<TileDataset>(file, initData.minimumPixelSize, initData.preprocessTiles);
-        auto threadPool = std::make_shared<ThreadPool>(1);
-        auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
-        auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
-        tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);
-
-        return tileProvider;
+        catch (const ghoul::RuntimeError& e)
+        {   // Then try to see if it is a temporal dataset.
+            CPLXMLNode * node = CPLParseXMLFile(file.c_str());
+            if (!node) {
+                throw ghoul::RuntimeError("Unable to parse file:\n" + file);
+            }
+            if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
+                tileProvider = std::make_shared<TemporalTileProvider>(file, initData);
+                return tileProvider;
+            }
+            // If still not able to read, throw the error.
+            throw ghoul::RuntimeError(e.message);
+        }
     }
 
     TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)

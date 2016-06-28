@@ -158,7 +158,7 @@ namespace openspace {
         //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
-        int calculateMaxLevel(int calculateMaxLevel);
+        const int calculateMaxLevel(int tileLevelDifference);
 
         TileDepthTransform calculateTileDepthTransform();
 

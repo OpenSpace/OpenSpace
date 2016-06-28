@@ -113,24 +113,23 @@ public:
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
     const Ellipsoid& ellipsoid();
     float getHeight(glm::dvec3 position);
+    float cameraMinHeight();
+    double interactionDepthBelowEllipsoid();
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
     
     // Properties 
     properties::FloatProperty lodScaleFactor;
-
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
-
     properties::BoolProperty atmosphereEnabled;
-
     ReferencedBoolSelection debugSelection;
-
     properties::BoolProperty _saveOrThrowCamera;
 
     
 
 
 private:
+    double _interactionDepthBelowEllipsoid;
 
     std::string _frame;
     double _time;
@@ -142,6 +141,8 @@ private:
     
 
     DistanceSwitch _distanceSwitch;
+
+    properties::FloatProperty _cameraMinHeight;
 };
 
 }  // namespace openspace

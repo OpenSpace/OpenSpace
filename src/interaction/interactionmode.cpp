@@ -341,8 +341,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
         // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = 10000.0;
-        double minHeightAboveGround = 100.0;
+        double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
+        double minHeightAboveGround = _globe->cameraMinHeight();
 
         glm::dvec3 centerPos = _focusNode->worldPosition().dvec3();
         glm::dvec3 camPos = camera.positionVec3();

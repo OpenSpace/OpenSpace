@@ -43,6 +43,8 @@ namespace {
     // Keys for the dictionary
     const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
+    const std::string keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
+    const std::string keyCameraMinHeight = "CameraMinHeight";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
     const std::string keyTextureInitData = "TextureInitData";
     const std::string keyTextures = "Textures";
@@ -57,14 +59,13 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
         , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
     {
         setName("RenderableGlobe");
         
-        
-
         dictionary.getValue(keyFrame, _frame);
 
         // Read the radii in to its own dictionary
@@ -78,6 +79,11 @@ namespace openspace {
         dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
         int patchSegments = patchSegmentsd;
         
+        dictionary.getValue(keyInteractionDepthBelowEllipsoid, _interactionDepthBelowEllipsoid);
+        float cameraMinHeight;
+        dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
+        _cameraMinHeight.set(cameraMinHeight);
+
         // Init tile provider manager
         ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
@@ -123,6 +129,7 @@ namespace openspace {
         addProperty(atmosphereEnabled);
         addProperty(_saveOrThrowCamera);
         addProperty(lodScaleFactor);
+        addProperty(_cameraMinHeight);
     }
 
     RenderableGlobe::~RenderableGlobe() {
@@ -242,6 +249,14 @@ namespace openspace {
         
         // Return the result
         return height;
+    }
+
+    double RenderableGlobe::interactionDepthBelowEllipsoid() {
+        return _interactionDepthBelowEllipsoid;
+    }
+
+    float RenderableGlobe::cameraMinHeight() {
+        return _cameraMinHeight.value();
     }
 
     std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {
