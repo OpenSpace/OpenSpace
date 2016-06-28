@@ -138,7 +138,8 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
                 standardDeviation = _standardDeviation[option];
                 histogram = _unNormalizedhistograms[option];
                 
-                filterMid = histogram->highestBinValue(_useHistogram);
+                // get the real value for the highest bin
+                filterMid = histogram->realBinValue( histogram->highestBin() );
                 filterWidth = histogram->binWidth();
 
                 filterMid = normalizeWithStandardScore(filterMid, mean, standardDeviation, _normValues);
@@ -149,7 +150,7 @@ void DataProcessor::calculateFilterValues(std::vector<int> selectedOptions){
 
             }else{
                 Histogram hist = _histograms[option]->equalize();
-                filterMid = hist.highestBinValue(true);
+                filterMid = hist.highestBin() / (float)hist.numBins();
                 filterWidth = std::min(1.0f / (float)NumBins, 1.0f / 512.0f);
             }
             _filterValues += glm::vec2(filterMid-filterWidth, filterMid+filterWidth);
@@ -204,8 +205,10 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         mean = (1.0f/_numValues[i])*_sum[i];
 
         //const float* histData = _unNormalizedhistograms[i]->data();
-        float histMin = _unNormalizedhistograms[i]->minValue();
-        float histMax = _unNormalizedhistograms[i]->maxValue();
+        //std::cout << "min: " << _min[i] << " max: " << _max[i] << std::endl;
+        //float histMin = _unNormalizedhistograms[i]->minValue();
+        //float histMax = _unNormalizedhistograms[i]->maxValue();
+        //std::cout << "histMin: " << histMin << " histMax: " << histMax << std::endl;
         int numBins = _unNormalizedhistograms[i]->numBins();
 
         // float fit = IswaManager::ref().fit();
@@ -215,9 +218,9 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         float fit = _unNormalizedhistograms[i]->entropy();
         _fitValues[i] = fit;
 
-        float max = normalizeWithStandardScore(histMax, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
-        float min = normalizeWithStandardScore(histMin, mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
-
+        float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
+        float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
+        std::cout << "min: " << min << " max: " << max << std::endl;
         std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(min, max, numBins);
 
         int length = _buildData[i].size();
@@ -226,12 +229,14 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         }
 
         _histograms[i] = newHist;
-        _histograms[i]->generateEqualizer(true);
-
-        // _unNormalizedhistograms[i]->print();
-        // ofs[i] << _fitValues[i] << " " << _histograms[i]->entropy() << std::endl;
-        // std::cout << _fitValues[i] << " " << _histograms[i]->entropy() << std::endl;
-        
+        //get the highest bin and sample its value (frequency)
+        int highestBin = _histograms[i]->highestBin();
+        float highestBinValue = _histograms[i]->sample(highestBin);
+        //remove the highest bin to give a better equalization
+        _histograms[i]->setBin(highestBin, 0.0f);
+        _histograms[i]->generateEqualizer();
+        //restore the highest bin
+        _histograms[i]->setBin(highestBin, highestBinValue);
     }
 
 

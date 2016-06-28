@@ -136,6 +136,7 @@ void Histogram::changeRange(float minValue, float maxValue){\
         int binIndex = std::min( (float)floor(normalizedValue * _numBins), _numBins - 1.0f ); // [0, _numBins - 1]
 
         newData[binIndex] = oldData[i];
+        //newData[binIndex] += oldData[i]; ?
     }
 
     _minValue = minValue;
@@ -244,34 +245,43 @@ void Histogram::normalize() {
  * Old histogram value is the index of the array, and the new equalized
  * value will be the value at the index.
  */
-void Histogram::generateEqualizer(bool withoutHighestBin){
-    float previousCdf = 0.0f;
+void Histogram::generateEqualizer(){
+
     _equalizer = std::vector<float>(_numBins, 0.0f);
+    // int numValues = _numValues;
+    // int highBin = -1;
 
-    int highestBin = -1;
-    float highestProbability = 0;
+    // if(withoutHighestBin){
+    //     int highBin = highestBin();
+    //     std::cout << "highBin: " << highBin << std::endl;
+    //     numValues -= (int)_data[highBin];
+    // }
 
-    if(withoutHighestBin){
-        highestBin = 0; 
-        for(int i=0; i<_numBins; i++){
-            if(_data[i] > _data[highestBin]){
-                highestBin = i;
-            }
-        }
-        highestProbability = _data[highestBin] / (float)_numValues;
-    }
-
+    float previousCdf = 0.0f;
 
     for(int i = 0; i < _numBins; i++){
-        float probability = highestProbability/(float)_numBins;
-        if(i != highestBin)
-             probability += _data[i] / (float)_numValues;
-
+        // float probability = 0.0f;
+        // if(i != highBin)
+        //     probability += _data[i] / (float)numValues;
+        float probability = _data[i] / (float)_numValues;
+        //if(withoutHighestBin)
+        //std::cout << "prob " << probability << std::endl;
         float cdf  = previousCdf + probability;
         cdf = std::min(1.0f, cdf);
         _equalizer[i] = cdf * (_numBins-1);
         previousCdf = cdf;
     }
+}
+
+bool Histogram::setBin(int bin, float value){
+    if (bin < 0 || bin > _numBins) {
+        LWARNING("setBin: bin is out of range");
+        return false;
+    }
+    _numValues -= _data[bin];
+    _numValues += (int)value;
+    _data[bin] = value;
+    return true;
 }
 
 /*
@@ -291,7 +301,7 @@ Histogram Histogram::equalize(){
  * Given a value within the domain of this histogram (_minValue < value < maxValue),
  * this method will use its equalizer to return a histogram equalized result.
  */
-float Histogram::equalize(float value){
+float Histogram::equalize(float value) const {
     // if (value < _minValue || value > _maxValue) {
     //     LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
     // }
@@ -327,26 +337,11 @@ void Histogram::print() const {
     std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
-float Histogram::highestBinValue(bool equalized, int overBins){
+int Histogram::highestBin() const {
     int highestBin = 0;
     float highestValue = 0.0f;
-
-    for(int i=0; i<_numBins; i++){
-        float value = 0.0f;
-        int num = 0;
-        for(int j=0; j<overBins; j++){
-            if(i-j>0){
-                value += _data[i-j];
-                num++;
-            }
-            if(i+j<_numBins){
-                value += _data[i+j];
-                num++;
-            }
-        }
-
-        value += _data[i];
-        value /= (float)++num;
+    for(int i=0; i < _numBins; i++){
+        float value = _data[i];
 
         if(value > highestValue){
             highestBin = i;
@@ -354,17 +349,20 @@ float Histogram::highestBinValue(bool equalized, int overBins){
         }
     }
 
-    if(!equalized){
-        float low = _minValue + (float(highestBin) / _numBins) * (_maxValue - _minValue);
-        float high = low + (_maxValue - _minValue) / float(_numBins);
-        return (high+low)/2.0;
-    }else{
-        return highestBin/(float)_numBins;
+    return highestBin;
+}
+
+float Histogram::realBinValue(int bin) const {
+    if (bin > _numBins || bin < 0) {
+        LWARNING("realBinValue: bin value should be between 0 - number of bin");
     }
+    float low = _minValue + (float(bin) / _numBins) * (_maxValue - _minValue);
+    float high = low + (_maxValue - _minValue) / float(_numBins);
+    return (high+low)/2.0;
 }
 
 float Histogram::binWidth(){
-    return (_maxValue-_minValue)/float(_numBins);
+    return (_maxValue-_minValue) / float(_numBins);
 }
 
 }

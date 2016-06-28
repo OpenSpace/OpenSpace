@@ -67,9 +67,9 @@ public:
 
     void normalize();
     void print() const;
-    void generateEqualizer(bool withoutHighestBin = false);
+    void generateEqualizer();
     Histogram equalize();
-    float equalize (float);
+    float equalize (float) const;
 
     /**
      * Entropy is a measure of histogram dispersion.
@@ -77,8 +77,34 @@ public:
      */
     float entropy() const;
 
-    float highestBinValue(bool equalized, int overBins=0);
+    /**
+     * finds the bin index with the highest frequency value
+     * @return The bin index
+     */
+    int highestBin() const;
+
+    /**
+     * Normalizes the bin index to a value between the
+     * highest data value (_maxValue) and the lowest (_minValue)
+     * 
+     * @param bin The bin you want to know the corresponding data value of 
+     * @return The normalized bin value.
+     */
+    float realBinValue(int bin) const;
     float binWidth();
+
+    /**
+     * Sets a bin to a certain value directly. This method is similar
+     * to add(float value, float repeat) but does the normalize the bin. 
+     * Instead it access the bin value directly. It also changes the bin value
+     * instead of just adding upon it.
+     * 
+     * @param bin The bin you want to change the value of
+     * @param value The value you want to change to
+     * 
+     * @return true if successful
+     */
+    bool setBin(int bin, float value);
 
     void changeRange(float minValue, float maxValue);
 
