@@ -6,10 +6,26 @@
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 </head>
 <body>
+    <button id="start-stop" onclick="startStop()">Start / Stop</button>
     <svg></svg>
 </body>
 
 <script type="text/javascript">
+
+var updateInterval = undefined;
+
+function startStop(){
+  if(updateInterval === undefined){
+    console.log("Start updating");
+    updateInterval = setInterval(doVis, 1000);
+    doVis(); // Do one immediately
+  }
+  else{
+    console.log("Stop updating");
+    clearInterval(updateInterval);
+    updateInterval = undefined;
+  }
+}
 
 function doVis(){
     var filename = "../data/scene/debugglobe/test_stats";
@@ -107,7 +123,6 @@ function doVis(){
     });
 }
 doVis();
-//setInterval(doVis, 1000);
 
 </script>
 

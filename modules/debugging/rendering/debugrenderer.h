@@ -43,41 +43,121 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
+
     /**
-        A helper class for quick rendering of vertices clipping space
+        A helper class for quick rendering of vertices IN clipping space. 
+
+        The class is practically stateless. It only stores a ghoul::opengl::ProgramObject
+        which can be reused despite the fact that rendering calls are invoked from different callers.
+        Therefor a static reference is provided for convenience which is accessed through ref(). Note:
+        That constructors are still public and the class is not a strict singleton.
     */
     class DebugRenderer {
     public:
-        DebugRenderer();
-
-        static std::shared_ptr<DebugRenderer> ref();
 
         typedef std::vector<glm::vec4> Vertices;
         typedef glm::vec4 RGBA;
 
-        
-        void renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA = {1, 0, 0, 1}) const;
-        void renderBoxFaces(const Vertices& clippingSpacePoints, RGBA rgba = { 1, 0, 0, 1 }) const;
-        void renderBoxEdges(const Vertices& clippingSpacePoints, RGBA rgba = { 1, 0, 0, 1 }) const;
-        void renderNiceBox(const Vertices& clippingSpacePoints, RGBA rgba = { 1, 0, 0, 0.3 }) const;
 
-        void renderCameraFrustum(const RenderData& data, const Camera& otherCamera) const;
+        /**
+         *  Consider using ref() before creating a new default instance!
+         */
+        DebugRenderer();
+
+        /**
+         *  Instantiate a new DebugRenderer with a custom shader program
+         */
+        DebugRenderer(std::shared_ptr<ProgramObject> programObject);
+
+        /**
+         *  Access the static reference
+         */
+        static std::shared_ptr<DebugRenderer> ref();
+
+
+
+
+        /**
+         *  Render the vector of clipping space points in the specified mode and color.
+         */
+        void renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA = {1, 0, 0, 1}) const;
+
+        /**
+         *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+         *  The box corners should be ordered from smaller to larger,
+         *  first by x, the, y and finally z. 
+         *
+         *  6-------7
+         *  |\      |\
+         *  | 2-------3
+         *  4 | - - 5 |
+         *   \|      \|
+         *    0-------1
+         *
+         */
+        void renderBoxFaces(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 1 }) const;
+        
+         /**
+         *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+         *  The box corners should be ordered from smaller to larger,
+         *  first by x, the, y and finally z. 
+         *
+         *  6-------7
+         *  |\      |\
+         *  | 2-------3
+         *  4 | - - 5 |
+         *   \|      \|
+         *    0-------1
+         *
+         */
+        void renderBoxEdges(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 1 }) const;
+
+        /**
+        *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+        *  The box corners should be ordered from smaller to larger,
+        *  first by x, the, y and finally z.
+        *
+        *  6-------7
+        *  |\      |\
+        *  | 2-------3
+        *  4 | - - 5 |
+        *   \|      \|
+        *    0-------1
+        *
+        */
+        void renderNiceBox(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 0.3 }) const;
+
+
+
+        /**
+         *  Input arguments:
+         *  1. const RenderData& data:     defines position and camera that we will see the 
+         *                                 other cameras view frustum from
+         *  2. const Camera& otherCamera:  The camera who's view frustum is to be rendered
+         *  3. RGBA rgba                   Color to draw the view frustum with
+         */
+        void renderCameraFrustum(const RenderData& data, const Camera& otherCamera, RGBA rgba = { 1, 1, 1, 0.3 }) const;
+
+        /**
+         *  Renders a screen space AABB2 to the screen with the provided color
+         */
         void renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba = { 1, 1, 1, 0.3 }) const;
 
         
+        /**
+        *  Takes a AABB3 in screen space and returns vertices representing the corner points 
+        *  of the AABB. The ordering of the corner points is compatible with the box rendering 
+        *  methods in this class.
+        */
         const Vertices verticesFor(const AABB3& screenSpaceAABB) const;
         
 
-    private:
+    protected:
 
-
-        
         std::shared_ptr<ProgramObject> _programObject;
-
-
-        static std::shared_ptr<DebugRenderer> _singleton;
-
+        static std::shared_ptr<DebugRenderer> _reference;
     };
+
 
 } // namespace openspace
 

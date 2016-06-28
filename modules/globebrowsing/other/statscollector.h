@@ -89,8 +89,13 @@ namespace openspace {
         }
 
         void reset() {
+            // copy last, i.e. current record
+            StatsRecord<T> lastRecord = _data.back();
             _data.clear();
+            // add it again after cleared the vector
+            _data.push_back(lastRecord);
             _writePos = 0;
+            
         }
 
         void writeHeader(std::ostream& os) {
@@ -137,11 +142,13 @@ namespace openspace {
 
         StatsCollector() = delete;
 
-        StatsCollector(const std::string& filename, const std::string& delimiter = ",", bool enabled = true)
+        StatsCollector(const std::string& filename, int dumpEveryXRecord, const std::string& delimiter = ",", bool enabled = true)
             : _filename(filename)
+            , _dumpEveryXRecord(dumpEveryXRecord)
+            , _recordsSinceLastDump(0)
             , _enabled(enabled)
             , _delimiter(delimiter)
-            , _hasWrittenHead(false)
+            , _hasWrittenHeader(false)
             , i(TemplatedStatsCollector<int>(_enabled, delimiter))
             , d(TemplatedStatsCollector<double>(_enabled, delimiter))
         {
@@ -154,6 +161,11 @@ namespace openspace {
         
         void startNewRecord() {
             if (_enabled) {
+                if (_dumpEveryXRecord && ++_recordsSinceLastDump >= _dumpEveryXRecord) {
+                    dumpToDisk();
+                    _recordsSinceLastDump = 0;
+                }
+
                 i.startNewRecord();
                 d.startNewRecord();
             }
@@ -167,18 +179,24 @@ namespace openspace {
             _enabled = true;
         }
 
+        int hasHeaders() {
+            return i.hasHeaders() || d.hasHeaders();
+        }
+
         void dumpToDisk() {
-            if (!_hasWrittenHead) {
-                writeHead();
+            if (_enabled && hasHeaders()) {
+                if (!_hasWrittenHeader) {
+                    writeHeader();
+                }
+                writeData();
             }
-            writeData();
         }
 
         TemplatedStatsCollector<int> i;
         TemplatedStatsCollector<double> d;
 
     private:
-        void writeHead() {
+        void writeHeader() {
             std::ofstream ofs(_filename);
             if (i.hasHeaders()) {
                 i.writeHeader(ofs);
@@ -190,6 +208,7 @@ namespace openspace {
             else {
                 d.writeHeader(ofs);
             }
+            _hasWrittenHeader = true;
             ofs << std::endl;
             ofs.close();
         }
@@ -211,8 +230,12 @@ namespace openspace {
 
         std::string _filename;
         std::string _delimiter;
+
+        int _dumpEveryXRecord;
+        int _recordsSinceLastDump;
+
         bool _enabled;
-        bool _hasWrittenHead;
+        bool _hasWrittenHeader;
 
     };
 

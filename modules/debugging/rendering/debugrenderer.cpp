@@ -41,7 +41,7 @@ namespace {
 
 namespace openspace {
 
-    std::shared_ptr<DebugRenderer> DebugRenderer::_singleton = nullptr;
+    std::shared_ptr<DebugRenderer> DebugRenderer::_reference = nullptr;
 
 
     DebugRenderer::DebugRenderer()  {
@@ -50,42 +50,47 @@ namespace openspace {
             "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
             "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
             ));
+    }
 
+    DebugRenderer::DebugRenderer(std::shared_ptr<ProgramObject> programObject) 
+        : _programObject(programObject) 
+    { 
+        // nothing to do
     }
 
     std::shared_ptr<DebugRenderer> DebugRenderer::ref() {
-        if (_singleton == nullptr) {
+        if (_reference == nullptr) {
             try {
-                _singleton = std::make_shared<DebugRenderer>();
+                _reference = std::make_shared<DebugRenderer>();
             }
             catch (const ShaderObject::ShaderCompileError& e) {
                 LERROR(e.what());
             }
         }
-        return _singleton;
+        return _reference;
     }
 
     void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA rgba) const {
         if (clippingSpacePoints.size() == 0) {
+            // nothing to render
             return;
         }
 
+        // Generate a vao, vertex array object (keeping track of pointers to vbo)
         GLuint _vaoID;
         glGenVertexArrays(1, &_vaoID);
         ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
+        // Generate a vbo, vertex buffer object (storeing actual data)
         GLuint _vertexBufferID;
         glGenBuffers(1, &_vertexBufferID);
         ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
+        // Activate the shader program and set the uniform color within the shader
         _programObject->activate();
         _programObject->setUniform("color", rgba);
 
-
         glBindVertexArray(_vaoID);
-
-
-        // Vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
         glBufferData(
             GL_ARRAY_BUFFER,
@@ -96,30 +101,29 @@ namespace openspace {
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
 
-        // uniforms
-
-
-
+        // Draw the vertices
         glDrawArrays(mode, 0, clippingSpacePoints.size());
+
+        // Check for errors
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
             LERROR(error);
         }
         
+        // Clean up after the draw call was made
         glBindVertexArray(0);
-
         glDeleteVertexArrays(1, &_vaoID);
         glDeleteBuffers(1, &_vertexBufferID);
         _programObject->deactivate();
-
     }
 
     void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
-        const std::vector<glm::vec4>& V = clippingSpaceBoxCorners;
+        ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+        const Vertices& V = clippingSpaceBoxCorners;
+
         std::vector<glm::vec4> T;
 
-        // add "sides";
-
+        // add "sides"
         T.push_back(V[1]); T.push_back(V[0]); T.push_back(V[4]);
         T.push_back(V[4]); T.push_back(V[5]); T.push_back(V[1]);
 
@@ -143,9 +147,12 @@ namespace openspace {
         renderVertices(T, GL_TRIANGLES, rgba);
     }
 
-    void DebugRenderer::renderBoxEdges(const Vertices& clippingSpacePoints, RGBA rgba) const {
-        const std::vector<glm::vec4>& V = clippingSpacePoints;
+    void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
+        ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
+        const Vertices& V = clippingSpaceBoxCorners;
+
         std::vector<glm::vec4> lineVertices;
+        
         for (size_t i = 0; i < 4; i++) {
             lineVertices.push_back(V[2 * i]);
             lineVertices.push_back(V[2 * i + 1]);
@@ -159,17 +166,17 @@ namespace openspace {
         DebugRenderer::ref()->renderVertices(lineVertices, GL_LINES, rgba);
     }
 
-    void DebugRenderer::renderNiceBox(const Vertices& clippingSpacePoints, RGBA rgba) const {
-        renderBoxFaces(clippingSpacePoints, rgba);
+    void DebugRenderer::renderNiceBox(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
+        renderBoxFaces(clippingSpaceBoxCorners, rgba);
 
         glLineWidth(4.0f);
-        DebugRenderer::ref()->renderBoxEdges(clippingSpacePoints, rgba);
+        DebugRenderer::ref()->renderBoxEdges(clippingSpaceBoxCorners, rgba);
 
         glPointSize(10.0f);
-        DebugRenderer::ref()->renderVertices(clippingSpacePoints, GL_POINTS, rgba);
+        DebugRenderer::ref()->renderVertices(clippingSpaceBoxCorners, GL_POINTS, rgba);
     }
 
-    void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& otherCamera) const {
+    void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& otherCamera, RGBA rgba) const {
         using namespace glm;
         dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
@@ -177,7 +184,7 @@ namespace openspace {
 
         dmat4 inverseSavedV = glm::inverse(otherCamera.combinedViewMatrix());
         dmat4 inverseSavedP = glm::inverse(otherCamera.projectionMatrix());
-        std::vector<glm::vec4> clippingSpaceFrustumCorners(8);
+        Vertices clippingSpaceFrustumCorners(8);
         // loop through the corners of the saved camera frustum
         for (size_t i = 0; i < 8; i++) {
             bool cornerIsRight = i % 2 == 0;
@@ -203,13 +210,12 @@ namespace openspace {
 
 
         glDisable(GL_CULL_FACE);
-        vec4 color(1, 1, 1, 0.3);
-        renderNiceBox(clippingSpaceFrustumCorners, color);
+        renderNiceBox(clippingSpaceFrustumCorners, rgba);
         glEnable(GL_CULL_FACE);
     }
     
     void DebugRenderer::renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba) const {
-        std::vector<vec4> vertices(4);
+        Vertices vertices(4);
         vertices[0] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
         vertices[1] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
         vertices[2] = vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1);
@@ -219,7 +225,7 @@ namespace openspace {
     }
 
     const DebugRenderer::Vertices DebugRenderer::verticesFor(const AABB3& screenSpaceAABB) const {
-        std::vector<vec4> vertices(8);
+        Vertices vertices(8);
         for (size_t i = 0; i < 8; i++) {
             bool cornerIsRight = i % 2 == 0;
             bool cornerIsUp = i > 3;
