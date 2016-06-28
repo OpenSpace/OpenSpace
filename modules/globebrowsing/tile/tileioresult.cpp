@@ -29,7 +29,7 @@
 #include <ghoul/filesystem/filesystem.h> // abspath
 #include <ghoul/misc/assert.h>
 
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileioresult.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
 

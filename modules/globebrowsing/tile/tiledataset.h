@@ -25,25 +25,20 @@
 #ifndef __TILE_DATASET_H__
 #define __TILE_DATASET_H__
 
-//#include <modules/globebrowsing/other/tileprovider.h>
-
-#include <ghoul/opengl/texture.h>
-#include <modules/globebrowsing/tile/tileioresult.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/other/threadpool.h>
-
-#include <ghoul/filesystem/file.h>
-
-
-#include "gdal_priv.h"
-
-
 #include <memory>
 #include <set>
 #include <queue>
 #include <iostream>
 
+#include "gdal_priv.h"
 
+#include <ghoul/filesystem/file.h>
+#include <ghoul/opengl/texture.h>
+
+#include <modules/globebrowsing/tile/tileioresult.h>
+#include <modules/globebrowsing/tile/tiledatatype.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
 namespace openspace {
     using namespace ghoul::opengl;
@@ -73,7 +68,6 @@ namespace openspace {
             GDALDataType gdalType;
             GLuint glType;
 
-
             size_t bytesPerDatum;
             size_t numRasters;
             size_t bytesPerPixel;
@@ -96,10 +90,7 @@ namespace openspace {
 
         struct GdalDataRegion {
 
-            GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex,
-                int tileLevelDifference);
-
-            const ChunkIndex chunkIndex;
+            GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex, int tileLevelDifference);
 
             glm::uvec2 pixelStart;
             glm::uvec2 pixelEnd;
@@ -122,28 +113,14 @@ namespace openspace {
         TileDepthTransform calculateTileDepthTransform();
 
 
-        static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
-
         static glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
-        static GLuint getOpenGLDataType(GDALDataType gdalType);
-
-        static GDALDataType getGdalDataType(GLuint glType);
-
-        static TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
-
-        static size_t numberOfBytes(GDALDataType gdalType);
 
         std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
             const GdalDataRegion& region, const DataLayout& dataLayout);
 
-        typedef std::function<float(const char*)> ValueReader;
-        static ValueReader getValueReader(GDALDataType gdalType);
 
-        static float readFloat(GDALDataType gdalType, const char* src);
-
-
-        static size_t getMaximumValue(GDALDataType gdalType);
+        static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
 
         static char* getImageDataFlippedY(const GdalDataRegion& region,
             const DataLayout& dataLayout, const char* imageData);
