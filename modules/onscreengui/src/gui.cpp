@@ -232,8 +232,8 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
     style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
     style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.0f, 0.43f, 0.8f, 1.0f);
-    style.Colors[ImGuiCol_Header] = ImVec4(0.34f, 0.5f, 0.9f, 0.45f);
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.34f, 0.5f, 0.9f, 0.8f);
+    style.Colors[ImGuiCol_Header] = ImVec4(0.f, 0.36f, 0.67f, 0.45f);
+    style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.f, 0.54f, 1.0f, 0.8f);
     style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.53f, 0.63f, 0.87f, 0.8f);
     style.Colors[ImGuiCol_ResizeGrip] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     style.Colors[ImGuiCol_CloseButton] = ImVec4(0.75f, 0.75f, 0.75f, 1.0f);
@@ -480,6 +480,14 @@ void GUI::render() {
 #if 0
     ImGui::Begin("Style Editor");
     ImGui::ShowStyleEditor();
+    ImGui::End();
+
+    ImGui::Begin("Test Window");
+    ImGui::ShowTestWindow();
+    ImGui::End();
+
+    ImGui::Begin("Metrics Window");
+    ImGui::ShowMetricsWindow();
     ImGui::End();
 #endif
 
