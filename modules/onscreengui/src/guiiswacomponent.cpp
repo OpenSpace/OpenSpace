@@ -71,21 +71,80 @@ void GuiIswaComponent::render() {
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
     // ImGui::Text("Global Magnetosphere");
-    ImGui::Checkbox("Global Magnetosphere From Data", &_gmdata);
-    ImGui::Checkbox("Global Magnetosphere From Images", &_gmimage);
 
-    // ImGui::Text("Ionosphere");
-    ImGui::Checkbox("Ionosphere From Data", &_iondata);
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+  if(ImGui::CollapsingHeader("Loaded Cdf Files")){
+        ImGui::Spacing();
+        ImGui::SameLine();
+        auto cdfInfo = IswaManager::ref().cdfInformation();
+
+        for(auto group : cdfInfo){
+            std::string groupName = group.first;
+
+            //if group does not exist in _cdfOptionsMap yet, create it and set selected to -1
+            if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
+                _cdfOptionsMap[groupName] = -1;
+            }
+
+            if(ImGui::CollapsingHeader((groupName+" Files").c_str())){
+                ImGui::Spacing();
+
+                // old selected index
+                int cdfOptionValue = _cdfOptionsMap[groupName];
+                auto cdfs = group.second;
+
+                // get new selected index from radio button
+                for(int i=0; i<cdfs.size(); i++){
+                    ImGui::Spacing();
+                    ImGui::SameLine();
+                    ImGui::Spacing();
+                    ImGui::SameLine();
+                    ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
+                }
+
+                //if different, add kameleon planes
+                int cdfOption = _cdfOptionsMap[groupName];
+                if(cdfOptionValue != cdfOption){
+                   // if(cdfOptionValue >= 0){
+                   //      groupName = cdfs[cdfOptionValue].group;
+                   //      // std::cout << groupName << std::endl;
+                   //      // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
+                   //  }
+
+                    std::string path  = cdfs[cdfOption].path;
+                    std::string date  = cdfs[cdfOption].date;
+                    groupName = cdfs[cdfOption].group;
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
+                    OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
+                    OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
+                }
+            }
+        }
+    }
+#endif
 
 
-    ImGui::Spacing();
-    static const int addCygnetBufferSize = 256;
-    static char addCygnetBuffer[addCygnetBufferSize];
-    ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+    if(ImGui::CollapsingHeader("OpenSpace Cygnets")){
+        ImGui::Spacing();
+        ImGui::SameLine();
+        ImGui::Checkbox("Global Magnetosphere From Data", &_gmdata);
 
-    if(ImGui::SmallButton("Add Cygnet"))
-        OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
-        // IswaManager::ref().setFit(std::stof(std::string(addCygnetBuffer)));
+        ImGui::Spacing();
+        ImGui::SameLine();
+        ImGui::Checkbox("Global Magnetosphere From Images", &_gmimage);
+
+        ImGui::Spacing();
+        ImGui::SameLine();
+        ImGui::Checkbox("Ionosphere From Data", &_iondata);
+    }
+
+    // static const int addCygnetBufferSize = 256;
+    // static char addCygnetBuffer[addCygnetBufferSize];
+    // ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+
+    // if(ImGui::SmallButton("Add Cygnet"))
+    //     OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
+    //     // IswaManager::ref().setFit(std::stof(std::string(addCygnetBuffer)));
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
@@ -120,51 +179,47 @@ void GuiIswaComponent::render() {
     }
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    if(ImGui::CollapsingHeader("Cdf files")){
-        auto cdfInfo = IswaManager::ref().cdfInformation();
+    if (ImGui::CollapsingHeader("iSWA Screen Space Cygntes")) {
 
-        for(auto group : cdfInfo){
-            std::string groupName = group.first;
+        auto map = IswaManager::ref().cygnetInformation();
+        for(auto cygnetInfo : map){
+            ImGui::Spacing();
+            ImGui::SameLine();
 
-            //if group does not exist in _cdfOptionsMap yet, create it and set selected to -1
-            if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
-                _cdfOptionsMap[groupName] = -1;
+            int id = cygnetInfo.first;
+            auto info = cygnetInfo.second;
+
+            bool selected = info->selected;
+            ImGui::Checkbox(info->name.c_str(), &info->selected);
+            ImGui::SameLine();
+
+            if(ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())){
+                ImGui::TextWrapped(info->description.c_str());
+                ImGui::Spacing();
             }
 
-            if(ImGui::CollapsingHeader(groupName.c_str())){
-                // old selected index
-                int cdfOptionValue = _cdfOptionsMap[groupName];
-                auto cdfs = group.second;
+            if(selected != info->selected){
+                if(info->selected){
+                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
+                        "{CygnetId = "+std::to_string(id)+" });");
+                }else{
+                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
 
-                // get new selected index from radio button
-                for(int i=0; i<cdfs.size(); i++){
-                    ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
-                }
-
-                //if different, add kameleon planes
-                int cdfOption = _cdfOptionsMap[groupName];
-                if(cdfOptionValue != cdfOption){
-                   // if(cdfOptionValue >= 0){
-                   //      groupName = cdfs[cdfOptionValue].group;
-                   //      // std::cout << groupName << std::endl;
-                   //      // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
-                   //  }
-
-                    std::string path  = cdfs[cdfOption].path;
-                    std::string date  = cdfs[cdfOption].date;
-                    groupName = cdfs[cdfOption].group;
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
-                    OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
-                    OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
                 }
             }
+
         }
     }
 #endif
 
+
+    ImGui::Spacing();
+    ImGui::Spacing();
     for (const auto& p : _propertiesByOwner) {
         if (ImGui::CollapsingHeader(p.first.c_str())) {
             for (properties::Property* prop : p.second) {
+                ImGui::Spacing();
+                ImGui::SameLine();
                 if (_boolProperties.find(prop) != _boolProperties.end()) {
                     renderBoolProperty(prop, p.first);
                     continue;
@@ -217,38 +272,6 @@ void GuiIswaComponent::render() {
             }
         }
     }
-
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {
-
-        auto map = IswaManager::ref().cygnetInformation();
-        for(auto cygnetInfo : map){
-            int id = cygnetInfo.first;
-            auto info = cygnetInfo.second;
-
-            bool selected = info->selected;
-            ImGui::Checkbox(info->name.c_str(), &info->selected);
-            ImGui::SameLine();
-
-            if(ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())){
-                ImGui::TextWrapped(info->description.c_str());
-                ImGui::Spacing();
-            }
-
-            if(selected != info->selected){
-                if(info->selected){
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
-                        "{CygnetId = "+std::to_string(id)+" });");
-                }else{
-                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
-
-                }
-            }
-
-        }
-    }
-#endif
     
     ImGui::End();
 }

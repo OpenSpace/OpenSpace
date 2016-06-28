@@ -82,12 +82,17 @@ using namespace openspace::properties;
         ImGui::PushID((ownerName + "." + name).c_str());
 
         if (ImGui::CollapsingHeader(name.c_str())) {
+            
             const std::vector<SelectionProperty::Option>& options = p->options();
             std::vector<int> newSelectedIndices;
 
             std::vector<int> selectedIndices = p->value();
 
             for (int i = 0; i < options.size(); ++i) {
+                ImGui::Spacing();
+                ImGui::SameLine();
+                ImGui::Spacing();
+                ImGui::SameLine();
                 std::string description = options[i].description;
                 bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
                 ImGui::Checkbox(description.c_str(), &selected);
