@@ -81,7 +81,7 @@ namespace openspace {
         static TimeFormat* getProvider(const std::string& format);
         static void init();
 
-        static std::unordered_map<std::string, TimeFormat*> _timeIdProviderMap;
+        static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
         static bool initialized;
     };
 
@@ -123,7 +123,7 @@ namespace openspace {
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
-        virtual void prerender();
+        virtual void update();
         virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
 
 

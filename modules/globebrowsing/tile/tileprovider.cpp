@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tilediskcache.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
@@ -34,6 +35,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+
 
 #include <sstream>
 
@@ -49,13 +51,12 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
-
-
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
         : _asyncTextureDataProvider(tileReader)
         , _tileCache(tileCache)
+        , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
         , _framesSinceLastRequestFlush(0)
     {
         
@@ -67,7 +68,7 @@ namespace openspace {
     }
 
 
-    void CachingTileProvider::prerender() {
+    void CachingTileProvider::update() {
         initTexturesFromLoadedData();
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();
@@ -87,7 +88,7 @@ namespace openspace {
             return tile;
         }
 
-        HashKey key = chunkIndex.hashKey();
+        ChunkHashKey key = chunkIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key);
@@ -98,7 +99,6 @@ namespace openspace {
         
         return tile;
     }
-
 
     void CachingTileProvider::initTexturesFromLoadedData() {
         while (_asyncTextureDataProvider->hasLoadedTextureData()) {
@@ -118,7 +118,7 @@ namespace openspace {
             return Tile::Status::OutOfRange;
         }
 
-        HashKey key = chunkIndex.hashKey();
+        ChunkHashKey key = chunkIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key).status;
@@ -129,7 +129,7 @@ namespace openspace {
 
 
     Tile CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
-        HashKey hashkey = chunkIndex.hashKey();
+        ChunkHashKey hashkey = chunkIndex.hashKey();
         if (_tileCache->exist(hashkey)) {
             return _tileCache->get(hashkey);
         }
@@ -145,7 +145,7 @@ namespace openspace {
 
 
     void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
-        HashKey key = tileIOResult->chunkIndex.hashKey();
+        ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
             tileIOResult->imageData,
@@ -155,13 +155,13 @@ namespace openspace {
             dataLayout.glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
-        
+
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(texturePtr);
-        //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        texture->uploadTexture();
         
+        texture->uploadTexture();
+        // AnisotropicMipMap must be set after texture is uploaded. Why?!
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
         Tile tile = {
             texture,

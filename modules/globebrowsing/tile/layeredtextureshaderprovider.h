@@ -133,10 +133,10 @@ namespace openspace {
             std::array<
             std::array<
             GLint,
-            LayeredTextures::NUM_TEXTURE_CATEGORIES>,
+            NUM_TILE_DATA_VARIABLES>,
             LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
             NUM_BLEND_TEXTURES>,
-            NUM_TILE_DATA_VARIABLES>
+            LayeredTextures::NUM_TEXTURE_CATEGORIES>
             _tileUniformIds;
 
         LayeredTextureShaderProvider* _shaderProvider;

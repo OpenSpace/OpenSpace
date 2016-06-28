@@ -32,7 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <fstream>
-
+#include <list>
 /* TODO for this class:
 *  In order to add geometry shader (for pretty-draw),
 *  need to pack each consecutive point pair into a vec2

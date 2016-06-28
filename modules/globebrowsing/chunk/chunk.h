@@ -60,8 +60,6 @@ namespace openspace {
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);
-        void render(const RenderData& data) const;
-
 
         std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
 

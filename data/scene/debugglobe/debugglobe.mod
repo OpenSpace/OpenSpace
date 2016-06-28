@@ -28,10 +28,13 @@ return {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
             Body = "EARTH",
-            Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            --Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            CameraMinHeight = 1000,
+            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             TextureInitData = {
-                ColorTextureMinimumSize = 1024,
+                ColorTextureMinimumSize = 512,
                 OverlayMinimumSize = 2048,
                 HeightMapMinimumSize = 64,
             },
@@ -55,6 +58,18 @@ return {
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        Enabled = false,
+                    },
+                                        {
+                        Name = "MARS_Viking_MDIM21",
+                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        Enabled = true,
+                    },
+                },
+                GrayScaleOverlays = {
+                    {
+                        Name = "CTX Mosaic",
+                        FilePath = "map_service_configs/CTX_Mosaic.xml",
                         Enabled = true,
                     },
                 },
@@ -69,6 +84,11 @@ return {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
+                        Enabled = false,
+                    },
+                    {
+                        Name = "Mola Elevation",
+                        FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
                     },
                 },

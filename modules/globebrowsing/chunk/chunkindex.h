@@ -27,6 +27,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <stdint.h>
 
 
 
@@ -51,7 +52,7 @@ enum CardinalDirection {
 
 
 
-using HashKey = unsigned long;
+using ChunkHashKey = uint64_t;
 
 
 struct ChunkIndex {
@@ -107,7 +108,7 @@ struct ChunkIndex {
 
     int manhattan(const ChunkIndex& other) const;
 
-    HashKey hashKey() const;
+    ChunkHashKey hashKey() const;
 
     bool operator==(const ChunkIndex& other) const;
 };

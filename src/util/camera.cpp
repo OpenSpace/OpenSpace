@@ -35,7 +35,7 @@ namespace openspace {
     //								        CAMERA	                                    //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, -1);
+    const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, 1);
     const Camera::Vec3 Camera::_LOOKUP_VECTOR_CAMERA_SPACE = Camera::Vec3(0, 1, 0);
 
     Camera::Camera()
@@ -188,6 +188,22 @@ namespace openspace {
         _scaling.postSynchronizationPreDraw();
 
         _cachedViewDirection.isDirty = true;
+    }
+
+    void Camera::serialize(std::ostream& os) const {
+        Vec3 p = positionVec3();
+        Quat q = rotationQuaternion();
+        os << p.x << " " << p.y << " " << p.z << std::endl;
+        os << q.x << " " << q.y << " " << q.z << " " << q.w << std::endl;
+    }
+
+    void Camera::deserialize(std::istream& is) {
+        Vec3 p;
+        Quat q;
+        is >> p.x >> p.y >> p.z;
+        is >> q.x >> q.y >> q.z >> q.w;
+        setPositionVec3(p);
+        setRotation(q);
     }
 
     void Camera::preSynchronization() {

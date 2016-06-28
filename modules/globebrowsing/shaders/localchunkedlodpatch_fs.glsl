@@ -45,6 +45,12 @@ uniform Tile OverlaysParent1[NUMLAYERS_OVERLAY];
 uniform Tile OverlaysParent2[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
+#if USE_GRAYSCALE_OVERLAY
+uniform Tile GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY];
+uniform Tile GrayScaleOverlaysParent1[NUMLAYERS_GRAYSCALE_OVERLAY];
+uniform Tile GrayScaleOverlaysParent2[NUMLAYERS_GRAYSCALE_OVERLAY];
+#endif // USE_GRAYSCALE_OVERLAY
+
 #if USE_WATERMASK
 uniform Tile WaterMasks[NUMLAYERS_WATERMASK];
 uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
@@ -62,7 +68,7 @@ in vec3 ellipsoidNormalCameraSpace;
 Fragment getFragment() {
 	Fragment frag;
 
-	frag.color = vec4(1,1,1,1);
+	frag.color = vec4(0.1,0.1,0.1,1);
 
 #if USE_COLORTEXTURE
 
@@ -72,6 +78,18 @@ Fragment getFragment() {
 		ColorTextures,
 		ColorTexturesParent1,
 		ColorTexturesParent2);
+
+#endif // USE_COLORTEXTURE
+
+#if USE_GRAYSCALE_OVERLAY
+	
+	frag.color = calculateGrayScaleOverlay(
+		frag.color,
+		fs_uv,
+		levelWeights,
+		GrayScaleOverlays,
+		GrayScaleOverlaysParent1,
+		GrayScaleOverlaysParent2);
 
 #endif // USE_COLORTEXTURE
 

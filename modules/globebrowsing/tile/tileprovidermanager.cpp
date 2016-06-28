@@ -55,7 +55,8 @@ namespace openspace {
 
             if (i == LayeredTextures::ColorTextures ||
                 i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks) {
+                i == LayeredTextures::WaterMasks    ||
+                i == LayeredTextures::GrayScaleOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
             }
             else if (i == LayeredTextures::Overlays) {
@@ -77,6 +78,9 @@ namespace openspace {
                 _layerCategories[i],
                 texturesDict,
                 initData);
+
+            // init level blending to be true
+            levelBlendingEnabled[i] = true;
         }
     }
 
@@ -115,31 +119,30 @@ namespace openspace {
         const TileProviderInitData& initData)
     {
         std::shared_ptr<TileProvider> tileProvider;
-        CPLXMLNode * node = CPLParseXMLFile(file.c_str());
-        if (!node) {
-            throw ghoul::RuntimeError("Unable to parse XML:\n" + file);
-        }
-        if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
-            tileProvider = std::shared_ptr<TileProvider>(
-                new TemporalTileProvider(file, initData));
+
+        try
+        {   // First try reading normally
+            auto tileDataset = std::make_shared<TileDataset>(file, initData.minimumPixelSize, initData.preprocessTiles);
+            auto threadPool = std::make_shared<ThreadPool>(1);
+            auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
+            auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
+            tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);
+
             return tileProvider;
         }
-
-        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(file, initData.minimumPixelSize, initData.preprocessTiles));
-
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(1));
-
-        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-            new AsyncTileDataProvider(tileDataset, threadPool));
-
-        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(initData.cacheSize));
-
-        tileProvider = std::shared_ptr<TileProvider>(
-            new CachingTileProvider(tileReader, tileCache, initData.framesUntilRequestQueueFlush));
-
-        return tileProvider;
+        catch (const ghoul::RuntimeError& e)
+        {   // Then try to see if it is a temporal dataset.
+            CPLXMLNode * node = CPLParseXMLFile(file.c_str());
+            if (!node) {
+                throw ghoul::RuntimeError("Unable to parse file:\n" + file);
+            }
+            if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
+                tileProvider = std::make_shared<TemporalTileProvider>(file, initData);
+                return tileProvider;
+            }
+            // If still not able to read, throw the error.
+            throw ghoul::RuntimeError(e.message);
+        }
     }
 
     TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)
@@ -147,11 +150,17 @@ namespace openspace {
         return _layerCategories[category];
     }
 
-    void TileProviderManager::prerender() {
-        for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory) {
+// <<<<<<< HEAD:modules/globebrowsing/tile/tileprovidermanager.cpp
+//     void TileProviderManager::prerender() {
+//         for (auto layerCategory : _layerCategories) {
+//             for (auto tileProviderWithName : layerCategory) {
+// =======
+    void TileProviderManager::update() {
+        for each (auto layerCategory in _layerCategories) {
+            for each (auto tileProviderWithName in layerCategory) {
+// >>>>>>> feature/globebrowsing:modules/globebrowsing/tile/TileProviderManager.cpp
                 if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->prerender();
+                    tileProviderWithName.tileProvider->update();
                 }
             }
         }
