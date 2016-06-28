@@ -28,7 +28,7 @@
 //#include <modules/globebrowsing/other/tileprovider.h>
 
 #include <ghoul/opengl/texture.h>
-
+#include <modules/globebrowsing/tile/tileioresult.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/other/threadpool.h>
 
@@ -48,47 +48,6 @@
 namespace openspace {
     using namespace ghoul::opengl;
     using namespace ghoul::filesystem;
-
-    struct TilePreprocessData {
-        std::vector<float> maxValues;
-        std::vector<float> minValues;
-
-        void serialize(std::ostream& s);
-        static TilePreprocessData deserialize(std::istream& s);
-    };
-
-    struct TextureFormat {
-        Texture::Format ghoulFormat;
-        GLuint glFormat;
-    };
-
-
-    struct TileIOResult {
-        TileIOResult();
-
-        void* imageData;
-        glm::uvec3 dimensions;
-        std::shared_ptr<TilePreprocessData> preprocessData;
-        ChunkIndex chunkIndex;
-        CPLErr error;
-        size_t nBytesImageData;
-
-        void serializeMetaData(std::ostream& s);
-        static TileIOResult deserializeMetaData(std::istream& s);
-   
-        static TileIOResult createDefaultRes();
-
-    };
-
-
-
-
-    struct TileDepthTransform {
-        float depthScale;
-        float depthOffset;
-    };
-
-
 
     class TileDataset {
     public:
