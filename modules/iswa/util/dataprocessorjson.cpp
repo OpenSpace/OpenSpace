@@ -134,8 +134,7 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data, cons
                 }
             }
         }
-        
-        calculateFilterValues(selectedOptions);
+        //calculateFilterValues(selectedOptions);
         return dataOptions;
     }
     return std::vector<float*>();

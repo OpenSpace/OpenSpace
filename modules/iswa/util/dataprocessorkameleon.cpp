@@ -130,7 +130,7 @@ std::vector<float*> DataProcessorKameleon::processData(const std::string& path, 
             }
         }
 
-        calculateFilterValues(selectedOptions);
+        //calculateFilterValues(selectedOptions);
         return dataOptions;
     }
     return std::vector<float*>(numOptions, nullptr);

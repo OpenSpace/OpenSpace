@@ -210,7 +210,7 @@ std::vector<float*> DataProcessorText::processData(const std::string& data, cons
             numValues++;
         }
 
-        calculateFilterValues(selectedOptions);
+        //calculateFilterValues(selectedOptions);
 
         return dataOptions;
     }

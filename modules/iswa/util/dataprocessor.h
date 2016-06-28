@@ -70,6 +70,7 @@ public:
      * @return Processed data
      */
     virtual std::vector<float*> processData(const std::string& data, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions) = 0;
+    void calculateFilterValues(std::vector<int> selectedOptions);
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);
@@ -82,7 +83,6 @@ public:
 protected:
     float processDataPoint(float value, int option);
     void initializeVectors(int numOptions);
-    void calculateFilterValues(std::vector<int> selectedOptions);
     void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
 
     std::vector<float> _min; 
