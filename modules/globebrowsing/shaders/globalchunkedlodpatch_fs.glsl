@@ -82,6 +82,8 @@ Fragment getFragment() {
 		ColorTexturesParent1,
 		ColorTexturesParent2);
 
+#else 
+	frag.color = calculateDebugColor(fs_uv, fs_position);
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALE_OVERLAY
