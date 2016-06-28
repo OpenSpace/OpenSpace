@@ -32,21 +32,15 @@
 namespace openspace {
 namespace gui {
 
-struct RadioOption {
-    int value;
-    std::string path;
-    std::string date;
-};
-
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
     GuiIswaComponent();
     void render() override;
 
 private:
-    bool _gmdata;
-    bool _gmimage;
-    bool _iondata;
+    bool _gmData;
+    bool _gmImage;
+    bool _ionData;
 
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;

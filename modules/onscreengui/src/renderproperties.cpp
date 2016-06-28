@@ -21,24 +21,18 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/onscreengui/include/renderproperties.h>
+
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
-
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <openspace/engine/openspaceengine.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-
 #include "imgui.h"
-
 
 namespace openspace {
 
@@ -126,7 +120,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
     ImGui::InputText(name.c_str(), buffer, bufferSize);
     std::string newValue(buffer);
 
-    if (newValue != p->value() && FileSys.fileExists(newValue))
+    if (newValue != p->value())
         executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
 
     ImGui::PopID();

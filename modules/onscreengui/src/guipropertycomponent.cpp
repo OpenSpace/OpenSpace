@@ -23,21 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/onscreengui/include/guipropertycomponent.h>
+
 #include <modules/onscreengui/include/renderproperties.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
 #include "imgui.h"
 
 namespace {
@@ -55,14 +45,6 @@ GuiPropertyComponent::GuiPropertyComponent(std::string name)
 void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
 }
-
-//void GuiPropertyComponent::registerPropertyOwner(properties::PropertyOwner* owner) {
-//    _owners.push_back(owner);
-//}
-//
-//void GuiPropertyComponent::unregisterPropertyOwner(properties::PropertyOwner* owner) {
-//    _owners.erase(std::find(_owners.begin(), _owners.end(), owner));
-//}
 
 void GuiPropertyComponent::render() {
     ImGui::Begin(_name.c_str(), &_isEnabled, size, 0.5f);
@@ -88,8 +70,9 @@ void GuiPropertyComponent::render() {
 
             if (header()) {
                 for (properties::Property* prop : pOwner->propertiesRecursive()) {
-                    if (prop->isVisible())
+                    if (prop->isVisible()) {
                         renderProperty(prop, pOwner);
+                    }
                 }
             }
         }
@@ -114,8 +97,9 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop, properties
     };
 
     auto it = FunctionMapping.find(prop->className());
-    if (it != FunctionMapping.end())
+    if (it != FunctionMapping.end()) {
         it->second(prop, owner->name());
+    }
 }
 
 } // gui

@@ -70,6 +70,7 @@
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/iswa/rendering/iswagroup.h>
 #include <modules/iswa/util/iswamanager.h>
 #endif
 
@@ -458,7 +459,23 @@ bool OpenSpaceEngine::initialize() {
         }
     );
 
-
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    OsEng.gui()._iswa.setSource(
+        [&]() {
+            const auto& groups = IswaManager::ref().groups();
+            std::vector<properties::PropertyOwner*> res;
+            std::transform(
+                groups.begin(),
+                groups.end(),
+                std::back_inserter(res),
+                [](const auto& val) {
+                    return val.second.get(); 
+                }
+            );
+            return res;
+        }
+    );
+#endif
     
 #endif
 

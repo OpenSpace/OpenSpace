@@ -47,9 +47,6 @@ const std::string GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;
-GLint positionLocation = 0;
-GLint uvLocation = 0;
-GLint colorLocation = 0;
 // A VBO max size of 0 will cause a lazy instantiation of the buffer
 size_t vboMaxSize = 0;
 GLuint vao = 0;
@@ -271,17 +268,13 @@ void GUI::initializeGL() {
     if (!_program)
         return;
 
-    positionLocation = glGetAttribLocation(*_program, "in_position");
-    uvLocation = glGetAttribLocation(*_program, "in_uv");
-    colorLocation = glGetAttribLocation(*_program, "in_color");
-
-    unsigned char* png_data;
-    int tex_x, tex_y;
-    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&png_data, &tex_x, &tex_y);
+    unsigned char* pngData;
+    glm::ivec2 textureSize;
+    ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&pngData, &textureSize.x, &textureSize.y);
 
     _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-        png_data,
-        glm::uvec3(tex_x, tex_y, 1)
+        pngData,
+        glm::uvec3(textureSize.x, textureSize.y, 1)
     );
     _fontTexture->setName("Gui Text");
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
@@ -291,16 +284,15 @@ void GUI::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
     
-
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glEnableVertexAttribArray(positionLocation);
-    glEnableVertexAttribArray(uvLocation);
-    glEnableVertexAttribArray(colorLocation);
+    glEnableVertexAttribArray(_program->attributeLocation("in_position"));
+    glEnableVertexAttribArray(_program->attributeLocation("in_uv"));
+    glEnableVertexAttribArray(_program->attributeLocation("in_color"));
 
     glVertexAttribPointer(
-        positionLocation,
+        _program->attributeLocation("in_position"),
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -308,7 +300,7 @@ void GUI::initializeGL() {
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, pos))
     );
     glVertexAttribPointer(
-        uvLocation,
+        _program->attributeLocation("in_uv"),
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -316,7 +308,7 @@ void GUI::initializeGL() {
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
     glVertexAttribPointer(
-        colorLocation,
+        _program->attributeLocation("in_color"),
         4,
         GL_UNSIGNED_BYTE,
         GL_TRUE,
@@ -336,6 +328,7 @@ void GUI::initializeGL() {
 
 void GUI::deinitializeGL() {
     _program = nullptr;
+    _fontTexture = nullptr;
 
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
@@ -480,7 +473,7 @@ void GUI::render() {
     static char addImageBuffer[addImageBufferSize];
     ImGui::InputText("addImage", addImageBuffer, addImageBufferSize);
 
-    if (ImGui::SmallButton("Add Image")){
+    if (ImGui::SmallButton("Add Image")) {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
