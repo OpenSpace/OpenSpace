@@ -25,6 +25,10 @@
 // open space includes
 #include <openspace/util/camera.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/query/query.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -34,6 +38,10 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //								        CAMERA	                                    //
     //////////////////////////////////////////////////////////////////////////////////////
+
+    namespace {
+        const std::string _loggerCat = "Camera";
+    }
 
     const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, -1);
     const Camera::Vec3 Camera::_LOOKUP_VECTOR_CAMERA_SPACE = Camera::Vec3(0, 1, 0);
@@ -212,41 +220,6 @@ namespace openspace {
         is >> q.x >> q.y >> q.z >> q.w;
         setPositionVec3(p);
         setRotation(q);
-    }
-    
-
-    void Camera::setStateFromDictionary(const ghoul::Dictionary& cameraDict) {
-        bool readSuccessful = true;
-
-        glm::dvec3 cameraPosition;
-        glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
-        readSuccessful &= cameraDict.getValue("CameraPosition", cameraPosition);
-        readSuccessful &= cameraDict.getValue("CameraRotation", cameraRotation);
-
-        if (!readSuccessful) {
-            throw ghoul::RuntimeError(
-                "CameraPosition and/or CameraRotation not defined in dictionary.");
-        }
-
-        setPositionVec3(cameraPosition);
-        setRotation(glm::dquat(
-            cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
-    }
-
-    ghoul::Dictionary Camera::getStateDictionary() {
-        glm::dvec3 cameraPosition;
-        glm::dquat quat;
-        glm::dvec4 cameraRotation;
-
-        cameraPosition = positionVec3();
-        quat = rotationQuaternion();
-        cameraRotation = glm::dvec4(quat.w, quat.x, quat.y, quat.z);
-        
-        ghoul::Dictionary cameraDict;
-        cameraDict.setValue("CameraPosition", cameraPosition);
-        cameraDict.setValue("CameraRotation", cameraRotation);
-
-        return cameraDict;
     }
 
     void Camera::preSynchronization() {

@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionhandler.h>
-//
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
@@ -40,6 +38,10 @@
 
 namespace {
     const std::string _loggerCat = "InteractionHandler";
+
+    const std::string KeyFocus = "Focus";
+    const std::string KeyPosition = "Position";
+    const std::string KeyRotation = "Rotation";
 }
 
 #include "interactionhandler_lua.inl"
@@ -673,10 +675,12 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
 
 void InteractionHandler::setInteractionModeToOrbital() {
     setInteractionMode(_orbitalInteractionMode);
+    LINFO("Interaction mode set to 'OrbitalInteractionMode'");
 }
 
 void InteractionHandler::setInteractionModeToGlobeBrowsing() { 
     setInteractionMode(_globebrowsingInteractionMode);
+    LINFO("Interaction mode set to 'GlobeBrowsingInteractionMode'");
 }
 
 void InteractionHandler::lockControls() {
@@ -737,12 +741,58 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
+void InteractionHandler::setStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+    bool readSuccessful = true;
+
+    std::string focus;
+    glm::dvec3 cameraPosition;
+    glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
+
+    readSuccessful &= cameraDict.getValue(KeyFocus, focus);
+    readSuccessful &= cameraDict.getValue(KeyPosition, cameraPosition);
+    readSuccessful &= cameraDict.getValue(KeyRotation, cameraRotation);
+
+    if (!readSuccessful) {
+        throw ghoul::RuntimeError(
+            "Position, Rotation and Focus need to be defined for camera dictionary.");
+    }
+
+    SceneGraphNode* node = sceneGraphNode(focus);
+    if (!node) {
+        throw ghoul::RuntimeError(
+            "Could not find a node in scenegraph called '" + focus + "'");
+    }
+
+    // Set state
+    setFocusNode(node);
+    _camera->setPositionVec3(cameraPosition);
+    _camera->setRotation(glm::dquat(
+        cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
+}
+
+ghoul::Dictionary InteractionHandler::getStateDictionary() {
+    glm::dvec3 cameraPosition;
+    glm::dquat quat;
+    glm::dvec4 cameraRotation;
+
+    cameraPosition = _camera->positionVec3();
+    quat = _camera->rotationQuaternion();
+    cameraRotation = glm::dvec4(quat.w, quat.x, quat.y, quat.z);
+
+    ghoul::Dictionary cameraDict;
+    cameraDict.setValue(KeyPosition, cameraPosition);
+    cameraDict.setValue(KeyRotation, cameraRotation);
+    cameraDict.setValue(KeyFocus, focusNode()->name());
+
+    return cameraDict;
+}
+
 void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
-        LDEBUG("Saving camera position: " << filepath);
+        LINFO("Saving camera position: " << filepath);
 
-        ghoul::Dictionary cameraDict = _camera->getStateDictionary();
+        ghoul::Dictionary cameraDict = getStateDictionary();
 
         // TODO : Should get the camera state as a dictionary and save the dictionary to
         // a file in form of a lua state and not use ofstreams here.
@@ -752,12 +802,13 @@ void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
         glm::dvec3 p = _camera->positionVec3();
         glm::dquat q = _camera->rotationQuaternion();
 
-        ofs << "return {" << std::endl;;
-        ofs << "    CameraPosition = {"
+        ofs << "return {" << std::endl;
+        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\"" << "," << std::endl;
+        ofs << "    " << KeyPosition << " = {"
             << std::to_string(p.x) << ", "
             << std::to_string(p.y) << ", "
             << std::to_string(p.z) << "}," << std::endl;
-        ofs << "    CameraRotation = {"
+        ofs << "    " << KeyRotation << " = {"
             << std::to_string(q.w) << ", "
             << std::to_string(q.x) << ", "
             << std::to_string(q.y) << ", "
@@ -769,14 +820,14 @@ void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
 }
 
 void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath) {
-    LDEBUG("Reading camera state from file: " << filepath);
+    LINFO("Reading camera state from file: " << filepath);
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 
     ghoul::Dictionary cameraDict;
     try {
         ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
-        _camera->setStateFromDictionary(cameraDict);
+        setStateFromDictionary(cameraDict);
         _cameraUpdatedFromScript = true;
     }
     catch (ghoul::RuntimeError& e) {

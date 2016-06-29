@@ -25,7 +25,6 @@
 namespace openspace {
 
 namespace luascriptfunctions {
-
 /**
  * \ingroup LuaScripts
  * setOrigin():
@@ -139,7 +138,6 @@ int setInteractionMode(lua_State* L) {
     else { // Default
         return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
     }
-
     return 0;
 }
 

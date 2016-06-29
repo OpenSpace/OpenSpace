@@ -198,6 +198,52 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
+    // Initialize all nodes
+    for (SceneGraphNode* node : _graph.nodes()) {
+        try {
+            bool success = node->initialize();
+            if (success)
+                LDEBUG(node->name() << " initialized successfully!");
+            else
+                LWARNING(node->name() << " not initialized.");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(_loggerCat + "(" + e.component + ")", e.what());
+        }
+    }
+
+    // update the position of all nodes
+    // TODO need to check this; unnecessary? (ab)
+    for (SceneGraphNode* node : _graph.nodes()) {
+        try {
+            node->update({ Time::ref().currentTime() });
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
+    }
+
+    for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
+        (*it)->calculateBoundingSphere();
+
+    // Read the camera dictionary
+    ghoul::Dictionary cameraDictionary;
+    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
+        OsEng.interactionHandler().setStateFromDictionary(cameraDictionary);
+    }
+
+    // explicitly update and sync the camera
+    Camera* c = OsEng.ref().renderEngine().camera();
+    c->preSynchronization();
+    c->postSynchronizationPreDraw();
+
+
+    // HOLY MOLY! This much code to read a camera state? Added the above code with
+    // functions to set camera state from a dictionary in interactio handler and commented
+    // away the below code.
+    // Also, the camera is now defined with a slightly different dictionary (no psc!) //KB
+
+    /*
     // TODO: Make it less hard-coded and more flexible when nodes are not found
     ghoul::Dictionary cameraDictionary;
     if (dictionary.getValue(KeyCamera, cameraDictionary)) {
@@ -357,7 +403,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // explicitly update and sync the camera
     c->preSynchronization();
     c->postSynchronizationPreDraw();
-
+    */
 
     for (SceneGraphNode* node : _graph.nodes()) {
         std::vector<properties::Property*> properties = node->propertiesRecursive();

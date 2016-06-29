@@ -127,8 +127,6 @@ namespace openspace {
         void serialize(std::ostream& os) const;
         void deserialize(std::istream& is);
         
-        void setStateFromDictionary(const ghoul::Dictionary& cameraDict);
-        ghoul::Dictionary getStateDictionary();
         /**
         Handles SGCT's internal matrices. Also caches a calculated viewProjection
         matrix. This is the data that is different for different cameras within

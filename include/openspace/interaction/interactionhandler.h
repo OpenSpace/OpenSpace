@@ -160,6 +160,7 @@ public:
     void setCamera(Camera* camera);
 
     // Interaction mode setters
+    void setStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionModeToOrbital();
     void setInteractionModeToGlobeBrowsing();
 
@@ -175,6 +176,7 @@ public:
     void update(double deltaTime);
 
     // Accessors
+    ghoul::Dictionary getStateDictionary();
     SceneGraphNode* const focusNode() const;
     Camera* const camera() const;
     const InputState& inputState() const;
