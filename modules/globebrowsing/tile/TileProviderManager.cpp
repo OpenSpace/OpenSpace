@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -100,17 +101,18 @@ namespace openspace {
             texDict.getValue("Name", name);
             texDict.getValue("FilePath", path);
 
+            std::string type = "LRUCaching"; // if type is unspecified
+            texDict.getValue("Type", type);
+
+            
+            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+            if (tileProvider == nullptr) {
+                continue;
+            }
+
             bool enabled = false; // defaults to false if unspecified
             texDict.getValue("Enabled", enabled);
 
-            std::shared_ptr<TileProvider> tileProvider;
-            try {
-                tileProvider = initProvider(path, initData);
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERROR(e.message);
-                continue;
-            }
             dest.push_back({ name, tileProvider, enabled });
         }
     }

@@ -41,10 +41,12 @@ return {
             Textures = {
                 ColorTextures = {
                     {
+                        Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
                         FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
+                        Type = "Temporal",
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
                         FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
                     },

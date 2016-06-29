@@ -22,62 +22,41 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __TILE_PROVIDER_FACTORY_H__
+#define __TILE_PROVIDER_FACTORY_H__
 
 
 #include <modules/globebrowsing/tile/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
 
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
-
 #include <ghoul/misc/dictionary.h>
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <functional>
 
 
 namespace openspace {
 
-    class TileProviderManager {
+    class TileProviderFactory {
     public:
 
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
+        static std::shared_ptr<TileProviderFactory> ref();
 
-        typedef std::vector<TileProviderWithName> LayerCategory;
-
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-        static ThreadPool tileRequestThreadPool;
-
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
-
-        void update();
-
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
-
+        std::shared_ptr<TileProvider> create(const std::string& type, const std::string& desc, const TileProviderInitData& initData);
 
     private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
 
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
+        TileProviderFactory();
+        void initialize();
 
-        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        typedef std::function<std::shared_ptr<TileProvider>(const std::string&, const TileProviderInitData&)> ConcreteFactory;
+
+        std::unordered_map<std::string, ConcreteFactory> _factoryMap;
+
+        static std::shared_ptr<TileProviderFactory> _ref;
     };
 
+  
 } // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+#endif  // __TILE_PROVIDER_FACTORY_H__

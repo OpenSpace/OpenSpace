@@ -78,6 +78,21 @@ namespace openspace {
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
 
 
+    class SingleImagePrivoder : public TileProvider {
+    public:
+        SingleImagePrivoder(const std::string& imagePath);
+        virtual ~SingleImagePrivoder() { }
+
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual int maxLevel();
+    private:
+        std::shared_ptr<Tile> _tile;
+    };
+
+
     /**
         Provides tiles through GDAL datasets which can be defined with xml files
         for example for wms.

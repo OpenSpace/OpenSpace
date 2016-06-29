@@ -51,6 +51,44 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
+    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath) {
+        auto texture = ghoul::io::TextureReader::ref().loadTexture(imagePath);
+        _tile = std::make_shared<Tile>();
+        _tile->texture = std::move(texture);
+        _tile->status = _tile->texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
+        _tile->preprocessData = nullptr;
+    }
+
+    Tile SingleImagePrivoder::getTile(const ChunkIndex& chunkIndex) {
+        return *_tile;
+    }
+
+    Tile::Status SingleImagePrivoder::getTileStatus(const ChunkIndex& index) {
+        return _tile->status;
+    }
+
+    TileDepthTransform SingleImagePrivoder::depthTransform() {
+        TileDepthTransform transform;
+        transform.depthOffset = 0.0f;
+        transform.depthScale = 1.0f;
+        return transform;
+    }
+
+    void SingleImagePrivoder::update() {
+        // nothing to be done
+    }
+
+    int SingleImagePrivoder::maxLevel() {
+        return 1337; // unlimited
+    }
+
+    
+
+
+
+
+
+
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)

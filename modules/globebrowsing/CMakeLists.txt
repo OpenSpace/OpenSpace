@@ -57,6 +57,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
 
@@ -102,6 +103,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
 
