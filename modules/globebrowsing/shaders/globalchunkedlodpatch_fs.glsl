@@ -83,7 +83,8 @@ Fragment getFragment() {
 		ColorTexturesParent2);
 
 #else 
-	frag.color = calculateDebugColor(fs_uv, fs_position);
+	vec2 vertexResolution = vec2(64.0);
+	frag.color = calculateDebugColor(fs_uv, fs_position, vertexResolution);
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALE_OVERLAY

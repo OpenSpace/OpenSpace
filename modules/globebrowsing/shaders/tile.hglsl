@@ -71,8 +71,18 @@ struct Tile {
 	TileUvTransform uvTransform;
 };
 
+vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 endOffset, const Tile tile, vec2 tileUV){
+	vec2 offset = endOffset - startOffset;
+	ivec2 resolution = textureSize(tile.textureSampler, 0);
 
-vec4 getTexVal(const Tile tile, const vec2 tileUV){
+	vec2 sourceSize = vec2(resolution) + offset;
+	vec2 currentSize = vec2(resolution);
+	vec2 oldToNewScale = currentSize / sourceSize;
+	tileUV = oldToNewScale * tileUV + startOffset / sourceSize;
+	return tileUV;
+}
+
+vec4 getTexVal(const Tile tile, vec2 tileUV){
 	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
 	vec4 texVal = texture(tile.textureSampler, samplePos);
 	return texVal;
