@@ -38,6 +38,12 @@ namespace openspace {
 
 using namespace properties;
 
+void renderTooltip(Property* prop) {
+    if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    }
+}
+
 void executeScript(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValue('" + id + "', " + value + ");";
@@ -51,8 +57,7 @@ void renderBoolProperty(Property* prop, const std::string& ownerName) {
 
     BoolProperty::ValueType value = *p;
     ImGui::Checkbox(name.c_str(), &value);
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
@@ -68,12 +73,11 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
     std::vector<OptionProperty::Option> options = p->options();
     for (const OptionProperty::Option& o : options) {
         ImGui::RadioButton(name.c_str(), &value, o.value);
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+
         ImGui::SameLine();
         ImGui::Text(o.description.c_str());
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+        renderTooltip(prop);
+
     }
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -93,10 +97,12 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
 
         for (int i = 0; i < options.size(); ++i) {
             std::string description = options[i].description;
-            bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
+            bool selected = std::find(
+                selectedIndices.begin(), selectedIndices.end(), i
+            ) != selectedIndices.end();
+
             ImGui::Checkbox(description.c_str(), &selected);
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+            renderTooltip(prop);
 
             if (selected)
                 newSelectedIndices.push_back(i);
@@ -127,8 +133,8 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
     strcpy(buffer, p->value().c_str());
 #endif
     ImGui::InputText(name.c_str(), buffer, bufferSize);
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
+
     std::string newValue(buffer);
 
     if (newValue != p->value())
@@ -147,8 +153,7 @@ void renderIntProperty(Property* prop, const std::string& ownerName) {
     int max = p->maxValue();
     
     ImGui::SliderInt(name.c_str(), &value, min, max);
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -165,8 +170,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     float min = p->minValue();
     float max = p->maxValue();
     ImGui::SliderFloat(name.c_str(), &value, min, max);
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -188,12 +192,13 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
         min,
         max
     );
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
-    if (value != p->value())
+    if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}");
+                      "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+        );
+    }
 
     ImGui::PopID();
 }
@@ -213,8 +218,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
         min,
         max
     );
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(),
@@ -242,8 +246,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
         min,
         max
     );
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(),
@@ -262,8 +265,7 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName) {
     bool pressed = ImGui::Button(name.c_str());
     if (pressed)
         executeScript(prop->fullyQualifiedIdentifier(), "nil");
-    if (ImGui::IsItemHovered())
-        ImGui::SetTooltip(prop->fullyQualifiedIdentifier().c_str());
+    renderTooltip(prop);
 
     ImGui::PopID();
 }

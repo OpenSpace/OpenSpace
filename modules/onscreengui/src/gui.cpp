@@ -39,6 +39,8 @@
 
 #include "gui_lua.inl"
 
+//#define SHOW_IMGUI_HELPERS
+
 namespace {
 
 const std::string _loggerCat = "GUI";
@@ -480,7 +482,7 @@ void GUI::render() {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
-#if 1
+#ifdef SHOW_IMGUI_HELPERS
     ImGui::Begin("Style Editor");
     ImGui::ShowStyleEditor();
     ImGui::End();
