@@ -29,6 +29,7 @@
 
 
 #include <fstream>
+#include <iomanip>
 #include <unordered_map>
 #include <vector>
 #include <set>
@@ -149,7 +150,7 @@ namespace openspace {
             , _enabled(enabled)
             , _delimiter(delimiter)
             , _hasWrittenHeader(false)
-            , i(TemplatedStatsCollector<int>(_enabled, delimiter))
+            , i(TemplatedStatsCollector<long long>(_enabled, delimiter))
             , d(TemplatedStatsCollector<double>(_enabled, delimiter))
         {
 
@@ -192,7 +193,7 @@ namespace openspace {
             }
         }
 
-        TemplatedStatsCollector<int> i;
+        TemplatedStatsCollector<long long> i;
         TemplatedStatsCollector<double> d;
 
     private:
@@ -215,6 +216,7 @@ namespace openspace {
 
         void writeData() {
             std::ofstream ofs(_filename, std::ofstream::out | std::ofstream::app);
+            ofs << std::setprecision(32);
             while (i.hasRecordsToWrite() || d.hasRecordsToWrite()) {
                 if (i.hasHeaders() && d.hasHeaders()) {
                     i.writeNextRecord(ofs); ofs << _delimiter; d.writeNextRecord(ofs);
