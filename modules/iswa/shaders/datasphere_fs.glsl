@@ -31,7 +31,7 @@ uniform sampler2D transferFunctions[6];
 
 uniform int numTextures;
 uniform int numTransferFunctions;
-uniform bool averageValues;
+//uniform bool averageValues;
 uniform vec2 backgroundValues;
 uniform float transparency;
 

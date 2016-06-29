@@ -69,8 +69,10 @@ bool DataCygnet::updateTexture(){
     if(data.empty())
         return false;
 
-    if(_autoFilter)
+    if(_autoFilter){
+        _dataProcessor->calculateFilterValues(_dataOptions.value());
         _backgroundValues.setValue(_dataProcessor->filterValues());
+    }
     
     bool texturesReady = false;
     std::vector<int> selectedOptions = _dataOptions.value();
