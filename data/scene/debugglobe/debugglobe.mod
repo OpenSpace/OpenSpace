@@ -32,7 +32,7 @@ return {
             Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
-            SegmentsPerPatch = 64,
+            SegmentsPerPatch = 90,
             TextureInitData = {
                 ColorTextureMinimumSize = 512,
                 OverlayMinimumSize = 2048,
@@ -43,22 +43,18 @@ return {
                     {
                         Name = "Temporal VIIRS SNPP",
                         FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
-                        Enabled = false,
                     },
                     {
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
                         FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
-                        Enabled = false,
                     },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
-                        Enabled = false,
                     },
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
-                        Enabled = false,
                     },
                     {
                         Name = "MARS_Viking_MDIM21",
@@ -77,14 +73,12 @@ return {
                     {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
-                        Enabled = false,
                     },
                 },
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
-                        Enabled = false,
                     },
                     {
                         Name = "Mola Elevation",
@@ -96,24 +90,20 @@ return {
                     {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/MODIS_Water_Mask.xml",
-                        Enabled = false,
                     },
                 },
                 Overlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/Coastlines.xml",
-                        Enabled = false,
                     },
                     {
                         Name = "Reference_Features",
                         FilePath = "map_service_configs/Reference_Features.xml",
-                        Enabled = false,
                     },
                     {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/Reference_Labels.xml",
-                        Enabled = false,
                     },
                 },
             },
