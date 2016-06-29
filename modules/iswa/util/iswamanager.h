@@ -136,7 +136,7 @@ private:
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
 
     LuaCygnetConverter _luaConverter;
-
+    
     float _fit;
 };
 

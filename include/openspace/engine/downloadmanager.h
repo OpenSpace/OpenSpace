@@ -94,6 +94,15 @@ public:
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
 
+    /**
+     * Downloads a file to memory. This is done in a separate thread if the 
+     * returned future object is kept alive.
+     * 
+     * @param url the url you want to request a file from
+     * @param successCallback optional callback that will be called when download is complete
+     * @param errorCallback optional callback that will be called when download has an error
+     * @return A future object with a shared state to a MemoryFile
+     */
     std::future<MemoryFile> fetchFile(
     const std::string& url,
     SuccessCallback successCallback = SuccessCallback(), ErrorCallback errorCallback = ErrorCallback());

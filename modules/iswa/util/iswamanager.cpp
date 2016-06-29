@@ -83,9 +83,10 @@ IswaManager::IswaManager()
     _geometryType[GeometryType::Plane] = "Plane";
     _geometryType[GeometryType::Sphere] = "Sphere";
 
-    DlManager.fetchFile(
+    std::future<DownloadManager::MemoryFile> futureMemoryFile;
+    futureMemoryFile = DlManager.fetchFile(
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
-        [this](const DownloadManager::MemoryFile& file){
+        [this, &futureMemoryFile](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
         },
         [](const std::string& err){
@@ -112,9 +113,11 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         meta->group = group;
         meta->resourceType = type;
 
-        // This callback determines what geometry should be used and creates the right cygbet
+        //have to keep the futureMemoryFile alive for the duration of the download to 
+        //keep it in a separate thread
+        std::future<DownloadManager::MemoryFile> futureMemoryFile;
         auto metadataCallback = 
-        [this, meta](const DownloadManager::MemoryFile& file){
+        [this, &meta, &futureMemoryFile](const DownloadManager::MemoryFile& file){
             std::string metadata(file.buffer, file.size);
             meta->json = metadata;
             createIswaCygnet(meta);
@@ -122,7 +125,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         };
 
         // Download metadata
-        DlManager.fetchFile(
+        futureMemoryFile = DlManager.fetchFile(
             baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
