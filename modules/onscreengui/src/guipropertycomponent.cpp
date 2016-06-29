@@ -48,10 +48,11 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
 
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     ImGui::PushID(owner->name().c_str());
-    for (properties::PropertyOwner* subOwner : owner->propertySubOwners()) {
-        if (subOwner->name() == "renderable")
+    const auto& subOwners = owner->propertySubOwners();
+    for (properties::PropertyOwner* subOwner : subOwners) {
+        if (subOwners.size() == 1) {
             renderPropertyOwner(subOwner);
-
+        }
         else {
             if (ImGui::TreeNode(subOwner->name().c_str())) {
                 renderPropertyOwner(subOwner);
@@ -60,7 +61,34 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         }
     }
 
-    for (properties::Property* prop : owner->properties()) {
+    ImGui::Spacing();
+
+    using Properties = std::vector<properties::Property*>;
+    std::map<std::string, Properties> propertiesByGroup;
+    Properties remainingProperies;
+
+    for (properties::Property* p : owner->properties()) {
+        std::string group = p->groupIdentifier();
+        if (group.empty()) {
+            remainingProperies.push_back(p);
+        }
+        else {
+            propertiesByGroup[group].push_back(p);
+        }
+    }
+
+    for (const std::pair<std::string, Properties>& p : propertiesByGroup) {
+        if (ImGui::TreeNode(p.first.c_str())) {
+            for (properties::Property* prop : p.second) {
+                renderProperty(prop, owner);
+            }
+            ImGui::TreePop();
+        }
+    }
+
+    ImGui::Spacing();
+
+    for (properties::Property* prop : remainingProperies) {
         if (prop->isVisible()) {
             renderProperty(prop, owner);
         }

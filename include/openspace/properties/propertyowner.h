@@ -82,7 +82,7 @@ public:
      * include Propertys owned by other sub-owners.
      * \return A list of all Propertys directly owned by this PropertyOwner
      */
-    const std::vector<Property*>& properties() const;
+    std::vector<Property*> properties() const;
 
     /**
      * Returns a list of all Propertys directly or indirectly owned by this PropertyOwner.
@@ -123,7 +123,7 @@ public:
      * this PropertyOwner.
      * \return A list of all sub-owners this PropertyOwner has
      */
-    const std::vector<PropertyOwner*>& propertySubOwners() const;
+    std::vector<PropertyOwner*> propertySubOwners() const;
 
     /**
      * This method returns the direct sub-owner of this PropertyOwner with the provided
@@ -160,7 +160,7 @@ public:
      * \return The human readable name for the Propertys identified by
      * <code>groupID</code>
      */
-    const std::string& propertyGroupName(const std::string& groupID) const;
+    std::string propertyGroupName(const std::string& groupID) const;
     
     /**
      * Assigns the Property <code>prop</code> to this PropertyOwner. This method will
