@@ -756,13 +756,21 @@ OrbitalInteractionMode::OrbitalInteractionMode(
     , _globalRotationMouseState(velocityScaleFactor)
     , _localRotationMouseState(velocityScaleFactor)
     , _truckMovementMouseState(velocityScaleFactor)
-    , _rollMouseState(velocityScaleFactor) {
+    , _rollMouseState(velocityScaleFactor)
+    , _rotationalFriction(true)
+    , _zoomFriction(true)
+{}
 
+OrbitalInteractionMode::~OrbitalInteractionMode() {}
+
+void OrbitalInteractionMode::setRotationalFriction(bool friction) {
+    _rotationalFriction = friction;
 }
 
-OrbitalInteractionMode::~OrbitalInteractionMode() {
-
+void OrbitalInteractionMode::setZoomFriction(bool friction) {
+    _zoomFriction = friction;
 }
+
 
 void OrbitalInteractionMode::updateMouseStatesFromInput(double deltaTime) {
     glm::dvec2 mousePosition = _inputState->getMousePosition();
@@ -794,10 +802,12 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(double deltaTime) {
     }
     else { // !button1Pressed
         _localRotationMouseState.previousPosition = mousePosition;
-        _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
-
         _globalRotationMouseState.previousPosition = mousePosition;
-        _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
+
+        if (_rotationalFriction) {
+            _localRotationMouseState.velocity.set(glm::dvec2(0, 0));
+            _globalRotationMouseState.velocity.set(glm::dvec2(0, 0));
+        }
     }
     if (button2Pressed) {
         glm::dvec2 mousePositionDelta =
@@ -806,7 +816,9 @@ void OrbitalInteractionMode::updateMouseStatesFromInput(double deltaTime) {
     }
     else { // !button2Pressed
         _truckMovementMouseState.previousPosition = mousePosition;
-        _truckMovementMouseState.velocity.set(glm::dvec2(0, 0));
+        if (_zoomFriction) {
+            _truckMovementMouseState.velocity.set(glm::dvec2(0, 0));
+        }
     }
     if (button3Pressed) {
         glm::dvec2 mousePositionDelta =
@@ -992,7 +1004,10 @@ void GlobeBrowsingInteractionMode::update(double deltaTime) {
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
-    , _coordinateSystem("coordinateSystem", "Coordinate System", "") {
+    , _coordinateSystem("coordinateSystem", "Coordinate System", "")
+    , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
+    , _zoomFriction("zoomFriction", "Zoom Friction", true)
+{
     setName("Interaction");
 
     _origin.onChange([this]() {
@@ -1010,6 +1025,7 @@ InteractionHandler::InteractionHandler()
     });
     addProperty(_coordinateSystem);
 
+
     // Create the interactionModes
     _inputState = std::shared_ptr<InputState>(new InputState());
     _orbitalInteractionMode = std::shared_ptr<OrbitalInteractionMode>(
@@ -1022,6 +1038,22 @@ InteractionHandler::InteractionHandler()
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
+
+    _rotationalFriction.onChange([&]() {
+        _orbitalInteractionMode->setRotationalFriction(_rotationalFriction);
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+        _globebrowsingInteractionMode->setRotationalFriction(_rotationalFriction);
+#endif
+    });
+    addProperty(_rotationalFriction);
+
+    _zoomFriction.onChange([&]() {
+        _orbitalInteractionMode->setZoomFriction(_zoomFriction);
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+        _globebrowsingInteractionMode->setZoomFriction(_zoomFriction);
+#endif
+    });
+    addProperty(_zoomFriction);
 }
 
 InteractionHandler::~InteractionHandler() {

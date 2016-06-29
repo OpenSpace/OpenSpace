@@ -67,9 +67,9 @@ public:
     GuiHelpComponent _help;
     GuiOriginComponent _origin;
     GuiPerformanceComponent _performance;
+    GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
-    GuiPropertyComponent _globalProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
 };

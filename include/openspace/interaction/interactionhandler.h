@@ -261,6 +261,10 @@ public:
     ~OrbitalInteractionMode();
 
     virtual void update(double deltaTime);
+
+    void setRotationalFriction(bool friction);
+    void setZoomFriction(bool friction);
+
 protected:
     void updateMouseStatesFromInput(double deltaTime);
     void updateCameraStateFromMouseStates();
@@ -274,6 +278,9 @@ protected:
 
     glm::dquat _localCameraRotation;
     glm::dquat _globalCameraRotation;
+
+    bool _rotationalFriction;
+    bool _zoomFriction;
 };
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
@@ -360,6 +367,9 @@ private:
     // Properties
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
+
+    properties::BoolProperty _rotationalFriction;
+    properties::BoolProperty _zoomFriction;
 };
 
 #endif // USE_OLD_INTERACTIONHANDLER

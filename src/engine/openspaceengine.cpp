@@ -440,7 +440,10 @@ bool OpenSpaceEngine::initialize() {
     _gui->initialize();
     _gui->_globalProperty.setSource(
             [&]() {
-            std::vector<properties::PropertyOwner*> res = { _settingsEngine.get() };
+            std::vector<properties::PropertyOwner*> res = {
+                _settingsEngine.get(),
+                _interactionHandler.get()
+            };
             return res;
         }
     );

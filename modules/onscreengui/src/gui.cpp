@@ -164,9 +164,9 @@ namespace gui {
 
 GUI::GUI() 
     : GuiComponent()
+    , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
-    , _globalProperty("Global")
 {}
 
 GUI::~GUI() {
@@ -369,12 +369,12 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 void GUI::endFrame() {
     render();
 
+    if (_globalProperty.isEnabled())
+        _globalProperty.render();
     if (_property.isEnabled())
         _property.render();
     if (_screenSpaceProperty.isEnabled())
         _screenSpaceProperty.render();
-    if (_globalProperty.isEnabled())
-        _globalProperty.render();
     if (_performance.isEnabled())
         _performance.render();
     if (_help.isEnabled())
