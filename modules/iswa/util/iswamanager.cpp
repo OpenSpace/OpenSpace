@@ -112,7 +112,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         meta->group = group;
         meta->resourceType = type;
 
-        // This callback determines what geometry should be used and creates the right cygbet
         auto metadataCallback = 
         [this, meta](const DownloadManager::MemoryFile& file){
             std::string metadata(file.buffer, file.size);

@@ -222,7 +222,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     SuccessCallback successCallback, ErrorCallback errorCallback)
 {
     LDEBUG("Start downloading file: '" << url << "' into memory");
-    
+
     auto downloadFunction = [url, successCallback, errorCallback]() {
         DownloadManager::MemoryFile file;
         file.buffer = (char*)malloc(1);
@@ -238,7 +238,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
             // Will fail when response status is 400 or above
             curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
-            
+
             CURLcode res = curl_easy_perform(curl);
             if(res == CURLE_OK){
                 // ask for the content-type
@@ -271,7 +271,13 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         }
     };
 
-    return std::move( std::async(std::launch::async, downloadFunction) );
+    //Create a packaged task
+    std::packaged_task<DownloadManager::MemoryFile()> downloadTask(downloadFunction);
+    //the future MemoryFile from downloadFunction
+    auto fut = downloadTask.get_future();
+    //start the packaged task is separate thread. (call downloadTask(); to make a thread blocking request)
+    std::thread(std::move(downloadTask)).detach();
+    return fut;
 }
 
 std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(
@@ -359,46 +365,6 @@ void DownloadManager::downloadRequestFilesAsync(const std::string& identifier,
     }
     else
         downloadFunction();
-}
-
-void DownloadManager::getFileExtension(const std::string& url,
-    RequestFinishedCallback finishedCallback){
-
-    auto requestFunction = [url, finishedCallback]() {
-        CURL* curl = curl_easy_init();
-        if (curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-            //USING CURLOPT NOBODY
-            curl_easy_setopt(curl, CURLOPT_NOBODY,1);
-            CURLcode res = curl_easy_perform(curl);
-            if(CURLE_OK == res) {
-                char *ct;
-                // ask for the content-type
-                res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);    
-                if ((res == CURLE_OK) && ct){
-
-                    if (finishedCallback)
-                        finishedCallback(std::string(ct));
-                }
-            }
-            
-/*            else
-                future->errorMessage = curl_easy_strerror(res);*/
-            
-            curl_easy_cleanup(curl);
-        }
-    };
-    if (_useMultithreadedDownload) {
-        using namespace ghoul::thread;
-        std::thread t = std::thread(requestFunction);
-        ghoul::thread::setPriority(
-            t, ThreadPriorityClass::Idle, ThreadPriorityLevel::Lowest
-        );
-        t.detach();
-    }
-    else {
-        requestFunction();
-    }
 }
 
 } // namespace openspace
