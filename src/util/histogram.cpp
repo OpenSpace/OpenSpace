@@ -330,11 +330,11 @@ void Histogram::print() const {
     std::cout << "number of bins: " << _numBins << std::endl
               << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
-        // float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
-        // float high = low + (_maxValue - _minValue) / float(_numBins);
-        // std::cout << i << " [" << low << ", " << high << "]"
-        //           << "   " << _data[i] << std::endl;
-        std::cout << _data[i]/(float)_numValues << ", ";
+        float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
+        float high = low + (_maxValue - _minValue) / float(_numBins);
+        std::cout << i << " [" << low << ", " << high << "]"
+                  << "   " << _data[i] << std::endl;
+        // std::cout << _data[i]/(float)_numValues << ", ";
     }
     std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
@@ -367,4 +367,19 @@ float Histogram::binWidth(){
     return (_maxValue-_minValue) / float(_numBins);
 }
 
+
+std::ostream& operator<<(std::ostream& os, const Histogram& hist){
+    int numBins = hist.numBins();
+    int numValues = hist.numValues();
+    const float* data = hist.data();
+
+    for (int i = 0; i < numBins; i++) {
+        // float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
+        // float high = low + (_maxValue - _minValue) / float(_numBins);
+        // std::cout << i << " [" << low << ", " << high << "]"
+        //           << "   " << _data[i] << std::endl;
+        os << data[i]/(float)numValues << ", ";
+    }
+    return os;
+}
 }
