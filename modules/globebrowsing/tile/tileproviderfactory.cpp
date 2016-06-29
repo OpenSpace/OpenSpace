@@ -85,7 +85,11 @@ namespace openspace {
                 return tileProvider;
             }
         }});
-
+        
+        _factoryMap.insert({ "SingleImage", [](const std::string& file, const TileProviderInitData& initData) {
+            auto tileProvider = std::make_shared<SingleImagePrivoder>(file);
+            return tileProvider;
+        } });
     }
 
 

@@ -46,10 +46,15 @@ return {
                         FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
+                        Type = "SingleImage",
+                        Name = "Debug Tiles",
+                        FilePath = "textures/test_tile.png",
+                    },
+                    --[[{
                         Type = "Temporal",
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
                         FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
-                    },
+                    },]]
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",

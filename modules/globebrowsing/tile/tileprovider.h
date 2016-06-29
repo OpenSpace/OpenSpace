@@ -89,7 +89,8 @@ namespace openspace {
         virtual void update();
         virtual int maxLevel();
     private:
-        std::shared_ptr<Tile> _tile;
+        Tile _tile;
+
     };
 
 
