@@ -77,6 +77,9 @@ void GuiPropertyComponent::render() {
         const std::vector<properties::PropertyOwner*>& owners = _function();
 
         for (properties::PropertyOwner* pOwner : owners) {
+            if (pOwner->propertiesRecursive().empty())
+                continue;
+
             auto header = [&]() -> bool {
                 if (owners.size() > 1) {
                     // Create a header in case we have multiple owners
