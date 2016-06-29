@@ -216,24 +216,5 @@ return {
             Type = "Static",
             Position = {0, 0, 0, 1}
         }, 
-    },
-        -- NAVCAM FoV square
-    {
-        Name = "FovImagePlane",
-        Parent = "Rosetta",
-        Renderable = {
-            Type = "RenderablePlaneProjection",
-            Frame = "67P/C-G_CK",
-            DefaultTarget = "CHURYUMOV-GERASIMENKO",
-            Spacecraft = "ROSETTA",
-            Instrument = "ROS_NAVCAM-A",
-            Moving = true,
-            Texture = "textures/squarefov.png",
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
-        },
     }
-
 }
