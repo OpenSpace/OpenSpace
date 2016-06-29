@@ -154,8 +154,8 @@ namespace openspace {
 
         // simply check the first heigtmap
         if (heightMapProviders.size() > 0) {
-            Tile::Status heightTileStatus = heightMapProviders[0]->getTileStatus(chunk.index());
-            if (heightTileStatus == Tile::Status::IOError || heightTileStatus == Tile::Status::OutOfRange) {
+            Tile::State heightTileStatus = heightMapProviders[0]->getTileStatus(chunk.index());
+            if (heightTileStatus == Tile::State::IOError || heightTileStatus == Tile::State::OutOfRange) {
                 return currLevel-1;
             }
 

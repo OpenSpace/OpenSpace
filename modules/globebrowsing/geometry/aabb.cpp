@@ -66,7 +66,7 @@ namespace openspace {
             if (o.contains(*this)) return AABBSpatialRelation::Contained;
             return AABBSpatialRelation::Intersecting;
         }
-        return AABBSpatialRelation::None;
+        return AABBSpatialRelation::NoRelation;
     }
 
 
@@ -113,7 +113,7 @@ namespace openspace {
             if (o.contains(*this)) return AABBSpatialRelation::Contained;
             return AABBSpatialRelation::Intersecting;
         }
-        return AABBSpatialRelation::None;
+        return AABBSpatialRelation::NoRelation;
     }
 
 
@@ -163,7 +163,7 @@ namespace openspace {
             if (o.contains(*this)) return AABBSpatialRelation::Contained;
             return AABBSpatialRelation::Intersecting;
         }
-        return AABBSpatialRelation::None;
+        return AABBSpatialRelation::NoRelation;
     }
 
 

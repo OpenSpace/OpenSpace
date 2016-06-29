@@ -116,7 +116,7 @@ namespace openspace {
         return _currentTileProvider->depthTransform();
     }
 
-    Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+    Tile::State TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
         if (_currentTileProvider == nullptr) {
             LDEBUG("Warning: had to call update from getTileStatus()");
             update();
@@ -234,8 +234,10 @@ namespace openspace {
     std::unordered_map<std::string, std::unique_ptr<TimeFormat>> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, std::unique_ptr<TimeFormat>>();
 
     void TimeIdProviderFactory::init() {
-        _timeIdProviderMap.insert({ "YYYY-MM-DD", std::make_unique<YYYY_MM_DD>() });
-        _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() });
+
+
+        _timeIdProviderMap.insert(std::make_pair("YYYY-MM-DD", std::make_unique<YYYY_MM_DD>()));
+        _timeIdProviderMap.insert(std::make_pair("YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>()));
         initialized = true;
     }
 

@@ -217,7 +217,7 @@ namespace openspace {
         const auto& tile = tileAndTransform.tile;
         const auto& uvTransform = tileAndTransform.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
-        if (tile.status != Tile::Status::OK) {
+        if (tile.status != Tile::State::OK) {
             return 0;
         }
         glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;

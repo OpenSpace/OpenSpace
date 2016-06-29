@@ -43,11 +43,11 @@ namespace openspace {
             useTextureCoordinates,
             useNormals)
     {
-        _geometry = std::unique_ptr<TriangleSoup>(new TriangleSoup(
+        _geometry = std::make_unique<TriangleSoup>(
             CreateElements(xSegments, ySegments),
             usePositions,
             useTextureCoordinates,
-            useNormals));
+            useNormals);
 
         if (usePositions == TriangleSoup::Positions::Yes) {
             _geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));

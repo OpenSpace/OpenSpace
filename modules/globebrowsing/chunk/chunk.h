@@ -50,7 +50,7 @@ namespace openspace {
             bool available;
         };
 
-        enum class Status {
+        enum class State {
             DO_NOTHING,
             WANT_MERGE,
             WANT_SPLIT,
@@ -59,7 +59,7 @@ namespace openspace {
         Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
 
         /// Updates chunk internally and returns a desired level
-        Status update(const RenderData& data);
+        State update(const RenderData& data);
 
         std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
 
