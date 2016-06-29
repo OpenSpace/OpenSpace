@@ -141,13 +141,13 @@ namespace openspace {
         _currentTileProvider->update();
     }
 
-    std::shared_ptr<AsyncTileDataProvider> TemporalTileProvider::getAsyncTileReader() {
+    int TemporalTileProvider::maxLevel() {
         if (_currentTileProvider == nullptr) {
             LDEBUG("Warning: had to call update from getAsyncTileReader()");
             update();
         }
 
-        return _currentTileProvider->getAsyncTileReader();
+        return _currentTileProvider->maxLevel();
     }
 
 

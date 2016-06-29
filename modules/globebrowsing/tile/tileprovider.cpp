@@ -75,15 +75,15 @@ namespace openspace {
         }
     }
 
-    std::shared_ptr<AsyncTileDataProvider> CachingTileProvider::getAsyncTileReader() {
-        return _asyncTextureDataProvider;
+    int CachingTileProvider::maxLevel() {
+        return _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
     }
 
     Tile CachingTileProvider::getTile(const ChunkIndex& chunkIndex) {
         Tile tile = Tile::TileUnavailable;
 
-        auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
-        if (chunkIndex.level > tileDataset->getMaximumLevel()) {
+        
+        if (chunkIndex.level > maxLevel()) {
             tile.status = Tile::Status::OutOfRange;
             return tile;
         }

@@ -124,7 +124,7 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
+        virtual int maxLevel();
 
 
 
