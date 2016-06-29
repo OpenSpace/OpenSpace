@@ -52,6 +52,7 @@ namespace openspace {
         : sgctInternal(o.sgctInternal)
         , _focusPosition(o._focusPosition)
         , _cachedViewDirection(o._cachedViewDirection)
+        , _cachedLookupVector(o._cachedLookupVector)
         , _rotation(o._rotation)
         , _scaling(o._scaling)
         , _position(o._position)
@@ -122,7 +123,12 @@ namespace openspace {
     }
 
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
-        return glm::normalize(_rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE));
+        if (_cachedLookupVector.isDirty) {
+            _cachedLookupVector.datum =
+                _rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
+            _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
+        }
+        return _cachedLookupVector.datum;
     }
 
     const glm::vec2& Camera::scaling() const {
@@ -188,6 +194,7 @@ namespace openspace {
         _scaling.postSynchronizationPreDraw();
 
         _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
     }
 
     void Camera::serialize(std::ostream& os) const {

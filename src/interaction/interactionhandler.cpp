@@ -639,8 +639,10 @@ InteractionHandler::InteractionHandler()
 
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
-    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(0.002, 1);
-    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(0.002, 1);
+    // Inject the same mouse states to both orbital and global interaction mode
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
+    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(_mouseStates);
+    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates);
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
@@ -673,7 +675,7 @@ void InteractionHandler::setInteractionModeToOrbital() {
     setInteractionMode(_orbitalInteractionMode);
 }
 
-void InteractionHandler::setInteractionModeToGlobeBrowsing() {
+void InteractionHandler::setInteractionModeToGlobeBrowsing() { 
     setInteractionMode(_globebrowsingInteractionMode);
 }
 
@@ -763,7 +765,6 @@ void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
 
         _camera->setPositionVec3(p);
         _camera->setRotation(r);
-        _currentInteractionMode->initialize(*_camera);
         _cameraUpdatedFromScript = true;
     }
 }

@@ -60,7 +60,7 @@ return {
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
                         Enabled = false,
                     },
-                                        {
+                    {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
                         Enabled = true,
