@@ -61,7 +61,7 @@ namespace openspace {
         //         has a loaded tile ready to use. 
         while (chunkIndex.level > 1) {
             Tile tile = tileProvider->getTile(chunkIndex);
-            if (tile.status != Tile::Status::OK) {
+            if (tile.status != Tile::State::OK) {
                 ascendToParent(chunkIndex, uvTransform);
             }
             else return { tile, uvTransform };

@@ -36,7 +36,7 @@
 
 #include <unordered_map>
 
-#include "gdal_priv.h"
+#include <gdal_priv.h>
 
 
 
@@ -121,7 +121,7 @@ namespace openspace {
 
         // These methods implements TileProvider
         virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
+        virtual Tile::State getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();

@@ -49,7 +49,7 @@ namespace {
 
 namespace openspace {
 
-    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
+    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::State::Unavailable };
 
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
@@ -84,7 +84,7 @@ namespace openspace {
 
         auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
         if (chunkIndex.level > tileDataset->getMaximumLevel()) {
-            tile.status = Tile::Status::OutOfRange;
+            tile.status = Tile::State::OutOfRange;
             return tile;
         }
 
@@ -112,10 +112,10 @@ namespace openspace {
         _framesSinceLastRequestFlush = 0;
     }
 
-    Tile::Status CachingTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+    Tile::State CachingTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
         auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
         if (chunkIndex.level > tileDataset->getMaximumLevel()) {
-            return Tile::Status::OutOfRange;
+            return Tile::State::OutOfRange;
         }
 
         ChunkHashKey key = chunkIndex.hashKey();
@@ -124,7 +124,7 @@ namespace openspace {
             return _tileCache->get(key).status;
         }
 
-        return Tile::Status::Unavailable;
+        return Tile::State::Unavailable;
     }
 
 
@@ -166,7 +166,7 @@ namespace openspace {
         Tile tile = {
             texture,
             tileIOResult->preprocessData,
-            tileIOResult->error == CE_None ? Tile::Status::OK : Tile::Status::IOError
+            tileIOResult->error == CE_None ? Tile::State::OK : Tile::State::IOError
         };
 
         _tileCache->put(key, tile);
