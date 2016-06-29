@@ -7,7 +7,7 @@ function preInitialization()
     ]]--
 
     --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.time.setTime('2015-03-15T11:00:00.00')
+    openspace.time.setTime('2015-03-15T00:00:00.00')
     --openspace.time.setTime('2000-01-01T00:00:00.00')
     openspace.time.setDeltaTime(0)
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_iswa.lua'))

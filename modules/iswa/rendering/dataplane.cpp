@@ -50,7 +50,6 @@ bool DataPlane::initialize(){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
     }else{
-        // OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -97,7 +96,8 @@ bool DataPlane::createGeometry() {
     const GLfloat z = s*_data->scale.z/2.0;
     const GLfloat w = _data->spatialScale.w;
 
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
+    //construct a 2D plane independent of axis alignment
+    const GLfloat vertex_data[] = { 
     //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
@@ -156,25 +156,6 @@ std::vector<float*> DataPlane::textureData(){
             return std::vector<float*>();
         }
     }
-    // _textureDimensions = _dataProcessor->dimensions();
-
-    // // FOR TESTING
-    // // ===========
-    // std::chrono::time_point<std::chrono::system_clock> start, end;
-    // start = std::chrono::system_clock::now();
-    // // ===========
-    // std::vector<float*> d = _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
-
-    // // FOR TESTING
-    // // ===========
-    // end = std::chrono::system_clock::now();
-    // _numOfBenchmarks++;
-    // std::chrono::duration<double> elapsed_seconds = end-start;
-    // _avgBenchmarkTime = ( (_avgBenchmarkTime * (_numOfBenchmarks-1)) + elapsed_seconds.count() ) / _numOfBenchmarks;
-    // std::cout << " processData() " << name() << std::endl;
-    // std::cout << "avg elapsed time: " << _avgBenchmarkTime << "s\n";
-    // std::cout << "num Benchmarks: " << _numOfBenchmarks << "\n";
-    // ===========
 
     return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }

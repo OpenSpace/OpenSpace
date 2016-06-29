@@ -103,17 +103,12 @@ protected:
     properties::StringProperty _transferFunctionsFile;
     properties::Vec2Property _backgroundValues;
     properties::Vec2Property _normValues;
-    // properties::BoolProperty _useLog;
     properties::BoolProperty _useHistogram;
     properties::BoolProperty _autoFilter;
 
     std::shared_ptr<DataProcessor> _dataProcessor; 
     std::string _dataBuffer;
     glm::size3_t _textureDimensions;
-
-    //FOR TESTING
-    // int _numOfBenchmarks;
-    // double _avgBenchmarkTime;
 
 private:
     bool readyToRender() const override;

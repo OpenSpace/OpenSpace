@@ -145,7 +145,7 @@ std::string LuaCygnetConverter::kameleonToLuaTable(CdfInfo info, std::string cut
                 coordinateType = "Cartesian";
             }else{
                 spatialScale = glm::vec4(1.0);
-                spatialScale.w = 1; //-log10(1.0f/max.x);
+                spatialScale.w = -log10(1.0f/max.x);
                 coordinateType = "Polar";
             }
 
@@ -212,6 +212,7 @@ std::string LuaCygnetConverter::sphereToLuaTable(std::shared_ptr<MetadataFuture>
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
         "GridMax = " + std::to_string(max) + ", "
+        "SpatialScale = " + std::to_string(spatialScale) + ", "
         "UpdateTime = " + std::to_string(updateTime) + ", "
         "Radius = " + std::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "

@@ -41,18 +41,13 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
     ,_dataProcessor(nullptr)
     ,_dataOptions("dataOptions", "Data Options")
-    // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
     ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
-    //FOR TESTING
-    // ,_numOfBenchmarks(0)
-    // ,_avgBenchmarkTime(0.0f)
 {
     addProperty(_dataOptions);
-    // addProperty(_useLog);
     addProperty(_useHistogram);
     addProperty(_autoFilter);
     addProperty(_normValues);
@@ -82,6 +77,7 @@ bool DataCygnet::updateTexture(){
         if(!values) continue;
 
         if(!_textures[option]){
+            //create new texture
             std::unique_ptr<ghoul::opengl::Texture> texture =  std::make_unique<ghoul::opengl::Texture>(
                                                                     values, 
                                                                     _textureDimensions,
@@ -98,6 +94,7 @@ bool DataCygnet::updateTexture(){
                 _textures[option] = std::move(texture);
             }
         }else{
+            //update existing texture
             _textures[option]->setPixelData(values);
             _textures[option]->uploadTexture();
         }
@@ -166,6 +163,7 @@ void DataCygnet::setTextureUniforms(){
     if(activeTextures > 0 && selectedOptions.back()>=(int)_transferFunctions.size())
             activeTransferfunctions = 1;
 
+    //Set Transferfunctions
     ghoul::opengl::TextureUnit tfUnits[MAX_TEXTURES];
     j = 0;
 
@@ -243,11 +241,6 @@ void DataCygnet::setPropertyCallbacks(){
         updateTexture();
     });
     
-    // _useLog.onChange([this](){
-    //     _dataProcessor->useLog(_useLog.value());
-    //     updateTexture();
-    // });
-
     _useHistogram.onChange([this](){
         _dataProcessor->useHistogram(_useHistogram.value());
         updateTexture();
@@ -309,11 +302,6 @@ void DataCygnet::subscribeToGroup(){
         _transferFunctionsFile.setValue(dict.value<std::string>("transferFunctions"));
     });
 
-    // groupEvent->subscribe(name(), "useLogChanged", [&](const ghoul::Dictionary& dict){
-    //     LDEBUG(name() + " Event useLogChanged");
-    //     _useLog.setValue(dict.value<bool>("useLog"));
-    // });
-
     groupEvent->subscribe(name(), "useHistogramChanged", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event useHistogramChanged");
         _useHistogram.setValue(dict.value<bool>("useHistogram"));
@@ -337,6 +325,7 @@ void DataCygnet::getGroupPropertyValues(){
         _backgroundValues.onChange([this]{
             glm::vec2 bv = _backgroundValues.value();
 
+            //let the values "push" each other
             if(bv.x > bv.y){
                 float y = bv.y;
                 bv.y = bv.x;

@@ -52,8 +52,6 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
     _programName = "DataSphereProgram";
     _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
     _fsPath = "${MODULE_ISWA}/shaders/datasphere_fs.glsl";
-
-
 }
 
 DataSphere::~DataSphere(){}
@@ -67,9 +65,7 @@ bool DataSphere::initialize(){
     if(_group){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
-        //getGroupPropertyValues();
     }else{
-        // OsEng.gui()._iswa.registerProperty(&_useLog);
         OsEng.gui()._iswa.registerProperty(&_useHistogram);
         OsEng.gui()._iswa.registerProperty(&_autoFilter);
         OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -99,7 +95,8 @@ bool DataSphere::initialize(){
 }
 
 bool DataSphere::createGeometry(){
-    PowerScaledScalar radius =  PowerScaledScalar(6.371f*_radius, 6.0);
+    // std::cout << _data->spatialScale.x << " " << _data->spatialScale.w << std::endl;
+    PowerScaledScalar radius =  PowerScaledScalar(_data->spatialScale.x*_radius, _data->spatialScale.w);
     int segments = 100;
     _sphere = std::make_shared<PowerScaledSphere>(radius, segments);
     _sphere->initialize();
