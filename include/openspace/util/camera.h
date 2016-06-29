@@ -29,7 +29,7 @@
 
 // open space includes
 #include <openspace/util/powerscaledcoordinate.h>
-//#include <openspace/util/syncbuffer.h>
+#include <openspace/util/syncbuffer.h>
 #include <openspace/rendering/renderengine.h>
 
 // glm includes
@@ -37,6 +37,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
+
 
 namespace openspace {
     class SyncBuffer;

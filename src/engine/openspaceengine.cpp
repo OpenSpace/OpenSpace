@@ -447,14 +447,14 @@ bool OpenSpaceEngine::initialize() {
 
     OsEng.gui()._screenSpaceProperty.setSource(
         [&]() {
-            auto& ssr = renderEngine().screenSpaceRenderables();
+            const auto& ssr = renderEngine().screenSpaceRenderables();
             return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
         }
     );
 
     OsEng.gui()._property.setSource(
         [&]() {
-            auto& nodes = renderEngine().scene()->allSceneGraphNodes();
+            const auto& nodes = renderEngine().scene()->allSceneGraphNodes();
             return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
         }
     );

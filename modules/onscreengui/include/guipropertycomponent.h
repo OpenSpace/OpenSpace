@@ -28,6 +28,7 @@
 #include <modules/onscreengui/include/guicomponent.h>
 
 #include <functional>
+#include <string>
 #include <vector>
 
 namespace openspace {
