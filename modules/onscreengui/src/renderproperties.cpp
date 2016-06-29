@@ -132,7 +132,10 @@ void renderIntProperty(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     IntProperty::ValueType value = *p;
-    ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
+    int min = p->minValue();
+    int max = p->maxValue();
+    
+    ImGui::SliderInt(name.c_str(), &value, min, max);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -146,7 +149,9 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     FloatProperty::ValueType value = *p;
-    ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
+    float min = p->minValue();
+    float max = p->maxValue();
+    ImGui::SliderFloat(name.c_str(), &value, min, max);
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
@@ -160,8 +165,14 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec2Property::ValueType value = *p;
-
-    ImGui::SliderFloat2(name.c_str(), &value.x, std::min(p->minValue().x, p->minValue().y), std::max(p->maxValue().x, p->maxValue().y));
+    float min = std::min(p->minValue().x, p->minValue().y);
+    float max = std::max(p->maxValue().x, p->maxValue().y);
+    ImGui::SliderFloat2(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(),
@@ -176,8 +187,15 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec3Property::ValueType value = *p;
+    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
+    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
 
-    ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+    ImGui::SliderFloat3(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(),
@@ -194,8 +212,17 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     Vec4Property::ValueType value = *p;
+    float min = std::min(std::min(std::min(
+        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
+    float max = std::max(std::max(std::max(
+        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
 
-    ImGui::SliderFloat4(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
+    ImGui::SliderFloat4(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
 
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(),
@@ -217,97 +244,5 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName) {
 
     ImGui::PopID();
 }
-
-//void renderBoolProperty(Property* prop, const std::string& ownerName) {
-//    BoolProperty* p = static_cast<BoolProperty*>(prop);
-//    std::string name = p->guiName();
-
-//    BoolProperty::ValueType value = *p;
-//    ImGui::Checkbox(name.c_str(), &value);
-//    p->set(value);
-//}
-
-//void renderOptionProperty(Property* prop, const std::string& ownerName) {
-//    OptionProperty* p = static_cast<OptionProperty*>(prop);
-//    std::string name = p->guiName();
-
-//    int value = *p;
-//    std::vector<OptionProperty::Option> options = p->options();
-//    for (const OptionProperty::Option& o : options) {
-//        ImGui::RadioButton(name.c_str(), &value, o.value);
-//        ImGui::SameLine();
-//        ImGui::Text(o.description.c_str());
-//    }
-//    p->set(value);
-//}
-
-//void renderSelectionProperty(Property* prop, const std::string& ownerName) {
-//    SelectionProperty* p = static_cast<SelectionProperty*>(prop);
-//    std::string name = p->guiName();
-
-//    if (ImGui::CollapsingHeader(name.c_str())) {
-//        const std::vector<SelectionProperty::Option>& options = p->options();
-//        std::vector<int> newSelectedIndices;
-
-//        std::vector<int> selectedIndices = p->value();
-
-//        for (int i = 0; i < options.size(); ++i) {
-//            std::string description = options[i].description;
-//            bool selected = std::find(selectedIndices.begin(), selectedIndices.end(), i) != selectedIndices.end();
-//            ImGui::Checkbox(description.c_str(), &selected);
-
-//            if (selected)
-//                newSelectedIndices.push_back(i);
-//        }
-
-//        p->setValue(std::move(newSelectedIndices));
-//    }
-//}
-
-//void renderIntProperty(Property* prop, const std::string& ownerName) {
-//    IntProperty* p = static_cast<IntProperty*>(prop);
-//    std::string name = p->guiName();
-
-//    IntProperty::ValueType value = *p;
-//    ImGui::SliderInt(name.c_str(), &value, p->minValue(), p->maxValue());
-//    p->set(value);
-//}
-
-//void renderFloatProperty(Property* prop, const std::string& ownerName) {
-//    FloatProperty* p = static_cast<FloatProperty*>(prop);
-//    std::string name = p->guiName();
-
-//    FloatProperty::ValueType value = *p;
-//    ImGui::SliderFloat(name.c_str(), &value, p->minValue(), p->maxValue());
-//    p->set(value);
-//}
-
-//void renderVec2Property(Property* prop, const std::string& ownerName) {
-//    Vec2Property* p = static_cast<Vec2Property*>(prop);
-//    std::string name = p->guiName();
-
-//    Vec2Property::ValueType value = *p;
-
-//    ImGui::SliderFloat2(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
-//    p->set(value);
-//}
-
-
-//void renderVec3Property(Property* prop, const std::string& ownerName) {
-//    Vec3Property* p = static_cast<Vec3Property*>(prop);
-//    std::string name = p->guiName();
-
-//    Vec3Property::ValueType value = *p;
-
-//    ImGui::SliderFloat3(name.c_str(), &value.x, p->minValue().x, p->maxValue().x);
-//    p->set(value);
-//}
-
-//void renderTriggerProperty(Property* prop, const std::string& ownerName) {
-//    std::string name = prop->guiName();
-//    bool pressed = ImGui::Button(name.c_str());
-//    if (pressed)
-//        prop->set(0);
-//}
 
 } // namespace openspace
