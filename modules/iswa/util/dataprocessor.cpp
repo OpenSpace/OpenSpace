@@ -165,16 +165,6 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
     int numValues;
     float mean, value, variance, standardDeviation, low, high;
 
-    // std::ofstream ofs[4];
-    // ofs[0].open ("norm-entropy_n", std::ofstream::out | std::ofstream::app);
-    // ofs[1].open ("norm-entropy_v", std::ofstream::out | std::ofstream::app);
-    // ofs[2].open ("norm-entropy_bz", std::ofstream::out | std::ofstream::app);
-
-    // ofs[0].open ("norm-entropy_eave", std::ofstream::out | std::ofstream::app);
-    // ofs[1].open ("norm-entropy_eflux", std::ofstream::out | std::ofstream::app);
-    // ofs[2].open ("norm-entropy_ep", std::ofstream::out | std::ofstream::app);
-    // ofs[3].open ("norm-entropy_jr", std::ofstream::out | std::ofstream::app);
-
     for(int i=0; i<numOptions; i++){
         std::vector<float> values = optionValues[i];
         numValues = values.size();
@@ -196,6 +186,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
             _unNormalizedhistograms[i]->add(value, 1);
             _buildData[i].push_back(value);
         }
+        
         _unNormalizedhistograms[i]->generateEqualizer();
 
         standardDeviation = sqrt(variance/ numValues);
@@ -204,15 +195,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         _numValues[i] += numValues;
         mean = (1.0f/_numValues[i])*_sum[i];
 
-        //const float* histData = _unNormalizedhistograms[i]->data();
-        //std::cout << "min: " << _min[i] << " max: " << _max[i] << std::endl;
-        //float histMin = _unNormalizedhistograms[i]->minValue();
-        //float histMax = _unNormalizedhistograms[i]->maxValue();
-        //std::cout << "histMin: " << histMin << " histMax: " << histMax << std::endl;
         int numBins = _unNormalizedhistograms[i]->numBins();
-
-        // float fit = IswaManager::ref().fit();
-        // float fit = _unNormalizedhistograms[i]->entropy()/IswaManager::ref().fit();
 
         // the E (entropy) method
         float fit = _unNormalizedhistograms[i]->entropy();
@@ -220,7 +203,6 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
 
         float max = normalizeWithStandardScore(_max[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
         float min = normalizeWithStandardScore(_min[i], mean, _standardDeviation[i], glm::vec2(_fitValues[i]));
-        std::cout << "min: " << min << " max: " << max << std::endl;
         std::shared_ptr<Histogram> newHist = std::make_shared<Histogram>(min, max, numBins);
 
         int length = _buildData[i].size();
@@ -238,13 +220,6 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
         //restore the highest bin
         _histograms[i]->setBin(highestBin, highestBinValue);
     }
-
-
-    // ofs[0].close();
-    // ofs[1].close();
-    // ofs[2].close();
-    // ofs[3].close();
-
 }
 
 void DataProcessor::clearBuildData(){
