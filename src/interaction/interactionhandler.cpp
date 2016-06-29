@@ -738,16 +738,35 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 }
 
 void InteractionHandler::saveCameraPosition(const std::string& filepath) {
+
+    
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LDEBUG("Saving camera position: " << fullpath);
+
+        ghoul::Dictionary cameraDict = _camera->getStateDictionary();
+        auto file = ghoul::filesystem::File(fullpath.c_str());
+
         std::ofstream ofs(fullpath.c_str());
         _camera->serialize(ofs);
         ofs.close();
     }
+    
 }
 
 void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
+    
+    /*
+    if (!FileSys.fileExists(filepath))
+        throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
+
+    ghoul::Dictionary cameraDict = _camera->getStateDictionary();
+    ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
+
+    _camera->setStateFromDictionary(cameraDict);
+    */
+    
+    
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LDEBUG("Reading camera position: " << fullpath);
@@ -767,6 +786,14 @@ void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
         _camera->setRotation(r);
         _cameraUpdatedFromScript = true;
     }
+    
+}
+
+void InteractionHandler::setCameraState(const ghoul::Dictionary& cameraDict) {
+    glm::dvec3 cameraPosition;
+    glm::dvec4 cameraRotation;
+    cameraDict.getValue("CameraPosition", cameraPosition);
+    cameraDict.getValue("CameraRotation", cameraRotation);
 }
 
 void InteractionHandler::resetKeyBindings() {

@@ -196,6 +196,7 @@ public:
 
     void saveCameraPosition(const std::string& filepath = "");
     void restoreCameraPosition(const std::string& filepath = "");
+    void setCameraState(const ghoul::Dictionary& cameraDict);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
