@@ -639,8 +639,10 @@ InteractionHandler::InteractionHandler()
 
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
-    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(0.002, 1);
-    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(0.002, 1);
+    // Inject the same mouse states to both orbital and global interaction mode
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
+    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(_mouseStates);
+    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates);
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
@@ -673,7 +675,7 @@ void InteractionHandler::setInteractionModeToOrbital() {
     setInteractionMode(_orbitalInteractionMode);
 }
 
-void InteractionHandler::setInteractionModeToGlobeBrowsing() {
+void InteractionHandler::setInteractionModeToGlobeBrowsing() { 
     setInteractionMode(_globebrowsingInteractionMode);
 }
 
@@ -736,16 +738,35 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
 }
 
 void InteractionHandler::saveCameraPosition(const std::string& filepath) {
+
+    
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LDEBUG("Saving camera position: " << fullpath);
+
+        ghoul::Dictionary cameraDict = _camera->getStateDictionary();
+        auto file = ghoul::filesystem::File(fullpath.c_str());
+
         std::ofstream ofs(fullpath.c_str());
         _camera->serialize(ofs);
         ofs.close();
     }
+    
 }
 
 void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
+    
+    /*
+    if (!FileSys.fileExists(filepath))
+        throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
+
+    ghoul::Dictionary cameraDict = _camera->getStateDictionary();
+    ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
+
+    _camera->setStateFromDictionary(cameraDict);
+    */
+    
+    
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LDEBUG("Reading camera position: " << fullpath);
@@ -763,9 +784,16 @@ void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
 
         _camera->setPositionVec3(p);
         _camera->setRotation(r);
-        _currentInteractionMode->initialize(*_camera);
         _cameraUpdatedFromScript = true;
     }
+    
+}
+
+void InteractionHandler::setCameraState(const ghoul::Dictionary& cameraDict) {
+    glm::dvec3 cameraPosition;
+    glm::dvec4 cameraRotation;
+    cameraDict.getValue("CameraPosition", cameraPosition);
+    cameraDict.getValue("CameraRotation", cameraRotation);
 }
 
 void InteractionHandler::resetKeyBindings() {

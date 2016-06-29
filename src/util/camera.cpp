@@ -52,6 +52,7 @@ namespace openspace {
         : sgctInternal(o.sgctInternal)
         , _focusPosition(o._focusPosition)
         , _cachedViewDirection(o._cachedViewDirection)
+        , _cachedLookupVector(o._cachedLookupVector)
         , _rotation(o._rotation)
         , _scaling(o._scaling)
         , _position(o._position)
@@ -122,7 +123,12 @@ namespace openspace {
     }
 
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
-        return glm::normalize(_rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE));
+        if (_cachedLookupVector.isDirty) {
+            _cachedLookupVector.datum =
+                _rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
+            _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
+        }
+        return _cachedLookupVector.datum;
     }
 
     const glm::vec2& Camera::scaling() const {
@@ -188,8 +194,10 @@ namespace openspace {
         _scaling.postSynchronizationPreDraw();
 
         _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
     }
 
+    
     void Camera::serialize(std::ostream& os) const {
         Vec3 p = positionVec3();
         Quat q = rotationQuaternion();
@@ -204,6 +212,34 @@ namespace openspace {
         is >> q.x >> q.y >> q.z >> q.w;
         setPositionVec3(p);
         setRotation(q);
+    }
+    
+
+    void Camera::setStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+        glm::dvec3 cameraPosition;
+        glm::dvec4 cameraRotation;
+        cameraDict.getValue("CameraPosition", cameraPosition);
+        cameraDict.getValue("CameraRotation", cameraRotation);
+
+        setPositionVec3(cameraPosition);
+        setRotation(glm::dquat(
+            cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
+    }
+
+    ghoul::Dictionary Camera::getStateDictionary() {
+        glm::dvec3 cameraPosition;
+        glm::dquat quat;
+        glm::dvec4 cameraRotation;
+
+        cameraPosition = positionVec3();
+        quat = rotationQuaternion();
+        cameraRotation = glm::dvec4(quat.x, quat.y, quat.z, quat.w);
+        
+        ghoul::Dictionary cameraDict;
+        cameraDict.setValue("CameraPosition", cameraPosition);
+        cameraDict.setValue("CameraRotation", cameraRotation);
+
+        return cameraDict;
     }
 
     void Camera::preSynchronization() {

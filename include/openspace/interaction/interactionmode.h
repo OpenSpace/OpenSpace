@@ -96,8 +96,6 @@ public:
     SceneGraphNode* focusNode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime) = 0;
-    virtual void initialize(const Camera& camera) = 0;
-
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -114,6 +112,10 @@ protected:
             _targetValue = value;
             _currentValue = _currentValue + (_targetValue - _currentValue) *
                 min(_scale * dt, 1.0); // less or equal to 1.0 keeps it stable
+        }
+        void setHard(T value) {
+            _targetValue = value;
+            _currentValue = value;
         }
         T get() {
             return _currentValue;
@@ -142,46 +144,53 @@ public:
     ~KeyframeInteractionMode();
 
     virtual void update(double deltaTime);
-    virtual void initialize(const Camera& camera);
 
 private:
     double _currentKeyframeTime;
 };
 
+class GlobeBrowsingInteractionMode;
+
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
-    /*!
+    class MouseStates
+    {
+    public:
+        /*!
         \param inputState
         \param sensitivity
         \param velocityScalefactor can be set to 60 to remove the inertia of the
-            interaction. Lower value will make it harder to move the camera.
-    */
-    OrbitalInteractionMode(double sensitivity, double velocityScaleFactor);
+        interaction. Lower value will make it harder to move the camera. 
+        */
+        MouseStates(double sensitivity, double velocityScaleFactor);
+        void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+    private:
+        friend class OrbitalInteractionMode;
+        friend class GlobeBrowsingInteractionMode;
+        double _sensitivity;
+
+        MouseState _globalRotationMouseState;
+        MouseState _localRotationMouseState;
+        MouseState _truckMovementMouseState;
+        MouseState _localRollMouseState;
+        MouseState _globalRollMouseState;
+    };
+
+    OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~OrbitalInteractionMode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
-    virtual void initialize(const Camera& camera);
 
 protected:
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromMouseStates(Camera& camera);
-
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _rollMouseState;
-
-    glm::dquat _localCameraRotation;
-    glm::dquat _globalCameraRotation;
+    std::shared_ptr<MouseStates> _mouseStates;
 };
 
 class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
 {
 public:
-    GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor);
+    GlobeBrowsingInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~GlobeBrowsingInteractionMode();
 
     virtual void setFocusNode(SceneGraphNode* focusNode);

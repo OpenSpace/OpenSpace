@@ -188,7 +188,7 @@ public:
     */
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    // Callback functions
+    // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
@@ -196,6 +196,7 @@ public:
 
     void saveCameraPosition(const std::string& filepath = "");
     void restoreCameraPosition(const std::string& filepath = "");
+    void setCameraState(const ghoul::Dictionary& cameraDict);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
@@ -209,6 +210,7 @@ private:
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
+    std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
     std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
     std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
 
