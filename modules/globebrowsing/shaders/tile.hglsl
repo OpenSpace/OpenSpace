@@ -93,7 +93,7 @@ vec2 compensateSourceTextureSampling2(vec2 startOffset, vec2 sizeDiff, const Til
 
 vec4 getTexVal(const Tile tile, vec2 tileUV){
 	tileUV = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	tileUV = compensateSourceTextureSampling(vec2(-1), vec2(2), tile, tileUV);
+	//tileUV = compensateSourceTextureSampling(vec2(-1), vec2(2), tile, tileUV);
 	//tileUV = compensateSourceTextureSampling2(vec2(-1), vec2(2), tile, tileUV);
 	vec4 texVal = texture(tile.textureSampler, tileUV);
 	return texVal;

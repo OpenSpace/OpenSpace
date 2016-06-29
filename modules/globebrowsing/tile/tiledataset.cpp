@@ -182,8 +182,8 @@ namespace openspace {
     //                               Tile Dataset                                   //
     //////////////////////////////////////////////////////////////////////////////////
 
-    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-1, -1);
-    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(2, 2);
+    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(0, 0);
+    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(0, 0);
 
     bool TileDataset::GdalHasBeenInitialized = false;
 
