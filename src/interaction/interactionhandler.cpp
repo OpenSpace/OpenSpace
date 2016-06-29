@@ -737,63 +737,52 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
-void InteractionHandler::saveCameraPosition(const std::string& filepath) {
-
-    
+void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
-        LDEBUG("Saving camera position: " << fullpath);
+        LDEBUG("Saving camera position: " << filepath);
 
         ghoul::Dictionary cameraDict = _camera->getStateDictionary();
-        auto file = ghoul::filesystem::File(fullpath.c_str());
 
+        // TODO : Should get the camera state as a dictionary and save the dictionary to
+        // a file in form of a lua state and not use ofstreams here.
+        
         std::ofstream ofs(fullpath.c_str());
-        _camera->serialize(ofs);
+        
+        glm::dvec3 p = _camera->positionVec3();
+        glm::dquat q = _camera->rotationQuaternion();
+
+        ofs << "return {" << std::endl;;
+        ofs << "    CameraPosition = {"
+            << std::to_string(p.x) << ", "
+            << std::to_string(p.y) << ", "
+            << std::to_string(p.z) << "}," << std::endl;
+        ofs << "    CameraRotation = {"
+            << std::to_string(q.w) << ", "
+            << std::to_string(q.x) << ", "
+            << std::to_string(q.y) << ", "
+            << std::to_string(q.z) << "}," << std::endl;
+        ofs << "}"<< std::endl;
+
         ofs.close();
     }
-    
 }
 
-void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
-    
-    /*
+void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath) {
+    LDEBUG("Reading camera state from file: " << filepath);
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 
-    ghoul::Dictionary cameraDict = _camera->getStateDictionary();
-    ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
-
-    _camera->setStateFromDictionary(cameraDict);
-    */
-    
-    
-    if (!filepath.empty()) {
-        auto fullpath = absPath(filepath);
-        LDEBUG("Reading camera position: " << fullpath);
-        std::ifstream ifs(fullpath.c_str());
-        Camera c;
-        c.deserialize(ifs);
-        ifs.close();
-
-        // uff, need to do this ... 
-        c.preSynchronization();
-        c.postSynchronizationPreDraw();
-
-        auto p = c.positionVec3();
-        auto r = c.rotationQuaternion();
-
-        _camera->setPositionVec3(p);
-        _camera->setRotation(r);
+    ghoul::Dictionary cameraDict;
+    try {
+        ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
+        _camera->setStateFromDictionary(cameraDict);
         _cameraUpdatedFromScript = true;
     }
-    
-}
-
-void InteractionHandler::setCameraState(const ghoul::Dictionary& cameraDict) {
-    glm::dvec3 cameraPosition;
-    glm::dvec4 cameraRotation;
-    cameraDict.getValue("CameraPosition", cameraPosition);
-    cameraDict.getValue("CameraRotation", cameraRotation);
+    catch (ghoul::RuntimeError& e) {
+        LWARNING("Unable to set camera position");
+        LWARNING(e.message);
+    }
 }
 
 void InteractionHandler::resetKeyBindings() {
@@ -830,16 +819,16 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 "Set the interaction mode for the camera"
             },
             {
-                "saveCameraPosition",
-                &luascriptfunctions::saveCameraPosition,
+                "saveCameraStateToFile",
+                &luascriptfunctions::saveCameraStateToFile,
                 "string",
-                "Save the current camera position to file"
+                "Save the current camera state to file"
             },
             {
-                "restoreCameraPosition",
-                &luascriptfunctions::restoreCameraPosition,
+                "restoreCameraStateFromFile",
+                &luascriptfunctions::restoreCameraStateFromFile,
                 "string",
-                "Restore the camera position from file"
+                "Restore the camera state from file"
             }
         }
     };

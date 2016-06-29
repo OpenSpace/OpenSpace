@@ -216,10 +216,17 @@ namespace openspace {
     
 
     void Camera::setStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+        bool readSuccessful = true;
+
         glm::dvec3 cameraPosition;
-        glm::dvec4 cameraRotation;
-        cameraDict.getValue("CameraPosition", cameraPosition);
-        cameraDict.getValue("CameraRotation", cameraRotation);
+        glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
+        readSuccessful &= cameraDict.getValue("CameraPosition", cameraPosition);
+        readSuccessful &= cameraDict.getValue("CameraRotation", cameraRotation);
+
+        if (!readSuccessful) {
+            throw ghoul::RuntimeError(
+                "CameraPosition and/or CameraRotation not defined in dictionary.");
+        }
 
         setPositionVec3(cameraPosition);
         setRotation(glm::dquat(
@@ -233,7 +240,7 @@ namespace openspace {
 
         cameraPosition = positionVec3();
         quat = rotationQuaternion();
-        cameraRotation = glm::dvec4(quat.x, quat.y, quat.z, quat.w);
+        cameraRotation = glm::dvec4(quat.w, quat.x, quat.y, quat.z);
         
         ghoul::Dictionary cameraDict;
         cameraDict.setValue("CameraPosition", cameraPosition);

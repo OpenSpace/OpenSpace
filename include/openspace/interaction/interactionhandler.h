@@ -194,9 +194,8 @@ public:
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void saveCameraPosition(const std::string& filepath = "");
-    void restoreCameraPosition(const std::string& filepath = "");
-    void setCameraState(const ghoul::Dictionary& cameraDict);
+    void saveCameraStateToFile(const std::string& filepath);
+    void restoreCameraStateFromFile(const std::string& filepath);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
