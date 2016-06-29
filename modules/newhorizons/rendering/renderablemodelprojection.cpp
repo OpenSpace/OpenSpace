@@ -82,8 +82,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         _defaultProjImage = absPath(texturePath);
 
     addPropertySubOwner(_geometry.get());
-
-    addProperty(_projectionFading);
+    addPropertySubOwner(_projectionComponent);
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
@@ -95,17 +94,15 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
         setBody(_target);
 
     bool completeSuccess = true;
-    completeSuccess &= initializeProjectionSettings(dictionary);
+    completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);
     
     openspace::SpiceManager::ref().addFrame(_target, _source);
     setBoundingSphere(pss(1.f, 9.f));
 
-    addProperty(_performShading);
-    addProperty(_performProjection);
-    addProperty(_clearAllProjections);
-    addProperty(_rotation);
+    Renderable::addProperty(_performShading);
+    Renderable::addProperty(_rotation);
 
-    success = initializeParser(dictionary);
+    success = _projectionComponent.initializeParser(dictionary);
     ghoul_assert(success, "");
 }
 
@@ -113,7 +110,7 @@ bool RenderableModelProjection::isReady() const {
     bool ready = true;
     ready &= (_programObject != nullptr);
     ready &= (_baseTexture != nullptr);
-    ready &= (_projectionTexture != nullptr);
+    ready &= (_projectionComponent.isReady());
     return ready;
 }
 
@@ -135,7 +132,7 @@ bool RenderableModelProjection::initialize() {
 
     completeSuccess &= loadTextures();
 
-    completeSuccess &= ProjectionComponent::initialize();
+    completeSuccess &= _projectionComponent.initialize();
 
     completeSuccess &= _geometry->initialize(this);
     completeSuccess &= !_source.empty();
@@ -151,7 +148,7 @@ bool RenderableModelProjection::deinitialize() {
     _geometry = nullptr;
     _baseTexture = nullptr;
 
-    ProjectionComponent::deinitialize();
+    _projectionComponent.deinitialize();
 
     OsEng.renderEngine().removeRenderProgram(_programObject);
     _programObject = nullptr;
@@ -159,14 +156,18 @@ bool RenderableModelProjection::deinitialize() {
     return true;
 }
 
+ghoul::opengl::Texture& RenderableModelProjection::baseTexture() const {
+    return _projectionComponent.projectionTexture();
+}
+
 void RenderableModelProjection::render(const RenderData& data) {
-    if (_clearAllProjections)
-        clearAllProjections();
+    if (_projectionComponent.needsClearProjection())
+        _projectionComponent.clearAllProjections();
 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
 
-    if (_capture && _performProjection)
+    if (_capture && _projectionComponent.doesPerformProjection())
         project();
 
     _programObject->activate();
@@ -178,7 +179,7 @@ void RenderableModelProjection::render(const RenderData& data) {
     _programObject->setUniform("sun_pos", _sunPosition.vec3());
     _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _programObject->setUniform("ModelTransform", _transform);
-    _programObject->setUniform("_projectionFading", _projectionFading);
+    _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
     setPscUniforms(*_programObject, data.camera, data.position);
 
     _geometry->setUniforms(*_programObject);
@@ -189,7 +190,7 @@ void RenderableModelProjection::render(const RenderData& data) {
     _programObject->setUniform("baseTexture", unit[0]);
 
     unit[1].activate();
-    _projectionTexture->bind();
+    _projectionComponent.projectionTexture().bind();
     _programObject->setUniform("projectionTexture", unit[1]);
 
     _geometry->render();
@@ -206,10 +207,12 @@ void RenderableModelProjection::update(const UpdateData& data) {
         
     _time = data.time;
 
-    if (openspace::ImageSequencer::ref().isReady() && _performProjection) {
+    if (openspace::ImageSequencer::ref().isReady() && _projectionComponent.doesPerformProjection()) {
         openspace::ImageSequencer::ref().updateSequencer(_time);
         _capture = openspace::ImageSequencer::ref().getImagePaths(
-            _imageTimes, _projecteeID, _instrumentID
+            _imageTimes,
+            _projectionComponent.projecteeId(),
+            _projectionComponent.instrumentId()
         );
     }
         
@@ -231,7 +234,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 void RenderableModelProjection::imageProjectGPU(
                                 std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
 {
-    ProjectionComponent::imageProjectBegin();
+    _projectionComponent.imageProjectBegin();
 
     _fboProgramObject->activate();
 
@@ -250,13 +253,13 @@ void RenderableModelProjection::imageProjectGPU(
 
     _fboProgramObject->deactivate();
 
-    ProjectionComponent::imageProjectEnd();
+    _projectionComponent.imageProjectEnd();
 }
 
 void RenderableModelProjection::attitudeParameters(double time) {
     try {
         _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
-        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_instrumentID, _destination, time);
+        _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
     }
     catch (const SpiceManager::SpiceException& e) {
         return;
@@ -288,7 +291,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
 
     glm::dvec3 boresight;
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
         boresight = std::move(res.boresightVector);
     } catch (const SpiceManager::SpiceException& e) {
         return;
@@ -296,21 +299,31 @@ void RenderableModelProjection::attitudeParameters(double time) {
 
     double lightTime;
     glm::dvec3 p =
-        SpiceManager::ref().targetPosition(_projectorID, _projecteeID, _destination, _aberration, time, lightTime);
+        SpiceManager::ref().targetPosition(
+            _projectionComponent.projectorId(),
+            _projectionComponent.projecteeId(),
+            _destination,
+            _projectionComponent.aberration(),
+            time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
     position[3] += (3 + _camScaling[1]);
     glm::vec3 cpos = position.vec3();
 
-    _projectorMatrix = computeProjectorMatrix(cpos, boresight, _up, _instrumentMatrix, 
-        _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight
+    _projectorMatrix = _projectionComponent.computeProjectorMatrix(
+        cpos, boresight, _up, _instrumentMatrix,
+        _projectionComponent.fieldOfViewY(),
+        _projectionComponent.aspectRatio(),
+        _projectionComponent.nearPlane(),
+        _projectionComponent.farPlane(),
+        _boresight
     );
 }
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
         attitudeParameters(img.startTime);
-        imageProjectGPU(loadProjectionTexture(img.path));
+        imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
     }
     _capture = false;
 }

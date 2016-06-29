@@ -87,7 +87,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (_target != "")
         setBody(_target);
 
-    success = initializeProjectionSettings(dictionary);
+    success = _projectionComponent.initializeProjectionSettings(dictionary);
     ghoul_assert(success, "");
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
@@ -104,8 +104,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _heightMapTexturePath = absPath(heightMapPath);
 
     addPropertySubOwner(_geometry.get());
-    addProperty(_performProjection);
-    addProperty(_clearAllProjections);
+    addPropertySubOwner(_projectionComponent);
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
@@ -113,11 +112,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_heightMapTexturePath);
     _heightMapTexturePath.onChange(std::bind(&RenderablePlanetProjection::loadTextures, this));
 
-    addProperty(_projectionFading);
     addProperty(_heightExaggeration);
     addProperty(_debugProjectionTextureRotation);
 
-    success = initializeParser(dictionary);
+    success = _projectionComponent.initializeParser(dictionary);
     ghoul_assert(success, "");
 }
 
@@ -137,7 +135,7 @@ bool RenderablePlanetProjection::initialize() {
     );
 
     completeSuccess &= loadTextures();
-    completeSuccess &= ProjectionComponent::initialize();
+    completeSuccess &= _projectionComponent.initialize();
 
     completeSuccess &= _geometry->initialize(this);
 
@@ -172,7 +170,7 @@ bool RenderablePlanetProjection::initialize() {
 }
 
 bool RenderablePlanetProjection::deinitialize() {
-    ProjectionComponent::deinitialize();
+    _projectionComponent.deinitialize();
     _baseTexture = nullptr;
     _geometry = nullptr;
 
@@ -187,13 +185,13 @@ bool RenderablePlanetProjection::deinitialize() {
     return true;
 }
 bool RenderablePlanetProjection::isReady() const {
-    return _geometry && _programObject && _baseTexture && _projectionTexture;
+    return _geometry && _programObject && _baseTexture && _projectionComponent.isReady();
 }
 
 void RenderablePlanetProjection::imageProjectGPU(
                                 std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
 {
-    imageProjectBegin();
+    _projectionComponent.imageProjectBegin();
 
     _fboProgramObject->activate();
 
@@ -228,14 +226,14 @@ void RenderablePlanetProjection::imageProjectGPU(
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _fboProgramObject->deactivate();
 
-    imageProjectEnd();
+    _projectionComponent.imageProjectEnd();
 }
 
 void RenderablePlanetProjection::attitudeParameters(double time) {
     // precomputations for shader
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
-        _instrumentID, _mainFrame, time
+        _projectionComponent.instrumentId(), _mainFrame, time
     );
 
     _transform = glm::mat4(1);
@@ -265,7 +263,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     glm::dvec3 bs;
     try {
-        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_instrumentID);
+        SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
         bs = std::move(res.boresightVector);
     }
     catch (const SpiceManager::SpiceException& e) {
@@ -275,7 +273,12 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
 
     double lightTime;
     glm::dvec3 p = SpiceManager::ref().targetPosition(
-        _projectorID, _projecteeID, _mainFrame, _aberration, time, lightTime
+        _projectionComponent.projectorId(),
+        _projectionComponent.projecteeId(),
+        _mainFrame,
+        _projectionComponent.aberration(),
+        time,
+        lightTime
     );
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
    
@@ -284,22 +287,34 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     //position[3] += 3;
     glm::vec3 cpos = position.vec3();
 
-    _projectorMatrix = computeProjectorMatrix(cpos, bs, _up, _instrumentMatrix, 
-        _fovy, _aspectRatio, _nearPlane, _farPlane, _boresight
+    _projectorMatrix = _projectionComponent.computeProjectorMatrix(
+        cpos,
+        bs,
+        _up,
+        _instrumentMatrix,
+        _projectionComponent.fieldOfViewY(),
+        _projectionComponent.aspectRatio(),
+        _projectionComponent.nearPlane(),
+        _projectionComponent.farPlane(),        
+        _boresight
     );
 }
 
+ghoul::opengl::Texture& RenderablePlanetProjection::baseTexture() const {
+    return _projectionComponent.projectionTexture();
+}
+
 void RenderablePlanetProjection::render(const RenderData& data) {
-    if (_clearAllProjections)
-        clearAllProjections();
+    if (_projectionComponent.needsClearProjection())
+        _projectionComponent.clearAllProjections();
 
     _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
 
-    if (_capture && _performProjection) {
+    if (_capture && _projectionComponent.doesPerformProjection()) {
         for (const Image& img : _imageTimes) {
             RenderablePlanetProjection::attitudeParameters(img.startTime);
-            imageProjectGPU(loadProjectionTexture(img.path));
+            imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
         }
         _capture = false;
     }
@@ -308,7 +323,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     double  lt;
     glm::dvec3 p =
-        SpiceManager::ref().targetPosition("SUN", _projecteeID, "GALACTIC", {}, _time, lt);
+        SpiceManager::ref().targetPosition("SUN", _projectionComponent.projecteeId(), "GALACTIC", {}, _time, lt);
     psc sun_pos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
     // Main renderpass
@@ -319,7 +334,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
-    _programObject->setUniform("_projectionFading", _projectionFading);
+    _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
 
     //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
@@ -331,7 +346,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     _programObject->setUniform("baseTexture", unit[0]);
 
     unit[1].activate();
-    _projectionTexture->bind();
+    _projectionComponent.projectionTexture().bind();
     _programObject->setUniform("projectionTexture", unit[1]);
 
     if (_heightMapTexture) {
@@ -355,10 +370,10 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     _time = Time::ref().currentTime();
     _capture = false;
 
-    if (openspace::ImageSequencer::ref().isReady() && _performProjection){
+    if (openspace::ImageSequencer::ref().isReady() && _projectionComponent.doesPerformProjection()){
         openspace::ImageSequencer::ref().updateSequencer(_time);
         _capture = openspace::ImageSequencer::ref().getImagePaths(
-            _imageTimes, _projecteeID, _instrumentID
+            _imageTimes, _projectionComponent.projecteeId(), _projectionComponent.instrumentId()
         );
     }
 

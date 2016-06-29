@@ -25,6 +25,7 @@
 #ifndef __PROJECTIONCOMPONENT_H__
 #define __PROJECTIONCOMPONENT_H__
 
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/util/spicemanager.h>
 
@@ -33,13 +34,14 @@
 
 namespace openspace {
 
-class ProjectionComponent {
+class ProjectionComponent : public properties::PropertyOwner {
 public:
     ProjectionComponent();
 
-protected:
     bool initialize();
     bool deinitialize();
+
+    bool isReady() const;
 
     bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
     bool initializeParser(const ghoul::Dictionary& dictionary);
@@ -65,9 +67,25 @@ protected:
         glm::vec3& boreSight
     );
 
+    bool doesPerformProjection() const;
+    bool needsClearProjection() const;
+    float projectionFading() const;
+
     void clearAllProjections();
 
+    ghoul::opengl::Texture& projectionTexture() const;
 
+    std::string projectorId() const;
+    std::string projecteeId() const;
+    std::string instrumentId() const;
+    SpiceManager::AberrationCorrection aberration() const;
+
+    float fieldOfViewY() const;
+    float aspectRatio() const;
+    float nearPlane() const;
+    float farPlane() const;
+
+protected:
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
     properties::FloatProperty _projectionFading;
@@ -85,7 +103,6 @@ protected:
     float _aspectRatio;
     float _nearPlane;
     float _farPlane;
-
 
     GLuint _fboID;
 
