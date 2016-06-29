@@ -129,12 +129,12 @@ float gridDots(vec2 uv, vec2 gridResolution){
 	return 1-length(1-uvDotSpace);
 }
 
-vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution){
+vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution, vec2 heightResolution){
 	vec2 uvVertexSpace = fract(vertexResolution * uv);
 	vec3 colorUv = vec3(0.3*uv.x, 0.3*uv.y, 0);
 	vec3 colorDistance = vec3(0, 0, min( 0.4*log(fragPos.w) - 3.9, 1));
 	vec3 colorVertex = (1.0-length(uvVertexSpace)) * vec3(0.5);
-	vec3 colorHeightSample = (gridDots(uv, vertexResolution) > 0.9 ? 1 : 0) * vec3(1,0,0);
+	vec3 colorHeightSample = (gridDots(uv, heightResolution) > 0.9 ? 1 : 0) * vec3(1,0,0);
 	vec3 colorSum = colorUv + colorDistance + colorVertex + colorHeightSample;
 	return vec4(0.5 * colorSum, 1);
 }

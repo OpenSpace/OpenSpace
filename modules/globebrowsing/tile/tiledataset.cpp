@@ -182,12 +182,14 @@ namespace openspace {
     //                               Tile Dataset                                   //
     //////////////////////////////////////////////////////////////////////////////////
 
+    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-1, -1);
+    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(2, 2);
+
     bool TileDataset::GdalHasBeenInitialized = false;
 
     TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize,
         bool doPreprocessing, GLuint dataType)
-        : _minimumPixelSize(minimumPixelSize)
-        , _doPreprocessing(doPreprocessing)
+        : _doPreprocessing(doPreprocessing)
         , _maxLevel(-1)
     {
         if (!GdalHasBeenInitialized) {
@@ -284,16 +286,17 @@ namespace openspace {
             
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
             
-            int pixelStartX = region.pixelStart.x * pixelSourceScale;
-            int pixelStartY = region.pixelStart.y * pixelSourceScale;
-            int pixelWidthX = region.numPixels.x * pixelSourceScale;
-            int pixelWidthY = region.numPixels.y * pixelSourceScale;
+            int pixelStartX = region.pixelStart.x * pixelSourceScale + tilePixelStartOffset.x;
+            int pixelStartY = region.pixelStart.y * pixelSourceScale + tilePixelStartOffset.y;
+            int pixelWidthX = region.numPixels.x * pixelSourceScale + tilePixelSizeDifference.x;
+            int pixelWidthY = region.numPixels.y * pixelSourceScale + tilePixelSizeDifference.y;
+
 
             // Clamp to be inside dataset
-            pixelStartX = glm::max(pixelStartX, 0);
-            pixelStartY = glm::max(pixelStartY, 0);
-            pixelWidthX = glm::min(pixelStartX + pixelWidthX, rasterBand->GetXSize()) - pixelStartX;
-            pixelWidthY = glm::min(pixelStartY + pixelWidthY, rasterBand->GetYSize()) - pixelStartY;
+            //pixelStartX = glm::max(pixelStartX, 0);
+            //pixelStartY = glm::max(pixelStartY, 0);
+            //pixelWidthX = glm::min(pixelStartX + pixelWidthX, rasterBand->GetXSize()) - pixelStartX;
+            //pixelWidthY = glm::min(pixelStartY + pixelWidthY, rasterBand->GetYSize()) - pixelStartY;
 
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,

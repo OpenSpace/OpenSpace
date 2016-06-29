@@ -102,6 +102,9 @@ namespace openspace {
         TileDepthTransform getDepthTransform() const;
         const TileDataLayout& getDataLayout() const;
 
+        const static glm::ivec2 tilePixelStartOffset;
+        const static glm::ivec2 tilePixelSizeDifference;
+
 
     private:
 
@@ -131,7 +134,6 @@ namespace openspace {
 
         static bool GdalHasBeenInitialized;
 
-        int _minimumPixelSize;
         int _maxLevel;
         double _tileLevelDifference;
 

@@ -28,6 +28,12 @@
 
 #include "fragment.glsl"
 
+#if USE_HEIGHTMAP
+uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
+#endif // USE_HEIGHTMAP
+
 #if USE_COLORTEXTURE
 uniform Tile ColorTextures[NUMLAYERS_COLORTEXTURE];
 uniform Tile ColorTexturesParent1[NUMLAYERS_COLORTEXTURE];
@@ -58,6 +64,9 @@ uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
 uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
+uniform vec2 vertexResolution;
+
+
 #if USE_ATMOSPHERE
 // TODO atmosphere uniforms here
 #endif // USE_ATMOSPHERE
@@ -83,8 +92,12 @@ Fragment getFragment() {
 		ColorTexturesParent2);
 
 #else 
-	vec2 vertexResolution = vec2(64.0);
-	frag.color = calculateDebugColor(fs_uv, fs_position, vertexResolution);
+	vec2 heightResolution = vec2(1,1);
+	#if USE_HEIGHTMAP
+		heightResolution = vec2(textureSize(HeightMaps[0].textureSampler,0));
+	#endif
+	
+	frag.color = calculateDebugColor(fs_uv, fs_position, vertexResolution, heightResolution);
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALE_OVERLAY
