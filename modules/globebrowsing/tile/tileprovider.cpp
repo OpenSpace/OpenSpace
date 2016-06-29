@@ -51,6 +51,46 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
+    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath) {
+        _tile = Tile();
+        _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(imagePath).release());
+        _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
+        _tile.preprocessData = nullptr;
+
+        _tile.texture->uploadTexture();
+        _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    }
+
+    Tile SingleImagePrivoder::getTile(const ChunkIndex& chunkIndex) {
+        return _tile;
+    }
+
+    Tile::Status SingleImagePrivoder::getTileStatus(const ChunkIndex& index) {
+        return _tile.status;
+    }
+
+    TileDepthTransform SingleImagePrivoder::depthTransform() {
+        TileDepthTransform transform;
+        transform.depthOffset = 0.0f;
+        transform.depthScale = 1.0f;
+        return transform;
+    }
+
+    void SingleImagePrivoder::update() {
+        // nothing to be done
+    }
+
+    int SingleImagePrivoder::maxLevel() {
+        return 1337; // unlimited
+    }
+
+    
+
+
+
+
+
+
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
@@ -75,15 +115,15 @@ namespace openspace {
         }
     }
 
-    std::shared_ptr<AsyncTileDataProvider> CachingTileProvider::getAsyncTileReader() {
-        return _asyncTextureDataProvider;
+    int CachingTileProvider::maxLevel() {
+        return _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
     }
 
     Tile CachingTileProvider::getTile(const ChunkIndex& chunkIndex) {
         Tile tile = Tile::TileUnavailable;
 
-        auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
-        if (chunkIndex.level > tileDataset->getMaximumLevel()) {
+        
+        if (chunkIndex.level > maxLevel()) {
             tile.status = Tile::Status::OutOfRange;
             return tile;
         }
@@ -146,7 +186,7 @@ namespace openspace {
 
     void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
         ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
-        TileDataset::DataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
+        TileDataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
             tileIOResult->imageData,
             tileIOResult->dimensions,

@@ -71,11 +71,27 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void update() = 0;
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader() = 0;
+        virtual int maxLevel() = 0;
     };
 
 
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
+
+
+    class SingleImagePrivoder : public TileProvider {
+    public:
+        SingleImagePrivoder(const std::string& imagePath);
+        virtual ~SingleImagePrivoder() { }
+
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual int maxLevel();
+    private:
+        Tile _tile;
+
+    };
 
 
     /**
@@ -97,7 +113,7 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
+        virtual int maxLevel();
 
 
     private:

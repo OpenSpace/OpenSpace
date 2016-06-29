@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -141,17 +142,17 @@ namespace openspace {
         _currentTileProvider->update();
     }
 
-    std::shared_ptr<AsyncTileDataProvider> TemporalTileProvider::getAsyncTileReader() {
+    int TemporalTileProvider::maxLevel() {
         if (_currentTileProvider == nullptr) {
             LDEBUG("Warning: had to call update from getAsyncTileReader()");
             update();
         }
 
-        return _currentTileProvider->getAsyncTileReader();
+        return _currentTileProvider->maxLevel();
     }
 
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
+    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
         Time tCopy(t);
         if (_timeQuantizer.quantize(tCopy)) {
             TimeKey timekey = _timeFormat->stringify(tCopy);
@@ -167,31 +168,23 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
+    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
         auto it = _tileProviderMap.find(timekey);
         if (it != _tileProviderMap.end()) {
             return it->second;
         }
         else {
             auto tileProvider = initTileProvider(timekey);
+
             _tileProviderMap[timekey] = tileProvider;
             return tileProvider;
         }
     }
 
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
+    std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
-        
-        auto tileDataset = std::make_shared<TileDataset>(gdalDatasetXml,
-                _tileProviderInitData.minimumPixelSize, _tileProviderInitData.preprocessTiles);
-        auto threadPool = std::make_shared<ThreadPool>(_tileProviderInitData.threads);
-        auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
-        auto tileCache = std::make_shared<TileCache>(_tileProviderInitData.cacheSize);
-        auto tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache,
-                _tileProviderInitData.framesUntilRequestQueueFlush);
-
-        return tileProvider;
+        return TileProviderFactory::ref()->create("LRUCaching", gdalDatasetXml, _tileProviderInitData);
     }
     
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {

@@ -124,15 +124,15 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
+        virtual int maxLevel();
 
 
 
 
         typedef std::string TimeKey;
 
-        std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
-        std::shared_ptr<CachingTileProvider> getTileProvider(TimeKey timekey);
+        std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
+        std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
 
     private:
 
@@ -143,7 +143,7 @@ namespace openspace {
         std::string getGdalDatasetXML(TimeKey key);
 
         
-        std::shared_ptr<CachingTileProvider> initTileProvider(TimeKey timekey);
+        std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
 
         std::string consumeTemporalMetaData(const std::string &xml);
         std::string getXMLValue(CPLXMLNode*, const std::string& key, const std::string& defaultVal);
@@ -155,7 +155,7 @@ namespace openspace {
         const std::string _datasetFile;
         std::string _gdalXmlTemplate;
 
-        std::unordered_map<TimeKey, std::shared_ptr<CachingTileProvider> > _tileProviderMap;
+        std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
         TileProviderInitData _tileProviderInitData;
 
         std::shared_ptr<TileProvider> _currentTileProvider;

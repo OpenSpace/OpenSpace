@@ -282,6 +282,10 @@ namespace openspace {
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
+        if (tileProviders[LayeredTextures::ColorTextures].size() == 0) {
+            programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
+        }       
+
         return programObject;
     }
 

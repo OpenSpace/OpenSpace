@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -94,22 +95,24 @@ namespace openspace {
         // Create TileProviders for all textures within this category
         for (size_t i = 0; i < texturesDict.size(); i++) {
             std::string name, path;
-            // Default to enabled = true on case it's not defined in the dictionary
-            bool enabled = true;
+            
             std::string dictKey = std::to_string(i + 1);
             ghoul::Dictionary texDict = texturesDict.value<ghoul::Dictionary>(dictKey);
             texDict.getValue("Name", name);
             texDict.getValue("FilePath", path);
-            texDict.getValue("Enabled", enabled);
 
-            std::shared_ptr<TileProvider> tileProvider;
-            try {
-                tileProvider = initProvider(path, initData);
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERROR(e.message);
+            std::string type = "LRUCaching"; // if type is unspecified
+            texDict.getValue("Type", type);
+
+            
+            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+            if (tileProvider == nullptr) {
                 continue;
             }
+
+            bool enabled = false; // defaults to false if unspecified
+            texDict.getValue("Enabled", enabled);
+
             dest.push_back({ name, tileProvider, enabled });
         }
     }
