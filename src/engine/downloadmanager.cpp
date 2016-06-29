@@ -160,9 +160,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
 
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
-	errno = 0;
+    errno = 0;
     FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
-	ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
+    ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
 
     //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
@@ -293,7 +293,7 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
     LDEBUG("Request File: " << requestFile);
 
     bool isFinished = false;
-    auto callback = [&futures, destination, &progressCallback, &isFinished, requestFile, overrideFiles](const FileFuture& f) {
+    auto callback = [&](const FileFuture& f) {
         LDEBUG("Finished: " << requestFile);
         std::ifstream temporary(requestFile);
         std::string line;
@@ -310,7 +310,7 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
 
             LDEBUG("\tLine: " << line << " ; Dest: " << destination.path() + "/" + file);
 
-            std::shared_ptr<FileFuture> future = DlManager.downloadFile(
+            std::shared_ptr<FileFuture> future = downloadFile(
                 line,
                 destination.path() + "/" + file,
                 overrideFiles,

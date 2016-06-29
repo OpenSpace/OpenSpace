@@ -84,7 +84,7 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
-    DlManager.fetchFile(
+    OsEng.downloadManager().fetchFile(
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
@@ -146,7 +146,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         };
 
         // Download metadata
-        DlManager.fetchFile(
+        OsEng.downloadManager().fetchFile(
             baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
@@ -170,7 +170,7 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
-    return std::move( DlManager.fetchFile(
+    return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
@@ -182,7 +182,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
 }
 
 std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
-    return std::move( DlManager.fetchFile(
+    return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
@@ -261,7 +261,7 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
-    DlManager.fetchFile(
+    OsEng.downloadManager().fetchFile(
         baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file){
             metaFuture->json = std::string(file.buffer, file.size);

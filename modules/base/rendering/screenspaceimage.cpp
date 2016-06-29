@@ -171,7 +171,7 @@ void ScreenSpaceImage::updateTexture() {
 std::future<DownloadManager::MemoryFile> ScreenSpaceImage::downloadImageToMemory(
     std::string url)
 {
-    return std::move(DlManager.fetchFile(
+    return std::move(OsEng.downloadManager().fetchFile(
         url,
         [url](const DownloadManager::MemoryFile& file) {
             LDEBUG("Download to memory finished for screen space image");
