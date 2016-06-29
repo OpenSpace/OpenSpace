@@ -85,7 +85,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    if (ImGui::CollapsingHeader(name.c_str())) {
+    if (ImGui::TreeNode(name.c_str())) {
         const std::vector<SelectionProperty::Option>& options = p->options();
         std::vector<int> newSelectedIndices;
 
@@ -109,6 +109,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
             parameters += "}";
             executeScript(p->fullyQualifiedIdentifier(), parameters);
         }
+        ImGui::TreePop();
     }
     ImGui::PopID();
 }
