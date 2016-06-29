@@ -68,6 +68,8 @@ public:
         bool corrupted;
     };
 
+    using MemoryFileFuture = std::future<DownloadManager::MemoryFile>;
+
     using DownloadProgressCallback = std::function<void(const FileFuture&)>;
     using DownloadFinishedCallback = std::function<void(const FileFuture&)>;
 
@@ -95,8 +97,7 @@ public:
     );
 
     /**
-     * Downloads a file to memory. This is done in a separate thread if the 
-     * returned future object is kept alive.
+     * Downloads a file to memory. This is done in a separate thread.
      * 
      * @param url the url you want to request a file from
      * @param successCallback optional callback that will be called when download is complete
@@ -118,9 +119,6 @@ public:
         const ghoul::filesystem::Directory& destination, int version,
         bool overrideFiles, AsyncDownloadFinishedCallback callback
     );
-
-    void getFileExtension(const std::string& url,
-        RequestFinishedCallback finishedCallback = RequestFinishedCallback());
 
 private:
     std::vector<std::string> _requestURL;

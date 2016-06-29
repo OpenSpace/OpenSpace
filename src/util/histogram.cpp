@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2015-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,7 +111,7 @@ int Histogram::numValues() const {
 
 bool Histogram::add(float value, float repeat) {
     if (value < _minValue || value > _maxValue) {
-        // Out of range
+        LWARNING("the value is out of range");
         return false;
     }
 
@@ -124,8 +124,18 @@ bool Histogram::add(float value, float repeat) {
     return true;
 }
 
-void Histogram::changeRange(float minValue, float maxValue){\
+void Histogram::changeRange(float minValue, float maxValue) {
+    // If both minValue and maxValue is within range of old min and max
+    // do not change anything. new range must be bigger.
     if(minValue > _minValue && maxValue < _maxValue) return;
+
+    // If old min value is smaller that the proposed new one. Then keep the old one. 
+    if(minValue > _minValue)
+        minValue = _minValue;
+
+    // If old max value is smaller that the proposed new one. Then keep the old one. 
+    if(maxValue < _maxValue)
+        maxValue = _maxValue;
 
     float* oldData = _data;
     float* newData = new float[_numBins]{0.0};
@@ -136,7 +146,6 @@ void Histogram::changeRange(float minValue, float maxValue){\
         int binIndex = std::min( (float)floor(normalizedValue * _numBins), _numBins - 1.0f ); // [0, _numBins - 1]
 
         newData[binIndex] = oldData[i];
-        //newData[binIndex] += oldData[i]; ?
     }
 
     _minValue = minValue;
@@ -245,27 +254,16 @@ void Histogram::normalize() {
  * Old histogram value is the index of the array, and the new equalized
  * value will be the value at the index.
  */
-void Histogram::generateEqualizer(){
+void Histogram::generateEqualizer() {
 
     _equalizer = std::vector<float>(_numBins, 0.0f);
-    // int numValues = _numValues;
-    // int highBin = -1;
-
-    // if(withoutHighestBin){
-    //     int highBin = highestBin();
-    //     std::cout << "highBin: " << highBin << std::endl;
-    //     numValues -= (int)_data[highBin];
-    // }
 
     float previousCdf = 0.0f;
 
     for(int i = 0; i < _numBins; i++){
-        // float probability = 0.0f;
-        // if(i != highBin)
-        //     probability += _data[i] / (float)numValues;
+
         float probability = _data[i] / (float)_numValues;
-        //if(withoutHighestBin)
-        //std::cout << "prob " << probability << std::endl;
+
         float cdf  = previousCdf + probability;
         cdf = std::min(1.0f, cdf);
         _equalizer[i] = cdf * (_numBins-1);
@@ -273,10 +271,14 @@ void Histogram::generateEqualizer(){
     }
 }
 
-bool Histogram::setBin(int bin, float value){
+bool Histogram::setBin(int bin, float value) {
     if (bin < 0 || bin > _numBins) {
         LWARNING("setBin: bin is out of range");
         return false;
+    }
+    if(value < 0.0f){
+        LWARNING("setBin: the value must not be negative");
+        return false;   
     }
     _numValues -= _data[bin];
     _numValues += (int)value;
@@ -302,9 +304,9 @@ Histogram Histogram::equalize(){
  * this method will use its equalizer to return a histogram equalized result.
  */
 float Histogram::equalize(float value) const {
-    // if (value < _minValue || value > _maxValue) {
-    //     LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
-    // }
+    if (value < _minValue || value > _maxValue) {
+        LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
+    }
     float normalizedValue = (value-_minValue)/(_maxValue-_minValue);
     int bin = floor(normalizedValue * _numBins);
     // If value == _maxValues then bin == _numBins, which is a invalid index.
