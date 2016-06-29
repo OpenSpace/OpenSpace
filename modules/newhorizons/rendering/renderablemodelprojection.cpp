@@ -207,13 +207,15 @@ void RenderableModelProjection::update(const UpdateData& data) {
         
     _time = data.time;
 
-    if (openspace::ImageSequencer::ref().isReady() && _projectionComponent.doesPerformProjection()) {
+    if (openspace::ImageSequencer::ref().isReady()) {
         openspace::ImageSequencer::ref().updateSequencer(_time);
-        _capture = openspace::ImageSequencer::ref().getImagePaths(
-            _imageTimes,
-            _projectionComponent.projecteeId(),
-            _projectionComponent.instrumentId()
-        );
+        if (_projectionComponent.doesPerformProjection()) {
+            _capture = openspace::ImageSequencer::ref().getImagePaths(
+                _imageTimes,
+                _projectionComponent.projecteeId(),
+                _projectionComponent.instrumentId()
+            );
+        }
     }
         
     // set spice-orientation in accordance to timestamp
