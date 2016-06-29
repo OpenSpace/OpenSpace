@@ -215,9 +215,11 @@ void GUI::initialize() {
     style.WindowPadding = { 4.f, 4.f };
     style.WindowRounding = 0.f;
     style.FramePadding = { 3.f, 3.f };
-    style.FrameRounding = 3.f;
+    style.FrameRounding = 0.f;
     style.ScrollbarWidth = 15.f;
     style.ScrollbarRounding = 0.f;
+    style.IndentSpacing = 25;
+    style.ItemSpacing = { 4.f, 2.f };
 
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.21f, 0.24f, 1.0f);
     style.Colors[ImGuiCol_Border] = ImVec4(0.1f, 0.39f, 0.42f, 0.59f);
@@ -228,6 +230,7 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.12f, 0.71f, 0.8f, 0.43f);
     style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
     style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.4f, 0.75f, 0.8f, 0.65f);
+    style.Colors[ImGuiCol_ComboBg] = ImVec4(0.18f, 0.51f, 0.78f, 1.f);
     style.Colors[ImGuiCol_SliderGrabActive] = ImVec4(0.5f, 0.8f, 0.76f, 1.0f);
     style.Colors[ImGuiCol_Button] = ImVec4(0.0f, 0.36f, 0.67f, 0.6f);
     style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.0f, 0.51f, 0.94f, 1.0f);
@@ -245,7 +248,7 @@ void GUI::initialize() {
     _globalProperty.initialize();
     _performance.initialize();
     _help.initialize();
-    _iswa.initialize();
+    _iswa.initialize(); 
 }
 
 void GUI::deinitialize() {
@@ -477,7 +480,7 @@ void GUI::render() {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
-#if 0
+#if 1
     ImGui::Begin("Style Editor");
     ImGui::ShowStyleEditor();
     ImGui::End();

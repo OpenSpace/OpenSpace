@@ -46,6 +46,28 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
 }
 
+void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
+    ImGui::PushID(owner->name().c_str());
+    for (properties::PropertyOwner* subOwner : owner->propertySubOwners()) {
+        if (subOwner->name() == "renderable")
+            renderPropertyOwner(subOwner);
+
+        else {
+            if (ImGui::TreeNode(subOwner->name().c_str())) {
+                renderPropertyOwner(subOwner);
+                ImGui::TreePop();
+            }
+        }
+    }
+
+    for (properties::Property* prop : owner->properties()) {
+        if (prop->isVisible()) {
+            renderProperty(prop, owner);
+        }
+    }
+    ImGui::PopID();
+}
+
 void GuiPropertyComponent::render() {
     ImGui::Begin(_name.c_str(), &_isEnabled, size, 0.5f);
 
@@ -69,11 +91,7 @@ void GuiPropertyComponent::render() {
             };
 
             if (header()) {
-                for (properties::Property* prop : pOwner->propertiesRecursive()) {
-                    if (prop->isVisible()) {
-                        renderProperty(prop, pOwner);
-                    }
-                }
+                renderPropertyOwner(pOwner);
             }
         }
     }
