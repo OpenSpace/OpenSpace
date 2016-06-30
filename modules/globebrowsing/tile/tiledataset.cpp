@@ -226,7 +226,6 @@ namespace openspace {
                 _maxLevel += numOverviews - 1;
             }
         }
-
         return _maxLevel;
     }
 
@@ -234,14 +233,59 @@ namespace openspace {
         return _depthTransform;
     }
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex) {
-        //GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
-        PixelRegion region = gdalPixelRegion(chunkIndex);
-        int overview = gdalOverview(chunkIndex);
-        region.shrinkPow2(overview + 1);
+    bool TileDataset::gdalHasOverviews() const {
+        return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
+    }
 
-        size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
-        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
+    GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
+        GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
+        return gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
+    }
+
+    PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
+        PixelRegion gdalRegion;
+        gdalRegion.start.x = 0;
+        gdalRegion.start.y = 0;
+        gdalRegion.numPixels.x = rasterBand->GetXSize();
+        gdalRegion.numPixels.y = rasterBand->GetYSize();
+        return gdalRegion;
+    }
+
+    IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) {
+        // Calculate suitable overview and corresponding pixel region
+        int overview = gdalOverview(chunkIndex);
+        PixelRegion region = gdalPixelRegion(chunkIndex); // pixel region at overview zero
+        region.downscalePow2(overview + 1); // pixel region at suitable overview 
+        
+        // Create an IORegion based on that overview pixel region
+        IODescription ioRegion;
+        ioRegion.overview = overview;
+        ioRegion.readRegion = region;
+        ioRegion.writeRegion = { PixelCoordinate(0, 0), region.numPixels };
+
+        // Handle the case where the dataset does not have overviews
+        if (!gdalHasOverviews()) {
+            ioRegion.readRegion.upscalePow2(overview + 1);
+            ioRegion.overview = 0; // no overview
+        }
+        
+        // For correct sampling in height dataset, we need to pad the texture tile
+        ioRegion.readRegion.pad(padding);
+
+        // Doing this may cause invalid regions, i.e. having negative pixel coordinates 
+        // or being too large etc. For now, just clamp 
+        PixelRegion overviewRegion = gdalPixelRegion(gdalRasterBand(overview));
+        ioRegion.readRegion.clampTo(overviewRegion);
+
+        return ioRegion;
+    }
+
+
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex) {
+        IODescription io = getIODescription(chunkIndex);
+
+        size_t bytesPerLine = _dataLayout.bytesPerPixel * io.writeRegion.numPixels.x;
+        size_t totalNumBytes = bytesPerLine * io.writeRegion.numPixels.y;
         char* imageData = new char[totalNumBytes];
 
         CPLErr worstError = CPLErr::CE_None;
@@ -250,36 +294,17 @@ namespace openspace {
         for (size_t i = 0; i < _dataLayout.numRasters; i++) {
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
             
-            PixelRegion readRegion(region);
-
-            GDALRasterBand* rasterBand;
-            if (_dataset->GetRasterBand(i + 1)->GetOverviewCount() <= 0){
-                rasterBand = _dataset->GetRasterBand(i + 1);
-                int pixelSourceScale = pow(2, overview + 1);
-                readRegion.scale(pixelSourceScale);
-            }
-            else {
-                rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(overview);
-            }
-            
-            PixelRegion gdalPixelRegion; 
-            gdalPixelRegion.start = glm::ivec2(0);
-            gdalPixelRegion.numPixels = glm::ivec2(rasterBand->GetXSize(), rasterBand->GetYSize());
-
-            
-            readRegion.addPadding(padding);
-            readRegion.clampTo(gdalPixelRegion);
-
+            GDALRasterBand* rasterBand = gdalRasterBand(io.overview, i+1);
 
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
-                readRegion.start.x,           // Begin read x
-                readRegion.start.y,           // Begin read y
-                readRegion.numPixels.x,            // width to read x
-                readRegion.numPixels.y,            // width to read y
+                io.readRegion.start.x,           // Begin read x
+                io.readRegion.start.y,           // Begin read y
+                io.readRegion.numPixels.x,            // width to read x
+                io.readRegion.numPixels.y,            // width to read y
                 dataDestination,               // Where to put data
-                region.numPixels.x,            // width to write x in destination
-                region.numPixels.y,            // width to write y in destination
+                io.writeRegion.numPixels.x,            // width to write x in destination
+                io.writeRegion.numPixels.y,            // width to write y in destination
                 _dataLayout.gdalType,		   // Type
                 _dataLayout.bytesPerPixel,	   // Pixel spacing
                 bytesPerLine);      // Line spacing
@@ -290,14 +315,14 @@ namespace openspace {
 
         std::shared_ptr<TileIOResult> result(new TileIOResult);
         result->chunkIndex = chunkIndex;
-        result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
-        result->dimensions = glm::uvec3(region.numPixels, 1);
-        result->nBytesImageData = _dataLayout.bytesPerPixel * region.numPixels.x * region.numPixels.y;
+        result->imageData = getImageDataFlippedY(io.writeRegion, _dataLayout, imageData);
+        result->dimensions = glm::uvec3(io.writeRegion.numPixels, 1);
+        result->nBytesImageData = _dataLayout.bytesPerPixel * io.writeRegion.numPixels.x * io.writeRegion.numPixels.y;
         result->error = worstError;
         if (_doPreprocessing) {
-            result->preprocessData = preprocess(imageData, region, _dataLayout);
+            result->preprocessData = preprocess(imageData, io.writeRegion, _dataLayout);
             int success;
-            auto gdalOverview = _dataset->GetRasterBand(1)->GetOverview(overview);
+            auto gdalOverview = _dataset->GetRasterBand(1)->GetOverview(io.overview);
             double missingDataValue = gdalOverview->GetNoDataValue(&success);
             if (!success) {
                 missingDataValue = 32767; // missing data value
