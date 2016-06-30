@@ -25,8 +25,10 @@
 #ifndef __PERFORMANCEMANAGER_H__
 #define __PERFORMANCEMANAGER_H__
 
-#include <chrono>
+#include <ghoul/misc/sharedmemory.h>
+
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace ghoul {
@@ -58,7 +60,7 @@ private:
     
     std::map<std::string, size_t> individualPerformanceLocations;
     
-    ghoul::SharedMemory* _performanceMemory;
+    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
 };
 
 } // namespace performance

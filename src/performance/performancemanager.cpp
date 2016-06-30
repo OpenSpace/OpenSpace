@@ -46,16 +46,14 @@ PerformanceManager::PerformanceManager()
     // Compute the total size
     const int totalSize = sizeof(PerformanceLayout);
     LINFO("Create shared memory of " << totalSize << " bytes");
-    
-    try {
-        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
-    }
-    catch (const ghoul::SharedMemory::SharedMemoryError& e) {
-        LINFOC(e.component, e.what());
-    }
-    
+
+    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
+        LWARNING("Shared memory for Performance measurements already existed.");
+
     ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
-    _performanceMemory = new ghoul::SharedMemory(PerformanceMeasurementSharedData);
+
+    _performanceMemory = std::make_unique<ghoul::SharedMemory>(PerformanceMeasurementSharedData);
+        
     void* ptr = _performanceMemory->memory();
     
     // Using the placement-new to create a PerformanceLayout in the shared memory
@@ -63,8 +61,7 @@ PerformanceManager::PerformanceManager()
 }
 
 PerformanceManager::~PerformanceManager() {
-    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
-        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+    ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
 }
 
 void PerformanceManager::resetPerformanceMeasurements() {

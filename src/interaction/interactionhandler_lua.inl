@@ -178,42 +178,16 @@ int saveCameraStateToFile(lua_State* L) {
     OsEng.interactionHandler().saveCameraStateToFile(cameraStateFilePath);
 }
 
-int setInteractionFriction(lua_State* L) {
-    const std::string _loggerCat = "lua.setInteractionFriction";
+int resetCameraDirection(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.resetCameraDirection";
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-    double friction = luaL_checknumber(L, -1);
-
-    OsEng.interactionHandler().setInteractionFriction(friction);
+    OsEng.interactionHandler().resetCameraDirection();
 }
-
-int setInteractionSensitivity(lua_State* L) {
-    const std::string _loggerCat = "lua.setInteractionFriction";
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    double sensitivity = luaL_checknumber(L, -1);
-
-    OsEng.interactionHandler().setInteractionSensitivity(sensitivity);
-}
-
-int setInteractionFollowScaleFactor(lua_State* L) {
-    const std::string _loggerCat = "lua.setInteractionFriction";
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    double scaleFactor = luaL_checknumber(L, -1);
-
-    OsEng.interactionHandler().setInteractionFollowScaleFactor(scaleFactor);
-}
-
 
 #ifdef USE_OLD_INTERACTIONHANDLER
 

@@ -125,7 +125,7 @@ int iswa_removeGroup(lua_State* L){
     if(groups.find(name) != groups.end())
         groups[name]->clearGroup();
 
-	return 0;
+    return 0;
 }
 
 int iswa_addCdfFiles(lua_State* L){

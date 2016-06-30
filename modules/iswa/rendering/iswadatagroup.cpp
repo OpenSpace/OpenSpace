@@ -62,13 +62,6 @@ IswaDataGroup::IswaDataGroup(std::string name, IswaManager::CygnetType type, std
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_useHistogram);
-    OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    OsEng.gui()._iswa.registerProperty(&_normValues);
-    OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-    OsEng.gui()._iswa.registerProperty(&_dataOptions);
-    if(!_autoFilter.value())
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
 
     _useHistogram.onChange([this]{
         LDEBUG("Group " + name() + " published useHistogramChanged");
@@ -82,11 +75,11 @@ void IswaDataGroup::registerProperties(){
         // and unregister backgroundvalues property.
         if(_autoFilter.value()){
             _backgroundValues.setValue(_dataProcessor->filterValues());
-            OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+            _backgroundValues.setVisible(false);
         // else if autofilter is turned off, register backgroundValues 
         } else {
             _backgroundValues.setValue(glm::vec2(0.f));
-            OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+            _backgroundValues.setVisible(true);
         }
         _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
     });

@@ -21,10 +21,10 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+
 #include <modules/base/rendering/screenspaceframebuffer.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/onscreengui/include/gui.h>
 #include <openspace/util/camera.h>
 
 #include <openspace/rendering/renderer.h>
@@ -40,11 +40,9 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
 {
     _id = id();
     setName("ScreenSpaceFramebuffer" + std::to_string(_id));
-    registerProperties();
 
     glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
     addProperty(_size);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_size);
     _size.set(glm::vec4(0, 0, resolution.x,resolution.y));
 
     _scale.setValue(1.0f);
@@ -63,8 +61,6 @@ bool ScreenSpaceFramebuffer::initialize(){
 }
 
 bool ScreenSpaceFramebuffer::deinitialize(){
-    unregisterProperties();
-
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 

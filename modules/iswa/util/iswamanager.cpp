@@ -82,7 +82,7 @@ IswaManager::IswaManager()
     _geometryType[GeometryType::Plane] = "Plane";
     _geometryType[GeometryType::Sphere] = "Sphere";
 
-    DlManager.fetchFile(
+    OsEng.downloadManager().fetchFile(
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
@@ -120,7 +120,7 @@ void IswaManager::addIswaCygnet(int id, ResourceType resourceType, std::string g
         };
 
         // Download metadata
-        DlManager.fetchFile(
+        OsEng.downloadManager().fetchFile(
             baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
@@ -172,8 +172,9 @@ std::string IswaManager::cygnetType(int i){
     return _cygnetType[static_cast<CygnetType>(i)];
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const{
-    return std::move( DlManager.fetchFile(
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const {
+    return std::move(OsEng.downloadManager().fetchFile(
+
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
@@ -184,8 +185,8 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) const{
-    return std::move( DlManager.fetchFile(
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) const {
+    return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));

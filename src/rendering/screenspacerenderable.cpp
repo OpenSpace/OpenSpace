@@ -30,8 +30,6 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
-#include <modules/onscreengui/include/gui.h>
-
  #ifdef WIN32
  #define _USE_MATH_DEFINES
  #include <math.h>
@@ -127,22 +125,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     // Setting spherical/euclidean onchange handler
     _useFlatScreen.onChange([this](){   
         if (_useFlatScreen) {
-            OsEng.gui()._screenSpaceProperty.registerProperty(
-                &_euclideanPosition,
-                &_useFlatScreen
-            );
             addProperty(_euclideanPosition);
-            
-            OsEng.gui()._screenSpaceProperty.unregisterProperty(&_sphericalPosition);
             removeProperty(_sphericalPosition);
         } else {
-            OsEng.gui()._screenSpaceProperty.unregisterProperty(&_euclideanPosition);
             removeProperty(_euclideanPosition);
-
-            OsEng.gui()._screenSpaceProperty.registerProperty(
-                &_sphericalPosition,
-                &_useFlatScreen
-            );
             addProperty(_sphericalPosition);
         }
         useEuclideanCoordinates(_useFlatScreen);
@@ -235,20 +221,6 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
     float phi = acos(euclidean[1]/_radius);
 
     return glm::vec2(theta, phi);
-}
-
-void ScreenSpaceRenderable::registerProperties() {
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_enabled);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_useFlatScreen);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_euclideanPosition);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_depth);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_scale);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_alpha);
-    OsEng.gui()._screenSpaceProperty.registerProperty(&_delete);
-}
-
-void ScreenSpaceRenderable::unregisterProperties() {
-    OsEng.gui()._screenSpaceProperty.unregisterProperties(name());
 }
 
 void ScreenSpaceRenderable::createShaders() {

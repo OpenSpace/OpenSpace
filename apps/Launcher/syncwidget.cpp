@@ -52,6 +52,7 @@
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
+#include <openspace/engine/openspaceengine.h>
 
 #include <fstream>
 
@@ -130,7 +131,7 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     setLayout(layout);
 
     ghoul::initialize();
-    openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
+    //openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
 
 
     libtorrent::error_code ec;
@@ -204,7 +205,7 @@ SyncWidget::~SyncWidget() {
     f.write(size.data.data(), sizeof(uint32_t));
     f.write(buffer.data(), buffer.size());
 
-    openspace::DownloadManager::deinitialize();
+    //openspace::DownloadManager::deinitialize();
     ghoul::deinitialize();
     delete _session;
 }
@@ -255,7 +256,7 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         LDEBUG(f.url.toStdString() << " -> " << f.destination.toStdString());
 
-        std::shared_ptr<openspace::DownloadManager::FileFuture> future = DlManager.downloadFile(
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future = OsEng.downloadManager().downloadFile(
             f.url.toStdString(),
             absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
@@ -284,7 +285,7 @@ void SyncWidget::handleFileRequest() {
         std::string path = absPath(f.destination.toStdString());
         int version = f.version;
 
-        DlManager.downloadRequestFilesAsync(
+        OsEng.downloadManager().downloadRequestFilesAsync(
                 identifier,
                 path,
                 version,

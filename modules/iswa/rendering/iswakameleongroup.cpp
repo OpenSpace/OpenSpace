@@ -38,6 +38,7 @@ namespace {
 }
 
 namespace openspace{
+
 IswaKameleonGroup::IswaKameleonGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor)
 	:IswaDataGroup(name, type, dataProcessor)
     ,_resolution("resolution", "Resolution%", 50.0f, 10.0f, 200.0f)
@@ -47,7 +48,7 @@ IswaKameleonGroup::IswaKameleonGroup(std::string name, IswaManager::CygnetType t
 {
     addProperty(_resolution);
     addProperty(_fieldlines);
-	registerProperties();
+    registerProperties();
 }
 
 IswaKameleonGroup::~IswaKameleonGroup(){}
@@ -58,7 +59,7 @@ void IswaKameleonGroup::clearGroup(){
 }
 
 std::vector<int> IswaKameleonGroup::fieldlineValue(){
-	return _fieldlines.value();
+    return _fieldlines.value();
 }
 
 void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath){
@@ -76,8 +77,6 @@ void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile, std::st
 
 
 void IswaKameleonGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_resolution);
-    OsEng.gui()._iswa.registerProperty(&_fieldlines);
     
     _resolution.onChange([this]{
         LDEBUG("Group " + name() + " published resolutionChanged");
@@ -86,7 +85,7 @@ void IswaKameleonGroup::registerProperties(){
 
     _fieldlines.onChange([this]{
         updateFieldlineSeeds();
-  	});
+    });
 }
 
 void IswaKameleonGroup::readFieldlinePaths(std::string indexFile){

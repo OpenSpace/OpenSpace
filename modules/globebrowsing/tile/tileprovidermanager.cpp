@@ -153,15 +153,9 @@ namespace openspace {
         return _layerCategories[category];
     }
 
-// <<<<<<< HEAD:modules/globebrowsing/tile/tileprovidermanager.cpp
-//     void TileProviderManager::prerender() {
-//         for (auto layerCategory : _layerCategories) {
-//             for (auto tileProviderWithName : layerCategory) {
-// =======
     void TileProviderManager::update() {
         for (auto layerCategory : _layerCategories) {
             for (auto tileProviderWithName : layerCategory) {
-// >>>>>>> feature/globebrowsing:modules/globebrowsing/tile/TileProviderManager.cpp
                 if (tileProviderWithName.isActive) {
                     tileProviderWithName.tileProvider->update();
                 }

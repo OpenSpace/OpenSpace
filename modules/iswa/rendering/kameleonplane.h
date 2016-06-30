@@ -40,8 +40,8 @@ namespace openspace{
  */
 class KameleonPlane : public DataCygnet {
 public:
- 	KameleonPlane(const ghoul::Dictionary& dictionary);
- 	~KameleonPlane();
+    KameleonPlane(const ghoul::Dictionary& dictionary);
+    ~KameleonPlane();
 
      bool initialize() override;
      bool deinitialize() override;
@@ -76,7 +76,7 @@ private:
     void subscribeToGroup();
 
     void changeKwPath(std::string path);
-	static int id();
+    static int id();
 
     properties::FloatProperty _resolution;
     properties::FloatProperty _slice;

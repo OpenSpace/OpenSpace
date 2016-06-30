@@ -27,8 +27,6 @@
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/onscreengui/include/gui.h>
-
 
 namespace {
     const std::string _loggerCat = "IswaCygnet";
@@ -107,9 +105,6 @@ bool IswaCygnet::initialize(){
     if(!_data->groupName.empty()){
         initializeGroup();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_alpha);
-        OsEng.gui()._iswa.registerProperty(&_delete);
-
         _delete.onChange([this](){
             deinitialize();
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
@@ -121,7 +116,7 @@ bool IswaCygnet::initialize(){
     createShader();
     downloadTextureResource();
 
-	return true;
+    return true;
 }
 
 bool IswaCygnet::deinitialize(){
@@ -218,15 +213,13 @@ bool IswaCygnet::destroyShader(){
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-	return true;
+    return true;
 }
 
 void IswaCygnet::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_enabled);
 }
 
 void IswaCygnet::unregisterProperties(){
-    OsEng.gui()._iswa.unregisterProperties(name());
 }
 
 void IswaCygnet::initializeTime(){

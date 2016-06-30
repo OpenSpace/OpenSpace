@@ -23,29 +23,16 @@
  ****************************************************************************************/
 
 #include <modules/onscreengui/include/guiiswacomponent.h>
-#include <modules/onscreengui/include/renderproperties.h>
 
+#include <modules/iswa/util/iswamanager.h>
+
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-
-#include <ext/json/json.hpp>
-#include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/util/iswamanager.h>
 #include <ghoul/filesystem/filesystem>
 
-
-#include <fstream>
+#include <ext/json/json.hpp>
 
 #include "imgui.h"
 
@@ -57,22 +44,23 @@ namespace {
 
 namespace openspace {
 namespace gui {
+
 GuiIswaComponent::GuiIswaComponent()
-    :GuiPropertyComponent()
-    ,_gmdata(false)
-    ,_gmimage(false)
-    ,_iondata(false)
+    : GuiPropertyComponent("iSWA")
+    , _gmData(false)
+    , _gmImage(false)
+    , _ionData(false)
 {}
 
 void GuiIswaComponent::render() {
-    bool gmdatavalue = _gmdata;
-    bool gmimagevalue = _gmimage;
-    bool iondatavalue = _iondata;
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    bool oldGmDataValue = _gmData;
+    bool oldGmImageValue = _gmImage;
+    bool oldIonDataValue = _ionData;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
     // ImGui::Text("Global Magnetosphere");
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
   if(ImGui::CollapsingHeader("Loaded Cdf Files")){
         ImGui::Spacing();
         ImGui::SameLine();
@@ -121,21 +109,19 @@ void GuiIswaComponent::render() {
             }
         }
     }
-#endif
-
 
     if(ImGui::CollapsingHeader("OpenSpace Cygnets")){
         ImGui::Spacing();
         ImGui::SameLine();
-        ImGui::Checkbox("Global Magnetosphere From Data", &_gmdata);
+        ImGui::Checkbox("Global Magnetosphere From Data", &_gmData);
 
         ImGui::Spacing();
         ImGui::SameLine();
-        ImGui::Checkbox("Global Magnetosphere From Images", &_gmimage);
+        ImGui::Checkbox("Global Magnetosphere From Images", &_gmImage);
 
         ImGui::Spacing();
         ImGui::SameLine();
-        ImGui::Checkbox("Ionosphere From Data", &_iondata);
+        ImGui::Checkbox("Ionosphere From Data", &_ionData);
     }
 
     // static const int addCygnetBufferSize = 256;
@@ -146,8 +132,8 @@ void GuiIswaComponent::render() {
     //     OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
     //     // IswaManager::ref().setFit(std::stof(std::string(addCygnetBuffer)));
 
-    if(_gmdata != gmdatavalue){
-        if(_gmdata){
+    if(_gmData != oldGmDataValue){
+        if(_gmData){
             // IswaManager::ResourceType::Text = 2
             std::string x = "openspace.iswa.addCygnet(-4, 2, 'Magnetosphere_Data');";
             std::string y = "openspace.iswa.addCygnet(-5, 2, 'Magnetosphere_Data');";
@@ -159,8 +145,8 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(_gmimage != gmimagevalue){
-        if(_gmimage){
+    if(_gmImage != oldGmImageValue){
+        if(_gmImage){
             // IswaManager::ResourceType::Texture = 0
             std::string x = "openspace.iswa.addCygnet(-4, 0, 'Magnetosphere_Image');";
             std::string y = "openspace.iswa.addCygnet(-5, 0, 'Magnetosphere_Image');";
@@ -171,8 +157,8 @@ void GuiIswaComponent::render() {
         }
     }
 
-    if(_iondata != iondatavalue){
-        if(_iondata){
+    if(_ionData != oldIonDataValue){
+        if(_ionData){
             // IswaManager::ResourceType::Json = 1
             OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10, 1, 'Ionosphere');");
             OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Ionosphere');");
@@ -181,7 +167,6 @@ void GuiIswaComponent::render() {
         }
     }
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     if (ImGui::CollapsingHeader("iSWA Screen Space Cygntes")) {
 
         auto map = IswaManager::ref().cygnetInformation();
@@ -207,77 +192,17 @@ void GuiIswaComponent::render() {
                         "{CygnetId = "+std::to_string(id)+" });");
                 }else{
                     OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
-
                 }
             }
 
         }
     }
-#endif
 
-
-    ImGui::Spacing();
-    ImGui::Spacing();
-    for (const auto& p : _propertiesByOwner) {
-        if (ImGui::CollapsingHeader(p.first.c_str())) {
-            for (properties::Property* prop : p.second) {
-                ImGui::Spacing();
-                ImGui::SameLine();
-                if (_boolProperties.find(prop) != _boolProperties.end()) {
-                    renderBoolProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_intProperties.find(prop) != _intProperties.end()) {
-                    renderIntProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_floatProperties.find(prop) != _floatProperties.end()) {
-                    renderFloatProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-                    renderVec2Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-                    renderVec3Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-                    renderVec4Property(prop, p.first);
-                    continue;
-                }
-
-                if (_optionProperties.find(prop) != _optionProperties.end()) {
-                    renderOptionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_triggerProperties.find(prop) != _triggerProperties.end()) {
-                    renderTriggerProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_selectionProperties.find(prop) != _selectionProperties.end()) {
-                    renderSelectionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_stringProperties.find(prop) != _stringProperties.end()) {
-                    renderStringProperty(prop, p.first);
-                    continue;
-                }
-            }
-        }
-    }
+    GuiPropertyComponent::render();
     
     ImGui::End();
+#endif
 }
 
-} // gui
-} // openspace
+} // namespace gui
+} // namespace openspace

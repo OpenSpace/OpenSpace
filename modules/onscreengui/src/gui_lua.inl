@@ -22,53 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guiorigincomponent.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-
-#include <ghoul/misc/assert.h>
-
-#include "imgui.h"
-
-namespace {
-    const std::string _loggerCat = "GuiOriginComponent";
-}
-
 namespace openspace {
+   
+namespace luascriptfunctions {
+
 namespace gui {
 
-void GuiOriginComponent::render() {
-    SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
+/**
+ * \ingroup LuaScripts
+ * show():
+ * Shows the GUI
+ */
+int show(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-    std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
-
-    std::sort(
-        nodes.begin(),
-        nodes.end(),
-        [](SceneGraphNode* lhs, SceneGraphNode* rhs) {
-            return lhs->name() < rhs->name();
-        }
-    );
-    std::string nodeNames = "";
-    for (SceneGraphNode* n : nodes) 
-        nodeNames += n->name() + '\0';
-
-    auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
-    ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
-    int currentPosition = static_cast<int>(std::distance(iCurrentFocus, nodes.begin()));
-
-    bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());
-    if (hasChanged) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.origin', '" +
-            nodes[currentPosition]->name() + "');"
-        );
-    }
+    OsEng.gui().setEnabled(true);
+    return 0;
 }
 
-} // gui
-} // openspace
+/**
+ * \ingroup LuaScripts
+ * hide():
+ * Hides the console
+ */
+int hide(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+    OsEng.gui().setEnabled(false);
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * toggle():
+ * Toggles the console
+ */
+int toggle(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+    OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
+    return 0;
+}
+
+} // namespace gui
+} // namespace luascriptfunctions
+} // namespace openspace

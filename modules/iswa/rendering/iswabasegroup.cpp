@@ -1,31 +1,38 @@
 /*****************************************************************************************
- *                                                                                       *
- * OpenSpace                                                                             *
- *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
- *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
- * software and associated documentation files (the "Software"), to deal in the Software *
- * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
- * permit persons to whom the Software is furnished to do so, subject to the following   *
- * conditions:                                                                           *
- *                                                                                       *
- * The above copyright notice and this permission notice shall be included in all copies *
- * or substantial portions of the Software.                                              *
- *                                                                                       *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
- * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
- ****************************************************************************************/
+*                                                                                       *
+* OpenSpace                                                                             *
+*                                                                                       *
+* Copyright (c) 2014-2015                                                               *
+*                                                                                       *
+* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+* software and associated documentation files (the "Software"), to deal in the Software *
+* without restriction, including without limitation the rights to use, copy, modify,    *
+* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+* permit persons to whom the Software is furnished to do so, subject to the following   *
+* conditions:                                                                           *
+*                                                                                       *
+* The above copyright notice and this permission notice shall be included in all copies *
+* or substantial portions of the Software.                                              *
+*                                                                                       *
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+****************************************************************************************/
 #include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/onscreengui/include/gui.h>
-#include <modules/iswa/util/iswamanager.h>
 
-#include <openspace/engine/openspaceengine.h>
+#include <fstream>
+#include <modules/iswa/ext/json/json.hpp>
+
+#include <modules/iswa/util/dataprocessortext.h>
+#include <modules/iswa/util/dataprocessorjson.h>
+#include <modules/iswa/util/dataprocessorkameleon.h>
+
+#include <modules/iswa/rendering/dataplane.h>
+#include <modules/iswa/rendering/datasphere.h>
+#include <modules/iswa/rendering/kameleonplane.h>
 
 namespace {
     const std::string _loggerCat = "IswaBaseGroup";
@@ -79,9 +86,6 @@ std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent(){
 
 
 void IswaBaseGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_enabled);
-    OsEng.gui()._iswa.registerProperty(&_alpha);
-
     _enabled.onChange([this]{
         LDEBUG("Group " + name() + " published enabledChanged");
         _groupEvent->publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled.value()}}));
@@ -93,14 +97,12 @@ void IswaBaseGroup::registerProperties(){
     });
 
 
-    OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{
         clearGroup();
     });  
 }
 
 void IswaBaseGroup::unregisterProperties(){
-    OsEng.gui()._iswa.unregisterProperties(name());
 }
 
 std::unique_ptr<ghoul::Dictionary> IswaBaseGroup::propertyValues() const{

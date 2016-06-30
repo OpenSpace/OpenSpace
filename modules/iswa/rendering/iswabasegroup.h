@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __ISWAGROUP_H__
-#define __ISWAGROUP_H__
+#ifndef __ISWABASEGROUP_H__
+#define __ISWABASEGROUP_H__
 
 #include <ghoul/designpattern/event.h>
 #include <openspace/properties/propertyowner.h>
@@ -45,20 +45,19 @@ public:
 	virtual void clearGroup();
 	virtual std::unique_ptr<ghoul::Dictionary> propertyValues() const;
 
-	std::shared_ptr<DataProcessor> dataProcessor();
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
+    std::shared_ptr<DataProcessor> dataProcessor();
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
 
 protected:
-	void registerProperties();
-	void unregisterProperties();
+    void registerProperties();
+    void unregisterProperties();
 
-	properties::BoolProperty _enabled;
-	properties::FloatProperty _alpha;
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
-
 	IswaManager::CygnetType _type;
 };
 

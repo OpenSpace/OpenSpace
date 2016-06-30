@@ -87,11 +87,10 @@ Fragment getFragment() {
 		ColorTexturesParent1,
 		ColorTexturesParent2);
 #else 
-	vec2 heightResolution = vec2(1,1);
+	frag.color = calculateDebugColor(fs_uv, fs_position, vertexResolution);
 	#if USE_HEIGHTMAP
-		heightResolution = vec2(textureSize(HeightMaps[0].textureSampler,0));
+		frag.color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
 	#endif
-	frag.color = calculateDebugColor(fs_uv, fs_position, vertexResolution, heightResolution);
 #endif // USE_COLORTEXTURE
 
 

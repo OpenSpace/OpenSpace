@@ -71,6 +71,7 @@
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
 #endif
 
@@ -130,6 +131,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _settingsEngine(new SettingsEngine)
+    , _downloadManager(nullptr)
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     , _gui(new gui::GUI)
 #endif
@@ -364,8 +366,9 @@ bool OpenSpaceEngine::initialize() {
     
     std::string requestURL = "";
     bool success = configurationManager().getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
-    if (success)
-        DownloadManager::initialize(requestURL, DownloadVersion);
+    if (success) {
+        _downloadManager = std::make_unique<DownloadManager>(requestURL, DownloadVersion);
+    }
 
     // Load SPICE time kernel
     success = loadSpiceKernels();
@@ -438,8 +441,48 @@ bool OpenSpaceEngine::initialize() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
     _gui->initialize();
-    for (properties::Property* p : _settingsEngine->propertiesRecursive())
-    	_gui->_globalProperty.registerProperty(p);
+    _gui->_globalProperty.setSource(
+            [&]() {
+            std::vector<properties::PropertyOwner*> res = {
+                _settingsEngine.get(),
+                _interactionHandler.get()
+            };
+            return res;
+        }
+    );
+
+    OsEng.gui()._screenSpaceProperty.setSource(
+        [&]() {
+            const auto& ssr = renderEngine().screenSpaceRenderables();
+            return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
+        }
+    );
+
+    OsEng.gui()._property.setSource(
+        [&]() {
+            const auto& nodes = renderEngine().scene()->allSceneGraphNodes();
+            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+        }
+    );
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    OsEng.gui()._iswa.setSource(
+        [&]() {
+            const auto& groups = IswaManager::ref().groups();
+            std::vector<properties::PropertyOwner*> res;
+            std::transform(
+                groups.begin(),
+                groups.end(),
+                std::back_inserter(res),
+                [](const auto& val) {
+                    return val.second.get(); 
+                }
+            );
+            return res;
+        }
+    );
+#endif
+    
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -772,15 +815,19 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LogMgr.resetMessageCounters();
 }
 
-void OpenSpaceEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
-    _renderEngine->render(projectionMatrix, viewMatrix);
+void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+
+    _renderEngine->render(projectionMatrix, viewMatrix, showGui);
 
     if (_isMaster && _windowWrapper->isRegularRendering()) {
-        if (_console->isVisible())
+        if (showGui) {
+            if (_console->isVisible())
                 _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled())
-            _gui->endFrame();
+            if (_gui->isEnabled())
+                _gui->endFrame();
+        }
 #endif
     }
 }
@@ -961,5 +1008,11 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
     ghoul_assert(_fontManager, "Font Manager must not be nullptr");
     return *_fontManager;
 }
+
+DownloadManager& OpenSpaceEngine::downloadManager() {
+    ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
+    return *_downloadManager;
+}
+
 
 }  // namespace openspace

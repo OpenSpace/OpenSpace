@@ -952,7 +952,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
     
     int observerId = naifId(observer);
 
-    std::set<double> coveredTimes = _spkCoverageTimes.find(targetId)->second;
+    const std::set<double>& coveredTimes = _spkCoverageTimes.find(targetId)->second;
     
     glm::dvec3 pos;
     if (coveredTimes.lower_bound(ephemerisTime) == coveredTimes.begin()) {

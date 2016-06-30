@@ -27,6 +27,8 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
+#include <memory>
+
 namespace ghoul {
     class SharedMemory;
 }
@@ -36,17 +38,14 @@ namespace gui {
 
 class GuiPerformanceComponent : public GuiComponent {
 public:
-    void initialize();
-    void deinitialize();
-
-    void render();
+    void render() override;
 
 protected:
-    ghoul::SharedMemory* _performanceMemory = nullptr;
-    int _sortingSelection;
+    std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
+    int _sortingSelection = -1;
     
-    bool _sceneGraphIsEnabled;
-    bool _functionsIsEnabled;
+    bool _sceneGraphIsEnabled = false;
+    bool _functionsIsEnabled = false;
 };
 
 } // namespace gui

@@ -36,13 +36,10 @@
 
 
 #include <list>
-
-// // <<<<<<< HEAD
+ 
 // #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 // #include <modules/globebrowsing/globes/renderableglobe.h>
 // #endif
-// // =======
-// // >>>>>>> feature/globebrowsing
 
 #include <mutex>
 
@@ -163,17 +160,12 @@ public:
     // Mutators
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
+    void resetCameraDirection();
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionModeToOrbital();
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     void setInteractionModeToGlobeBrowsing();
-#endif
-    void setInteractionFriction(double friction);
-    void setInteractionSensitivity(double sensitivity);
-    void setInteractionFollowScaleFactor(double scaleFactor);
-
 
     void resetKeyBindings();
 
@@ -224,14 +216,18 @@ private:
 
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
     std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
-#endif
 
     // Properties
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
+
+    properties::FloatProperty _rotationalFriction;
+    properties::FloatProperty _horizontalFriction;
+    properties::FloatProperty _verticalFriction;
+
+    properties::FloatProperty _sensitivity;
+    properties::FloatProperty _rapidness;
 };
 
 #endif // USE_OLD_INTERACTIONHANDLER

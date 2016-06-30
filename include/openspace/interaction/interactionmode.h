@@ -119,7 +119,7 @@ protected:
         }
         void decelerate(double dt) {
             _currentValue = _currentValue + (- _currentValue) *
-                std::min(_friction * dt, 1.0); // less or equal to 1.0 keeps it stable
+                std::min(_scaleFactor * _friction * dt, 1.0); // less or equal to 1.0 keeps it stable
         }
         void setHard(T value) {
             _targetValue = value;
@@ -187,7 +187,9 @@ public:
         */
         MouseStates(double sensitivity, double velocityScaleFactor);
         void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-        void setFriction(double friction);
+        void setRotationalFriction(double friction);
+        void setHorizontalFriction(double friction);
+        void setVerticalFriction(double friction);
         void setSensitivity(double sensitivity);
         void setVelocityScaleFactor(double scaleFactor);
         void stop();
