@@ -25,68 +25,85 @@
 #ifndef __TILE_DATASET_H__
 #define __TILE_DATASET_H__
 
-//#include <modules/globebrowsing/other/tileprovider.h>
-
-#include <ghoul/opengl/texture.h>
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/other/threadpool.h>
-
-#include <ghoul/filesystem/file.h>
-
-
-#include "gdal_priv.h"
-
-
 #include <memory>
 #include <set>
 #include <queue>
 #include <iostream>
+#include <unordered_map>
 
+#include "gdal_priv.h"
 
+#include <ghoul/filesystem/file.h>
+#include <ghoul/opengl/texture.h>
+
+#include <modules/globebrowsing/tile/tileioresult.h>
+#include <modules/globebrowsing/tile/tiledatatype.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/other/threadpool.h>
 
 namespace openspace {
     using namespace ghoul::opengl;
     using namespace ghoul::filesystem;
 
-    struct TilePreprocessData {
-        std::vector<float> maxValues;
-        std::vector<float> minValues;
 
-        void serialize(std::ostream& s);
-        static TilePreprocessData deserialize(std::istream& s);
+    struct TileDataLayout {
+        TileDataLayout();
+        TileDataLayout(GDALDataset* dataSet, GLuint glType);
+
+        GDALDataType gdalType;
+        GLuint glType;
+
+        size_t bytesPerDatum;
+        size_t numRasters;
+        size_t bytesPerPixel;
+
+        TextureFormat textureFormat;
     };
 
-    struct TextureFormat {
-        Texture::Format ghoulFormat;
-        GLuint glFormat;
+    typedef glm::ivec2 PixelCoordinate;
+
+    struct PixelRegion {
+
+        PixelRegion() : start(0), numPixels(0) { }
+        PixelRegion(const PixelRegion& o) : start(o.start), numPixels(o.numPixels) { }
+        PixelRegion(const PixelCoordinate& pixelStart, const PixelCoordinate& numberOfPixels)
+            : start(pixelStart), numPixels(numberOfPixels) { }
+
+
+        PixelCoordinate start;
+        PixelCoordinate numPixels;
+
+        void addPadding(const PixelRegion& padding) {
+            start += padding.start;
+            numPixels += padding.numPixels;
+        }
+
+        void clamp(const PixelRegion& boundingRegion) {
+            start = glm::max(start, boundingRegion.start);
+            numPixels = glm::min(end(), boundingRegion.end()) - start;
+        }
+
+        PixelCoordinate end() const {
+            return start + numPixels;
+        }
+
+        void scale(const glm::dvec2& s) {
+            start = PixelCoordinate(glm::round(s * glm::dvec2(start)));
+            numPixels = PixelCoordinate(glm::round(s * glm::dvec2(numPixels)));
+        }
+
+        void scale(double s) {
+            scale(glm::dvec2(s));
+        }
+
+        void shrinkPow2(int exponent) {
+            start.x >>= exponent;
+            start.y >>= exponent;
+            numPixels.x >>= exponent;
+            numPixels.y >>= exponent;
+        }
     };
 
-
-    struct TileIOResult {
-        TileIOResult();
-
-        void* imageData;
-        glm::uvec3 dimensions;
-        std::shared_ptr<TilePreprocessData> preprocessData;
-        ChunkIndex chunkIndex;
-        CPLErr error;
-        size_t nBytesImageData;
-
-        void serializeMetaData(std::ostream& s);
-        static TileIOResult deserializeMetaData(std::istream& s);
-   
-        static TileIOResult createDefaultRes();
-
-    };
-
-
-
-
-    struct TileDepthTransform {
-        float depthScale;
-        float depthOffset;
-    };
 
 
 
@@ -107,87 +124,48 @@ namespace openspace {
 
         ~TileDataset();
 
-        struct DataLayout {
-            DataLayout();
-            DataLayout(GDALDataset* dataSet, GLuint glType);
-
-            GDALDataType gdalType;
-            GLuint glType;
-
-
-            size_t bytesPerDatum;
-            size_t numRasters;
-            size_t bytesPerPixel;
-
-            TextureFormat textureFormat;
-        };
-
-
        
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
 
+
         int getMaximumLevel() const;
-
         TileDepthTransform getDepthTransform() const;
+        const TileDataLayout& getDataLayout() const;
 
-        const DataLayout& getDataLayout() const;
+        const static glm::ivec2 tilePixelStartOffset;
+        const static glm::ivec2 tilePixelSizeDifference;
+
+        const static PixelRegion padding;
+
+
+        static PixelCoordinate geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
 
     private:
 
-        struct GdalDataRegion {
-
-            GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex,
-                int tileLevelDifference);
-
-            const ChunkIndex chunkIndex;
-
-            glm::uvec2 pixelStart;
-            glm::uvec2 pixelEnd;
-            glm::uvec2 numPixels;
-
-            int overview;
-
-        };
-
-
-
-
+        
 
         //////////////////////////////////////////////////////////////////////////////////
         //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
-        const int calculateMaxLevel(int tileLevelDifference);
+        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
+
+        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
+        int gdalOverview(const ChunkIndex& chunkIndex) const;
+
+        int calculateMaxLevel(int tileLevelDifference);
 
         TileDepthTransform calculateTileDepthTransform();
+
+        std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
+            const PixelRegion& region, const TileDataLayout& dataLayout);
 
 
         static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
 
-        static glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
-
-        static GLuint getOpenGLDataType(GDALDataType gdalType);
-
-        static GDALDataType getGdalDataType(GLuint glType);
-
-        static TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
-
-        static size_t numberOfBytes(GDALDataType gdalType);
-
-        std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
-            const GdalDataRegion& region, const DataLayout& dataLayout);
-
-        typedef std::function<float(const char*)> ValueReader;
-        static ValueReader getValueReader(GDALDataType gdalType);
-
-        static float readFloat(GDALDataType gdalType, const char* src);
-
-
-        static size_t getMaximumValue(GDALDataType gdalType);
-
-        static char* getImageDataFlippedY(const GdalDataRegion& region,
-            const DataLayout& dataLayout, const char* imageData);
+        static char* getImageDataFlippedY(const PixelRegion& region,
+            const TileDataLayout& dataLayout, const char* imageData);
 
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -196,14 +174,13 @@ namespace openspace {
 
         static bool GdalHasBeenInitialized;
 
-        int _minimumPixelSize;
         int _maxLevel;
         double _tileLevelDifference;
 
         TileDepthTransform _depthTransform;
 
         GDALDataset* _dataset;
-        DataLayout _dataLayout;
+        TileDataLayout _dataLayout;
 
         bool _doPreprocessing;
     };

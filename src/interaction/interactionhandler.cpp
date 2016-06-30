@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionhandler.h>
-//
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
@@ -42,6 +40,10 @@
 
 namespace {
     const std::string _loggerCat = "InteractionHandler";
+
+    const std::string KeyFocus = "Focus";
+    const std::string KeyPosition = "Position";
+    const std::string KeyRotation = "Rotation";
 }
 
 #include "interactionhandler_lua.inl"
@@ -640,10 +642,12 @@ InteractionHandler::InteractionHandler()
 
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
-    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(0.002, 1);
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(0.002, 1);
-#endif
+    // Inject the same mouse states to both orbital and global interaction mode
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
+    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(_mouseStates);
+    #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates);
+    #endif
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
@@ -674,11 +678,13 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
 
 void InteractionHandler::setInteractionModeToOrbital() {
     setInteractionMode(_orbitalInteractionMode);
+    LINFO("Interaction mode set to 'OrbitalInteractionMode'");
 }
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 void InteractionHandler::setInteractionModeToGlobeBrowsing() {
     setInteractionMode(_globebrowsingInteractionMode);
+    LINFO("Interaction mode set to 'GlobeBrowsingInteractionMode'");
 }
 #endif
 
@@ -740,37 +746,136 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
-void InteractionHandler::saveCameraPosition(const std::string& filepath) {
+void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+    bool readSuccessful = true;
+
+    std::string focus;
+    glm::dvec3 cameraPosition;
+    glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
+
+    readSuccessful = cameraDict.getValue(KeyFocus, focus);
+    std::cout << readSuccessful << std::endl;
+    readSuccessful = cameraDict.getValue(KeyPosition, cameraPosition);
+    std::cout << readSuccessful << std::endl;
+    std::cout << std::to_string(cameraPosition) << std::endl;
+    readSuccessful = cameraDict.getValue(KeyRotation, cameraRotation);
+    std::cout << readSuccessful << std::endl;
+    std::cout << std::to_string(cameraRotation) << std::endl;
+
+    if (!readSuccessful) {
+        throw ghoul::RuntimeError(
+            "Position, Rotation and Focus need to be defined for camera dictionary.");
+    }
+
+    SceneGraphNode* node = sceneGraphNode(focus);
+    if (!node) {
+        throw ghoul::RuntimeError(
+            "Could not find a node in scenegraph called '" + focus + "'");
+    }
+
+    // Set state
+    setFocusNode(node);
+    _camera->setPositionVec3(cameraPosition);
+    _camera->setRotation(glm::dquat(
+        cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
+
+    // Explicitly synch
+    _camera->preSynchronization();
+    _camera->postSynchronizationPreDraw();
+}
+
+ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
+    glm::dvec3 cameraPosition;
+    glm::dquat quat;
+    glm::dvec4 cameraRotation;
+
+    cameraPosition = _camera->positionVec3();
+    quat = _camera->rotationQuaternion();
+    cameraRotation = glm::dvec4(quat.w, quat.x, quat.y, quat.z);
+
+    ghoul::Dictionary cameraDict;
+    cameraDict.setValue(KeyPosition, cameraPosition);
+    cameraDict.setValue(KeyRotation, cameraRotation);
+    cameraDict.setValue(KeyFocus, focusNode()->name());
+
+    return cameraDict;
+}
+
+void InteractionHandler::setInteractionFriction(double friction) {
+    if (friction < 0) {
+        LWARNING("Clamping friction factor to a value bigger or equal to 0");
+        friction = glm::max(friction, 0.0);
+    }
+    _mouseStates->setFriction(friction);
+    LINFO("Interaction friction set to: " << friction);
+}
+
+void InteractionHandler::setInteractionSensitivity(double sensitivity) {
+    if (sensitivity < 0) {
+        LWARNING("Clamping scale sensitivity to a value bigger or equal to 0");
+        sensitivity = glm::max(sensitivity, 0.0);
+    }
+    _mouseStates->setSensitivity(sensitivity);
+    LINFO("Interaction sensitivity set to: " << sensitivity);
+}
+
+void InteractionHandler::setInteractionFollowScaleFactor(double scaleFactor) {
+    const double minFollowScaleFactor = 0.01;
+    if (scaleFactor < minFollowScaleFactor) {
+        LWARNING("Clamping scale factor to a value bigger or equal to " << minFollowScaleFactor);
+        scaleFactor = glm::max(scaleFactor, minFollowScaleFactor);
+    }
+    _mouseStates->setVelocityScaleFactor(scaleFactor);
+    LINFO("Interaction velocity scale factor set to: " << scaleFactor);
+}
+
+void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
-        LDEBUG("Saving camera position: " << fullpath);
+        LINFO("Saving camera position: " << filepath);
+
+        ghoul::Dictionary cameraDict = getCameraStateDictionary();
+
+        // TODO : Should get the camera state as a dictionary and save the dictionary to
+        // a file in form of a lua state and not use ofstreams here.
+        
         std::ofstream ofs(fullpath.c_str());
-        _camera->serialize(ofs);
+        
+        glm::dvec3 p = _camera->positionVec3();
+        glm::dquat q = _camera->rotationQuaternion();
+
+        ofs << "return {" << std::endl;
+        ofs << "    " << KeyFocus << " = " << "\"" << focusNode()->name() << "\"" << "," << std::endl;
+        ofs << "    " << KeyPosition << " = {"
+            << std::to_string(p.x) << ", "
+            << std::to_string(p.y) << ", "
+            << std::to_string(p.z) << "}," << std::endl;
+        ofs << "    " << KeyRotation << " = {"
+            << std::to_string(q.w) << ", "
+            << std::to_string(q.x) << ", "
+            << std::to_string(q.y) << ", "
+            << std::to_string(q.z) << "}," << std::endl;
+        ofs << "}"<< std::endl;
+
         ofs.close();
     }
 }
 
-void InteractionHandler::restoreCameraPosition(const std::string& filepath) {
-    if (!filepath.empty()) {
-        auto fullpath = absPath(filepath);
-        LDEBUG("Reading camera position: " << fullpath);
-        std::ifstream ifs(fullpath.c_str());
-        Camera c;
-        c.deserialize(ifs);
-        ifs.close();
+void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath) {
+    LINFO("Reading camera state from file: " << filepath);
+    if (!FileSys.fileExists(filepath))
+        throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
 
-        // uff, need to do this ... 
-        c.preSynchronization();
-        c.postSynchronizationPreDraw();
-
-        auto p = c.positionVec3();
-        auto r = c.rotationQuaternion();
-
-        _camera->setPositionVec3(p);
-        _camera->setRotation(r);
-        _currentInteractionMode->initialize(*_camera);
+    ghoul::Dictionary cameraDict;
+    try {
+        ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
+        setCameraStateFromDictionary(cameraDict);
         _cameraUpdatedFromScript = true;
         _currentInteractionMode->stop();
+    }
+    catch (ghoul::RuntimeError& e) {
+        LWARNING("Unable to set camera position");
+        LWARNING(e.message);
     }
 }
 
@@ -808,17 +913,35 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 "Set the interaction mode for the camera"
             },
             {
-                "saveCameraPosition",
-                &luascriptfunctions::saveCameraPosition,
+                "saveCameraStateToFile",
+                &luascriptfunctions::saveCameraStateToFile,
                 "string",
-                "Save the current camera position to file"
+                "Save the current camera state to file"
             },
             {
-                "restoreCameraPosition",
-                &luascriptfunctions::restoreCameraPosition,
+                "restoreCameraStateFromFile",
+                &luascriptfunctions::restoreCameraStateFromFile,
                 "string",
-                "Restore the camera position from file"
-            }
+                "Restore the camera state from file"
+            },
+            {
+                "setInteractionFriction",
+                    &luascriptfunctions::setInteractionFriction,
+                    "number",
+                    "Set the interaction friction"
+            },
+            {
+                "setInteractionSensitivity",
+                    &luascriptfunctions::setInteractionSensitivity,
+                    "number",
+                    "Set the interaction sensitivity"
+            },
+            {
+                "setInteractionFollowScaleFactor",
+                    &luascriptfunctions::setInteractionFollowScaleFactor,
+                    "number",
+                    "Set the interaction follow scale factor"
+            },
         }
     };
 }

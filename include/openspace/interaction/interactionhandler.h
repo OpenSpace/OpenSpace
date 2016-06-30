@@ -165,10 +165,15 @@ public:
     void setCamera(Camera* camera);
 
     // Interaction mode setters
+    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionModeToOrbital();
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     void setInteractionModeToGlobeBrowsing();
 #endif
+    void setInteractionFriction(double friction);
+    void setInteractionSensitivity(double sensitivity);
+    void setInteractionFollowScaleFactor(double scaleFactor);
+
 
     void resetKeyBindings();
 
@@ -182,6 +187,7 @@ public:
     void update(double deltaTime);
 
     // Accessors
+    ghoul::Dictionary getCameraStateDictionary();
     SceneGraphNode* const focusNode() const;
     Camera* const camera() const;
     const InputState& inputState() const;
@@ -195,14 +201,14 @@ public:
     */
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
-    // Callback functions
+    // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
 
-    void saveCameraPosition(const std::string& filepath = "");
-    void restoreCameraPosition(const std::string& filepath = "");
+    void saveCameraStateToFile(const std::string& filepath);
+    void restoreCameraStateFromFile(const std::string& filepath);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
@@ -216,6 +222,7 @@ private:
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
+    std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
     std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED

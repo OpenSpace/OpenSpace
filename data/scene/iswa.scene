@@ -19,6 +19,7 @@ function postInitialization()
     created and initialized, but before the first render call. This is the place to set
     graphical settings for the renderables.
     ]]--
+    openspace.setInteractionMode('OrbitalInteractionMode')
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
@@ -33,7 +34,7 @@ function postInitialization()
 
     if openspace.modules.isLoaded("ISWA") then
     
-        openspace.restoreCameraPosition('${OPENSPACE_DATA}/iswa/magnetosphere.pos');
+        --openspace.restoreCameraStateFromFile('${OPENSPACE_DATA}/iswa/magnetosphere.pos');
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/iswa/cdflist.json");
 
         --openspace.iswa.addCygnet(7);
@@ -53,6 +54,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
+        Position = {0.0, -0.000000, -0.000000},
+        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
     },
     Modules = {
         "sun",

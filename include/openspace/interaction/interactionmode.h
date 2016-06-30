@@ -98,7 +98,6 @@ public:
     SceneGraphNode* focusNode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime) = 0;
-    virtual void initialize(const Camera& camera) = 0;
     virtual void stop() = 0;
 protected:
     /**
@@ -109,32 +108,55 @@ protected:
     template <typename T, typename ScaleType>
     class DelayedVariable {
     public:
-        DelayedVariable(ScaleType scale) {
-            _scale = scale;
+        DelayedVariable(ScaleType scaleFactor, ScaleType friction) {
+            _scaleFactor = scaleFactor;
+            _friction = glm::max(friction, ScaleType(0.0));
         }
         void set(T value, double dt) {
             _targetValue = value;
             _currentValue = _currentValue + (_targetValue - _currentValue) *
-                std::min(_scale * dt, 1.0); // less or equal to 1.0 keeps it stable
+                std::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+        }
+        void decelerate(double dt) {
+            _currentValue = _currentValue + (- _currentValue) *
+                std::min(_friction * dt, 1.0); // less or equal to 1.0 keeps it stable
+        }
+        void setHard(T value) {
+            _targetValue = value;
+            _currentValue = value;
+        }
+        void setFriction(ScaleType friction) {
+            _friction = glm::max(friction, ScaleType(0.0));
+        }
+        void setScaleFactor(ScaleType scaleFactor) {
+            _scaleFactor = scaleFactor;
         }
         T get() {
             return _currentValue;
         }
     private:
-        ScaleType _scale;
+        ScaleType _scaleFactor;
+        ScaleType _friction;
         T _targetValue;
         T _currentValue;
     };
 
     struct MouseState {
-        MouseState(double scale)
-            : velocity(scale)
+        MouseState(double scaleFactor)
+            : velocity(scaleFactor, 1)
             , previousPosition(0.0, 0.0) {}
+        void setFriction(double friction) {
+            velocity.setFriction(friction);
+        }
+        void setVelocityScaleFactor(double scaleFactor) {
+            velocity.setScaleFactor(scaleFactor);
+        }
         glm::dvec2 previousPosition;
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
     SceneGraphNode* _focusNode = nullptr;
+    glm::dvec3 _previousFocusNodePosition;
 };
 
 class KeyframeInteractionMode : public InteractionMode
@@ -144,48 +166,59 @@ public:
     ~KeyframeInteractionMode();
 
     virtual void update(double deltaTime);
-    virtual void initialize(const Camera& camera);
 
 private:
     double _currentKeyframeTime;
 };
 
+class GlobeBrowsingInteractionMode;
+
 class OrbitalInteractionMode : public InteractionMode
 {
 public:
-    /*!
+    class MouseStates
+    {
+    public:
+        /*!
         \param inputState
         \param sensitivity
         \param velocityScalefactor can be set to 60 to remove the inertia of the
-            interaction. Lower value will make it harder to move the camera.
-    */
-    OrbitalInteractionMode(double sensitivity, double velocityScaleFactor);
+        interaction. Lower value will make it harder to move the camera. 
+        */
+        MouseStates(double sensitivity, double velocityScaleFactor);
+        void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+        void setFriction(double friction);
+        void setSensitivity(double sensitivity);
+        void setVelocityScaleFactor(double scaleFactor);
+        void stop();
+    private:
+        friend class OrbitalInteractionMode;
+        friend class GlobeBrowsingInteractionMode;
+        double _sensitivity;
+
+        MouseState _globalRotationMouseState;
+        MouseState _localRotationMouseState;
+        MouseState _truckMovementMouseState;
+        MouseState _localRollMouseState;
+        MouseState _globalRollMouseState;
+    };
+
+    OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~OrbitalInteractionMode();
 
     virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
-    virtual void initialize(const Camera& camera);
     void stop();
 
 protected:
-    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromMouseStates(Camera& camera);
-
-    double _sensitivity;
-
-    MouseState _globalRotationMouseState;
-    MouseState _localRotationMouseState;
-    MouseState _truckMovementMouseState;
-    MouseState _rollMouseState;
-
-    glm::dquat _localCameraRotation;
-    glm::dquat _globalCameraRotation;
+    std::shared_ptr<MouseStates> _mouseStates;
 };
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
 {
 public:
-    GlobeBrowsingInteractionMode(double sensitivity, double velocityScaleFactor);
+    GlobeBrowsingInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~GlobeBrowsingInteractionMode();
 
     virtual void setFocusNode(SceneGraphNode* focusNode);

@@ -22,62 +22,67 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __TILE_IO_RESULT_H__
+#define __TILE_IO_RESULT_H__
+
+#include <ghoul/opengl/texture.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+
+#include <ghoul/filesystem/file.h>
 
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include "gdal_priv.h"
 
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
-
-#include <ghoul/misc/dictionary.h>
 
 #include <memory>
-#include <vector>
-#include <string>
+#include <iostream>
+
 
 
 namespace openspace {
+    using namespace ghoul::opengl;
+    using namespace ghoul::filesystem;
 
-    class TileProviderManager {
-    public:
+    struct TilePreprocessData {
+        std::vector<float> maxValues;
+        std::vector<float> minValues;
 
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
-
-        typedef std::vector<TileProviderWithName> LayerCategory;
-
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-        static ThreadPool tileRequestThreadPool;
-
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
-
-        void update();
-
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
-
-
-    private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
-
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
-
-        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        void serialize(std::ostream& s);
+        static TilePreprocessData deserialize(std::istream& s);
     };
 
+    struct TextureFormat {
+        Texture::Format ghoulFormat;
+        GLuint glFormat;
+    };
+
+    struct TileIOResult {
+        TileIOResult();
+
+        void* imageData;
+        glm::uvec3 dimensions;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+        ChunkIndex chunkIndex;
+        CPLErr error;
+        size_t nBytesImageData;
+
+        void serializeMetaData(std::ostream& s);
+        static TileIOResult deserializeMetaData(std::istream& s);
+   
+        static TileIOResult createDefaultRes();
+
+    };
+
+    struct TileDepthTransform {
+        float depthScale;
+        float depthOffset;
+    };
+
+
 } // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+
+
+
+
+
+#endif  // __TILE_IO_RESULT_H__

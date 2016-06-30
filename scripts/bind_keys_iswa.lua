@@ -23,5 +23,5 @@ openspace.bindKey("l", "openspace.iswa.setBaseUrl('http://localhost:3000/')");
 
 openspace.bindKey("v", "openspace.time.setTime('2015-03-15T00:00:00.00')");
 
-openspace.bindKey("s", "openspace.saveCameraPosition('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");
-openspace.bindKey("a", "openspace.restoreCameraPosition('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");
+openspace.bindKey("s", "openspace.saveCameraStateToFile('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");
+openspace.bindKey("a", "openspace.restoreCameraStateFromFile('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");

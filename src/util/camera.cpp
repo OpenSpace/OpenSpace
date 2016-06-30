@@ -25,6 +25,10 @@
 // open space includes
 #include <openspace/util/camera.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/query/query.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
+
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
@@ -35,7 +39,12 @@ namespace openspace {
     //								        CAMERA	                                    //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, 1);
+    namespace {
+        const std::string _loggerCat = "Camera";
+    }
+
+    //const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, 1);
+    const Camera::Vec3 Camera::_VIEW_DIRECTION_CAMERA_SPACE = Camera::Vec3(0, 0, -1);
     const Camera::Vec3 Camera::_LOOKUP_VECTOR_CAMERA_SPACE = Camera::Vec3(0, 1, 0);
 
     Camera::Camera()
@@ -52,6 +61,7 @@ namespace openspace {
         : sgctInternal(o.sgctInternal)
         , _focusPosition(o._focusPosition)
         , _cachedViewDirection(o._cachedViewDirection)
+        , _cachedLookupVector(o._cachedLookupVector)
         , _rotation(o._rotation)
         , _scaling(o._scaling)
         , _position(o._position)
@@ -122,7 +132,12 @@ namespace openspace {
     }
 
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
-        return glm::normalize(_rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE));
+        if (_cachedLookupVector.isDirty) {
+            _cachedLookupVector.datum =
+                _rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
+            _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
+        }
+        return _cachedLookupVector.datum;
     }
 
     const glm::vec2& Camera::scaling() const {
@@ -188,8 +203,10 @@ namespace openspace {
         _scaling.postSynchronizationPreDraw();
 
         _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
     }
 
+    
     void Camera::serialize(std::ostream& os) const {
         Vec3 p = positionVec3();
         Quat q = rotationQuaternion();

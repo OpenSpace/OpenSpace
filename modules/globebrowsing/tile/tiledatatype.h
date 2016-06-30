@@ -22,62 +22,39 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __TILE_DATA_TYPE_H__
+#define __TILE_DATA_TYPE_H__
 
+#include <ghoul/opengl/texture.h>
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/tile/tileioresult.h>
 
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
-
-#include <ghoul/misc/dictionary.h>
-
-#include <memory>
-#include <vector>
-#include <string>
+#include "gdal_priv.h"
 
 
 namespace openspace {
+   
+    struct TileDataType {
 
-    class TileProviderManager {
-    public:
+        static GLuint getOpenGLDataType(GDALDataType gdalType);
 
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
+        static GDALDataType getGdalDataType(GLuint glType);
 
-        typedef std::vector<TileProviderWithName> LayerCategory;
+        static TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
+        static size_t getMaximumValue(GDALDataType gdalType);
 
-        static ThreadPool tileRequestThreadPool;
+        static size_t numberOfBytes(GDALDataType gdalType);
 
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
+        static float interpretFloat(GDALDataType gdalType, const char* src);
 
-        void update();
-
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
-
-
-    private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
-
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
-
-        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 
 } // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+
+
+
+
+
+#endif  // __TILE_DATA_TYPE_H__

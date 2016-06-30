@@ -25,7 +25,6 @@
 namespace openspace {
 
 namespace luascriptfunctions {
-
 /**
  * \ingroup LuaScripts
  * setOrigin():
@@ -143,11 +142,27 @@ int setInteractionMode(lua_State* L) {
     else { // Default
         return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
     }
-
     return 0;
 }
 
-int restoreCameraPosition(lua_State* L) {
+int restoreCameraStateFromFile(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.restoreCameraStateFromFile";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string cameraStateFilePath = luaL_checkstring(L, -1);
+
+    if (cameraStateFilePath.empty())
+        return luaL_error(L, "filepath string is empty");
+
+    OsEng.interactionHandler().restoreCameraStateFromFile(cameraStateFilePath);
+    return 0;
+}
+
+int saveCameraStateToFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     const std::string _loggerCat = "lua.setCameraPosition";
 
@@ -155,30 +170,50 @@ int restoreCameraPosition(lua_State* L) {
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    std::string cameraPosFilePath = luaL_checkstring(L, -1);
+    std::string cameraStateFilePath = luaL_checkstring(L, -1);
 
-    if (cameraPosFilePath.empty())
+    if (cameraStateFilePath.empty())
         return luaL_error(L, "filepath string is empty");
 
-    OsEng.interactionHandler().restoreCameraPosition(cameraPosFilePath);
-    return 0;
+    OsEng.interactionHandler().saveCameraStateToFile(cameraStateFilePath);
 }
 
-int saveCameraPosition(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setCameraPosition";
+int setInteractionFriction(lua_State* L) {
+    const std::string _loggerCat = "lua.setInteractionFriction";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    std::string cameraPosFilePath = luaL_checkstring(L, -1);
+    double friction = luaL_checknumber(L, -1);
 
-    if (cameraPosFilePath.empty())
-        return luaL_error(L, "filepath string is empty");
-
-    OsEng.interactionHandler().saveCameraPosition(cameraPosFilePath);
+    OsEng.interactionHandler().setInteractionFriction(friction);
 }
+
+int setInteractionSensitivity(lua_State* L) {
+    const std::string _loggerCat = "lua.setInteractionFriction";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double sensitivity = luaL_checknumber(L, -1);
+
+    OsEng.interactionHandler().setInteractionSensitivity(sensitivity);
+}
+
+int setInteractionFollowScaleFactor(lua_State* L) {
+    const std::string _loggerCat = "lua.setInteractionFriction";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double scaleFactor = luaL_checknumber(L, -1);
+
+    OsEng.interactionHandler().setInteractionFollowScaleFactor(scaleFactor);
+}
+
 
 #ifdef USE_OLD_INTERACTIONHANDLER
 

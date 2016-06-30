@@ -52,7 +52,7 @@ namespace openspace {
 
         // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
         //         the range of defined data.
-        int maximumLevel = tileProvider->getAsyncTileReader()->getTextureDataProvider()->getMaximumLevel();
+        int maximumLevel = tileProvider->maxLevel();
         while(chunkIndex.level > maximumLevel){
             ascendToParent(chunkIndex, uvTransform);
         }
