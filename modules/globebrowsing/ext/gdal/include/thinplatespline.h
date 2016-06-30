@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: thinplatespline.h 33715 2016-03-13 08:52:06Z goatbar $
  *
  * Project:  GDAL Warp API
  * Purpose:  Declarations for 2D Thin Plate Spline transformer.

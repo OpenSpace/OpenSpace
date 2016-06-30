@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdaljp2metadata.h 33694 2016-03-10 17:54:30Z goatbar $
  *
  * Project:  GDAL
  * Purpose:  JP2 Box Reader (and GMLJP2 Interpreter)

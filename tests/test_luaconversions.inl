@@ -33,27 +33,27 @@
 
 class LuaConversionTest : public testing::Test {
 protected:
-	lua_State* state;
+    lua_State* state;
 
-	LuaConversionTest() {
-		state = luaL_newstate();
-		luaL_openlibs(state);
+    LuaConversionTest() {
+        state = luaL_newstate();
+        luaL_openlibs(state);
     }
 
-	~LuaConversionTest() {
-		lua_close(state);
+    ~LuaConversionTest() {
+        lua_close(state);
     }
 
-	void reset() {
-		lua_close(state);
-		state = luaL_newstate();
-		luaL_openlibs(state);
-	}
+    void reset() {
+        lua_close(state);
+        state = luaL_newstate();
+        luaL_openlibs(state);
+    }
 };
 
 TEST_F(LuaConversionTest, LuaExecution) {
-	int status = luaL_loadstring(state, "");
-	EXPECT_EQ(status, LUA_OK);
+    int status = luaL_loadstring(state, "");
+    EXPECT_EQ(status, LUA_OK);
 }
 
 #define CONVERSION_TEST_TEMPLATE(__NAME__, __TYPE__, __VALUE__)                          \
@@ -89,7 +89,7 @@ TEST_F(LuaConversionTest, LuaExecution) {
 CONVERSION_TEST_TEMPLATE(Bool, bool, true);
 
 CONVERSION_TEST_NUMERICAL(Char, char, 1);
-CONVERSION_TEST_NUMERICAL(WChar, wchar_t, 1);
+//CONVERSION_TEST_NUMERICAL(WChar, wchar_t, 1);
 CONVERSION_TEST_NUMERICAL(SignedChar, signed char, 1);
 CONVERSION_TEST_NUMERICAL(UnsignedChar, unsigned char, 1);
 CONVERSION_TEST_NUMERICAL(Short, short, 1);
@@ -138,14 +138,14 @@ CONVERSION_TEST_NUMERICAL(DMat4x4, glm::dmat4x4, glm::dmat4x4(1.f));
 
 TEST_F(LuaConversionTest, String)
 {
-	using namespace openspace::properties;
-	bool success
-		  = PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
-				state, "value");
-	EXPECT_TRUE(success) << "toLuaValue";
-	std::string value = "";
-	value = PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
-		  state, success);
-	EXPECT_TRUE(success) << "fromLuaValue";
-	EXPECT_EQ(value, "value") << "fromLuaValue";
+    using namespace openspace::properties;
+    bool success
+          = PropertyDelegate<TemplateProperty<std::string>>::toLuaValue<std::string>(
+                state, "value");
+    EXPECT_TRUE(success) << "toLuaValue";
+    std::string value = "";
+    value = PropertyDelegate<TemplateProperty<std::string>>::fromLuaValue<std::string>(
+          state, success);
+    EXPECT_TRUE(success) << "fromLuaValue";
+    EXPECT_EQ(value, "value") << "fromLuaValue";
 }

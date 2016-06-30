@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdalpansharpen.h 33715 2016-03-13 08:52:06Z goatbar $
  *
  * Project:  GDAL Pansharpening module
  * Purpose:  Prototypes, and definitions for pansharpening related work.

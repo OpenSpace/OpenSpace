@@ -41,33 +41,37 @@ namespace {
 
 namespace openspace {
 
-    std::shared_ptr<DebugRenderer> DebugRenderer::_reference = nullptr;
-
+    DebugRenderer* DebugRenderer::_reference = nullptr;
 
     DebugRenderer::DebugRenderer()  {
-        _programObject = std::shared_ptr<ProgramObject>(OsEng.renderEngine().buildRenderProgram(
+        _programObject = OsEng.renderEngine().buildRenderProgram(
             "BasicDebugShader", 
             "${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl",
             "${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl"
-            ));
+            );
     }
 
-    DebugRenderer::DebugRenderer(std::shared_ptr<ProgramObject> programObject) 
-        : _programObject(programObject) 
+    DebugRenderer::DebugRenderer(std::unique_ptr<ProgramObject> programObject) 
+        : _programObject(std::move(programObject)) 
     { 
         // nothing to do
     }
 
-    std::shared_ptr<DebugRenderer> DebugRenderer::ref() {
+    DebugRenderer::~DebugRenderer()
+    {
+
+    }
+
+    const DebugRenderer& DebugRenderer::ref() {
         if (_reference == nullptr) {
             try {
-                _reference = std::make_shared<DebugRenderer>();
+                _reference = new DebugRenderer();
             }
             catch (const ShaderObject::ShaderCompileError& e) {
                 LERROR(e.what());
             }
         }
-        return _reference;
+        return *_reference;
     }
 
     void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA rgba) const {
@@ -163,17 +167,17 @@ namespace openspace {
         lineVertices.push_back(V[1]); lineVertices.push_back(V[3]);
         lineVertices.push_back(V[4]); lineVertices.push_back(V[6]);
         lineVertices.push_back(V[5]); lineVertices.push_back(V[7]);
-        DebugRenderer::ref()->renderVertices(lineVertices, GL_LINES, rgba);
+        DebugRenderer::ref().renderVertices(lineVertices, GL_LINES, rgba);
     }
 
     void DebugRenderer::renderNiceBox(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
         renderBoxFaces(clippingSpaceBoxCorners, rgba);
 
         glLineWidth(4.0f);
-        DebugRenderer::ref()->renderBoxEdges(clippingSpaceBoxCorners, rgba);
+        DebugRenderer::ref().renderBoxEdges(clippingSpaceBoxCorners, rgba);
 
         glPointSize(10.0f);
-        DebugRenderer::ref()->renderVertices(clippingSpaceBoxCorners, GL_POINTS, rgba);
+        DebugRenderer::ref().renderVertices(clippingSpaceBoxCorners, GL_POINTS, rgba);
     }
 
     void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& otherCamera, RGBA rgba) const {

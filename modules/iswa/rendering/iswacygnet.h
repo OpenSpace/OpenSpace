@@ -25,10 +25,6 @@
 #ifndef __ISWACYGNET_H__
 #define __ISWACYGNET_H__
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <memory>
 #include <chrono>
 #include <modules/iswa/util/iswamanager.h>
 #include <ghoul/designpattern/event.h>
@@ -38,6 +34,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/time.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/rendering/iswadatagroup.h>
@@ -64,7 +61,6 @@ struct Metadata {
 
 
 class IswaCygnet : public Renderable, public std::enable_shared_from_this<IswaCygnet> {
-    friend class IswaBaseGroup;
 
 public:
     IswaCygnet(const ghoul::Dictionary& dictionary);
@@ -119,7 +115,7 @@ protected:
      * this should be the data file.
      * @return true if update was successfull
      */
-    virtual bool downloadTextureResource() = 0;
+    virtual bool downloadTextureResource(double timestamp = Time::ref().currentTime()) = 0;
     virtual bool readyToRender() const = 0;
      /**
      * should set all uniforms needed to render
@@ -134,6 +130,21 @@ protected:
 
     std::shared_ptr<Metadata> _data;
 
+    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
+    std::future<DownloadManager::MemoryFile> _futureObject;
+
+    std::shared_ptr<IswaBaseGroup> _group;
+
+    bool _textureDirty;
+
+    // Must be set by children.
+    std::string _vsPath;
+    std::string _fsPath;
+    std::string _programName;
+
+    glm::mat4 _rotation; //to rotate objects with fliped texture coordniates
+private:
+    bool destroyShader();
     glm::dmat3 _stateMatrix;
 
     double _openSpaceTime;
@@ -142,20 +153,6 @@ protected:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
     int _minRealTimeUpdateInterval;
-
-    std::vector<std::shared_ptr<TransferFunction>> _transferFunctions;
-    std::future<DownloadManager::MemoryFile> _futureObject;
-
-    std::shared_ptr<IswaBaseGroup> _group;
-
-    bool _textureDirty;
-
-    std::string _vsPath;
-    std::string _fsPath;
-    std::string _programName;
-
-private:
-    bool destroyShader();
 
 };
 

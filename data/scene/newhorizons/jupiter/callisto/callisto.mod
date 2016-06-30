@@ -18,11 +18,6 @@ return {
                 Project = "textures/defaultProj.png",
                 Sequencing = "true",
             },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            },
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CALLISTO",

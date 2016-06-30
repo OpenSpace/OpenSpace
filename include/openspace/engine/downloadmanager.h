@@ -25,8 +25,6 @@
 #ifndef __DOWNLOADMANAGER_H__
 #define __DOWNLOADMANAGER_H__
 
-#include <ghoul/designpattern/singleton.h>
-
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
 
@@ -39,7 +37,7 @@
 namespace openspace {
 
 // Multithreaded
-class DownloadManager : public ghoul::Singleton<DownloadManager> {
+class DownloadManager {
 public:
     struct FileFuture {
         // Since the FileFuture object will be used from multiple threads, we have to be
@@ -118,8 +116,6 @@ private:
     int _applicationVersion;
     bool _useMultithreadedDownload;
 };
-
-#define DlManager (openspace::DownloadManager::ref())
 
 } // namespace openspace
 

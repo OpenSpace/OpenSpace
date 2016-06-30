@@ -38,7 +38,7 @@
 //#include <test_lrucache.inl>
 //#include <test_threadpool.inl>
 //#include <test_aabb.inl>
-#include <test_convexhull.inl>
+//#include <test_convexhull.inl>
 
 //#include <test_luaconversions.inl>
 //#include <test_powerscalecoordinates.inl>
@@ -66,19 +66,26 @@ using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
 namespace {
-	std::string _loggerCat = "OpenSpaceTest";
+    std::string _loggerCat = "OpenSpaceTest";
 }
 
 int main(int argc, char** argv) {
-	std::vector<std::string> args;
-	openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    std::vector<std::string> args;
+    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
 
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	int returnVal = RUN_ALL_TESTS();
+    //testing::internal::CaptureStdout();
+    //testing::internal::CaptureStderr();
+    bool b = RUN_ALL_TESTS();
+    //std::string output = testing::internal::GetCapturedStdout();
+    //std::string error = testing::internal::GetCapturedStderr();
 
-	// keep console from closing down
-	int dummy; std::cin >> dummy;
+    //std::ofstream o("output.txt");
+    //o << output;
 
-	return returnVal;
+    //std::ofstream e("error.txt");
+    //e << error;
+
+    return b;
 }

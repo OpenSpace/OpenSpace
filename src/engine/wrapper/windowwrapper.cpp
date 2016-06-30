@@ -72,11 +72,25 @@ bool WindowWrapper::isRegularRendering() const {
     return true;
 }
 
+bool WindowWrapper::hasGuiWindow() const {
+    return false;
+}
+
+bool WindowWrapper::isGuiWindow() const {
+    return false;
+}
+
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
+    return glm::mat4(1.f);
+}
+
+glm::mat4 WindowWrapper::modelMatrix() const {
     return glm::mat4(1.f);
 }
     
 void WindowWrapper::setNearFarClippingPlane(float near, float far) {}
+
+void WindowWrapper::setEyeSeparationDistance(float distance) {}
     
 glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     return glm::ivec4(

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdalgrid_priv.h 33715 2016-03-13 08:52:06Z goatbar $
  *
  * Project:  GDAL Gridding API.
  * Purpose:  Prototypes, and definitions for of GDAL scattered data gridder.

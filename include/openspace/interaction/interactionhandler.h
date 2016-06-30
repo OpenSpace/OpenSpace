@@ -36,6 +36,7 @@
 
 
 #include <list>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <mutex>
 
@@ -147,8 +148,6 @@ private:
 
 #else // USE_OLD_INTERACTIONHANDLER
 
-
-
 class InteractionHandler : public properties::PropertyOwner
 {
 public:
@@ -158,14 +157,12 @@ public:
     // Mutators
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);
+    void resetCameraDirection();
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionModeToOrbital();
     void setInteractionModeToGlobeBrowsing();
-    void setInteractionFriction(double friction);
-    void setInteractionSensitivity(double sensitivity);
-    void setInteractionFollowScaleFactor(double scaleFactor);
 
     void resetKeyBindings();
 
@@ -221,6 +218,13 @@ private:
     // Properties
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
+
+    properties::FloatProperty _rotationalFriction;
+    properties::FloatProperty _horizontalFriction;
+    properties::FloatProperty _verticalFriction;
+
+    properties::FloatProperty _sensitivity;
+    properties::FloatProperty _rapidness;
 };
 
 #endif // USE_OLD_INTERACTIONHANDLER

@@ -252,12 +252,18 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
     }
 }
 
-void OrbitalInteractionMode::MouseStates::setFriction(double friction) {
-    _globalRotationMouseState.setFriction(friction);
+void OrbitalInteractionMode::MouseStates::setRotationalFriction(double friction) {
     _localRotationMouseState.setFriction(friction);
-    _truckMovementMouseState.setFriction(friction);
     _localRollMouseState.setFriction(friction);
     _globalRollMouseState.setFriction(friction);
+}
+
+void OrbitalInteractionMode::MouseStates::setHorizontalFriction(double friction) {
+    _globalRotationMouseState.setFriction(friction);
+}
+
+void OrbitalInteractionMode::MouseStates::setVerticalFriction(double friction) {
+    _truckMovementMouseState.setFriction(friction);
 }
 
 void OrbitalInteractionMode::MouseStates::setSensitivity(double sensitivity) {

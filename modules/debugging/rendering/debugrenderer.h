@@ -43,7 +43,6 @@
 namespace openspace {
     using namespace ghoul::opengl;
 
-
     /**
         A helper class for quick rendering of vertices IN clipping space. 
 
@@ -54,10 +53,8 @@ namespace openspace {
     */
     class DebugRenderer {
     public:
-
         typedef std::vector<glm::vec4> Vertices;
         typedef glm::vec4 RGBA;
-
 
         /**
          *  Consider using ref() before creating a new default instance!
@@ -67,15 +64,13 @@ namespace openspace {
         /**
          *  Instantiate a new DebugRenderer with a custom shader program
          */
-        DebugRenderer(std::shared_ptr<ProgramObject> programObject);
+        DebugRenderer(std::unique_ptr<ProgramObject> programObject);
+        ~DebugRenderer();
 
         /**
          *  Access the static reference
          */
-        static std::shared_ptr<DebugRenderer> ref();
-
-
-
+        static const DebugRenderer& ref();
 
         /**
          *  Render the vector of clipping space points in the specified mode and color.
@@ -127,8 +122,6 @@ namespace openspace {
         */
         void renderNiceBox(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 0.3 }) const;
 
-
-
         /**
          *  Input arguments:
          *  1. const RenderData& data:     defines position and camera that we will see the 
@@ -143,7 +136,6 @@ namespace openspace {
          */
         void renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba = { 1, 1, 1, 0.3 }) const;
 
-        
         /**
         *  Takes a AABB3 in screen space and returns vertices representing the corner points 
         *  of the AABB. The ordering of the corner points is compatible with the box rendering 
@@ -151,17 +143,13 @@ namespace openspace {
         */
         const Vertices verticesFor(const AABB3& screenSpaceAABB) const;
         
-
     protected:
+        std::unique_ptr<ProgramObject> _programObject;
 
-        std::shared_ptr<ProgramObject> _programObject;
-        static std::shared_ptr<DebugRenderer> _reference;
+        // A raw pointer for the reason that it should not be deleted by the static
+        // destructor and the normal destructor. This class has ownership
+        static DebugRenderer* _reference;
     };
-
-
 } // namespace openspace
-
-
-
 #endif // __DEBUG_RENDERER_H__
 

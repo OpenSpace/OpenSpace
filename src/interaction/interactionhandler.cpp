@@ -617,11 +617,16 @@ void InteractionHandler::clearKeyframes(){
 
 #else // USE_OLD_INTERACTIONHANDLER
 
-
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
-    , _coordinateSystem("coordinateSystem", "Coordinate System", "") {
+    , _coordinateSystem("coordinateSystem", "Coordinate System", "")
+    , _rotationalFriction("rotationalFriction", "Rotational Friction", 1, 0, 1)
+    , _horizontalFriction("horizontalFriction", "Horizontal Friction", 1, 0, 1)
+    , _verticalFriction("verticalFriction", "Vertical Friction", 1, 0, 1)
+    , _sensitivity("sensitivity", "Sensitivity", 0.002, 0.0001, 0.02)
+    , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
+{
     setName("Interaction");
 
     _origin.onChange([this]() {
@@ -639,6 +644,7 @@ InteractionHandler::InteractionHandler()
     });
     addProperty(_coordinateSystem);
 
+
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
@@ -648,6 +654,30 @@ InteractionHandler::InteractionHandler()
 
     // Set the interactionMode
     _currentInteractionMode = _orbitalInteractionMode;
+
+    // Define lambda functions for changed properties
+    _rotationalFriction.onChange([&]() {
+        _mouseStates->setRotationalFriction(_rotationalFriction);
+    });
+    _horizontalFriction.onChange([&]() {
+        _mouseStates->setHorizontalFriction(_horizontalFriction);
+    });
+    _verticalFriction.onChange([&]() {
+        _mouseStates->setVerticalFriction(_verticalFriction);
+    });
+    _sensitivity.onChange([&]() {
+        _mouseStates->setSensitivity(_sensitivity);
+    });
+    _rapidness.onChange([&]() {
+        _mouseStates->setVelocityScaleFactor(_rapidness);
+    });
+
+    // Add the properties
+    addProperty(_rotationalFriction);
+    addProperty(_horizontalFriction);
+    addProperty(_verticalFriction);
+    addProperty(_sensitivity);
+    addProperty(_rapidness);
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -660,6 +690,38 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
+}
+
+void InteractionHandler::resetCameraDirection() {
+    LINFO("Setting camera direction to point at focus node.");
+
+    glm::dquat rotation = _camera->rotationQuaternion();
+    glm::dvec3 focusPosition = focusNode()->worldPosition().dvec3();
+    glm::dvec3 cameraPosition = _camera->positionVec3();
+    glm::dvec3 lookUpVector = _camera->lookUpVectorWorldSpace();
+
+    glm::dvec3 directionToFocusNode = glm::normalize(focusPosition - cameraPosition);
+
+    // To make sure the lookAt function won't fail
+    static const double epsilon = 0.000001;
+    if (glm::dot(lookUpVector, directionToFocusNode) > 1.0 - epsilon) {
+        // Change the look up vector a little bit
+        lookUpVector = glm::normalize(lookUpVector + glm::dvec3(epsilon));
+    }
+
+    // Create the rotation to look at  focus node
+    dmat4 lookAtMat = lookAt(
+        dvec3(0, 0, 0),
+        directionToFocusNode,
+        lookUpVector);
+    dquat rotationLookAtFocusNode = normalize(quat_cast(inverse(lookAtMat)));
+
+    // Update camera Rotation
+    _camera->setRotation(rotationLookAtFocusNode);
+
+    // Explicitly synch
+    _camera->preSynchronization();
+    _camera->postSynchronizationPreDraw();
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
@@ -791,34 +853,6 @@ ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
     return cameraDict;
 }
 
-void InteractionHandler::setInteractionFriction(double friction) {
-    if (friction < 0) {
-        LWARNING("Clamping friction factor to a value bigger or equal to 0");
-        friction = glm::max(friction, 0.0);
-    }
-    _mouseStates->setFriction(friction);
-    LINFO("Interaction friction set to: " << friction);
-}
-
-void InteractionHandler::setInteractionSensitivity(double sensitivity) {
-    if (sensitivity < 0) {
-        LWARNING("Clamping scale sensitivity to a value bigger or equal to 0");
-        sensitivity = glm::max(sensitivity, 0.0);
-    }
-    _mouseStates->setSensitivity(sensitivity);
-    LINFO("Interaction sensitivity set to: " << sensitivity);
-}
-
-void InteractionHandler::setInteractionFollowScaleFactor(double scaleFactor) {
-    const double minFollowScaleFactor = 0.01;
-    if (scaleFactor < minFollowScaleFactor) {
-        LWARNING("Clamping scale factor to a value bigger or equal to " << minFollowScaleFactor);
-        scaleFactor = glm::max(scaleFactor, minFollowScaleFactor);
-    }
-    _mouseStates->setVelocityScaleFactor(scaleFactor);
-    LINFO("Interaction velocity scale factor set to: " << scaleFactor);
-}
-
 void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
@@ -914,22 +948,10 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 "Restore the camera state from file"
             },
             {
-                "setInteractionFriction",
-                    &luascriptfunctions::setInteractionFriction,
-                    "number",
-                    "Set the interaction friction"
-            },
-            {
-                "setInteractionSensitivity",
-                    &luascriptfunctions::setInteractionSensitivity,
-                    "number",
-                    "Set the interaction sensitivity"
-            },
-            {
-                "setInteractionFollowScaleFactor",
-                    &luascriptfunctions::setInteractionFollowScaleFactor,
-                    "number",
-                    "Set the interaction follow scale factor"
+                "resetCameraDirection",
+                &luascriptfunctions::resetCameraDirection,
+                "void",
+                "Reset the camera direction to point at the focus node"
             },
         }
     };

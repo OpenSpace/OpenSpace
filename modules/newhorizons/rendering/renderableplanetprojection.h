@@ -43,7 +43,7 @@ namespace planetgeometry {
     class PlanetGeometry;
 }
 
-class RenderablePlanetProjection : public Renderable, private ProjectionComponent {
+class RenderablePlanetProjection : public Renderable {
 public:
     RenderablePlanetProjection(const ghoul::Dictionary& dictionary);
     ~RenderablePlanetProjection();
@@ -54,7 +54,7 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-    ghoul::opengl::Texture* baseTexture() { return _projectionTexture.get(); };
+    ghoul::opengl::Texture& baseTexture() const;
 
 protected:
     bool loadTextures();
@@ -63,6 +63,8 @@ protected:
 
 private:
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
+
+    ProjectionComponent _projectionComponent;
 
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _heightMapTexturePath;

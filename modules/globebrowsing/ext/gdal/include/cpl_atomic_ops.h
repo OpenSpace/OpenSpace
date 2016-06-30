@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_atomic_ops.h 33666 2016-03-07 05:21:07Z goatbar $
  *
  * Name:     cpl_atomic_ops.h
  * Project:  CPL - Common Portability Library

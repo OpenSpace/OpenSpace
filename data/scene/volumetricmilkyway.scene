@@ -1,0 +1,42 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.time.setTime(openspace.time.currentWallTime())
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
+    -- openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    -- openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+
+    -- openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    -- openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.printInfo("Done setting default values")
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Volumetric Milky Way",
+        Position = {1, 0, 0, 5},
+    },
+    Modules = {
+        "volumetricmilkyway"
+    }
+}

@@ -32,7 +32,7 @@ namespace gui {
 
 class GuiHelpComponent : public GuiComponent {
 public:
-    void render();
+    void render() override;
 };
 
 } // namespace gui

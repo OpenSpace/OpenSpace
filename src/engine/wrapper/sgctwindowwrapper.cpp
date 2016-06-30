@@ -30,6 +30,10 @@
 #undef near
 #undef far
 
+namespace {
+    const std::string GuiWindowName = "GUI";
+}
+
 namespace openspace {
     
 void SGCTWindowWrapper::setBarrier(bool enabled) {
@@ -111,15 +115,36 @@ bool SGCTWindowWrapper::isRegularRendering() const {
 
     return true;
 }
+
+bool SGCTWindowWrapper::hasGuiWindow() const {
+    auto engine = sgct::Engine::instance();
+    for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
+        if (engine->getWindowPtr(i)->getName() == GuiWindowName)
+            return true;
+    }
+    return false;
+}
+
+bool SGCTWindowWrapper::isGuiWindow() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
+}
     
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
+}
+
+glm::mat4 SGCTWindowWrapper::modelMatrix() const {
+    return sgct::Engine::instance()->getModelMatrix();
 }
     
 void SGCTWindowWrapper::setNearFarClippingPlane(float nearPlane, float farPlane) {
     sgct::Engine::instance()->setNearAndFarClippingPlanes(nearPlane, farPlane);
 }
-    
+
+void SGCTWindowWrapper::setEyeSeparationDistance(float distance) {
+    sgct::Engine::instance()->setEyeSeparation(distance);
+}
+
 glm::ivec4 SGCTWindowWrapper::viewportPixelCoordinates() const {
     int x1, xSize, y1, ySize;
     sgct::Engine::instance()->getCurrentWindowPtr()->getCurrentViewportPixelCoords(x1,

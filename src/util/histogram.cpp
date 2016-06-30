@@ -296,31 +296,54 @@ float Histogram::entropy(){
 }
 
 void Histogram::print() const {
-    std::cout << "number of bins: " << _numBins << std::endl
-              << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
+    // std::cout << "number of bins: " << _numBins << std::endl
+    //           << "range: " << _minValue << " - " << _maxValue << std::endl << std::endl;
     for (int i = 0; i < _numBins; i++) {
         float low = _minValue + float(i) / _numBins * (_maxValue - _minValue);
         float high = low + (_maxValue - _minValue) / float(_numBins);
-        std::cout << i << " [" << low << ", " << high << "]"
-                  << "   " << _data[i] << std::endl;
+        // std::cout << i << " [" << low << ", " << high << "]"
+        //           << "   " << _data[i] << std::endl;
+        std::cout << _data[i]/(float)_numValues << ", ";
     }
-    std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
+    std::cout << std::endl;
+    // std::cout << std::endl << std::endl << std::endl<< "==============" << std::endl;
 }
 
-float Histogram::highestBinValue(bool equalized){
+float Histogram::highestBinValue(bool equalized, int overBins){
     int highestBin = 0;
+    float highestValue = 0;
+
     for(int i=0; i<_numBins; i++){
-        if(_data[i] > _data[highestBin])
+        float value = 0;
+        int num = 0;
+        for(int j=0; j<overBins; j++){
+            if(i-j>0){
+                value += _data[i-j];
+                num++;
+            }
+            if(i+j<_numBins){
+                value += _data[i+j];
+                num++;
+            }
+        }
+
+        value += _data[i];
+        value /= (float)++num;
+
+        if(value > highestValue){
             highestBin = i;
+            highestValue = value;
+        }
     }
 
-    float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
-    float high = low + (_maxValue - _minValue) / float(_numBins);
 
     if(!equalized){
+        float low = _minValue + float(highestBin) / _numBins * (_maxValue - _minValue);
+        float high = low + (_maxValue - _minValue) / float(_numBins);
         return (high+low)/2.0;
     }else{
-        return equalize((high+low)/2.0);
+        return highestBin/(float)_numBins;
+        // return equalize((high+low)/2.0);
     }
 }
 

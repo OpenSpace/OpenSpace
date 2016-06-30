@@ -36,6 +36,12 @@ namespace {
 
 namespace openspace {
 
+bool hasKeyModifier(KeyAction lhs, KeyAction rhs) {
+    return
+        static_cast<std::underlying_type_t<KeyAction>>(lhs) &
+        static_cast<std::underlying_type_t<KeyAction>>(rhs);
+}
+
 KeyAction operator|(KeyAction lhs, KeyAction rhs) {
     return static_cast<KeyAction>(
         static_cast<std::underlying_type_t<KeyAction>>(lhs) |
@@ -47,6 +53,13 @@ KeyAction operator|=(KeyAction& lhs, KeyAction rhs) {
     lhs = (lhs | rhs);
     return lhs;
 }
+
+bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs) {
+    return
+        static_cast<std::underlying_type_t<KeyModifier>>(lhs) &
+        static_cast<std::underlying_type_t<KeyModifier>>(rhs);
+}
+
 
 KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(

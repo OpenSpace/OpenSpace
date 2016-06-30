@@ -67,11 +67,18 @@ namespace openspace {
 using ghoul::Dictionary;
 
 ProjectionComponent::ProjectionComponent()
-    : _performProjection("performProjection", "Perform Projections", true)
+    : properties::PropertyOwner()
+    , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _projectionTexture(nullptr)
-{}
+{
+    setName("ProjectionComponent");
+
+    addProperty(_performProjection);
+    addProperty(_clearAllProjections);
+    addProperty(_projectionFading);
+}
 
 bool ProjectionComponent::initialize() {
     bool a = generateProjectionLayerTexture();
@@ -100,6 +107,10 @@ bool ProjectionComponent::deinitialize() {
     glDeleteFramebuffers(1, &_fboID);
 
     return true;
+}
+
+bool ProjectionComponent::isReady() const {
+    return (_projectionTexture != nullptr);
 }
 
 bool ProjectionComponent::initializeProjectionSettings(const Dictionary& dictionary) {
@@ -275,6 +286,54 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
                                                   0, 0, 0.5f, 0,
                                                   0.5f, 0.5f, 0.5f, 1);
     return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
+}
+
+bool ProjectionComponent::doesPerformProjection() const {
+    return _performProjection;
+}
+
+bool ProjectionComponent::needsClearProjection() const {
+    return _clearAllProjections;
+}
+
+float ProjectionComponent::projectionFading() const {
+    return _projectionFading;
+}
+
+ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
+    return *_projectionTexture;
+}
+
+std::string ProjectionComponent::projectorId() const {
+    return _projectorID;
+}
+
+std::string ProjectionComponent::projecteeId() const {
+    return _projecteeID;
+}
+
+std::string ProjectionComponent::instrumentId() const {
+    return _instrumentID;
+}
+
+SpiceManager::AberrationCorrection ProjectionComponent::aberration() const {
+    return _aberration;
+}
+
+float ProjectionComponent::fieldOfViewY() const {
+    return _fovy;
+}
+
+float ProjectionComponent::aspectRatio() const {
+    return _aspectRatio;
+}
+
+float ProjectionComponent::nearPlane() const {
+    return _nearPlane;
+}
+
+float ProjectionComponent::farPlane() const {
+    return _farPlane;
 }
 
 void ProjectionComponent::clearAllProjections() {
