@@ -73,7 +73,7 @@ namespace openspace {
         PixelCoordinate start;
         PixelCoordinate numPixels;
 
-        void addPadding(const PixelRegion& padding) {
+        void pad(const PixelRegion& padding) {
             start += padding.start;
             numPixels += padding.numPixels;
         }
@@ -96,19 +96,33 @@ namespace openspace {
             scale(glm::dvec2(s));
         }
 
-        void shrinkPow2(int exponent) {
+        void downscalePow2(int exponent) {
             start.x >>= exponent;
             start.y >>= exponent;
             numPixels.x >>= exponent;
             numPixels.y >>= exponent;
         }
+
+        void upscalePow2(int exponent) {
+            start.x <<= exponent;
+            start.y <<= exponent;
+            numPixels.x <<= exponent;
+            numPixels.y <<= exponent;
+        }
     };
 
 
+    struct IODescription {
+        int overview;
+        PixelRegion readRegion;
+        PixelRegion writeRegion;
+    };
 
 
     class TileDataset {
     public:
+
+        
 
         
         /**
@@ -143,6 +157,7 @@ namespace openspace {
 
     private:
 
+        IODescription getIODescription(const ChunkIndex& chunkIndex);
         
 
         //////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +168,9 @@ namespace openspace {
 
         int gdalOverview(const PixelCoordinate& baseRegionSize) const;
         int gdalOverview(const ChunkIndex& chunkIndex) const;
+        bool gdalHasOverviews() const;
+        PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
+        GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
 
         TileDepthTransform calculateTileDepthTransform();
 
