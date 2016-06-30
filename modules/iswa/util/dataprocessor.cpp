@@ -74,7 +74,6 @@ void DataProcessor::clear(){
     _unNormalizedhistograms.clear();
 }
 
-
 float DataProcessor::processDataPoint(float value, int option){
     if(_numValues.empty()) return 0.0f;
     std::shared_ptr<Histogram> histogram = _histograms[option];
@@ -100,16 +99,6 @@ float DataProcessor::normalizeWithStandardScore(float value, float mean, float s
     //return and normalize
     return ( standardScore + zScoreMin )/(zScoreMin + zScoreMax );  
 }
-
-// float DataProcessor::unnormalizeWithStandardScore(float standardScore, float mean, float sd, glm::vec2 normalizationValues){
-//     float zScoreMin = normalizationValues.x;
-//     float zScoreMax = normalizationValues.y; 
-
-//     float value = standardScore*(zScoreMax+zScoreMin)-zScoreMin;
-//     value = value*sd+mean; 
-
-//     return value; 
-// }
 
 void DataProcessor::initializeVectors(int numOptions){
     if(_min.empty()) _min = std::vector<float>(numOptions, std::numeric_limits<float>::max());
