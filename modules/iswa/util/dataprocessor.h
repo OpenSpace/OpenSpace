@@ -50,7 +50,7 @@ public:
     /**
      * Function that initializes the dataprocessor for a new data variable by 
      * calculating its min & max value, standard deviation, sum and histogram for a 
-     * given data file. This file will then be used as reference when normalizing, filtering
+     * given data file. This data will then be used as reference when normalizing, filtering
      * and give auto-contrast 
      * 
      * @param data The data file content to add data from
@@ -90,10 +90,8 @@ protected:
     std::set<std::string> _coordinateVariables;
     glm::size3_t _dimensions;
 
-    //glm::vec2 _histNormValues;
 private:
     float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
-    //float unnormalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
 
     bool _useLog;
     bool _useHistogram;
