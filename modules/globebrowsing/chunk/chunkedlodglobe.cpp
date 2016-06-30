@@ -202,7 +202,7 @@ namespace openspace {
 
 
         if (_savedCamera != nullptr) {
-            DebugRenderer::ref()->renderCameraFrustum(data, *_savedCamera);
+            DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
         
 
@@ -234,12 +234,12 @@ namespace openspace {
             vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
 
             if (debugOptions.showChunkBounds) {
-                DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+                DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
             }
 
             if (debugOptions.showChunkAABB) {
-                auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
-                DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
+                auto& screenSpacePoints = DebugRenderer::ref().verticesFor(screenSpaceBounds);
+                DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
             }
         }
     }

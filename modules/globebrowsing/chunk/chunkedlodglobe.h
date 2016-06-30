@@ -37,7 +37,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
 #include <modules/globebrowsing/chunk/chunknode.h>
@@ -149,7 +148,6 @@ namespace openspace {
         std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
-
     };
 
 }  // namespace openspace
