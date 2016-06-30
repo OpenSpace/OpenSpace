@@ -51,6 +51,7 @@ public:
     void setSource(SourceFunction func);
 
     void render();
+    void renderProperties();
 
 protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
