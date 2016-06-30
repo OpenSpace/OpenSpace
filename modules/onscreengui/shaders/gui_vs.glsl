@@ -24,14 +24,14 @@
 
 #version __CONTEXT__
 
-uniform mat4 ortho;
-
 in vec2 in_position;
 in vec2 in_uv;
 in vec4 in_color;
 
 out vec2 out_uv;
 out vec4 out_color;
+
+uniform mat4 ortho;
 
 void main() {
     out_uv = in_uv;

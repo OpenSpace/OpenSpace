@@ -66,15 +66,15 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type)
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_useLog);
-    OsEng.gui()._iswa.registerProperty(&_useHistogram);
-    OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    if(!_autoFilter.value())
-        OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-    // OsEng.gui()._iswa.registerProperty(&_autoFilter);
-    OsEng.gui()._iswa.registerProperty(&_normValues);
-    OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
-    OsEng.gui()._iswa.registerProperty(&_dataOptions);
+    //OsEng.gui()._iswa.registerProperty(&_useLog);
+    //OsEng.gui()._iswa.registerProperty(&_useHistogram);
+    //OsEng.gui()._iswa.registerProperty(&_autoFilter);
+    //if(!_autoFilter.value())
+    //    OsEng.gui()._iswa.registerProperty(&_backgroundValues);
+    //// OsEng.gui()._iswa.registerProperty(&_autoFilter);
+    //OsEng.gui()._iswa.registerProperty(&_normValues);
+    //OsEng.gui()._iswa.registerProperty(&_transferFunctionsFile);
+    //OsEng.gui()._iswa.registerProperty(&_dataOptions);
 
 
     _useLog.onChange([this]{
@@ -94,10 +94,10 @@ void IswaDataGroup::registerProperties(){
         // and unregister backgroundvalues property.
         if(_autoFilter.value()){
             _backgroundValues.setValue(_dataProcessor->filterValues());
-            OsEng.gui()._iswa.unregisterProperty(&_backgroundValues); 
+            _backgroundValues.setVisible(false);
         // else if autofilter is turned off, register backgroundValues 
         } else {
-            OsEng.gui()._iswa.registerProperty(&_backgroundValues, &_autoFilter);            
+            _backgroundValues.setVisible(true);
         }
         _groupEvent->publish("autoFilterChanged", ghoul::Dictionary({{"autoFilter", _autoFilter.value()}}));
     });

@@ -68,6 +68,8 @@ enum class KeyAction : int {
     Repeat = 2
 };
 
+bool hasKeyAction(KeyAction lhs, KeyAction rhs);
+
 KeyAction operator|(KeyAction lhs, KeyAction rhs);
 KeyAction operator|=(KeyAction& lhs, KeyAction rhs);
 
@@ -78,6 +80,8 @@ enum class KeyModifier : int {
     Alt = 0x0004,
     Super = 0x0008
 };
+
+bool hasKeyModifier(KeyModifier lhs, KeyModifier rhs);
 
 KeyModifier operator|(KeyModifier lhs, KeyModifier rhs);
 KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs);

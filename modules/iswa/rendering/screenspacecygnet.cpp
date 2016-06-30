@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <openspace/util/time.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace {
     const std::string _loggerCat = "ScreenSpaceCygnet";

@@ -42,29 +42,29 @@ class IswaCygnet;
 
 class IswaBaseGroup : public properties::PropertyOwner{
 public:
-	IswaBaseGroup(std::string name, std::string type);
-	~IswaBaseGroup();
-	bool isType(std::string type);
+    IswaBaseGroup(std::string name, std::string type);
+    ~IswaBaseGroup();
+    bool isType(std::string type);
 
-	void updateGroup();
-	virtual void clearGroup();
+    void updateGroup();
+    virtual void clearGroup();
 
-	std::shared_ptr<DataProcessor> dataProcessor();
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
+    std::shared_ptr<DataProcessor> dataProcessor();
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
 
 protected:
-	void registerProperties();
-	void unregisterProperties();
+    void registerProperties();
+    void unregisterProperties();
 
-	properties::BoolProperty _enabled;
-	properties::FloatProperty _alpha;
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _alpha;
     properties::TriggerProperty _delete;
 
-	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
+    std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
-	bool _registered;
-	std::string _type;
+    bool _registered;
+    std::string _type;
 };
 
 } //namespace openspace

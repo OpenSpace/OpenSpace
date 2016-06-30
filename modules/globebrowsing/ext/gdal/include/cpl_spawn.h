@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_spawn.h 31287 2015-11-01 18:29:27Z goatbar $
  *
  * Project:  CPL - Common Portability Library
  * Purpose:  Implement CPLSystem().

@@ -71,7 +71,7 @@ public:
     float equalize (float);
     float entropy();
 
-    float highestBinValue(bool equalized);
+    float highestBinValue(bool equalized, int overBins=0);
     float binWidth();
 
     void changeRange(float minValue, float maxValue);

@@ -138,13 +138,28 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-target_include_directories(
-    openspace-module-globebrowsing
-    SYSTEM PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
-)
+if (WIN32)
+    target_include_directories(
+        openspace-module-globebrowsing
+        SYSTEM PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
+    )
 
-target_link_libraries(
-    openspace-module-globebrowsing
-    ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
-)
+    target_link_libraries(
+        openspace-module-globebrowsing
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
+    )
+else (WIN32)
+    find_package(GDAL REQUIRED)
+
+    target_include_directories(
+        openspace-module-globebrowsing
+        SYSTEM PUBLIC
+        ${GDAL_INCLUDE}
+    )
+
+    target_link_libraries(
+        openspace-module-globebrowsing
+        ${GDAL_LIBRARY}
+    )
+endif ()

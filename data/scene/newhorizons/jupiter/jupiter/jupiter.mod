@@ -32,11 +32,6 @@ return {
                 Project = "textures/lorriTest1.jpg",
                 Sequencing = "true",
             },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
-            },
             Projection = {
                 --Sequence   = "F:/JupiterFullSequence",
                 Sequence   = "${OPENSPACE_DATA}/scene/newhorizons/jupiter/jupiter/ProjectionsOfInterest",

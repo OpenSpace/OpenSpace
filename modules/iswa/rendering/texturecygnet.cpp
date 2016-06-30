@@ -58,7 +58,7 @@ bool TextureCygnet::updateTexture() {
     return false;
 }
 
-bool TextureCygnet::downloadTextureResource(){
+bool TextureCygnet::downloadTextureResource(double timestamp){
 
     if(_futureObject.valid())
         return false;
@@ -66,7 +66,7 @@ bool TextureCygnet::downloadTextureResource(){
     if(_textures.empty())
         _textures.push_back(nullptr);
 
-    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id);
+    std::future<DownloadManager::MemoryFile> future = IswaManager::ref().fetchImageCygnet(_data->id, timestamp);
 
     if(future.valid()){
         _futureObject = std::move(future);

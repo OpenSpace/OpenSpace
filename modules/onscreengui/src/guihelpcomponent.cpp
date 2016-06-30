@@ -39,5 +39,5 @@ void GuiHelpComponent::render() {
     ImGui::End();
 }
 
-} // gui
-} // openspace
+} // namespace gui
+} // namespace openspace

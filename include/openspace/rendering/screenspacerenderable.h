@@ -24,38 +24,33 @@
  
 #ifndef __SCREENSPACERENDERABLE_H__
 #define __SCREENSPACERENDERABLE_H__
-#include <ghoul/opengl/programobject.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <ghoul/opengl/texture.h>
-#include <modules/onscreengui/include/gui.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <ghoul/opengl/textureunit.h>
- #include <openspace/util/camera.h>
 
-#ifdef WIN32
-#define _USE_MATH_DEFINES
-#include <math.h>
-#endif
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vectorproperty.h>
+
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace openspace {
+
 /**
- * @brief The base class for screen scape images and screen space framebuffers
- * @details This base class handles general functionality specific to planes that
- * are rendered infront of the camera. It implements protected methods and properties for converting
- * the planes from spherical to euclidean coordinates and back. It also specifies the interface
- * that it's children needs to implement.
+ * The base class for screen space images and screen space framebuffers.
+ * This base class handles general functionality specific to planes that are rendered in 
+ * front of the camera. It implements protected methods and properties for converting
+ * the planes from Spherical to Euclidean coordinates and back. It also specifies the
+ * interface that its children need to implement.
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
-    static ScreenSpaceRenderable* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static ScreenSpaceRenderable* createFromDictionary(
+        const ghoul::Dictionary& dictionary);
+
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceRenderable();
+    virtual ~ScreenSpaceRenderable();
 
     virtual void render() = 0;
     virtual bool initialize() = 0;
@@ -64,33 +59,29 @@ public:
     virtual bool isReady() const = 0;
     bool isEnabled() const;
     
-    glm::vec2 euclideanPosition() const {return _euclideanPosition.value();};
-    glm::vec2 sphericalPosition() const {return _sphericalPosition.value();};
-    float depth() const {return _depth.value();};
+    glm::vec3 euclideanPosition() const;
+    glm::vec3 sphericalPosition() const;
+    float depth() const;
     
 protected:
     void createPlane();
     void useEuclideanCoordinates(bool b);
 
     /**
-     * @brief Converts vec2 polar coordinates to euclidean 
-     * 
-     * @param polar the coordinates theta and phi
-     * @param radius the radius position value of the plane
-     * 
-     * @return glm::vec2 with the x and y position value of the plane 
+     * Converts Spherical coordinates to Euclidean.
+     * \param spherical The coordinates theta and phi
+     * \param radius The radius position value of the plane
+     * \return The x and y position value of the plane 
      */
-    glm::vec2 toEuclidean(glm::vec2 polar, float radius);
+    glm::vec2 toEuclidean(const glm::vec2& spherical, float radius);
 
     /**
-     * @brief Converts vec2 euclidean coordinates to sperical
-     * 
-     * @param euclidean the coordinates x and y
-     * @return glm::vec2 with the spherical coordinates theta and phi.
+     * Converts Euclidean coordinates to Spherical.
+     * \param euclidean The coordinates x and y
+     * \return The spherical coordinates theta and phi.
      */
-    glm::vec2 toSpherical(glm::vec2 euclidean);
-    void registerProperties();
-    void unregisterProperties();
+    glm::vec2 toSpherical(const glm::vec2& euclidean);
+
 
     void createShaders();
     glm::mat4 scaleMatrix();
@@ -109,18 +100,15 @@ protected:
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-    const std::string _rendererPath;
-    ghoul::Dictionary _rendererData;
-    const std::string _vertexPath;
-    const std::string _fragmentPath;
     std::unique_ptr<ghoul::opengl::Texture>  _texture;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
     bool _useEuclideanCoordinates;
-    const float _planeDepth = -2.0;
     glm::vec2 _originalViewportSize;
 
     float _radius;
 };
+
 }  // namespace openspace
+
 #endif  // __SCREENSPACERENDERABLE_H__

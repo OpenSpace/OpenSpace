@@ -25,32 +25,26 @@
 #ifndef __GUIISWACOMPONENT_H__
 #define __GUIISWACOMPONENT_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guipropertycomponent.h>
+
+#include <map>
 
 namespace openspace {
 namespace gui {
 
-struct RadioOption {
-	int value;
-	std::string path;
-	std::string date;
-};
-
 class GuiIswaComponent : public GuiPropertyComponent {
 public:
     GuiIswaComponent();
-    virtual void render() override;
+    void render() override;
 
 private:
-    bool _gmdata;
-    bool _gmimage;
-    bool _iondata;
+    bool _gmData;
+    bool _gmImage;
+    bool _ionData;
 
     std::vector<int> _cdfOptions;
     std::map<std::string, int> _cdfOptionsMap;
 };
-
 
 } // namespace gui
 } // namespace openspace

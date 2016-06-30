@@ -40,7 +40,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <ghoul/lua/ghoul_lua.h>
@@ -51,6 +51,8 @@
 namespace {
     using json = nlohmann::json;
     const std::string _loggerCat = "IswaManager";
+    std::string baseUrl = "https://iswa-demo-server.herokuapp.com/";
+    //const std::string baseUrl = "http://128.183.168.116:3000/";
 }
 
 namespace openspace{
@@ -82,7 +84,7 @@ IswaManager::IswaManager()
     _geom[CygnetGeometry::Plane] = "Plane";
     _geom[CygnetGeometry::Sphere] = "Sphere";
 
-    DlManager.fetchFile(
+    OsEng.downloadManager().fetchFile(
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
@@ -144,9 +146,8 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
         };
 
         // Download metadata
-        DlManager.fetchFile(
-            "http://128.183.168.116:3000/" + std::to_string(-id),
-            // "http://localhost:3000/" + std::to_string(-id),
+        OsEng.downloadManager().fetchFile(
+            baseUrl + std::to_string(-id),
             metadataCallback,
             [id](const std::string& err){
                 LDEBUG("Download to memory was aborted for data cygnet with id "+ std::to_string(id)+": " + err);
@@ -157,7 +158,6 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
 void IswaManager::addKameleonCdf(std::string groupName, int pos){
     // auto info = _cdfInformation[group][pos];
-    // std::cout << group << " " << pos << std::endl;
     auto group = iswaGroup(groupName);
     if(group){
         std::dynamic_pointer_cast<IswaKameleonGroup>(group)->changeCdf(_cdfInformation[groupName][pos].path);
@@ -169,9 +169,9 @@ void IswaManager::addKameleonCdf(std::string groupName, int pos){
     createKameleonPlane(_cdfInformation[groupName][pos], "x");
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
-    return std::move( DlManager.fetchFile(
-            iswaUrl(id, "image"),
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp){
+    return std::move(OsEng.downloadManager().fetchFile(
+            iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
             },
@@ -181,9 +181,9 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id){
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
-    return std::move( DlManager.fetchFile(
-            iswaUrl(id, "data"),
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
+    return std::move(OsEng.downloadManager().fetchFile(
+            iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for data cygnet with id: " + std::to_string(id));
             },
@@ -193,16 +193,16 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id){
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, std::string type){
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
-        url = "http://128.183.168.116:3000/"+type+"/" + std::to_string(-id) + "/";
-        // url = "http://localhost:3000/"+type+"/" + std::to_string(-id) + "/";
+        url = baseUrl+type+"/" + std::to_string(-id) + "/";
     } else{
         url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
-    std::string t = Time::ref().currentTimeUTC(); 
+    //std::string t = Time::ref().currentTimeUTC(); 
+    std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
     std::stringstream ss(t);
     std::string token;
 
@@ -261,9 +261,8 @@ std::shared_ptr<MetadataFuture> IswaManager::downloadMetadata(int id){
     std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
 
     metaFuture->id = id;
-    DlManager.fetchFile(
-        "http://128.183.168.116:3000/" + std::to_string(-id),
-        // "http://localhost:3000/" + std::to_string(-id),
+    OsEng.downloadManager().fetchFile(
+        baseUrl + std::to_string(-id),
         [&metaFuture](const DownloadManager::MemoryFile& file){
             metaFuture->json = std::string(file.buffer, file.size);
             metaFuture->isFinished = true;
@@ -305,6 +304,13 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             spatialScale.w = 6;
         }
 
+        float xOffset = 0.0f;
+        if(data->id == -7)
+            xOffset = -10.0f;
+        if(data->id == -8)
+            xOffset = -20.0f;
+        if(data->id == -9)
+            xOffset = -30.0f;
 
         std::string table = "{"
         "Name = '" + data->name +"' , "
@@ -319,6 +325,7 @@ std::string IswaManager::jsonPlaneToLuaTable(std::shared_ptr<MetadataFuture> dat
             "UpdateTime = " + std::to_string(updateTime) + ", "
             "CoordinateType = '" + coordinateType + "', "
             "Group = '"+ data->group + "',"
+            "XOffset = "+ std::to_string(xOffset) + ","
             "}"
         "}";
         
@@ -393,7 +400,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
     parent[0] = toupper(parent[0]);
     std::string frame = j["standard_grid_target"];
     std::string coordinateType = j["grid_1_type"];
-    std::string updateTime = j["output_time_interval"];
+    float updateTime = j["output_time_interval"];
     float radius = j["radius"];
 
     glm::vec4 spatialScale(6.371f, 6.371f, 6.371f, 6);
@@ -419,7 +426,7 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "
         "GridMax = " + std::to_string(max) + ", "
-        "UpdateTime = " + updateTime + ", "
+        "UpdateTime = " + std::to_string(updateTime) + ", "
         "Radius = " + std::to_string(radius) + ", "
         "CoordinateType = '" + coordinateType + "', "
         "Group = '"+ data->group + "',"
@@ -640,6 +647,11 @@ void IswaManager::addCdfFiles(std::string path){
     }
 }
 
+void IswaManager::setBaseUrl(std::string bUrl){
+    LDEBUG("Swapped baseurl to: " + bUrl);
+    baseUrl = bUrl;
+}
+
 scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
@@ -698,6 +710,13 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_removeGroup,
                 "int",
                 "Remove a group of Cygnets",
+                true
+            },
+            {
+                "setBaseUrl",
+                &luascriptfunctions::iswa_setBaseUrl,
+                "string",
+                "sets the base url",
                 true
             }
         }

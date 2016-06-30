@@ -37,8 +37,8 @@ TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
     ,_vertexPositionBuffer(0)
 {
     _programName = "PlaneProgram";
-    _vsPath = "${MODULE_ISWA}/shaders/cygnetplane_vs.glsl";
-    _fsPath = "${MODULE_ISWA}/shaders/cygnetplane_fs.glsl";
+    _vsPath = "${MODULE_ISWA}/shaders/textureplane_vs.glsl";
+    _fsPath = "${MODULE_ISWA}/shaders/textureplane_fs.glsl";
 }
 
 TexturePlane::~TexturePlane(){}

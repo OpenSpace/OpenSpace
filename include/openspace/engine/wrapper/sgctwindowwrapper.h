@@ -49,9 +49,13 @@ public:
     int currentNumberOfAaSamples() const override;
 
     bool isRegularRendering() const override;
+    bool hasGuiWindow() const override;
+    bool isGuiWindow() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
+    glm::mat4 modelMatrix() const override;
     void setNearFarClippingPlane(float near, float far) override;
+    void setEyeSeparationDistance(float distance) override;
     
     glm::ivec4 viewportPixelCoordinates() const override;
     

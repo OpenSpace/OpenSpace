@@ -57,7 +57,7 @@ PropertyOwner::~PropertyOwner() {
     _subOwners.clear();
 }
 
-const std::vector<Property*>& PropertyOwner::properties() const {
+std::vector<Property*> PropertyOwner::properties() const {
     return _properties;
 }
 
@@ -112,7 +112,7 @@ bool PropertyOwner::hasProperty(const std::string& id) const {
     return property(id) != nullptr;
 }
     
-const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
+std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
@@ -140,7 +140,7 @@ void PropertyOwner::setPropertyGroupName(std::string groupID, std::string name) 
     _groupNames[std::move(groupID)] = std::move(name);
 }
     
-const std::string& PropertyOwner::propertyGroupName(const std::string& groupID) const {
+std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
     auto it = _groupNames.find(groupID);
     if (it == _groupNames.end())
         return groupID;

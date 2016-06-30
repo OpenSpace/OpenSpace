@@ -35,6 +35,7 @@
 
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
 #include <openspace/performance/performancemanager.h>
 
@@ -382,11 +383,13 @@ void RenderEngine::postSynchronizationPreDraw() {
 
 }
 
-void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix) {
+void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui) {
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
-    if (!(OsEng.isMaster() && _disableMasterRendering)) {
+
+
+    if (!(OsEng.isMaster() && _disableMasterRendering) && !OsEng.windowWrapper().isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
@@ -395,13 +398,13 @@ void RenderEngine::render(const glm::mat4 &projectionMatrix, const glm::mat4 &vi
         if (_showInfo) {
             renderInformation();
         }
-        if (_showLog) {
+        if (_showLog && showGui) {
             renderScreenLog();
         }
     }
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
-        if(screenSpaceRenderable->isEnabled())
+        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
             screenSpaceRenderable->render();
     }
 }
@@ -1152,6 +1155,17 @@ std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::
     return nullptr;
 }
 
+std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
+    std::vector<ScreenSpaceRenderable*> res(_screenSpaceRenderables.size());
+    std::transform(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        res.begin(),
+        [](std::shared_ptr<ScreenSpaceRenderable> p) { return p.get(); }
+    );
+    return res;
+}
+
 RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
@@ -1476,11 +1490,14 @@ void RenderEngine::renderScreenLog() {
     }
 }
 
-void RenderEngine::sortScreenspaceRenderables(){
-    std::sort(_screenSpaceRenderables.begin(), _screenSpaceRenderables.end(),
-              [](std::shared_ptr<ScreenSpaceRenderable> j, std::shared_ptr<ScreenSpaceRenderable> i){
-                  return i->depth() > j->depth();
-              });
+void RenderEngine::sortScreenspaceRenderables() {
+    std::sort(
+        _screenSpaceRenderables.begin(),
+        _screenSpaceRenderables.end(),
+        [](auto j, auto i) {
+            return i->depth() > j->depth();
+        }
+    );
 }
 
 }// namespace openspace

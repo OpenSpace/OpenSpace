@@ -464,12 +464,12 @@ float* KameleonWrapper::getUniformSliceValues(
                 if(value != missingValue){
                     doubleData[index] = value;
                     data[index] = value;
-                    if(value > maxValue){
-                        maxValue = value;
-                    }
-                    if(value < minValue){
-                        minValue = value;
-                    }
+                    // if(value > maxValue){
+                    //     maxValue = value;
+                    // }
+                    // if(value < minValue){
+                    //     minValue = value;
+                    // }
                 }else{
                     // std::cout << "value missing" << std::endl;
                     doubleData[index] = 0;

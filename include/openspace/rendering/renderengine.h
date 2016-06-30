@@ -89,7 +89,7 @@ public:
     bool initializeGL();
     void postSynchronizationPreDraw();
     void preSynchronization();
-    void render(const glm::mat4 &projectionMatrix, const glm::mat4 &viewMatrix);
+    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui);
     void postDraw();
 
     void takeScreenshot();
@@ -114,6 +114,7 @@ public:
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::string name);
     std::shared_ptr<ScreenSpaceRenderable> screenSpaceRenderable(std::string name);
+    std::vector<ScreenSpaceRenderable*> screenSpaceRenderables() const;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
