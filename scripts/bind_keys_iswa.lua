@@ -21,7 +21,7 @@ openspace.bindKey("h", "openspace.iswa.setBaseUrl('http://iswa-demo-server.herok
 openspace.bindKey("g", "openspace.iswa.setBaseUrl('http://128.183.168.116:3000/')");
 openspace.bindKey("l", "openspace.iswa.setBaseUrl('http://localhost:3000/')");
 
-openspace.bindKey("v", "openspace.time.setTime('2015-03-15T00:00:00.00')");
+openspace.bindKey("v", "openspace.time.setTime('2015-03-15T00:05:00.00')");
 
 openspace.bindKey("s", "openspace.saveCameraStateToFile('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");
 openspace.bindKey("a", "openspace.restoreCameraStateFromFile('${OPENSPACE_DATA}/iswa/magnetosphere.pos');");

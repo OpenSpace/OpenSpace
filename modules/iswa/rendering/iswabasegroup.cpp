@@ -32,7 +32,7 @@ namespace {
 }
 
 namespace openspace {
-IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
+IswaBaseGroup::IswaBaseGroup(std::string name, IswaManager::CygnetType type)
     :_enabled("enabled", "Enabled", true)
     ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     ,_delete("delete", "Delete")
@@ -51,7 +51,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 
 IswaBaseGroup::~IswaBaseGroup(){}
 
-bool IswaBaseGroup::isType(std::string type){
+bool IswaBaseGroup::isType(IswaManager::CygnetType type){
     return (_type == type);
 }
 

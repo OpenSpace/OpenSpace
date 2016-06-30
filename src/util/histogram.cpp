@@ -304,9 +304,9 @@ Histogram Histogram::equalize(){
  * this method will use its equalizer to return a histogram equalized result.
  */
 float Histogram::equalize(float value) const {
-    if (value < _minValue || value > _maxValue) {
-        LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
-    }
+    // if (value < _minValue || value > _maxValue) {
+    //     LWARNING("Equalized value is is not within domain of histogram. min: " + std::to_string(_minValue) + " max: " + std::to_string(_maxValue) + " val: " + std::to_string(value));
+    // }
     float normalizedValue = (value-_minValue)/(_maxValue-_minValue);
     int bin = floor(normalizedValue * _numBins);
     // If value == _maxValues then bin == _numBins, which is a invalid index.

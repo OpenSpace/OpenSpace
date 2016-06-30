@@ -23,19 +23,14 @@
  ****************************************************************************************/
 uniform float time;
 
-// uniform sampler2D texture1;
 uniform sampler2D textures[6];
 uniform sampler2D transferFunctions[6];
-// uniform sampler2D tf;
-// uniform sampler2D tfs[6];
 
 uniform int numTextures;
 uniform int numTransferFunctions;
 uniform bool averageValues;
 uniform vec2 backgroundValues;
 uniform float transparency;
-
-// uniform float background;
 
 in vec2 vs_st;
 in vec4 vs_position;

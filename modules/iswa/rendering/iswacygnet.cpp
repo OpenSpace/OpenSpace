@@ -182,13 +182,14 @@ void IswaCygnet::update(const UpdateData& data){
 
     // the texture resource is downloaded ahead of time, so we need to
     // know if we are going backwards or forwards in time
-    double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
+    double clockwiseSign = (Time::ref().deltaTime()<0) ? -1.0 : 1.0;
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
 
-    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
-                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&          //wants to update in openspace
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);  //but enough time must have passed 
+                                                                                                        //in the real world
 
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
@@ -222,7 +223,6 @@ bool IswaCygnet::destroyShader(){
 
 void IswaCygnet::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
-    // OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
 void IswaCygnet::unregisterProperties(){

@@ -39,9 +39,8 @@ namespace {
 }
 
 namespace openspace{
-IswaDataGroup::IswaDataGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor)
+IswaDataGroup::IswaDataGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor)
     :IswaBaseGroup(name, type)    
-    // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
     ,_autoFilter("autoFilter", "Auto Filter", true)
     ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
@@ -49,7 +48,6 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type, std::shared_ptr
     ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
     ,_dataOptions("dataOptions", "Data Options")
 {
-    // addProperty(_useLog);
     addProperty(_useHistogram);
     addProperty(_autoFilter);
     addProperty(_normValues);
@@ -64,7 +62,6 @@ IswaDataGroup::IswaDataGroup(std::string name, std::string type, std::shared_ptr
 IswaDataGroup::~IswaDataGroup(){}
 
 void IswaDataGroup::registerProperties(){
-    // OsEng.gui()._iswa.registerProperty(&_useLog);
     OsEng.gui()._iswa.registerProperty(&_useHistogram);
     OsEng.gui()._iswa.registerProperty(&_autoFilter);
     OsEng.gui()._iswa.registerProperty(&_normValues);
@@ -72,12 +69,6 @@ void IswaDataGroup::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_dataOptions);
     if(!_autoFilter.value())
         OsEng.gui()._iswa.registerProperty(&_backgroundValues);
-
-
-    // _useLog.onChange([this]{
-    //     LDEBUG("Group " + name() + " published useLogChanged");
-    //     _groupEvent->publish("useLogChanged", ghoul::Dictionary({{"useLog", _useLog.value()}}));
-    // });
 
     _useHistogram.onChange([this]{
         LDEBUG("Group " + name() + " published useHistogramChanged");
@@ -108,6 +99,7 @@ void IswaDataGroup::registerProperties(){
     _backgroundValues.onChange([this]{
         glm::vec2 bv = _backgroundValues.value();
 
+        //let the values "push" each other
         if(bv.x > bv.y){
             float y = bv.y;
             bv.y = bv.x;
@@ -134,7 +126,6 @@ void IswaDataGroup::registerProperties(){
 }
 
 void IswaDataGroup::registerOptions(const std::vector<properties::SelectionProperty::Option>& options){
-
     if(_dataOptions.options().empty()){
         for(auto option : options){
             _dataOptions.addOption({option.value, option.description});

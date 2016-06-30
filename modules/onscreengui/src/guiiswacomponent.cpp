@@ -148,9 +148,10 @@ void GuiIswaComponent::render() {
 
     if(_gmdata != gmdatavalue){
         if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-4,'Text','Magnetosphere_Data');";
-            std::string y = "openspace.iswa.addCygnet(-5,'Text','Magnetosphere_Data');";
-            std::string z = "openspace.iswa.addCygnet(-6,'Text','Magnetosphere_Data');";
+            // IswaManager::ResourceType::Text = 2
+            std::string x = "openspace.iswa.addCygnet(-4, 2, 'Magnetosphere_Data');";
+            std::string y = "openspace.iswa.addCygnet(-5, 2, 'Magnetosphere_Data');";
+            std::string z = "openspace.iswa.addCygnet(-6, 2, 'Magnetosphere_Data');";
             OsEng.scriptEngine().queueScript(x+y+z);
             OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Magnetosphere_Data');");
         }else{
@@ -160,9 +161,10 @@ void GuiIswaComponent::render() {
 
     if(_gmimage != gmimagevalue){
         if(_gmimage){
-            std::string x = "openspace.iswa.addCygnet(-4,'Texture','Magnetosphere_Image');";
-            std::string y = "openspace.iswa.addCygnet(-5,'Texture','Magnetosphere_Image');";
-            std::string z = "openspace.iswa.addCygnet(-6,'Texture','Magnetosphere_Image');";
+            // IswaManager::ResourceType::Texture = 0
+            std::string x = "openspace.iswa.addCygnet(-4, 0, 'Magnetosphere_Image');";
+            std::string y = "openspace.iswa.addCygnet(-5, 0, 'Magnetosphere_Image');";
+            std::string z = "openspace.iswa.addCygnet(-6, 0, 'Magnetosphere_Image');";
             OsEng.scriptEngine().queueScript(x+y+z);
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Magnetosphere_Image');");
@@ -171,7 +173,8 @@ void GuiIswaComponent::render() {
 
     if(_iondata != iondatavalue){
         if(_iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10,'Json','Ionosphere');");
+            // IswaManager::ResourceType::Json = 1
+            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10, 1, 'Ionosphere');");
             OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Ionosphere');");
         }else{
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
