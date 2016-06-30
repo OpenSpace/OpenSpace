@@ -263,6 +263,12 @@ public:
     void setVisible(bool state);
 
     /**
+     * Returns whether this Property is visible or not.
+     * \return Whether this Property is visible or hidden
+     */
+    bool isVisible() const;
+
+    /**
      * This method determines if this Property should be read-only in external
      * applications. This setting is only a hint and does not need to be followed by GUI
      * applications and does not have any effect on the Property::set,

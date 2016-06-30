@@ -140,13 +140,13 @@ int iswa_removeScrenSpaceCygnet(lua_State* L){
 
 int iswa_removeGroup(lua_State* L){
     std::string name = luaL_checkstring(L, -1);
-	// IswaManager::ref().unregisterGroup(id);
+    // IswaManager::ref().unregisterGroup(id);
 
     auto groups = IswaManager::ref().groups(); 
     if(groups.find(name) != groups.end())
         groups[name]->clearGroup();
 
-	return 0;
+    return 0;
 }
 
 int iswa_addCdfFiles(lua_State* L){
@@ -161,6 +161,12 @@ int iswa_addKameleonPlanes(lua_State* L){
     int pos = lua_tonumber(L, 2);
     IswaManager::ref().addKameleonCdf(group, pos);
     // auto cdfInfo = 
+    return 0;
+}
+
+int iswa_setBaseUrl(lua_State* L){
+    std::string url = luaL_checkstring(L, 1);
+    IswaManager::ref().setBaseUrl(url);
     return 0;
 }
 

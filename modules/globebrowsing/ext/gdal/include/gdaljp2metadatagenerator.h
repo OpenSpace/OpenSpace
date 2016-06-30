@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: gdaljp2metadatagenerator.h 33694 2016-03-10 17:54:30Z goatbar $
  *
  * Project:  GDAL
  * Purpose:  GDALJP2Metadata: metadata generator

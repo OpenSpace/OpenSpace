@@ -25,11 +25,6 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/gray.jpg",
-            },
-            Atmosphere = {
-                Type = "Nishita", -- for example, values missing etc etc
-                MieFactor = 1.0,
-                MieColor = {1.0, 1.0, 1.0}
             }
         },
         Ephemeris = {

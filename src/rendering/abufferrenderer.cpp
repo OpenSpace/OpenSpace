@@ -32,6 +32,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/performance/performancemeasurement.h>
 
 
 #include <ghoul/opengl/programobject.h>
@@ -166,6 +167,8 @@ void ABufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attache
 }
     
 void ABufferRenderer::update() {
+    PerfMeasure("ABufferRenderer::update");
+    
     // Make sure that the fragment buffer has the correct resoliution
     // according to the output render buffer size
     if (_dirtyResolution) {
@@ -221,10 +224,13 @@ void ABufferRenderer::update() {
 
     
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
-    if (_scene == nullptr) return;
-    if (_camera == nullptr) return;
+    PerfMeasure("ABufferRenderer::render");
 
 
+    if (_scene == nullptr)
+        return;
+    if (_camera == nullptr)
+        return;
 
     _mainColorTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _mainColorTextureUnit->activate();
@@ -387,6 +393,8 @@ void ABufferRenderer::clear() {
 }
 
 void ABufferRenderer::updateResolution() {
+    PerfMeasure("ABufferRenderer::updateResolution");
+
     int totalPixels = _resolution.x * _resolution.y;
     glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
@@ -475,6 +483,7 @@ void ABufferRenderer::updateResolveDictionary() {
 }
 
 void ABufferRenderer::updateRaycastData() {
+    PerfMeasure("ABufferRenderer::updateRaycastData");
 
     _raycastData.clear();
     _boundsPrograms.clear();
@@ -543,6 +552,8 @@ void ABufferRenderer::updateRaycastData() {
 
 
 void ABufferRenderer::updateRendererData() {
+    PerfMeasure("ABufferRenderer::updateRendererData");
+
     ghoul::Dictionary dict;
     dict.setValue("windowWidth", _resolution.x);
     dict.setValue("windowHeight", _resolution.y);

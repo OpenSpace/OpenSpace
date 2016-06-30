@@ -45,7 +45,7 @@ namespace modelgeometry {
     class ModelGeometry;
 }
 
-class RenderableModelProjection : public Renderable, private ProjectionComponent {
+class RenderableModelProjection : public Renderable {
 public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
 
@@ -57,12 +57,16 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    ghoul::opengl::Texture& baseTexture() const;
+
 private:
     bool loadTextures();
     void attitudeParameters(double time);
     void imageProjectGPU(std::shared_ptr<ghoul::opengl::Texture> projectionTexture);
 
     void project();
+
+    ProjectionComponent _projectionComponent;
 
     properties::StringProperty _colorTexturePath;
 

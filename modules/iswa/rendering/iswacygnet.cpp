@@ -28,7 +28,6 @@
 #include <openspace/util/transformationmanager.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-
 namespace {
     const std::string _loggerCat = "IswaCygnet";
 }
@@ -42,6 +41,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     , _group(nullptr)
     , _textureDirty(false)
+    , _rotation(glm::mat4(1.0f))
 {
     std::string name;
     dictionary.getValue("Name", name);
@@ -52,6 +52,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     // dict.getValue can only set strings in _data directly
     float renderableId;
     float updateTime;
+    float xOffset;
     glm::vec3 min, max;
     glm::vec4 spatialScale;
 
@@ -62,6 +63,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("GridMax", max);
     dictionary.getValue("Frame",_data->frame);
     dictionary.getValue("CoordinateType", _data->coordinateType);
+    dictionary.getValue("XOffset", xOffset);
     
     _data->id = (int) renderableId;
     _data->updateTime = (int) updateTime;
@@ -79,8 +81,9 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
         (max.z - min.z)
     );
 
+
     offset = glm::vec3(
-        (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f),
+        (min.x + (std::abs(min.x)+std::abs(max.x))/2.0f)+xOffset,
         (min.y + (std::abs(min.y)+std::abs(max.y))/2.0f),
         (min.z + (std::abs(min.z)+std::abs(max.z))/2.0f)
     );
@@ -102,9 +105,6 @@ bool IswaCygnet::initialize(){
     if(!_data->groupName.empty()){
         initializeGroup();
     }else{
-        OsEng.gui()._iswa.registerProperty(&_alpha);
-        OsEng.gui()._iswa.registerProperty(&_delete);
-
         _delete.onChange([this](){
             deinitialize();
             OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
@@ -116,7 +116,7 @@ bool IswaCygnet::initialize(){
     createShader();
     downloadTextureResource();
 
-	return true;
+    return true;
 }
 
 bool IswaCygnet::deinitialize(){
@@ -143,12 +143,12 @@ void IswaCygnet::render(const RenderData& data){
     psc position = data.position;
     glm::mat4 transform = glm::mat4(1.0);
 
-    glm::mat4 rot = glm::mat4(1.0);
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
             transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
         }
     }
+    transform = transform*_rotation;
 
     position += transform*glm::vec4(_data->spatialScale.x*_data->offset, _data->spatialScale.w);
     
@@ -171,6 +171,13 @@ void IswaCygnet::render(const RenderData& data){
 }
 
 void IswaCygnet::update(const UpdateData& data){
+
+    if (!_enabled)
+        return;
+
+    // the texture resource is downloaded ahead of time, so we need to
+    // now if we are going backwards or forwards
+    double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
@@ -178,22 +185,19 @@ void IswaCygnet::update(const UpdateData& data){
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
                         (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
 
-    if( _data->updateTime != 0 && (Time::ref().timeJumped() || timeToUpdate )){
-        downloadTextureResource();
-
-        _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime = _openSpaceTime;
-    }
-
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
         if(success)
             _textureDirty = true;
     }
-    
-    if(_textureDirty) {
+
+    if(_textureDirty && _data->updateTime != 0 && timeToUpdate) {
         updateTexture();
         _textureDirty = false;
+
+        downloadTextureResource(_openSpaceTime + clockwiseSign*_data->updateTime);
+        _lastUpdateRealTime = _realTime;
+        _lastUpdateOpenSpaceTime =_openSpaceTime;
     }
 
     if(!_transferFunctions.empty())
@@ -208,21 +212,18 @@ bool IswaCygnet::destroyShader(){
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-	return true;
+    return true;
 }
 
 void IswaCygnet::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_enabled);
-    // OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
 void IswaCygnet::unregisterProperties(){
-    OsEng.gui()._iswa.unregisterProperties(name());
 }
 
 void IswaCygnet::initializeTime(){
     _openSpaceTime = Time::ref().currentTime();
-    _lastUpdateOpenSpaceTime = _openSpaceTime;
+    _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;

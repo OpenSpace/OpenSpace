@@ -38,9 +38,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <iostream>
-
 namespace openspace {
+    class SyncBuffer;
+
     /**
     This class still needs some more love. Suggested improvements:
     - Remove psc from the camera class interface.

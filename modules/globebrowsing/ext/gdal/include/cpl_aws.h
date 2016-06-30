@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id$
+ * $Id: cpl_aws.h 33758 2016-03-21 09:06:22Z rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library

@@ -23,29 +23,16 @@
  ****************************************************************************************/
 
 #include <modules/onscreengui/include/guiiswacomponent.h>
-#include <modules/onscreengui/include/renderproperties.h>
 
+#include <modules/iswa/util/iswamanager.h>
+
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/assert.h>
-
-#include <ext/json/json.hpp>
-#include <openspace/engine/downloadmanager.h>
-#include <modules/iswa/util/iswamanager.h>
 #include <ghoul/filesystem/filesystem>
 
-
-#include <fstream>
+#include <ext/json/json.hpp>
 
 #include "imgui.h"
 
@@ -57,86 +44,96 @@ namespace {
 
 namespace openspace {
 namespace gui {
+
 GuiIswaComponent::GuiIswaComponent()
-    :GuiPropertyComponent()
-    ,_gmdata(false)
-    ,_gmimage(false)
-    ,_iondata(false)
+    : GuiPropertyComponent("iSWA")
+    , _gmData(false)
+    , _gmImage(false)
+    , _ionData(false)
 {}
 
 void GuiIswaComponent::render() {
-    bool gmdatavalue = _gmdata;
-    bool gmimagevalue = _gmimage;
-    bool iondatavalue = _iondata;
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+    bool oldGmDataValue = _gmData;
+    bool oldGmImageValue = _gmImage;
+    bool oldIonDataValue = _ionData;
 
     ImGui::Begin("ISWA", &_isEnabled, size, 0.5f);
-    // ImGui::Text("Global Magnetosphere");
-    // ImGui::Checkbox("Gm From Data", &_gmdata); ImGui::SameLine();
-    // ImGui::Checkbox("Gm From Images", &_gmimage);
+    
+    ImGui::Text("Global Magnetosphere");
+    ImGui::Checkbox("Gm From Data", &_gmData); ImGui::SameLine();
+    ImGui::Checkbox("Gm From Images", &_gmImage);
 
-    // ImGui::Text("Ionosphere");
-    // ImGui::Checkbox("Ion From Data", &_iondata);
+    ImGui::Text("Ionosphere");
+    ImGui::Checkbox("Ion From Data", &_ionData);
 
+    ImGui::Spacing();
+    static const int addCygnetBufferSize = 256;
+    static char addCygnetBuffer[addCygnetBufferSize];
+    ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
 
-    // ImGui::Spacing();
-    // static const int addCygnetBufferSize = 256;
-    // static char addCygnetBuffer[addCygnetBufferSize];
-    // ImGui::InputText("addCynget", addCygnetBuffer, addCygnetBufferSize);
+    if (ImGui::SmallButton("Add Cygnet")) {
+        OsEng.scriptEngine().queueScript(
+            "openspace.iswa.addCygnet(" + std::string(addCygnetBuffer) + ");"
+        );
+    }
 
-    // if(ImGui::SmallButton("Add Cygnet"))
-    //     OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet("+std::string(addCygnetBuffer)+");");
-
-    if(_gmdata != gmdatavalue){
-        if(_gmdata){
-            std::string x = "openspace.iswa.addCygnet(-1,'Data','GMData');";
-            std::string y = "openspace.iswa.addCygnet(-2,'Data','GMData');";
-            std::string z = "openspace.iswa.addCygnet(-3,'Data','GMData');";
-            OsEng.scriptEngine().queueScript(x+y+z);
-        }else{
+    if (_gmData != oldGmDataValue) {
+        if (_gmData) {
+            std::string x = "openspace.iswa.addCygnet(-4, 'Data', 'GMData');";
+            std::string y = "openspace.iswa.addCygnet(-5, 'Data', 'GMData');";
+            std::string z = "openspace.iswa.addCygnet(-6, 'Data', 'GMData');";
+            OsEng.scriptEngine().queueScript(x + y + z);
+        } else {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMData');");
         }
     }
 
-    if(_gmimage != gmimagevalue){
-        if(_gmimage){
-            std::string x = "openspace.iswa.addCygnet(-1,'Texture','GMImage');";
-            std::string y = "openspace.iswa.addCygnet(-2,'Texture','GMImage');";
-            std::string z = "openspace.iswa.addCygnet(-3,'Texture','GMImage');";
-            OsEng.scriptEngine().queueScript(x+y+z);
-        }else{
+    if (_gmImage != oldGmImageValue) {
+        if (_gmImage) {
+            std::string x = "openspace.iswa.addCygnet(-4, 'Texture', 'GMImage');";
+            std::string y = "openspace.iswa.addCygnet(-5, 'Texture', 'GMImage');";
+            std::string z = "openspace.iswa.addCygnet(-6, 'Texture', 'GMImage');";
+            OsEng.scriptEngine().queueScript(x + y + z);
+        } else {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('GMImage');");
         }
     }
 
-    if(_iondata != iondatavalue){
-        if(_iondata){
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-4,'Data','Ionosphere');");
-        }else{
+    if(_ionData != oldIonDataValue) {
+        if(_ionData) {
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.addCygnet(-10,'Data','Ionosphere');"
+            );
+        } else {
             OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
         }
     }
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    if(ImGui::CollapsingHeader("Cdf files")){
-        auto cdfInfo = IswaManager::ref().cdfInformation();
+    if (ImGui::CollapsingHeader("Cdf files")) {
+        const auto& cdfInfo = IswaManager::ref().cdfInformation();
 
-        for(auto group : cdfInfo){
+        for (const auto& group : cdfInfo) {
             std::string groupName = group.first;
-            if(_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
+            if (_cdfOptionsMap.find(groupName) == _cdfOptionsMap.end()){
                 _cdfOptionsMap[groupName] = -1;
             }
 
-            if(ImGui::CollapsingHeader(groupName.c_str())){
+            if (ImGui::CollapsingHeader(groupName.c_str())) {
                 int cdfOptionValue = _cdfOptionsMap[groupName];
-                auto cdfs = group.second;
+                const auto& cdfs = group.second;
 
-                for(int i=0; i<cdfs.size(); i++){
-                    ImGui::RadioButton(cdfs[i].name.c_str(), &_cdfOptionsMap[groupName], i);
+                for (int i = 0; i < cdfs.size(); ++i) {
+                    ImGui::RadioButton(
+                        cdfs[i].name.c_str(),
+                        &_cdfOptionsMap[groupName],
+                        i
+                    );
                 }
 
                 int cdfOption = _cdfOptionsMap[groupName];
-                if(cdfOptionValue != cdfOption){
-                   if(cdfOptionValue >= 0){
+                if (cdfOptionValue != cdfOption) {
+                   if (cdfOptionValue >= 0) {
                         groupName = cdfs[cdfOptionValue].group;
                         // std::cout << groupName << std::endl;
                         // OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('"+groupName+"');");
@@ -145,77 +142,29 @@ void GuiIswaComponent::render() {
                     std::string path  = cdfs[cdfOption].path;
                     std::string date  = cdfs[cdfOption].date;
                     groupName = cdfs[cdfOption].group;
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
-                    OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
-                    OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
-                }
-            }
-        }
-    }
-#endif
-
-    for (const auto& p : _propertiesByOwner) {
-        if (ImGui::CollapsingHeader(p.first.c_str())) {
-            for (properties::Property* prop : p.second) {
-                if (_boolProperties.find(prop) != _boolProperties.end()) {
-                    renderBoolProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_intProperties.find(prop) != _intProperties.end()) {
-                    renderIntProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_floatProperties.find(prop) != _floatProperties.end()) {
-                    renderFloatProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_vec2Properties.find(prop) != _vec2Properties.end()) {
-                    renderVec2Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec3Properties.find(prop) != _vec3Properties.end()) {
-                    renderVec3Property(prop, p.first);
-                    continue;
-                }
-
-                if (_vec4Properties.find(prop) != _vec4Properties.end()) {
-                    renderVec4Property(prop, p.first);
-                    continue;
-                }
-
-                if (_optionProperties.find(prop) != _optionProperties.end()) {
-                    renderOptionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_triggerProperties.find(prop) != _triggerProperties.end()) {
-                    renderTriggerProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_selectionProperties.find(prop) != _selectionProperties.end()) {
-                    renderSelectionProperty(prop, p.first);
-                    continue;
-                }
-
-                if (_stringProperties.find(prop) != _stringProperties.end()) {
-                    renderStringProperty(prop, p.first);
-                    continue;
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.addKameleonPlanes('" +
+                        groupName +
+                        "'," +
+                        std::to_string(cdfOption) +
+                        ");"
+                    );
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.time.setTime('" + date + "');"
+                    );
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.time.setDeltaTime(0);"
+                    );
                 }
             }
         }
     }
 
+    GuiPropertyComponent::render();
 
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
     if (ImGui::CollapsingHeader("iSWA screen space cygntes")) {
-
-        auto map = IswaManager::ref().cygnetInformation();
-        for(auto cygnetInfo : map){
+        const auto& map = IswaManager::ref().cygnetInformation();
+        for (const auto& cygnetInfo : map) {
             int id = cygnetInfo.first;
             auto info = cygnetInfo.second;
 
@@ -223,27 +172,31 @@ void GuiIswaComponent::render() {
             ImGui::Checkbox(info->name.c_str(), &info->selected);
             ImGui::SameLine();
 
-            if(ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())){
+            if (ImGui::CollapsingHeader(("Description" + std::to_string(id)).c_str())) {
                 ImGui::TextWrapped(info->description.c_str());
                 ImGui::Spacing();
             }
 
-            if(selected != info->selected){
-                if(info->selected){
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
-                        "{CygnetId = "+std::to_string(id)+" });");
-                }else{
-                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
-
+            if (selected != info->selected) {
+                if (info->selected) {
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.addScreenSpaceCygnet("
+                        "{CygnetId = " + std::to_string(id) + " });"
+                    );
+                } else {
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.removeScreenSpaceCygnet(" +
+                        std::to_string(id) +
+                        ");"
+                    );
                 }
             }
-
         }
     }
-#endif
     
     ImGui::End();
+#endif
 }
 
-} // gui
-} // openspace
+} // namespace gui
+} // namespace openspace

@@ -34,7 +34,6 @@
 #include <modules/iswa/rendering/datasphere.h>
 #include <modules/iswa/rendering/kameleonplane.h>
 
-
 namespace {
     const std::string _loggerCat = "IswaBaseGroup";
     using json = nlohmann::json;
@@ -87,9 +86,6 @@ std::shared_ptr<ghoul::Event<ghoul::Dictionary> > IswaBaseGroup::groupEvent(){
 
 
 void IswaBaseGroup::registerProperties(){
-    OsEng.gui()._iswa.registerProperty(&_enabled);
-    OsEng.gui()._iswa.registerProperty(&_alpha);
-
     _enabled.onChange([this]{
         LDEBUG("Group " + name() + " published enabledChanged");
         _groupEvent->publish("enabledChanged", ghoul::Dictionary({{"enabled", _enabled.value()}}));
@@ -101,7 +97,6 @@ void IswaBaseGroup::registerProperties(){
     });
 
 
-    OsEng.gui()._iswa.registerProperty(&_delete);
     _delete.onChange([this]{
         clearGroup();
     }); 
@@ -110,7 +105,6 @@ void IswaBaseGroup::registerProperties(){
 }
 
 void IswaBaseGroup::unregisterProperties(){
-    OsEng.gui()._iswa.unregisterProperties(name());
     _registered = false;
 }
 

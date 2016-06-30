@@ -42,9 +42,9 @@ public:
     PowerScaledScalar(float f1, float f2);
     static PowerScaledScalar CreatePSS(double d1);
 
-	const glm::vec2& vec2() const;
-	float lengthf() const;
-	double lengthd() const;
+    const glm::vec2& vec2() const;
+    float lengthf() const;
+    double lengthd() const;
 
 
     // operator overloading

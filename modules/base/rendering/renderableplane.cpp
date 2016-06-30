@@ -196,7 +196,7 @@ void RenderablePlane::render(const RenderData& data) {
         SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
         if (textureNode != nullptr){
             RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-            _texture = std::unique_ptr<ghoul::opengl::Texture>(t->baseTexture());
+            _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
             float h = _texture->height();
             float w = _texture->width();
             float scale = h / w;

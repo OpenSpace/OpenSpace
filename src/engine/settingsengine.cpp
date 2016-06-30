@@ -22,39 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float time;
-uniform sampler2D texture1;
-uniform float transparency;
+#include <openspace/engine/settingsengine.h>
 
-in vec2 vs_st;
-in vec4 vs_position;
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+namespace openspace {
 
-Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-    vec4 diffuse;
-    diffuse = texture(texture1, vec2(vs_st.s, 1-vs_st.t));
-
-    //vec4 diffuse = vec4(1,vs_st,1);
-    //vec4 diffuse = vec4(1,0,0,1);
-    // if(position.w > 9.0) {
-    //     diffuse = vec4(1,0,0,1);
-    // }
-
-    //diffuse.a = diffuse.r;
-    float tot = diffuse.r + diffuse.g + diffuse.b;
-    tot /= 3.0;
-    if (tot >= 0.5 || tot <= 0.05)
-        discard;
-
-    diffuse.a *= transparency;
-    
-    Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
-    return frag;
+SettingsEngine::SettingsEngine() :
+    _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
+{
+    addProperty(_eyeSeparation);
+    setName("Global");
+    _eyeSeparation.onChange(
+        [this](){ OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
+}
 
 }

@@ -26,7 +26,6 @@
 #define __KAMELEONPLANE_H__
 
 #include <modules/iswa/rendering/datacygnet.h>
-#include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/selectionproperty.h>
 
 namespace openspace{
@@ -41,8 +40,8 @@ namespace openspace{
  */
 class KameleonPlane : public DataCygnet {
 public:
- 	KameleonPlane(const ghoul::Dictionary& dictionary);
- 	~KameleonPlane();
+    KameleonPlane(const ghoul::Dictionary& dictionary);
+    ~KameleonPlane();
 
      bool initialize() override;
      bool deinitialize() override;
@@ -77,20 +76,11 @@ private:
     void subscribeToGroup();
 
     void changeKwPath(std::string path);
-	static int id();
+    static int id();
 
     properties::FloatProperty _resolution;
     properties::FloatProperty _slice;
-    properties::StringProperty _transferFunctionsFile;
-
     properties::SelectionProperty _fieldlines;
-
-    properties::Vec2Property _backgroundValues;
-    properties::Vec2Property _normValues;
-
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
 
     std::string _kwPath;
 

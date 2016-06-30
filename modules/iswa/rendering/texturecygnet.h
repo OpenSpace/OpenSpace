@@ -43,7 +43,7 @@ public:
 protected:
 
     bool updateTexture() override;
-    bool downloadTextureResource() override;
+    bool downloadTextureResource(double timestamp = Time::ref().currentTime()) override;
     bool readyToRender() const override;
     bool updateTextureResource() override;
 

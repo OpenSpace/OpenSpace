@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <algorithm>
+//#include <algorithm>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
@@ -42,7 +42,7 @@ DataProcessorKameleon::DataProcessorKameleon()
 DataProcessorKameleon::~DataProcessorKameleon(){}
 
 
-std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path){
+std::vector<std::string> DataProcessorKameleon::readMetadata(std::string path, glm::size3_t& dimensions){
 
     if(!path.empty()){
         if(path != _kwPath || !_kw){
@@ -98,13 +98,13 @@ void DataProcessorKameleon::addDataValues(std::string path, properties::Selectio
         add(optionValues, sum);
     }
 }
-std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, float slice, glm::size3_t& dimensions){
+std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions, float slice){
     _slice = slice;
-    _dimensions = dimensions; 
-    return processData(path, dataOptions);
+    // _dimensions = dimensions; 
+    return processData(path, dataOptions, dimensions);
 }
 
-std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions){
+std::vector<float*> DataProcessorKameleon::processData(std::string path, properties::SelectionProperty& dataOptions,  glm::size3_t& dimensions){
     int numOptions =  dataOptions.options().size();
     
     if(!path.empty()){
@@ -117,13 +117,13 @@ std::vector<float*> DataProcessorKameleon::processData(std::string path, propert
         auto options = dataOptions.options();
         int numOptions = options.size();
 
-        int numValues = _dimensions.x*_dimensions.y*_dimensions.z;
+        int numValues = dimensions.x*dimensions.y*dimensions.z;
 
         float value;
 
         std::vector<float*> dataOptions(numOptions, nullptr);
         for(int option : selectedOptions){
-            dataOptions[option] = _kw->getUniformSliceValues(options[option].description, _dimensions, _slice);
+            dataOptions[option] = _kw->getUniformSliceValues(options[option].description, dimensions, _slice);
 
             for(int i=0; i<numValues; i++){
                 value = dataOptions[option][i];

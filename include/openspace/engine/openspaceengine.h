@@ -43,6 +43,7 @@ namespace fontrendering { class FontManager; }
 namespace openspace {
 
 class ConfigurationManager;
+class DownloadManager;
 class LuaConsole;
 class NetworkEngine;
 class GUI;
@@ -50,6 +51,7 @@ class RenderEngine;
 class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
+class SettingsEngine;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
@@ -83,6 +85,7 @@ public:
     properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
+    DownloadManager& downloadManager();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     gui::GUI& gui();
@@ -130,13 +133,15 @@ private:
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
+    std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<DownloadManager> _downloadManager;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;
 #endif
     std::unique_ptr<network::ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
-    
+
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     std::unique_ptr<SyncBuffer> _syncBuffer;

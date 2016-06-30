@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id$
+ * $Id: cplkeywordparser.h 33666 2016-03-07 05:21:07Z goatbar $
  *
  * Project:  Common Portability Library
  * Purpose:  Implementation of CPLKeywordParser - a class for parsing

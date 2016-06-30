@@ -126,11 +126,34 @@ public:
     virtual bool isRegularRendering() const;
 
     /**
+     * Returns <code>true</code> if there is a dedicated GUI window. In these cases, the
+     * GUI elements will not be drawn on the non-GUI windows but only on the dedicated
+     * windows.
+     * \return Whether there are dedicated GUI windows
+     */
+    virtual bool hasGuiWindow() const;
+
+    /**
+     * Returns <code>true</code> if the current rendering window is a GUI-only window. In
+     * these cases, the regular rendering is suppressed, but input is still possible in
+     * the window
+     * \return Whether the current rendering window is GUI-only
+     */
+    virtual bool isGuiWindow() const;
+
+    /**
      * Returns the currently employed view-projection matrix. On default, this method will
      * return the identity matrix.
      * \return The currently employed view-projection matrix
      */
     virtual glm::mat4 viewProjectionMatrix() const;
+
+    /**
+     * Returns the currently employed model matrix. On default, this method will return
+     * the identity matrix.
+     * \return The currently employed model matrix
+     */
+    virtual glm::mat4 modelMatrix() const;
     
     /**
      * Sets the near and far clipping planes of the rendering window. This method defaults
@@ -140,6 +163,12 @@ public:
      */
     virtual void setNearFarClippingPlane(float near, float far);
     
+    /**
+     * Sets the stereo eye separation distance for the render engine.
+     * \param distance The distance between eyes for stereo rendering.
+     */
+    virtual void setEyeSeparationDistance(float distance);
+
     /**
      * Returns the location and size of the current viewport (<code>x</code>,
      * <code>width</code>, <code>y</code>, and <code>height</code>). If there is only a
