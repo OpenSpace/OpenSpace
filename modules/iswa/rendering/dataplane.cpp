@@ -89,14 +89,13 @@ bool DataPlane::createGeometry() {
     // ============================
     //         GEOMETRY (quad)
     // ============================
-    // GLfloat x,y, z;
     float s = _data->spatialScale.x;
     const GLfloat x = s*_data->scale.x/2.0;
     const GLfloat y = s*_data->scale.y/2.0;
     const GLfloat z = s*_data->scale.z/2.0;
     const GLfloat w = _data->spatialScale.w;
 
-    //construct a 2D plane independent of axis alignment
+    //construct a 2D plane with correct axis alignment
     const GLfloat vertex_data[] = { 
     //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,

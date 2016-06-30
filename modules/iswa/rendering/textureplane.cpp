@@ -67,8 +67,9 @@ bool TexturePlane::createGeometry() {
     const GLfloat z = s*_data->scale.z/2.0;
     const GLfloat w = _data->spatialScale.w;
 
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
+    //construct a 2D plane with correct axis alignment
+    const GLfloat vertex_data[] = {
+    //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
         -x,  ((x>0)?y:-y),   z,  w, 0, 0,

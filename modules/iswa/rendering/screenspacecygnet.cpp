@@ -62,8 +62,6 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
             "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");"
         );
     });
-        // IswaManager::ref().deleteIswaCygnet(name());});
-
 }
 
 ScreenSpaceCygnet::~ScreenSpaceCygnet(){}
@@ -75,7 +73,7 @@ void ScreenSpaceCygnet::update(){
 
     // the image is downloaded ahead of time, so we need to
     // know if we are going backwards or forwards in time
-    double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
+    double clockwiseSign = (Time::ref().deltaTime()<0) ? -1.0 : 1.0;
     _openSpaceTime = Time::ref().currentTime();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 

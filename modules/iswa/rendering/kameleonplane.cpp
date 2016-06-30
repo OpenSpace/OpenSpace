@@ -43,7 +43,7 @@ namespace openspace {
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
     ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
+    ,_resolution("resolution", "Resolution%", 50.0f, 10.0f, 200.0f)
     ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
 {       
 
@@ -61,7 +61,7 @@ KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
 
     OsEng.gui()._iswa.registerProperty(&_slice);
 
-
+    //specifies cut plane in 3D cdf file
     if(axis == "x")         _cut = 0;
     else if (axis == "y")   _cut = 1;
     else                    _cut = 2;
@@ -176,15 +176,15 @@ bool KameleonPlane::createGeometry() {
     // ============================
     //         GEOMETRY (quad)
     // ============================
-    // GLfloat x,y, z;
     float s = _data->spatialScale.x;
     const GLfloat x = s*_data->scale.x/2.0;
     const GLfloat y = s*_data->scale.y/2.0;
     const GLfloat z = s*_data->scale.z/2.0;
     const GLfloat w = _data->spatialScale.w;
 
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
+    //construct a 2D plane with correct axis alignment
+    const GLfloat vertex_data[] = {
+    //   x   y               z   w  s  t
         -x, -y,             -z,  w, 0, 1,
          x,  y,              z,  w, 1, 0,
         -x,  ((x>0)?y:-y),   z,  w, 0, 0,
@@ -224,9 +224,7 @@ std::vector<float*> KameleonPlane::textureData() {
 };
 
 bool KameleonPlane::updateTextureResource(){
-
     _data->offset[_cut] = _data->gridMin[_cut]+_slice.value()*_scale;
-    // _textureDirty = true;
     updateTexture();
     return true;
 }

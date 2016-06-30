@@ -81,7 +81,7 @@ bool TextureCygnet::downloadTextureResource(double timestamp){
 }
 
 bool TextureCygnet::updateTextureResource(){
-
+    
     // if The future is done then get the new imageFile
     DownloadManager::MemoryFile imageFile;
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)){
