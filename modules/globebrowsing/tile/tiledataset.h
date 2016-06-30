@@ -60,19 +60,49 @@ namespace openspace {
         TextureFormat textureFormat;
     };
 
-    struct GdalDataRegion {
-        GdalDataRegion(GDALDataset* dataSet, const ChunkIndex& chunkIndex, int tileLevelDifference);
+    typedef glm::ivec2 PixelCoordinate;
 
-        glm::uvec2 pixelStart;
-        glm::uvec2 pixelEnd;
-        glm::uvec2 numPixels;
+    struct PixelRegion {
 
-        int overview;
+        PixelRegion() : start(0), numPixels(0) { }
+        PixelRegion(const PixelRegion& o) : start(o.start), numPixels(o.numPixels) { }
+        PixelRegion(const PixelCoordinate& pixelStart, const PixelCoordinate& numberOfPixels)
+            : start(pixelStart), numPixels(numberOfPixels) { }
 
-        static glm::uvec2 geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
 
+        PixelCoordinate start;
+        PixelCoordinate numPixels;
+
+        void addPadding(const PixelRegion& padding) {
+            start += padding.start;
+            numPixels += padding.numPixels;
+        }
+
+        void clamp(const PixelRegion& boundingRegion) {
+            start = glm::max(start, boundingRegion.start);
+            numPixels = glm::min(end(), boundingRegion.end()) - start;
+        }
+
+        PixelCoordinate end() const {
+            return start + numPixels;
+        }
+
+        void scale(const glm::dvec2& s) {
+            start = PixelCoordinate(glm::round(s * glm::dvec2(start)));
+            numPixels = PixelCoordinate(glm::round(s * glm::dvec2(numPixels)));
+        }
+
+        void scale(double s) {
+            scale(glm::dvec2(s));
+        }
+
+        void shrinkPow2(int exponent) {
+            start.x >>= exponent;
+            start.y >>= exponent;
+            numPixels.x >>= exponent;
+            numPixels.y >>= exponent;
+        }
     };
-
 
 
 
@@ -105,6 +135,11 @@ namespace openspace {
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
 
+        const static PixelRegion padding;
+
+
+        static PixelCoordinate geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
+
 
     private:
 
@@ -114,17 +149,22 @@ namespace openspace {
         //                             HELPER FUNCTIONS                                 //
         //////////////////////////////////////////////////////////////////////////////////
 
-        const int calculateMaxLevel(int tileLevelDifference);
+        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
+
+        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
+        int gdalOverview(const ChunkIndex& chunkIndex) const;
+
+        int calculateMaxLevel(int tileLevelDifference);
 
         TileDepthTransform calculateTileDepthTransform();
 
         std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
-            const GdalDataRegion& region, const TileDataLayout& dataLayout);
+            const PixelRegion& region, const TileDataLayout& dataLayout);
 
 
         static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
 
-        static char* getImageDataFlippedY(const GdalDataRegion& region,
+        static char* getImageDataFlippedY(const PixelRegion& region,
             const TileDataLayout& dataLayout, const char* imageData);
 
 
