@@ -159,34 +159,6 @@ std::vector<float*> DataProcessorText::processData(const std::string& data, cons
         while (getline(memorystream, line)) {
             if (line.find("#") == 0) continue;
 
-            
-            // ----------- OLD METHODS ------------------------
-            // values = std::vector<float>();
-            // std::stringstream ss(line);
-            // float v;
-            // while(ss >> v){
-            //     values.push_back(v);
-            // }
-
-            // copy(
-            //     std::istream_iterator<float> (ss),
-            //     std::istream_iterator<float> (),
-            //     back_inserter(values)
-            // );
-
-            // copy(
-            //     std::next( std::istream_iterator<float> (ss), 3 ), //+3 because options x, y and z in the file
-            //     std::istream_iterator<float> (),
-            //     back_inserter(values)
-            // );
-
-            // for(int option : selectedOptions){
-            //     value = values[option]; 
-            //     //value = values[option+3]; //+3 because options x, y and z in the file
-            //     dataOptions[option][numValues] = processDataPoint(value, option);
-            // }
-            // ----------- OLD METHODS ------------------------
-
             first = 0; 
             last = 0;
             option = -3;
@@ -198,8 +170,7 @@ std::vector<float*> DataProcessorText::processData(const std::string& data, cons
                 last =  line.find_first_of(" \t", first);
                 last = (last > 0)? last : lineSize;
                 
-                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){
-                    // boost::spirit::qi::parse(&line[first], &line[last], boost::spirit::qi::float_, value);                
+                if(option >= 0 && std::find(selectedOptions.begin(), selectedOptions.end(), option) != selectedOptions.end()){             
                     value = std::stof(line.substr(first, last));
                     dataOptions[option][numValues] = processDataPoint(value, option);
                 }
@@ -209,8 +180,6 @@ std::vector<float*> DataProcessorText::processData(const std::string& data, cons
 
             numValues++;
         }
-
-        //calculateFilterValues(selectedOptions);
 
         return dataOptions;
     }

@@ -70,6 +70,7 @@ public:
      * @return Processed data
      */
     virtual std::vector<float*> processData(const std::string& data, const properties::SelectionProperty& dataOptions, const glm::size3_t& dimensions) = 0;
+    
     void calculateFilterValues(std::vector<int> selectedOptions);
 
     void useLog(bool useLog);

@@ -38,7 +38,6 @@ DataProcessor::DataProcessor()
     ,_filterValues(glm::vec2(0.0))
 {
     _coordinateVariables = {"x", "y", "z", "phi", "theta"};
-    // _normValues = glm::vec2(IswaManager::ref().fit()); //for testing
 }
 
 DataProcessor::~DataProcessor(){};
@@ -213,6 +212,7 @@ void DataProcessor::add(std::vector<std::vector<float>>& optionValues, std::vect
 }
 
 void DataProcessor::clearBuildData(){
+    //the data is only needed to be stored when building the histogram
     for(int i=0; _buildData.size(); i++){
         _buildData[i].clear();
     }
