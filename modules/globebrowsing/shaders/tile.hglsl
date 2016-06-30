@@ -81,21 +81,15 @@ vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Tile
 	return tileUV;
 }
 
-
-vec2 compensateSourceTextureSampling2(vec2 startOffset, vec2 sizeDiff, const Tile tile, vec2 tileUV){
-	vec2 pixelSizeUV = 1 / (textureSize(tile.textureSampler, 0) + sizeDiff);
-
-	tileUV *= (1 - pixelSizeUV* 2);
-	tileUV += pixelSizeUV;
-
-	return tileUV;
+vec2 TileUVToTextureSamplePosition(const Tile tile, vec2 tileUV){
+	vec2 uv = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
+	uv = compensateSourceTextureSampling(vec2(0), vec2(0), tile, uv);
+	return uv;
 }
 
 vec4 getTexVal(const Tile tile, vec2 tileUV){
-	tileUV = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	//tileUV = compensateSourceTextureSampling(vec2(-1), vec2(2), tile, tileUV);
-	//tileUV = compensateSourceTextureSampling2(vec2(-1), vec2(2), tile, tileUV);
-	vec4 texVal = texture(tile.textureSampler, tileUV);
+	vec2 samplePosition = TileUVToTextureSamplePosition(tile, tileUV);
+	vec4 texVal = texture(tile.textureSampler, samplePosition);
 	return texVal;
 }
 
