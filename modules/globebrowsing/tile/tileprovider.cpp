@@ -116,7 +116,7 @@ namespace openspace {
     }
 
     int CachingTileProvider::maxLevel() {
-        return _asyncTextureDataProvider->getTextureDataProvider()->getMaximumLevel();
+        return _asyncTextureDataProvider->getTextureDataProvider()->maxChunkLevel();
     }
 
     Tile CachingTileProvider::getTile(const ChunkIndex& chunkIndex) {
@@ -154,7 +154,7 @@ namespace openspace {
 
     Tile::Status CachingTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
         auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
-        if (chunkIndex.level > tileDataset->getMaximumLevel()) {
+        if (chunkIndex.level > tileDataset->maxChunkLevel()) {
             return Tile::Status::OutOfRange;
         }
 
