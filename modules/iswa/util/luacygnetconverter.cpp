@@ -40,8 +40,7 @@ LuaCygnetConverter::~LuaCygnetConverter(){};
 std::string LuaCygnetConverter::toLuaTable(std::shared_ptr<MetadataFuture> metadata) const {
 
     //get resource type as enum value
-    int resourceType;
-    IswaManager::ref().getResourceType(metadata->resourceType, resourceType);
+    IswaManager::ResourceType resourceType = static_cast<IswaManager::ResourceType>(metadata->resourceType);
 
     std::string luaTable;
     if (IswaManager::ResourceType::Json == resourceType)
@@ -103,7 +102,7 @@ std::string LuaCygnetConverter::planeToLuaTable(std::shared_ptr<MetadataFuture> 
         "Name = '" + data->group +"_"+ data->name +"' , "
         "Parent = '" + parent + "', "
         "Renderable = {"    
-            "Type = '" + data->cygnetType + "', "
+            "Type = '" + IswaManager::ref().cygnetType(data->cygnetType) + "', "
             "Id = " + std::to_string(data->id) + ", "
             "Frame = '" + frame + "' , "
             "GridMin = " + std::to_string(min) + ", "
@@ -207,7 +206,7 @@ std::string LuaCygnetConverter::sphereToLuaTable(std::shared_ptr<MetadataFuture>
     "Name = '" + data->group +"_"+ data->name +"' , "
     "Parent = '" + parent + "', "
     "Renderable = {"    
-        "Type = '" + data->cygnetType + "', "
+        "Type = '" + IswaManager::ref().cygnetType(data->cygnetType) + "', "
         "Id = " + std::to_string(data->id) + ", "
         "Frame = '" + frame + "' , "
         "GridMin = " + std::to_string(min) + ", "

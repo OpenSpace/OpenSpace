@@ -32,7 +32,7 @@
 namespace openspace{
 class IswaDataGroup : public IswaBaseGroup{
 public:
-    IswaDataGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor);
+    IswaDataGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor);
     ~IswaDataGroup();
 
     void registerOptions(const std::vector<properties::SelectionProperty::Option>& options);

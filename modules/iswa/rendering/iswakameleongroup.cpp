@@ -38,7 +38,7 @@ namespace {
 }
 
 namespace openspace{
-IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor)
+IswaKameleonGroup::IswaKameleonGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor)
 	:IswaDataGroup(name, type, dataProcessor)
     ,_resolution("resolution", "Resolution%", 100.0f, 10.0f, 200.0f)
 	,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")

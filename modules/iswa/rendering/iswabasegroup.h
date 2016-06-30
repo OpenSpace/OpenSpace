@@ -29,15 +29,17 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/triggerproperty.h>
 #include <modules/iswa/util/dataprocessor.h>
+#include <modules/iswa/util/iswamanager.h>
+
 
 namespace openspace{
 class IswaCygnet;
 
 class IswaBaseGroup : public properties::PropertyOwner{
 public:
-	IswaBaseGroup(std::string name, std::string type);
+	IswaBaseGroup(std::string name, IswaManager::CygnetType type);
 	~IswaBaseGroup();
-	bool isType(std::string type);
+	bool isType(IswaManager::CygnetType type);
 
 	void updateGroup();
 	virtual void clearGroup();
@@ -57,7 +59,7 @@ protected:
 	std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 
-	std::string _type;
+	IswaManager::CygnetType _type;
 };
 
 } //namespace openspace

@@ -30,19 +30,19 @@ int iswa_addCygnet(lua_State* L) {
     int nArguments = lua_gettop(L);
 
     int id = -1;
-    std::string type = "Texture";
+    int resourceType = IswaManager::ResourceType::Texture;
     std::string group = "";
 
     if(nArguments > 0)
         id = lua_tonumber(L, 1);
 
     if(nArguments > 1)
-        type = luaL_checkstring(L, 2);
+        resourceType = lua_tonumber(L, 2);
 
     if(nArguments > 2)
         group = luaL_checkstring(L, 3);
     
-    IswaManager::ref().addIswaCygnet(id, type, group);
+    IswaManager::ref().addIswaCygnet(id, static_cast<IswaManager::ResourceType>(resourceType), group);
 
     return 0;
 }

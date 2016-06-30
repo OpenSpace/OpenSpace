@@ -72,8 +72,8 @@ struct MetadataFuture {
     int id;
     std::string group;
     std::string name;
-    std::string resourceType;
-    std::string cygnetType;
+    int resourceType;
+    int cygnetType;
     std::string json; // Metadata from iSWA
 };
 
@@ -87,7 +87,7 @@ public:
     IswaManager();
     ~IswaManager();
 
-    void addIswaCygnet(int id, std::string type = "Texture", std::string group = "");
+    void addIswaCygnet(int id, ResourceType type = ResourceType::Texture, std::string group = "");
     void addKameleonCdf(std::string group, int pos);
     void createFieldline(std::string name, std::string cdfPath, std::string seedPath) const ;
 
@@ -108,15 +108,13 @@ public:
     void unregisterGroup(std::string groupName);
     void clearGroupBuildData(std::string name);
 
-    bool getResourceType(const std::string& type, int& enumType);
-    bool getCygnetType(const std::string& type, int& enumType);
-    
-    //for testing
-    void setFit(float fit){_fit = fit;}
-    float fit(){return _fit;}
+    bool getResourceType(const std::string& type, ResourceType& enumType);
+    bool getCygnetType(const std::string& type, CygnetType& enumType);
+
+    std::string cygnetType(int i);
 private:
     
-    void registerGroup(std::string groupName, int cygnetType, int resourceType);
+    void registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType);
     void createScreenSpace(int id);
     void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
@@ -136,8 +134,6 @@ private:
     std::map<std::string, std::vector<CdfInfo>> _cdfInformation;
 
     LuaCygnetConverter _luaConverter;
-    
-    float _fit;
 };
 
 } //namespace openspace

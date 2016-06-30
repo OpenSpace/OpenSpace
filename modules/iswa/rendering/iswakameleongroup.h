@@ -28,7 +28,7 @@
 namespace openspace{
 class IswaKameleonGroup : public IswaDataGroup{
 public:
-	IswaKameleonGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor);
+	IswaKameleonGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor);
 	~IswaKameleonGroup();
 
 	virtual void clearGroup();

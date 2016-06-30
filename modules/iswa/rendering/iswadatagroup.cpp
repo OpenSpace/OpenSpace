@@ -39,7 +39,7 @@ namespace {
 }
 
 namespace openspace{
-IswaDataGroup::IswaDataGroup(std::string name, std::string type, std::shared_ptr<DataProcessor> dataProcessor)
+IswaDataGroup::IswaDataGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor)
     :IswaBaseGroup(name, type)    
     // ,_useLog("useLog","Use Logarithm", false)
     ,_useHistogram("useHistogram", "Auto Contrast", false)
