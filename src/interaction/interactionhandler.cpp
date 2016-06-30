@@ -741,7 +741,7 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     }
 }
 
-void InteractionHandler::setStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
     bool readSuccessful = true;
 
     std::string focus;
@@ -768,9 +768,13 @@ void InteractionHandler::setStateFromDictionary(const ghoul::Dictionary& cameraD
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
+
+    // Explicitly synch
+    _camera->preSynchronization();
+    _camera->postSynchronizationPreDraw();
 }
 
-ghoul::Dictionary InteractionHandler::getStateDictionary() {
+ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
     glm::dvec3 cameraPosition;
     glm::dquat quat;
     glm::dvec4 cameraRotation;
@@ -787,12 +791,40 @@ ghoul::Dictionary InteractionHandler::getStateDictionary() {
     return cameraDict;
 }
 
+void InteractionHandler::setInteractionFriction(double friction) {
+    if (friction < 0) {
+        LWARNING("Clamping friction factor to a value bigger or equal to 0");
+        friction = glm::max(friction, 0.0);
+    }
+    _mouseStates->setFriction(friction);
+    LINFO("Interaction friction set to: " << friction);
+}
+
+void InteractionHandler::setInteractionSensitivity(double sensitivity) {
+    if (sensitivity < 0) {
+        LWARNING("Clamping scale sensitivity to a value bigger or equal to 0");
+        sensitivity = glm::max(sensitivity, 0.0);
+    }
+    _mouseStates->setSensitivity(sensitivity);
+    LINFO("Interaction sensitivity set to: " << sensitivity);
+}
+
+void InteractionHandler::setInteractionFollowScaleFactor(double scaleFactor) {
+    const double minFollowScaleFactor = 0.01;
+    if (scaleFactor < minFollowScaleFactor) {
+        LWARNING("Clamping scale factor to a value bigger or equal to " << minFollowScaleFactor);
+        scaleFactor = glm::max(scaleFactor, minFollowScaleFactor);
+    }
+    _mouseStates->setVelocityScaleFactor(scaleFactor);
+    LINFO("Interaction velocity scale factor set to: " << scaleFactor);
+}
+
 void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LINFO("Saving camera position: " << filepath);
 
-        ghoul::Dictionary cameraDict = getStateDictionary();
+        ghoul::Dictionary cameraDict = getCameraStateDictionary();
 
         // TODO : Should get the camera state as a dictionary and save the dictionary to
         // a file in form of a lua state and not use ofstreams here.
@@ -827,7 +859,7 @@ void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath)
     ghoul::Dictionary cameraDict;
     try {
         ghoul::lua::loadDictionaryFromFile(filepath, cameraDict);
-        setStateFromDictionary(cameraDict);
+        setCameraStateFromDictionary(cameraDict);
         _cameraUpdatedFromScript = true;
     }
     catch (ghoul::RuntimeError& e) {
@@ -880,7 +912,25 @@ scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
                 &luascriptfunctions::restoreCameraStateFromFile,
                 "string",
                 "Restore the camera state from file"
-            }
+            },
+            {
+                "setInteractionFriction",
+                    &luascriptfunctions::setInteractionFriction,
+                    "number",
+                    "Set the interaction friction"
+            },
+            {
+                "setInteractionSensitivity",
+                    &luascriptfunctions::setInteractionSensitivity,
+                    "number",
+                    "Set the interaction sensitivity"
+            },
+            {
+                "setInteractionFollowScaleFactor",
+                    &luascriptfunctions::setInteractionFollowScaleFactor,
+                    "number",
+                    "Set the interaction follow scale factor"
+            },
         }
     };
 }

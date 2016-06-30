@@ -229,14 +229,8 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // Read the camera dictionary
     ghoul::Dictionary cameraDictionary;
     if (dictionary.getValue(KeyCamera, cameraDictionary)) {
-        OsEng.interactionHandler().setStateFromDictionary(cameraDictionary);
+        OsEng.interactionHandler().setCameraStateFromDictionary(cameraDictionary);
     }
-
-    // explicitly update and sync the camera
-    Camera* c = OsEng.ref().renderEngine().camera();
-    c->preSynchronization();
-    c->postSynchronizationPreDraw();
-
 
     // HOLY MOLY! This much code to read a camera state? Added the above code with
     // functions to set camera state from a dictionary in interactio handler and commented

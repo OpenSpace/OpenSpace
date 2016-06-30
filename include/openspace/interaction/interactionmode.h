@@ -105,36 +105,55 @@ protected:
     template <typename T, typename ScaleType>
     class DelayedVariable {
     public:
-        DelayedVariable(ScaleType scale) {
-            _scale = scale;
+        DelayedVariable(ScaleType scaleFactor, ScaleType friction) {
+            _scaleFactor = scaleFactor;
+            _friction = glm::max(friction, ScaleType(0.0));
         }
         void set(T value, double dt) {
             _targetValue = value;
             _currentValue = _currentValue + (_targetValue - _currentValue) *
-                min(_scale * dt, 1.0); // less or equal to 1.0 keeps it stable
+                min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+        }
+        void decelerate(double dt) {
+            _currentValue = _currentValue + (- _currentValue) *
+                min(_friction * dt, 1.0); // less or equal to 1.0 keeps it stable
         }
         void setHard(T value) {
             _targetValue = value;
             _currentValue = value;
         }
+        void setFriction(ScaleType friction) {
+            _friction = glm::max(friction, ScaleType(0.0));
+        }
+        void setScaleFactor(ScaleType scaleFactor) {
+            _scaleFactor = scaleFactor;
+        }
         T get() {
             return _currentValue;
         }
     private:
-        ScaleType _scale;
+        ScaleType _scaleFactor;
+        ScaleType _friction;
         T _targetValue;
         T _currentValue;
     };
 
     struct MouseState {
-        MouseState(double scale)
-            : velocity(scale)
+        MouseState(double scaleFactor)
+            : velocity(scaleFactor, 1)
             , previousPosition(0.0, 0.0) {}
+        void setFriction(double friction) {
+            velocity.setFriction(friction);
+        }
+        void setVelocityScaleFactor(double scaleFactor) {
+            velocity.setScaleFactor(scaleFactor);
+        }
         glm::dvec2 previousPosition;
         DelayedVariable<glm::dvec2, double> velocity;
     };
 
     SceneGraphNode* _focusNode = nullptr;
+    glm::dvec3 _previousFocusNodePosition;
 };
 
 class KeyframeInteractionMode : public InteractionMode
@@ -165,6 +184,9 @@ public:
         */
         MouseStates(double sensitivity, double velocityScaleFactor);
         void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+        void setFriction(double friction);
+        void setSensitivity(double sensitivity);
+        void setVelocityScaleFactor(double scaleFactor);
     private:
         friend class OrbitalInteractionMode;
         friend class GlobeBrowsingInteractionMode;
