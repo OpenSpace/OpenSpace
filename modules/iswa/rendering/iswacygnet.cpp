@@ -187,8 +187,9 @@ void IswaCygnet::update(const UpdateData& data){
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
 
-    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&
-                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);
+    bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _data->updateTime &&          //wants to update in openspace
+                        (_realTime.count()-_lastUpdateRealTime.count()) > _minRealTimeUpdateInterval);  //but enough time must have passed 
+                                                                                                        //in the real world
 
     if(_futureObject.valid() && DownloadManager::futureReady(_futureObject)) {
         bool success = updateTextureResource();
@@ -222,7 +223,6 @@ bool IswaCygnet::destroyShader(){
 
 void IswaCygnet::registerProperties(){
     OsEng.gui()._iswa.registerProperty(&_enabled);
-    // OsEng.gui()._iswa.registerProperty(&_delete);
 }
 
 void IswaCygnet::unregisterProperties(){
