@@ -108,7 +108,6 @@ namespace openspace {
         _depthTransform = calculateTileDepthTransform();
         _tileLevelDifference = calculateTileLevelDifference(_dataset, minimumPixelSize);
         LDEBUG(gdalDatasetDesc << " - " << _tileLevelDifference);
-        _maxLevel = calculateMaxLevel(_tileLevelDifference);
     }
 
 
@@ -128,25 +127,18 @@ namespace openspace {
             maxOverview = firstBand->GetOverview(numOverviews - 1);
         }
         sizeLevel0 = maxOverview->GetXSize();
-        return log2(minimumPixelSize) - log2(sizeLevel0);
+        double diff = log2(minimumPixelSize) - log2(sizeLevel0);
+        return diff;
     }
 
-    int TileDataset::calculateMaxLevel(int tileLevelDifference) {
-        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        if (numOverviews <= 0) { // No overviews.
-            return -tileLevelDifference;
-        }
-        else { // Use the overview to get the maximum level.
-            return numOverviews - 1 - tileLevelDifference;
-        }
-    }
+
 
     TileDepthTransform TileDataset::calculateTileDepthTransform() {
         GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
         // Floating point types does not have a fix maximum or minimum value and
         // can not be normalized when sampling a texture. Hence no rescaling is needed.
-        double maximumValue = (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64) ?
-            1.0 : TileDataType::getMaximumValue(_dataLayout.gdalType);
+        bool isFloat = (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64);
+        double maximumValue = isFloat ? 1.0 : TileDataType::getMaximumValue(_dataLayout.gdalType);
 
         TileDepthTransform transform;
         transform.depthOffset = firstBand->GetOffset();
@@ -221,12 +213,20 @@ namespace openspace {
 
     int TileDataset::gdalOverview(const ChunkIndex& chunkIndex) const {
         int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int ov = _dataset->GetRasterBand(1)->GetOverviewCount() - (chunkIndex.level + _tileLevelDifference + 1);
+        int ov = overviews - (chunkIndex.level + _tileLevelDifference + 1);
         return glm::clamp(ov, 0, overviews - 1);
     }
 
 
-    int TileDataset::getMaximumLevel() const {
+    int TileDataset::maxChunkLevel() {
+        if (_maxLevel < 0) {
+            int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+            _maxLevel = -_tileLevelDifference;
+            if (numOverviews > 0) {
+                _maxLevel += numOverviews - 1;
+            }
+        }
+
         return _maxLevel;
     }
 
@@ -268,7 +268,7 @@ namespace openspace {
 
             
             readRegion.addPadding(padding);
-            readRegion.clamp(gdalPixelRegion);
+            readRegion.clampTo(gdalPixelRegion);
 
 
             CPLErr err = rasterBand->RasterIO(

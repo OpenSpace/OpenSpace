@@ -78,7 +78,7 @@ namespace openspace {
             numPixels += padding.numPixels;
         }
 
-        void clamp(const PixelRegion& boundingRegion) {
+        void clampTo(const PixelRegion& boundingRegion) {
             start = glm::max(start, boundingRegion.start);
             numPixels = glm::min(end(), boundingRegion.end()) - start;
         }
@@ -128,7 +128,7 @@ namespace openspace {
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
 
 
-        int getMaximumLevel() const;
+        int maxChunkLevel();
         TileDepthTransform getDepthTransform() const;
         const TileDataLayout& getDataLayout() const;
 
@@ -153,8 +153,6 @@ namespace openspace {
 
         int gdalOverview(const PixelCoordinate& baseRegionSize) const;
         int gdalOverview(const ChunkIndex& chunkIndex) const;
-
-        int calculateMaxLevel(int tileLevelDifference);
 
         TileDepthTransform calculateTileDepthTransform();
 
