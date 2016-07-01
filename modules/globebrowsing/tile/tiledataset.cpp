@@ -79,8 +79,8 @@ namespace openspace {
     //                               Tile Dataset                                   //
     //////////////////////////////////////////////////////////////////////////////////
 
-    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-2);
-    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(4);
+    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(0);
+    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(0);
 
     const PixelRegion TileDataset::padding = PixelRegion(tilePixelStartOffset, tilePixelSizeDifference);
 
