@@ -142,53 +142,58 @@ namespace openspace {
 
         ~TileDataset();
 
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                              Public interface                                //
+        //////////////////////////////////////////////////////////////////////////////////
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
-
-
         int maxChunkLevel();
         TileDepthTransform getDepthTransform() const;
         const TileDataLayout& getDataLayout() const;
+
 
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
         const static PixelRegion padding; // same as the two above
 
 
-
     private:
-
-        IODescription getIODescription(const ChunkIndex& chunkIndex);
-        
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //                           GDAL HELPER FUNCTIONS                              //
-        //////////////////////////////////////////////////////////////////////////////////
-
-        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
-        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
-        int gdalOverview(const ChunkIndex& chunkIndex) const;
-        bool gdalHasOverviews() const;
-        PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
-        GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
-
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Initialization                                //
         //////////////////////////////////////////////////////////////////////////////////
+
         TileDepthTransform calculateTileDepthTransform();
         int calculateTileLevelDifference(int minimumPixelSize);
 
 
         //////////////////////////////////////////////////////////////////////////////////
+        //                            GDAL helper methods                               //
+        //////////////////////////////////////////////////////////////////////////////////
+
+        bool gdalHasOverviews() const;
+        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
+        int gdalOverview(const ChunkIndex& chunkIndex) const;
+        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
+        PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
+        GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
+
+
+        //////////////////////////////////////////////////////////////////////////////////
         //                          ReadTileData helper functions                       //
         //////////////////////////////////////////////////////////////////////////////////
+
         PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-        char* getImageDataFlippedY(const PixelRegion& region, const char* imageData);
-        std::shared_ptr<TilePreprocessData> preprocess(const char* imageData, const PixelRegion& region);
+        IODescription getIODescription(const ChunkIndex& chunkIndex) const;
+        char* readImageData(const IODescription& io, CPLErr& worstError) const;
+        char* flipImageYAxis(char*& imageData, const IODescription::WriteData& writeData) const;
+        std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const;
+        CPLErr postProcessErrorCheck(std::shared_ptr<const TileIOResult> ioResult, const IODescription& io) const;
+
 
 
         //////////////////////////////////////////////////////////////////////////////////
-        //                              MEMBER VARIABLES                                //
+        //                              Member variables                                //
         //////////////////////////////////////////////////////////////////////////////////
 
 
