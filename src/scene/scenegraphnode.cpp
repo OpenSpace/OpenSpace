@@ -171,19 +171,22 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    _worldPositionCached = calculateWorldPosition();
+    UpdateData newUpdateData = data;
+    newUpdateData.position = worldPosition().dvec3();
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(data);
+            _ephemeris->update(newUpdateData);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _ephemeris->update(data);
+            _ephemeris->update(newUpdateData);
     }
 
     if (_renderable && _renderable->isReady()) {
@@ -191,16 +194,15 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _renderable->update(data);
+            _renderable->update(newUpdateData);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeRenderable = (end - start).count();
         }
         else
-            _renderable->update(data);
+            _renderable->update(newUpdateData);
     }
-    _worldPositionCached = calculateWorldPosition();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {

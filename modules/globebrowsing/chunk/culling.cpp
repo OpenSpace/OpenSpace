@@ -57,7 +57,7 @@ namespace openspace {
 
     bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
@@ -93,15 +93,21 @@ namespace openspace {
 
     bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         //return !isVisible(data, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
+        
+        // Calculations are done in the reference frame of the globe. Hence, the camera
+        // position needs to be transformed with the inverse model matrix
+        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
         const GeodeticPatch& patch = chunk.surfacePatch();
         float maxHeight = chunk.getBoundingHeights().max;
         Vec3 globePosition = data.position.dvec3();
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
 
-        Vec3 cameraPosition = data.camera.positionVec3();
+        Vec3 cameraPosition = 
+            glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
 
-        Vec3 globeToCamera = cameraPosition - globePosition;
+        Vec3 globeToCamera = cameraPosition;
 
         Geodetic2 cameraPositionOnGlobe =
             ellipsoid.cartesianToGeodetic2(globeToCamera);
