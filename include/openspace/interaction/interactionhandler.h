@@ -161,8 +161,7 @@ public:
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    void setInteractionModeToOrbital();
-    void setInteractionModeToGlobeBrowsing();
+    void setInteractionMode(const std::string& interactionModeKey);
 
     void resetKeyBindings();
 
@@ -211,9 +210,10 @@ private:
 
     std::shared_ptr<InteractionMode> _currentInteractionMode;
 
+    std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
-    std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
-    std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
+    //std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+    //std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
