@@ -79,8 +79,8 @@ namespace openspace {
     //                               Tile Dataset                                   //
     //////////////////////////////////////////////////////////////////////////////////
 
-    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(0, 0);
-    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(0, 0);
+    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-2);
+    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(4);
 
     const PixelRegion TileDataset::padding = PixelRegion(tilePixelStartOffset, tilePixelSizeDifference);
 
@@ -314,11 +314,13 @@ namespace openspace {
 
         // For correct sampling in height dataset, we need to pad the texture tile
         io.read.region.pad(padding);
+        io.write.region.pad(padding);
 
         // Doing this may cause invalid regions, i.e. having negative pixel coordinates 
         // or being too large etc. For now, just clamp 
         PixelRegion overviewRegion = gdalPixelRegion(gdalRasterBand(overview));
-        io.read.region.clampTo(overviewRegion);
+        //io.read.region.clampTo(overviewRegion);
+        //io.write.region.clampTo(overviewRegion);
 
         io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
         io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
@@ -332,9 +334,17 @@ namespace openspace {
 
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < _dataLayout.numRasters; i++) {
+            GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+            
+            // The final destination pointer is offsetted by one datum byte size
+            // for every raster (or data channel, i.e. R in RGB)
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
 
-            GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+            // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
+            // Therefore, we increment the destination pointer to the last line on in the 
+            // buffer, and the we specify in the rasterIO call that we want negative line 
+            // spacing. Doing this compensates the flipped Y axis
+            dataDestination += (io.write.totalNumBytes - io.write.bytesPerLine);
 
             CPLErr err = rasterBand->RasterIO(
                 GF_Read,
@@ -347,15 +357,74 @@ namespace openspace {
                 io.write.region.numPixels.y,        // width to write y in destination
                 _dataLayout.gdalType,		        // Type
                 _dataLayout.bytesPerPixel,	        // Pixel spacing
-                io.write.bytesPerLine);             // Line spacing
+                -io.write.bytesPerLine);             // Line spacing
 
             // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
             worstError = std::max(worstError, err);
         }
 
         // GDAL reads pixel lines top to bottom, we want the opposit
+        return imageData;
+    }
+
+    char* TileDataset::readImageData2(const IODescription& io, CPLErr& worstError) const {
+        std::vector<char *> imageDataChannels(_dataLayout.numRasters);
+        size_t numByterPerChannel = io.write.totalNumBytes / _dataLayout.numRasters;
+        // Read the data (each rasterband is a separate channel)
+        for (size_t i = 0; i < _dataLayout.numRasters; i++) {
+            imageDataChannels[i] = new char[numByterPerChannel];
+
+            GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+
+            CPLErr err = rasterBand->RasterIO(
+                GF_Read,
+                io.read.region.start.x,             // Begin read x
+                io.read.region.start.y,             // Begin read y
+                io.read.region.numPixels.x,         // width to read x
+                io.read.region.numPixels.y,         // width to read y
+                imageDataChannels[i],                    // Where to put data
+                io.write.region.numPixels.x,        // width to write x in destination
+                io.write.region.numPixels.y,        // width to write y in destination
+                _dataLayout.gdalType,		        // Type
+                0,	        // Pixel spacing
+                0);             // Line spacing
+
+            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+            worstError = std::max(worstError, err);
+        }
+
+        // Combined image data
+        char* imageData = new char[io.write.totalNumBytes];
+        size_t yx = 0;
+        size_t c = 0;
+        for (size_t y = 0; y < io.write.region.numPixels.y; y++) {
+            for (size_t x = 0; x < io.write.region.numPixels.x; x++) {
+                for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+                    size_t combinedChannelIndex = (yx * _dataLayout.numRasters + c) * _dataLayout.bytesPerDatum;
+                    size_t separateChannelIndex = yx * _dataLayout.bytesPerDatum;
+
+                    ghoul_assert(combinedChannelIndex < io.write.totalNumBytes, "Invalid combined index!");
+                    ghoul_assert(separateChannelIndex < numByterPerChannel, "invalid single index!");
+
+                    char* channelData = imageDataChannels[c];
+                    for (size_t b = 0; b < _dataLayout.bytesPerDatum; b++) {
+                        char val = channelData[separateChannelIndex + b];
+                        imageData[combinedChannelIndex + b] = channelData[separateChannelIndex+b];
+                    }
+                }
+                yx++;
+            }
+        }
+
+        for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+            char * singleChannel = imageDataChannels[c];
+            delete[] singleChannel;
+        }
+
+        // GDAL reads pixel lines top to bottom, we want the opposit
         return flipImageYAxis(imageData, io.write);
     }
+
 
     char* TileDataset::flipImageYAxis(char*& imageData, const IODescription::WriteData& writeData) const {
         char* imageDataYflipped = new char[writeData.totalNumBytes];

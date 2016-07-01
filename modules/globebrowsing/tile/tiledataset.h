@@ -69,10 +69,6 @@ namespace openspace {
         PixelRegion(const PixelCoordinate& pixelStart, const PixelCoordinate& numberOfPixels)
             : start(pixelStart), numPixels(numberOfPixels) { }
 
-
-        PixelCoordinate start;
-        PixelCoordinate numPixels;
-
         void pad(const PixelRegion& padding) {
             start += padding.start;
             numPixels += padding.numPixels;
@@ -109,6 +105,9 @@ namespace openspace {
             numPixels.x <<= exponent;
             numPixels.y <<= exponent;
         }
+
+        PixelCoordinate start;
+        PixelCoordinate numPixels;
     };
 
 
@@ -186,6 +185,7 @@ namespace openspace {
         PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
         IODescription getIODescription(const ChunkIndex& chunkIndex) const;
         char* readImageData(const IODescription& io, CPLErr& worstError) const;
+        char* readImageData2(const IODescription& io, CPLErr& worstError) const;
         char* flipImageYAxis(char*& imageData, const IODescription::WriteData& writeData) const;
         std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const;
         CPLErr postProcessErrorCheck(std::shared_ptr<const TileIOResult> ioResult, const IODescription& io) const;
