@@ -70,11 +70,11 @@ return {
                     },
                 },
                 GrayScaleOverlays = {
-                    {
+                   --[[ {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         Enabled = true,
-                    },
+                    },]]---
                 },
                 NightTextures = {
                     {
@@ -87,11 +87,11 @@ return {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
                     },
-                    {
+                    --[[{
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
-                    },
+                    },]]--
                 },
                 WaterMasks = {
                     {
