@@ -69,11 +69,7 @@ namespace openspace {
         PixelRegion(const PixelCoordinate& pixelStart, const PixelCoordinate& numberOfPixels)
             : start(pixelStart), numPixels(numberOfPixels) { }
 
-
-        PixelCoordinate start;
-        PixelCoordinate numPixels;
-
-        void addPadding(const PixelRegion& padding) {
+        void pad(const PixelRegion& padding) {
             start += padding.start;
             numPixels += padding.numPixels;
         }
@@ -96,20 +92,41 @@ namespace openspace {
             scale(glm::dvec2(s));
         }
 
-        void shrinkPow2(int exponent) {
+        void downscalePow2(int exponent) {
             start.x >>= exponent;
             start.y >>= exponent;
             numPixels.x >>= exponent;
             numPixels.y >>= exponent;
         }
+
+        void upscalePow2(int exponent) {
+            start.x <<= exponent;
+            start.y <<= exponent;
+            numPixels.x <<= exponent;
+            numPixels.y <<= exponent;
+        }
+
+        PixelCoordinate start;
+        PixelCoordinate numPixels;
     };
 
 
+    struct IODescription {
+        struct ReadData {
+            int overview;
+            PixelRegion region;
+        } read;
+
+        struct WriteData {
+            PixelRegion region; // should always start at 0,0
+            size_t bytesPerLine;
+            size_t totalNumBytes;
+        } write;
+    };
 
 
     class TileDataset {
     public:
-
         
         /**
         * Opens a GDALDataset in readonly mode and calculates meta data required for 
@@ -124,53 +141,61 @@ namespace openspace {
 
         ~TileDataset();
 
-       
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                              Public interface                                //
+        //////////////////////////////////////////////////////////////////////////////////
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
-
-
         int maxChunkLevel();
         TileDepthTransform getDepthTransform() const;
         const TileDataLayout& getDataLayout() const;
 
+
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
-
-        const static PixelRegion padding;
-
-
-        static PixelCoordinate geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo);
+        const static PixelRegion padding; // same as the two above
 
 
     private:
 
-        
-
         //////////////////////////////////////////////////////////////////////////////////
-        //                             HELPER FUNCTIONS                                 //
+        //                                Initialization                                //
         //////////////////////////////////////////////////////////////////////////////////
-
-        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
-
-        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
-        int gdalOverview(const ChunkIndex& chunkIndex) const;
 
         TileDepthTransform calculateTileDepthTransform();
-
-        std::shared_ptr<TilePreprocessData> preprocess(const char* imageData,
-            const PixelRegion& region, const TileDataLayout& dataLayout);
-
-
-        static int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize);
-
-        static char* getImageDataFlippedY(const PixelRegion& region,
-            const TileDataLayout& dataLayout, const char* imageData);
+        int calculateTileLevelDifference(int minimumPixelSize);
 
 
         //////////////////////////////////////////////////////////////////////////////////
-        //                              MEMBER VARIABLES                                //
+        //                            GDAL helper methods                               //
         //////////////////////////////////////////////////////////////////////////////////
 
-        static bool GdalHasBeenInitialized;
+        bool gdalHasOverviews() const;
+        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
+        int gdalOverview(const ChunkIndex& chunkIndex) const;
+        PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
+        PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
+        GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                          ReadTileData helper functions                       //
+        //////////////////////////////////////////////////////////////////////////////////
+
+        PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+        IODescription getIODescription(const ChunkIndex& chunkIndex) const;
+        char* readImageData(const IODescription& io, CPLErr& worstError) const;
+        char* readImageData2(const IODescription& io, CPLErr& worstError) const;
+        char* flipImageYAxis(char*& imageData, const IODescription::WriteData& writeData) const;
+        std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const;
+        CPLErr postProcessErrorCheck(std::shared_ptr<const TileIOResult> ioResult, const IODescription& io) const;
+
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        //                              Member variables                                //
+        //////////////////////////////////////////////////////////////////////////////////
+
 
         int _maxLevel;
         double _tileLevelDifference;
@@ -181,6 +206,9 @@ namespace openspace {
         TileDataLayout _dataLayout;
 
         bool _doPreprocessing;
+
+        static bool GdalHasBeenInitialized;
+
     };
 
 
