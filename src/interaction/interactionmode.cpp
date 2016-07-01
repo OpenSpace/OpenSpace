@@ -412,6 +412,8 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    // This function needs some cleaning up /KB
+
     if (_focusNode && _globe) {
         
         // Declare variables to use in interaction calculations
@@ -432,12 +434,22 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
         dvec3 camDirection = camera.viewDirectionWorldSpace();
 
+        // Sampling of height is done in the reference frame of the globe.
+        // Hence, the camera position needs to be transformed with the inverse model matrix
+        glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
+        glm::dmat4 modelTransform = _globe->chunkedLodGlobe()->modelTransform();
+        glm::dvec3 cameraPositionModelSpace =
+            glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
         dvec3 posDiff = camPos - centerPos;
+
+        dvec3 directionFromSurfaceToCameraModelSpace =
+           _globe->ellipsoid().geodeticSurfaceNormal(
+                _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
         dvec3 directionFromSurfaceToCamera =
-            _globe->ellipsoid().geodeticSurfaceNormal(
-                _globe->ellipsoid().cartesianToGeodetic2(posDiff));
-        dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(posDiff) -
-            directionFromSurfaceToCamera * ellipsoidShrinkTerm;
+            dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
+            directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
         double distFromCenterToSurface =
@@ -484,18 +496,31 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
             glm::dvec3 rotationDiffVec3 =
                 (distFromCenterToCamera * directionFromSurfaceToCamera)
-                 * rotationDiffWorldSpace * focusNodeRotationDiff
+                 * rotationDiffWorldSpace
                 - (distFromCenterToCamera * directionFromSurfaceToCamera);
 
-            camPos += rotationDiffVec3;
+            glm::dvec3 rotationDiffVec3AroundCenter = 
+                posDiff
+                 * focusNodeRotationDiff
+                - (posDiff);
+
+            camPos += rotationDiffVec3 + rotationDiffVec3AroundCenter;
             dvec3 posDiff = camPos - centerPos;
 
-            directionFromSurfaceToCamera =
+
+
+            cameraPositionModelSpace =
+                glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
+            directionFromSurfaceToCameraModelSpace =
                 _globe->ellipsoid().geodeticSurfaceNormal(
-                    _globe->ellipsoid().cartesianToGeodetic2(posDiff));
-            centerToEllipsoidSurface = _globe->projectOnEllipsoid(posDiff) -
-                directionFromSurfaceToCamera * ellipsoidShrinkTerm;
+                    _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
+            directionFromSurfaceToCamera =
+                dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+            centerToEllipsoidSurface = dmat3(modelTransform) * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
+                directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
+
 
             glm::dvec3 lookUpWhenFacingSurface =
                 inverse(focusNodeRotationDiff) * globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
@@ -519,8 +544,15 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         { // Push up to surface
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
+            // Sampling of height is done in the reference frame of the globe.
+            // Hence, the camera position needs to be transformed with the inverse model matrix
+            glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
+            glm::dvec3 cameraPositionModelSpace =
+                glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
             distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface = _globe->getHeight(camPos) + ellipsoidShrinkTerm;
+            double heightToSurface =
+                _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
             double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
             camPos += directionFromSurfaceToCamera *
                 glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);

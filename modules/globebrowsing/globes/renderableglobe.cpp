@@ -185,6 +185,7 @@ namespace openspace {
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
         _tileProviderManager->update();
+        _chunkedLodGlobe->update(data);
     }
 
     glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
