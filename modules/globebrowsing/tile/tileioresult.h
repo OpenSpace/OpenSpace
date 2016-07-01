@@ -59,7 +59,7 @@ namespace openspace {
     struct TileIOResult {
         TileIOResult();
 
-        void* imageData;
+        char* imageData;
         glm::uvec3 dimensions;
         std::shared_ptr<TilePreprocessData> preprocessData;
         ChunkIndex chunkIndex;
