@@ -649,11 +649,19 @@ InteractionHandler::InteractionHandler()
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
     _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
-    _orbitalInteractionMode = std::make_shared<OrbitalInteractionMode>(_mouseStates);
-    _globebrowsingInteractionMode = std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates);
+    _interactionModes.insert(
+        std::pair<std::string, std::shared_ptr<InteractionMode>>(
+            "OrbitalInteractionMode",
+            std::make_shared<OrbitalInteractionMode>(_mouseStates)
+            ));
+    _interactionModes.insert(
+        std::pair<std::string, std::shared_ptr<InteractionMode>>(
+            "GlobeBrowsingInteractionMode",
+            std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates)
+            ));
 
     // Set the interactionMode
-    _currentInteractionMode = _orbitalInteractionMode;
+    _currentInteractionMode = _interactionModes["OrbitalInteractionMode"];
 
     // Define lambda functions for changed properties
     _rotationalFriction.onChange([&]() {
@@ -735,14 +743,19 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
     _currentInteractionMode->setFocusNode(focusNode);
 }
 
-void InteractionHandler::setInteractionModeToOrbital() {
-    setInteractionMode(_orbitalInteractionMode);
-    LINFO("Interaction mode set to 'OrbitalInteractionMode'");
-}
-
-void InteractionHandler::setInteractionModeToGlobeBrowsing() { 
-    setInteractionMode(_globebrowsingInteractionMode);
-    LINFO("Interaction mode set to 'GlobeBrowsingInteractionMode'");
+void InteractionHandler::setInteractionMode(const std::string& interactionModeKey) {
+    if (_interactionModes.find(interactionModeKey) != _interactionModes.end()) {
+        setInteractionMode(_interactionModes[interactionModeKey]);
+        LINFO("Interaction mode set to '" << interactionModeKey << "'");
+    }
+    else {
+        std::string listInteractionModes("");
+        for (auto pair : _interactionModes) {
+            listInteractionModes += "'" + pair.first + "', ";
+        }
+        LWARNING("'" << interactionModeKey <<
+            "' is not a valid interaction mode. Candidates are " << listInteractionModes);
+    }
 }
 
 void InteractionHandler::lockControls() {
