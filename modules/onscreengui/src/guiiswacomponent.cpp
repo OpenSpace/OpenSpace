@@ -198,7 +198,7 @@ void GuiIswaComponent::render() {
         }
     }
 
-    GuiPropertyComponent::render();
+    renderProperties();
     
     ImGui::End();
 #endif

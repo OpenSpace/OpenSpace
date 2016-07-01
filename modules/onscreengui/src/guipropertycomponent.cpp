@@ -101,6 +101,12 @@ void GuiPropertyComponent::render() {
 
     ImGui::Spacing();
 
+    renderProperties();
+
+    ImGui::End();
+}
+
+void GuiPropertyComponent::renderProperties(){
     if (_function) {
         const std::vector<properties::PropertyOwner*>& owners = _function();
 
@@ -126,8 +132,6 @@ void GuiPropertyComponent::render() {
             }
         }
     }
-
-    ImGui::End();
 }
 
 void GuiPropertyComponent::renderProperty(properties::Property* prop, properties::PropertyOwner* owner)     {
