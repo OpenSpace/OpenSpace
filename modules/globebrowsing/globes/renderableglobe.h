@@ -112,6 +112,7 @@ public:
 
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
     const Ellipsoid& ellipsoid();
+    const glm::dmat3& stateMatrix();
     float getHeight(glm::dvec3 position);
     float cameraMinHeight();
     double interactionDepthBelowEllipsoid();

@@ -173,11 +173,11 @@ namespace openspace {
     void RenderableGlobe::update(const UpdateData& data) {
 
         // set spice-orientation in accordance to timestamp
-        //_chunkedLodGlobe->setStateMatrix(
-        //    SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time));
+        _chunkedLodGlobe->setStateMatrix(
+            SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time));
         // We currently do not consider rotation anywhere in the rendering.
         // @TODO Consider rotation everywhere in the rendering (culling, splitting, camera, etc)
-        _chunkedLodGlobe->setStateMatrix(glm::dmat3(1.0));
+        //_chunkedLodGlobe->setStateMatrix(glm::dmat3(1.0));
         _time = data.time;
         _distanceSwitch.update(data);
 
@@ -193,6 +193,10 @@ namespace openspace {
 
     const Ellipsoid& RenderableGlobe::ellipsoid() {
         return _ellipsoid;
+    }
+
+    const glm::dmat3& RenderableGlobe::stateMatrix() {
+        return _chunkedLodGlobe->stateMatrix();
     }
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
