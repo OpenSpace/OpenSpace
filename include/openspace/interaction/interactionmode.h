@@ -154,6 +154,7 @@ protected:
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
+    glm::dquat _previousFocusNodeRotation;
 };
 
 class KeyframeInteractionMode : public InteractionMode
