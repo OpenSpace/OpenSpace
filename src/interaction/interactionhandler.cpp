@@ -715,11 +715,11 @@ void InteractionHandler::resetCameraDirection() {
     }
 
     // Create the rotation to look at  focus node
-    dmat4 lookAtMat = lookAt(
-        dvec3(0, 0, 0),
+    glm::dmat4 lookAtMat = lookAt(
+        glm::dvec3(0, 0, 0),
         directionToFocusNode,
         lookUpVector);
-    dquat rotationLookAtFocusNode = normalize(quat_cast(inverse(lookAtMat)));
+    glm::dquat rotationLookAtFocusNode = normalize(quat_cast(inverse(lookAtMat)));
 
     // Update camera Rotation
     _camera->setRotation(rotationLookAtFocusNode);

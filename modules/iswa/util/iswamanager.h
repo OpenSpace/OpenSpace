@@ -80,10 +80,10 @@ struct MetadataFuture {
 class IswaManager : public ghoul::Singleton<IswaManager> { 
 public:
 
-
     enum CygnetType {TexturePlane, DataPlane, DataSphere, KameleonPlane, NoCygnetType};
     enum ResourceType {Texture, Json, Text, Cdf, NoResourceType};
     enum GeometryType {Plane, Sphere};
+
     IswaManager();
     ~IswaManager();
 
@@ -100,6 +100,7 @@ public:
     std::map<int, std::shared_ptr<CygnetInfo>>& cygnetInformation();
     std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
+    std::string cygnetType(int i);
 
     static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
@@ -111,7 +112,6 @@ public:
     bool getResourceType(const std::string& type, ResourceType& enumType);
     bool getCygnetType(const std::string& type, CygnetType& enumType);
 
-    std::string cygnetType(int i);
 private:
     
     void registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType);
@@ -119,7 +119,6 @@ private:
     void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
-
     
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _resourceType;

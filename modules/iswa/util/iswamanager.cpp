@@ -209,6 +209,8 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) con
     std::stringstream ss(t);
     std::string token;
 
+
+    //get the url with the right time format
     std::getline(ss, token, ' ');
     url += token + "-"; 
     std::getline(ss, token, ' ');
@@ -350,7 +352,6 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
     const std::string& extension = ghoul::filesystem::File(absPath(info.path)).fileExtension();
     if(FileSys.fileExists(absPath(info.path)) && extension == "cdf"){
 
-
         if(!info.group.empty()){
             ResourceType resourceType = ResourceType::Cdf;
             CygnetType cygnetType = CygnetType::KameleonPlane;
@@ -399,7 +400,8 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
         json j = json::parse(jsonString);
         
         std::set<std::string> lists  =  {"listOfPriorityCygnets", "listOfOKCygnets"
-                                        // ,"listOfStaleCygnets", "listOfInactiveCygnets",
+                                        // other types of cygnets available
+                                        // ,"listOfStaleCygnets", "listOfInactiveCygnets" 
                                         };
 
         for(auto list : lists){
@@ -427,7 +429,6 @@ void IswaManager::addCdfFiles(std::string path){
     path = absPath(path);
     if(FileSys.fileExists(path)){
 
-        //std::string basePath = path.substr(0, path.find_last_of("/\\"));
         std::ifstream jsonFile(path);
         
         if (jsonFile.is_open()){
@@ -501,13 +502,6 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 "Adds KameleonPlanes from cdf file.",
                 true
             },
-            // {
-            //     "addKameleonPlane",
-            //     &luascriptfunctions::iswa_addKameleonPlane,
-            //     "string, string, string",
-            //     "Adds a KameleonPlane from cdf file.",
-            //     true
-            // },
             {
                 "addCdfFiles",
                 &luascriptfunctions::iswa_addCdfFiles,
