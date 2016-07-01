@@ -300,6 +300,11 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
 
+        // Explicitly synch since camera is referenced after this
+        camera.setPositionVec3(camPos);
+        camera.preSynchronization();
+        camera.postSynchronizationPreDraw();
+
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 lookUp = camera.lookUpVectorWorldSpace();

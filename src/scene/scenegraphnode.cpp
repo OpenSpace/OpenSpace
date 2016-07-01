@@ -200,6 +200,7 @@ void SceneGraphNode::update(const UpdateData& data) {
         else
             _renderable->update(data);
     }
+    _worldPositionCached = calculateWorldPosition();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
@@ -243,7 +244,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPosition = worldPosition();
+    const psc thisPosition = _worldPositionCached;
 
     RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
@@ -270,7 +271,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = worldPosition();
+    const psc thisPosition = _worldPositionCached;
     RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement };
 
     _performanceRecord.renderTime = 0;
@@ -318,10 +319,15 @@ const psc& SceneGraphNode::position() const
 
 psc SceneGraphNode::worldPosition() const
 {
+    return _worldPositionCached;
+}
+
+psc SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->worldPosition();
-    } else {
+        return _ephemeris->position() + _parent->calculateWorldPosition();
+    }
+    else {
         return _ephemeris->position();
     }
 }
