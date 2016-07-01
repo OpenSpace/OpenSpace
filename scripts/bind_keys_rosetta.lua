@@ -17,7 +17,7 @@ openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'Rosett
 
 -- openspace.bindKey("F5", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun'); openspace.printInfo('Changing Viewpoint to Sun');");
 openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', '67P'); openspace.printInfo('Changing Viewpoint to 67P');");
-openspace.bindKey("F8", "openspace.setPropertyValue('67P.renderable.clearAllProjections', true);");
+openspace.bindKey("F8", "openspace.setPropertyValue('67P.renderable.ProjectionComponent.clearAllProjections', true);");
 
 openspace.bindKey("i", helper.renderable.toggle('ImagePlaneRosetta'))
 openspace.bindKey("q", helper.renderable.toggle('SunMarker'))
