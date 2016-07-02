@@ -57,7 +57,7 @@ namespace opengl {
 namespace openspace {
 
 struct ReferencedBoolSelection : public properties::SelectionProperty {
-    ReferencedBoolSelection::ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
+    ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
         : properties::SelectionProperty(identifier, guiName) { }
 
     void addOption(const std::string& name, bool* ref) {
