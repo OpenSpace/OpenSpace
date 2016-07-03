@@ -104,8 +104,8 @@ void ScreenSpaceImage::render() {
 }
 
 void ScreenSpaceImage::update() {
-    bool futureReady = DownloadManager::futureReady(_futureImage);
-    if (_downloadImage && _futureImage.valid() && futureReady) {
+    bool download = _downloadImage ? (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) : true;
+    if (download) {
         loadTexture();
     }
 }
