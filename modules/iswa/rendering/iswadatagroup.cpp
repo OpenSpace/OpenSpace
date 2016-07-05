@@ -41,12 +41,12 @@ namespace {
 namespace openspace{
 IswaDataGroup::IswaDataGroup(std::string name, IswaManager::CygnetType type, std::shared_ptr<DataProcessor> dataProcessor)
     :IswaBaseGroup(name, type)    
-    ,_useHistogram("useHistogram", "Auto Contrast", false)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
-    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
-    ,_dataOptions("dataOptions", "Data Options")
+    ,_transferFunctionsFile("04transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
+    ,_autoFilter("05autoFilter", "Auto Filter", true)
+    ,_backgroundValues("06backgroundValues", "Filter Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
+    ,_useHistogram("07useHistogram", "Auto Contrast", false)
+    ,_normValues("08normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_dataOptions("99dataOptions", "Data Options")
 {
     addProperty(_useHistogram);
     addProperty(_autoFilter);
@@ -57,6 +57,9 @@ IswaDataGroup::IswaDataGroup(std::string name, IswaManager::CygnetType type, std
 
     _dataProcessor = dataProcessor;
     registerProperties();
+    if(_autoFilter.value()){
+        _backgroundValues.setVisible(false);
+    }
 }
  
 IswaDataGroup::~IswaDataGroup(){}

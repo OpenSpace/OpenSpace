@@ -40,12 +40,12 @@ namespace openspace{
 DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     :IswaCygnet(dictionary)
     ,_dataProcessor(nullptr)
-    ,_dataOptions("dataOptions", "Data Options")
-    ,_useHistogram("useHistogram", "Auto Contrast", false)
-    ,_autoFilter("autoFilter", "Auto Filter", true)
-    ,_normValues("normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
-    ,_backgroundValues("backgroundValues", "Background Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
-    ,_transferFunctionsFile("transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
+    ,_transferFunctionsFile("04transferfunctions", "Transfer Functions", "${OPENSPACE_DATA}/iswa/transferfunctions/tfs/default.tf")
+    ,_autoFilter("05autoFilter", "Auto Filter", true)
+    ,_backgroundValues("06backgroundValues", "Filter Values", glm::vec2(0.0), glm::vec2(0), glm::vec2(1.0))
+    ,_useHistogram("07useHistogram", "Auto Contrast", false)
+    ,_normValues("08normValues", "Normalize Values", glm::vec2(1.0,1.0), glm::vec2(0), glm::vec2(5.0))
+    ,_dataOptions("99dataOptions", "Data Options")
 {
     addProperty(_dataOptions);
     addProperty(_useHistogram);
@@ -54,6 +54,10 @@ DataCygnet::DataCygnet(const ghoul::Dictionary& dictionary)
     addProperty(_backgroundValues);
     addProperty(_transferFunctionsFile);
     registerProperties();
+
+     if(_autoFilter.value()){
+        _backgroundValues.setVisible(false);
+     }
 }
 
 DataCygnet::~DataCygnet(){}
@@ -259,10 +263,13 @@ void DataCygnet::setPropertyCallbacks(){
     });
 
     _autoFilter.onChange([this](){ 
-        if(_autoFilter.value())
+        if(_autoFilter.value()){
             _backgroundValues.setValue(_dataProcessor->filterValues());
-        else
+            _backgroundValues.setVisible(false);
+        } else {
             _backgroundValues.setValue(glm::vec2(0.f));
+            _backgroundValues.setVisible(true);
+        }
         updateTexture();
     });
 }

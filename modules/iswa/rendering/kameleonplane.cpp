@@ -43,9 +43,9 @@ namespace openspace {
 
 KameleonPlane::KameleonPlane(const ghoul::Dictionary& dictionary)
     :DataCygnet(dictionary)
-    ,_fieldlines("fieldlineSeedsIndexFile", "Fieldline Seedpoints")
-    ,_resolution("resolution", "Resolution%", 50.0f, 10.0f, 200.0f)
-    ,_slice("slice", "Slice", 0.0, 0.0, 1.0)
+    ,_fieldlines("11fieldlineSeedsIndexFile", "Fieldline Seedpoints")
+    ,_resolution("09resolution", "Resolution%", 50.0f, 10.0f, 200.0f)
+    ,_slice("10slice", "Slice", 0.0, 0.0, 1.0)
 {       
 
     addProperty(_resolution);
