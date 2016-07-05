@@ -476,7 +476,6 @@ namespace openspace {
             }
         }
 
-       
 
         CPLErr err = rasterIO(rasterBand, io, dataDestination);
         worstError = std::max(worstError, err);
