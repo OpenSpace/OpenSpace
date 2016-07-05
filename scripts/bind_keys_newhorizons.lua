@@ -21,7 +21,7 @@ openspace.bindKey("F5", "openspace.setPropertyValue('Interaction.coordinateSyste
 openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter'); openspace.printInfo('Changing Viewpoint to Jupiter');");
 openspace.bindKey("F7", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto'); openspace.printInfo('Changing Viewpoint to Pluto');");
 
-openspace.bindKey("F8", "openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")
+openspace.bindKey("F8", "openspace.setPropertyValue('PlutoProjection.renderable.ProjectionComponent.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.ProjectionComponent.clearAllProjections', true);")
 
 -- Quickfix backjumps in pluto sequence
 openspace.bindKey("F9", "openspace.time.setTime('2015-07-14T09:00:00.00'); openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true); openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);")

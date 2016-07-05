@@ -246,6 +246,7 @@ bool IswaCygnet::createShader(){
 
 void IswaCygnet::initializeGroup(){
     _group = IswaManager::ref().iswaGroup(_data->groupName);
+    _group->addCygnet(this);
     getGroupPropertyValues();
 
     //Subscribe to enable and delete property

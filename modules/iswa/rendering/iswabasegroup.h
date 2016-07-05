@@ -30,6 +30,7 @@
 #include <openspace/properties/triggerproperty.h>
 #include <modules/iswa/util/dataprocessor.h>
 #include <modules/iswa/util/iswamanager.h>
+// #include <modules/iswa/rendering/iswacygnet.h>
 
 
 namespace openspace{
@@ -48,6 +49,14 @@ public:
     std::shared_ptr<DataProcessor> dataProcessor();
     std::shared_ptr<ghoul::Event<ghoul::Dictionary> > groupEvent();
 
+    void addCygnet(IswaCygnet* cygnet){
+        _cygnets.push_back(cygnet);
+    }
+
+    std::vector<IswaCygnet*> cygnets(){
+        return _cygnets;
+    }
+
 protected:
     void registerProperties();
     void unregisterProperties();
@@ -59,6 +68,8 @@ protected:
     std::shared_ptr<ghoul::Event<ghoul::Dictionary> > _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
 	IswaManager::CygnetType _type;
+
+    std::vector<IswaCygnet*> _cygnets;
 };
 
 } //namespace openspace
