@@ -147,7 +147,7 @@ std::string LuaCygnetConverter::kameleonToLuaTable(CdfInfo info, std::string cut
                 spatialScale.w = -log10(1.0f/max.x);
                 coordinateType = "Polar";
             }
-
+            float xOffset = 0.0f;
             std::string table = "{"
                 "Name = '" + info.group +"_" + info.name + "',"
                 "Parent = '" + parent + "', " 
@@ -163,7 +163,8 @@ std::string LuaCygnetConverter::kameleonToLuaTable(CdfInfo info, std::string cut
                     "axisCut = '"+cut+"',"
                     "CoordinateType = '" + coordinateType + "', "
                     "Group = '"+ info.group + "',"
-                    "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"'"
+                    "fieldlineSeedsIndexFile = '"+info.fieldlineSeedsIndexFile+"',"
+                    "XOffset = "+ std::to_string(xOffset) + ","
                     "}"
                 "}"
                 ; 
