@@ -818,14 +818,9 @@ void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& c
     glm::dvec3 cameraPosition;
     glm::dvec4 cameraRotation; // Need to read the quaternion as a vector first.
 
-    readSuccessful = cameraDict.getValue(KeyFocus, focus);
-    std::cout << readSuccessful << std::endl;
-    readSuccessful = cameraDict.getValue(KeyPosition, cameraPosition);
-    std::cout << readSuccessful << std::endl;
-    std::cout << std::to_string(cameraPosition) << std::endl;
-    readSuccessful = cameraDict.getValue(KeyRotation, cameraRotation);
-    std::cout << readSuccessful << std::endl;
-    std::cout << std::to_string(cameraRotation) << std::endl;
+    readSuccessful &= cameraDict.getValue(KeyFocus, focus);
+    readSuccessful &= cameraDict.getValue(KeyPosition, cameraPosition);
+    readSuccessful &= cameraDict.getValue(KeyRotation, cameraRotation);
 
     if (!readSuccessful) {
         throw ghoul::RuntimeError(
