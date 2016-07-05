@@ -40,9 +40,9 @@ namespace {
 
 namespace openspace {
 IswaBaseGroup::IswaBaseGroup(std::string name, IswaManager::CygnetType type)
-    :_enabled("enabled", "Enabled", true)
-    ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
-    ,_delete("delete", "Delete")
+    :_enabled("01enabled", "Enabled", true)
+    ,_delete("02delete", "Delete")
+    ,_alpha("03alpha", "Alpha", 0.9f, 0.0f, 1.0f)
     ,_type(type)
     ,_dataProcessor(nullptr)
 {
