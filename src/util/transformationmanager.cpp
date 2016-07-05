@@ -55,9 +55,16 @@
                                                                     double ephemerisTime) const
     {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-        ccmc::Position in0 = {1.f, 0.f, 0.f};
-        ccmc::Position in1 = {0.f, 1.f, 0.f};
-        ccmc::Position in2 = {0.f, 0.f, 1.f};
+
+        ccmc::Position inOrig = {0.f, 0.f, 0.f};
+        ccmc::Position outOrig;
+        _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &inOrig, &outOrig);
+        glm::vec3 outOrigVec(outOrig.c0, outOrig.c1, outOrig.c2);
+
+        //100.0 to get enough distance between the points
+        ccmc::Position in0 = {100.f, 0.f, 0.f};
+        ccmc::Position in1 = {0.f, 100.f, 0.f};
+        ccmc::Position in2 = {0.f, 0.f, 100.f};
 
         ccmc::Position out0;
         ccmc::Position out1;
@@ -67,14 +74,22 @@
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in1, &out1);
         _kameleon->_cxform(from.c_str(), to.c_str(), ephemerisTime, &in2, &out2);
 
-        float size0 = sqrt(out0.c0*out0.c0 + out0.c1*out0.c1 + out0.c2*out0.c2);
-        float size1 = sqrt(out1.c0*out1.c0 + out1.c1*out1.c1 + out1.c2*out1.c2);
-        float size2 = sqrt(out2.c0*out2.c0 + out2.c1*out2.c1 + out2.c2*out2.c2);
+        glm::vec3 out0Vec(out0.c0, out0.c1, out0.c2);
+        glm::vec3 out1Vec(out1.c0, out1.c1, out1.c2);
+        glm::vec3 out2Vec(out2.c0, out2.c1, out2.c2);
+
+        out0Vec -= outOrigVec;
+        out1Vec -= outOrigVec;
+        out2Vec -= outOrigVec;
+
+        out0Vec = glm::normalize(out0Vec);
+        out1Vec = glm::normalize(out1Vec);
+        out2Vec = glm::normalize(out2Vec);
 
         return glm::dmat3(
-                    out0.c0/size0 , out0.c1/size0  , out0.c2/size0,
-                    out1.c0/size1 , out1.c1/size1  , out1.c2/size1,
-                    out2.c0/size2 , out2.c1/size2  , out2.c2/size2
+                    out0Vec.x, out0Vec.y, out0Vec.z,
+                    out1Vec.x, out1Vec.y, out1Vec.z,
+                    out2Vec.x, out2Vec.y, out2Vec.z
                 );
 #else
         return glm::dmat3(0.0);

@@ -48,8 +48,6 @@ bool DataPlane::initialize(){
         _dataProcessor = _group->dataProcessor();
         subscribeToGroup();
     }else{
-        // if(!_autoFilter.value())
-        //     _backgroundValues.setVisible(false);
         _dataProcessor = std::make_shared<DataProcessorText>();
 
         //If autofiler is on, background values property should be hidden
