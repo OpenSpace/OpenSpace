@@ -22,8 +22,9 @@ return {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
             Body = "EARTH",
-            Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            --Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             --Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            Radii =   {2439700.0, 2439700.0, 2439700.0},
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 90,
@@ -37,7 +38,7 @@ return {
                     {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
-                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/earth/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Type = "SingleImage",
@@ -48,7 +49,7 @@ return {
                         Type = "Temporal",
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
                         FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
-                    },]]
+                    },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
@@ -56,54 +57,73 @@ return {
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
-                        Enabled = true,
+                        --Enabled = true,
                     },
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        --Enabled = true,
+                    },]]
+                    {
+                        Name = "Mars Viking Clr",
+                        FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat.cub",
+                        --Enabled = true,
+                    },
+                    {
+                        Name = "On Mercury Color",
+                        FilePath = "map_service_configs/mercury/OnMercuryColor.xml",
+                    },
+                    {
+                        Name = "On Mercury Image",
+                        FilePath = "map_service_configs/mercury/OnMercuryImage.xml",
                     },
                 },
                 GrayScaleOverlays = {
                     {
                         Name = "CTX Mosaic",
-                        FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
                     },
                 },
                 NightTextures = {
                     {
                         Name = "Earth at Night 2012",
-                        FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+                        FilePath = "map_service_configs/earth/VIIRS_CityLights_2012.xml",
                     },
                 },
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
-                        FilePath = "map_service_configs/TERRAIN.wms",
-                        Enabled = true,
+                        FilePath = "map_service_configs/earth/TERRAIN.wms",
+                        --Enabled = true,
                     },
                     {
                         Name = "Mola Elevation",
-                        FilePath = "map_service_configs/Mola_Elevation.xml",
+                        FilePath = "map_service_configs/mars/Mola_Elevation.xml",
                     },
+                    {
+                        Name = "On Mercury Height",
+                        FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
+                        Enabled = true,
+                    }
                 },
                 WaterMasks = {
                     {
                         Name = "MODIS_Water_Mask",
-                        FilePath = "map_service_configs/MODIS_Water_Mask.xml",
+                        FilePath = "map_service_configs/earth/MODIS_Water_Mask.xml",
                     },
                 },
                 Overlays = {
                     {
                         Name = "Coastlines",
-                        FilePath = "map_service_configs/Coastlines.xml",
+                        FilePath = "map_service_configs/earth/Coastlines.xml",
                     },
                     {
                         Name = "Reference_Features",
-                        FilePath = "map_service_configs/Reference_Features.xml",
+                        FilePath = "map_service_configs/earth/Reference_Features.xml",
                     },
                     {
                         Name = "Reference_Labels",
-                        FilePath = "map_service_configs/Reference_Labels.xml",
+                        FilePath = "map_service_configs/earth/Reference_Labels.xml",
                     },
                 },
             },
