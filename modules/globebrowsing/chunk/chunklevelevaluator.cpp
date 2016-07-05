@@ -43,17 +43,20 @@ namespace openspace {
 
     
     int EvaluateChunkLevelByDistance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+        // Calculations are done in the reference frame of the globe. Hence, the camera
+        // position needs to be transformed with the inverse model matrix
+        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
         ChunkedLodGlobe const * globe = chunk.owner();
         const Ellipsoid& ellipsoid = globe->ellipsoid();
 
-        Vec3 cameraPosition = data.camera.positionVec3();
+        Vec3 cameraPosition =
+            glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
         Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
             ellipsoid.cartesianToGeodetic2(cameraPosition));
         
         Chunk::BoundingHeights heights = chunk.getBoundingHeights();
 
-        Vec3 globePosition = data.position.dvec3();
-        Vec3 patchPosition = globePosition + ellipsoid.cartesianSurfacePosition(pointOnPatch);
+        Vec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
         Vec3 cameraToChunk = patchPosition - cameraPosition;
 
 
@@ -68,11 +71,15 @@ namespace openspace {
     }
 
     int EvaluateChunkLevelByProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+        // Calculations are done in the reference frame of the globe. Hence, the camera
+        // position needs to be transformed with the inverse model matrix
+        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+
         ChunkedLodGlobe const * globe = chunk.owner();
         const Ellipsoid& ellipsoid = globe->ellipsoid();
-        Vec3 cameraPosition = data.camera.positionVec3();
-        Vec3 globePosition = data.position.dvec3();
-        Vec3 cameraToEllipseCenter = globePosition - cameraPosition;
+        Vec3 cameraPosition =
+            glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
+        Vec3 cameraToEllipsoidCenter = - cameraPosition;
 
         Geodetic2 camPos = ellipsoid.cartesianToGeodetic2(cameraPosition);
         /*
@@ -114,10 +121,10 @@ namespace openspace {
         const Geodetic3 c2 = { chunk.surfacePatch().getCorner((Quad)2), heights.min };
         const Geodetic3 c3 = { chunk.surfacePatch().getCorner((Quad)3), heights.min };
 
-        Vec3 A = cameraToEllipseCenter + ellipsoid.cartesianPosition(c0);
-        Vec3 B = cameraToEllipseCenter + ellipsoid.cartesianPosition(c1);
-        Vec3 C = cameraToEllipseCenter + ellipsoid.cartesianPosition(c2);
-        Vec3 D = cameraToEllipseCenter + ellipsoid.cartesianPosition(c3);
+        Vec3 A = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c0);
+        Vec3 B = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c1);
+        Vec3 C = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c2);
+        Vec3 D = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c3);
 
         // Project points onto unit sphere
         A = glm::normalize(A);

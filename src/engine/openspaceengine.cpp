@@ -760,7 +760,6 @@ void OpenSpaceEngine::preSynchronization() {
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
         
-        _interactionHandler->update(dt);
         _scriptEngine->preSynchronization();
         _renderEngine->preSynchronization();
         _parallelConnection->preSynchronization();
@@ -773,6 +772,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
+    // InteractionHandler needs to be updated after the scene
+    double dt = _windowWrapper->averageDeltaTime();
+    _interactionHandler->update(dt);
+
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
@@ -785,8 +788,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
             static_cast<float>(drawBufferResolution.y) / static_cast<float>(windowSize.y)
         );
         
-        double dt = _windowWrapper->averageDeltaTime();
-
         _gui->startFrame(
             static_cast<float>(dt),
             glm::vec2(drawBufferResolution),

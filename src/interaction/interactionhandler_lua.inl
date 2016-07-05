@@ -124,24 +124,12 @@ int setInteractionMode(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 
-    std::string interactionModeName = luaL_checkstring(L, -1);
+    std::string interactionModeKey = luaL_checkstring(L, -1);
     
-    if (interactionModeName.empty())
+    if (interactionModeKey.empty())
         return luaL_error(L, "interactionmode name string is empty");
 
-    if (interactionModeName == "OrbitalInteractionMode") {
-        OsEng.interactionHandler().setInteractionModeToOrbital();
-    }
-    else if (interactionModeName == "GlobeBrowsingInteractionMode") {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        OsEng.interactionHandler().setInteractionModeToGlobeBrowsing();
-#else
-        return luaL_error(L, "OpenSpace compiled without support for GlobeBrowsing");
-#endif
-    }
-    else { // Default
-        return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
-    }
+    OsEng.interactionHandler().setInteractionMode(interactionModeKey);
     return 0;
 }
 

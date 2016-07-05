@@ -151,6 +151,7 @@ InteractionMode::~InteractionMode() {
 void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
     _previousFocusNodePosition = _focusNode->worldPosition().dvec3();
+    _previousFocusNodeRotation = dquat();
 }
 
 SceneGraphNode* InteractionMode::focusNode() {
@@ -300,6 +301,11 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
 
+        // Explicitly synch since camera is referenced after this
+        camera.setPositionVec3(camPos);
+        camera.preSynchronization();
+        camera.postSynchronizationPreDraw();
+
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
@@ -406,7 +412,10 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    // This function needs some cleaning up /KB
+
     if (_focusNode && _globe) {
+        
         // Declare variables to use in interaction calculations
         // Shrink interaction ellipsoid to enable interaction below height = 0
         double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
@@ -414,23 +423,33 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
         // Read the current state of the camera and focusnode
         dvec3 camPos = camera.positionVec3();
-        
-        // Follow focus nodes movement
         dvec3 centerPos = _focusNode->worldPosition().dvec3();
+
+        // Follow focus nodes movement
         dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
-        
+
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
         dvec3 camDirection = camera.viewDirectionWorldSpace();
 
+        // Sampling of height is done in the reference frame of the globe.
+        // Hence, the camera position needs to be transformed with the inverse model matrix
+        glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
+        glm::dmat4 modelTransform = _globe->chunkedLodGlobe()->modelTransform();
+        glm::dvec3 cameraPositionModelSpace =
+            glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
         dvec3 posDiff = camPos - centerPos;
+
+        dvec3 directionFromSurfaceToCameraModelSpace =
+           _globe->ellipsoid().geodeticSurfaceNormal(
+                _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
         dvec3 directionFromSurfaceToCamera =
-            _globe->ellipsoid().geodeticSurfaceNormal(
-                _globe->ellipsoid().cartesianToGeodetic2(camPos));
-        dvec3 centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
-            directionFromSurfaceToCamera * ellipsoidShrinkTerm;
+            dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
+            directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
         double distFromCenterToSurface =
@@ -445,6 +464,12 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
             normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
         dquat globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
         dquat localCameraRotation = inverse(globalCameraRotation) * totalRotation;
+
+        // Rotate with the globe
+        dmat3 globeStateMatrix = _globe->stateMatrix();
+        dquat globeRotation = quat_cast(globeStateMatrix);
+        dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
+        _previousFocusNodeRotation = globeRotation;
 
         { // Do local roll
             glm::dquat cameraRollRotation =
@@ -471,20 +496,34 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
             glm::dvec3 rotationDiffVec3 =
                 (distFromCenterToCamera * directionFromSurfaceToCamera)
-                * rotationDiffWorldSpace
+                 * rotationDiffWorldSpace
                 - (distFromCenterToCamera * directionFromSurfaceToCamera);
 
-            camPos += rotationDiffVec3;
+            glm::dvec3 rotationDiffVec3AroundCenter = 
+                posDiff
+                 * focusNodeRotationDiff
+                - (posDiff);
 
-            directionFromSurfaceToCamera =
+            camPos += rotationDiffVec3 + rotationDiffVec3AroundCenter;
+            dvec3 posDiff = camPos - centerPos;
+
+
+
+            cameraPositionModelSpace =
+                glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
+            directionFromSurfaceToCameraModelSpace =
                 _globe->ellipsoid().geodeticSurfaceNormal(
-                    _globe->ellipsoid().cartesianToGeodetic2(camPos));
-            centerToEllipsoidSurface = _globe->projectOnEllipsoid(camPos) -
-                directionFromSurfaceToCamera * ellipsoidShrinkTerm;
+                    _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
+            directionFromSurfaceToCamera =
+                dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+            centerToEllipsoidSurface = dmat3(modelTransform) * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
+                directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
+
             glm::dvec3 lookUpWhenFacingSurface =
-                globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
+                inverse(focusNodeRotationDiff) * globalCameraRotation * glm::dvec3(camera.lookUpVectorCameraSpace());
             glm::dmat4 lookAtMat = glm::lookAt(
                 glm::dvec3(0, 0, 0),
                 -directionFromSurfaceToCamera,
@@ -505,15 +544,27 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         { // Push up to surface
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
+            // Sampling of height is done in the reference frame of the globe.
+            // Hence, the camera position needs to be transformed with the inverse model matrix
+            glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
+            glm::dvec3 cameraPositionModelSpace =
+                glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
             distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface = _globe->getHeight(camPos) + ellipsoidShrinkTerm;
+            double heightToSurface =
+                _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
             double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
             camPos += directionFromSurfaceToCamera *
                 glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);
         }
+
         // Update the camera state
+        camera.setPositionVec3(camPos); 
         camera.setRotation(globalCameraRotation * localCameraRotation);
-        camera.setPositionVec3(camPos);
+    
+        // Unfortunately need to synch since interactionhandler is updated after synch..
+        camera.preSynchronization();
+        camera.postSynchronizationPreDraw();
     }
 }
 

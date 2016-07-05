@@ -311,8 +311,13 @@ namespace openspace {
             }
         }
         if (performAnyBlending) {
+            // Calculations are done in the reference frame of the globe. Hence, the camera
+            // position needs to be transformed with the inverse model matrix
+            glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+            glm::dvec3 cameraPosition =
+                glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
-            programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
+            programObject->setUniform("cameraPosition", vec3(cameraPosition));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
         }
@@ -322,8 +327,7 @@ namespace openspace {
         auto patchSize = chunk.surfacePatch().size();
         
         // TODO : Model transform should be fetched as a matrix directly.
-        dmat4 modelTransform = dmat4(chunk.owner()->stateMatrix()); // Rotation
-        modelTransform = translate(dmat4(1), data.position.dvec3()) * modelTransform; // Translation
+        dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewTransform = mat4(viewTransform * modelTransform);
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix() * modelViewTransform;
@@ -385,7 +389,7 @@ namespace openspace {
         // Calculate other uniform variables needed for rendering
 
         // TODO : Model transform should be fetched as a matrix directly.
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 

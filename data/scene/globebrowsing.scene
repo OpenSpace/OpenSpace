@@ -13,11 +13,18 @@ function preInitialization()
 end
 
 function postInitialization()
+    openspace.printInfo("Setting default values")
+
     openspace.setInteractionMode('GlobeBrowsingInteractionMode')
     --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    
 
     openspace.resetCameraDirection()
 
@@ -36,6 +43,7 @@ return {
 
     Modules = {
         "debugglobe",
+        "sun",
         "stars",
         "milkyway",
     }

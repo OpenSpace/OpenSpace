@@ -86,6 +86,8 @@ namespace openspace {
         //Scalar globeRadius;
         const Ellipsoid& ellipsoid() const;
         const glm::dmat3& stateMatrix();
+        const glm::dmat4& modelTransform();
+        const glm::dmat4& inverseModelTransform();
 
         const int minSplitDepth;
         const int maxSplitDepth;
@@ -144,6 +146,8 @@ namespace openspace {
 
         const Ellipsoid& _ellipsoid;
         glm::dmat3 _stateMatrix;
+        glm::dmat4 _modelTransform;
+        glm::dmat4 _inverseModelTransform;
 
         std::shared_ptr<Camera> _savedCamera;
         

@@ -57,7 +57,7 @@ namespace opengl {
 namespace openspace {
 
 struct ReferencedBoolSelection : public properties::SelectionProperty {
-    ReferencedBoolSelection::ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
+    ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
         : properties::SelectionProperty(identifier, guiName) { }
 
     void addOption(const std::string& name, bool* ref) {
@@ -112,6 +112,7 @@ public:
 
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
     const Ellipsoid& ellipsoid();
+    const glm::dmat3& stateMatrix();
     float getHeight(glm::dvec3 position);
     float cameraMinHeight();
     double interactionDepthBelowEllipsoid();

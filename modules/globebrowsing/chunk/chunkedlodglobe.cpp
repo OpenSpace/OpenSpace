@@ -154,7 +154,6 @@ namespace openspace {
     void ChunkedLodGlobe::render(const RenderData& data){
 
         stats.startNewRecord();
-
         
         int j2000s = Time::now().unsyncedJ2000Seconds();
         /*
@@ -177,10 +176,9 @@ namespace openspace {
         _rightRoot->updateChunkTree(data);
 
         // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
-        dmat4 mvp = vp * modelTransform;
+        dmat4 mvp = vp * _modelTransform;
 
         // Render function
         std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
@@ -245,6 +243,11 @@ namespace openspace {
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
+        _modelTransform =
+            translate(dmat4(1), data.position) *
+            dmat4(stateMatrix()); // Translation
+        _inverseModelTransform = glm::inverse(_modelTransform);
+
         _renderer->update();
     }
 
@@ -256,6 +259,14 @@ namespace openspace {
     const glm::dmat3& ChunkedLodGlobe::stateMatrix()
     {
         return _stateMatrix;
+    }
+
+    const glm::dmat4& ChunkedLodGlobe::modelTransform() {
+        return _modelTransform;
+    }
+
+    const glm::dmat4& ChunkedLodGlobe::inverseModelTransform() {
+        return _inverseModelTransform;
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

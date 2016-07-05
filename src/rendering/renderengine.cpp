@@ -352,6 +352,7 @@ void RenderEngine::postSynchronizationPreDraw() {
 
     // update and evaluate the scene starting from the root node
     _sceneGraph->update({
+        glm::dvec3(0),
         Time::ref().currentTime(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
