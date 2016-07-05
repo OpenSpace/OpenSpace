@@ -204,7 +204,7 @@ SyncWidget::~SyncWidget() {
     f.write(size.data.data(), sizeof(uint32_t));
     f.write(buffer.data(), buffer.size());
 
-    _downloadManager.release();
+    _downloadManager.reset();
     ghoul::deinitialize();
     delete _session;
 }
