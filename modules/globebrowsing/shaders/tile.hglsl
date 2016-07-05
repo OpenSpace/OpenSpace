@@ -83,7 +83,7 @@ vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Tile
 
 vec2 TileUVToTextureSamplePosition(const Tile tile, vec2 tileUV){
 	vec2 uv = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	uv = compensateSourceTextureSampling(vec2(0), vec2(0), tile, uv);
+	uv = compensateSourceTextureSampling(vec2(-2), vec2(4), tile, uv);
 	return uv;
 }
 
