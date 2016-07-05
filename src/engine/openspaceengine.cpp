@@ -73,6 +73,7 @@
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
 #include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
+#include <modules/iswa/rendering/iswacygnet.h>
 #endif
 
 #ifdef _MSC_VER
@@ -478,6 +479,13 @@ bool OpenSpaceEngine::initialize() {
                     return val.second.get(); 
                 }
             );
+
+            for(auto group : groups){
+                auto cygnets = group.second->cygnets();
+                for(auto cygnet : cygnets)
+                    res.push_back(dynamic_cast<properties::PropertyOwner*>(cygnet));
+            }
+
             return res;
         }
     );
