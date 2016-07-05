@@ -37,6 +37,7 @@ struct InitializeData {
 };
 
 struct UpdateData {
+    glm::dvec3 position;
     double time;
     bool isTimeJump;
     double delta;

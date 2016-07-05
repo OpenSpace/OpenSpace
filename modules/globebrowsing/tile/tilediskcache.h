@@ -42,7 +42,7 @@ namespace openspace {
         
         std::shared_ptr<TileIOResult> get(const ChunkIndex& chunkIndex);
         bool has(const ChunkIndex& chunkIndex) const;
-        bool TileDiskCache::put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult);
+        bool put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult);
 
         
         static const std::string CACHE_ROOT;
