@@ -47,18 +47,33 @@ namespace openspace {
         //                                  Mutators                                    //
         //////////////////////////////////////////////////////////////////////////////////
 
+        /**
+         * Sets one of the sides of the pixel region the specified position. This changes
+         * the number of pixels in the region.
+         *
+         * Example: side = LEFT and pos 16:
+         *          set start.x = 16 and keep the end position the same.
+         */
         void setSide(Side side, int pos);
         void setLeft(int x);
         void setTop(int p);
         void setRight(int x);
         void setBottom(int y);
         
+        /**
+        * Aligns one the sides of the pixel regino to the specified position. This does 
+        * not change the number of pixels within the region.
+        *
+        * Example: Side = left and pos = 16:
+        *                 start.x = 16 and keep the size the same
+        */
         void align(Side side, int pos);
         void alignLeft(int x);
         void alignTop(int y);
         void alignRight(int x);
         void alignBottom(int y);
 
+        
         void scale(const glm::dvec2& s);
         void scale(double s);
         void downscalePow2(int exponent);
@@ -100,7 +115,6 @@ namespace openspace {
         PixelRange numPixels;
     };
 
-    
 
 
 

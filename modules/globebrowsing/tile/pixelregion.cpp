@@ -38,9 +38,10 @@ namespace {
 
 
 
+
 namespace openspace {
 
-
+   
 
     PixelRegion::PixelRegion()
         : start(0)

@@ -75,6 +75,28 @@ namespace openspace {
   
 
 
+    IODescription IODescription::cut(PixelRegion::Side side, int pos) {
+        PixelRegion readPreCut = read.region;
+        PixelRegion writePreCut = write.region;
+
+        IODescription whatCameOff = *this;
+        whatCameOff.read.region = read.region.globalCut(side, pos);
+
+        PixelCoordinate cutSize = whatCameOff.read.region.numPixels;
+        int cutWidth = (side % 2 == 0) ? cutSize.x : cutSize.y;
+        whatCameOff.write.region = write.region.localCut(side, cutWidth);
+
+
+        if (cutWidth == 0) {
+            ghoul_assert(read.region.equals(readPreCut), "Read region should not have been modified");
+            ghoul_assert(write.region.equals(writePreCut), "Write region should not have been modified");
+        }
+
+        return whatCameOff;
+    }
+
+
+
 
 
 
