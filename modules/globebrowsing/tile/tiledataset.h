@@ -43,9 +43,6 @@
 #include <modules/globebrowsing/other/threadpool.h>
 
 namespace openspace {
-    using namespace ghoul::opengl;
-    using namespace ghoul::filesystem;
-
 
     struct TileDataLayout {
         TileDataLayout();
@@ -60,29 +57,9 @@ namespace openspace {
 
         TextureFormat textureFormat;
     };
-     
-
 
     struct IODescription {
-        IODescription cut(PixelRegion::Side side, int pos) {
-            PixelRegion readPreCut = read.region;
-            PixelRegion writePreCut = write.region;
-
-            IODescription whatCameOff = *this;
-            whatCameOff.read.region = read.region.globalCut(side, pos);
-
-            PixelCoordinate cutSize = whatCameOff.read.region.numPixels;
-            int cutWidth = (side % 2 == 0) ? cutSize.x : cutSize.y;
-            whatCameOff.write.region = write.region.localCut(side, cutWidth);
-            
-
-            if (cutWidth == 0) {
-                ghoul_assert(read.region.equals(readPreCut), "Read region should not have been modified");
-                ghoul_assert(write.region.equals(writePreCut), "Write region should not have been modified");
-            }
-            
-            return whatCameOff;
-        }
+        IODescription cut(PixelRegion::Side side, int pos);
 
         struct ReadData {
             int overview;
@@ -90,11 +67,15 @@ namespace openspace {
         } read;
 
         struct WriteData {
-            PixelRegion region; // should always start at 0,0
+            PixelRegion region;
             size_t bytesPerLine;
             size_t totalNumBytes;
         } write;
     };
+
+
+    using namespace ghoul::opengl;
+    using namespace ghoul::filesystem;
 
 
     class TileDataset {
