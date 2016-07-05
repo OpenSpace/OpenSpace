@@ -105,11 +105,8 @@ void ScreenSpaceImage::render() {
 }
 
 void ScreenSpaceImage::update() {
-    if (!_downloadImage) {
-        if (_futureImage.valid() && DownloadManager::futureReady(_futureImage))
-            _textureDirty = true;
-    }
-    if (_textureDirty) {
+    bool download = _downloadImage ? (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) : true;
+    if (download) {
         loadTexture();
         _textureDirty = false;
     }
