@@ -51,6 +51,10 @@ namespace {
 
 namespace openspace {
 
+    std::ostream& operator<<(std::ostream& os, const openspace::PixelRegion& pr) {
+        return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
+    }
+
     //////////////////////////////////////////////////////////////////////////////////
     //                             Tile Data Layout                                 //
     //////////////////////////////////////////////////////////////////////////////////
@@ -118,6 +122,9 @@ namespace openspace {
         delete _dataset;
     }
 
+
+
+
     //////////////////////////////////////////////////////////////////////////////////
     //                              Public interface                                //
     //////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +169,9 @@ namespace openspace {
     }
 
 
+
+
+
     //////////////////////////////////////////////////////////////////////////////////
     //                                Initialization                                //
     //////////////////////////////////////////////////////////////////////////////////
@@ -196,9 +206,13 @@ namespace openspace {
     }
 
 
+
+
+
     //////////////////////////////////////////////////////////////////////////////////
     //                            GDAL helper methods                               //
     //////////////////////////////////////////////////////////////////////////////////
+
 
     bool TileDataset::gdalHasOverviews() const {
         return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
@@ -252,6 +266,9 @@ namespace openspace {
     }
 
 
+
+
+
     //////////////////////////////////////////////////////////////////////////////////
     //                          ReadTileData helper functions                       //
     //////////////////////////////////////////////////////////////////////////////////
@@ -300,11 +317,11 @@ namespace openspace {
         PixelRegion region = gdalPixelRegion(chunkIndex); // pixel region at overview zero
         region.downscalePow2(overview + 1); // pixel region at suitable overview 
 
-                                            // Create an IORegion based on that overview pixel region
+        // Create an IORegion based on that overview pixel region
         IODescription io;
         io.read.overview = overview;
         io.read.region = region;
-        io.write.region = { PixelCoordinate(0, 0), region.numPixels };
+        io.write.region = region;
 
         // Handle the case where the dataset does not have overviews
         if (!gdalHasOverviews()) {
@@ -315,12 +332,19 @@ namespace openspace {
         // For correct sampling in height dataset, we need to pad the texture tile
         io.read.region.pad(padding);
         io.write.region.pad(padding);
+        io.write.region.start = PixelCoordinate(0, 0); // write region starts in origin
+        
+        
 
         // Doing this may cause invalid regions, i.e. having negative pixel coordinates 
         // or being too large etc. For now, just clamp 
         PixelRegion overviewRegion = gdalPixelRegion(gdalRasterBand(overview));
-        //io.read.region.clampTo(overviewRegion);
-        //io.write.region.clampTo(overviewRegion);
+
+        //if (chunkIndex.level < 3) {
+        //    io.read.region.clampTo(overviewRegion);
+        //    io.write.region.clampTo(overviewRegion);
+        //}
+        
 
         io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
         io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
@@ -328,7 +352,7 @@ namespace openspace {
         return io;
     }
 
-    char* TileDataset::readImageData(const IODescription& io, CPLErr& worstError) const {
+    char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
         // allocate memory for the image
         char* imageData = new char[io.write.totalNumBytes];
 
@@ -340,24 +364,7 @@ namespace openspace {
             // for every raster (or data channel, i.e. R in RGB)
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
 
-            // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
-            // Therefore, we increment the destination pointer to the last line on in the 
-            // buffer, and the we specify in the rasterIO call that we want negative line 
-            // spacing. Doing this compensates the flipped Y axis
-            dataDestination += (io.write.totalNumBytes - io.write.bytesPerLine);
-
-            CPLErr err = rasterBand->RasterIO(
-                GF_Read,
-                io.read.region.start.x,             // Begin read x
-                io.read.region.start.y,             // Begin read y
-                io.read.region.numPixels.x,         // width to read x
-                io.read.region.numPixels.y,         // width to read y
-                dataDestination,                    // Where to put data
-                io.write.region.numPixels.x,        // width to write x in destination
-                io.write.region.numPixels.y,        // width to write y in destination
-                _dataLayout.gdalType,		        // Type
-                _dataLayout.bytesPerPixel,	        // Pixel spacing
-                -io.write.bytesPerLine);             // Line spacing
+            CPLErr err = repeatedRasterIO(rasterBand, io, dataDestination);
 
             // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
             worstError = std::max(worstError, err);
@@ -367,87 +374,156 @@ namespace openspace {
         return imageData;
     }
 
-    char* TileDataset::readImageData2(const IODescription& io, CPLErr& worstError) const {
-        std::vector<char *> imageDataChannels(_dataLayout.numRasters);
-        size_t numByterPerChannel = io.write.totalNumBytes / _dataLayout.numRasters;
-        // Read the data (each rasterband is a separate channel)
-        for (size_t i = 0; i < _dataLayout.numRasters; i++) {
-            imageDataChannels[i] = new char[numByterPerChannel];
+    CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination) const {
+        CPLErr worstError = CPLErr::CE_None;
 
-            GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+        // NOTE: 
+        // Ascii graphics illustrates the implementation details of this method, for one  
+        // specific case. Even though the illustrated case is specific, readers can 
+        // hopefully find it useful to get the general idea.
 
-            CPLErr err = rasterBand->RasterIO(
-                GF_Read,
-                io.read.region.start.x,             // Begin read x
-                io.read.region.start.y,             // Begin read y
-                io.read.region.numPixels.x,         // width to read x
-                io.read.region.numPixels.y,         // width to read y
-                imageDataChannels[i],                    // Where to put data
-                io.write.region.numPixels.x,        // width to write x in destination
-                io.write.region.numPixels.y,        // width to write y in destination
-                _dataLayout.gdalType,		        // Type
-                0,	        // Pixel spacing
-                0);             // Line spacing
+        // Make a copy of the full IO desription as we will have to modify it
+        IODescription io = fullIO;
+        PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
 
-            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-            worstError = std::max(worstError, err);
-        }
 
-        // Combined image data
-        char* imageData = new char[io.write.totalNumBytes];
-        size_t yx = 0;
-        size_t c = 0;
-        for (size_t y = 0; y < io.write.region.numPixels.y; y++) {
-            for (size_t x = 0; x < io.write.region.numPixels.x; x++) {
-                for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-                    size_t combinedChannelIndex = (yx * _dataLayout.numRasters + c) * _dataLayout.bytesPerDatum;
-                    size_t separateChannelIndex = yx * _dataLayout.bytesPerDatum;
+        // Example: 
+        // We have an io description that defines a WRITE and a READ region.
+        // In this case the READ region extends outside of the defined gdal region,
+        // meaning we will have to do wrapping
 
-                    ghoul_assert(combinedChannelIndex < io.write.totalNumBytes, "Invalid combined index!");
-                    ghoul_assert(separateChannelIndex < numByterPerChannel, "invalid single index!");
 
-                    char* channelData = imageDataChannels[c];
-                    for (size_t b = 0; b < _dataLayout.bytesPerDatum; b++) {
-                        char val = channelData[separateChannelIndex + b];
-                        imageData[combinedChannelIndex + b] = channelData[separateChannelIndex+b];
-                    }
+        // io.write.region             io.read.region
+        //    |                         |
+        //    V                         V
+        // +-------+                +-------+ 
+        // |       |                |       |--------+ 
+        // |       |                |       |        |
+        // |       |                |       |        |
+        // +-------+                +-------+        |
+        //                            |              | <-- gdalRegion  
+        //                            |              |
+        //                            +--------------+
+
+
+        LDEBUG("-");
+        LDEBUG("repeated read: " << io.read.region);
+        LDEBUG("repeated write: " << io.write.region);
+
+        bool didCutOff = false;
+
+        if (!io.read.region.isInside(gdalRegion)) {
+            //  Loop through each side: left, top, right, bottom
+            for (int i = 0; i < 4; ++i) {
+
+                // Example: 
+                // We are currently considering the left side of the pixel region
+                PixelRegion::Side side = (PixelRegion::Side) i;
+                IODescription cutoff = io.cut(side, gdalRegion.edge(side));
+
+                // Example: 
+                // We cut off the left part that was outside the gdal region, and we now 
+                // have an additional io description for the cut off region. 
+                // Note that the cut-method used above takes care of the corresponding 
+                // WRITE region for us.
+
+                // cutoff.write.region    cutoff.read.region
+                //  |  io.write.region     |  io.read.region
+                //  |   |                  |   |
+                //  V   V                  V   V
+                // +-+-----+               +-+-----+ 
+                // | |     |               | |     |--------+
+                // | |     |               | |     |        |
+                // | |     |               | |     |        |
+                // +-+-----+               +-+-----+        |
+                //                           |              | <-- gdalRegion  
+                //                           |              |
+                //                           +--------------+
+
+                if (cutoff.read.region.area() > 0) {
+                    didCutOff = true;
+
+                    // Wrap by repeating
+                    PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
+
+                    cutoff.read.region.align(oppositeSide, gdalRegion.edge(oppositeSide));
+
+                    // Example:
+                    // The cut off region is wrapped to the opposite side of the region,
+                    // i.e. "repeated". Note that we don't want WRITE region to change, 
+                    // we're only wrapping the READ region.
+
+                    // cutoff.write.region   io.read.region cutoff.read.region
+                    //  |  io.write.region        |          |
+                    //  |   |                     V          V
+                    //  V   V                  +-----+      +-+
+                    // +-+-----+               |     |------| |
+                    // | |     |               |     |      | | 
+                    // | |     |               |     |      | |
+                    // | |     |               +-----+      +-+
+                    // +-+-----+               |              | <-- gdalRegion  
+                    //                         |              |
+                    //                         +--------------+
+
+                    // Example:
+                    // The cutoff region has been repeated along one of its sides, but 
+                    // as we can see in this example, it still has a top part outside the
+                    // defined gdal region. This is handled through recursion.
+                    CPLErr err = repeatedRasterIO(rasterBand, cutoff, dataDestination);
+
+                    worstError = std::max(worstError, err);
                 }
-                yx++;
             }
         }
 
-        for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-            char * singleChannel = imageDataChannels[c];
-            delete[] singleChannel;
-        }
+       
 
-        // GDAL reads pixel lines top to bottom, we want the opposit
-        return flipImageYAxis(imageData, io.write);
+        CPLErr err = rasterIO(rasterBand, io, dataDestination);
+        worstError = std::max(worstError, err);
+        return worstError;
     }
 
+    CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dataDestination) const {
+        PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
 
-    char* TileDataset::flipImageYAxis(char*& imageData, const IODescription::WriteData& writeData) const {
-        char* imageDataYflipped = new char[writeData.totalNumBytes];
-        for (size_t y = 0; y < writeData.region.numPixels.y; y++) {
-            size_t yi_flipped = y * writeData.bytesPerLine;
-            size_t yi = (writeData.region.numPixels.y - 1 - y) * writeData.bytesPerLine;
-            size_t i = 0;
-            for (size_t x = 0; x < writeData.region.numPixels.x; x++) {
-                for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-                    for (size_t b = 0; b < _dataLayout.bytesPerDatum; b++) {
-                        imageDataYflipped[yi_flipped + i] = imageData[yi + i];
-                        i++;
-                    }
-                }
-            }
-        }
+        LDEBUG("rasterIO read: " << io.read.region);
+        LDEBUG("rasterIO write: " << io.write.region);
 
-        // Delete the old data and return the new
-        delete[] imageData;
-        imageData = nullptr;
+        ghoul_assert(io.read.region.isInside(gdalRegion), "write region of bounds!");
 
-        return imageDataYflipped;
+        ghoul_assert(io.write.region.start.x >= 0 && io.write.region.start.y >= 0, "Invalid write region");
+
+        PixelCoordinate end = io.write.region.end();
+        size_t largestIndex = (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _dataLayout.bytesPerPixel;
+        ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
+
+        char * dataDest = dataDestination;
+
+        // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
+        // Therefore, we increment the destination pointer to the last line on in the 
+        // buffer, and the we specify in the rasterIO call that we want negative line 
+        // spacing. Doing this compensates the flipped Y axis
+        dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
+
+        // handle requested write region
+        dataDest -= io.write.region.start.y * io.write.bytesPerLine; // note -= since flipped y axis
+        dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
+
+        
+        return rasterBand->RasterIO(
+            GF_Read,
+            io.read.region.start.x,             // Begin read x
+            io.read.region.start.y,             // Begin read y
+            io.read.region.numPixels.x,         // width to read x
+            io.read.region.numPixels.y,         // width to read y
+            dataDest,                           // Where to put data
+            io.write.region.numPixels.x,        // width to write x in destination
+            io.write.region.numPixels.y,        // width to write y in destination
+            _dataLayout.gdalType,		        // Type
+            _dataLayout.bytesPerPixel,	        // Pixel spacing
+            -io.write.bytesPerLine);             // Line spacing
     }
+
 
     std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const {
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
