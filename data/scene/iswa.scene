@@ -7,8 +7,8 @@ function preInitialization()
     ]]--
 
     --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.time.setTime('2015-03-15T00:05:00.00')
-    --openspace.time.setTime('2000-01-01T00:00:00.00')
+    --openspace.time.setTime('2015-03-15T00:05:00.00')
+    openspace.time.setTime('2000-01-01T00:00:00.00')
     openspace.time.setDeltaTime(0)
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_iswa.lua'))
 end
@@ -21,8 +21,8 @@ function postInitialization()
     ]]--
     openspace.setInteractionMode('OrbitalInteractionMode')
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", true)
-    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", true)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
@@ -61,14 +61,14 @@ return {
     },
     Modules = {
         "sun",
-        --"mercury",
-        --"venus",
+        "mercury",
+        "venus",
         "earth",
-        --"mars",
-        --"jupiter",
-        --"saturn",
-        --"uranus",
-        --"neptune",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
         "stars",
         --"stars-denver",
         "milkyway",
