@@ -31,27 +31,33 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 // test files
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
+#include <test_common.inl>
+#include <test_spicemanager.inl>
+#include <test_scenegraphloader.inl>
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_threadpool.inl>
-//#include <test_aabb.inl>
-//#include <test_convexhull.inl>
+#include <test_lrucache.inl>
+#include <test_threadpool.inl>
+#include <test_aabb.inl>
+#include <test_convexhull.inl>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-
-//#include <test_angle.inl>
+#include <test_angle.inl>
 //#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
+#include <test_gdalwms.inl>
 //#include <test_patchcoverageprovider.inl>
 
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
-//#include <test_screenspaceimage.inl>
+#include <test_concurrentqueue.inl>
+#include <test_concurrentjobmanager.inl>
+#endif
+
+#include <test_luaconversions.inl>
+#include <test_powerscalecoordinates.inl>
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <test_screenspaceimage.inl>
 //#include <test_iswamanager.inl>
+#endif
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
