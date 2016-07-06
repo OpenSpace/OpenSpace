@@ -24,6 +24,8 @@
 
 #include <openspace/util/syncbuffer.h>
 
+#include <sgct.h>
+
 namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
@@ -35,15 +37,15 @@ SyncBuffer::SyncBuffer(size_t n)
 }
 
 void SyncBuffer::write() {
-    _synchronizationBuffer.setVal(_dataStream);
-    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+    _synchronizationBuffer->setVal(_dataStream);
+    sgct::SharedData::instance()->writeVector(_synchronizationBuffer);
     _encodeOffset = 0;
     _decodeOffset = 0;
 }
 
 void SyncBuffer::read() {
-    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-    _dataStream = std::move(_synchronizationBuffer.getVal());
+    sgct::SharedData::instance()->readVector(_synchronizationBuffer);
+    _dataStream = std::move(_synchronizationBuffer->getVal());
     _encodeOffset = 0;
     _decodeOffset = 0;
 }
