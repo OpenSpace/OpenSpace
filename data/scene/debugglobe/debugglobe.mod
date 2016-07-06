@@ -23,8 +23,8 @@ return {
             Frame = "IAU_EARTH",
             Body = "EARTH",
             --Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
-            Radii = {1738100, 1738100, 1736000}, -- Moon's radii
-            --Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            --Radii = {1738100, 1738100, 1736000}, -- Moon's radii
+            Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
             --Radii =   {2439700.0, 2439700.0, 2439700.0},
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
@@ -49,26 +49,26 @@ return {
                     --[[{
                         Type = "Temporal",
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
-                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/earth/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/earth/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
-                        --Enabled = true,
-                    },
-                    {
-                        Name = "MARS_Viking_MDIM21",
-                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        FilePath = "map_service_configs/earth/ESRI_Imagery_World_2D.wms",
                         --Enabled = true,
                     },]]
                     {
-                        Name = "Mars Viking Clr",
-                        FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat.cub",
+                        Name = "MARS_Viking_MDIM21",
+                        FilePath = "map_service_configs/mars/MARS_Viking_MDIM21.xml",
                         --Enabled = true,
+                    },
+                    {
+                        Name = "Mars Viking Clr",
+                        FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
+                        Enabled = true,
                     },
                     --[[
                     {
@@ -89,7 +89,7 @@ return {
                     {
                         Name = "On Moon Color",
                         FilePath = "map_service_configs/moon/OnMoonColor.xml",
-                        Enabled = true,
+                        --Enabled = true,
                     },
                 },
                 NightTextures = {
@@ -112,7 +112,7 @@ return {
                     {
                         Name = "On Moon Height",
                         FilePath = "map_service_configs/moon/OnMoonHeight.xml",
-                        Enabled = true,
+                        --Enabled = true,
                     },
                     {
                         Name = "On Mercury Height",

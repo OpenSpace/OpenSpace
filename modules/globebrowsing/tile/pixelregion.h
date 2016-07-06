@@ -76,8 +76,8 @@ namespace openspace {
         
         void scale(const glm::dvec2& s);
         void scale(double s);
-        void downscalePow2(int exponent);
-        void upscalePow2(int exponent);
+        void downscalePow2(int exponent, PixelCoordinate wrt = {0,0});
+        void upscalePow2(int exponent, PixelCoordinate wrt = { 0,0 });
 
         void move(Side side, int amount);
         void pad(const PixelRegion& padding);

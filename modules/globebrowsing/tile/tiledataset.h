@@ -68,7 +68,7 @@ namespace openspace {
 
         struct WriteData {
             PixelRegion region;
-            size_t bytesPerLine;
+            size_t bytesPerLine; 
             size_t totalNumBytes;
         } write;
     };
@@ -124,8 +124,9 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         bool gdalHasOverviews() const;
-        int gdalOverview(const PixelCoordinate& baseRegionSize) const;
+        int gdalOverview(const PixelRange& baseRegionSize) const;
         int gdalOverview(const ChunkIndex& chunkIndex) const;
+        int gdalVirtualOverview(const ChunkIndex& chunkIndex) const;
         PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
         PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
         GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
@@ -152,7 +153,8 @@ namespace openspace {
 
         int _maxLevel;
         double _tileLevelDifference;
-
+        
+        std::string _description;
         TileDepthTransform _depthTransform;
 
         GDALDataset* _dataset;

@@ -135,6 +135,7 @@ namespace openspace {
         _dataLayout = TileDataLayout(_dataset, dataType);
         _depthTransform = calculateTileDepthTransform();
         _tileLevelDifference = calculateTileLevelDifference(minimumPixelSize);
+        _description = gdalDatasetDesc;
 
         LDEBUG(gdalDatasetDesc << " - " << _tileLevelDifference);
     }
@@ -240,7 +241,7 @@ namespace openspace {
         return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
     }
 
-    int TileDataset::gdalOverview(const PixelCoordinate& regionSizeOverviewZero) const {
+    int TileDataset::gdalOverview(const PixelRange& regionSizeOverviewZero) const {
         GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
 
         int minNumPixels0 = glm::min(regionSizeOverviewZero.x, regionSizeOverviewZero.y);
@@ -264,6 +265,13 @@ namespace openspace {
         return glm::clamp(ov, 0, overviews - 1);
     }
 
+
+    int TileDataset::gdalVirtualOverview(const ChunkIndex& chunkIndex) const {
+        int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+        int ov = overviews - (chunkIndex.level + _tileLevelDifference + 1);
+        return ov;
+    }
+
     PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
         PixelRegion gdalRegion;
         gdalRegion.start.x = 0;
@@ -284,7 +292,10 @@ namespace openspace {
 
     GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
         GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
-        return gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
+        int numberOfOverviews = rasterBand->GetOverviewCount();
+        rasterBand = gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
+        ghoul_assert(rasterBand != nullptr, "Rasterband is null");
+        return rasterBand;
     }
 
 
@@ -334,40 +345,36 @@ namespace openspace {
     }
 
     IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
-        // Calculate suitable overview and corresponding pixel region
-        int overview = gdalOverview(chunkIndex);
-        PixelRegion region = gdalPixelRegion(chunkIndex); // pixel region at overview zero
-        region.downscalePow2(overview + 1); // pixel region at suitable overview 
-
-        // Create an IORegion based on that overview pixel region
         IODescription io;
-        io.read.overview = overview;
-        io.read.region = region;
-        io.write.region = region;
+        io.read.region = gdalPixelRegion(chunkIndex);
 
-        // Handle the case where the dataset does not have overviews
-        if (!gdalHasOverviews()) {
-            io.read.region.upscalePow2(overview + 1);
-            io.read.overview = 0; // no overview
+        //Geodetic2 halfSize = Geodetic2(dAngle::HALF.asRadians(), dAngle::QUARTER.asRadians());
+        //PixelRegion fullRegion = gdalPixelRegion(GeodeticPatch(Geodetic2(0, 0), Geodetic2(dAngle::HALF)))
+
+
+        if (gdalHasOverviews()) {
+            int overview = gdalOverview(chunkIndex);
+            io.read.overview = overview;
+            io.read.region.downscalePow2(overview + 1);
+            io.write.region = io.read.region;
         }
+        else {
+            io.read.overview = 0;
+            io.write.region = io.read.region;
+            int virtualOverview = gdalVirtualOverview(chunkIndex);
+            io.write.region.downscalePow2(virtualOverview + 1);
+        }
+
+
 
         // For correct sampling in height dataset, we need to pad the texture tile
         io.read.region.pad(padding);
         io.write.region.pad(padding);
+
+        io.write.region.numPixels.x += (io.write.region.numPixels.x % 2);
+        io.write.region.numPixels.y += (io.write.region.numPixels.y % 2);
+
         io.write.region.start = PixelCoordinate(0, 0); // write region starts in origin
-        
-        
-
-        // Doing this may cause invalid regions, i.e. having negative pixel coordinates 
-        // or being too large etc. For now, just clamp 
-        PixelRegion overviewRegion = gdalPixelRegion(gdalRasterBand(overview));
-
-        //if (chunkIndex.level < 3) {
-        //    io.read.region.clampTo(overviewRegion);
-        //    io.write.region.clampTo(overviewRegion);
-        //}
-        
-
         io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
         io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
 
@@ -381,7 +388,7 @@ namespace openspace {
         // Read the data (each rasterband is a separate channel)
         for (size_t i = 0; i < _dataLayout.numRasters; i++) {
             GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
-            
+
             // The final destination pointer is offsetted by one datum byte size
             // for every raster (or data channel, i.e. R in RGB)
             char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
