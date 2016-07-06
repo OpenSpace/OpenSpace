@@ -344,13 +344,20 @@ namespace openspace {
         return PixelCoordinate(glm::round(P), glm::round(L));
     }
 
+    Geodetic2 TileDataset::pixelToGeodetic(const PixelCoordinate& p) const {
+        double padfTransform[6];
+        CPLErr err = _dataset->GetGeoTransform(padfTransform);
+        ghoul_assert(err != CE_Failure, "Failed to get transform");
+        Geodetic2 geodetic;
+        geodetic.lon = padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2];
+        geodetic.lat = padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5];
+        return geodetic;
+    }
+
+
     IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
         IODescription io;
         io.read.region = gdalPixelRegion(chunkIndex);
-
-        //Geodetic2 halfSize = Geodetic2(dAngle::HALF.asRadians(), dAngle::QUARTER.asRadians());
-        //PixelRegion fullRegion = gdalPixelRegion(GeodeticPatch(Geodetic2(0, 0), Geodetic2(dAngle::HALF)))
-
 
         if (gdalHasOverviews()) {
             int overview = gdalOverview(chunkIndex);
@@ -364,8 +371,6 @@ namespace openspace {
             int virtualOverview = gdalVirtualOverview(chunkIndex);
             io.write.region.downscalePow2(virtualOverview + 1);
         }
-
-
 
         // For correct sampling in height dataset, we need to pad the texture tile
         io.read.region.pad(padding);
