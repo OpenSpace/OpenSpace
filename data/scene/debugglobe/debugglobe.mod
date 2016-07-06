@@ -23,8 +23,9 @@ return {
             Frame = "IAU_EARTH",
             Body = "EARTH",
             --Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            Radii = {1738100, 1738100, 1736000}, -- Moon's radii
             --Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
-            Radii =   {2439700.0, 2439700.0, 2439700.0},
+            --Radii =   {2439700.0, 2439700.0, 2439700.0},
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 90,
@@ -69,6 +70,7 @@ return {
                         FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat.cub",
                         --Enabled = true,
                     },
+                    --[[
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/mercury/OnMercuryColor.xml",
@@ -77,11 +79,17 @@ return {
                         Name = "On Mercury Image",
                         FilePath = "map_service_configs/mercury/OnMercuryImage.xml",
                     },
+                    ]]
                 },
                 GrayScaleOverlays = {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
+                    },
+                    {
+                        Name = "On Moon Color",
+                        FilePath = "map_service_configs/moon/OnMoonColor.xml",
+                        Enabled = true,
                     },
                 },
                 NightTextures = {
@@ -99,11 +107,16 @@ return {
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/mars/Mola_Elevation.xml",
+                        --Enabled = true,
+                    },
+                    {
+                        Name = "On Moon Height",
+                        FilePath = "map_service_configs/moon/OnMoonHeight.xml",
+                        Enabled = true,
                     },
                     {
                         Name = "On Mercury Height",
                         FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
-                        Enabled = true,
                     }
                 },
                 WaterMasks = {
