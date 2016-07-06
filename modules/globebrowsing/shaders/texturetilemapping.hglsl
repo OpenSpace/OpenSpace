@@ -216,9 +216,9 @@ vec4 calculateGrayScaleOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Tile grayscaleOverlayTiles[NUMLAYERS_OVERLAY],
-	const Tile grayscaleOverlayTilesParent1[NUMLAYERS_OVERLAY],
-	const Tile grayscaleOverlayTilesParent2[NUMLAYERS_OVERLAY]) {
+	const Tile grayscaleOverlayTiles[NUMLAYERS_GRAYSCALE_OVERLAY],
+	const Tile grayscaleOverlayTilesParent1[NUMLAYERS_GRAYSCALE_OVERLAY],
+	const Tile grayscaleOverlayTilesParent2[NUMLAYERS_GRAYSCALE_OVERLAY]) {
 
 	vec4 colorGrayScale = vec4(0);
 
@@ -235,7 +235,7 @@ vec4 calculateGrayScaleOverlay(
 			levelWeights.w2 * getTexVal(grayscaleOverlayTilesParent1[#{i}], uv) +
 			levelWeights.w3 * getTexVal(grayscaleOverlayTilesParent2[#{i}], uv);
 
-		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}
 	#endfor
