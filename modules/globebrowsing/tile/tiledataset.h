@@ -74,6 +74,7 @@ namespace openspace {
     };
 
 
+
     using namespace ghoul::opengl;
     using namespace ghoul::filesystem;
 
@@ -137,6 +138,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+        Geodetic2 pixelToGeodetic(const PixelCoordinate& p) const;
         IODescription getIODescription(const ChunkIndex& chunkIndex) const;
         char* readImageData(IODescription& io, CPLErr& worstError) const;
         CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
