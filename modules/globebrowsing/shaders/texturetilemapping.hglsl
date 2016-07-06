@@ -235,7 +235,7 @@ vec4 calculateGrayScaleOverlay(
 			levelWeights.w2 * getTexVal(grayscaleOverlayTilesParent1[#{i}], uv) +
 			levelWeights.w3 * getTexVal(grayscaleOverlayTilesParent2[#{i}], uv);
 
-		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}
 	#endfor

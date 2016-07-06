@@ -135,18 +135,22 @@ namespace openspace {
         scale(glm::dvec2(s));
     }
 
-    void PixelRegion::downscalePow2(int exponent) {
+    void PixelRegion::downscalePow2(int exponent, PixelCoordinate wrt) {
+        start += wrt;
         start.x >>= exponent;
         start.y >>= exponent;
         numPixels.x >>= exponent;
         numPixels.y >>= exponent;
+        start -= wrt;
     }
 
-    void PixelRegion::upscalePow2(int exponent) {
+    void PixelRegion::upscalePow2(int exponent, PixelCoordinate wrt) {
+        start += wrt;
         start.x <<= exponent;
         start.y <<= exponent;
         numPixels.x <<= exponent;
         numPixels.y <<= exponent;
+        start -= wrt;
     }
 
 
