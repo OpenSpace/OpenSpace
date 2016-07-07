@@ -73,9 +73,6 @@ namespace openspace {
         static void initTexures(std::vector<TileProviderWithName>& destination,
             const ghoul::Dictionary& dict, const TileProviderInitData& initData);
 
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
-            const TileProviderInitData& initData);
-
         std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 

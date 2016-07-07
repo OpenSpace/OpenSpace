@@ -81,6 +81,13 @@ namespace openspace {
 
     class TileDataset {
     public:
+
+        struct Configuration {
+            bool doPreProcessing;
+            int minimumTilePixelSize;
+            GLuint dataType = 0; // default = no datatype reinterpretation
+        };
+
         
         /**
         * Opens a GDALDataset in readonly mode and calculates meta data required for 
@@ -90,8 +97,7 @@ namespace openspace {
         * \param minimumPixelSize - minimum number of pixels per side per tile requested 
         * \param datatype         - datatype for storing pixel data in requested tile
         */
-        TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, 
-            bool doPreprocessing, GLuint dataType = 0);
+        TileDataset(const std::string& gdalDatasetDesc, const Configuration& config);
 
         ~TileDataset();
 
@@ -108,6 +114,7 @@ namespace openspace {
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
         const static PixelRegion padding; // same as the two above
+
 
 
     private:
@@ -166,6 +173,9 @@ namespace openspace {
             int _maxLevel = -1;
             double _tileLevelDifference;
         } _cached;
+
+        const Configuration _config;
+
 
         GDALDataset* _dataset;
         TileDepthTransform _depthTransform;
