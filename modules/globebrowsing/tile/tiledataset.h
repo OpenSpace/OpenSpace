@@ -106,14 +106,17 @@ namespace openspace {
         //                              Public interface                                //
         //////////////////////////////////////////////////////////////////////////////////
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
+        std::shared_ptr<TileIOResult> defaultTileData();
         int maxChunkLevel();
-        TileDepthTransform getDepthTransform() ;
-        const TileDataLayout& getDataLayout() ;
+        TileDepthTransform getDepthTransform();
+        const TileDataLayout& getDataLayout();
 
 
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
         const static PixelRegion padding; // same as the two above
+
+        
 
 
 
@@ -132,6 +135,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                            GDAL helper methods                               //
         //////////////////////////////////////////////////////////////////////////////////
+
         void gdalEnsureInitialized();
         GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
         bool gdalHasOverviews() const;
