@@ -107,7 +107,7 @@ private:
     size_t _encodeOffset;
     size_t _decodeOffset;
     std::vector<char> _dataStream;
-    sgct::SharedVector<char> _synchronizationBuffer;
+    sgct::SharedVector<char>* _synchronizationBuffer;
 };
 
 } // namespace openspace
