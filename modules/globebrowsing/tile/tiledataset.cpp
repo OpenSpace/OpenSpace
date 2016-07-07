@@ -79,18 +79,28 @@ namespace openspace {
         PixelRegion readPreCut = read.region;
         PixelRegion writePreCut = write.region;
 
+        glm::dvec2 ratio;
+        ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
+        ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
+
+        double ratioRatio = ratio.x / ratio.y;
+        ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.001, "Different read/write aspect ratio!");
+
+
         IODescription whatCameOff = *this;
         whatCameOff.read.region = read.region.globalCut(side, pos);
 
-        PixelCoordinate cutSize = whatCameOff.read.region.numPixels;
-        int cutWidth = (side % 2 == 0) ? cutSize.x : cutSize.y;
-        whatCameOff.write.region = write.region.localCut(side, cutWidth);
+        PixelRange cutSize = whatCameOff.read.region.numPixels;
+        PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+        
 
-
-        if (cutWidth == 0) {
+        if (cutSize.x == 0 || cutSize.y == 0) {
             ghoul_assert(read.region.equals(readPreCut), "Read region should not have been modified");
             ghoul_assert(write.region.equals(writePreCut), "Write region should not have been modified");
         }
+
+        int localWriteCutPos = (side % 2 == 0) ? localWriteCutSize.x : localWriteCutSize.y;
+        whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
 
         return whatCameOff;
     }
@@ -403,16 +413,20 @@ namespace openspace {
             io.read.overview = overview;
             io.read.region.downscalePow2(overview + 1);
             io.write.region = io.read.region;
+            io.read.region.pad(padding);
         }
         else {
             io.read.overview = 0;
             io.write.region = io.read.region;
             int virtualOverview = gdalVirtualOverview(chunkIndex);
             io.write.region.downscalePow2(virtualOverview + 1);
+            PixelRegion scaledPadding = padding;
+
+            scaledPadding.upscalePow2(std::max(virtualOverview + 1, 0));
+            io.read.region.pad(scaledPadding);
         }
 
         // For correct sampling in height dataset, we need to pad the texture tile
-        io.read.region.pad(padding);
         io.write.region.pad(padding);
 
         io.write.region.numPixels.x += (io.write.region.numPixels.x % 2);
