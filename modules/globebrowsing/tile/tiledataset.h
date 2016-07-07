@@ -162,14 +162,13 @@ namespace openspace {
             GLuint dataType;
         } _initData;
         
-
-
-        int _maxLevel;
-        double _tileLevelDifference;
-        
-        TileDepthTransform _depthTransform;
+        struct Cached {
+            int _maxLevel = -1;
+            double _tileLevelDifference;
+        } _cached;
 
         GDALDataset* _dataset;
+        TileDepthTransform _depthTransform;
         TileDataLayout _dataLayout;
 
         bool _doPreprocessing;

@@ -116,7 +116,6 @@ namespace openspace {
     TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize,
         bool doPreprocessing, GLuint dataType)
         : _doPreprocessing(doPreprocessing)
-        , _maxLevel(-1)
         , hasBeenInitialized(false)
     {
         _initData = { gdalDatasetDesc, minimumPixelSize, dataType };
@@ -137,9 +136,9 @@ namespace openspace {
         //Do any other initialization needed for the TileDataset
         _dataLayout = TileDataLayout(_dataset, _initData.dataType);
         _depthTransform = calculateTileDepthTransform();
-        _tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
+        _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
 
-        LDEBUG(_initData.gdalDatasetDesc << " - " << _tileLevelDifference);
+        LDEBUG(_initData.gdalDatasetDesc << " - " << _cached._tileLevelDifference);
     }
 
     void TileDataset::gdalEnsureInitialized() {
@@ -212,14 +211,14 @@ namespace openspace {
 
     int TileDataset::maxChunkLevel() {
         ensureInitialized();
-        if (_maxLevel < 0) {
+        if (_cached._maxLevel < 0) {
             int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-            _maxLevel = -_tileLevelDifference;
+            _cached._maxLevel = -_cached._tileLevelDifference;
             if (numOverviews > 0) {
-                _maxLevel += numOverviews - 1;
+                _cached._maxLevel += numOverviews - 1;
             }
         }
-        return _maxLevel;
+        return _cached._maxLevel;
     }
 
     TileDepthTransform TileDataset::getDepthTransform() {
@@ -294,7 +293,7 @@ namespace openspace {
         // The dataset itself may not have overviews but even if it does not, an overview
         // for the data region can be calculated and possibly be used to sample greater
         // Regions of the original dataset.
-        int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) - _tileLevelDifference;
+        int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) - _cached._tileLevelDifference;
         ov = glm::clamp(ov, 0, overviews - 1);
         
         return ov;
@@ -302,14 +301,14 @@ namespace openspace {
 
     int TileDataset::gdalOverview(const ChunkIndex& chunkIndex) const {
         int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int ov = overviews - (chunkIndex.level + _tileLevelDifference + 1);
+        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
         return glm::clamp(ov, 0, overviews - 1);
     }
 
 
     int TileDataset::gdalVirtualOverview(const ChunkIndex& chunkIndex) const {
         int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int ov = overviews - (chunkIndex.level + _tileLevelDifference + 1);
+        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
         return ov;
     }
 
