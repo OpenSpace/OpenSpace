@@ -28,6 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/assert.h>
 
+#include <memory>
 #include <stdint.h>
 #include <vector>
 
@@ -42,6 +43,8 @@ class SyncBuffer {
 public:
 
     SyncBuffer(size_t n);
+
+    ~SyncBuffer();
 
     void encode(const std::string& s) {
         const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
@@ -107,7 +110,7 @@ private:
     size_t _encodeOffset;
     size_t _decodeOffset;
     std::vector<char> _dataStream;
-    sgct::SharedVector<char> _synchronizationBuffer;
+    std::unique_ptr<sgct::SharedVector<char>> _synchronizationBuffer;
 };
 
 } // namespace openspace
