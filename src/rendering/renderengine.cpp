@@ -347,7 +347,7 @@ void RenderEngine::postSynchronizationPreDraw() {
     if (windowResized) {
         glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
         _renderer->setResolution(res);
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
     }
 
     // update and evaluate the scene starting from the root node
