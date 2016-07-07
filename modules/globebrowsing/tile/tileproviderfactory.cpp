@@ -67,7 +67,11 @@ namespace openspace {
 
     void TileProviderFactory::initialize() {
         _factoryMap.insert({"LRUCaching", [](const std::string& desc, const TileProviderInitData& initData) {
-            auto tileDataset = std::make_shared<TileDataset>(desc, initData.minimumPixelSize, initData.preprocessTiles);
+            TileDataset::Configuration config;
+            config.doPreProcessing = initData.preprocessTiles;
+            config.minimumTilePixelSize = initData.minimumPixelSize;
+
+            auto tileDataset = std::make_shared<TileDataset>(desc, config);
             auto threadPool = std::make_shared<ThreadPool>(1);
             auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
             auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
