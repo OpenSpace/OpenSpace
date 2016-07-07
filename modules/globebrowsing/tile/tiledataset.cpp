@@ -210,7 +210,7 @@ namespace openspace {
         result->dimensions = glm::uvec3(io.write.region.numPixels, 1);
         result->nBytesImageData = io.write.totalNumBytes;
         
-        if (_doPreprocessing) {
+        if (_config.doPreProcessing) {
             result->preprocessData = preprocess(result, io.write.region);
             result->error = std::max(result->error, postProcessErrorCheck(result, io));
         }

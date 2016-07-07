@@ -121,7 +121,7 @@ namespace openspace {
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Initialization                                //
-        //////////////////////////////////////////////////////////////////////////////////\
+        //////////////////////////////////////////////////////////////////////////////////
 
         void initialize();
         void ensureInitialized();
@@ -180,8 +180,6 @@ namespace openspace {
         GDALDataset* _dataset;
         TileDepthTransform _depthTransform;
         TileDataLayout _dataLayout;
-
-        bool _doPreprocessing;
 
         static bool GdalHasBeenInitialized;
         bool hasBeenInitialized;
