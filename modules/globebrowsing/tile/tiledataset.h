@@ -101,8 +101,8 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
         int maxChunkLevel();
-        TileDepthTransform getDepthTransform() const;
-        const TileDataLayout& getDataLayout() const;
+        TileDepthTransform getDepthTransform() ;
+        const TileDataLayout& getDataLayout() ;
 
 
         const static glm::ivec2 tilePixelStartOffset;
@@ -114,8 +114,10 @@ namespace openspace {
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Initialization                                //
-        //////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////\
 
+        void initialize();
+        void ensureInitialized();
         TileDepthTransform calculateTileDepthTransform();
         int calculateTileLevelDifference(int minimumPixelSize);
 
@@ -123,7 +125,8 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                            GDAL helper methods                               //
         //////////////////////////////////////////////////////////////////////////////////
-
+        void gdalEnsureInitialized();
+        GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
         bool gdalHasOverviews() const;
         int gdalOverview(const PixelRange& baseRegionSize) const;
         int gdalOverview(const ChunkIndex& chunkIndex) const;
@@ -152,11 +155,18 @@ namespace openspace {
         //                              Member variables                                //
         //////////////////////////////////////////////////////////////////////////////////
 
+        // init data
+        struct InitData {
+            std::string gdalDatasetDesc;
+            int minimumPixelSize;
+            GLuint dataType;
+        } _initData;
+        
+
 
         int _maxLevel;
         double _tileLevelDifference;
         
-        std::string _description;
         TileDepthTransform _depthTransform;
 
         GDALDataset* _dataset;
@@ -165,7 +175,7 @@ namespace openspace {
         bool _doPreprocessing;
 
         static bool GdalHasBeenInitialized;
-
+        bool hasBeenInitialized;
     };
 
 
