@@ -68,6 +68,7 @@ namespace openspace {
         virtual ~TileProvider() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
+        virtual Tile getDefaultTile() = 0;
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void update() = 0;
@@ -84,6 +85,7 @@ namespace openspace {
         virtual ~SingleImagePrivoder() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
@@ -110,6 +112,7 @@ namespace openspace {
         virtual ~CachingTileProvider();
         
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
@@ -130,7 +133,8 @@ namespace openspace {
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
-        void initializeAndAddToCache(std::shared_ptr<TileIOResult> uninitedTexture);
+
+        Tile createTile(std::shared_ptr<TileIOResult> res);
 
         void clearRequestQueue();
 
@@ -143,6 +147,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         std::shared_ptr<TileCache> _tileCache;
+        Tile _defaultTile;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;

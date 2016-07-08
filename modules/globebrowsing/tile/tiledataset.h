@@ -116,9 +116,6 @@ namespace openspace {
         const static glm::ivec2 tilePixelSizeDifference;
         const static PixelRegion padding; // same as the two above
 
-        
-
-
 
     private:
 
