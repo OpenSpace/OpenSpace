@@ -113,12 +113,11 @@ namespace openspace {
 
     bool TileDataset::GdalHasBeenInitialized = false;
 
-    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize,
-        bool doPreprocessing, GLuint dataType)
-        : _doPreprocessing(doPreprocessing)
+    TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
+        : _config(config)
         , hasBeenInitialized(false)
     {
-        _initData = { gdalDatasetDesc, minimumPixelSize, dataType };
+        _initData = { gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
         ensureInitialized();
     }
 
