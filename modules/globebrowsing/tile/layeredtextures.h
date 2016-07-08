@@ -40,12 +40,12 @@ namespace openspace {
 
         enum TextureCategory {
             ColorTextures,
+            GrayScaleOverlays,
             NightTextures,
-            HeightMaps,
-            HeightMapOverlays,
             WaterMasks,
             Overlays,
-            GrayScaleOverlays,
+            HeightMaps,
+            HeightMapOverlays,
         };
 
         static const std::string TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES];

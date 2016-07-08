@@ -39,12 +39,12 @@ namespace openspace {
     const std::string LayeredTextures::TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES] =
     {
         "ColorTextures",
+        "GrayScaleOverlays",
         "NightTextures",
-        "HeightMaps",
-        "HeightMapOverlays",
         "WaterMasks",
         "Overlays",
-        "GrayScaleOverlays"
+        "HeightMaps",
+        "HeightMapOverlays",
     };
 
 }  // namespace openspace
