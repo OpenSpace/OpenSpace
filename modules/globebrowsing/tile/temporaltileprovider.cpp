@@ -64,6 +64,7 @@ namespace openspace {
         // read file
         std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
+        _defaultTile = getTileProvider()->getDefaultTile();
     }
 
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -109,46 +110,40 @@ namespace openspace {
     }
 
     TileDepthTransform TemporalTileProvider::depthTransform() {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call update from depthTransform()");
-            update();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->depthTransform();
     }
 
     Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call update from getTileStatus()");
-            update();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->getTileStatus(chunkIndex);
     }
 
     Tile TemporalTileProvider::getTile(const ChunkIndex& chunkIndex) {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call update from getTile()");
-            update();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->getTile(chunkIndex);
     }
 
+    Tile TemporalTileProvider::getDefaultTile() {
+        return _defaultTile;
+    }
 
+
+    int TemporalTileProvider::maxLevel() {
+        ensureUpdated();
+        return _currentTileProvider->maxLevel();
+    }
+
+    void TemporalTileProvider::ensureUpdated() {
+        if (_currentTileProvider == nullptr) {
+            LDEBUG("Warning: update was done lazily");
+            update();
+        }
+    }
 
     void TemporalTileProvider::update() {
         _currentTileProvider = getTileProvider();
         _currentTileProvider->update();
-    }
-
-    int TemporalTileProvider::maxLevel() {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call update from getAsyncTileReader()");
-            update();
-        }
-
-        return _currentTileProvider->maxLevel();
     }
 
 

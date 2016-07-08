@@ -118,9 +118,10 @@ namespace openspace {
     const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(4);
 
     const PixelRegion TileDataset::padding = PixelRegion(tilePixelStartOffset, tilePixelSizeDifference);
-
-
+    
     bool TileDataset::GdalHasBeenInitialized = false;
+
+
 
     TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
         : _config(config)
@@ -201,7 +202,7 @@ namespace openspace {
         IODescription io = getIODescription(chunkIndex);
         CPLErr worstError = CPLErr::CE_None;
 
-        // Build the Tile IO Result from the data we queried
+        // Build the Tile IO Result from the data we queride
         std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
         result->imageData = readImageData(io, worstError);
         result->error = worstError;
@@ -209,9 +210,31 @@ namespace openspace {
         result->dimensions = glm::uvec3(io.write.region.numPixels, 1);
         result->nBytesImageData = io.write.totalNumBytes;
         
-        if (_doPreprocessing) {
+        if (_config.doPreProcessing) {
             result->preprocessData = preprocess(result, io.write.region);
             result->error = std::max(result->error, postProcessErrorCheck(result, io));
+        }
+
+        return result;
+    }
+
+
+    std::shared_ptr<TileIOResult> TileDataset::defaultTileData() {
+        ensureInitialized();
+        PixelRegion pixelRegion = { PixelCoordinate(0, 0), PixelRange(16, 16) };
+        std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
+        result->chunkIndex = { 0, 0, 0 };
+        result->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
+        result->nBytesImageData = result->dimensions.x * result->dimensions.y * _dataLayout.bytesPerPixel;
+        result->imageData = new char[result->nBytesImageData];
+        for (size_t i = 0; i < result->nBytesImageData; ++i) {
+            result->imageData[i] = 0;
+        }
+        result->error = CPLErr::CE_None;
+        
+        if (_config.doPreProcessing) {
+            result->preprocessData = preprocess(result, pixelRegion);
+            //result->error = std::max(result->error, postProcessErrorCheck(result, io));
         }
 
         return result;

@@ -121,6 +121,7 @@ namespace openspace {
 
         // These methods implements TileProvider
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
@@ -148,6 +149,8 @@ namespace openspace {
         std::string consumeTemporalMetaData(const std::string &xml);
         std::string getXMLValue(CPLXMLNode*, const std::string& key, const std::string& defaultVal);
 
+        void ensureUpdated();
+
         //////////////////////////////////////////////////////////////////////////////////
         //                                Members variables                             //
         //////////////////////////////////////////////////////////////////////////////////
@@ -157,6 +160,8 @@ namespace openspace {
 
         std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
         TileProviderInitData _tileProviderInitData;
+
+        Tile _defaultTile;
 
         std::shared_ptr<TileProvider> _currentTileProvider;
 

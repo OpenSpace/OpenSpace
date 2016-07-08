@@ -65,6 +65,11 @@ namespace openspace {
         return _tile;
     }
 
+    Tile SingleImagePrivoder::getDefaultTile() {
+        return _tile;
+    }
+
+
     Tile::Status SingleImagePrivoder::getTileStatus(const ChunkIndex& index) {
         return _tile.status;
     }
@@ -140,10 +145,20 @@ namespace openspace {
         return tile;
     }
 
+    Tile CachingTileProvider::getDefaultTile() {
+        if (_defaultTile.texture == nullptr) {
+            _defaultTile = createTile(_asyncTextureDataProvider->getTextureDataProvider()->defaultTileData());
+        }
+        return _defaultTile;
+    }
+
+
     void CachingTileProvider::initTexturesFromLoadedData() {
         while (_asyncTextureDataProvider->hasLoadedTextureData()) {
             std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider->nextTileIOResult();
-            initializeAndAddToCache(tileIOResult);
+            ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
+            Tile tile = createTile(tileIOResult);
+            _tileCache->put(key, tile);
         }
     }
 
@@ -184,7 +199,7 @@ namespace openspace {
     }
 
 
-    void CachingTileProvider::initializeAndAddToCache(std::shared_ptr<TileIOResult> tileIOResult) {
+    Tile CachingTileProvider::createTile(std::shared_ptr<TileIOResult> tileIOResult) {
         ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
@@ -209,7 +224,7 @@ namespace openspace {
             tileIOResult->error == CE_None ? Tile::Status::OK : Tile::Status::IOError
         };
 
-        _tileCache->put(key, tile);
+        return tile;
     }
 
 

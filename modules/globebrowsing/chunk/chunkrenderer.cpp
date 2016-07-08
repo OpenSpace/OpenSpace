@@ -218,9 +218,9 @@ namespace openspace {
                 // Get the texture that should be used for rendering
                 TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
                 if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                    // don't render if no tile was available
-                    programObject->deactivate();
-                    return nullptr;
+                    tileAndTransform.tile = tileProvider->getDefaultTile();
+                    tileAndTransform.uvTransform.uvOffset = { 0, 0 };
+                    tileAndTransform.uvTransform.uvScale = { 1, 1 };
                 }
 
                 activateTileAndSetTileUniforms(

@@ -62,7 +62,19 @@ namespace openspace {
             LERROR("Unknown type: " << type);
             return nullptr;
         }
-        return concreteFactoryIterator->second(desc, initData);
+
+        std::shared_ptr<TileProvider> tileProvider;
+
+        try {
+            tileProvider = concreteFactoryIterator->second(desc, initData);
+        }
+        catch (const std::exception& e) {
+            LERROR(e.what());
+        }
+        catch (...) {
+            LERROR("Could not open dataset:\n" << desc << "\n");
+        }
+        return tileProvider;
     }
 
     void TileProviderFactory::initialize() {
