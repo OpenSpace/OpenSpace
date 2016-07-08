@@ -84,8 +84,7 @@ namespace openspace {
         ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
         double ratioRatio = ratio.x / ratio.y;
-        ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.001, "Different read/write aspect ratio!");
-
+        //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.01, "Different read/write aspect ratio!");
 
         IODescription whatCameOff = *this;
         whatCameOff.read.region = read.region.globalCut(side, pos);
