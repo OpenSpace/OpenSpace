@@ -8,7 +8,7 @@ return {
             Body = "ROSETTA", 
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "obj/mainbodyros.obj",   
+                GeometryFile = "obj/Rosetta.obj",
                 Magnification = 1,
             },
             Textures = {
@@ -126,55 +126,6 @@ return {
         },
         GuiName = "RosettaCometTrail"
     },
-
-    -- Rosetta Solar Array module 1
-    {   
-        Name = "RosettaSolar1",
-        Parent = "Rosetta",  
-        Renderable = {
-            Type = "RenderableModel",
-            Body = "ROSETTA", 
-            Geometry = {
-                Type = "MultiModelGeometry",
-                Magnification = 1,    
-                GeometryFile = "obj/solarpanelleft.obj", 
-            }, 
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
-            Rotation = {
-                Source = "ROS_SA+Y",
-                Destination = "ROS_SPACECRAFT"
-            },
-        },
-    },
-
-    -- Rosetta Solar Array module 2
-    {   
-        Name = "RosettaSolar2",
-        Parent = "Rosetta", 
-
-        Renderable = {
-            Type = "RenderableModel",
-            Body = "ROSETTA",
-            Geometry = {
-                Type = "MultiModelGeometry",
-                GeometryFile = "obj/solarpanelright.obj", 
-                Magnification = 1,
-            },
-            Textures = {
-                Type = "simple",
-                Color = "textures/gray.png",
-            },
-            Rotation = {
-                Source = "ROS_SA-Y",
-                Destination = "ROS_SPACECRAFT"
-            },
-        },
-    },
-
-    -- RosettaFov main module
     {   
         Name = "NAVCAM",
         Parent = "Rosetta",
