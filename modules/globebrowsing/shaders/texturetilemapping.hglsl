@@ -123,7 +123,7 @@ float calculateHeightOverlay(
 
 		float heightSample = getTransformedTexVal(heightOverlayTiles[#{i}].depthTransform, untransformedHeightSample.r);
 		if (untransformedHeightSample.g > 0.5)
-				height = heightSample;	
+			height = heightSample;
 	}
 	#endfor
 	

@@ -129,15 +129,15 @@ return {
                         FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
                     },
                     {
-                        Name = "West_Candor_Chasma_DEM_longlat_global",
+                        Name = "West_Candor_Chasma_DEM_longlat_global1",
                         FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
                     }
                 },
                 HeightMapOverlays = {
                     {
-                        Name = "West_Candor_Chasma_DEM_longlat_global",
+                        Name = "West_Candor_Chasma_DEM_longlat_global2",
                         FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
-                    }
+                    },
                 },
                 WaterMasks = {
                     {

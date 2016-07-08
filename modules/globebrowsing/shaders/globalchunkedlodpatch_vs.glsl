@@ -93,8 +93,6 @@ void main()
 #endif // USE_HEIGHTMAP
 
 #if USE_HEIGHTMAP_OVERLAY
-	// Calculate desired level based on distance to the vertex on the ellipsoid
-    // Before any heightmapping is done
 	height = calculateHeightOverlay(
 		height,
 		in_uv,
