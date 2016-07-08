@@ -157,6 +157,7 @@ Fragment getFragment() {
 
 	frag.depth = fs_position.w;
 
+	
 	return frag;
 }
 

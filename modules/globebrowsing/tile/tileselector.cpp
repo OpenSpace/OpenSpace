@@ -66,7 +66,8 @@ namespace openspace {
             }
             else return { tile, uvTransform };
         }
-        return {Tile::TileUnavailable, uvTransform};
+        
+        return{ Tile::TileUnavailable, uvTransform };
     }
 
     void TileSelector::ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv) {
