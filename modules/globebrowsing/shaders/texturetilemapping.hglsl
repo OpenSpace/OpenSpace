@@ -33,6 +33,11 @@
 #define USE_HEIGHTMAP #{useHeightMaps}
 #define HEIGHTMAP_BLENDING_ENABLED #{blendHeightMaps}
 
+// First layer type from LayeredTextureShaderProvider is height map
+#define NUMLAYERS_HEIGHTMAP_OVERLAY #{lastLayerIndexHeightMapOverlays} + 1
+#define USE_HEIGHTMAP_OVERLAY #{useHeightMapOverlays}
+#define HEIGHTMAP_OVERLAY_BLENDING_ENABLED #{blendHeightMapOverlays}
+
 // Second layer type from LayeredTextureShaderProvider is color texture
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColorTextures} + 1
 #define USE_COLORTEXTURE #{useColorTextures}
@@ -77,7 +82,7 @@ float calculateHeight(
 	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
 	
-
+	
 	#for i in 0..#{lastLayerIndexHeightMaps}
 	{
 		float untransformedHeight = 
@@ -85,11 +90,43 @@ float calculateHeight(
 			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
 			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
 
-		// OBS! Only the values from the last height map will be used!
-		height = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
+		float heightSample = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
+		if (heightSample > -100000)
+			height = heightSample;
 	}
 	#endfor
+	return height;
+}
 
+float calculateHeightOverlay(
+	float currentHeight,
+	vec2 uv,
+	LevelWeights levelWeights,
+	const Tile heightOverlayTiles[NUMLAYERS_HEIGHTMAP_OVERLAY],
+	const Tile heightOverlayTilesParent1[NUMLAYERS_HEIGHTMAP_OVERLAY],
+	const Tile heightOverlayTilesParent2[NUMLAYERS_HEIGHTMAP_OVERLAY]) {
+
+	float height = currentHeight;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !HEIGHTMAP_OVERLAY_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // HEIGHTMAP_OVERLAY_BLENDING_ENABLED
+	
+	#for i in 0..#{lastLayerIndexHeightMapOverlays}
+	{
+		vec4 untransformedHeightSample = 
+			levelWeights.w1 * getTexVal(heightOverlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(heightOverlayTilesParent1[#{i}], uv) + 
+			levelWeights.w3 * getTexVal(heightOverlayTilesParent2[#{i}], uv);
+
+		float heightSample = getTransformedTexVal(heightOverlayTiles[#{i}].depthTransform, untransformedHeightSample.r);
+		if (untransformedHeightSample.g > 0.5)
+				height = heightSample;	
+	}
+	#endfor
+	
 	return height;
 }
 

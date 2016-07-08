@@ -96,6 +96,7 @@ Fragment getFragment() {
 	#if USE_HEIGHTMAP
 		frag.color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
 	#endif
+	//frag.color = frag.color * 0.001 + vec4(0,0,0,1);
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALE_OVERLAY

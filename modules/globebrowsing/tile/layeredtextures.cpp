@@ -41,6 +41,7 @@ namespace openspace {
         "ColorTextures",
         "NightTextures",
         "HeightMaps",
+        "HeightMapOverlays",
         "WaterMasks",
         "Overlays",
         "GrayScaleOverlays"

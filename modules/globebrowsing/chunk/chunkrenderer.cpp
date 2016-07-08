@@ -257,6 +257,16 @@ namespace openspace {
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
                 }
+
+                /*
+                if (category == LayeredTextures::HeightMaps && tileAndTransform.tile.preprocessData) {
+                    //auto preprocessingData = tileAndTransform.tile.preprocessData;
+                    //float noDataValue = preprocessingData->noDataValues[0];
+                    programObject->setUniform(
+                        "minimumValidHeight[" + std::to_string(i) + "]",
+                        -100000);
+                }
+                */
                 i++;
             }
         }
@@ -285,7 +295,7 @@ namespace openspace {
         if (tileProviders[LayeredTextures::ColorTextures].size() == 0) {
             programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
         }       
-
+        
         return programObject;
     }
 

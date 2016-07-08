@@ -22,9 +22,9 @@ return {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
             Body = "EARTH",
-            --Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             --Radii = {1738100, 1738100, 1736000}, -- Moon's radii
-            Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            --Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
             --Radii =   {2439700.0, 2439700.0, 2439700.0},
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
@@ -54,23 +54,23 @@ return {
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/earth/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
-                    },
+                    },]]
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/earth/ESRI_Imagery_World_2D.wms",
                         --Enabled = true,
-                    },]]
+                    },
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/mars/MARS_Viking_MDIM21.xml",
                         --Enabled = true,
                     },
+                    --[[
                     {
                         Name = "Mars Viking Clr",
                         FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
                         Enabled = true,
                     },
-                    --[[
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/mercury/OnMercuryColor.xml",
@@ -85,12 +85,21 @@ return {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
+                                                Enabled = false,
+
                     },
+                    --[[
                     {
                         Name = "On Moon Color",
                         FilePath = "map_service_configs/moon/OnMoonColor.xml",
                         --Enabled = true,
-                    },
+                    },]]
+                    {
+                        Name = "West_Candor_Chasma_longlat_global",
+                        FilePath = "map_datasets/West_Candor_Chasma_longlat_global.vrt",
+                                                Enabled = true,
+
+                    }
                 },
                 NightTextures = {
                     {
@@ -109,14 +118,25 @@ return {
                         FilePath = "map_service_configs/mars/Mola_Elevation.xml",
                         --Enabled = true,
                     },
+                    --[[
                     {
                         Name = "On Moon Height",
                         FilePath = "map_service_configs/moon/OnMoonHeight.xml",
                         --Enabled = true,
-                    },
+                    },]]
                     {
                         Name = "On Mercury Height",
                         FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
+                    },
+                    {
+                        Name = "West_Candor_Chasma_DEM_longlat_global",
+                        FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
+                    }
+                },
+                HeightMapOverlays = {
+                    {
+                        Name = "West_Candor_Chasma_DEM_longlat_global",
+                        FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
                     }
                 },
                 WaterMasks = {

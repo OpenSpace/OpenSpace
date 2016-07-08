@@ -45,6 +45,12 @@ uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
 uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
+#if USE_HEIGHTMAP_OVERLAY
+uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
+#endif // USE_HEIGHTMAP_OVERLAY
+
 uniform vec3 cameraPosition;
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
@@ -77,7 +83,6 @@ void main()
 	float height = 0;
 
 #if USE_HEIGHTMAP
-	
 	// Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
 	height = calculateHeight(
@@ -86,6 +91,17 @@ void main()
 		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
+
+#if USE_HEIGHTMAP_OVERLAY
+	// Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	height = calculateHeightOverlay(
+		height,
+		in_uv,
+		levelWeights, 							// Variable to determine which texture to sample from
+		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
+
+#endif // USE_HEIGHTMAP_OVERLAY
 
 	// Skirts
 	int vertexIDx = gl_VertexID % (xSegments + 3);
