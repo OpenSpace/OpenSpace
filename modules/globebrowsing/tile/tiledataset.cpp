@@ -425,7 +425,6 @@ namespace openspace {
         return geodetic;
     }
 
-
     IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
         IODescription io;
         io.read.region = gdalPixelRegion(chunkIndex);
@@ -680,7 +679,7 @@ namespace openspace {
 
     CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const TileIOResult> result, const IODescription& io) const{
         int success;
-        
+
         double missingDataValue = gdalRasterBand(io.read.overview)->GetNoDataValue(&success);
         if (!success) {
             missingDataValue = 32767; // missing data value for TERRAIN.wms. Should be specified in xml

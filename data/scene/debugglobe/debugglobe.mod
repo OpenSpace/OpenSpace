@@ -55,6 +55,7 @@ return {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/earth/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
                     },]]
+
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/earth/ESRI_Imagery_World_2D.wms",
