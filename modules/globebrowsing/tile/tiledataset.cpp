@@ -117,27 +117,64 @@ namespace openspace {
         bool doPreprocessing, GLuint dataType)
         : _doPreprocessing(doPreprocessing)
         , _maxLevel(-1)
+        , hasBeenInitialized(false)
     {
-        // 1. First make sure GDAL has been initialized
+        _initData = { gdalDatasetDesc, minimumPixelSize, dataType };
+        ensureInitialized();
+    }
+
+    void TileDataset::ensureInitialized() {
+        if (!hasBeenInitialized) {
+            initialize();
+            hasBeenInitialized = true;
+        }
+    }
+
+    void TileDataset::initialize() {
+        gdalEnsureInitialized();
+        _dataset = gdalDataset(_initData.gdalDatasetDesc);
+
+        //Do any other initialization needed for the TileDataset
+        _dataLayout = TileDataLayout(_dataset, _initData.dataType);
+        _depthTransform = calculateTileDepthTransform();
+        _tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
+
+        LDEBUG(_initData.gdalDatasetDesc << " - " << _tileLevelDifference);
+    }
+
+    void TileDataset::gdalEnsureInitialized() {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
             CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
             GdalHasBeenInitialized = true;
         }
+    }
 
-        //2. Secondly, open the GDAL dataset. Other methods depends on this
-        _dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
-        if (!_dataset) {
+    GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
+        GDALDataset* dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
+        if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
         }
 
-        //3. Do any other initialization needed for the TileDataset
-        _dataLayout = TileDataLayout(_dataset, dataType);
-        _depthTransform = calculateTileDepthTransform();
-        _tileLevelDifference = calculateTileLevelDifference(minimumPixelSize);
-        _description = gdalDatasetDesc;
+        const std::string originalDriverName = dataset->GetDriverName();
+        
+        if (originalDriverName != "WMS") {
+            LDEBUG("  " << originalDriverName);
+            LDEBUG("  " << dataset->GetGCPProjection());
+            LDEBUG("  " << dataset->GetProjectionRef());
 
-        LDEBUG(gdalDatasetDesc << " - " << _tileLevelDifference);
+            GDALDriver* driver = dataset->GetDriver();
+            char** metadata = driver->GetMetadata();
+            for (int i = 0; metadata[i] != nullptr; i++) {
+                LDEBUG("  " << metadata[i]);
+            }
+
+            const char* in_memory = "";
+            //GDALDataset* vrtDataset = driver->CreateCopy(in_memory, dataset, false, nullptr, nullptr, nullptr);
+        }
+        
+
+        return dataset;
     }
 
 
@@ -153,6 +190,7 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////
 
     std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex) {
+        ensureInitialized();
         IODescription io = getIODescription(chunkIndex);
         CPLErr worstError = CPLErr::CE_None;
 
@@ -173,6 +211,7 @@ namespace openspace {
     }
 
     int TileDataset::maxChunkLevel() {
+        ensureInitialized();
         if (_maxLevel < 0) {
             int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
             _maxLevel = -_tileLevelDifference;
@@ -183,11 +222,13 @@ namespace openspace {
         return _maxLevel;
     }
 
-    TileDepthTransform TileDataset::getDepthTransform() const {
+    TileDepthTransform TileDataset::getDepthTransform() {
+        ensureInitialized();
         return _depthTransform;
     }
 
-    const TileDataLayout& TileDataset::getDataLayout() const {
+    const TileDataLayout& TileDataset::getDataLayout() {
+        ensureInitialized();
         return _dataLayout;
     }
 
