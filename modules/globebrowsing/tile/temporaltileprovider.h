@@ -161,6 +161,8 @@ namespace openspace {
         std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
         TileProviderInitData _tileProviderInitData;
 
+        Tile _defaultTile;
+
         std::shared_ptr<TileProvider> _currentTileProvider;
 
         TimeFormat * _timeFormat;

@@ -64,6 +64,7 @@ namespace openspace {
         // read file
         std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
+        _defaultTile = getTileProvider()->getDefaultTile();
     }
 
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -124,8 +125,7 @@ namespace openspace {
     }
 
     Tile TemporalTileProvider::getDefaultTile() {
-        ensureUpdated();
-        return _currentTileProvider->getDefaultTile();
+        return _defaultTile;
     }
 
 

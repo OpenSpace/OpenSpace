@@ -104,7 +104,7 @@ namespace openspace {
         , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
         , _framesSinceLastRequestFlush(0)
     {
-        _defaultTile = createTile(_asyncTextureDataProvider->getTextureDataProvider()->defaultTileData());
+        
     }
 
 
@@ -146,6 +146,9 @@ namespace openspace {
     }
 
     Tile CachingTileProvider::getDefaultTile() {
+        if (_defaultTile.texture == nullptr) {
+            _defaultTile = createTile(_asyncTextureDataProvider->getTextureDataProvider()->defaultTileData());
+        }
         return _defaultTile;
     }
 
