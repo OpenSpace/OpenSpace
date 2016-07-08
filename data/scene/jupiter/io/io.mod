@@ -37,7 +37,7 @@ return {
     -- IoTrail module
     {   
         Name = "IoTrail",
-        Parent = "Io",
+        Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "IO",
