@@ -71,6 +71,8 @@ using namespace ghoul::cmdparser;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
+//#define PRINT_OUTPUT
+
 namespace {
     std::string _loggerCat = "OpenSpaceTest";
 }
@@ -81,17 +83,25 @@ int main(int argc, char** argv) {
 
     testing::InitGoogleTest(&argc, argv);
 
-    //testing::internal::CaptureStdout();
-    //testing::internal::CaptureStderr();
+#ifdef PRINT_OUTPUT
+    testing::internal::CaptureStdout();
+    testing::internal::CaptureStderr();
+#endif
+
+    openspace::SpiceManager::deinitialize();
+
     bool b = RUN_ALL_TESTS();
-    //std::string output = testing::internal::GetCapturedStdout();
-    //std::string error = testing::internal::GetCapturedStderr();
 
-    //std::ofstream o("output.txt");
-    //o << output;
+#ifdef PRINT_OUTPUT
+    std::string output = testing::internal::GetCapturedStdout();
+    std::string error = testing::internal::GetCapturedStderr();
 
-    //std::ofstream e("error.txt");
-    //e << error;
+    std::ofstream o("output.txt");
+    o << output;
+
+    std::ofstream e("error.txt");
+    e << error;
+#endif
 
     return b;
 }
