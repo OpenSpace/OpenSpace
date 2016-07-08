@@ -654,13 +654,12 @@ void ScriptEngine::postSynchronizationPreDraw() {
     
     while (!scripts.empty()) {
         try {
-            const std::string& script = scripts.back();
-            scripts.pop_back();
-            runScript(script);
+            runScript(scripts.back());
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
         }
+        scripts.pop_back();
     }
     
 }
