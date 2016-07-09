@@ -54,23 +54,24 @@ return {
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/earth/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
-                    },
+                    },]]
+
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/earth/ESRI_Imagery_World_2D.wms",
                         --Enabled = true,
-                    },]]
+                    },
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/mars/MARS_Viking_MDIM21.xml",
-                        --Enabled = true,
+                        Enabled = true,
                     },
+                    --[[
                     {
                         Name = "Mars Viking Clr",
                         FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
                         Enabled = true,
                     },
-                    --[[
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/mercury/OnMercuryColor.xml",
@@ -85,39 +86,26 @@ return {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
+                        Enabled = false,
                     },
+                    --[[
                     {
                         Name = "On Moon Color",
                         FilePath = "map_service_configs/moon/OnMoonColor.xml",
                         --Enabled = true,
+                    }
+                    {
+                        Name = "West_Candor_Chasma_longlat_global",
+                        FilePath = "map_datasets/West_Candor_Chasma_longlat_global.vrt",
+                        Enabled = true,
                     },
+                    ]]
                 },
                 NightTextures = {
                     {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/earth/VIIRS_CityLights_2012.xml",
                     },
-                },
-                HeightMaps = {
-                    {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/earth/TERRAIN.wms",
-                        --Enabled = true,
-                    },
-                    {
-                        Name = "Mola Elevation",
-                        FilePath = "map_service_configs/mars/Mola_Elevation.xml",
-                        --Enabled = true,
-                    },
-                    {
-                        Name = "On Moon Height",
-                        FilePath = "map_service_configs/moon/OnMoonHeight.xml",
-                        --Enabled = true,
-                    },
-                    {
-                        Name = "On Mercury Height",
-                        FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
-                    }
                 },
                 WaterMasks = {
                     {
@@ -138,6 +126,37 @@ return {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/earth/Reference_Labels.xml",
                     },
+                },
+                HeightMaps = {
+                    {
+                        Name = "Terrain tileset",
+                        FilePath = "map_service_configs/earth/TERRAIN.wms",
+                        --Enabled = true,
+                    },
+                    {
+                        Name = "Mola Elevation",
+                        FilePath = "map_service_configs/mars/Mola_Elevation.xml",
+                        Enabled = true,
+                    },
+                    --[[
+                    {
+                        Name = "On Moon Height",
+                        FilePath = "map_service_configs/moon/OnMoonHeight.xml",
+                        --Enabled = true,
+                    },]]
+                    {
+                        Name = "On Mercury Height",
+                        FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
+                    },
+                },
+                HeightMapOverlays = {
+                    --[[
+                    {
+                        Name = "West_Candor_Chasma_DEM_longlat_global2",
+                        FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
+                        Enabled = true,
+                    },
+                    ]]
                 },
             },
         },

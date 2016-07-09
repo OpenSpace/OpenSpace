@@ -84,8 +84,8 @@ namespace openspace {
         ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
         double ratioRatio = ratio.x / ratio.y;
-        //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.001, "Different read/write aspect ratio!");
 
+        //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.01, "Different read/write aspect ratio!");
 
         IODescription whatCameOff = *this;
         whatCameOff.read.region = read.region.globalCut(side, pos);
@@ -426,7 +426,6 @@ namespace openspace {
         return geodetic;
     }
 
-
     IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
         IODescription io;
         io.read.region = gdalPixelRegion(chunkIndex);
@@ -663,22 +662,29 @@ namespace openspace {
         preprocessData->maxValues.resize(_dataLayout.numRasters);
         preprocessData->minValues.resize(_dataLayout.numRasters);
 
+        std::vector<float> noDataValues;
+        noDataValues.resize(_dataLayout.numRasters);
+
         for (size_t c = 0; c < _dataLayout.numRasters; c++) {
             preprocessData->maxValues[c] = -FLT_MAX;
             preprocessData->minValues[c] = FLT_MAX;
+            noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
         }
 
+        float noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
+
         for (size_t y = 0; y < region.numPixels.y; y++) {
-            size_t yi_flipped = y * bytesPerLine;
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
             size_t i = 0;
             for (size_t x = 0; x < region.numPixels.x; x++) {
                 for (size_t c = 0; c < _dataLayout.numRasters; c++) {
 
                     float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
-                    preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
-                    preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
-
+                    
+                    if (val != noDataValue) {
+                        preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
+                        preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
+                    }
                     i += _dataLayout.bytesPerDatum;
                 }
             }
@@ -695,15 +701,18 @@ namespace openspace {
 
     CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const TileIOResult> result, const IODescription& io) const{
         int success;
+
         double missingDataValue = gdalRasterBand(io.read.overview)->GetNoDataValue(&success);
         if (!success) {
             missingDataValue = 32767; // missing data value for TERRAIN.wms. Should be specified in xml
         }
 
         bool hasMissingData = false;
+        
         for (size_t c = 0; c < _dataLayout.numRasters; c++) {
             hasMissingData |= result->preprocessData->maxValues[c] == missingDataValue;
         }
+        
         bool onHighLevel = result->chunkIndex.level > 6;
         if (hasMissingData && onHighLevel) {
             return CE_Fatal;

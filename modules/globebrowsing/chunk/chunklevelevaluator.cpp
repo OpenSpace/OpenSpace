@@ -62,7 +62,7 @@ namespace openspace {
 
         // Calculate desired level based on distance
         Scalar distanceToPatch = glm::length(cameraToChunk);
-        Scalar distance = distanceToPatch - heights.min; // distance to actual minimum heights
+        Scalar distance = distanceToPatch -heights.min; // distance to actual minimum heights
 
         Scalar scaleFactor = globe->lodScaleFactor * ellipsoid.minimumRadius();
         Scalar projectedScaleFactor = scaleFactor / distance;

@@ -63,7 +63,7 @@ namespace openspace {
             else if (i == LayeredTextures::Overlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
             }
-            else if (i == LayeredTextures::HeightMaps) {
+            else if (i == LayeredTextures::HeightMaps || i == LayeredTextures::HeightMapOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
             }
             else {
@@ -73,7 +73,9 @@ namespace openspace {
             initData.threads = 1;
             initData.cacheSize = 500;
             initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles = i == LayeredTextures::HeightMaps; // Only preprocess height maps.
+            initData.preprocessTiles =
+                i == LayeredTextures::HeightMaps ||
+                i == LayeredTextures::HeightMapOverlays; // Only preprocess height maps.
 
             initTexures(
                 _layerCategories[i],
