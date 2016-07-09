@@ -174,7 +174,33 @@ namespace openspace {
         numPixels = glm::min(end(), boundingRegion.end()) - start;
     }
 
+    void PixelRegion::forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple) {
+        ghoul_assert(multiple > 0, "multiple must be 1 or larger");
+        int sizeDiff = numPixels.x - numPixels.y;
+        if (std::abs(sizeDiff) > 0) {
+            if (sizeDiff > 0) {
+                numPixels.y += sizeDiff % multiple;
+            }
+            else {
+                numPixels.x += std::abs(sizeDiff) % multiple;
+            }
+        }
+    }
 
+    void PixelRegion::roundUpNumPixelToNearestMultipleOf(unsigned int multiple) {
+        ghoul_assert(multiple > 0, "multiple must be 1 or larger");
+        numPixels.x += numPixels.x % multiple;
+        numPixels.y += numPixels.y % multiple;
+    }
+
+    void PixelRegion::roundDownToQuadratic() {
+        if (numPixels.x < numPixels.y) {
+            numPixels.y = numPixels.x;
+        }
+        else if (numPixels.x > numPixels.y) {
+            numPixels.x = numPixels.y;
+        }
+    }
 
     PixelRegion PixelRegion::globalCut(Side side, int p) {
         if (!lineIntersect(side, p)) {

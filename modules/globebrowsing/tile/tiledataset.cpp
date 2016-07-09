@@ -84,7 +84,7 @@ namespace openspace {
         ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
         double ratioRatio = ratio.x / ratio.y;
-        ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.001, "Different read/write aspect ratio!");
+        //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.001, "Different read/write aspect ratio!");
 
 
         IODescription whatCameOff = *this;
@@ -451,9 +451,13 @@ namespace openspace {
 
         // For correct sampling in height dataset, we need to pad the texture tile
         io.write.region.pad(padding);
+        PixelRange preRound = io.write.region.numPixels;
+        io.write.region.roundDownToQuadratic();
+        io.write.region.roundUpNumPixelToNearestMultipleOf(2);
+        if (preRound != io.write.region.numPixels) {
+            LDEBUG(chunkIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
+        }
 
-        io.write.region.numPixels.x += (io.write.region.numPixels.x % 2);
-        io.write.region.numPixels.y += (io.write.region.numPixels.y % 2);
 
         io.write.region.start = PixelCoordinate(0, 0); // write region starts in origin
         io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
@@ -484,7 +488,10 @@ namespace openspace {
         return imageData;
     }
 
-    CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination) const {
+    CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination, int depth) const {
+        std::string spaces = "                      ";
+        std::string indentation = spaces.substr(0, 2 * depth);
+
         CPLErr worstError = CPLErr::CE_None;
 
         // NOTE: 
@@ -516,9 +523,9 @@ namespace openspace {
         //                            +--------------+
 
 
-        LDEBUG("-");
-        LDEBUG("repeated read: " << io.read.region);
-        LDEBUG("repeated write: " << io.write.region);
+        //LDEBUG(indentation << "-");
+        //LDEBUG(indentation << "repeated read: " << io.read.region);
+        //LDEBUG(indentation << "repeated write: " << io.write.region);
 
         bool didCutOff = false;
 
@@ -579,24 +586,38 @@ namespace openspace {
                     // The cutoff region has been repeated along one of its sides, but 
                     // as we can see in this example, it still has a top part outside the
                     // defined gdal region. This is handled through recursion.
-                    CPLErr err = repeatedRasterIO(rasterBand, cutoff, dataDestination);
+                    CPLErr err = repeatedRasterIO(rasterBand, cutoff, dataDestination, depth + 1);
 
                     worstError = std::max(worstError, err);
                 }
             }
         }
 
-
+        LDEBUG(indentation << "rasterIO read: " << io.read.region);
+        LDEBUG(indentation << "rasterIO write: " << io.write.region);
         CPLErr err = rasterIO(rasterBand, io, dataDestination);
         worstError = std::max(worstError, err);
-        return worstError;
+
+        // The return error from a repeated rasterIO is ONLY based on the main region,
+        // which in the usual case will cover the main area of the patch anyway
+        
+
+
+        if (err > CPLErr::CE_None) {
+            if (depth == 0) {
+                LDEBUG(indentation << "Error reading main region: " << err);
+            }
+            
+        }
+        else if (worstError > CPLErr::CE_None) {
+            //LDEBUG(indentation << "Error reading padding: " << worstError);
+        }
+
+        return err;
     }
 
     CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dataDestination) const {
         PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
-
-        LDEBUG("rasterIO read: " << io.read.region);
-        LDEBUG("rasterIO write: " << io.write.region);
 
         ghoul_assert(io.read.region.isInside(gdalRegion), "write region of bounds!");
 

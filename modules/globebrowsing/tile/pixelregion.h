@@ -83,6 +83,10 @@ namespace openspace {
         void pad(const PixelRegion& padding);
         void clampTo(const PixelRegion& boundingRegion);
 
+        void forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple);
+        void roundUpNumPixelToNearestMultipleOf(unsigned int multiple);
+        void roundDownToQuadratic();
+
 
         PixelRegion globalCut(Side side, int globalPos);
         PixelRegion localCut(Side side, int localPos);

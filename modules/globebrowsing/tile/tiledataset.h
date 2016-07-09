@@ -59,8 +59,7 @@ namespace openspace {
     };
 
     struct IODescription {
-        IODescription cut(PixelRegion::Side side, int pos);
-
+        
         struct ReadData {
             int overview;
             PixelRegion region;
@@ -71,6 +70,9 @@ namespace openspace {
             size_t bytesPerLine; 
             size_t totalNumBytes;
         } write;
+
+
+        IODescription cut(PixelRegion::Side side, int pos);
     };
 
 
@@ -153,7 +155,7 @@ namespace openspace {
         IODescription getIODescription(const ChunkIndex& chunkIndex) const;
         char* readImageData(IODescription& io, CPLErr& worstError) const;
         CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
-        CPLErr repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
+        CPLErr repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;
         std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const;
         CPLErr postProcessErrorCheck(std::shared_ptr<const TileIOResult> ioResult, const IODescription& io) const;
 
