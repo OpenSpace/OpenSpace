@@ -376,9 +376,6 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
             camPos += -directionToCenter *
                 max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
         }
-        // Update the camera state
-        camera.setRotation(globalCameraRotation * localCameraRotation);
-        camera.setPositionVec3(camPos);
     }
 }
 
