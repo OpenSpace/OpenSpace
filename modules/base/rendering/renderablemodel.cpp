@@ -53,6 +53,8 @@ namespace {
     const std::string keyStart       = "StartTime";
     const std::string keyEnd         = "EndTime";
     const std::string keyFading      = "Shading.Fadeable";
+    
+    const std::string keyModelTransform = "Rotation.ModelTransform";
     //const std::string keyGhosting      = "Shading.Ghosting";
 
 }
@@ -95,6 +97,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     dictionary.getValue(keySource, _source);
     dictionary.getValue(keyDestination, _destination);
+    if (dictionary.hasKeyAndValue<glm::dmat3>(keyModelTransform))
+        dictionary.getValue(keyModelTransform, _modelTransform);
+    else
+        _modelTransform = glm::dmat3(1.f);
     dictionary.getValue(keyBody, _target);
 
     openspace::SpiceManager::ref().addFrame(_target, _source);
@@ -170,7 +176,7 @@ void RenderableModel::render(const RenderData& data) {
     _frameCount++;
 
     double lt;
-    glm::mat4 transform = glm::mat4(1);
+    glm::mat4 transform = glm::mat4(1.f);
 
     glm::mat4 tmp = glm::mat4(1);
     for (int i = 0; i < 3; i++){
@@ -251,7 +257,7 @@ void RenderableModel::update(const UpdateData& data) {
 
     // set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time);
+        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time) * _modelTransform;
     }
 
     double  lt;

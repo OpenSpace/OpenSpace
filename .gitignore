@@ -150,3 +150,7 @@ data/scene/atmosphereearth/textures/earth_clouds.jpg
 data/scene/atmosphereearth/textures/earth_night.jpg
 data/scene/atmosphereearth/textures/earth_reflectance.png
 data/scene/atmosphereearth/textures/marker.png
+data/scene/juno/juno/textures
+data/scene/juno/juno/spice
+data/scene/juno/juno/Juno.mtl
+data/scene/juno/juno/Juno.obj
