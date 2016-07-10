@@ -71,7 +71,7 @@ namespace openspace {
             }
 
             initData.threads = 1;
-            initData.cacheSize = 500;
+            initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
             initData.preprocessTiles =
                 i == LayeredTextures::HeightMaps ||
