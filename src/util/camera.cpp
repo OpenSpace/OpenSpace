@@ -73,16 +73,25 @@ namespace openspace {
     void Camera::setPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _position.local = pos;
+      
+        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     void Camera::setFocusPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _focusPosition = pos;
+      
+        _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
+        _cachedViewRotationMatrix.isDirty = true;
+        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     void Camera::setRotation(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _rotation.local = rotation;
+        _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
         _cachedCombinedViewMatrix.isDirty = true;
     }
@@ -102,6 +111,11 @@ namespace openspace {
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _rotation.local = rotation * _rotation.local;
+      
+        _cachedViewDirection.isDirty = true;
+        _cachedLookupVector.isDirty = true;
+        _cachedViewRotationMatrix.isDirty = true;
+        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     // Accessors
@@ -122,6 +136,7 @@ namespace openspace {
             _cachedViewDirection.datum =
                 _rotation.synced * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
             _cachedViewDirection.datum = glm::normalize(_cachedViewDirection.datum);
+            _cachedViewDirection.isDirty = true;
         }
         return _cachedViewDirection.datum;
     }
@@ -135,6 +150,7 @@ namespace openspace {
             _cachedLookupVector.datum =
                 _rotation.synced * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
             _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
+            _cachedLookupVector.isDirty = true;
         }
         return _cachedLookupVector.datum;
     }
@@ -150,6 +166,7 @@ namespace openspace {
     float Camera::sinMaxFov() const {
         if (_cachedSinMaxFov.isDirty) {
             _cachedSinMaxFov.datum = sin(_maxFov);
+            _cachedSinMaxFov.isDirty = true;
         }
         return _cachedSinMaxFov.datum;
     }
@@ -168,11 +185,12 @@ namespace openspace {
     const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
             Mat4 cameraTranslation =
-                glm::inverse(glm::translate(Mat4(1.0), _position.shared));
+                glm::inverse(glm::translate(Mat4(1.0), _position.synced));
             _cachedCombinedViewMatrix.datum =
                 Mat4(sgctInternal.viewMatrix()) *
                 Mat4(viewRotationMatrix()) *
                 cameraTranslation;
+            _cachedCombinedViewMatrix.isDirty = true;
         }
         return _cachedCombinedViewMatrix.datum;
     }
@@ -203,6 +221,8 @@ namespace openspace {
 
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
+        _cachedViewRotationMatrix.isDirty = true;
+        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     

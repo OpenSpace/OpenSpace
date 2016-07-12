@@ -301,11 +301,6 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
 
-        // Explicitly synch since camera is referenced after this
-        camera.setPositionVec3(camPos);
-        camera.preSynchronization();
-        camera.postSynchronizationPreDraw();
-
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
@@ -376,6 +371,10 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
             camPos += -directionToCenter *
                 max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
         }
+      
+        // Update the camera state
+        camera.setPositionVec3(camPos);
+        camera.setRotation(globalCameraRotation * localCameraRotation);
     }
 }
 
@@ -558,10 +557,6 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         // Update the camera state
         camera.setPositionVec3(camPos); 
         camera.setRotation(globalCameraRotation * localCameraRotation);
-    
-        // Unfortunately need to synch since interactionhandler is updated after synch..
-        camera.preSynchronization();
-        camera.postSynchronizationPreDraw();
     }
 }
 
