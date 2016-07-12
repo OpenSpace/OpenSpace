@@ -756,6 +756,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
+        _interactionHandler->update(dt);
 
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
@@ -763,8 +764,6 @@ void OpenSpaceEngine::preSynchronization() {
         _scriptEngine->preSynchronization();
         _renderEngine->preSynchronization();
         _parallelConnection->preSynchronization();
-
-        _interactionHandler->update(dt);
     }
 }
 
