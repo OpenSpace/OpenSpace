@@ -59,6 +59,7 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
@@ -128,6 +129,7 @@ namespace openspace {
 
         addProperty(atmosphereEnabled);
         addProperty(_saveOrThrowCamera);
+        addProperty(_resetTileProviders);
         addProperty(lodScaleFactor);
         addProperty(_cameraMinHeight);
     }
@@ -184,6 +186,10 @@ namespace openspace {
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
+        if (_resetTileProviders) {
+            _tileProviderManager->reset();
+            _resetTileProviders = false;
+        }
         _tileProviderManager->update();
         _chunkedLodGlobe->update(data);
     }

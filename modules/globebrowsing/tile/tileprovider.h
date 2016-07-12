@@ -72,6 +72,7 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
         virtual void update() = 0;
+        virtual void reset() = 0;
         virtual int maxLevel() = 0;
     };
 
@@ -89,10 +90,11 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
+        virtual void reset();
         virtual int maxLevel();
     private:
         Tile _tile;
-
+        std::string _imagePath;
     };
 
 
@@ -116,6 +118,7 @@ namespace openspace {
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
+        virtual void reset();
         virtual int maxLevel();
 
 

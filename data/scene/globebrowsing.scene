@@ -17,7 +17,6 @@ function postInitialization()
 
     openspace.setInteractionMode('GlobeBrowsingInteractionMode')
     --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
-    openspace.time.setDeltaTime(0);
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
@@ -28,6 +27,7 @@ function postInitialization()
     
 
     openspace.resetCameraDirection()
+    openspace.time.setDeltaTime(0)
 
     openspace.printInfo("Done setting default values")
 end
@@ -47,6 +47,7 @@ return {
         "sun",
         "stars",
         "milkyway",
+        
     }
 }
 

@@ -71,7 +71,7 @@ namespace openspace {
             }
 
             initData.threads = 1;
-            initData.cacheSize = 500;
+            initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
             initData.preprocessTiles =
                 i == LayeredTextures::HeightMaps ||
@@ -129,6 +129,19 @@ namespace openspace {
             for (auto tileProviderWithName : layerCategory) {
                 if (tileProviderWithName.isActive) {
                     tileProviderWithName.tileProvider->update();
+                }
+            }
+        }
+    }
+
+    void TileProviderManager::reset(bool includingInactive) {
+        for (auto layerCategory : _layerCategories) {
+            for (auto tileProviderWithName : layerCategory) {
+                if (tileProviderWithName.isActive) {
+                    tileProviderWithName.tileProvider->reset();
+                }
+                else if (includingInactive) {
+                    tileProviderWithName.tileProvider->reset();
                 }
             }
         }

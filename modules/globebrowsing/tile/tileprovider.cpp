@@ -51,14 +51,10 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
-    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath) {
-        _tile = Tile();
-        _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(imagePath).release());
-        _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
-        _tile.preprocessData = nullptr;
-
-        _tile.texture->uploadTexture();
-        _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath) 
+        : _imagePath(imagePath)
+    {
+        reset();
     }
 
     Tile SingleImagePrivoder::getTile(const ChunkIndex& chunkIndex) {
@@ -83,6 +79,16 @@ namespace openspace {
 
     void SingleImagePrivoder::update() {
         // nothing to be done
+    }
+
+    void SingleImagePrivoder::reset() {
+        _tile = Tile();
+        _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(_imagePath).release());
+        _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
+        _tile.preprocessData = nullptr;
+
+        _tile.texture->uploadTexture();
+        _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
 
     int SingleImagePrivoder::maxLevel() {
@@ -117,6 +123,16 @@ namespace openspace {
         initTexturesFromLoadedData();
         if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
             clearRequestQueue();
+        }
+    }
+
+    void CachingTileProvider::reset() {
+        _tileCache->clear();
+        _asyncTextureDataProvider->clearRequestQueue();
+
+        // also clear tiles that has just been finished loading
+        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
+            _asyncTextureDataProvider->nextTileIOResult(); // get it and throw it away
         }
     }
 

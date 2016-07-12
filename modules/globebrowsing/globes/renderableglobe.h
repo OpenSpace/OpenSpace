@@ -125,7 +125,7 @@ public:
     properties::BoolProperty atmosphereEnabled;
     ReferencedBoolSelection debugSelection;
     properties::BoolProperty _saveOrThrowCamera;
-
+    properties::BoolProperty _resetTileProviders;
     
 
 
