@@ -324,6 +324,11 @@ psc SceneGraphNode::worldPosition() const
     return _worldPositionCached;
 }
 
+const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
+{
+    return _ephemeris->worldRotationMatrix();
+}
+
 psc SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {

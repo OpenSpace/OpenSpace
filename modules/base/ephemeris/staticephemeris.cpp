@@ -47,6 +47,10 @@ const psc& StaticEphemeris::position() const {
     return _position;
 }
 
+const glm::dmat3& StaticEphemeris::worldRotationMatrix() const {
+    return glm::dmat3(1.0);
+}
+
 void StaticEphemeris::update(const UpdateData&) {}
 
 } // namespace openspace

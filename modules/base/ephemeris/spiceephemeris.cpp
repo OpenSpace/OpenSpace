@@ -77,13 +77,25 @@ const psc& SpiceEphemeris::position() const {
     return _position;
 }
 
+const glm::dmat3& SpiceEphemeris::worldRotationMatrix() const {
+    return _worldRotationMatrix;
+}
+
 void SpiceEphemeris::update(const UpdateData& data) {
     if (!_kernelsLoadedSuccessfully)
         return;
 
     double lightTime = 0.0;
     glm::dvec3 position = SpiceManager::ref().targetPosition(_targetName, _originName, "GALACTIC", {}, data.time, lightTime);
-    
+    std::string frame = SpiceManager::ref().frameFromBody(_targetName);
+    if (SpiceManager::ref().hasFrameId(frame))
+    {
+        _worldRotationMatrix = SpiceManager::ref().positionTransformMatrix(frame, "GALACTIC", data.time);
+    }
+    else
+    {
+        _worldRotationMatrix = glm::dmat3();
+    }
     //double interval = openspace::ImageSequencer::ref().getIntervalLength();
     //if (_ghosting == "TRUE" && interval > 60){
     //    double _time = openspace::ImageSequencer::ref().getNextCaptureTime();

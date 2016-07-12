@@ -17,7 +17,7 @@ function postInitialization()
 
     openspace.setInteractionMode('GlobeBrowsingInteractionMode')
     --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
-    
+
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
@@ -37,15 +37,13 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "LodMars",
-        Position = {41717685.600207, -0.000000, -0.000000},
-        Rotation = {0.031159, -0.713114, 0.015919, -0.700174},
+        Focus = "DebugGlobe",
+        Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
+        Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
     },
 
     Modules = {
-        --"debugglobe",
-        "lodearth",
-        "lodmars",
+        "debugglobe",
         "sun",
         "stars",
         "milkyway",
