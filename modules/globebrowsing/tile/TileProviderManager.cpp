@@ -134,6 +134,19 @@ namespace openspace {
         }
     }
 
+    void TileProviderManager::reset(bool includingInactive) {
+        for (auto layerCategory : _layerCategories) {
+            for (auto tileProviderWithName : layerCategory) {
+                if (tileProviderWithName.isActive) {
+                    tileProviderWithName.tileProvider->reset();
+                }
+                else if (includingInactive) {
+                    tileProviderWithName.tileProvider->reset();
+                }
+            }
+        }
+    }
+
     const std::vector<std::shared_ptr<TileProvider> >
         TileProviderManager::getActivatedLayerCategory(
             LayeredTextures::TextureCategory textureCategory)

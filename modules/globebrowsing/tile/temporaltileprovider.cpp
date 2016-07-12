@@ -146,6 +146,12 @@ namespace openspace {
         _currentTileProvider->update();
     }
 
+    void TemporalTileProvider::reset() {
+        auto end = _tileProviderMap.end();
+        for (auto it = _tileProviderMap.begin(); it != end; it++) {
+            it->second->reset();
+        }
+    }
 
     std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
         Time tCopy(t);

@@ -65,6 +65,7 @@ namespace openspace {
             getActivatedLayerCategory(LayeredTextures::TextureCategory);
 
         void update();
+        void reset(bool includingInactive = false);
 
         std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
 
