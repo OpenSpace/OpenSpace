@@ -117,11 +117,11 @@ namespace openspace {
             std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
             
-            auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
-            for (auto& provider : categoryProviders) {
+            auto& categoryProviders = _tileProviderManager->getTileProviderGroup(category);
+            for (auto& provider : categoryProviders.tileProviders) {
                 selection->addOption(provider.name, &provider.isActive);
             }
-            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->levelBlendingEnabled[category]);
+            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled);
 
             addProperty(selection.get());
             _categorySelections.push_back(std::move(selection));
@@ -208,7 +208,7 @@ namespace openspace {
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
-        const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         if (heightMapProviders.size() == 0)
             return 0;
         const auto& tileProvider = heightMapProviders[0];

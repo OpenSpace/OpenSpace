@@ -37,7 +37,35 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(1);
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Tile Provider Group                                   //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    void TileProviderGroup::update() {
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                tileProviderWithName.tileProvider->update();
+            }
+        }
+    }
+
+
+    const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const {
+        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                activeTileProviders.push_back(tileProviderWithName.tileProvider);
+            }
+        }
+        return activeTileProviders;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                           Tile Provider Manager                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+
 
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
@@ -78,12 +106,12 @@ namespace openspace {
                 i == LayeredTextures::HeightMapOverlays; // Only preprocess height maps.
 
             initTexures(
-                _layerCategories[i],
+                _layerCategories[i].tileProviders,
                 texturesDict,
                 initData);
 
             // init level blending to be true
-            levelBlendingEnabled[i] = true;
+            _layerCategories[i].levelBlendingEnabled = true;
         }
     }
 
@@ -119,24 +147,23 @@ namespace openspace {
         }
     }
 
-    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)
-    {
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(size_t groupId) {
+        return _layerCategories[groupId];
+    }
+
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(LayeredTextures::TextureCategory category) {
         return _layerCategories[category];
     }
 
     void TileProviderManager::update() {
-        for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory) {
-                if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->update();
-                }
-            }
+        for (auto tileProviderGroup : _layerCategories) {
+            tileProviderGroup.update();
         }
     }
 
     void TileProviderManager::reset(bool includingInactive) {
         for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory) {
+            for (auto tileProviderWithName : layerCategory.tileProviders) {
                 if (tileProviderWithName.isActive) {
                     tileProviderWithName.tileProvider->reset();
                 }
@@ -147,17 +174,6 @@ namespace openspace {
         }
     }
 
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActivatedLayerCategory(
-            LayeredTextures::TextureCategory textureCategory)
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto tileProviderWithName : _layerCategories[textureCategory]) {
-            if (tileProviderWithName.isActive) {
-                tileProviders.push_back(tileProviderWithName.tileProvider);
-            }
-        }
-        return tileProviders;
-    }
+   
 
 }  // namespace openspace
