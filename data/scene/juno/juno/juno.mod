@@ -26,12 +26,8 @@ return {
                     0.0, -1.0, 0.0
                 }
             },
-            Shading = {
-                PerformShading = true,
-                Fadeable = false,
-                Ghosting = false,
-            },
         },
+
         Ephemeris = {
             Type = "Spice",
             Body = "JUNO",
@@ -136,8 +132,7 @@ return {
             Body = "JUNO",
             Frame = "GALACTIC",
             Observer = "JUPITER BARYCENTER",
-            -- Observer = "PLUTO BARYCENTER",
-            RGB = {0.70,0.50,0.20},
+            RGB = { 0.70,0.50,0.20 },
             TropicalOrbitPeriod = 394250.0,
             EarthOrbitRatio = 4.5,
             DayLength = 9.9259,
@@ -145,9 +140,7 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/glare_blue.png",
-                -- need to add different texture
             },  
         },
-        GuiName = "/Solar/JunoTrail"
     },
     }

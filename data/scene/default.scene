@@ -6,8 +6,7 @@ function preInitialization()
     critical objects.
     ]]--
 
-    --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.time.setTime('2015-03-15T11:00:00.00')
+    openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end
 
@@ -63,7 +62,7 @@ return {
         "uranus",
         "neptune",
         "stars",
-        --"stars-denver",
+        -- "stars-denver",
         "milkyway",
         --"milkyway-eso",
         "constellationbounds",
