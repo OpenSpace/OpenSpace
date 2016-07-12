@@ -592,25 +592,22 @@ namespace openspace {
             }
         }
 
-        LDEBUG(indentation << "rasterIO read: " << io.read.region);
-        LDEBUG(indentation << "rasterIO write: " << io.write.region);
+        if (depth == 0) {
+            LDEBUG(indentation << "main rasterIO read: " << io.read.region);
+            LDEBUG(indentation << "main rasterIO write: " << io.write.region);
+        }
+
+        else if (worstError > CPLErr::CE_None) {
+            LDEBUG(indentation << "Error reading padding: " << worstError);
+        }
+        
         CPLErr err = rasterIO(rasterBand, io, dataDestination);
         worstError = std::max(worstError, err);
 
         // The return error from a repeated rasterIO is ONLY based on the main region,
         // which in the usual case will cover the main area of the patch anyway
         
-
-
-        if (err > CPLErr::CE_None) {
-            if (depth == 0) {
-                LDEBUG(indentation << "Error reading main region: " << err);
-            }
-            
-        }
-        else if (worstError > CPLErr::CE_None) {
-            //LDEBUG(indentation << "Error reading padding: " << worstError);
-        }
+        
 
         return err;
     }

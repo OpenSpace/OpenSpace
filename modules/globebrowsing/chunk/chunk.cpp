@@ -101,7 +101,7 @@ namespace openspace {
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
         auto tileProvidermanager = owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         if (heightMapProviders.size() > 0) {
             TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
             if (tileAndTransform.tile.status == Tile::Status::OK) {

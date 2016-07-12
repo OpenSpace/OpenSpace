@@ -166,12 +166,11 @@ namespace openspace {
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
 
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            tileProviders[category] = _tileProviderManager->getActivatedLayerCategory(
-                LayeredTextures::TextureCategory(category));
+            tileProviders[category] = _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders();
 
             LayeredTextureInfo layeredTextureInfo;
             layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
-            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->levelBlendingEnabled[category];
+            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->getTileProviderGroup(category).levelBlendingEnabled;
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
@@ -332,7 +331,7 @@ namespace openspace {
         
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if(_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
+            if(_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0){
                 performAnyBlending = true; 
                 break;
             }
@@ -365,7 +364,7 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures).size() > 0) {
+        if (_tileProviderManager->getTileProviderGroup(LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
             programObject->setUniform("modelViewTransform", modelViewTransform);
         }
 
@@ -402,7 +401,7 @@ namespace openspace {
         bool performAnyBlending = false;
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
+            if (_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0) {
                 performAnyBlending = true;
                 break;
             }

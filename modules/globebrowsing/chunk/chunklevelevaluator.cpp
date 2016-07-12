@@ -162,7 +162,7 @@ namespace openspace {
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         auto tileProvidermanager = chunk.owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         int currLevel = chunk.index().level;
 
         // simply check the first heigtmap

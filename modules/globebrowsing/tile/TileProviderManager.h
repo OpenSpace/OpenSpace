@@ -42,39 +42,50 @@
 
 namespace openspace {
 
+    
+    struct TileProviderWithName {
+        std::string name;
+        std::shared_ptr<TileProvider> tileProvider;
+        bool isActive;
+    };
+
+
+
+    struct TileProviderGroup {
+
+        void update();
+        const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const;
+
+
+        std::vector<TileProviderWithName> tileProviders;
+        bool levelBlendingEnabled;
+
+    };
+
+
+
     class TileProviderManager {
     public:
-
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
-
-        typedef std::vector<TileProviderWithName> LayerCategory;
 
         TileProviderManager(
             const ghoul::Dictionary& textureCategoriesDictionary,
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
 
-        static ThreadPool tileRequestThreadPool;
-
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
+        TileProviderGroup& getTileProviderGroup(size_t groupId);
+        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
 
         void update();
         void reset(bool includingInactive = false);
 
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
-
 
     private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
+        static void initTexures(
+            std::vector<TileProviderWithName>& destination, 
+            const ghoul::Dictionary& dict, 
+            const TileProviderInitData& initData);
 
-        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 
 } // namespace openspace
