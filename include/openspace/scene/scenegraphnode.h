@@ -79,6 +79,8 @@ public:
     const psc& position() const;
     psc worldPosition() const;
 
+    const glm::dmat3& worldRotationMatrix() const;
+
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
 

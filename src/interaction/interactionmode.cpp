@@ -151,7 +151,7 @@ InteractionMode::~InteractionMode() {
 void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
     _previousFocusNodePosition = _focusNode->worldPosition().dvec3();
-    _previousFocusNodeRotation = dquat();
+    _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
 }
 
 SceneGraphNode* InteractionMode::focusNode() {
@@ -394,7 +394,7 @@ GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
 }
 
 void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
+    InteractionMode::setFocusNode(focusNode);
 
     Renderable* baseRenderable = _focusNode->renderable();
     if (RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(baseRenderable)) {
@@ -408,10 +408,8 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
-    // This function needs some cleaning up /KB
-
+    using namespace glm;
     if (_focusNode && _globe) {
-        
         // Declare variables to use in interaction calculations
         // Shrink interaction ellipsoid to enable interaction below height = 0
         double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
@@ -462,7 +460,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         dquat localCameraRotation = inverse(globalCameraRotation) * totalRotation;
 
         // Rotate with the globe
-        dmat3 globeStateMatrix = _globe->stateMatrix();
+        dmat3 globeStateMatrix = _focusNode->worldRotationMatrix();
         dquat globeRotation = quat_cast(globeStateMatrix);
         dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
         _previousFocusNodeRotation = globeRotation;
@@ -478,7 +476,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
             localCameraRotation = localCameraRotation * rotationDiff;
         }
-        { // Do global rotation
+        { // Do global rotation (horizontal movement)
             glm::dvec3 eulerAngles = glm::dvec3(
                 -_mouseStates->_globalRotationMouseState.velocity.get().y,
                 -_mouseStates->_globalRotationMouseState.velocity.get().x,
@@ -553,7 +551,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
             camPos += directionFromSurfaceToCamera *
                 glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);
         }
-
+        
         // Update the camera state
         camera.setPositionVec3(camPos); 
         camera.setRotation(globalCameraRotation * localCameraRotation);
@@ -564,7 +562,6 @@ void GlobeBrowsingInteractionMode::update(Camera& camera, const InputState& inpu
     _mouseStates->updateMouseStatesFromInput(inputState, deltaTime);
     updateCameraStateFromMouseStates(camera);
 }
-
 
 } // namespace interaction
 } // namespace openspace
