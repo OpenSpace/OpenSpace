@@ -219,9 +219,9 @@ private:
     properties::StringProperty _origin;
     properties::StringProperty _coordinateSystem;
 
-    properties::FloatProperty _rotationalFriction;
-    properties::FloatProperty _horizontalFriction;
-    properties::FloatProperty _verticalFriction;
+    properties::BoolProperty _rotationalFriction;
+    properties::BoolProperty _horizontalFriction;
+    properties::BoolProperty _verticalFriction;
 
     properties::FloatProperty _sensitivity;
     properties::FloatProperty _rapidness;

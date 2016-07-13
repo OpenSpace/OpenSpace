@@ -621,9 +621,9 @@ void InteractionHandler::clearKeyframes(){
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
     , _coordinateSystem("coordinateSystem", "Coordinate System", "")
-    , _rotationalFriction("rotationalFriction", "Rotational Friction", 1, 0, 1)
-    , _horizontalFriction("horizontalFriction", "Horizontal Friction", 1, 0, 1)
-    , _verticalFriction("verticalFriction", "Vertical Friction", 1, 0, 1)
+    , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
+    , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
+    , _verticalFriction("verticalFriction", "Vertical Friction", true)
     , _sensitivity("sensitivity", "Sensitivity", 0.002, 0.0001, 0.02)
     , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
 {
@@ -637,13 +637,10 @@ InteractionHandler::InteractionHandler()
         }
         setFocusNode(node);
     });
-    addProperty(_origin);
 
     _coordinateSystem.onChange([this]() {
         OsEng.renderEngine().changeViewPoint(_coordinateSystem.value());
     });
-    addProperty(_coordinateSystem);
-
 
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
@@ -681,6 +678,9 @@ InteractionHandler::InteractionHandler()
     });
 
     // Add the properties
+    addProperty(_origin);
+    addProperty(_coordinateSystem);
+
     addProperty(_rotationalFriction);
     addProperty(_horizontalFriction);
     addProperty(_verticalFriction);

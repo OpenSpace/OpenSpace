@@ -101,7 +101,7 @@ namespace openspace {
         const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
         const GeodeticPatch& patch = chunk.surfacePatch();
         float maxHeight = chunk.getBoundingHeights().max;
-        Vec3 globePosition = data.position.dvec3();
+        Vec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0
         Scalar minimumGlobeRadius = ellipsoid.minimumRadius();
 
         Vec3 cameraPosition = 
