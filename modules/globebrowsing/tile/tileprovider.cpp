@@ -36,6 +36,10 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/font/fontmanager.h>
+
+#include <openspace/engine/openspaceengine.h>
 
 #include <sstream>
 
@@ -51,7 +55,135 @@ namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
 
-    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath) 
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Chunk Index Tile Provider                             //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    ChunkIndexTileProvider::ChunkIndexTileProvider(const glm::uvec2 textureSize, size_t fontSize)
+        : _tileCache(500)
+        , _textureSize(textureSize)
+        , _fontSize(fontSize)
+    {
+        using namespace ghoul::fontrendering;
+
+        _font = OsEng.fontManager().font("Mono", _fontSize);
+        _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
+        _fontRenderer->setWindowSize(textureSize);
+
+        glGenFramebuffers(1, &_fbo);
+    }
+
+    ChunkIndexTileProvider::~ChunkIndexTileProvider() {
+        glDeleteFramebuffers(1, &_fbo);
+    }
+
+    Tile ChunkIndexTileProvider::getTile(const ChunkIndex& chunkIndex) {
+        ChunkHashKey key = chunkIndex.hashKey();
+        
+        if (!_tileCache.exist(key)) {
+            _tileCache.put(key, createTile(chunkIndex));
+        }
+
+        return _tileCache.get(key);
+    }
+
+    Tile ChunkIndexTileProvider::getDefaultTile() {
+        return Tile::TileUnavailable;
+    }
+
+
+    Tile::Status ChunkIndexTileProvider::getTileStatus(const ChunkIndex& index) {
+        return Tile::Status::OK;
+    }
+
+    TileDepthTransform ChunkIndexTileProvider::depthTransform() {
+        TileDepthTransform transform;
+        transform.depthOffset = 0.0f;
+        transform.depthScale = 1.0f;
+        return transform;
+    }
+
+    void ChunkIndexTileProvider::update() {
+        // nothing to be done
+    }
+
+    void ChunkIndexTileProvider::reset() {
+        _tileCache.clear();
+    }
+
+    Tile ChunkIndexTileProvider::createTile(const ChunkIndex& chunkIndex) {
+        Tile tile = Tile();
+        tile.texture = std::make_shared<Texture>(glm::uvec3(_textureSize, 1));
+
+        int numBytes = _textureSize.x * _textureSize.y * 4 * 1;
+        char* pixels = new char[numBytes];
+        memset(pixels, 0, numBytes); // set to transparent black
+
+        tile.texture->setPixelData(pixels);
+        tile.status = Tile::Status::OK;
+        tile.preprocessData = nullptr;
+
+        tile.texture->uploadTexture();
+        tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+        // Keep track of defaultFBO and viewport to be able to reset state when done
+        GLint defaultFBO;
+        GLint viewport[4];
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        // Render to texture
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *(tile.texture),
+            0
+            );
+
+        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        //LDEBUG(status);
+
+        glViewport(
+            0, 0,
+            static_cast<GLsizei>(tile.texture->width()),
+            static_cast<GLsizei>(tile.texture->height())
+            );
+        
+        _fontRenderer->render(
+            *_font,
+            glm::vec2(
+                _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << chunkIndex.level),
+                _textureSize.y / 2 + _fontSize),
+            glm::vec4(1.0, 0.0, 0.0, 1.0),
+            "level: %i \nx: %i \ny: %i",
+            chunkIndex.level, chunkIndex.x, chunkIndex.y
+            );
+
+        // Reset state: bind default FBO and set viewport to what it was
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+        return tile;
+    }
+
+
+    int ChunkIndexTileProvider::maxLevel() {
+        return 1337; // unlimited
+    }
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                           Single Image Tile Provider                             //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+
+    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath)
         : _imagePath(imagePath)
     {
         reset();
@@ -100,7 +232,9 @@ namespace openspace {
 
 
 
-
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                              Caching Tile Provider                               //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,

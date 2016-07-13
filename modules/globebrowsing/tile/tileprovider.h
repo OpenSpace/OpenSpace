@@ -34,6 +34,8 @@
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/font/fontrenderer.h>
+
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
@@ -46,11 +48,13 @@
 //									TILE PROVIDER									    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
+
 namespace openspace {
+    
+
     using namespace ghoul::opengl;
 
     
-
 
     struct Tile {
         std::shared_ptr<Texture> texture;
@@ -78,6 +82,33 @@ namespace openspace {
 
 
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
+
+    
+    class ChunkIndexTileProvider : public TileProvider {
+    public:
+        ChunkIndexTileProvider(const glm::uvec2 textureSize = {512, 512}, size_t fontSize = 48);
+        virtual ~ChunkIndexTileProvider();
+
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
+    private:
+        Tile createTile(const ChunkIndex& chunkIndex);
+
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+        
+        TileCache _tileCache;
+        glm::uvec2 _textureSize;
+        size_t _fontSize;
+
+        GLuint _fbo;
+
+    };
 
 
     class SingleImagePrivoder : public TileProvider {
