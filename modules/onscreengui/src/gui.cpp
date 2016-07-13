@@ -153,7 +153,7 @@ void addScreenSpaceRenderable(std::string texturePath) {
         return;
     }
     std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '+" + absPath(texturePath) + " ' }";
+        "{Type = 'ScreenSpaceImage', TexturePath = '" + absPath(texturePath) + "' }";
     std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script);
 }

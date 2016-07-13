@@ -39,8 +39,8 @@ namespace properties {
     [](lua_State* state, bool& success) -> __TYPE__ {                                    \
         __TYPE__ result;                                                                 \
         int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_rows<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_cols<__TYPE__>::value; ++j) {       \
+        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
+            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
                 lua_getfield(state, -1, std::to_string(number).c_str());                 \
                 if (lua_isnumber(state, -1) != 1) {                                      \
                     success = false;                                                     \
@@ -61,8 +61,8 @@ namespace properties {
     [](lua_State* state, __TYPE__ value) -> bool {                                       \
         lua_newtable(state);                                                             \
         int number = 1;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_rows<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_cols<__TYPE__>::value; ++j) {       \
+        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
+            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
                 lua_pushnumber(state, static_cast<lua_Number>(value[i][j]));             \
                 lua_setfield(state, -2, std::to_string(number).c_str());                 \
                 ++number;                                                                \
@@ -82,8 +82,8 @@ namespace properties {
             return result;                                                               \
         }                                                                                \
         int number = 0;                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_rows<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_cols<__TYPE__>::value; ++j) {       \
+        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
+            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
                 std::stringstream s(tokens[number]);                                     \
                 __TYPE__::value_type v;                                                  \
                 s >> v;                                                                  \
@@ -104,8 +104,8 @@ namespace properties {
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
         outValue = "";                                                                   \
-        for (glm::length_t i = 0; i < ghoul::glm_rows<__TYPE__>::value; ++i) {           \
-            for (glm::length_t j = 0; j < ghoul::glm_cols<__TYPE__>::value; ++j) {       \
+        for (glm::length_t i = 0; i < ghoul::glm_cols<__TYPE__>::value; ++i) {           \
+            for (glm::length_t j = 0; j < ghoul::glm_rows<__TYPE__>::value; ++j) {       \
                 outValue += std::to_string(inValue[i][j]) + ",";                         \
             }                                                                            \
             outValue.pop_back();                                                         \

@@ -347,7 +347,7 @@ void RenderEngine::postSynchronizationPreDraw() {
     if (windowResized) {
         glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
         _renderer->setResolution(res);
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setWindowSize(glm::vec2(res));
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
     }
 
     // update and evaluate the scene starting from the root node
@@ -850,9 +850,11 @@ void RenderEngine::changeViewPoint(std::string origin) {
     if (origin == "Sun") {
         solarSystemBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
 
-        plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+        if (plutoBarycenterNode)
+            plutoBarycenterNode->setParent(solarSystemBarycenterNode);
         jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-        newHorizonsNode->setParent(solarSystemBarycenterNode);
+        if (newHorizonsNode)
+            newHorizonsNode->setParent(solarSystemBarycenterNode);
         //newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
 
         //newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
@@ -878,7 +880,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
         
         solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
         jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-        plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+        if (plutoBarycenterNode)
+            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
 
         ghoul::Dictionary newHorizonsDictionary =
         {
@@ -888,7 +891,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Observer"), std::string("SUN") },
             { std::string("Kernels"), ghoul::Dictionary() }
         };
-        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+        if (newHorizonsNode)
+            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
         //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
         
@@ -938,7 +942,8 @@ void RenderEngine::changeViewPoint(std::string origin) {
         jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
 
         solarSystemBarycenterNode->setParent(jupiterBarycenterNode);
-        newHorizonsNode->setParent(jupiterBarycenterNode);
+        if (newHorizonsNode)
+            newHorizonsNode->setParent(jupiterBarycenterNode);
         //newHorizonsTrailNode->setParent(jupiterBarycenterNode);
 
         //dawnNode->setParent(jupiterBarycenterNode);
@@ -972,8 +977,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
             { std::string("Kernels"), ghoul::Dictionary() }
         };
         solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+        if (plutoBarycenterNode)
+            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+        if (newHorizonsNode)
+            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
         //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
         //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
 
@@ -1123,7 +1130,8 @@ void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
 
-void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s)
+{
     s->initialize();
     _screenSpaceRenderables.push_back(s);
 }

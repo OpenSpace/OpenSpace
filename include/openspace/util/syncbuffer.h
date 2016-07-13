@@ -25,11 +25,17 @@
 #ifndef SYNCBUFFER_H
 #define SYNCBUFFER_H
 
-#include <vector>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/assert.h>
 
-#include <sgct.h>
+#include <memory>
 #include <stdint.h>
+#include <vector>
+
+namespace sgct {
+    template <typename T>
+    class SharedVector;
+} // namespace sgct
 
 namespace openspace {
 
@@ -38,9 +44,11 @@ public:
 
     SyncBuffer(size_t n);
 
+    ~SyncBuffer();
+
     void encode(const std::string& s) {
         const size_t size = sizeof(char) * s.size() + sizeof(int32_t);
-        assert(_encodeOffset + size < _n);
+        ghoul_assert(_encodeOffset + size < _n, "");
 
         int32_t length = static_cast<int32_t>(s.length());
         memcpy(_dataStream.data() + _encodeOffset, reinterpret_cast<const char*>(&length), sizeof(int32_t));
@@ -52,7 +60,7 @@ public:
     template <typename T>
     void encode(const T& v) {
         const size_t size = sizeof(T);
-        assert(_encodeOffset + size < _n);
+        ghoul_assert(_encodeOffset + size < _n, "");
 
         memcpy(_dataStream.data() + _encodeOffset, &v, size);
         _encodeOffset += size;
@@ -74,7 +82,7 @@ public:
     template <typename T>
     T decode() {
         const size_t size = sizeof(T);
-        assert(_decodeOffset + size < _n);
+        ghoul_assert(_decodeOffset + size < _n, "");
         T value;
         memcpy(&value, _dataStream.data() + _decodeOffset, size);
         _decodeOffset += size;
@@ -88,7 +96,7 @@ public:
     template <typename T>
     void decode(T& value) {
         const size_t size = sizeof(T);
-        assert(_decodeOffset + size < _n);
+        ghoul_assert(_decodeOffset + size < _n, "");
         memcpy(&value, _dataStream.data() + _decodeOffset, size);
         _decodeOffset += size;
     }
@@ -102,7 +110,7 @@ private:
     size_t _encodeOffset;
     size_t _decodeOffset;
     std::vector<char> _dataStream;
-    sgct::SharedVector<char> _synchronizationBuffer;
+    std::unique_ptr<sgct::SharedVector<char>> _synchronizationBuffer;
 };
 
 } // namespace openspace

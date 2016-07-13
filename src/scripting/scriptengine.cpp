@@ -644,8 +644,7 @@ void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
     }
 }
 
-void ScriptEngine::postSynchronizationPreDraw(){
-    
+void ScriptEngine::postSynchronizationPreDraw() {
     std::vector<std::string> scripts;
 
     _mutex.lock();
@@ -653,14 +652,19 @@ void ScriptEngine::postSynchronizationPreDraw(){
     _receivedScripts.clear();
     _mutex.unlock();
     
-    while (!scripts.empty()){
-        runScript(scripts.back());
+    while (!scripts.empty()) {
+        try {
+            runScript(scripts.back());
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
         scripts.pop_back();
     }
     
 }
 
-void ScriptEngine::preSynchronization(){
+void ScriptEngine::preSynchronization() {
     
     _mutex.lock();
     

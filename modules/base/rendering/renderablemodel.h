@@ -63,6 +63,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     modelgeometry::ModelGeometry* _geometry;
+    
+    glm::dmat3 _modelTransform;
 
     float _alpha;
     glm::dmat3 _stateMatrix; 
