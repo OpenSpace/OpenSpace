@@ -113,8 +113,6 @@ namespace openspace {
 
             bool doHorizonCulling = true;
             bool doFrustumCulling = true;
-
-            bool limitLevelByAvailableHeightData = true;
             bool levelByProjAreaElseDistance = true;
         } debugOptions;
 

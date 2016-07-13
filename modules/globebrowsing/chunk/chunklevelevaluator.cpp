@@ -165,17 +165,18 @@ namespace openspace {
         auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         int currLevel = chunk.index().level;
 
-        // simply check the first heigtmap
-        if (heightMapProviders.size() > 0) {
-            Tile::Status heightTileStatus = heightMapProviders[0]->getTileStatus(chunk.index());
-            if (heightTileStatus == Tile::Status::IOError || heightTileStatus == Tile::Status::OutOfRange) {
-                return currLevel-1;
-            }
+        for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
+            auto tileProviderGroup = tileProvidermanager->getTileProviderGroup(i);
+            for (auto tileProvider : tileProviderGroup.getActiveTileProviders()) {
+                Tile::Status tileStatus = tileProvider->getTileStatus(chunk.index());
 
-            return UNKNOWN_DESIRED_LEVEL;
+                if (tileStatus == Tile::Status::OK) {
+                    return UNKNOWN_DESIRED_LEVEL;
+                }
+            }
         }
 
-        return UNKNOWN_DESIRED_LEVEL;
+        return currLevel - 1;;
     }
 
 } // namespace openspace

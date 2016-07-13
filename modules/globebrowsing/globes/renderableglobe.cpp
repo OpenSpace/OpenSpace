@@ -109,7 +109,6 @@ namespace openspace {
         debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);
 
         debugSelection.addOption("Level by proj area (else distance)", &_chunkedLodGlobe->debugOptions.levelByProjAreaElseDistance);
-        debugSelection.addOption("Level limited by available data", &_chunkedLodGlobe->debugOptions.limitLevelByAvailableHeightData);
 
         // Add all tile layers as being toggleable for each category
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
