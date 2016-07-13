@@ -126,6 +126,11 @@ return {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/earth/Reference_Labels.xml",
                     },
+                    {
+                        Type = "ChunkIndex",
+                        Name = "Indices",
+                        FilePath = "textures/test_tile.png",
+                    },
                 },
                 HeightMaps = {
                     {
@@ -186,5 +191,15 @@ return {
             DayLength = 24
         },
         GuiName = "/Solar/EarthTrail"
-    },
+    }
+    --[[,
+    {
+        Name = "DebugPlane",
+        Parent = "DebugGlobe",
+        Renderable = {
+            Type = "RenderableDebugPlane",
+            Texture = 34,
+            Size = { 1, 7 }
+        }
+    }]]
 }

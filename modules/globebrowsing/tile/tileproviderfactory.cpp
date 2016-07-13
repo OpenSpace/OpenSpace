@@ -106,6 +106,11 @@ namespace openspace {
             auto tileProvider = std::make_shared<SingleImagePrivoder>(file);
             return tileProvider;
         } });
+
+        _factoryMap.insert({ "ChunkIndex", [](const std::string& file, const TileProviderInitData& initData) {
+            auto tileProvider = std::make_shared<ChunkIndexTileProvider>();
+            return tileProvider;
+        } });
     }
 
 
