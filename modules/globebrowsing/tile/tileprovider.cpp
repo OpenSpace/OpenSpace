@@ -70,7 +70,7 @@ namespace openspace {
 
         _font = OsEng.fontManager().font("Mono", _fontSize);
         _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
-        _fontRenderer->setWindowSize(textureSize);
+        _fontRenderer->setFramebufferSize(textureSize);
 
         glGenFramebuffers(1, &_fbo);
     }
