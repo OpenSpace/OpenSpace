@@ -83,7 +83,9 @@ private:
 
     std::vector<float> _slicedData;
     std::vector<float> _fullData;
+    std::vector<std::string> _starNames;
     int _nValuesPerStar;
+    uint32_t _nNameBytes;
 
     GLuint _vao;
     GLuint _vbo;

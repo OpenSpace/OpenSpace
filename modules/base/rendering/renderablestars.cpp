@@ -33,6 +33,8 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <array>
 #include <fstream>
 #include <stdint.h>
@@ -391,6 +393,10 @@ bool RenderableStars::readSpeckFile() {
     }
 
     _nValuesPerStar = 0;
+    _nNameBytes = 0;
+    
+    //simple lambda function test for skipping a line
+    auto skippableLine = [](std::string l) { return l[0] == '#' || l.empty(); };
 
     // The beginning of the speck file has a header that either contains comments
     // (signaled by a preceding '#') or information about the structure of the file
@@ -400,7 +406,7 @@ bool RenderableStars::readSpeckFile() {
         std::ifstream::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty())
+        if (skippableLine(line))
             continue;
 
         if (line.substr(0, 7) != "datavar" &&
@@ -430,16 +436,32 @@ bool RenderableStars::readSpeckFile() {
 
     _nValuesPerStar += 3; // X Y Z are not counted in the Speck file indices
 
+    std::string starName;
+
     do {
         std::vector<float> values(_nValuesPerStar);
 
-        std::getline(file, line);
-        std::stringstream str(line);
+        // Get star attribute values first by splitting on the comment
+        std::getline(file, line, '#');
 
+        if (skippableLine(line))
+            continue;
+
+        // Iterate over and store the attribute values
+        std::stringstream str(line);
         for (int i = 0; i < _nValuesPerStar; ++i)
             str >> values[i];
 
         _fullData.insert(_fullData.end(), values.begin(), values.end());
+
+        // Store the star's name (assume it's everything in the # comment for now) and
+        // increment the length of the data +1 for a null terminator. We store the length
+        // along with the string block in the cache.
+        std::getline(file, starName);
+        boost::trim(starName);
+        _starNames.push_back(starName);
+        _nNameBytes += starName.size() + 1;
+
     } while (!file.eof());
 
     return true;
@@ -457,17 +479,30 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
             return false;
         }
 
+        // Read header values
         int32_t nValues = 0;
         fileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
         fileStream.read(reinterpret_cast<char*>(&_nValuesPerStar), sizeof(int32_t));
-
+        fileStream.read(reinterpret_cast<char*>(&_nNameBytes), sizeof(uint32_t));
+        
+        // Read star attribute values
         _fullData.resize(nValues);
         fileStream.read(reinterpret_cast<char*>(&_fullData[0]),
             nValues * sizeof(_fullData[0]));
 
+        // Read in star names as a null-terminatated char array, then push them onto a 
+        // vector of strings by getting their length and advancing the pointer
+        char* nullTermNames = new char [_nNameBytes];
+        fileStream.read(reinterpret_cast<char*>(&nullTermNames[0]), _nNameBytes);
+
+        for (int i = 0; i < _nNameBytes; i += std::string(nullTermNames + i).size() + 1) {
+            _starNames.push_back(std::string(nullTermNames + i));
+        }
+
         bool success = fileStream.good();
         return success;
-    }
+
+        }
     else {
         LERROR("Error opening file '" << file << "' for loading cache file");
         return false;
@@ -477,6 +512,8 @@ bool RenderableStars::loadCachedFile(const std::string& file) {
 bool RenderableStars::saveCachedFile(const std::string& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (fileStream.good()) {
+
+        // write headers for datablock sizes
         fileStream.write(reinterpret_cast<const char*>(&CurrentCacheVersion),
             sizeof(int8_t));
 
@@ -489,9 +526,18 @@ bool RenderableStars::saveCachedFile(const std::string& file) const {
 
         int32_t nValuesPerStar = static_cast<int32_t>(_nValuesPerStar);
         fileStream.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
-
+        
+        uint32_t nNameBytes = static_cast<uint32_t>(_nNameBytes);
+        fileStream.write(reinterpret_cast<const char*>(&nNameBytes), sizeof(uint32_t));
+        
+        // Write star attribute values
         size_t nBytes = nValues * sizeof(_fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(&_fullData[0]), nBytes);
+
+        // Write star names (+1 length for null terminator)
+        for (auto name : _starNames) {
+            fileStream.write(reinterpret_cast<const char*>(name.c_str()), name.size() + 1);
+        }
 
         bool success = fileStream.good();
         return success;
