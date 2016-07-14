@@ -94,6 +94,9 @@ namespace openspace {
             return _finishedJobs.size();
         }
 
+        void reset() {
+            threadPool->clearTasks();
+        }
 
     
     private:

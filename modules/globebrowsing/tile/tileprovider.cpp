@@ -283,12 +283,7 @@ namespace openspace {
 
     void CachingTileProvider::reset() {
         _tileCache->clear();
-        _asyncTextureDataProvider->clearRequestQueue();
-
-        // also clear tiles that has just been finished loading
-        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
-            _asyncTextureDataProvider->nextTileIOResult(); // get it and throw it away
-        }
+        _asyncTextureDataProvider->reset();
     }
 
     int CachingTileProvider::maxLevel() {

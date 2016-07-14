@@ -112,6 +112,7 @@ namespace openspace {
         int maxChunkLevel();
         TileDepthTransform getDepthTransform();
         const TileDataLayout& getDataLayout();
+        void reset();
 
 
         const static glm::ivec2 tilePixelStartOffset;
@@ -167,6 +168,7 @@ namespace openspace {
 
         // init data
         struct InitData {
+            std::string initDirectory;
             std::string gdalDatasetDesc;
             int minimumPixelSize;
             GLuint dataType;
