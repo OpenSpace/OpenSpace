@@ -40,6 +40,14 @@ uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
 
+layout(location = 1) in vec2 in_uv;
+
+out vec2 fs_uv;
+out vec4 fs_position;
+out vec3 ellipsoidNormalCameraSpace;
+out LevelWeights levelWeights;
+
+
 vec3 bilinearInterpolation(vec2 uv) {
 	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
 	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
@@ -48,16 +56,20 @@ vec3 bilinearInterpolation(vec2 uv) {
 }
 
 void main() {
-	
+
 	// Position in cameraspace
 	vec3 p = bilinearInterpolation(in_uv);
 	
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
 	float distToVertexOnEllipsoid = length(p);
+	float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
+
+	// use level weight for height sampling, and output to fragment shader
+	levelWeights = getLevelWeights(levelInterpolationParameter);
 
 	// Get the height value
-	float height = getTileVertexHeight(distToVertexOnEllipsoid);
+	float height = getTileVertexHeight(in_uv, levelWeights);
 
 	// Apply skirts
 	height -= getTileVertexSkirtLength();

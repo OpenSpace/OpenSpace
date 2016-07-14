@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef TILE_FRAG_COLOR_HGLSL
+#define TILE_FRAG_COLOR_HGLSL
+
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -30,18 +33,7 @@
 
 // The heightmaps is only used in the fragment shader visually debugging 
 // the alignment and resolution of the heightmaps
-
-#if USE_HEIGHTMAP
-uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
-#endif // USE_HEIGHTMAP
-
-#if USE_HEIGHTMAP_OVERLAY
-uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
-#endif // USE_HEIGHTMAP_OVERLAY
+#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
 
 
 
@@ -78,13 +70,14 @@ uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
 uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
+#if SHOW_HEIGHT_RESOLUTION
+uniform vec2 vertexResolution;
+#endif
 
 
 #if USE_ATMOSPHERE
 // TODO atmosphere uniforms here
 #endif // USE_ATMOSPHERE
-
-uniform vec2 vertexResolution;
 
 in vec4 fs_position;
 in vec2 fs_uv;
@@ -112,14 +105,6 @@ vec4 getTileFragColor(){
 		ColorTextures,
 		ColorTexturesParent1,
 		ColorTexturesParent2);
-#else 
-	color = calculateDebugColor(fs_uv, fs_position, vertexResolution);
-	#if USE_HEIGHTMAP
-		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
-	#endif
-	#if USE_HEIGHTMAP_OVERLAY
-		color.g += tileResolution(fs_uv, HeightMapOverlays[0]) > 0.9 ? 1 : 0;
-	#endif // USE_HEIGHTMAP_OVERLAY
 #endif // USE_COLORTEXTURE
 
 
@@ -178,5 +163,34 @@ vec4 getTileFragColor(){
 
 #endif // USE_OVERLAY
 
+
+
+#if SHOW_HEIGHT_INTENSITIES
+	color.r *= 0.1;
+	color.g *= 0.1;
+	color.b *= 0.1;
+
+	float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
+	float contourLine = fract(10*untransformedHeight) > 0.98 ? 1 : 0;
+	color.r += untransformedHeight;
+	color.b = contourLine;
+#endif
+
+
+#if SHOW_HEIGHT_RESOLUTION
+
+	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
+	#if USE_HEIGHTMAP
+		color.r = min(color.r, 0.8);
+		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
+	#endif
+	#if USE_HEIGHTMAP_OVERLAY
+		color.g = min(color.g, 0.8);
+		color.g += tileResolution(fs_uv, HeightMapOverlays[0]) > 0.9 ? 1 : 0;
+	#endif // USE_HEIGHTMAP_OVERLAY
+#endif
+
 	return color;
 }
+
+#endif ///TILE_FRAG_COLOR_HGLSL

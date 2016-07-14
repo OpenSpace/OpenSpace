@@ -104,6 +104,8 @@ namespace openspace {
         debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->debugOptions.showChunkEdges);
         debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->debugOptions.showChunkBounds);
         debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->debugOptions.showChunkAABB);
+        debugSelection.addOption("Show height resolution", &_chunkedLodGlobe->debugOptions.showHeightResolution);
+        debugSelection.addOption("Show height intensities", &_chunkedLodGlobe->debugOptions.showHeightIntensities);
 
         debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->debugOptions.doFrustumCulling);
         debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);

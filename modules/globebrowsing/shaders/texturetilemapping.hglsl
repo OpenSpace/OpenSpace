@@ -66,6 +66,35 @@
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
+#define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
+#define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
+
+float calculateUntransformedHeight(
+	vec2 uv,
+	LevelWeights levelWeights,
+	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+
+	float height = 0;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !HEIGHTMAP_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // HEIGHTMAP_BLENDING_ENABLED
+	
+	
+	#for i in 0..#{lastLayerIndexHeightMaps}
+	{
+		height = 
+			levelWeights.w1 * getTexVal(heightTiles[#{i}], uv).r +
+			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
+			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
+	}
+	#endfor
+	return height;
+}
 
 float calculateHeight(
 	vec2 uv,
@@ -95,6 +124,43 @@ float calculateHeight(
 			height = heightSample;
 	}
 	#endfor
+	return height;
+}
+
+
+
+float calculateUntransformedHeightOverlay(
+	float currentHeight,
+	vec2 uv,
+	LevelWeights levelWeights,
+	const Tile heightOverlayTiles[NUMLAYERS_HEIGHTMAP_OVERLAY],
+	const Tile heightOverlayTilesParent1[NUMLAYERS_HEIGHTMAP_OVERLAY],
+	const Tile heightOverlayTilesParent2[NUMLAYERS_HEIGHTMAP_OVERLAY]) {
+
+	float height = currentHeight;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !HEIGHTMAP_OVERLAY_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // HEIGHTMAP_OVERLAY_BLENDING_ENABLED
+	
+	#for i in 0..#{lastLayerIndexHeightMapOverlays}
+	{
+		vec4 untransformedHeightSample = 
+			levelWeights.w1 * getTexVal(heightOverlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(heightOverlayTilesParent1[#{i}], uv) + 
+			levelWeights.w3 * getTexVal(heightOverlayTilesParent2[#{i}], uv);
+
+		if (untransformedHeightSample.g > 0.5){
+			// Float datasets will return un-normalized values, and needs to 
+			// be downscaled in order to be visualized. 
+			float scaleFactor = 0.00005;
+			height = scaleFactor * untransformedHeightSample.r;
+		}
+	}
+	#endfor
+	
 	return height;
 }
 

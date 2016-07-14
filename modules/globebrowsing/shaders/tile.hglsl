@@ -110,6 +110,12 @@ struct LevelWeights {
 	float w3;
 };
 
+float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor, float distToVertexOnEllipsoid){
+	float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
+	float desiredLevel = log2(projectedScaleFactor);
+	return chunkLevel - desiredLevel;
+}
+
 LevelWeights getLevelWeights(float levelInterpolationParameter){
 	LevelWeights levelWeights;
 	levelWeights.w1 = clamp(1 - levelInterpolationParameter, 0 , 1);

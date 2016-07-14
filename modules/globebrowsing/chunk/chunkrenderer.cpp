@@ -186,6 +186,17 @@ namespace openspace {
                 std::to_string(chunk.owner()->debugOptions.showChunkEdges)));
 
 
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "showHeightResolution",
+                std::to_string(chunk.owner()->debugOptions.showHeightResolution)));
+
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "showHeightIntensities",
+                std::to_string(chunk.owner()->debugOptions.showHeightIntensities)));
+
+
         // Now the shader program can be accessed
         ProgramObject* programObject =
             layeredTextureShaderProvider->getUpdatedShaderProgram(
@@ -308,7 +319,7 @@ namespace openspace {
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
-        if (tileProviders[LayeredTextures::ColorTextures].size() == 0) {
+        if (chunk.owner()->debugOptions.showHeightResolution) {
             programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
         }       
         
