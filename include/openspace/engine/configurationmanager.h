@@ -61,6 +61,10 @@ public:
     static const std::string KeyPropertyDocumentationType;
     /// The key that stores the save location of the Property documentation
     static const std::string KeyPropertyDocumentationFile;
+    /// The key that stores the type of keyboard bindings that should be stored
+    static const std::string KeyKeyboardShortcutsType;
+    /// The key that stores the save location of the keyboard bindings file
+    static const std::string KeyKeyboardShortcutsFile;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
     /// The key that stores the subdirectory containing a list of all startup scripts to

@@ -87,14 +87,28 @@ bool Scene::deinitialize() {
     return true;
 }
 
-//bool ONCE = false;
-
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
         try {
             loadSceneInternal(_sceneGraphToLoad);
             _sceneGraphToLoad = "";
+            
+            // After loading the scene, the keyboard bindings have been set
+            
+            std::string type;
+            std::string file;
+            bool hasType = OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyKeyboardShortcutsType, type
+            );
+            
+            bool hasFile = OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyKeyboardShortcutsFile, file
+            );
+            
+            if (hasType && hasFile) {
+                OsEng.interactionHandler().writeKeyboardDocumentation(type, file);
+            }
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(e.what());

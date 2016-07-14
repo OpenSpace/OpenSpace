@@ -51,6 +51,8 @@ const string ConfigurationManager::KeyPropertyDocumentationType =
     "PropertyDocumentationFile.Type";
 const string ConfigurationManager::KeyPropertyDocumentationFile =
     "PropertyDocumentationFile.File";
+const string ConfigurationManager::KeyKeyboardShortcutsType = "KeyboardShortcuts.Type";
+const string ConfigurationManager::KeyKeyboardShortcutsFile = "KeyboardShortcuts.File";
 const string ConfigurationManager::KeyConfigScene = "Scene";
 const string ConfigurationManager::KeySpiceTimeKernel = "SpiceKernel.Time";
 const string ConfigurationManager::KeySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";

@@ -36,6 +36,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#include <fstream>
+
 namespace {
     const std::string _loggerCat = "InteractionHandler";
 }
@@ -1150,6 +1152,24 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
         { key, modifier },
         lua
     });
+}
+    
+void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
+{
+    if (type == "text") {
+        std::ofstream f(absPath(file));
+        
+        for (const auto& p : _keyLua) {
+            f << std::to_string(p.first) << ": " <<
+                p.second << std::endl;
+        }
+    }
+    else {
+        throw ghoul::RuntimeError(
+            "Unsupported keyboard documentation type '" + type + "'",
+            "InteractionHandler"
+        );
+    }
 }
 
 scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
