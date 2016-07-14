@@ -168,9 +168,15 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 LERROR("Specified common folder '" << fullCommonFolder << "' did not exist");
             else {
                 if (!commonFolder.empty()) {
-                    FileSys.registerPathToken(_commonModuleToken, commonFolder);
+                    FileSys.registerPathToken(
+                        _commonModuleToken, commonFolder,
+                        ghoul::filesystem::FileSystem::Override::Yes
+                    );
                     size_t nKeys = moduleDictionary.size();
-                    moduleDictionary.setValue(std::to_string(nKeys + 1), commonFolder);
+                    moduleDictionary.setValue(
+                        std::to_string(nKeys + 1),
+                        commonFolder
+                    );
                 }
             }
         }
