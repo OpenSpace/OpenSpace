@@ -111,7 +111,7 @@ namespace openspace {
 
         
         Chunk::BoundingHeights heights = chunk.getBoundingHeights();
-        const Geodetic3 c0 = { closestCorner, heights.min };
+        const Geodetic3 c = { center, heights.min };
         const Geodetic3 c1 = { Geodetic2(center.lat, closestCorner.lon), heights.min };
         const Geodetic3 c2 = { Geodetic2(closestCorner.lat, center.lon), heights.min };
         
@@ -123,15 +123,15 @@ namespace openspace {
         // [  ]<
         //                     *geodetic space*
         //
-        //    c0-------c2-------+  <-- north east corner
+        //    +--------c2-------+  <-- north east corner
         //    |                 |
-        //    c1     center     |
+        //    c1       c        |
         //    |                 |
         //    +-----------------+  <-- south east corner
 
 
         // Go from geodetic to cartesian space
-        Vec3 A = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c0);
+        Vec3 A = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c);
         Vec3 B = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c1);
         Vec3 C = cameraToEllipsoidCenter + ellipsoid.cartesianPosition(c2);
 
@@ -143,9 +143,9 @@ namespace openspace {
         // Camera                      *cartesian space*
         // |                    +--------+---+ 
         // V             __--''   __--''    /
-        //              C-------center---- +
+        //              C-------A--------- +
         // oo          /       /          /
-        //[  ]<       A-------B----------+
+        //[  ]<       +-------B----------+
         //
 
         // If the geodetic patch is small (i.e. has small width), that means the patch in
