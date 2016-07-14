@@ -70,6 +70,25 @@ namespace openspace {
         return{ Tile::TileUnavailable, uvTransform };
     }
 
+    TileAndTransform TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex) {
+        TileAndTransform mostHighResolution;
+        mostHighResolution.tile = Tile::TileUnavailable;
+        mostHighResolution.uvTransform.uvScale.x = 0;
+
+        auto activeProviders = tileProviderGroup.getActiveTileProviders();
+        for (size_t i = 0; i < activeProviders.size(); i++) {
+            TileAndTransform tileAndTransform = getHighestResolutionTile(activeProviders[i].get(), chunkIndex);
+            bool tileIsOk = tileAndTransform.tile.status == Tile::Status::OK;
+            bool tileHasPreprocessData = tileAndTransform.tile.preprocessData != nullptr;
+            bool tileIsHigherResolution = tileAndTransform.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
+            if (tileIsOk && tileHasPreprocessData && tileIsHigherResolution) {
+                mostHighResolution = tileAndTransform;
+            }
+        }
+
+        return mostHighResolution;
+    }
+
     void TileSelector::ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
