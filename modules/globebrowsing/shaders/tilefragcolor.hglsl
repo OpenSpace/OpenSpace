@@ -24,13 +24,28 @@
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
+#include "PowerScaling/powerScaling_fs.hglsl"
 
+
+
+// The heightmaps is only used in the fragment shader visually debugging 
+// the alignment and resolution of the heightmaps
 
 #if USE_HEIGHTMAP
 uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
 uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
 uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
+
+#if USE_HEIGHTMAP_OVERLAY
+uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
+#endif // USE_HEIGHTMAP_OVERLAY
+
+
+// Below are all the tiles that are used for contributing 
+// the actual fragment color
 
 #if USE_COLORTEXTURE
 uniform Tile ColorTextures[NUMLAYERS_COLORTEXTURE];
@@ -62,6 +77,8 @@ uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
 uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
+
+
 #if USE_ATMOSPHERE
 // TODO atmosphere uniforms here
 #endif // USE_ATMOSPHERE
@@ -76,6 +93,12 @@ in vec3 ellipsoidNormalCameraSpace;
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
 
+
+/**
+ * This method defines the fragment color pipeline which is used in both
+ * the local and global chunk rendering. 
+ *
+ */
 vec4 getTileFragColor(){
 
 	vec4 color = vec4(0.1,0.1,0.1,1);
@@ -93,6 +116,9 @@ vec4 getTileFragColor(){
 	#if USE_HEIGHTMAP
 		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
 	#endif
+	#if USE_HEIGHTMAP_OVERLAY
+		color.g += tileResolution(fs_uv, HeightMapOverlays[0]) > 0.9 ? 1 : 0;
+	#endif // USE_HEIGHTMAP_OVERLAY
 #endif // USE_COLORTEXTURE
 
 
