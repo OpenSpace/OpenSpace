@@ -45,6 +45,9 @@ namespace openspace {
 
     class Chunk {
     public:
+
+        const static float DEFAULT_HEIGHT;
+
         struct BoundingHeights {
             float min, max;
             bool available;
@@ -72,7 +75,6 @@ namespace openspace {
         void setIndex(const ChunkIndex& index);
         void setOwner(ChunkedLodGlobe* newOwner);
 
-        const static float DEFAULT_HEIGHT;
 
     private:
 
