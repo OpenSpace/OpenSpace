@@ -46,6 +46,7 @@ namespace openspace {
     struct TilePreprocessData {
         std::vector<float> maxValues;
         std::vector<float> minValues;
+        std::vector<bool> hasMissingData;
 
         void serialize(std::ostream& s);
         static TilePreprocessData deserialize(std::istream& s);

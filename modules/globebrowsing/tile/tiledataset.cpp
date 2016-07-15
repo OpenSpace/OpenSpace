@@ -675,13 +675,15 @@ namespace openspace {
         TilePreprocessData* preprocessData = new TilePreprocessData();
         preprocessData->maxValues.resize(_dataLayout.numRasters);
         preprocessData->minValues.resize(_dataLayout.numRasters);
-
+        preprocessData->hasMissingData.resize(_dataLayout.numRasters);
+        
         std::vector<float> noDataValues;
         noDataValues.resize(_dataLayout.numRasters);
 
         for (size_t c = 0; c < _dataLayout.numRasters; c++) {
             preprocessData->maxValues[c] = -FLT_MAX;
             preprocessData->minValues[c] = FLT_MAX;
+            preprocessData->hasMissingData[c] = false;
             noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
         }
 
@@ -695,23 +697,14 @@ namespace openspace {
             for (size_t x = 0; x < region.numPixels.x; x++) {
                 
                 for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-                    //float lastMaxR = preprocessData->maxValues[0];
-                    //float lastMinR = preprocessData->minValues[0];
                     float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
                     if (val != noDataValue) {
                         preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
                         preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
                     }
-
-                    // ugly case for heightmap overlays and alpha
-                    /*
-                    if (c == 1 && _dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
-                        if (val < 0.5) {
-                            preprocessData->maxValues[0] = lastMaxR;
-                            preprocessData->minValues[0] = lastMinR;
-                        }
-                    }*/
-
+                    else {
+                        preprocessData->hasMissingData[c] = true;
+                    }
                     i += _dataLayout.bytesPerDatum;
                 }
             }
