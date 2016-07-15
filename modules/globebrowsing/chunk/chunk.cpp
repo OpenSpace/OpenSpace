@@ -107,14 +107,39 @@ namespace openspace {
         
         auto heightMapProviders = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
        
+        
+        size_t HEIGHT_CHANNEL = 0;
         const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
-        TileAndTransform mostHighResHeightmap = TileSelector::getHighestResolutionTile(heightmaps, _index);
-        if (mostHighResHeightmap.tile.status == Tile::Status::OK) {
-            auto preprocessData = mostHighResHeightmap.tile.preprocessData;
-            if (preprocessData != nullptr && preprocessData->minValues[0] < preprocessData->maxValues[0]) {
-                boundingHeights.min = preprocessData->minValues[0];
-                boundingHeights.max = preprocessData->maxValues[0];
-                boundingHeights.available = true;
+        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _index);
+        bool lastHadMissingData = true;
+        for (auto tile : tiles) {
+            bool goodTile = tile.tile.status == Tile::Status::OK;
+            bool hasPreprocessData = tile.tile.preprocessData != nullptr;
+
+            if (goodTile && hasPreprocessData) {
+                auto preprocessData = tile.tile.preprocessData;
+
+                if (!boundingHeights.available) {
+                    if (preprocessData->hasMissingData[HEIGHT_CHANNEL]) {
+                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
+                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                    }
+                    else {
+                        boundingHeights.min = preprocessData->minValues[HEIGHT_CHANNEL];
+                        boundingHeights.max = preprocessData->maxValues[HEIGHT_CHANNEL];
+                    }
+                    boundingHeights.available = true;
+                }
+                else {
+                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
+                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                }
+                lastHadMissingData = preprocessData->hasMissingData[HEIGHT_CHANNEL];
+            }
+
+            // Allow for early termination
+            if (!lastHadMissingData) {
+                break;
             }
         }
         
@@ -140,6 +165,9 @@ namespace openspace {
             }
         }
         
+                
+        
+
         return boundingHeights;
     }
 

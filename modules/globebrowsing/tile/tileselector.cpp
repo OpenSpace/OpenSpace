@@ -24,11 +24,10 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-
-
 #include <ghoul/logging/logmanager.h>
 
 #include <sstream>
+#include <algorithm>
 
 
 
@@ -39,6 +38,8 @@ namespace {
 
 
 namespace openspace {
+
+    const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
     TileAndTransform TileSelector::getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents) {
         TileUvTransform uvTransform;
@@ -87,6 +88,24 @@ namespace openspace {
         }
 
         return mostHighResolution;
+    }
+
+    bool TileSelector::CompareResolution::operator()(const TileAndTransform& a, const TileAndTransform& b) {
+        // large uv scale means smaller resolution
+        return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
+    }
+
+    std::vector<TileAndTransform> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const ChunkIndex& chunkIndex) {
+        auto activeProviders = tileProviderGroup.getActiveTileProviders();
+        std::vector<TileAndTransform> tiles;
+        for (auto provider : activeProviders){
+            tiles.push_back(getHighestResolutionTile(provider.get(), chunkIndex));
+        }
+
+
+        std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);
+
+        return tiles;
     }
 
     void TileSelector::ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv) {
