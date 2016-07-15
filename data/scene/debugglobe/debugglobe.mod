@@ -88,18 +88,14 @@ return {
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
                         Enabled = false,
                     },
+
                     --[[
                     {
                         Name = "On Moon Color",
                         FilePath = "map_service_configs/moon/OnMoonColor.xml",
                         --Enabled = true,
-                    }
-                    {
-                        Name = "West_Candor_Chasma_longlat_global",
-                        FilePath = "map_datasets/West_Candor_Chasma_longlat_global.vrt",
-                        Enabled = true,
-                    },
-                    ]]
+                    }]]
+                    
                 },
                 NightTextures = {
                     {
@@ -133,17 +129,18 @@ return {
                     },
                 },
                 HeightMaps = {
-                    {
-                        Name = "Terrain tileset",
-                        FilePath = "map_service_configs/earth/TERRAIN.wms",
-                        --Enabled = true,
-                    },
+
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/mars/Mola_Elevation.xml",
                         Enabled = true,
                     },
-                    --[[
+                     --[[                   {
+                        Name = "Terrain tileset",
+                        FilePath = "map_service_configs/earth/TERRAIN.wms",
+                        --Enabled = true,
+                    },
+                    
                     {
                         Name = "On Moon Height",
                         FilePath = "map_service_configs/moon/OnMoonHeight.xml",
