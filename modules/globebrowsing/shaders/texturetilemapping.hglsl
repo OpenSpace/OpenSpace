@@ -63,11 +63,15 @@
 #define USE_GRAYSCALE_OVERLAY #{useGrayScaleOverlays}
 #define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleOverlays}
 
+// Global constants
+#define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
+
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
+
 
 float calculateUntransformedHeight(
 	vec2 uv,

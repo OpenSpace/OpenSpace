@@ -39,6 +39,8 @@ namespace {
 
 namespace openspace {
 
+    const float Chunk::DEFAULT_HEIGHT_VALUE = 0.0f;
+
     Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible)
         : _owner(owner)
         , _surfacePatch(chunkIndex)
@@ -131,8 +133,8 @@ namespace openspace {
                     boundingHeights.available = true;
 
                     if (preprocessData->hasMissingData[0]) {
-                        boundingHeights.min = std::min(0.0f, preprocessData->minValues[0]);
-                        boundingHeights.max = std::max(0.0f, preprocessData->maxValues[0]);
+                        boundingHeights.min = std::min(DEFAULT_HEIGHT_VALUE, preprocessData->minValues[0]);
+                        boundingHeights.max = std::max(DEFAULT_HEIGHT_VALUE, preprocessData->maxValues[0]);
                     }
                 }
             }

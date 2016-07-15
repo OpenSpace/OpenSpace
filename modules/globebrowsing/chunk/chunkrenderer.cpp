@@ -196,6 +196,13 @@ namespace openspace {
                 "showHeightIntensities",
                 std::to_string(chunk.owner()->debugOptions.showHeightIntensities)));
 
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "defaultHeight",
+                std::to_string(Chunk::DEFAULT_HEIGHT_VALUE)));
+        
+
+
 
         // Now the shader program can be accessed
         ProgramObject* programObject =
