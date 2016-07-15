@@ -50,7 +50,7 @@ uniform int chunkLevel;
 
 
 float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
-	float height = 0;
+	float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
 	// Calculate desired level based on distance to the vertex on the ellipsoid
@@ -76,7 +76,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 
 
 float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
-	float height = 0;
+	float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
 	// Calculate desired level based on distance to the vertex on the ellipsoid

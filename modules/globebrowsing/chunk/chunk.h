@@ -72,6 +72,7 @@ namespace openspace {
         void setIndex(const ChunkIndex& index);
         void setOwner(ChunkedLodGlobe* newOwner);
 
+        const static float DEFAULT_HEIGHT;
 
     private:
 
