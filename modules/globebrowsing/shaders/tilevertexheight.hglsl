@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef TILE_VERTEX_HEIGHT_HGLSL
+#define TILE_VERTEX_HEIGHT_HGLSL
+
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
@@ -45,28 +48,41 @@ uniform float skirtLength;
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
-layout(location = 1) in vec2 in_uv;
 
-out vec2 fs_uv;
-out vec4 fs_position;
-out vec3 ellipsoidNormalCameraSpace;
+float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
+	float height = 0;
 
-out LevelWeights levelWeights;
+#if USE_HEIGHTMAP
+	// Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	height = calculateUntransformedHeight(
+		uv,
+		levelWeights, 							// Variable to determine which texture to sample from
+		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
-float getTileVertexHeight(float distToVertexOnEllipsoid){
-	float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
-	float desiredLevel = log2(projectedScaleFactor);
+#endif // USE_HEIGHTMAP
 
-	float levelInterpolationParameter = chunkLevel - desiredLevel;
-	levelWeights = getLevelWeights(levelInterpolationParameter);
+#if USE_HEIGHTMAP_OVERLAY
+	height = calculateUntransformedHeightOverlay(
+		height,
+		uv,
+		levelWeights, 							// Variable to determine which texture to sample from
+		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
 
+#endif // USE_HEIGHTMAP_OVERLAY
+
+	return height;
+}
+
+
+float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	float height = 0;
 
 #if USE_HEIGHTMAP
 	// Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
 	height = calculateHeight(
-		in_uv,
+		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
 		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
@@ -75,7 +91,7 @@ float getTileVertexHeight(float distToVertexOnEllipsoid){
 #if USE_HEIGHTMAP_OVERLAY
 	height = calculateHeightOverlay(
 		height,
-		in_uv,
+		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
 		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
 
@@ -94,3 +110,5 @@ bool tileVertexIsSkirtVertex(){
 float getTileVertexSkirtLength(){
 	return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
+
+#endif // TILE_VERTEX_HEIGHT_HGLSL

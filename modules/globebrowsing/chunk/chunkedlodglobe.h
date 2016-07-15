@@ -110,6 +110,8 @@ namespace openspace {
             bool showChunkEdges = false;
             bool showChunkBounds = false;
             bool showChunkAABB = false;
+            bool showHeightResolution = false;
+            bool showHeightIntensities = false;
 
             bool doHorizonCulling = true;
             bool doFrustumCulling = true;

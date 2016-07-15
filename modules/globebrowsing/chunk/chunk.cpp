@@ -100,20 +100,44 @@ namespace openspace {
 
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
-        auto tileProvidermanager = owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
-        if (heightMapProviders.size() > 0) {
-            TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
-            if (tileAndTransform.tile.status == Tile::Status::OK) {
-                std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
-                if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
-                    boundingHeights.max = preprocessData->maxValues[0];
+        auto tileProviderManager = owner()->getTileProviderManager();
+        
+        
+        auto heightMapProviders = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+       
+        const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
+        TileAndTransform mostHighResHeightmap = TileSelector::getHighestResolutionTile(heightmaps, _index);
+        if (mostHighResHeightmap.tile.status == Tile::Status::OK) {
+            auto preprocessData = mostHighResHeightmap.tile.preprocessData;
+            if (preprocessData != nullptr && preprocessData->minValues[0] < preprocessData->maxValues[0]) {
+                boundingHeights.min = preprocessData->minValues[0];
+                boundingHeights.max = preprocessData->maxValues[0];
+                boundingHeights.available = true;
+            }
+        }
+        
+        const TileProviderGroup& heightmapOverlays = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMapOverlays);
+        TileAndTransform mostHighResHeightmapOverlay = TileSelector::getHighestResolutionTile(heightmapOverlays, _index);
+        if (mostHighResHeightmapOverlay.tile.status == Tile::Status::OK) {
+            auto preprocessData = mostHighResHeightmapOverlay.tile.preprocessData;
+            if (preprocessData != nullptr && preprocessData->minValues[0] < preprocessData->maxValues[0]) {
+                if (boundingHeights.available) {
+                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[0]);
+                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[0]);
+                }
+                else {
                     boundingHeights.min = preprocessData->minValues[0];
+                    boundingHeights.max = preprocessData->maxValues[0];
                     boundingHeights.available = true;
+
+                    if (preprocessData->hasMissingData[0]) {
+                        boundingHeights.min = std::min(0.0f, preprocessData->minValues[0]);
+                        boundingHeights.max = std::max(0.0f, preprocessData->maxValues[0]);
+                    }
                 }
             }
         }
-
+        
         return boundingHeights;
     }
 

@@ -38,6 +38,13 @@ uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 uniform vec3 cameraPosition;
 
+layout(location = 1) in vec2 in_uv;
+
+out vec2 fs_uv;
+out vec4 fs_position;
+out vec3 ellipsoidNormalCameraSpace;
+out LevelWeights levelWeights;
+
 PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
 	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
@@ -50,8 +57,13 @@ void main() {
 	PositionNormalPair pair = globalInterpolation();
 	float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
 
+	float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
+
+	// use level weight for height sampling, and output to fragment shader
+	levelWeights = getLevelWeights(levelInterpolationParameter);
+
 	// Get the height value
-	float height = getTileVertexHeight(distToVertexOnEllipsoid);
+	float height = getTileVertexHeight(in_uv, levelWeights);
 
 	// Apply skirts
 	height -= getTileVertexSkirtLength();
