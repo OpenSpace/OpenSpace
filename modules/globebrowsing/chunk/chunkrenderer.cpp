@@ -199,7 +199,7 @@ namespace openspace {
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "defaultHeight",
-                std::to_string(Chunk::DEFAULT_HEIGHT_VALUE)));
+                std::to_string(Chunk::DEFAULT_HEIGHT)));
         
 
 
