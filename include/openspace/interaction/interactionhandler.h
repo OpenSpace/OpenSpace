@@ -109,6 +109,7 @@ public:
     void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
     void lookAt(const glm::quat& rotation);
     void setRotation(const glm::quat& rotation);
+    
 
 private:
     // Remove copy and move constructors
@@ -348,6 +349,8 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);

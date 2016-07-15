@@ -5,16 +5,7 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-
-    -- openspace.time.setTime("2007-02-28T11:40:00.000")
-
-    -- openspace.time.setTime("2015-07-08T15:57:45.00")
-    -- openspace.time.setTime("2015-07-12T07:41:00.00")
-    -- openspace.time.setTime("2015-07-12T15:43:00.00")
-    -- openspace.time.setTime("2015-07-12T22:19:20.00")
-    -- openspace.time.setTime("2015-07-13T20:59:00.00")
-    -- openspace.time.setTime("2015-07-14T02:41:55.00")
-    openspace.time.setTime("2016-07-12T10:05:00.00")
+    openspace.time.setTime("2016-07-05T10:05:00.00")
     openspace.time.setDeltaTime(0)
 
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
@@ -24,6 +15,8 @@ function preInitialization()
       1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
+
+    openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
 end
 
 function postInitialization()
