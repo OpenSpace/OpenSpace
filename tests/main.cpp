@@ -31,27 +31,33 @@
 #include <ghoul/lua/ghoul_lua.h>
 
 // test files
-//#include <test_common.inl>
-//#include <test_spicemanager.inl>
-//#include <test_scenegraphloader.inl>
+#include <test_common.inl>
+#include <test_spicemanager.inl>
+#include <test_scenegraphloader.inl>
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>
-//#include <test_lrucache.inl>
-//#include <test_threadpool.inl>
-//#include <test_aabb.inl>
-//#include <test_convexhull.inl>
+#include <test_lrucache.inl>
+#include <test_threadpool.inl>
+#include <test_aabb.inl>
+#include <test_convexhull.inl>
 
-//#include <test_luaconversions.inl>
-//#include <test_powerscalecoordinates.inl>
-
-//#include <test_angle.inl>
+#include <test_angle.inl>
 //#include <test_latlonpatch.inl>
-//#include <test_gdalwms.inl>
+#include <test_gdalwms.inl>
 //#include <test_patchcoverageprovider.inl>
 
-//#include <test_concurrentqueue.inl>
-//#include <test_concurrentjobmanager.inl>
-//#include <test_screenspaceimage.inl>
+#include <test_concurrentqueue.inl>
+#include <test_concurrentjobmanager.inl>
+#endif
+
+#include <test_luaconversions.inl>
+#include <test_powerscalecoordinates.inl>
+
+#ifdef OPENSPACE_MODULE_ISWA_ENABLED
+#include <test_screenspaceimage.inl>
 //#include <test_iswamanager.inl>
+#endif
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -65,6 +71,8 @@ using namespace ghoul::cmdparser;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
 
+//#define PRINT_OUTPUT
+
 namespace {
     std::string _loggerCat = "OpenSpaceTest";
 }
@@ -75,17 +83,25 @@ int main(int argc, char** argv) {
 
     testing::InitGoogleTest(&argc, argv);
 
-    //testing::internal::CaptureStdout();
-    //testing::internal::CaptureStderr();
+#ifdef PRINT_OUTPUT
+    testing::internal::CaptureStdout();
+    testing::internal::CaptureStderr();
+#endif
+
+    openspace::SpiceManager::deinitialize();
+
     bool b = RUN_ALL_TESTS();
-    //std::string output = testing::internal::GetCapturedStdout();
-    //std::string error = testing::internal::GetCapturedStderr();
 
-    //std::ofstream o("output.txt");
-    //o << output;
+#ifdef PRINT_OUTPUT
+    std::string output = testing::internal::GetCapturedStdout();
+    std::string error = testing::internal::GetCapturedStderr();
 
-    //std::ofstream e("error.txt");
-    //e << error;
+    std::ofstream o("output.txt");
+    o << output;
+
+    std::ofstream e("error.txt");
+    e << error;
+#endif
 
     return b;
 }

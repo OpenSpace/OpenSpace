@@ -24,26 +24,35 @@
 
 #include <openspace/util/syncbuffer.h>
 
+#include <sgct.h>
+
 namespace openspace {
 
 SyncBuffer::SyncBuffer(size_t n)
     : _n(n)
     , _encodeOffset(0)
     , _decodeOffset(0)
+    , _synchronizationBuffer(new sgct::SharedVector<char>())
 {
     _dataStream.resize(_n);
 }
 
+SyncBuffer::~SyncBuffer() {
+    // The destructor is defined here, so that the otherwise default inlined destructor is
+    // not created (which would make it impossible to use a forward declaration with
+    // unique_ptr
+}
+
 void SyncBuffer::write() {
-    _synchronizationBuffer.setVal(_dataStream);
-    sgct::SharedData::instance()->writeVector(&_synchronizationBuffer);
+    _synchronizationBuffer->setVal(_dataStream);
+    sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
     _encodeOffset = 0;
     _decodeOffset = 0;
 }
 
 void SyncBuffer::read() {
-    sgct::SharedData::instance()->readVector(&_synchronizationBuffer);
-    _dataStream = std::move(_synchronizationBuffer.getVal());
+    sgct::SharedData::instance()->readVector(_synchronizationBuffer.get());
+    _dataStream = std::move(_synchronizationBuffer->getVal());
     _encodeOffset = 0;
     _decodeOffset = 0;
 }

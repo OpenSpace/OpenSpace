@@ -25,7 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/../modules/globebrowsing/geodetics/angle.h>
+#include <modules/globebrowsing/geometry/angle.h>
 
 #include <fstream>
 #include <glm/glm.hpp>
@@ -93,12 +93,12 @@ TEST_F(AngleTest, Clamp) {
 
 	ASSERT_EQ(
 		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
+		180
 		) << "clamp [0, 180]";
 
 	ASSERT_EQ(
 		dAngle::fromDegrees(390).clamp(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
+		360
 		) << "clamp [0, 360]";
 }
 
@@ -108,12 +108,12 @@ TEST_F(AngleTest, ConstClamp) {
 	const dAngle a = dAngle::fromDegrees(390);
 	ASSERT_EQ(
 		a.getClamped(dAngle::ZERO, dAngle::HALF).asDegrees(),
-		180,
+		180
 		) << "clamp [0, 180]";
 
 	const dAngle b = dAngle::fromDegrees(390);
 	ASSERT_EQ(
 		b.getClamped(dAngle::ZERO, dAngle::FULL).asDegrees(),
-		360,
+		360
 		) << "clamp [0, 360]";
 }

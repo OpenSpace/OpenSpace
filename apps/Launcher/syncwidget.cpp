@@ -130,8 +130,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     setLayout(layout);
 
     ghoul::initialize();
-    openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
-
+    _downloadManager = std::make_unique<openspace::DownloadManager>(
+        "http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
 
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
@@ -204,7 +204,7 @@ SyncWidget::~SyncWidget() {
     f.write(size.data.data(), sizeof(uint32_t));
     f.write(buffer.data(), buffer.size());
 
-    openspace::DownloadManager::deinitialize();
+    _downloadManager.reset();
     ghoul::deinitialize();
     delete _session;
 }
@@ -255,7 +255,7 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         LDEBUG(f.url.toStdString() << " -> " << f.destination.toStdString());
 
-        std::shared_ptr<openspace::DownloadManager::FileFuture> future = DlManager.downloadFile(
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future = _downloadManager->downloadFile(
             f.url.toStdString(),
             absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
@@ -284,12 +284,12 @@ void SyncWidget::handleFileRequest() {
         std::string path = absPath(f.destination.toStdString());
         int version = f.version;
 
-        DlManager.downloadRequestFilesAsync(
-                identifier,
-                path,
-                version,
-                OverwriteFiles,
-                std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
+        _downloadManager->downloadRequestFilesAsync(
+            identifier,
+            path,
+            version,
+            OverwriteFiles,
+            std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
         );
 
         FileSys.setCurrentDirectory(d);

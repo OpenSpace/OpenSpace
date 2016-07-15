@@ -109,6 +109,9 @@ private:
 
     std::vector<std::shared_ptr<openspace::DownloadManager::FileFuture>> _futuresToAdd;
     std::atomic_flag _mutex;
+
+    std::unique_ptr<openspace::DownloadManager> _downloadManager;
+
 };
 
 #endif // __SYNCWIDGET_H__

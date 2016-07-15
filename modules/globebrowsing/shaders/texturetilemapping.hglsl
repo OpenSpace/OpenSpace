@@ -192,7 +192,7 @@ float calculateHeightOverlay(
 			levelWeights.w3 * getTexVal(heightOverlayTilesParent2[#{i}], uv);
 
 		float heightSample = getTransformedTexVal(heightOverlayTiles[#{i}].depthTransform, untransformedHeightSample.r);
-		if (untransformedHeightSample.g > 0.5)
+		if (heightSample > -100000)
 			height = heightSample;
 	}
 	#endfor
@@ -327,7 +327,7 @@ vec4 calculateGrayScaleOverlay(
 	const Tile grayscaleOverlayTilesParent1[NUMLAYERS_GRAYSCALE_OVERLAY],
 	const Tile grayscaleOverlayTilesParent2[NUMLAYERS_GRAYSCALE_OVERLAY]) {
 
-	vec4 colorGrayScale = vec4(0);
+	vec4 colorGrayScale = currentColor;
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -347,7 +347,6 @@ vec4 calculateGrayScaleOverlay(
 	}
 	#endfor
 
-
 	// HSV blending
 	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
 	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, colorGrayScale.r);
@@ -355,7 +354,7 @@ vec4 calculateGrayScaleOverlay(
 /*
 	// HSL blending
 	vec3 hslCurrent = rgb2hsl(currentColor.rgb);
-	hslCurrent.y = hslCurrent.z > 0.7 ? 0 : hslCurrent.y;
+	//hslCurrent.y = hslCurrent.z > 0.7 ? 0 : hslCurrent.y;
 	vec3 hslNew = vec3(hslCurrent.x, hslCurrent.y, colorGrayScale.r);
 	vec3 rgbNew = hsl2rgb(hslNew);
 */

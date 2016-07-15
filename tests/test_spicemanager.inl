@@ -26,18 +26,15 @@
 #include "gtest/gtest.h"
 #include <openspace/util/spicemanager.h>
 
-class SpiceManagerTest : public testing::Test{
+class SpiceManagerTest : public testing::Test {
 protected:
-    SpiceManagerTest() {
-        //openspace::SpiceManager::initialize();
-    }
-    ~SpiceManagerTest() {
-        //openspace::SpiceManager::deinitialize();
+    void SetUp() override {
+        openspace::SpiceManager::initialize();
     }
 
-    void reset() {
+    void TearDown() override {
         openspace::SpiceManager::deinitialize();
-        openspace::SpiceManager::initialize();
+
     }
 };
 
@@ -52,21 +49,75 @@ char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
 double abs_error = 0.00001;
 
 
-// Shorthand-path definitions
-#define LSK  absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-#define PCK  absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
-#define META absPath("${TESTDIR}/SpiceTest/spicekernels/metaKernel.tm")
-
 // In this testclass only a handset of the testfunctions require a single kernel.
 // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'.
-#define KERNEL(param) int kernelID = -1; \
-                            kernelID = openspace::SpiceManager::ref().loadKernel(param); \
-                            EXPECT_TRUE(kernelID != -1) << "loadKernel did not return proper id"; \
-                            return kernelID; \
 
-int loadMetaKernel() { KERNEL(META); }
-int loadLSKKernel()  { KERNEL(LSK); }
-int loadPCKKernel()  { KERNEL(PCK); }
+void loadMetaKernel() {
+    int k1 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+    );
+    EXPECT_EQ(1, k1) << "loadKernel did not return proper id";
+
+    int k2 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
+    );
+    EXPECT_EQ(2, k2) << "loadKernel did not return proper id";
+
+    int k3 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
+    );
+    EXPECT_EQ(3, k3) << "loadKernel did not return proper id";
+
+    int k4 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
+    );
+    EXPECT_EQ(4, k4) << "loadKernel did not return proper id";
+
+    int k5 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
+    );
+    EXPECT_EQ(5, k5) << "loadKernel did not return proper id";
+
+    int k6 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
+    );
+    EXPECT_EQ(6, k6) << "loadKernel did not return proper id";
+
+    int k7 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
+    );
+    EXPECT_EQ(7, k7) << "loadKernel did not return proper id";
+
+    int k8 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
+    );
+    EXPECT_EQ(8, k8) << "loadKernel did not return proper id";
+
+    int k9 = openspace::SpiceManager::ref().loadKernel(
+        ("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
+    );
+    EXPECT_EQ(9, k9) << "loadKernel did not return proper id";
+}
+
+#define LSK absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
+
+int loadLSKKernel()  { 
+    int kernelID = openspace::SpiceManager::ref().loadKernel(
+        LSK
+    );
+    EXPECT_EQ(1, kernelID) << "loadKernel did not return proper id";
+    return kernelID;
+}
+
+#define PCK absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
+
+int loadPCKKernel()  { 
+    int kernelID = openspace::SpiceManager::ref().loadKernel(
+        PCK
+    );
+    EXPECT_EQ(1, kernelID) << "loadKernel did not return proper id";
+    return kernelID;
+}
 
 std::string fileType(char type[]){
     std::string str(type);
@@ -81,24 +132,6 @@ TEST_F(SpiceManagerTest, loadSingleKernel) {
     kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
     
     ASSERT_TRUE(found == SPICETRUE) << "Kernel not loaded";
-    unload_c(LSK.c_str());
-}
-
-// Try loading multiple kernels via META file
-TEST_F(SpiceManagerTest, loadMetaKernel) {
-    loadMetaKernel();
-    // typeArr[] has values ordered to match each type of kernel 
-    // as specified in the 'metaKernel.tm' file 
-    std::string typeArr[nrMetaKernels] = { "META", "TEXT", "TEXT",
-                                           "SPK", "SPK", "SPK", 
-                                           "TEXT", "CK", "TEXT" };
-    // If one of the kernels does not load we expect a mismatch
-    for (int i = 0; i < nrMetaKernels; i++){
-        SpiceBoolean found;
-        kdata_c(i, "all", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
-        EXPECT_EQ(fileType(filtyp), typeArr[i]) << "One or more kernels did not load properly";
-    }
-    unload_c(META.c_str());
 }
 
 // Try unloading kernel using user assigned keyword
@@ -133,31 +166,6 @@ TEST_F(SpiceManagerTest, unloadKernelInteger) {
     EXPECT_FALSE(found == SPICETRUE) << "One or more kernels still present in kernel-pool";
 }
 
-// Try unloading multiple kernels
-TEST_F(SpiceManagerTest, unloadMetaKernel) {
-    loadMetaKernel();
-    // The metakernel loads these kerneltypes in the exact order as in typeArr
-    std::string typeArr[nrMetaKernels] = { "META", "TEXT", "TEXT",
-                                           "SPK", "SPK", "SPK",
-                                           "TEXT", "CK", "TEXT" };
-
-    for (int i = 0; i < nrMetaKernels; i++) {
-        // check kernelpool against typeArr
-        SpiceBoolean found;
-        kdata_c(i, "all", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
-        EXPECT_EQ(fileType(filtyp), typeArr[i]) << "One or more kernels did not load properly";
-    }
-    openspace::SpiceManager::ref().unloadKernel(META);
-
-    for (int i = 0; i < nrMetaKernels; i++) {
-        // the values should by now be unloaded
-        SpiceBoolean found;
-        kdata_c(i, "all", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
-        EXPECT_FALSE(found == SPICETRUE) << "Failed unloading kernel";
-    }
-    unload_c(META.c_str());
-}
-
 // Attempt finding a value in kernelpool 
 TEST_F(SpiceManagerTest, hasValue) {
     loadPCKKernel();
@@ -168,7 +176,6 @@ TEST_F(SpiceManagerTest, hasValue) {
 
     bool found = openspace::SpiceManager::ref().hasValue(naifId, kernelPoolValue);
     ASSERT_TRUE(found) << "Could not find value for specified kernel";
-    unload_c(PCK.c_str());
 }
 
 // Get 1dim value from kernelpool
@@ -181,7 +188,6 @@ TEST_F(SpiceManagerTest, getValueFromID_1D) {
     double return1D;
     ASSERT_NO_THROW(openspace::SpiceManager::ref().getValue(target, value1D, return1D));
     EXPECT_EQ(return1D, 78.565) << "Value not found / differs from expected return";
-    unload_c(PCK.c_str());
 }
 
 // Get 2dim value from kernelpool
@@ -197,7 +203,6 @@ TEST_F(SpiceManagerTest, getValueFromID_3D) {
     EXPECT_EQ(return3D.x, 6378.14) << "Value not found / differs from expected return";
     EXPECT_EQ(return3D.y, 6378.14) << "Value not found / differs from expected return";
     EXPECT_EQ(return3D.z, 6356.75) << "Value not found / differs from expected return";
-    unload_c(PCK.c_str());
 }
 
 // Get Ndim value from kernelpool
@@ -217,7 +222,6 @@ TEST_F(SpiceManagerTest, getValueFromID_ND) {
     for (unsigned int i = 0; i < returnND.size(); ++i){
         EXPECT_EQ(controlVec[i], returnND[i]) << "Vector value not equal";
     }
-    unload_c(PCK.c_str());
 }
 
 // Try converting string to Ephemeris time
@@ -232,7 +236,6 @@ TEST_F(SpiceManagerTest, stringToEphemerisTime) {
     ASSERT_NO_THROW(ephemerisTime = openspace::SpiceManager::ref().ephemerisTimeFromDate(date));
     
     EXPECT_EQ(ephemerisTime, control_ephemerisTime) << "Ephemeries times differ / not found";
-    unload_c(LSK.c_str());
 }
 
 // Try getting positional vector of target
@@ -261,7 +264,6 @@ TEST_F(SpiceManagerTest, getTargetPosition) {
     EXPECT_DOUBLE_EQ(pos[0], targetPosition[0]) << "Position not found or differs from expected return";
     EXPECT_DOUBLE_EQ(pos[1], targetPosition[1]) << "Position not found or differs from expected return";
     EXPECT_DOUBLE_EQ(pos[2], targetPosition[2]) << "Position not found or differs from expected return";
-    unload_c(META.c_str());
 }
 
 // Try getting position & velocity vectors of target
@@ -290,45 +292,43 @@ TEST_F(SpiceManagerTest, getTargetState) {
         EXPECT_DOUBLE_EQ(state[i], res.position[i])   << "Position not found or differs from expected return";
         EXPECT_DOUBLE_EQ(state[i+3], res.velocity[i]) << "Velocity not found or differs from expected return";
     }
-    unload_c(META.c_str());
 }
 
 // Try getting transformation matrix and transform position and velocity into new reference frame
-TEST_F(SpiceManagerTest, getStateTransformMatrix) {
-    loadMetaKernel();
-
-    double et;
-    double state[6];
-    double state_t[6];
-    double lt;
-    double referenceMatrix[6][6];
-
-    str2et_c("2004 jun 11 19:32:00", &et);
-    spkezr_c("PHOEBE", et, "J2000", "LT+S", "CASSINI", state, &lt);
-    sxform_c("J2000", "IAU_PHOEBE", et, referenceMatrix);
-
-    glm::dvec3 position(state[0], state[1], state[2]);
-    glm::dvec3 velocity(state[3], state[4], state[5]);
-
-    openspace::SpiceManager::TransformMatrix stateMatrix;
-    ASSERT_NO_THROW(stateMatrix = openspace::SpiceManager::ref().stateTransformMatrix(
-        "J2000", "IAU_PHOEBE", et));
-    
-    // check for matrix consistency
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 6; j++) {
-            EXPECT_DOUBLE_EQ(referenceMatrix[i][j], stateMatrix[i * 6 + j]) << "State-matrix not set or has wrong values";
-        }
-    }
-    mxvg_c(referenceMatrix, state, 6, 6, state_t);
-
-
-    for (int i = 0; i < 3; i++) {
-        EXPECT_DOUBLE_EQ(position[i], state_t[i])     << "Position vector differs from its reference";
-        EXPECT_DOUBLE_EQ(velocity[i], state_t[i + 3]) << "Velocity vector differs from its reference";
-    }
-    unload_c(META.c_str());
-}
+//TEST_F(SpiceManagerTest, getStateTransformMatrix) {
+//    loadMetaKernel();
+//
+//    double et;
+//    double state[6];
+//    double state_t[6];
+//    double lt;
+//    double referenceMatrix[6][6];
+//
+//    str2et_c("2004 jun 11 19:32:00", &et);
+//    spkezr_c("PHOEBE", et, "J2000", "LT+S", "CASSINI", state, &lt);
+//    sxform_c("J2000", "IAU_PHOEBE", et, referenceMatrix);
+//
+//    glm::dvec3 position(state[0], state[1], state[2]);
+//    glm::dvec3 velocity(state[3], state[4], state[5]);
+//
+//    openspace::SpiceManager::TransformMatrix stateMatrix;
+//    ASSERT_NO_THROW(stateMatrix = openspace::SpiceManager::ref().stateTransformMatrix(
+//        "J2000", "IAU_PHOEBE", et));
+//    
+//    // check for matrix consistency
+//    for (int i = 0; i < 6; i++) {
+//        for (int j = 0; j < 6; j++) {
+//            EXPECT_DOUBLE_EQ(referenceMatrix[i][j], stateMatrix[i * 6 + j]) << "State-matrix not set or has wrong values";
+//        }
+//    }
+//    mxvg_c(referenceMatrix, state, 6, 6, state_t);
+//
+//
+//    for (int i = 0; i < 3; i++) {
+//        EXPECT_DOUBLE_EQ(position[i], state_t[i])     << "Position vector differs from its reference";
+//        EXPECT_DOUBLE_EQ(velocity[i], state_t[i + 3]) << "Velocity vector differs from its reference";
+//    }
+//}
 
 // Try getting transformation matrix and transform the position only into new reference frame
 TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
@@ -363,7 +363,6 @@ TEST_F(SpiceManagerTest, getPositionTransformMatrix) {
     for (int i = 0; i < 3; i++) {
         EXPECT_DOUBLE_EQ(position[i], state_t[i]) << "Position vector differs from its reference";
     }
-    unload_c(META.c_str());
 }
 
 // Try to get boresight vector and instrument field of view boundary vectors
@@ -399,5 +398,4 @@ TEST_F(SpiceManagerTest, getFieldOfView) {
                                                                  differ from expected output";
         }
     }
-    unload_c(META.c_str());
 }
