@@ -28,6 +28,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/ellipsoid.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.hglsl>
+#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
@@ -35,32 +36,7 @@ uniform vec3 radiiSquared;
 
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
-
-uniform int xSegments;
-uniform float skirtLength;
-
-#if USE_HEIGHTMAP
-uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
-#endif // USE_HEIGHTMAP
-
-#if USE_HEIGHTMAP_OVERLAY
-uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
-#endif // USE_HEIGHTMAP_OVERLAY
-
 uniform vec3 cameraPosition;
-uniform float distanceScaleFactor;
-uniform int chunkLevel;
-
-layout(location = 1) in vec2 in_uv;
-
-out vec2 fs_uv;
-out vec4 fs_position;
-out vec3 ellipsoidNormalCameraSpace;
-out LevelWeights levelWeights;
 
 PositionNormalPair globalInterpolation() {
 	vec2 lonLatInput;
@@ -70,50 +46,18 @@ PositionNormalPair globalInterpolation() {
 	return positionPairModelSpace;
 }
 
-void main()
-{
+void main() {
 	PositionNormalPair pair = globalInterpolation();
-
 	float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
-    float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
-	float desiredLevel = log2(projectedScaleFactor);
 
-	float levelInterpolationParameter = chunkLevel - desiredLevel;
-	levelWeights = getLevelWeights(levelInterpolationParameter);
-	float height = 0;
+	// Get the height value
+	float height = getTileVertexHeight(distToVertexOnEllipsoid);
 
-#if USE_HEIGHTMAP
-	// Calculate desired level based on distance to the vertex on the ellipsoid
-    // Before any heightmapping is done
-	height = calculateHeight(
-		in_uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP
-
-#if USE_HEIGHTMAP_OVERLAY
-	height = calculateHeightOverlay(
-		height,
-		in_uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP_OVERLAY
-
-	// Skirts
-	int vertexIDx = gl_VertexID % (xSegments + 3);
-	int vertexIDy = gl_VertexID / (xSegments + 3);
-	if (vertexIDx == 0 ||
-		vertexIDy == 0 ||
-		vertexIDx == (xSegments + 2) ||
-		vertexIDy == (xSegments + 2) ) {
-		height -= skirtLength;
-	}
+	// Apply skirts
+	height -= getTileVertexSkirtLength();
 	
 	// Add the height in the direction of the normal
 	pair.position += pair.normal * height;
-	
 	vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
 
 	// Write output

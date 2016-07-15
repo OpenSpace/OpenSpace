@@ -62,7 +62,15 @@ namespace openspace {
 
         enum class Status { Unavailable, OutOfRange, IOError, OK } status;
     
+        
+        /**
+         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
+         * color in rgba. Color values ranges between 0-255.
+         */
+        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
+
         static const Tile TileUnavailable;
+
     };
 
 
@@ -86,7 +94,7 @@ namespace openspace {
     
     class ChunkIndexTileProvider : public TileProvider {
     public:
-        ChunkIndexTileProvider(const glm::uvec2 textureSize = {512, 512}, size_t fontSize = 48);
+        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
         virtual ~ChunkIndexTileProvider();
 
         virtual Tile getTile(const ChunkIndex& chunkIndex);
@@ -97,7 +105,7 @@ namespace openspace {
         virtual void reset();
         virtual int maxLevel();
     private:
-        Tile createTile(const ChunkIndex& chunkIndex);
+        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
 
         std::shared_ptr<ghoul::fontrendering::Font> _font;
         std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
@@ -105,7 +113,7 @@ namespace openspace {
         TileCache _tileCache;
         glm::uvec2 _textureSize;
         size_t _fontSize;
-
+        
         GLuint _fbo;
 
     };

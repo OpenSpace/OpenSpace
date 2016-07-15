@@ -29,6 +29,7 @@
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 
 
@@ -48,6 +49,7 @@ namespace openspace {
     class TileSelector {
     public:
         static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents = 0);
+        static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex);
     private:
         static void ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv);
     };

@@ -172,6 +172,16 @@ namespace openspace {
         return true;
     }
 
+    void AsyncTileDataProvider::reset() {
+        _enqueuedTileRequests.clear();
+        _concurrentJobManager.reset();
+        // also clear tiles that has just been finished loading
+        while (hasLoadedTextureData()) {
+            nextTileIOResult(); // get it and throw it away
+        }
+        getTextureDataProvider()->reset();
+    }
+
 
     void AsyncTileDataProvider::clearRequestQueue() {
         _concurrentJobManager.clearEnqueuedJobs();

@@ -54,14 +54,45 @@ namespace {
 namespace openspace {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
+    
 
+    Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
+        using namespace ghoul::opengl;
+        
+        // Create pixel data
+        int numBytes = size.x * size.y * 4 * 1;
+        char* pixels = new char[numBytes];
+        size_t numPixels = size.x * size.y;
+        size_t i = 0;
+        for (size_t p = 0; p < numPixels; p++){
+            pixels[i++] = color.r;
+            pixels[i++] = color.g;
+            pixels[i++] = color.b;
+            pixels[i++] = color.a;
+        }
+
+        // Create ghoul texture
+        auto texture = std::make_shared<Texture>(glm::uvec3(size, 1));
+        texture->setDataOwnership(Texture::TakeOwnership::Yes);
+        texture->setPixelData(pixels);
+        texture->uploadTexture();
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+        // Create tile
+        Tile tile;
+        tile.status = Tile::Status::OK;
+        tile.preprocessData = nullptr;
+        tile.texture = texture;
+
+        return tile;
+    }
 
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                            Chunk Index Tile Provider                             //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    ChunkIndexTileProvider::ChunkIndexTileProvider(const glm::uvec2 textureSize, size_t fontSize)
+    ChunkIndexTileProvider::ChunkIndexTileProvider(const glm::uvec2& textureSize, size_t fontSize)
         : _tileCache(500)
         , _textureSize(textureSize)
         , _fontSize(fontSize)
@@ -70,7 +101,8 @@ namespace openspace {
 
         _font = OsEng.fontManager().font("Mono", _fontSize);
         _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
-        _fontRenderer->setWindowSize(textureSize);
+        _fontRenderer->setFramebufferSize(textureSize);
+
 
         glGenFramebuffers(1, &_fbo);
     }
@@ -83,7 +115,7 @@ namespace openspace {
         ChunkHashKey key = chunkIndex.hashKey();
         
         if (!_tileCache.exist(key)) {
-            _tileCache.put(key, createTile(chunkIndex));
+            _tileCache.put(key, createChunkIndexTile(chunkIndex));
         }
 
         return _tileCache.get(key);
@@ -113,20 +145,9 @@ namespace openspace {
         _tileCache.clear();
     }
 
-    Tile ChunkIndexTileProvider::createTile(const ChunkIndex& chunkIndex) {
-        Tile tile = Tile();
-        tile.texture = std::make_shared<Texture>(glm::uvec3(_textureSize, 1));
-
-        int numBytes = _textureSize.x * _textureSize.y * 4 * 1;
-        char* pixels = new char[numBytes];
-        memset(pixels, 0, numBytes); // set to transparent black
-
-        tile.texture->setPixelData(pixels);
-        tile.status = Tile::Status::OK;
-        tile.preprocessData = nullptr;
-
-        tile.texture->uploadTexture();
-        tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    Tile ChunkIndexTileProvider::createChunkIndexTile(const ChunkIndex& chunkIndex) {
+        glm::uvec4 color = { 0, 0, 0, 0 };
+        Tile tile = Tile::createPlainTile(_textureSize, color);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
@@ -262,12 +283,7 @@ namespace openspace {
 
     void CachingTileProvider::reset() {
         _tileCache->clear();
-        _asyncTextureDataProvider->clearRequestQueue();
-
-        // also clear tiles that has just been finished loading
-        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
-            _asyncTextureDataProvider->nextTileIOResult(); // get it and throw it away
-        }
+        _asyncTextureDataProvider->reset();
     }
 
     int CachingTileProvider::maxLevel() {

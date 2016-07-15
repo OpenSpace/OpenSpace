@@ -128,8 +128,19 @@ namespace openspace {
         : _config(config)
         , hasBeenInitialized(false)
     {
-        _initData = { gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
+        
+        _initData = { "",  gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
         ensureInitialized();
+        _initData.initDirectory = CPLGetCurrentDir();
+    }
+
+    void TileDataset::reset() {
+        _cached._maxLevel = -1;
+        if (_dataset != nullptr) {
+            GDALClose((GDALDatasetH)_dataset);
+        }
+        
+        initialize();
     }
 
     void TileDataset::ensureInitialized() {
@@ -137,10 +148,12 @@ namespace openspace {
             initialize();
             hasBeenInitialized = true;
         }
+
     }
 
     void TileDataset::initialize() {
         gdalEnsureInitialized();
+
         _dataset = gdalDataset(_initData.gdalDatasetDesc);
 
         //Do any other initialization needed for the TileDataset
@@ -162,7 +175,11 @@ namespace openspace {
     GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
         GDALDataset* dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
         if (!dataset) {
-            throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
+            std::string correctedPath = ghoul::filesystem::FileSystem::ref().pathByAppendingComponent(_initData.initDirectory, gdalDatasetDesc);
+            dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);
+            if (!dataset) {
+                throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
+            }
         }
 
         const std::string originalDriverName = dataset->GetDriverName();
@@ -668,20 +685,33 @@ namespace openspace {
             noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
         }
 
+        
+
         float noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
 
         for (size_t y = 0; y < region.numPixels.y; y++) {
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
             size_t i = 0;
             for (size_t x = 0; x < region.numPixels.x; x++) {
+                
                 for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-
+                    //float lastMaxR = preprocessData->maxValues[0];
+                    //float lastMinR = preprocessData->minValues[0];
                     float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
-                    
                     if (val != noDataValue) {
                         preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
                         preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
                     }
+
+                    // ugly case for heightmap overlays and alpha
+                    /*
+                    if (c == 1 && _dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
+                        if (val < 0.5) {
+                            preprocessData->maxValues[0] = lastMaxR;
+                            preprocessData->minValues[0] = lastMinR;
+                        }
+                    }*/
+
                     i += _dataLayout.bytesPerDatum;
                 }
             }
@@ -713,6 +743,15 @@ namespace openspace {
         bool onHighLevel = result->chunkIndex.level > 6;
         if (hasMissingData && onHighLevel) {
             return CE_Fatal;
+        }
+        // ugly test for heightmap overlay
+        if (_dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
+            // check the alpha
+            if (result->preprocessData->maxValues[1] == 0.0
+                && result->preprocessData->minValues[1] == 0.0) 
+            {
+                //return CE_Warning;
+            }
         }
         return CE_None;
     }

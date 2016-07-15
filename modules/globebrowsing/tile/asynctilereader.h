@@ -128,6 +128,7 @@ namespace openspace {
         bool hasLoadedTextureData() const;
         std::shared_ptr<TileIOResult> nextTileIOResult();
         
+        void reset();
         void clearRequestQueue();
 
         std::shared_ptr<TileDataset> getTextureDataProvider() const;
