@@ -818,21 +818,20 @@ void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4&
     bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
 
     _renderEngine->render(projectionMatrix, viewMatrix, showGui);
-
-    if (_isMaster && _windowWrapper->isRegularRendering()) {
-        if (showGui) {
-            if (_console->isVisible())
-                _console->render();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-            if (_gui->isEnabled())
-                _gui->endFrame();
-        }
-#endif
-    }
 }
 
 void OpenSpaceEngine::postDraw() {
     _renderEngine->postDraw();
+
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (showGui) {
+        if (_console->isVisible())
+            _console->render();
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+        if (_gui->isEnabled())
+            _gui->endFrame();
+    }
+#endif
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
