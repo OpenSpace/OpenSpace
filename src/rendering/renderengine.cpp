@@ -383,11 +383,9 @@ void RenderEngine::postSynchronizationPreDraw() {
 
 }
 
-void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui) {
+void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
-
-
 
     if (!(OsEng.isMaster() && _disableMasterRendering) && !OsEng.windowWrapper().isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
@@ -398,9 +396,6 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
         if (_showInfo) {
             renderInformation();
         }
-        if (_showLog && showGui) {
-            renderScreenLog();
-        }
     }
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
@@ -409,16 +404,44 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
     }
 }
 
+void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
+    timer = timer < 0.f ? 0.f : timer;
+
+    auto size = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *_fontDate,
+        "Shutdown in: %.2fs/%.2fs",
+        timer,
+        fullTime
+    );
+
+    glm::vec2 penPosition = glm::vec2(
+        OsEng.windowWrapper().viewportPixelCoordinates().y - size.boundingBox.x,
+        OsEng.windowWrapper().viewportPixelCoordinates().w - size.boundingBox.y
+    );
+    penPosition.y -= _fontDate->height();
+
+    RenderFontCr(
+        *_fontDate,
+        penPosition,
+        "Shutdown in: %.2fs/%.2fs",
+        timer,
+        fullTime
+    );
+}
+
 void RenderEngine::postDraw() {
-    if (Time::ref().timeJumped())
+    if (Time::ref().timeJumped()) {
         Time::ref().setTimeJumped(false);
+    }
+
     if (_takeScreenshot) {
         OsEng.windowWrapper().takeScreenshot();
         _takeScreenshot = false;
     }
 
-    if (_performanceManager)
+    if (_performanceManager) {
         _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
+    }
 }
 
 void RenderEngine::takeScreenshot() {
@@ -1201,7 +1224,7 @@ void RenderEngine::renderInformation() {
         glm::vec2 penPosition = glm::vec2(
             10.f,
             OsEng.windowWrapper().viewportPixelCoordinates().w
-            );
+        );
         penPosition.y -= _fontDate->height();
 
         RenderFontCr(*_fontDate,
@@ -1412,6 +1435,9 @@ void RenderEngine::renderInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
+    if (!_showLog)
+        return;
+
     _log->removeExpiredEntries();
 
     const int max = 10;

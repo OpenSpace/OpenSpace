@@ -61,6 +61,7 @@ const string ConfigurationManager::KeyLogImmediateFlush = "Logging.ImmediateFlus
 const string ConfigurationManager::KeyLogs = "Logging.Logs";
 const string ConfigurationManager::KeyCapabilitiesVerbosity =
     "Logging.CapabilitiesVerbosity";
+const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 

@@ -31,6 +31,8 @@ namespace openspace {
 WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string& msg)
     : ghoul::RuntimeError(msg, "WindowWrapper")
 {}
+
+void WindowWrapper::terminate() {}
     
 void WindowWrapper::setBarrier(bool) {}
     

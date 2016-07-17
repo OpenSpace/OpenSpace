@@ -36,6 +36,10 @@ namespace {
 
 namespace openspace {
     
+void SGCTWindowWrapper::terminate() {
+    sgct::Engine::instance()->terminate();
+}
+
 void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }

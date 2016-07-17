@@ -36,6 +36,7 @@ namespace openspace {
  */
 class SGCTWindowWrapper : public WindowWrapper {
 public:
+    void terminate() override;
     void setBarrier(bool enabled) override;
     void clearAllWindows(const glm::vec4& clearColor) override;
     bool windowHasResized() const override;

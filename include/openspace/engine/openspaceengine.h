@@ -28,6 +28,8 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
+#include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -55,7 +57,7 @@ class SettingsEngine;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
-namespace scripting { class ScriptEngine; }
+//namespace scripting { class ScriptEngine; }
 namespace network { class ParallelConnection; }
 namespace properties { class PropertyOwner; }
  
@@ -110,7 +112,15 @@ public:
     void enableBarrier();
     void disableBarrier();
 
+    void toggleShutdownMode();
+
     void runPostInitializationScripts(const std::string& sceneDescription);
+
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * application.
+    */
+    static scripting::ScriptEngine::LuaLibrary luaLibrary();
 
 private:
     OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
@@ -148,6 +158,14 @@ private:
     
     bool _isMaster;
     double _runTime;
+
+    // Whether the application is currently in shutdown mode (i.e. counting down the timer
+    // and closing it at '0'
+    bool _isInShutdownMode;
+    // The total amount of time the application will wait before actually shutting down
+    float _shutdownWait;
+    // The current state of the countdown; if it reaches '0', the application will close
+    float _shutdownCountdown;
 
     static OpenSpaceEngine* _engine;
 };

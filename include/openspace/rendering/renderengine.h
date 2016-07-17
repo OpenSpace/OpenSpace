@@ -89,7 +89,10 @@ public:
     bool initializeGL();
     void postSynchronizationPreDraw();
     void preSynchronization();
-    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui);
+    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+
+    void renderScreenLog();
+    void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
     void takeScreenshot();
@@ -183,7 +186,6 @@ private:
     RendererImplementation rendererFromString(const std::string& method);
 
     void renderInformation();
-    void renderScreenLog();
 
     Camera* _mainCamera;
     Scene* _sceneGraph;
