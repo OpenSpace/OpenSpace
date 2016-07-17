@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/interactionhandler.h>
-//
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
@@ -31,6 +31,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
