@@ -100,7 +100,7 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-    std::vector<SceneGraphNode*> allSceneGraphNodes();
+    std::vector<SceneGraphNode*> allSceneGraphNodes() const;
 
     SceneGraph& sceneGraph();
 
