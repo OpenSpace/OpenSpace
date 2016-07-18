@@ -25,6 +25,7 @@
 #ifndef __SPICEMANAGER_H__
 #define __SPICEMANAGER_H__
 
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
 #include <ghoul/glm.h>
@@ -47,7 +48,6 @@ namespace openspace {
 
 class SpiceManager : public ghoul::Singleton<SpiceManager> {
     friend class ghoul::Singleton<SpiceManager>;
-
 public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
@@ -809,6 +809,8 @@ public:
      */
     std::string frameFromBody(const std::string& body) const;
     
+    static scripting::LuaLibrary luaLibrary();
+
 private:
     /// Struct storing the information about all loaded kernels
     struct KernelInformation {

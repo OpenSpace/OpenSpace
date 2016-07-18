@@ -382,6 +382,7 @@ bool OpenSpaceEngine::initialize() {
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     _scriptEngine->addLibrary(OpenSpaceEngine::luaLibrary());
+    _scriptEngine->addLibrary(SpiceManager::luaLibrary());
     _scriptEngine->addLibrary(RenderEngine::luaLibrary());
     _scriptEngine->addLibrary(Scene::luaLibrary());
     _scriptEngine->addLibrary(Time::luaLibrary());
