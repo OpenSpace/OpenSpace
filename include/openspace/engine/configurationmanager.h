@@ -73,12 +73,6 @@ public:
     /// The key that stores the subdirectory containing a list of all settings scripts to
     /// be executed on application start and after the scene file is loaded
     static const std::string KeySettingsScript;
-    /// The key that stores the location of the SPICE time kernel to be loaded on
-    /// application start
-    static const std::string KeySpiceTimeKernel;
-    /// The key that stores the location of the SPICE leapsecond kernel to be loaded on
-    /// application start
-    static const std::string KeySpiceLeapsecondKernel;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
     static const std::string KeyLogLevel;

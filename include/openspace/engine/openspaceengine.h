@@ -128,7 +128,6 @@ private:
 
     void clearAllWindows();
     bool gatherCommandlineArguments();
-    bool loadSpiceKernels();
     void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
     void runPreInitializationScripts(const std::string& sceneDescription);

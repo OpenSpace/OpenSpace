@@ -5,6 +5,9 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
     openspace.time.setTime("2016-07-05T10:05:00.00")
     openspace.time.setDeltaTime(0)
 

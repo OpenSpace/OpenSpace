@@ -374,11 +374,6 @@ bool OpenSpaceEngine::initialize() {
         _downloadManager = std::make_unique<DownloadManager>(requestURL, DownloadVersion);
     }
 
-    // Load SPICE time kernel
-    success = loadSpiceKernels();
-    if (!success)
-        return false;
-
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     _scriptEngine->addLibrary(OpenSpaceEngine::luaLibrary());
@@ -532,30 +527,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
-    return true;
-}
-
-bool OpenSpaceEngine::loadSpiceKernels() {
-    // Load time kernel
-    std::string timeKernel;
-    bool success = configurationManager().getValue(ConfigurationManager::KeySpiceTimeKernel, timeKernel);
-    // Move this to configurationmanager::completenesscheck ---abock
-    if (!success) {
-        LERROR("Configuration file does not contain a '" << ConfigurationManager::KeySpiceTimeKernel << "'");
-        return false;
-    }
-    SpiceManager::KernelHandle id =
-        SpiceManager::ref().loadKernel(timeKernel);
-
-    // Load SPICE leap second kernel
-    std::string leapSecondKernel;
-    success = configurationManager().getValue(ConfigurationManager::KeySpiceLeapsecondKernel, leapSecondKernel);
-    if (!success) {
-        // Move this to configurationmanager::completenesscheck ---abock
-        LERROR("Configuration file does not have a '" << ConfigurationManager::KeySpiceLeapsecondKernel << "'");
-        return false;
-    }
-    id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
     return true;
 }
 
