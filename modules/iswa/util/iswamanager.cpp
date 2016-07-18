@@ -652,7 +652,7 @@ void IswaManager::setBaseUrl(std::string bUrl){
     baseUrl = bUrl;
 }
 
-scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
+scripting::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {

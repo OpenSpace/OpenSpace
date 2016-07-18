@@ -240,8 +240,8 @@ bool Time::paused() const {
     return _timePaused;
 }
 
-scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
-    scripting::ScriptEngine::LuaLibrary timeLibrary = {
+scripting::LuaLibrary Time::luaLibrary() {
+    return {
         "time",
         {
             {
@@ -307,7 +307,6 @@ scripting::ScriptEngine::LuaLibrary Time::luaLibrary() {
             }
         }
     };
-    return timeLibrary;
 }
 
 } // namespace openspace

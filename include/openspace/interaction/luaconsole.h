@@ -52,7 +52,7 @@ public:
     void setVisible(bool visible);
     void toggleVisibility();
         
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 
 private:

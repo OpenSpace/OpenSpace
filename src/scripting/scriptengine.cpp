@@ -54,10 +54,6 @@ namespace {
 
 }
 
-bool ScriptEngine::LuaLibrary::operator<(const LuaLibrary& rhs) const {
-    return name < rhs.name;
-}
-
 void ScriptEngine::initialize() {
     LDEBUG("Adding base library");
     addBaseLibrary();
@@ -208,7 +204,7 @@ bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::str
         }
     }
     
-    std::vector<scripting::ScriptEngine::LuaLibrary::Function>::const_iterator funcit;
+    std::vector<scripting::LuaLibrary::Function>::const_iterator funcit;
     //library was found
     if (libit != _registeredLibraries.cend()){
         for (funcit = libit->functions.cbegin();

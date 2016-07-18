@@ -61,6 +61,10 @@ public:
     static const std::string KeyPropertyDocumentationType;
     /// The key that stores the save location of the Property documentation
     static const std::string KeyPropertyDocumentationFile;
+    /// The key that stores the type of keyboard bindings that should be stored
+    static const std::string KeyKeyboardShortcutsType;
+    /// The key that stores the save location of the keyboard bindings file
+    static const std::string KeyKeyboardShortcutsFile;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
     /// The key that stores the subdirectory containing a list of all startup scripts to
@@ -69,12 +73,6 @@ public:
     /// The key that stores the subdirectory containing a list of all settings scripts to
     /// be executed on application start and after the scene file is loaded
     static const std::string KeySettingsScript;
-    /// The key that stores the location of the SPICE time kernel to be loaded on
-    /// application start
-    static const std::string KeySpiceTimeKernel;
-    /// The key that stores the location of the SPICE leapsecond kernel to be loaded on
-    /// application start
-    static const std::string KeySpiceLeapsecondKernel;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
     static const std::string KeyLogLevel;
@@ -88,6 +86,9 @@ public:
     /// The key that stores the verbosity (None, Minimal, Default, Full) of the system
     /// capabilities components
     static const std::string KeyCapabilitiesVerbosity;
+    /// The key that stores the time (in seconds) that the application will wait before
+    /// shutting down after the shutdown call is made
+    static const std::string KeyShutdownCountdown;
     /// The key that stores whether the master node should perform rendering just function
     /// as a pure manager
     static const std::string KeyDisableMasterRendering;

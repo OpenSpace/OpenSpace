@@ -19,6 +19,9 @@ function preInitialization()
 
      --   6:20 -> 23:20 day before in UTC
     ]]--
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
     openspace.time.setTime("2016-03-08T22:45:00")
 
 

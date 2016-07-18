@@ -22,18 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <regex>
+
 namespace openspace {
+
+namespace {
+
+void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properties::Property*> properties, int type) {
+    static const std::string _loggerCat = "property_setValue";
+
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    for (properties::Property* prop : properties) {
+        // Check the regular expression for all properties
+        std::string id = prop->fullyQualifiedIdentifier();
+        if (std::regex_match(id, regex)) {
+            // If the fully qualified id matches the regular expression, we queue the
+            // value change if the types agree
+
+            if (type != prop->typeLua()) {
+                LERROR(errorLocation(L) << "Property '" <<
+                       prop->fullyQualifiedIdentifier() <<
+                       "' does not accept input of type '" << luaTypeToString(type) <<
+                       "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
+            }
+            else {
+                prop->setLuaValue(L);
+                //ensure properties are synced over parallel connection
+                std::string value;
+                prop->getStringValue(value);
+                OsEng.parallelConnection().scriptMessage(
+                    prop->fullyQualifiedIdentifier(),
+                    value
+                );
+            }
+
+        }
+    }
+}
+}
+
 
 namespace luascriptfunctions {
 
 /**
  * \ingroup LuaScripts
- * setPropertyValue(string, *):
+ * setPropertyValueSingle(string, *):
  * Sets the property identified by the URI in the first argument to the value passed to
  * the second argument. The type of the second argument is arbitrary, but it must agree
  * with the type the denoted Property expects
  */
-int property_setValue(lua_State* L) {
+int property_setValueSingle(lua_State* L) {
     static const std::string _loggerCat = "property_setValue";
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
@@ -44,7 +84,7 @@ int property_setValue(lua_State* L) {
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
 
-    openspace::properties::Property* prop = property(uri);
+    properties::Property* prop = property(uri);
     if (!prop) {
         LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
         return 0;
@@ -57,13 +97,82 @@ int property_setValue(lua_State* L) {
             "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
         return 0;
     }
-    else{
+    else {
         prop->setLuaValue(L);
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
         OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * setPropertyValueRegex(string, *):
+ * Sets all properties that pass the regular expression in the first argument. The second
+ * argument can be any type, but it has to match the type of the properties that matched
+ * the regular expression. The regular expression has to be of the ECMAScript grammar.
+*/
+int property_setValueRegex(lua_State* L) {
+    static const std::string _loggerCat = "property_setValueRegex";
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
+
+    std::string regex = luaL_checkstring(L, -2);
+    try {
+        applyRegularExpression(
+            L,
+            std::regex(regex, std::regex_constants::optimize),
+            allProperties(),
+            lua_type(L, -1)
+        );
+    }
+    catch (const std::regex_error& e) {
+        LERROR("Malformed regular expression: '" << regex << "'");
+    }
+
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* setPropertyValue(string, *):
+* Sets all properties identified by the URI (with potential wildcards) in the first
+* argument. The second argument can be any type, but it has to match the type that the
+* property (or properties) expect.
+*/
+
+int property_setValue(lua_State* L) {
+    static const std::string _loggerCat = "property_setValueRegex";
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
+
+    std::string regex = luaL_checkstring(L, -2);
+
+    // Replace all wildcards *  with the correct regex (.*)
+    size_t startPos = regex.find("*");
+    while (startPos != std::string::npos) {
+        regex.replace(startPos, 1, "(.*)");
+        startPos += 4;
+
+        startPos = regex.find("*", startPos);
+    }
+
+
+    applyRegularExpression(
+        L,
+        std::regex(regex/*, std::regex_constants::optimize*/),
+        allProperties(),
+        lua_type(L, -1)
+    );
 
     return 0;
 }

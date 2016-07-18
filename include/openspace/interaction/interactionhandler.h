@@ -92,7 +92,7 @@ public:
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 
     // Callback functions
@@ -108,6 +108,7 @@ public:
     void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
     void lookAt(const glm::quat& rotation);
     void setRotation(const glm::quat& rotation);
+    
 
 private:
     // Remove copy and move constructors
@@ -187,7 +188,7 @@ public:
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -197,6 +198,7 @@ public:
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
+    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);

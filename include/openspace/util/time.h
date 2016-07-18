@@ -207,7 +207,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      * Time singleton
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     static Time* _instance; ///< The singleton instance

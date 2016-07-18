@@ -130,6 +130,9 @@ int main(int argc, char** argv) {
     _sgctEngine->setExternalControlCallback(mainExternalControlCallback);
     _sgctEngine->setCharCallbackFunction(mainCharCallback);
 
+    // Disable the immediate exit of the application when the ESC key is pressed
+    _sgctEngine->setExitKey(SGCT_KEY_UNKNOWN);
+
     sgct::MessageHandler::instance()->setNotifyLevel(sgct::MessageHandler::NOTIFY_ALL);
 
     // set encode and decode functions

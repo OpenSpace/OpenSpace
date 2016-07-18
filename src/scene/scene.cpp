@@ -87,14 +87,28 @@ bool Scene::deinitialize() {
     return true;
 }
 
-//bool ONCE = false;
-
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
         try {
             loadSceneInternal(_sceneGraphToLoad);
             _sceneGraphToLoad = "";
+            
+            // After loading the scene, the keyboard bindings have been set
+            
+            std::string type;
+            std::string file;
+            bool hasType = OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyKeyboardShortcutsType, type
+            );
+            
+            bool hasFile = OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyKeyboardShortcutsFile, file
+            );
+            
+            if (hasType && hasFile) {
+                OsEng.interactionHandler().writeKeyboardDocumentation(type, file);
+            }
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(e.what());
@@ -380,7 +394,7 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
     return _graph.sceneGraphNode(name);
 }
 
-std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() {
+std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() const {
     return _graph.nodes();
 }
 
@@ -415,7 +429,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         LERROR("Undefined type '" << type << "' for Property documentation");
 }
 
-scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
+scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {
@@ -423,9 +437,25 @@ scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 "string, *",
+                "Sets all properties identified by the URI (with potential wildcards) in "
+                "the first argument. The second argument can be any type, but it has to "
+                "match the type that the property (or properties) expect."
+            },
+            {
+                "setPropertyValueRegex",
+                &luascriptfunctions::property_setValueRegex,
+                "Sets all properties that pass the regular expression in the first "
+                "argument. The second argument can be any type, but it has to match the "
+                "type of the properties that matched the regular expression. The regular "
+                "expression has to be of the ECMAScript grammar."
+            },
+            {
+                "setPropertyValueSingle",
+                &luascriptfunctions::property_setValueSingle,
+                "string, *",
                 "Sets a property identified by the URI in "
                 "the first argument. The second argument can be any type, but it has to "
-                " agree with the type that the property expects",
+                "match the type that the property expects.",
                 true
             },
             {

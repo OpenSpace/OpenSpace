@@ -26,12 +26,14 @@
 #define __QUERY_H__
 
 #include <string>
+#include <vector>
 
 namespace openspace {
 
 namespace properties {
     class Property;
 }
+
 class Renderable;
 class Scene;
 class SceneGraphNode;
@@ -42,6 +44,7 @@ Scene* sceneGraph();
 SceneGraphNode* sceneGraphNode(const std::string& name);
 Renderable* renderable(const std::string& name);
 properties::Property* property(const std::string& uri);
+std::vector<properties::Property*> allProperties();
 
 } // namespace
 

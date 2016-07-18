@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/interaction/interactionhandler.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
@@ -29,6 +31,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
@@ -494,7 +497,7 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
     });
 }
 
-scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return {
         "",
         {
@@ -925,8 +928,26 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
         lua
     });
 }
+    
+void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
+{
+    if (type == "text") {
+        std::ofstream f(absPath(file));
+        
+        for (const auto& p : _keyLua) {
+            f << std::to_string(p.first) << ": " <<
+                p.second << std::endl;
+        }
+    }
+    else {
+        throw ghoul::RuntimeError(
+            "Unsupported keyboard documentation type '" + type + "'",
+            "InteractionHandler"
+        );
+    }
+}
 
-scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return{
         "",
         {

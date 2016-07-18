@@ -398,7 +398,7 @@ void LuaConsole::toggleVisibility() {
     _isVisible = !_isVisible;
 }
 
-scripting::ScriptEngine::LuaLibrary LuaConsole::luaLibrary() {
+scripting::LuaLibrary LuaConsole::luaLibrary() {
     return {
         "console",
         {

@@ -6,9 +6,12 @@ function preInitialization()
     critical objects.
     ]]--
 
-    --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.time.setTime('2015-03-15T11:00:00.00')
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+
 end
 
 function postInitialization()
@@ -66,7 +69,7 @@ return {
         "uranus",
         "neptune",
         "stars",
-        --"stars-denver",
+        -- "stars-denver",
         "milkyway",
         --"milkyway-eso",
         "constellationbounds",

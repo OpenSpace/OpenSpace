@@ -99,7 +99,7 @@ public:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
 
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     ghoul::Event<>& iswaEvent(){
         return _iswaEvent;

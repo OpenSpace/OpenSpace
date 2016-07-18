@@ -100,7 +100,7 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-    std::vector<SceneGraphNode*> allSceneGraphNodes();
+    std::vector<SceneGraphNode*> allSceneGraphNodes() const;
 
     SceneGraph& sceneGraph();
 
@@ -115,7 +115,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      * scene graph
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);

@@ -6,10 +6,14 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.time.setTime("2015 NOV 24 00:00:00")
     --openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime("2015 NOV 24 00:00:00")
+
+    openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
-    --openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
 end
 
 function postInitialization()

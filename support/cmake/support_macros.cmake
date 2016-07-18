@@ -363,7 +363,10 @@ function (handle_internal_modules)
 
     message(STATUS "Included modules:")
     foreach (module ${sortedModules})
-        message(STATUS "\t${module}")
+        create_option_name(${module} optionName)
+        if (${optionName})
+            message(STATUS "\t${module}")
+        endif ()
     endforeach ()
 
     # Add subdirectories in the correct order

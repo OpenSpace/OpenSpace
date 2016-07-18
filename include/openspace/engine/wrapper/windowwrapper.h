@@ -43,6 +43,12 @@ namespace openspace {
 class WindowWrapper {
 public:
     /**
+     * This method closes the application by calling the necessary terminate function of
+     * the window management system
+     */
+    virtual void terminate();
+
+    /**
      * This method enables or disables a framelock barrier. If the specific windowing
      * framework does not provide a framelock, this method defaults to a no-op.
      * \param enabled If <code>true</code> the framelock is enabled, <code>false</code>

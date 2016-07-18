@@ -359,7 +359,14 @@ static const std::map<std::string, Key> KeyMapping = {
     { "MENU", Key::Menu }
 };
 
-
 } // namespace openspace
+    
+namespace std {
+    
+std::string to_string(openspace::Key key);
+std::string to_string(openspace::KeyModifier mod);
+std::string to_string(openspace::KeyWithModifier key);
+    
+} // namespace std
 
 #endif // __KEYS_H__

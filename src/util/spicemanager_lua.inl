@@ -17,57 +17,75 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
  * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ *  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWWRAPPER_H__
-#define __SGCTWINDOWWRAPPER_H__
-
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/scripting/script_helper.h>
 
 namespace openspace {
+namespace luascriptfunctions {
 
 /**
- * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
- * method calls to the specific functions in the Engine and SGCTWindow classes.
- * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
+ * \ingroup LuaScripts
+ * loadKernel(string):
+ * Loads the provided SPICE kernel by name. The name can contain path tokens, which are
+ * automatically resolved.
  */
-class SGCTWindowWrapper : public WindowWrapper {
-public:
-    void terminate() override;
-    void setBarrier(bool enabled) override;
-    void clearAllWindows(const glm::vec4& clearColor) override;
-    bool windowHasResized() const override;
 
-    double averageDeltaTime() const override;
-    glm::vec2 mousePosition() const override;
-    uint32_t mouseButtons(int maxNumber) const override;
-    glm::ivec2 currentWindowSize() const override;
-    glm::ivec2 currentWindowResolution() const override;
-    glm::ivec2 currentDrawBufferResolution() const override;
-    int currentNumberOfAaSamples() const override;
+int loadKernel(lua_State* L) {
+    const std::string _loggerCat = "loadKernel";
 
-    bool isRegularRendering() const override;
-    bool hasGuiWindow() const override;
-    bool isGuiWindow() const override;
-    
-    glm::mat4 viewProjectionMatrix() const override;
-    glm::mat4 modelMatrix() const override;
-    void setNearFarClippingPlane(float near, float far) override;
-    void setEyeSeparationDistance(float distance) override;
-    
-    glm::ivec4 viewportPixelCoordinates() const override;
-    
-    bool isExternalControlConnected() const override;
-    void sendMessageToExternalControl(const std::vector<char>& message) const override;
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
 
-    bool isSimpleRendering() const override;
+    bool isString = (lua_isstring(L, -1) == 1);
+    if (!isString) {
+        LERROR(ghoul::lua::errorLocation(L) << "Expected argument of type 'string'");
+        return 0;
+    }
 
-    void takeScreenshot() const override;
-};
+    std::string argument = lua_tostring(L, -1);
+    unsigned int result = SpiceManager::ref().loadKernel(argument);
 
+    lua_pushnumber(L, result);
+    return 1;
+}
+
+/**
+ * unloadKernel({string, number}):
+ * Unloads the provided SPICE kernel. The name can contain path tokens, which are
+ * automatically resolved.
+ */
+int unloadKernel(lua_State* L) {
+    const std::string _loggerCat = "loadKernel";
+
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+
+    bool isString = (lua_isstring(L, -1) == 1);
+    bool isNumber = (lua_isnumber(L, -1) == 1);
+
+    if (!isString && !isNumber) {
+        LERROR(
+            ghoul::lua::errorLocation(L) <<
+            "Expected argument of type 'string' or 'number'"
+        );
+        return 0;
+    }
+
+    if (isString) {
+        std::string argument = lua_tostring(L, -1);
+        SpiceManager::ref().unloadKernel(argument);
+        return 0;
+    }
+
+    if (isNumber) {
+        unsigned int argument = static_cast<unsigned int>(lua_tonumber(L, -1));
+        SpiceManager::ref().unloadKernel(argument);
+    }
+}
+
+} // luascriptfunctions
 } // namespace openspace
-
-#endif // __SGCTWINDOWWRAPPER_H__

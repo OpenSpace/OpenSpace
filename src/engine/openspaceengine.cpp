@@ -84,6 +84,8 @@
 #include <WinBase.h>
 #endif
 
+#include "openspaceengine_lua.inl"
+
 using namespace openspace::scripting;
 using namespace ghoul::filesystem;
 using namespace ghoul::logging;
@@ -140,6 +142,9 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _isMaster(false)
     , _runTime(0.0)
     , _syncBuffer(new SyncBuffer(4096))
+    , _isInShutdownMode(false)
+    , _shutdownCountdown(0.f)
+    , _shutdownWait(0.f)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
@@ -369,13 +374,10 @@ bool OpenSpaceEngine::initialize() {
         _downloadManager = std::make_unique<DownloadManager>(requestURL, DownloadVersion);
     }
 
-    // Load SPICE time kernel
-    success = loadSpiceKernels();
-    if (!success)
-        return false;
-
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
+    _scriptEngine->addLibrary(OpenSpaceEngine::luaLibrary());
+    _scriptEngine->addLibrary(SpiceManager::luaLibrary());
     _scriptEngine->addLibrary(RenderEngine::luaLibrary());
     _scriptEngine->addLibrary(Scene::luaLibrary());
     _scriptEngine->addLibrary(Time::luaLibrary());
@@ -410,6 +412,9 @@ bool OpenSpaceEngine::initialize() {
         ConfigurationManager::KeyDisableMasterRendering, disableMasterRendering);
     _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
 
+    configurationManager().getValue(
+        ConfigurationManager::KeyShutdownCountdown, _shutdownWait
+    );
 
     // Load scenegraph
     Scene* sceneGraph = new Scene;
@@ -522,30 +527,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
 
-    return true;
-}
-
-bool OpenSpaceEngine::loadSpiceKernels() {
-    // Load time kernel
-    std::string timeKernel;
-    bool success = configurationManager().getValue(ConfigurationManager::KeySpiceTimeKernel, timeKernel);
-    // Move this to configurationmanager::completenesscheck ---abock
-    if (!success) {
-        LERROR("Configuration file does not contain a '" << ConfigurationManager::KeySpiceTimeKernel << "'");
-        return false;
-    }
-    SpiceManager::KernelHandle id =
-        SpiceManager::ref().loadKernel(timeKernel);
-
-    // Load SPICE leap second kernel
-    std::string leapSecondKernel;
-    success = configurationManager().getValue(ConfigurationManager::KeySpiceLeapsecondKernel, leapSecondKernel);
-    if (!success) {
-        // Move this to configurationmanager::completenesscheck ---abock
-        LERROR("Configuration file does not have a '" << ConfigurationManager::KeySpiceLeapsecondKernel << "'");
-        return false;
-    }
-    id = SpiceManager::ref().loadKernel(std::move(leapSecondKernel));
     return true;
 }
 
@@ -768,6 +749,13 @@ void OpenSpaceEngine::preSynchronization() {
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+    if (_isInShutdownMode) {
+        if (_shutdownCountdown <= 0.f) {
+            _windowWrapper->terminate();
+        }
+        _shutdownCountdown -= _windowWrapper->averageDeltaTime();
+    }
+
     Time::ref().postSynchronizationPreDraw();
 
     _scriptEngine->postSynchronizationPreDraw();
@@ -816,24 +804,26 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-
-    _renderEngine->render(projectionMatrix, viewMatrix, showGui);
-
-    if (_isMaster && _windowWrapper->isRegularRendering()) {
-        if (showGui) {
-            if (_console->isVisible())
-                _console->render();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-            if (_gui->isEnabled())
-                _gui->endFrame();
-        }
-#endif
-    }
+    _renderEngine->render(projectionMatrix, viewMatrix);
 }
 
 void OpenSpaceEngine::postDraw() {
     _renderEngine->postDraw();
+
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (showGui) {
+        _renderEngine->renderScreenLog();
+
+        if (_console->isVisible())
+            _console->render();
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+        if (_gui->isEnabled())
+            _gui->endFrame();
+    }
+#endif
+
+    if (_isInShutdownMode)
+        _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
@@ -934,6 +924,35 @@ void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int siz
         return;
 
     _networkEngine->handleMessage(std::string(receivedChars, size));
+}
+
+void OpenSpaceEngine::toggleShutdownMode() {
+    if (_isInShutdownMode) {
+        // If we are already in shutdown mode, we want to disable it instead
+        LINFO("Disabled shutdown mode");
+        _isInShutdownMode = false;
+    }
+    else {
+        // Else, we hav eto enable it
+        LINFO("Shutting down OpenSpace");
+        _shutdownCountdown = _shutdownWait;
+        _isInShutdownMode = true;
+    }
+}
+
+scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "toggleShutdown",
+                &luascriptfunctions::toggleShutdown,
+                "",
+                "Toggles the shutdown mode that will close the application after the count"
+                "down timer is reached"
+            }
+        }
+    };
 }
 
 void OpenSpaceEngine::enableBarrier() {

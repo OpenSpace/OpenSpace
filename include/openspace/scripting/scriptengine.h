@@ -25,6 +25,8 @@
 #ifndef __SCRIPTENGINE_H__
 #define __SCRIPTENGINE_H__
 
+#include <openspace/scripting/lualibrary.h>
+
 #include <ghoul/lua/ghoul_lua.h>
 
 #include <map>
@@ -47,39 +49,6 @@ namespace scripting {
  */
 class ScriptEngine {
 public:
-    /**
-     * This structure represents a Lua library, itself consisting of a unique #name and
-     * an arbitrary number of #functions
-     */
-    struct LuaLibrary {
-        /**
-         * This structure represents a Lua function with its #name, #function pointer
-         * #argumentText describing the arguments this function takes, the #helpText
-         * describing the function, and whether it should be shared in a parallel
-         * connection (#parallelShared)
-         */
-        struct Function {
-            /// The name of the function
-            std::string name;
-            /// The function pointer that is executed if the function is called
-            lua_CFunction function;
-            /// A text describing the arugments to this function
-            std::string argumentText;
-            /// A help text describing what the function does/
-            std::string helpText;
-            /// If <code>true</code>, this function will be shared with other parallel
-            /// connections
-            bool parallelShared;
-        };
-        /// The name of the library
-        std::string name;
-        /// The list of all functions for this library
-        std::vector<Function> functions;
-
-        /// Comparison function that compares two LuaLibrary%s name
-        bool operator<(const LuaLibrary& rhs) const;
-    };
-
     /**
      * Initializes the internal Lua state and registers a common set of library functions
      * \throw LuaRuntimeException If the creation of the new Lua state fails

@@ -25,6 +25,9 @@
 #ifndef __PERFORMANCEMEASUREMENT_H__
 #define __PERFORMANCEMEASUREMENT_H__
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+
 #include <chrono>
 #include <string>
 
@@ -49,7 +52,12 @@ private:
 #define __LABEL(a) __MERGE(unique_name_, a)
 
 /// Declare a new variable for measuring the performance of the current block
-#define PerfMeasure(name) auto __LABEL(__LINE__) = openspace::performance::PerformanceMeasurement((name), OsEng.renderEngine().performanceManager())
+#define PerfMeasure(name) \
+    auto __LABEL(__LINE__) = \
+        openspace::performance::PerformanceMeasurement(\
+            (name), \
+            OsEng.renderEngine().performanceManager() \
+        )
     
 } // namespace performance
 } // namespace openspace
