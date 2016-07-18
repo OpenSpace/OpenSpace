@@ -115,7 +115,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      * scene graph
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);

@@ -79,7 +79,7 @@ public:
     * Returns the Lua library that contains all Lua functions available to affect the
     * modules.
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     /// The list of all registered OpenSpaceModule%s

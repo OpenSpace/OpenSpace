@@ -6,6 +6,9 @@ function preInitialization()
     critical objects.
     ]]--
 
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
     openspace.time.setTime("2011 AUG 06 00:00:00")
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 end

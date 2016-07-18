@@ -555,7 +555,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         LERROR("Undefined type '" << type << "' for Property documentation");
 }
 
-scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
+scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {

@@ -54,13 +54,12 @@ const string ConfigurationManager::KeyPropertyDocumentationFile =
 const string ConfigurationManager::KeyKeyboardShortcutsType = "KeyboardShortcuts.Type";
 const string ConfigurationManager::KeyKeyboardShortcutsFile = "KeyboardShortcuts.File";
 const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeySpiceTimeKernel = "SpiceKernel.Time";
-const string ConfigurationManager::KeySpiceLeapsecondKernel = "SpiceKernel.LeapSecond";
 const string ConfigurationManager::KeyLogLevel = "Logging.LogLevel";
 const string ConfigurationManager::KeyLogImmediateFlush = "Logging.ImmediateFlush";
 const string ConfigurationManager::KeyLogs = "Logging.Logs";
 const string ConfigurationManager::KeyCapabilitiesVerbosity =
     "Logging.CapabilitiesVerbosity";
+const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 

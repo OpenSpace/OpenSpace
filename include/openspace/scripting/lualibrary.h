@@ -22,52 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWWRAPPER_H__
-#define __SGCTWINDOWWRAPPER_H__
+#ifndef __LUALIBRARY_H__
+#define __LUALIBRARY_H__
 
-#include <openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace {
+namespace scripting {
 
 /**
- * WindowWrapper subclass wrapping the Simple Graphics Cluster Toolkit, forwarding all
- * method calls to the specific functions in the Engine and SGCTWindow classes.
- * \sa https://c-student.itn.liu.se/wiki/develop:sgct:sgct
- */
-class SGCTWindowWrapper : public WindowWrapper {
-public:
-    void terminate() override;
-    void setBarrier(bool enabled) override;
-    void clearAllWindows(const glm::vec4& clearColor) override;
-    bool windowHasResized() const override;
+* This structure represents a Lua library, itself consisting of a unique #name and
+* an arbitrary number of #functions
+*/
+struct LuaLibrary {
+    /**
+    * This structure represents a Lua function with its #name, #function pointer
+    * #argumentText describing the arguments this function takes, the #helpText
+    * describing the function, and whether it should be shared in a parallel
+    * connection (#parallelShared)
+    */
+    struct Function {
+        /// The name of the function
+        std::string name;
+        /// The function pointer that is executed if the function is called
+        lua_CFunction function;
+        /// A text describing the arugments to this function
+        std::string argumentText;
+        /// A help text describing what the function does/
+        std::string helpText;
+        /// If <code>true</code>, this function will be shared with other parallel
+        /// connections
+        bool parallelShared;
+    };
+    /// The name of the library
+    std::string name;
+    /// The list of all functions for this library
+    std::vector<Function> functions;
 
-    double averageDeltaTime() const override;
-    glm::vec2 mousePosition() const override;
-    uint32_t mouseButtons(int maxNumber) const override;
-    glm::ivec2 currentWindowSize() const override;
-    glm::ivec2 currentWindowResolution() const override;
-    glm::ivec2 currentDrawBufferResolution() const override;
-    int currentNumberOfAaSamples() const override;
-
-    bool isRegularRendering() const override;
-    bool hasGuiWindow() const override;
-    bool isGuiWindow() const override;
-    
-    glm::mat4 viewProjectionMatrix() const override;
-    glm::mat4 modelMatrix() const override;
-    void setNearFarClippingPlane(float near, float far) override;
-    void setEyeSeparationDistance(float distance) override;
-    
-    glm::ivec4 viewportPixelCoordinates() const override;
-    
-    bool isExternalControlConnected() const override;
-    void sendMessageToExternalControl(const std::vector<char>& message) const override;
-
-    bool isSimpleRendering() const override;
-
-    void takeScreenshot() const override;
+    /// Comparison function that compares two LuaLibrary%s name
+    bool operator<(const LuaLibrary& rhs) const;
 };
 
+} // namespace scripting
 } // namespace openspace
 
-#endif // __SGCTWINDOWWRAPPER_H__
+#endif // __LUALIBRARY_H__

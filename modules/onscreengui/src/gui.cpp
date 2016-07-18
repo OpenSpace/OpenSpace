@@ -499,7 +499,7 @@ void GUI::render() {
     ImGui::End();
 }
     
-scripting::ScriptEngine::LuaLibrary GUI::luaLibrary() {
+scripting::LuaLibrary GUI::luaLibrary() {
     return {
         "gui",
         {

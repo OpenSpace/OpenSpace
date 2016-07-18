@@ -108,7 +108,7 @@ namespace openspace{
              * \return The Lua library that contains all Lua functions available to affect the
              * interaction
              */
-            static scripting::ScriptEngine::LuaLibrary luaLibrary();
+            static scripting::LuaLibrary luaLibrary();
             
         protected:
             

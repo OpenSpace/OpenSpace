@@ -93,7 +93,7 @@ public:
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 
     // Callback functions
@@ -342,7 +342,7 @@ public:
     * \return The Lua library that contains all Lua functions available to affect the
     * interaction
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     // Callback functions
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
