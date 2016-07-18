@@ -94,7 +94,7 @@ void SpiceEphemeris::update(const UpdateData& data) {
     }
     else
     {
-        _worldRotationMatrix = glm::dmat3();
+        _worldRotationMatrix = glm::dmat3(1.0);
     }
     //double interval = openspace::ImageSequencer::ref().getIntervalLength();
     //if (_ghosting == "TRUE" && interval > 60){
