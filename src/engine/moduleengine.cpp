@@ -82,7 +82,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     return result;
 }
 
-scripting::ScriptEngine::LuaLibrary ModuleEngine::luaLibrary() {
+scripting::LuaLibrary ModuleEngine::luaLibrary() {
     return {
         "modules",
         {

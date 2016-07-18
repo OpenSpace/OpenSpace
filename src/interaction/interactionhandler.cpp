@@ -493,7 +493,7 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
     });
 }
 
-scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return {
         "",
         {
@@ -1173,7 +1173,7 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
     }
 }
 
-scripting::ScriptEngine::LuaLibrary InteractionHandler::luaLibrary() {
+scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return{
         "",
         {

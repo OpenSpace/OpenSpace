@@ -1100,7 +1100,7 @@ int ParallelConnection::headerSize(){
     return 2 * sizeof(uint8_t) + 2 + sizeof(uint32_t);
 }
 
-scripting::ScriptEngine::LuaLibrary ParallelConnection::luaLibrary() {
+scripting::LuaLibrary ParallelConnection::luaLibrary() {
     return {
         "parallel",
         {

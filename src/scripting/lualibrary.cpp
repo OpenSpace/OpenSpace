@@ -22,59 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
-
-#include <modules/onscreengui/include/guicomponent.h>
-#include <modules/onscreengui/include/guihelpcomponent.h>
-#include <modules/onscreengui/include/guiperformancecomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
-#include <modules/onscreengui/include/guiorigincomponent.h>
-#include <modules/onscreengui/include/guitimecomponent.h>
-#include <modules/onscreengui/include/guiiswacomponent.h>
-#include <openspace/scripting/scriptengine.h>
-
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+#include <openspace/scripting/lualibrary.h>
 
 namespace openspace {
-namespace gui {
+namespace scripting {
 
-class GUI : public GuiComponent {
-public:
-    GUI();
-    ~GUI();
+bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
+    return name < rhs.name;
+}
 
-    void initialize();
-    void deinitialize();
-
-    void initializeGL();
-    void deinitializeGL();
-
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
-    bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-    bool charCallback(unsigned int character, KeyModifier modifier);
-
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
-    void endFrame();
-
-    void render();
-
-    static openspace::scripting::LuaLibrary luaLibrary();
-
-//protected:
-    GuiHelpComponent _help;
-    GuiOriginComponent _origin;
-    GuiPerformanceComponent _performance;
-    GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiTimeComponent _time;
-    GuiIswaComponent _iswa;
-};
-
-} // namespace gui
+} // namespace scripting
 } // namespace openspace
-
-#endif // __GUI_H__

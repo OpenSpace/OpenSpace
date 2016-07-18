@@ -967,7 +967,7 @@ void OpenSpaceEngine::toggleShutdownMode() {
     }
 }
 
-scripting::ScriptEngine::LuaLibrary OpenSpaceEngine::luaLibrary() {
+scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {

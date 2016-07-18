@@ -165,7 +165,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     // This is a temporary method to change the origin of the coordinate system ---abock
     void changeViewPoint(std::string origin);

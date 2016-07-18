@@ -22,59 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __LUALIBRARY_H__
+#define __LUALIBRARY_H__
 
-#include <modules/onscreengui/include/guicomponent.h>
-#include <modules/onscreengui/include/guihelpcomponent.h>
-#include <modules/onscreengui/include/guiperformancecomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
-#include <modules/onscreengui/include/guiorigincomponent.h>
-#include <modules/onscreengui/include/guitimecomponent.h>
-#include <modules/onscreengui/include/guiiswacomponent.h>
-#include <openspace/scripting/scriptengine.h>
-
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+#include <ghoul/lua/ghoul_lua.h>
 
 namespace openspace {
-namespace gui {
+namespace scripting {
 
-class GUI : public GuiComponent {
-public:
-    GUI();
-    ~GUI();
+/**
+* This structure represents a Lua library, itself consisting of a unique #name and
+* an arbitrary number of #functions
+*/
+struct LuaLibrary {
+    /**
+    * This structure represents a Lua function with its #name, #function pointer
+    * #argumentText describing the arguments this function takes, the #helpText
+    * describing the function, and whether it should be shared in a parallel
+    * connection (#parallelShared)
+    */
+    struct Function {
+        /// The name of the function
+        std::string name;
+        /// The function pointer that is executed if the function is called
+        lua_CFunction function;
+        /// A text describing the arugments to this function
+        std::string argumentText;
+        /// A help text describing what the function does/
+        std::string helpText;
+        /// If <code>true</code>, this function will be shared with other parallel
+        /// connections
+        bool parallelShared;
+    };
+    /// The name of the library
+    std::string name;
+    /// The list of all functions for this library
+    std::vector<Function> functions;
 
-    void initialize();
-    void deinitialize();
-
-    void initializeGL();
-    void deinitializeGL();
-
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
-    bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-    bool charCallback(unsigned int character, KeyModifier modifier);
-
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
-    void endFrame();
-
-    void render();
-
-    static openspace::scripting::LuaLibrary luaLibrary();
-
-//protected:
-    GuiHelpComponent _help;
-    GuiOriginComponent _origin;
-    GuiPerformanceComponent _performance;
-    GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiTimeComponent _time;
-    GuiIswaComponent _iswa;
+    /// Comparison function that compares two LuaLibrary%s name
+    bool operator<(const LuaLibrary& rhs) const;
 };
 
-} // namespace gui
+} // namespace scripting
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __LUALIBRARY_H__

@@ -120,7 +120,7 @@ public:
     * Returns the Lua library that contains all Lua functions available to affect the
     * application.
     */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
 private:
     OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
