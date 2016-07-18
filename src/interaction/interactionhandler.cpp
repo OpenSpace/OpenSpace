@@ -651,17 +651,17 @@ InteractionHandler::InteractionHandler()
     _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
     _interactionModes.insert(
         std::pair<std::string, std::shared_ptr<InteractionMode>>(
-            "OrbitalInteractionMode",
+            "Orbital",
             std::make_shared<OrbitalInteractionMode>(_mouseStates)
             ));
     _interactionModes.insert(
         std::pair<std::string, std::shared_ptr<InteractionMode>>(
-            "GlobeBrowsingInteractionMode",
+            "GlobeBrowsing",
             std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates)
             ));
 
     // Set the interactionMode
-    _currentInteractionMode = _interactionModes["OrbitalInteractionMode"];
+    _currentInteractionMode = _interactionModes["Orbital"];
 
     // Define lambda functions for changed properties
     _rotationalFriction.onChange([&]() {
