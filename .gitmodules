@@ -4,3 +4,6 @@
 [submodule "modules/kameleon/ext/kameleon"]
 	path = modules/kameleon/ext/kameleon
 	url = https://github.com/OpenSpace/Kameleon.git
+[submodule "ext/spice"]
+	path = ext/spice
+	url = https://github.com/OpenSpace/Spice.git

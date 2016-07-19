@@ -124,10 +124,11 @@ function (add_external_dependencies)
     endif ()
 
     # Spice
-    set(SPICE_ROOT_DIR "${OPENSPACE_EXT_DIR}/spice")
-    find_package(Spice REQUIRED)
-    target_include_directories(libOpenSpace SYSTEM PUBLIC ${SPICE_INCLUDE_DIRS})
-    target_link_libraries(libOpenSpace ${SPICE_LIBRARIES})
+    add_subdirectory(${OPENSPACE_EXT_DIR}/spice)
+    target_link_libraries(libOpenSpace Spice)
+    get_property(SPICE_INCLUDE_DIR TARGET Spice PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+    target_include_directories(libOpenSpace PUBLIC ${SPICE_INCLUDE_DIR})
+    set_property(TARGET Spice PROPERTY FOLDER "External")
 
     # Curl
     if (WIN32)
