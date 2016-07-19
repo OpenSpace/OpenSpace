@@ -3,21 +3,44 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
-        Static = true,
+        Ephemeris = {
+            Type = "Static"
+        }
+    },
+    -- EarthTrail module
+    {   
+        Name = "EarthTrail",
+        Parent = "SolarSystemBarycenter",
+        Renderable = {
+            Type = "RenderableTrail",
+            Body = "EARTH",
+            Frame = "GALACTIC",
+            Observer = "SUN",
+            RGB = { 0.5, 0.8, 1.0},
+            TropicalOrbitPeriod = 365.242,
+            EarthOrbitRatio = 1,
+            DayLength = 24
+        },
+        GuiName = "/Solar/EarthTrail"
+    },
+    -- RenderableGlobe module
+    {
+        Name = "LodEarth",
+        Parent = "EarthBarycenter",
         Ephemeris = {
             Type = "Spice",
-            Body = "EARTH BARYCENTER",
+            Body = "EARTH",
             Reference = "ECLIPJ2000",
             Observer = "SUN",
             Kernels = {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
         },
-    },
-    -- RenderableGlobe module
-    {   
-        Name = "LodEarth",
-        Parent = "EarthBarycenter",
+        Rotation = {
+            Type = "Spice",
+            Frame = "IAU_EARTH",
+            Reference = "ECLIPJ2000"
+        },
         Renderable = {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
