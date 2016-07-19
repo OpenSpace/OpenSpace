@@ -1,0 +1,73 @@
+UseAccurateNewHorizonsKernels = false
+-- TextureResolution = "low"
+TextureResolution = "med"
+-- TextureResolution = "high"
+
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    -- openspace.time.setTime("2007-02-28T11:40:00.000")
+
+    -- openspace.time.setTime("2015-07-08T15:57:45.00")
+    -- openspace.time.setTime("2015-07-12T07:41:00.00")
+    -- openspace.time.setTime("2015-07-12T15:43:00.00")
+    -- openspace.time.setTime("2015-07-12T22:19:20.00")
+    -- openspace.time.setTime("2015-07-13T20:59:00.00")
+    -- openspace.time.setTime("2015-07-14T02:41:55.00")
+    openspace.time.setTime("2015-07-14T10:05:00.00")
+    openspace.time.setDeltaTime(0)
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_newhorizons.lua'))
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    --openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTrail.renderable.enabled", false)
+    openspace.setPropertyValue("PlutoTexture.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.printInfo("Done setting default values")
+end
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Earth",
+        Position = {1, 0, 0, 5},
+    },
+    Modules = {
+        "sun",
+        "mercury",
+        "venus",
+        "earth",
+        "mars",
+        "saturn",
+        "uranus",
+        "neptune",
+        "stars",
+        -- "stars-denver",
+        "milkyway",
+        -- "milkyway-eso",
+        "imageplane",
+    }
+}
+
