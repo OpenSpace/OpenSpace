@@ -1,29 +1,12 @@
---dofile "osirisrex_spicekernels.lua"
-
+local BENNU_BODY = "2101955"
 return {
-    -- Earth barycenter module
-    {
-        Name = "EarthBarycenter",
-        Parent = "SolarSystemBarycenter",
-        Static = true,
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-    },
-
     {   
-        Name = "OsirisRex",
-        Parent = "EarthBarycenter",
+        Name = "Bennu2",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-            Frame = "IAU_EARTH",
-            Body = "EARTH",
+            Frame = "IAU_BENNU",
+            Body = BENNU_BODY,
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
@@ -39,7 +22,31 @@ return {
                 Clouds = "textures/earth_clouds.jpg"
             }
         },
+
+        Ephemeris = {
+            Type = "Spice",
+            Body = BENNU_BODY,
+            -- Reference = "ECLIPJ2000",
+            Reference = "GALACTIC",
+            Observer = "SUN",
+        },
         
-        GuiName = "/Solar/Planets/OsirisRex"
+        GuiName = "/Solar/Bennu"
+    },
+
+    {   
+        Name = "BennuTrail",
+        Parent = "SolarSystemBarycenter",
+         Renderable = {
+            Type = "RenderableTrail",
+            Body = BENNU_BODY,
+            Frame = "GALACTIC",
+            Observer = "SUN",
+            RGB = { 0.4, 0.0, 0.7},
+            TropicalOrbitPeriod = 436.649,
+            EarthOrbitRatio = 1.3559, -- worst parameter I've ever seen
+            DayLength = 4.288 -- why this for a path??
+        },
+        GuiName = "/Solar/BennuTrail"
     },
 }
