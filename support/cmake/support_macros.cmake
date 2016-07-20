@@ -126,7 +126,7 @@ function (add_external_dependencies)
         # sgct
         sgct_light glew glfw png16_static quat  tinythreadpp tinyxml2static turbojpeg-static
         vrpn zlibstatic
-        # simd
+        ${GLFW_LIBRARIES}
     )
 
     set_property(TARGET sgct_light PROPERTY FOLDER "External")
