@@ -46,7 +46,7 @@ void renderTooltip(Property* prop) {
 
 void executeScript(const std::string& id, const std::string& value) {
     std::string script =
-        "openspace.setPropertyValue('" + id + "', " + value + ");";
+        "openspace.setPropertyValueSingle('" + id + "', " + value + ");";
     OsEng.scriptEngine().queueScript(script);
 }
 

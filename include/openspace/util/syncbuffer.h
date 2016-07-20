@@ -28,6 +28,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/assert.h>
 
+#include <cstring>
 #include <memory>
 #include <stdint.h>
 #include <vector>

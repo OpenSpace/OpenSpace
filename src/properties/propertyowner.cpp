@@ -104,8 +104,9 @@ Property* PropertyOwner::property(const std::string& id) const {
             }
         }
     }
-    else
+    else {
         return *it;
+    }
 }
     
 bool PropertyOwner::hasProperty(const std::string& id) const {
