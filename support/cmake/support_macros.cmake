@@ -116,9 +116,31 @@ function (add_external_dependencies)
     set_property(TARGET lz4 PROPERTY FOLDER "External")
 
     # SGCT
-    find_package(SGCT REQUIRED)
-    target_include_directories(libOpenSpace SYSTEM PUBLIC ${SGCT_INCLUDE_DIRECTORIES})
-    target_link_libraries(libOpenSpace ${SGCT_LIBRARIES})
+    set(SGCT_TEXT OFF CACHE FORCE "")
+    set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE FORCE "")
+    
+    add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
+    target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
+    target_link_libraries(
+        libOpenSpace
+        # sgct
+        sgct_light glew glfw png16_static quat  tinythreadpp tinyxml2static turbojpeg-static
+        vrpn zlibstatic
+        # simd
+    )
+
+    set_property(TARGET sgct_light PROPERTY FOLDER "External")
+    set_property(TARGET glew PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET glfw PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET png16_static PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET quat PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET simd PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET tinythreadpp PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET tinyxml2static PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET turbojpeg-static PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET vrpn PROPERTY FOLDER "External/SGCT")
+    set_property(TARGET zlibstatic PROPERTY FOLDER "External/SGCT")
+
     if (UNIX AND (NOT APPLE))
         target_link_libraries(libOpenSpace Xcursor Xinerama X11)
     endif ()

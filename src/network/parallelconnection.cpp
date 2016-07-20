@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef __WIN32__
+#ifdef WIN32
 #ifndef _ERRNO
 #define _ERRNO WSAGetLastError()
 #endif
@@ -148,7 +148,7 @@ void ParallelConnection::closeSocket(){
         * SHUT_RDWR (Disables further send and receive operations)
         */
             
-#ifdef __WIN32__
+#ifdef WIN32
     shutdown(_clientSocket, SD_BOTH);
     closesocket(_clientSocket);
 #else
