@@ -106,7 +106,12 @@ namespace openspace {
 
 const std::string RenderEngine::KeyFontMono = "Mono";
 const std::string RenderEngine::KeyFontLight = "Light";
-    
+const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
+	RenderEngine::FrametimeType::DtTimeAvg,
+	RenderEngine::FrametimeType::FPS,
+	RenderEngine::FrametimeType::FPSAvg
+});
+
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
     , _sceneGraph(nullptr)
@@ -121,6 +126,7 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+	, _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
     _onScreenInformation = {
@@ -452,6 +458,18 @@ void RenderEngine::toggleInfoText(bool b) {
     _showInfo = b;
 }
 
+void RenderEngine::toggleFrametimeType(int t) {
+
+	std::vector<FrametimeType>::const_iterator it = std::find(
+		FrametimeTypes.begin(), FrametimeTypes.end(), _frametimeType);
+
+	if (!t && it == FrametimeTypes.begin()) {
+		it = FrametimeTypes.end();
+	}  
+	_frametimeType = t ? *(++it) : *(--it);
+
+}
+
 Scene* RenderEngine::scene() {
     // TODO custom assert (ticket #5)
     assert(_sceneGraph);
@@ -705,6 +723,12 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "bool",
                 "Toggles the showing of render information on-screen text"
             },
+			{
+				"toggleFrametimeType",
+				&luascriptfunctions::toggleFrametimeType,
+				"int",
+				"Toggle showing FPS or Average Frametime in heads up info"
+			},
             {
                 "setPerformanceMeasurement",
                 &luascriptfunctions::setPerformanceMeasurement,
@@ -1239,11 +1263,36 @@ void RenderEngine::renderInformation() {
             Time::ref().deltaTime()
             );
 
-        RenderFontCr(*_fontInfo,
-            penPosition,
-            "Avg. Frametime: %.5f",
-            OsEng.windowWrapper().averageDeltaTime()
-            );
+		switch (_frametimeType) {
+			case FrametimeType::DtTimeAvg:
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					"Avg. Frametime: %.5f",
+					OsEng.windowWrapper().averageDeltaTime()
+				);
+				break;
+			case FrametimeType::FPS:
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					"FPS: %3.2f",
+					1.0 / OsEng.windowWrapper().deltaTime()
+				);
+				break;
+			case FrametimeType::FPSAvg:
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					"Avg. FPS: %3.2f",
+					1.0 / OsEng.windowWrapper().averageDeltaTime()
+				);
+				break;
+			default:
+				RenderFontCr(*_fontInfo,
+					penPosition,
+					"Avg. Frametime: %.5f",
+					OsEng.windowWrapper().averageDeltaTime()
+				);
+				break;
+		}
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");

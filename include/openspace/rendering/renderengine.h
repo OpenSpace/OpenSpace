@@ -68,8 +68,15 @@ public:
         Post
     };
 
+	enum class FrametimeType {
+		DtTimeAvg = 0,
+		FPS,
+		FPSAvg
+	};
+
     static const std::string KeyFontMono;
     static const std::string KeyFontLight;
+	static const std::vector<FrametimeType> FrametimeTypes;
 
     RenderEngine();
     ~RenderEngine();
@@ -97,6 +104,7 @@ public:
 
     void takeScreenshot();
     void toggleInfoText(bool b);
+	void toggleFrametimeType(int t);
 
     // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
@@ -198,6 +206,8 @@ private:
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
+
+	FrametimeType _frametimeType;
 
     bool _showInfo;
     bool _showLog;
