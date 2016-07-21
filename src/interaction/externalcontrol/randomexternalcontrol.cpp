@@ -1,7 +1,7 @@
 #include <openspace/interaction/externalcontrol/randomexternalcontrol.h>
 
 #include <cstdio>
-#ifndef __WIN32__
+#ifndef _WIN32
     #include <unistd.h>
 #endif
 
@@ -22,7 +22,7 @@ void *updatedx(void * arg) {
         *dx = *dx + 0.5;
 
         
-#ifndef __WIN32__
+#ifndef _WIN32
         // random sleep time
         int diff = rand() % 200;
 
