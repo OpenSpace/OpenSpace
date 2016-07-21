@@ -19,7 +19,7 @@ end
 function postInitialization()
     openspace.printInfo("Setting default values")
 
-    --openspace.setInteractionMode('GlobeBrowsing')
+    openspace.setInteractionMode('GlobeBrowsing')
     --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
