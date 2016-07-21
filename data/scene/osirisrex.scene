@@ -166,7 +166,7 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Bennu2",
+        Focus = "OsirisRex",
         Position = {690952831942.419800, 665640329630.609375, 131488636639.521881},
         Rotation = {0.668258, -0.089482, 0.589040, 0.445484},
     },

@@ -34,7 +34,7 @@ return {
                     {
                         Type = "SingleImage",
                         Name = "Basic",
-                        FilePath = "../debugglobe/map_service_configs/ESRI_Imagery_World_2D.wms",
+                        FilePath = "../debugglobe/textures/test_tile.png",
                         Enabled = true,
                     },
                 }
@@ -85,7 +85,7 @@ return {
                     {
                         Type = "SingleImage",
                         Name = "Basic",
-                        FilePath = "../debugglobe/map_service_configs/ESRI_Imagery_World_2D.wms",
+                        FilePath = "../debugglobe/textures/test_tile.png",
                         Enabled = true,
                     },
                 }
