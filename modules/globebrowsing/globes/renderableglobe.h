@@ -120,12 +120,14 @@ public:
 
     
     // Properties 
+    properties::BoolProperty _isEnabled;
     properties::FloatProperty lodScaleFactor;
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
     properties::BoolProperty atmosphereEnabled;
     ReferencedBoolSelection debugSelection;
     properties::BoolProperty _saveOrThrowCamera;
     properties::BoolProperty _resetTileProviders;
+    
     
 
 
