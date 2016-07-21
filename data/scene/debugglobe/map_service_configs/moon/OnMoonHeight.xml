@@ -1,0 +1,21 @@
+<GDAL_WMS>
+    <Service name="TiledWMS">
+        <ServerUrl>http://onmoon.lmmp.nasa.gov/raw/wms.cgi?</ServerUrl>
+        <TiledGroupName>Lunar Elevation v2, half meters</TiledGroupName>
+        <!-- 
+            Lunar Elevation v2
+        -->
+    </Service>
+    <DataWindow>
+        <UpperLeftX>-180.0</UpperLeftX>
+        <UpperLeftY>90</UpperLeftY>
+        <LowerRightX>180.0</LowerRightX>
+        <LowerRightY>-90</LowerRightY>
+        <TileLevel>24</TileLevel>
+        <TileCountX>2</TileCountX>
+        <TileCountY>1</TileCountY>
+        <YOrigin>top</YOrigin>
+    </DataWindow>
+    <BlockSizeX>512</BlockSizeX>
+    <BlockSizeY>512</BlockSizeY>
+</GDAL_WMS>

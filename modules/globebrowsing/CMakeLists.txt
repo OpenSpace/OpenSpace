@@ -51,17 +51,23 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     
 
 )
@@ -92,16 +98,23 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     
    
 )

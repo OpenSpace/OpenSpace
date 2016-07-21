@@ -171,19 +171,22 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
+    _worldPositionCached = calculateWorldPosition();
+    UpdateData newUpdateData = data;
+    newUpdateData.position = worldPosition().dvec3();
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(data);
+            _ephemeris->update(newUpdateData);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _ephemeris->update(data);
+            _ephemeris->update(newUpdateData);
     }
 
     if (_renderable && _renderable->isReady()) {
@@ -191,14 +194,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _renderable->update(data);
+            _renderable->update(newUpdateData);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeRenderable = (end - start).count();
         }
         else
-            _renderable->update(data);
+            _renderable->update(newUpdateData);
     }
 }
 
@@ -243,7 +246,7 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPosition = worldPosition();
+    const psc thisPosition = _worldPositionCached;
 
     RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
 
@@ -270,7 +273,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = worldPosition();
+    const psc thisPosition = _worldPositionCached;
     RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement };
 
     _performanceRecord.renderTime = 0;
@@ -318,10 +321,20 @@ const psc& SceneGraphNode::position() const
 
 psc SceneGraphNode::worldPosition() const
 {
+    return _worldPositionCached;
+}
+
+const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
+{
+    return _ephemeris->worldRotationMatrix();
+}
+
+psc SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->worldPosition();
-    } else {
+        return _ephemeris->position() + _parent->calculateWorldPosition();
+    }
+    else {
         return _ephemeris->position();
     }
 }

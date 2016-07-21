@@ -95,8 +95,21 @@ namespace openspace {
         return std::abs(x - other.x) + std::abs(y - other.y);
     }
 
-    HashKey ChunkIndex::hashKey() const {
-        return x ^ (y << 16) ^ (level << 24);
+
+    /**
+    Creates a hash which can be used as key in hash maps
+        BITS | USAGE
+         0-6 | level
+        6-26 | x
+       26-46 | y
+       46-64 | reserved for future use, e.g. time key
+    */
+    ChunkHashKey ChunkIndex::hashKey() const {
+        ChunkHashKey key = 0LL;
+        key |= level;
+        key |= x << 6;
+        key |= ((ChunkHashKey)y) << 26;
+        return key;
     }
 
 

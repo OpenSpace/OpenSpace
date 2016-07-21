@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -63,6 +64,7 @@ namespace openspace {
         // read file
         std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
+        _defaultTile = getTileProvider()->getDefaultTile();
     }
 
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -108,50 +110,50 @@ namespace openspace {
     }
 
     TileDepthTransform TemporalTileProvider::depthTransform() {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from depthTransform()");
-            prerender();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->depthTransform();
     }
 
     Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getTileStatus()");
-            prerender();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->getTileStatus(chunkIndex);
     }
 
     Tile TemporalTileProvider::getTile(const ChunkIndex& chunkIndex) {
-        if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getTile()");
-            prerender();
-        }
-
+        ensureUpdated();
         return _currentTileProvider->getTile(chunkIndex);
     }
 
-
-
-    void TemporalTileProvider::prerender() {
-        _currentTileProvider = getTileProvider();
-        _currentTileProvider->prerender();
+    Tile TemporalTileProvider::getDefaultTile() {
+        return _defaultTile;
     }
 
-    std::shared_ptr<AsyncTileDataProvider> TemporalTileProvider::getAsyncTileReader() {
+
+    int TemporalTileProvider::maxLevel() {
+        ensureUpdated();
+        return _currentTileProvider->maxLevel();
+    }
+
+    void TemporalTileProvider::ensureUpdated() {
         if (_currentTileProvider == nullptr) {
-            LDEBUG("Warning: had to call prerender from getAsyncTileReader()");
-            prerender();
+            LDEBUG("Warning: update was done lazily");
+            update();
         }
-
-        return _currentTileProvider->getAsyncTileReader();
     }
 
+    void TemporalTileProvider::update() {
+        _currentTileProvider = getTileProvider();
+        _currentTileProvider->update();
+    }
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(Time t) {
+    void TemporalTileProvider::reset() {
+        auto end = _tileProviderMap.end();
+        for (auto it = _tileProviderMap.begin(); it != end; it++) {
+            it->second->reset();
+        }
+    }
+
+    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
         Time tCopy(t);
         if (_timeQuantizer.quantize(tCopy)) {
             TimeKey timekey = _timeFormat->stringify(tCopy);
@@ -167,40 +169,23 @@ namespace openspace {
     }
 
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
+    std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
         auto it = _tileProviderMap.find(timekey);
         if (it != _tileProviderMap.end()) {
             return it->second;
         }
         else {
             auto tileProvider = initTileProvider(timekey);
+
             _tileProviderMap[timekey] = tileProvider;
             return tileProvider;
         }
     }
 
 
-    std::shared_ptr<CachingTileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
+    std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
-        
-        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(gdalDatasetXml,
-                _tileProviderInitData.minimumPixelSize,
-                _tileProviderInitData.preprocessTiles));
-
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(_tileProviderInitData.threads));
-
-        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-            new AsyncTileDataProvider(tileDataset, threadPool));
-
-        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(_tileProviderInitData.cacheSize));
-
-        std::shared_ptr<CachingTileProvider> tileProvider= std::shared_ptr<CachingTileProvider>(
-            new CachingTileProvider(tileReader, tileCache,
-                _tileProviderInitData.framesUntilRequestQueueFlush));
-
-        return tileProvider;
+        return TileProviderFactory::ref()->create("LRUCaching", gdalDatasetXml, _tileProviderInitData);
     }
     
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
@@ -240,11 +225,12 @@ namespace openspace {
 
     bool TimeIdProviderFactory::initialized = false;
 
-    std::unordered_map<std::string, TimeFormat*> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, TimeFormat*>();
+    std::unordered_map<std::string, std::unique_ptr<TimeFormat>> TimeIdProviderFactory::_timeIdProviderMap = std::unordered_map<std::string, std::unique_ptr<TimeFormat>>();
 
     void TimeIdProviderFactory::init() {
-        _timeIdProviderMap.insert({ "YYYY-MM-DD", new YYYY_MM_DD });
-        _timeIdProviderMap.insert({ "YYYY-MM-DDThh:mm:ssZ", new YYYY_MM_DDThh_mm_ssZ });
+        _timeIdProviderMap.insert(
+                                  std::pair<std::string, std::unique_ptr<TimeFormat> >( "YYYY-MM-DD", std::make_unique<YYYY_MM_DD>() ));
+      _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat> > ( "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() ));
         initialized = true;
     }
 
@@ -252,7 +238,9 @@ namespace openspace {
         if (!initialized) {
             init();
         }
-        return _timeIdProviderMap[format];
+        ghoul_assert(_timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
+            "Unsupported Time format: " << format);
+        return _timeIdProviderMap[format].get();
     }
 
 

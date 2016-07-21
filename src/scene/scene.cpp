@@ -184,34 +184,6 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
-    // TODO: Make it less hard-coded and more flexible when nodes are not found
-    ghoul::Dictionary cameraDictionary;
-    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
-        LDEBUG("Camera dictionary found");
-        std::string focus;
-
-        if (cameraDictionary.hasKey(KeyFocusObject)
-            && cameraDictionary.getValue(KeyFocusObject, focus))
-        {
-            auto focusIterator = std::find_if(
-                _graph.nodes().begin(),
-                _graph.nodes().end(),
-                [focus](SceneGraphNode* node) {
-                    return node->name() == focus;
-                }
-            );
-
-            if (focusIterator != _graph.nodes().end()) {
-                _focus = focus;
-                LDEBUG("Setting camera focus to '" << _focus << "'");
-            }
-            else {
-                LERROR("Could not find focus object '" << focus << "'");
-                _focus = "Root";
-            }
-        }
-    }
-
     // Initialize all nodes
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
@@ -226,12 +198,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         }
     }
 
-
     // update the position of all nodes
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
-            node->update({ Time::ref().currentTime() });
+            node->update({glm::dvec3(0), Time::ref().currentTime() });
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -241,108 +212,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
         (*it)->calculateBoundingSphere();
 
-
-    // Calculate the bounding sphere for the scenegraph
-    //_root->calculateBoundingSphere();
-
-    // set the camera position
-    Camera* c = OsEng.ref().renderEngine().camera();
-    //auto focusIterator = _allNodes.find(_focus);
-    auto focusIterator = std::find_if(
-                _graph.nodes().begin(),
-                _graph.nodes().end(),
-                [&](SceneGraphNode* node) {
-        return node->name() == _focus;
+    // Read the camera dictionary and set the camera state
+    ghoul::Dictionary cameraDictionary;
+    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
+        OsEng.interactionHandler().setCameraStateFromDictionary(cameraDictionary);
     }
-    );
-
-    glm::vec2 cameraScaling(1);
-    psc cameraPosition(0,0,1,0);
-
-    //if (_focus->)
-    if (focusIterator != _graph.nodes().end()) {
-        LDEBUG("Camera focus is '" << _focus << "'");
-        SceneGraphNode* focusNode = *focusIterator;
-        //Camera* c = OsEng.interactionHandler().getCamera();
-
-        // TODO: Make distance depend on radius
-        // TODO: Set distance and camera direction in some more smart way
-        // TODO: Set scaling dependent on the position and distance
-        // set position for camera
-        const PowerScaledScalar bound = focusNode->calculateBoundingSphere();
-
-        // this part is full of magic!
-        glm::vec2 boundf = bound.vec2();
-        //glm::vec2 scaling{1.0f, -boundf[1]};
-
-        cameraScaling = glm::vec2(1.f, -boundf[1]);
-        //boundf[0] *= 5.0f;
-
-        
-        //psc cameraPosition = focusNode->position();
-        //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
-
-        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
-
-        cameraPosition = focusNode->position();
-        cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
-        
-        //why this line? (JK)
-        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
-
-
-        //c->setPosition(cameraPosition);
-       // c->setCameraDirection(glm::vec3(0, 0, -1));
-      //  c->setScaling(scaling);
-
-        // Set the focus node for the interactionhandler
-        OsEng.interactionHandler().setFocusNode(focusNode);
-    }
-    else
-        OsEng.interactionHandler().setFocusNode(_graph.rootNode());
-
-    glm::vec4 position;
-    if (cameraDictionary.hasKeyAndValue<glm::vec4>(KeyPositionObject)) {
-        try {
-            position = cameraDictionary.value<glm::vec4>(KeyPositionObject);
-
-            LDEBUG("Camera position is ("
-                << position[0] << ", "
-                << position[1] << ", "
-                << position[2] << ", "
-                << position[3] << ")");
-
-            cameraPosition = psc(position);
-        }
-        catch (const ghoul::Dictionary::DictionaryError& e) {
-            LERROR("Error loading Camera location: " << e.what());
-        }
-    }
-
-    // the camera position
-    const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
-    if (!fn) {
-        throw ghoul::RuntimeError("Could not find focus node");
-    }
-
-    // Check crash for when fn == nullptr
-    glm::vec3 target = glm::normalize(fn->worldPosition().vec3() - cameraPosition.vec3());
-    glm::mat4 la = glm::lookAt(glm::vec3(0, 0, 0), target, glm::vec3(c->lookUpVectorCameraSpace()));
-
-    c->setRotation(glm::quat_cast(la));
-    c->setPosition(cameraPosition);
-    c->setScaling(cameraScaling);
-
-    glm::vec3 viewOffset;
-    if (cameraDictionary.hasKey(KeyViewOffset)
-        && cameraDictionary.getValue(KeyViewOffset, viewOffset)) {
-        glm::quat rot = glm::quat(viewOffset);
-        c->rotate(rot);
-    }
-
-    // explicitly update and sync the camera
-    c->preSynchronization();
-    c->postSynchronizationPreDraw();
 
     // If a PropertyDocumentationFile was specified, generate it now
     const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);

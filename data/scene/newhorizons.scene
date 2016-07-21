@@ -52,7 +52,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "NewHorizons",
-        Position = {1, 0, 0, 5},
+        Position = {4662120063743.592773, 1263245003503.724854, -955413856565.788086},
+        Rotation = {0.683224, -0.165934, 0.701234, 0.118073},
     },
     Modules = {
         "sun",

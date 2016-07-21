@@ -35,6 +35,7 @@ public:
                                 = ghoul::Dictionary());
     virtual ~StaticEphemeris();
     virtual const psc& position() const;
+    virtual const glm::dmat3& worldRotationMatrix() const;
     virtual void update(const UpdateData& data) override;
 private:
     psc _position;

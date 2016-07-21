@@ -24,11 +24,10 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-
-
 #include <ghoul/logging/logmanager.h>
 
 #include <sstream>
+#include <algorithm>
 
 
 
@@ -39,6 +38,8 @@ namespace {
 
 
 namespace openspace {
+
+    const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
     TileAndTransform TileSelector::getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents) {
         TileUvTransform uvTransform;
@@ -52,7 +53,7 @@ namespace openspace {
 
         // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
         //         the range of defined data.
-        int maximumLevel = tileProvider->getAsyncTileReader()->getTextureDataProvider()->getMaximumLevel();
+        int maximumLevel = tileProvider->maxLevel();
         while(chunkIndex.level > maximumLevel){
             ascendToParent(chunkIndex, uvTransform);
         }
@@ -66,7 +67,45 @@ namespace openspace {
             }
             else return { tile, uvTransform };
         }
-        return {Tile::TileUnavailable, uvTransform};
+        
+        return{ Tile::TileUnavailable, uvTransform };
+    }
+
+    TileAndTransform TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex) {
+        TileAndTransform mostHighResolution;
+        mostHighResolution.tile = Tile::TileUnavailable;
+        mostHighResolution.uvTransform.uvScale.x = 0;
+
+        auto activeProviders = tileProviderGroup.getActiveTileProviders();
+        for (size_t i = 0; i < activeProviders.size(); i++) {
+            TileAndTransform tileAndTransform = getHighestResolutionTile(activeProviders[i].get(), chunkIndex);
+            bool tileIsOk = tileAndTransform.tile.status == Tile::Status::OK;
+            bool tileHasPreprocessData = tileAndTransform.tile.preprocessData != nullptr;
+            bool tileIsHigherResolution = tileAndTransform.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
+            if (tileIsOk && tileHasPreprocessData && tileIsHigherResolution) {
+                mostHighResolution = tileAndTransform;
+            }
+        }
+
+        return mostHighResolution;
+    }
+
+    bool TileSelector::CompareResolution::operator()(const TileAndTransform& a, const TileAndTransform& b) {
+        // large uv scale means smaller resolution
+        return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
+    }
+
+    std::vector<TileAndTransform> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const ChunkIndex& chunkIndex) {
+        auto activeProviders = tileProviderGroup.getActiveTileProviders();
+        std::vector<TileAndTransform> tiles;
+        for (auto provider : activeProviders){
+            tiles.push_back(getHighestResolutionTile(provider.get(), chunkIndex));
+        }
+
+
+        std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);
+
+        return tiles;
     }
 
     void TileSelector::ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv) {

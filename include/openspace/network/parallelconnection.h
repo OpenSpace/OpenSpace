@@ -43,7 +43,7 @@
 #include <map>
 #include <condition_variable>
 
-#ifdef __WIN32__
+#ifdef WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -52,7 +52,7 @@
 #include <ws2tcpip.h>
 #endif
 
-#if defined(__WIN32__) || defined(__MING32__) || defined(__MING64__)
+#if defined(WIN32) || defined(__MING32__) || defined(__MING64__)
 typedef size_t _SOCKET;
 #else
 typedef int _SOCKET;

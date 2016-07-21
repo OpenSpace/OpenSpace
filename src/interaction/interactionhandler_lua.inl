@@ -25,7 +25,6 @@
 namespace openspace {
 
 namespace luascriptfunctions {
-
 /**
  * \ingroup LuaScripts
  * setOrigin():
@@ -125,26 +124,57 @@ int setInteractionMode(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 
-    std::string interactionModeName = luaL_checkstring(L, -1);
+    std::string interactionModeKey = luaL_checkstring(L, -1);
     
-    if (interactionModeName.empty())
+    if (interactionModeKey.empty())
         return luaL_error(L, "interactionmode name string is empty");
 
-    if (interactionModeName == "OrbitalInteractionMode") {
-        OsEng.interactionHandler().setInteractionModeToOrbital();
-    }
-    else if (interactionModeName == "GlobeBrowsingInteractionMode") {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        OsEng.interactionHandler().setInteractionModeToGlobeBrowsing();
-#else
-        return luaL_error(L, "OpenSpace compiled without support for GlobeBrowsing");
-#endif
-    }
-    else { // Default
-        return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
-    }
-
+    OsEng.interactionHandler().setInteractionMode(interactionModeKey);
     return 0;
+}
+
+int restoreCameraStateFromFile(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.restoreCameraStateFromFile";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string cameraStateFilePath = luaL_checkstring(L, -1);
+
+    if (cameraStateFilePath.empty())
+        return luaL_error(L, "filepath string is empty");
+
+    OsEng.interactionHandler().restoreCameraStateFromFile(cameraStateFilePath);
+    return 0;
+}
+
+int saveCameraStateToFile(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.setCameraPosition";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    std::string cameraStateFilePath = luaL_checkstring(L, -1);
+
+    if (cameraStateFilePath.empty())
+        return luaL_error(L, "filepath string is empty");
+
+    OsEng.interactionHandler().saveCameraStateToFile(cameraStateFilePath);
+}
+
+int resetCameraDirection(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    const std::string _loggerCat = "lua.resetCameraDirection";
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+    OsEng.interactionHandler().resetCameraDirection();
 }
 
 #ifdef USE_OLD_INTERACTIONHANDLER

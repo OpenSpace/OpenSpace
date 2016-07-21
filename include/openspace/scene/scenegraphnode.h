@@ -79,6 +79,8 @@ public:
     const psc& position() const;
     psc worldPosition() const;
 
+    const glm::dmat3& worldRotationMatrix() const;
+
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
 
@@ -102,6 +104,8 @@ public:
 private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
+    psc calculateWorldPosition() const;
+
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     Ephemeris* _ephemeris;
@@ -113,6 +117,8 @@ private:
 
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
+
+    psc _worldPositionCached;
 };
 
 } // namespace openspace

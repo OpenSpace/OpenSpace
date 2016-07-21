@@ -48,6 +48,13 @@ namespace openspace {
     //////////////////////////////
 
     template<typename KeyType, typename ValueType>
+    void LRUCache<KeyType, ValueType>::clear()
+    {
+        _itemList.erase(_itemList.begin(), _itemList.end());
+        _itemMap.erase(_itemMap.begin(), _itemMap.end());
+    }
+
+    template<typename KeyType, typename ValueType>
     void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value)
     {
         auto it = _itemMap.find(key);

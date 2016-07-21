@@ -737,11 +737,11 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
+        _interactionHandler->update(dt);
 
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
         
-        _interactionHandler->update(dt);
         _scriptEngine->preSynchronization();
         _renderEngine->preSynchronization();
         _parallelConnection->preSynchronization();
@@ -761,6 +761,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
+
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();

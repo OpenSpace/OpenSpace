@@ -6,20 +6,32 @@ function preInitialization()
     critical objects.
     ]]--
 
+    --openspace.time.setTime(openspace.time.currentWallTime())
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    --openspace.time.setTime("2015 NOV 24 00:00:00")
+    openspace.time.setTime("2015 NOV 24 00:00:00")
+
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
-    --openspace.bindKey("v", "openspace.setPropertyValue('DebugGlobe.saveOrThrowCamera', true)")
 end
 
 function postInitialization()
-    openspace.setInteractionMode('GlobeBrowsingInteractionMode')
+    openspace.printInfo("Setting default values")
+
+    openspace.setInteractionMode('GlobeBrowsing')
+    --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    
+
+    openspace.resetCameraDirection()
+    openspace.time.setDeltaTime(0)
 
     openspace.printInfo("Done setting default values")
 end
@@ -29,13 +41,17 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "DebugGlobe",
-        Position = {1, 0, 0, 8},
+        Focus = "LodMars",
+        Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
+        Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
     },
+
     Modules = {
-        "debugglobe",
+        "lodearth",
+        "lodmars",
+        "sun",
         "stars",
-        "milkyway",
+        "milkyway",    
     }
 }
 

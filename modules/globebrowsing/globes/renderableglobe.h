@@ -56,6 +56,48 @@ namespace opengl {
 
 namespace openspace {
 
+struct ReferencedBoolSelection : public properties::SelectionProperty {
+    ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
+        : properties::SelectionProperty(identifier, guiName) { }
+
+    void addOption(const std::string& name, bool* ref) {
+        int optionId= options().size();
+        _referenceMap.insert({ optionId, ref });
+        properties::SelectionProperty::addOption({ optionId, name});
+    }
+
+    void initialize() {
+        // Set values in GUI to the current values of the references
+        int nOptions = options().size();
+        std::vector<int> selected;
+        for (int i = 0; i < nOptions; ++i) {
+            if (*_referenceMap[i]) {
+                selected.push_back(i);
+            }
+        }
+        setValue(selected);
+
+
+        onChange([this]() {
+            int nOptions = this->options().size();
+            for (int i = 0; i < nOptions; ++i) {
+                (*_referenceMap[i]) = false;
+            }
+
+            const std::vector<int>& selectedIndices = (*this);
+            for (auto selectedIndex : selectedIndices) {
+                (*_referenceMap[selectedIndex]) = true;
+            }
+        });
+    }
+
+    std::unordered_map<int, bool* const> _referenceMap;
+};
+
+
+
+
+
 class RenderableGlobe : public Renderable {
 public:
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -68,78 +110,40 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-    glm::dvec3 geodeticSurfaceProjection(glm::dvec3 position);
+    glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
+    const Ellipsoid& ellipsoid();
+    const glm::dmat3& stateMatrix();
+    float getHeight(glm::dvec3 position);
+    float cameraMinHeight();
+    double interactionDepthBelowEllipsoid();
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
-    properties::BoolProperty doFrustumCulling;
-    properties::BoolProperty doHorizonCulling;
-    properties::BoolProperty mergeInvisible;
-    properties::FloatProperty lodScaleFactor;
-    properties::BoolProperty initChunkVisible;
-    properties::BoolProperty renderSmallChunksFirst;
-    properties::FloatProperty chunkHeight;
-
-    // Layered rendering
-    properties::SelectionProperty _baseLayersSelection;
-    properties::SelectionProperty _nightLayersSelection;
-    properties::SelectionProperty _heightMapsSelection;
-    properties::SelectionProperty _waterMasksSelection;
-    properties::SelectionProperty _overlaysSelection;
     
-    properties::BoolProperty blendHeightMap;
-    properties::BoolProperty blendColorMap;
-    properties::BoolProperty blendNightTexture;
-    properties::BoolProperty blendOverlay;
-    properties::BoolProperty blendWaterMask;
+    // Properties 
+    properties::FloatProperty lodScaleFactor;
+    std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
     properties::BoolProperty atmosphereEnabled;
-
-    properties::BoolProperty showChunkEdges;
-    properties::BoolProperty showChunkBounds;
-    properties::BoolProperty levelByProjArea;
-    properties::BoolProperty limitLevelByAvailableHeightData;
+    ReferencedBoolSelection debugSelection;
+    properties::BoolProperty _saveOrThrowCamera;
+    properties::BoolProperty _resetTileProviders;
+    
 
 
 private:
+    double _interactionDepthBelowEllipsoid;
+
     std::string _frame;
-
-    void addToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& dest
-    );
-
-    void initializeToggleLayerProperties(
-        LayeredTextures::TextureCategory category,
-        properties::SelectionProperty& dest
-        );
-
     double _time;
 
     Ellipsoid _ellipsoid;
 
-    //std::vector<std::string> _heightMapKeys;
-    //std::vector<std::string> _colorTextureKeys;
-
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     
-    properties::BoolProperty _saveOrThrowCamera;
-
-    std::vector<properties::BoolProperty> _activeColorLayers;
-    std::vector<properties::BoolProperty> _activeNightLayers;
-    std::vector<properties::BoolProperty> _activeOverlays;
-    std::vector<properties::BoolProperty> _activeHeightMapLayers;
-    std::vector<properties::BoolProperty> _activeWaterMaskLayers;
-
-    void selectionChanged(
-        properties::SelectionProperty selectionProperty,
-        LayeredTextures::TextureCategory textureCategory);
-    void baseLayerSelectionChanged();
-    void nightLayersSelectionChanged();
-    void heightMapsSelectionChanged();
-    void waterMasksSelectionChanged();
-    void overlaysSelectionChanged();
 
     DistanceSwitch _distanceSwitch;
+
+    properties::FloatProperty _cameraMinHeight;
 };
 
 }  // namespace openspace

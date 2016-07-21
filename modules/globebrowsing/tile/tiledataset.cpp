@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <ogr_featurestyle.h>
+#include <ogr_spatialref.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
@@ -34,6 +36,11 @@
 
 #include <float.h>
 
+#include <sstream>
+#include <algorithm>
+
+
+
 
 
 namespace {
@@ -44,32 +51,156 @@ namespace {
 
 namespace openspace {
 
-    // INIT THIS TO FALSE AFTER REMOVED FROM TILEPROVIDER
-    bool TileDataset::GdalHasBeenInitialized = false; 
+    std::ostream& operator<<(std::ostream& os, const openspace::PixelRegion& pr) {
+        return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
+    }
 
-    TileDataset::TileDataset(const std::string& gdalDatasetDesc, int minimumPixelSize, 
-        bool doPreprocessing, GLuint dataType)
-        : _minimumPixelSize(minimumPixelSize)
-        , _doPreprocessing(doPreprocessing)
-        , _maxLevel(-1)
+    //////////////////////////////////////////////////////////////////////////////////
+    //                             Tile Data Layout                                 //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    TileDataLayout::TileDataLayout() {
+
+    }
+
+    TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint _glType) {
+        // Assume all raster bands have the same data type
+        gdalType = _glType != 0 ? TileDataType::getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
+        glType = TileDataType::getOpenGLDataType(gdalType);
+        numRasters = dataSet->GetRasterCount();
+        bytesPerDatum = TileDataType::numberOfBytes(gdalType);
+        bytesPerPixel = bytesPerDatum * numRasters;
+        textureFormat = TileDataType::getTextureFormat(numRasters, gdalType);
+    }
+  
+
+
+    IODescription IODescription::cut(PixelRegion::Side side, int pos) {
+        PixelRegion readPreCut = read.region;
+        PixelRegion writePreCut = write.region;
+
+        glm::dvec2 ratio;
+        ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
+        ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
+
+        double ratioRatio = ratio.x / ratio.y;
+
+        //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.01, "Different read/write aspect ratio!");
+
+        IODescription whatCameOff = *this;
+        whatCameOff.read.region = read.region.globalCut(side, pos);
+
+        PixelRange cutSize = whatCameOff.read.region.numPixels;
+        PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+        
+
+        if (cutSize.x == 0 || cutSize.y == 0) {
+            ghoul_assert(read.region.equals(readPreCut), "Read region should not have been modified");
+            ghoul_assert(write.region.equals(writePreCut), "Write region should not have been modified");
+        }
+
+        int localWriteCutPos = (side % 2 == 0) ? localWriteCutSize.x : localWriteCutSize.y;
+        whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
+
+        return whatCameOff;
+    }
+
+
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //                               Tile Dataset                                   //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-2);
+    const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(4);
+
+    const PixelRegion TileDataset::padding = PixelRegion(tilePixelStartOffset, tilePixelSizeDifference);
+    
+    bool TileDataset::GdalHasBeenInitialized = false;
+
+
+
+    TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
+        : _config(config)
+        , hasBeenInitialized(false)
     {
+        
+        _initData = { "",  gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
+        ensureInitialized();
+        _initData.initDirectory = CPLGetCurrentDir();
+    }
+
+    void TileDataset::reset() {
+        _cached._maxLevel = -1;
+        if (_dataset != nullptr) {
+            GDALClose((GDALDatasetH)_dataset);
+        }
+        
+        initialize();
+    }
+
+    void TileDataset::ensureInitialized() {
+        if (!hasBeenInitialized) {
+            initialize();
+            hasBeenInitialized = true;
+        }
+
+    }
+
+    void TileDataset::initialize() {
+        gdalEnsureInitialized();
+
+        _dataset = gdalDataset(_initData.gdalDatasetDesc);
+
+        //Do any other initialization needed for the TileDataset
+        _dataLayout = TileDataLayout(_dataset, _initData.dataType);
+        _depthTransform = calculateTileDepthTransform();
+        _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
+
+        LDEBUG(_initData.gdalDatasetDesc << " - " << _cached._tileLevelDifference);
+    }
+
+    void TileDataset::gdalEnsureInitialized() {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
             CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
-
             GdalHasBeenInitialized = true;
         }
+    }
 
-        _dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
-        if (!_dataset) {
-            throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
+    GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
+        GDALDataset* dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
+        if (!dataset) {
+            std::string correctedPath = ghoul::filesystem::FileSystem::ref().pathByAppendingComponent(_initData.initDirectory, gdalDatasetDesc);
+            dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);
+            if (!dataset) {
+                throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
+            }
         }
-        //ghoul_assert(_dataset != nullptr, "Failed to load dataset:\n" << gdalDatasetDesc);
-        _dataLayout = DataLayout(_dataset, dataType);
 
-        _depthTransform = calculateTileDepthTransform();
-        _tileLevelDifference = calculateTileLevelDifference(_dataset, minimumPixelSize);
-        _maxLevel = calculateMaxLevel(_tileLevelDifference);
+        const std::string originalDriverName = dataset->GetDriverName();
+        
+        if (originalDriverName != "WMS") {
+            LDEBUG("  " << originalDriverName);
+            LDEBUG("  " << dataset->GetGCPProjection());
+            LDEBUG("  " << dataset->GetProjectionRef());
+
+            GDALDriver* driver = dataset->GetDriver();
+            char** metadata = driver->GetMetadata();
+            for (int i = 0; metadata[i] != nullptr; i++) {
+                LDEBUG("  " << metadata[i]);
+            }
+
+            const char* in_memory = "";
+            //GDALDataset* vrtDataset = driver->CreateCopy(in_memory, dataset, false, nullptr, nullptr, nullptr);
+        }
+        
+
+        return dataset;
     }
 
 
@@ -77,226 +208,203 @@ namespace openspace {
         delete _dataset;
     }
 
-    int TileDataset::calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
-        GDALRasterBand* firstBand = dataset->GetRasterBand(1);
-        int numOverviews = firstBand->GetOverviewCount();
-        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
-        return log2(minimumPixelSize) - log2(sizeLevel0);
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //                              Public interface                                //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex) {
+        ensureInitialized();
+        IODescription io = getIODescription(chunkIndex);
+        CPLErr worstError = CPLErr::CE_None;
+
+        // Build the Tile IO Result from the data we queride
+        std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
+        result->imageData = readImageData(io, worstError);
+        result->error = worstError;
+        result->chunkIndex = chunkIndex;
+        result->dimensions = glm::uvec3(io.write.region.numPixels, 1);
+        result->nBytesImageData = io.write.totalNumBytes;
+        
+        if (_config.doPreProcessing) {
+            result->preprocessData = preprocess(result, io.write.region);
+            result->error = std::max(result->error, postProcessErrorCheck(result, io));
+        }
+
+        return result;
     }
 
-    int TileDataset::calculateMaxLevel(int calculateMaxLevel) {
-        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        _maxLevel = numOverviews - 1 - _tileLevelDifference;
-        return _maxLevel;
+
+    std::shared_ptr<TileIOResult> TileDataset::defaultTileData() {
+        ensureInitialized();
+        PixelRegion pixelRegion = { PixelCoordinate(0, 0), PixelRange(16, 16) };
+        std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
+        result->chunkIndex = { 0, 0, 0 };
+        result->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
+        result->nBytesImageData = result->dimensions.x * result->dimensions.y * _dataLayout.bytesPerPixel;
+        result->imageData = new char[result->nBytesImageData];
+        for (size_t i = 0; i < result->nBytesImageData; ++i) {
+            result->imageData[i] = 0;
+        }
+        result->error = CPLErr::CE_None;
+        
+        if (_config.doPreProcessing) {
+            result->preprocessData = preprocess(result, pixelRegion);
+            //result->error = std::max(result->error, postProcessErrorCheck(result, io));
+        }
+
+        return result;
+    }
+
+    int TileDataset::maxChunkLevel() {
+        ensureInitialized();
+        if (_cached._maxLevel < 0) {
+            int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+            _cached._maxLevel = -_cached._tileLevelDifference;
+            if (numOverviews > 0) {
+                _cached._maxLevel += numOverviews - 1;
+            }
+        }
+        return _cached._maxLevel;
+    }
+
+    TileDepthTransform TileDataset::getDepthTransform() {
+        ensureInitialized();
+        return _depthTransform;
+    }
+
+    const TileDataLayout& TileDataset::getDataLayout() {
+        ensureInitialized();
+        return _dataLayout;
+    }
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //                                Initialization                                //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    int TileDataset::calculateTileLevelDifference(int minimumPixelSize) {
+        GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
+        GDALRasterBand* maxOverview;
+        int numOverviews = firstBand->GetOverviewCount();
+        int sizeLevel0;
+        if (numOverviews <= 0) { // No overviews. Use first band.
+            maxOverview = firstBand;
+        }
+        else { // Pick the highest overview.
+            maxOverview = firstBand->GetOverview(numOverviews - 1);
+        }
+        sizeLevel0 = maxOverview->GetXSize();
+        double diff = log2(minimumPixelSize) - log2(sizeLevel0);
+        return diff;
     }
 
     TileDepthTransform TileDataset::calculateTileDepthTransform() {
         GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
         // Floating point types does not have a fix maximum or minimum value and
         // can not be normalized when sampling a texture. Hence no rescaling is needed.
-        double maximumValue = (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64) ?
-            1.0 : getMaximumValue(_dataLayout.gdalType);
-        
+        bool isFloat = (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64);
+        double maximumValue = isFloat ? 1.0 : TileDataType::getMaximumValue(_dataLayout.gdalType);
+
         TileDepthTransform transform;
         transform.depthOffset = firstBand->GetOffset();
         transform.depthScale = firstBand->GetScale() * maximumValue;
         return transform;
     }
 
-    int TileDataset::getMaximumLevel() const {
-        return _maxLevel;
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //                            GDAL helper methods                               //
+    //////////////////////////////////////////////////////////////////////////////////
+
+
+    bool TileDataset::gdalHasOverviews() const {
+        return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
     }
 
-    TileDepthTransform TileDataset::getDepthTransform() const {
-        return _depthTransform;
+    int TileDataset::gdalOverview(const PixelRange& regionSizeOverviewZero) const {
+        GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
+
+        int minNumPixels0 = glm::min(regionSizeOverviewZero.x, regionSizeOverviewZero.y);
+
+        int overviews = firstBand->GetOverviewCount();
+        GDALRasterBand* maxOverview = overviews ? firstBand->GetOverview(overviews - 1) : firstBand;
+        
+        int sizeLevel0 = maxOverview->GetXSize();
+        // The dataset itself may not have overviews but even if it does not, an overview
+        // for the data region can be calculated and possibly be used to sample greater
+        // Regions of the original dataset.
+        int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) - _cached._tileLevelDifference;
+        ov = glm::clamp(ov, 0, overviews - 1);
+        
+        return ov;
     }
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex)
-    {               
-        GdalDataRegion region(_dataset, chunkIndex, _tileLevelDifference);
-        size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
-        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
-        char* imageData = new char[totalNumBytes];
-
-        CPLErr worstError = CPLErr::CE_None;
-
-        // Read the data (each rasterband is a separate channel)
-        for (size_t i = 0; i < _dataLayout.numRasters; i++) {
-            GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1)->GetOverview(region.overview);
-            
-            char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
-            
-            CPLErr err = rasterBand->RasterIO(
-                GF_Read,
-                region.pixelStart.x,           // Begin read x
-                region.pixelStart.y,           // Begin read y
-                region.numPixels.x,            // width to read x
-                region.numPixels.y,            // width to read y
-                dataDestination,               // Where to put data
-                region.numPixels.x,            // width to write x in destination
-                region.numPixels.y,            // width to write y in destination
-                _dataLayout.gdalType,		   // Type
-                _dataLayout.bytesPerPixel,	   // Pixel spacing
-                bytesPerLine);      // Line spacing
-
-            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-            worstError = std::max(worstError, err);
-        }
-
-        std::shared_ptr<TileIOResult> result(new TileIOResult);
-        result->chunkIndex = chunkIndex;
-        result->imageData = getImageDataFlippedY(region, _dataLayout, imageData);
-        result->dimensions = glm::uvec3(region.numPixels, 1);
-        if (_doPreprocessing) {
-            result->preprocessData = preprocess(imageData, region, _dataLayout);
-        }
-        result->error = worstError;
-
-        delete[] imageData;
-        return result;
-    }
-
-    char* TileDataset::getImageDataFlippedY(const GdalDataRegion& region,
-        const DataLayout& dataLayout, const char* imageData) 
-    {
-        size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
-        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
-
-        // GDAL reads image data top to bottom. We want the opposite.
-        char* imageDataYflipped = new char[totalNumBytes];
-        for (size_t y = 0; y < region.numPixels.y; y++) {
-            size_t yi_flipped = y * bytesPerLine;
-            size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
-            size_t i = 0;
-            for (size_t x = 0; x < region.numPixels.x; x++) {
-                for (size_t c = 0; c < dataLayout.numRasters; c++) {
-                    for (size_t b = 0; b < dataLayout.bytesPerDatum; b++) {
-                        imageDataYflipped[yi_flipped + i] = imageData[yi + i];
-                        i++;
-                    }
-                }
-            }
-        }
-
-        return imageDataYflipped;
+    int TileDataset::gdalOverview(const ChunkIndex& chunkIndex) const {
+        int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
+        return glm::clamp(ov, 0, overviews - 1);
     }
 
 
-    const TileDataset::DataLayout& TileDataset::getDataLayout() const {
-        return _dataLayout;
+    int TileDataset::gdalVirtualOverview(const ChunkIndex& chunkIndex) const {
+        int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
+        return ov;
     }
 
-
-    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(const char* imageData,
-        const GdalDataRegion& region, const DataLayout& dataLayout)
-    {
-        size_t bytesPerLine = dataLayout.bytesPerPixel * region.numPixels.x;
-        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
-
-        TilePreprocessData* preprocessData = new TilePreprocessData();
-        preprocessData->maxValues.resize(dataLayout.numRasters);
-        preprocessData->minValues.resize(dataLayout.numRasters);
-
-        for (size_t c = 0; c < dataLayout.numRasters; c++) {
-            preprocessData->maxValues[c] = -FLT_MAX;
-            preprocessData->minValues[c] = FLT_MAX;
-        }
-
-        ValueReader valueReader = getValueReader(dataLayout.gdalType);
-        for (size_t y = 0; y < region.numPixels.y; y++) {
-            size_t yi_flipped = y * bytesPerLine;
-            size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
-            size_t i = 0;
-            for (size_t x = 0; x < region.numPixels.x; x++) {
-                for (size_t c = 0; c < dataLayout.numRasters; c++) {
-
-                    float val = readFloat(dataLayout.gdalType, &(imageData[yi + i]));
-                    preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
-                    preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
-
-                    i += dataLayout.bytesPerDatum;
-                }
-            }
-        }
-
-        return std::shared_ptr < TilePreprocessData>(preprocessData);
+    PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
+        PixelRegion gdalRegion;
+        gdalRegion.start.x = 0;
+        gdalRegion.start.y = 0;
+        gdalRegion.numPixels.x = rasterBand->GetXSize();
+        gdalRegion.numPixels.y = rasterBand->GetYSize();
+        return gdalRegion;
     }
 
-
-    TileDataset::ValueReader TileDataset::getValueReader(GDALDataType gdalType) {
-        switch (gdalType) {
-        case GDT_Byte:      return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLubyte*>(src)); };
-        case GDT_UInt16:    return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLushort*>(src)); };
-        case GDT_Int16:     return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLshort*>(src)); };
-        case GDT_UInt32:    return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLuint*>(src)); };
-        case GDT_Int32:     return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLint*>(src)); };
-        case GDT_Float32:   return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLfloat*>(src)); };
-        case GDT_Float64:   return [](const char* src) { return static_cast<float>(*reinterpret_cast<const GLdouble*>(src)); };
-        default:
-            LERROR("Unknown data type");
-            ghoul_assert(false, "Unknown data type");
-            return nullptr;
-        }
+    PixelRegion TileDataset::gdalPixelRegion(const GeodeticPatch& geodeticPatch) const {
+        Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
+        Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
+        PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
+        PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
+        PixelRegion gdalRegion(pixelStart, pixelEnd - pixelStart);
+        return gdalRegion;
     }
 
-     float TileDataset::readFloat(GDALDataType gdalType, const char* src) {
-        switch (gdalType) {
-        case GDT_Byte:      return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
-        case GDT_UInt16:    return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
-        case GDT_Int16:     return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
-        case GDT_UInt32:    return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
-        case GDT_Int32:     return static_cast<float>(*reinterpret_cast<const GLint*>(src));
-        case GDT_Float32:   return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
-        case GDT_Float64:   return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
-        default:
-            LERROR("Unknown data type");
-            ghoul_assert(false, "Unknown data type");
-            return -1.0;
-        }
+    GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
+        GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
+        int numberOfOverviews = rasterBand->GetOverviewCount();
+        rasterBand = gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
+        ghoul_assert(rasterBand != nullptr, "Rasterband is null");
+        return rasterBand;
     }
 
 
 
-    size_t TileDataset::numberOfBytes(GDALDataType gdalType) {
-        switch (gdalType) {
-            case GDT_Byte: return sizeof(GLubyte);
-            case GDT_UInt16: return sizeof(GLushort);
-            case GDT_Int16: return sizeof(GLshort);
-            case GDT_UInt32: return sizeof(GLuint);
-            case GDT_Int32: return sizeof(GLint);
-            case GDT_Float32: return sizeof(GLfloat);
-            case GDT_Float64: return sizeof(GLdouble);
-            default:  
-                LERROR("Unknown data type");
-                ghoul_assert(false, "Unknown data type");
-                return -1; 
-        }
-    }
-
-    size_t TileDataset::getMaximumValue(GDALDataType gdalType) {
-        switch (gdalType) {
-            case GDT_Byte: return 2 << 7;
-            case GDT_UInt16: return 2 << 15;
-            case GDT_Int16: return 2 << 14;
-            case GDT_UInt32: return 2 << 31;
-            case GDT_Int32: return 2 << 30;
-            default:
-                LERROR("Unknown data type"); 
-                return -1;
-        }
-    }
 
 
-    
-    glm::uvec2 TileDataset::geodeticToPixel(GDALDataset* dataSet, const Geodetic2& geo) {
+    //////////////////////////////////////////////////////////////////////////////////
+    //                          ReadTileData helper functions                       //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
+
         double padfTransform[6];
-        CPLErr err = dataSet->GetGeoTransform(padfTransform);
+        CPLErr err = _dataset->GetGeoTransform(padfTransform);
 
         ghoul_assert(err != CE_Failure, "Failed to get transform");
 
         Scalar Y = Angle<Scalar>::fromRadians(geo.lat).asDegrees();
         Scalar X = Angle<Scalar>::fromRadians(geo.lon).asDegrees();
-        
+
         // convert from pixel and line to geodetic coordinates
         // Xp = padfTransform[0] + P*padfTransform[1] + L*padfTransform[2];
         // Yp = padfTransform[3] + P*padfTransform[4] + L*padfTransform[5];
@@ -307,13 +415,13 @@ namespace openspace {
 
         // Xp = a[0] + P*a[1] + L*a[2];
         // Yp = b[0] + P*b[1] + L*b[2];
-        
+
         // <=>
-        double divisor = (a[2]*b[1] - a[1]*b[2]);
+        double divisor = (a[2] * b[1] - a[1] * b[2]);
         ghoul_assert(divisor != 0.0, "Division by zero!");
         //ghoul_assert(a[2] != 0.0, "a2 must not be zero!");
-        double P = (a[0]*b[2] - a[2]*b[0] + a[2]*Y - b[2]*X) / divisor;
-        double L = (-a[0]*b[1] + a[1]*b[0] - a[1]*Y + b[1]*X) / divisor;
+        double P = (a[0] * b[2] - a[2] * b[0] + a[2] * Y - b[2] * X) / divisor;
+        double L = (-a[0] * b[1] + a[1] * b[0] - a[1] * Y + b[1] * X) / divisor;
         // ref: https://www.wolframalpha.com/input/?i=X+%3D+a0+%2B+a1P+%2B+a2L,+Y+%3D+b0+%2B+b1P+%2B+b2L,+solve+for+P+and+L
 
         double Xp = a[0] + P*a[1] + L*a[2];
@@ -321,165 +429,325 @@ namespace openspace {
 
         ghoul_assert(abs(X - Xp) < 1e-10, "inverse should yield X as before");
         ghoul_assert(abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
+
+        return PixelCoordinate(glm::round(P), glm::round(L));
+    }
+
+    Geodetic2 TileDataset::pixelToGeodetic(const PixelCoordinate& p) const {
+        double padfTransform[6];
+        CPLErr err = _dataset->GetGeoTransform(padfTransform);
+        ghoul_assert(err != CE_Failure, "Failed to get transform");
+        Geodetic2 geodetic;
+        geodetic.lon = padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2];
+        geodetic.lat = padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5];
+        return geodetic;
+    }
+
+    IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
+        IODescription io;
+        io.read.region = gdalPixelRegion(chunkIndex);
+
+        if (gdalHasOverviews()) {
+            int overview = gdalOverview(chunkIndex);
+            io.read.overview = overview;
+            io.read.region.downscalePow2(overview + 1);
+            io.write.region = io.read.region;
+            io.read.region.pad(padding);
+        }
+        else {
+            io.read.overview = 0;
+            io.write.region = io.read.region;
+            int virtualOverview = gdalVirtualOverview(chunkIndex);
+            io.write.region.downscalePow2(virtualOverview + 1);
+            PixelRegion scaledPadding = padding;
+
+            scaledPadding.upscalePow2(std::max(virtualOverview + 1, 0));
+            io.read.region.pad(scaledPadding);
+        }
+
+        // For correct sampling in height dataset, we need to pad the texture tile
+        io.write.region.pad(padding);
+        PixelRange preRound = io.write.region.numPixels;
+        io.write.region.roundDownToQuadratic();
+        io.write.region.roundUpNumPixelToNearestMultipleOf(2);
+        if (preRound != io.write.region.numPixels) {
+            LDEBUG(chunkIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
+        }
+
+
+        io.write.region.start = PixelCoordinate(0, 0); // write region starts in origin
+        io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
+        io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
+
+        return io;
+    }
+
+    char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
+        // allocate memory for the image
+        char* imageData = new char[io.write.totalNumBytes];
+
+        // Read the data (each rasterband is a separate channel)
+        for (size_t i = 0; i < _dataLayout.numRasters; i++) {
+            GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+
+            // The final destination pointer is offsetted by one datum byte size
+            // for every raster (or data channel, i.e. R in RGB)
+            char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
+
+            CPLErr err = repeatedRasterIO(rasterBand, io, dataDestination);
+
+            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+            worstError = std::max(worstError, err);
+        }
+
+        // GDAL reads pixel lines top to bottom, we want the opposit
+        return imageData;
+    }
+
+    CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination, int depth) const {
+        std::string spaces = "                      ";
+        std::string indentation = spaces.substr(0, 2 * depth);
+
+        CPLErr worstError = CPLErr::CE_None;
+
+        // NOTE: 
+        // Ascii graphics illustrates the implementation details of this method, for one  
+        // specific case. Even though the illustrated case is specific, readers can 
+        // hopefully find it useful to get the general idea.
+
+        // Make a copy of the full IO desription as we will have to modify it
+        IODescription io = fullIO;
+        PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
+
+
+        // Example: 
+        // We have an io description that defines a WRITE and a READ region.
+        // In this case the READ region extends outside of the defined gdal region,
+        // meaning we will have to do wrapping
+
+
+        // io.write.region             io.read.region
+        //    |                         |
+        //    V                         V
+        // +-------+                +-------+ 
+        // |       |                |       |--------+ 
+        // |       |                |       |        |
+        // |       |                |       |        |
+        // +-------+                +-------+        |
+        //                            |              | <-- gdalRegion  
+        //                            |              |
+        //                            +--------------+
+
+
+        //LDEBUG(indentation << "-");
+        //LDEBUG(indentation << "repeated read: " << io.read.region);
+        //LDEBUG(indentation << "repeated write: " << io.write.region);
+
+        bool didCutOff = false;
+
+        if (!io.read.region.isInside(gdalRegion)) {
+            //  Loop through each side: left, top, right, bottom
+            for (int i = 0; i < 4; ++i) {
+
+                // Example: 
+                // We are currently considering the left side of the pixel region
+                PixelRegion::Side side = (PixelRegion::Side) i;
+                IODescription cutoff = io.cut(side, gdalRegion.edge(side));
+
+                // Example: 
+                // We cut off the left part that was outside the gdal region, and we now 
+                // have an additional io description for the cut off region. 
+                // Note that the cut-method used above takes care of the corresponding 
+                // WRITE region for us.
+
+                // cutoff.write.region    cutoff.read.region
+                //  |  io.write.region     |  io.read.region
+                //  |   |                  |   |
+                //  V   V                  V   V
+                // +-+-----+               +-+-----+ 
+                // | |     |               | |     |--------+
+                // | |     |               | |     |        |
+                // | |     |               | |     |        |
+                // +-+-----+               +-+-----+        |
+                //                           |              | <-- gdalRegion  
+                //                           |              |
+                //                           +--------------+
+
+                if (cutoff.read.region.area() > 0) {
+                    didCutOff = true;
+
+                    // Wrap by repeating
+                    PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
+
+                    cutoff.read.region.align(oppositeSide, gdalRegion.edge(oppositeSide));
+
+                    // Example:
+                    // The cut off region is wrapped to the opposite side of the region,
+                    // i.e. "repeated". Note that we don't want WRITE region to change, 
+                    // we're only wrapping the READ region.
+
+                    // cutoff.write.region   io.read.region cutoff.read.region
+                    //  |  io.write.region        |          |
+                    //  |   |                     V          V
+                    //  V   V                  +-----+      +-+
+                    // +-+-----+               |     |------| |
+                    // | |     |               |     |      | | 
+                    // | |     |               |     |      | |
+                    // | |     |               +-----+      +-+
+                    // +-+-----+               |              | <-- gdalRegion  
+                    //                         |              |
+                    //                         +--------------+
+
+                    // Example:
+                    // The cutoff region has been repeated along one of its sides, but 
+                    // as we can see in this example, it still has a top part outside the
+                    // defined gdal region. This is handled through recursion.
+                    CPLErr err = repeatedRasterIO(rasterBand, cutoff, dataDestination, depth + 1);
+
+                    worstError = std::max(worstError, err);
+                }
+            }
+        }
+
+        if (depth == 0) {
+            LDEBUG(indentation << "main rasterIO read: " << io.read.region);
+            LDEBUG(indentation << "main rasterIO write: " << io.write.region);
+        }
+
+        else if (worstError > CPLErr::CE_None) {
+            LDEBUG(indentation << "Error reading padding: " << worstError);
+        }
         
-        return glm::uvec2(glm::round(P), glm::round(L));
+        CPLErr err = rasterIO(rasterBand, io, dataDestination);
+        worstError = std::max(worstError, err);
+
+        // The return error from a repeated rasterIO is ONLY based on the main region,
+        // which in the usual case will cover the main area of the patch anyway
+        
+        
+
+        return err;
+    }
+
+    CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dataDestination) const {
+        PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
+
+        ghoul_assert(io.read.region.isInside(gdalRegion), "write region of bounds!");
+
+        ghoul_assert(io.write.region.start.x >= 0 && io.write.region.start.y >= 0, "Invalid write region");
+
+        PixelCoordinate end = io.write.region.end();
+        size_t largestIndex = (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _dataLayout.bytesPerPixel;
+        ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
+
+        char * dataDest = dataDestination;
+
+        // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
+        // Therefore, we increment the destination pointer to the last line on in the 
+        // buffer, and the we specify in the rasterIO call that we want negative line 
+        // spacing. Doing this compensates the flipped Y axis
+        dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
+
+        // handle requested write region
+        dataDest -= io.write.region.start.y * io.write.bytesPerLine; // note -= since flipped y axis
+        dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
+
+        
+        return rasterBand->RasterIO(
+            GF_Read,
+            io.read.region.start.x,             // Begin read x
+            io.read.region.start.y,             // Begin read y
+            io.read.region.numPixels.x,         // width to read x
+            io.read.region.numPixels.y,         // width to read y
+            dataDest,                           // Where to put data
+            io.write.region.numPixels.x,        // width to write x in destination
+            io.write.region.numPixels.y,        // width to write y in destination
+            _dataLayout.gdalType,		        // Type
+            _dataLayout.bytesPerPixel,	        // Pixel spacing
+            -io.write.bytesPerLine);             // Line spacing
     }
 
 
-    TextureFormat TileDataset::getTextureFormat(
-        int rasterCount, GDALDataType gdalType)
-    {
-        TextureFormat format;
+    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const {
+        size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
+        size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
-        switch (rasterCount) {
-        case 1: // Red
-            format.ghoulFormat = Texture::Format::Red;
-            switch (gdalType) {
-            case GDT_Byte:      format.glFormat = GL_R8; break;
-            case GDT_UInt16:    format.glFormat = GL_R16; break;
-            case GDT_Int16:     format.glFormat = GL_R16; break;
-            case GDT_UInt32:    format.glFormat = GL_R32UI; break;
-            case GDT_Int32:     format.glFormat = GL_R32I; break;
-            case GDT_Float32:   format.glFormat = GL_R32F; break;
-            //case GDT_Float64:   format.glFormat = GL_RED; break; // No representation of 64 bit float?  
-            default: LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            }
-            break;
-        case 2:
-            format.ghoulFormat = Texture::Format::RG;
-            switch (gdalType) {
-            case GDT_Byte: format.glFormat = GL_RG8; break;
-            case GDT_UInt16: format.glFormat = GL_RG16; break;
-            case GDT_Int16: format.glFormat = GL_RG16; break;
-            case GDT_UInt32: format.glFormat = GL_RG32UI; break;
-            case GDT_Int32: format.glFormat = GL_RG32I; break;
-            case GDT_Float32: format.glFormat = GL_RG32F; break;    
-            case GDT_Float64: format.glFormat = GL_RED; break; // No representation of 64 bit float?
-            default: LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            }
-            break;
-        case 3:
-            format.ghoulFormat = Texture::Format::RGB;
-            switch (gdalType) {
-            case GDT_Byte: format.glFormat = GL_RGB8; break;
-            case GDT_UInt16: format.glFormat = GL_RGB16; break;
-            case GDT_Int16: format.glFormat = GL_RGB16; break;
-            case GDT_UInt32: format.glFormat = GL_RGB32UI; break;
-            case GDT_Int32: format.glFormat = GL_RGB32I; break;
-            case GDT_Float32: format.glFormat = GL_RGB32F; break;    
-            // case GDT_Float64: format.glFormat = GL_RED; break;// No representation of 64 bit float? 
-            default: LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            }
-            break;
-        case 4:
-            format.ghoulFormat = Texture::Format::RGBA;
-            switch (gdalType) {
-            case GDT_Byte: format.glFormat = GL_RGBA8; break;
-            case GDT_UInt16: format.glFormat = GL_RGBA16; break;
-            case GDT_Int16: format.glFormat = GL_RGBA16; break;
-            case GDT_UInt32: format.glFormat = GL_RGBA32UI; break;
-            case GDT_Int32: format.glFormat = GL_RGBA32I; break;
-            case GDT_Float32: format.glFormat = GL_RGBA32F; break;
-            case GDT_Float64: format.glFormat = GL_RED; break; // No representation of 64 bit float?
-            default: LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            }
-            break;
-        default:
-            LERROR("Unknown number of channels for OpenGL texture: " << rasterCount);
-            break;
+        TilePreprocessData* preprocessData = new TilePreprocessData();
+        preprocessData->maxValues.resize(_dataLayout.numRasters);
+        preprocessData->minValues.resize(_dataLayout.numRasters);
+        preprocessData->hasMissingData.resize(_dataLayout.numRasters);
+        
+        std::vector<float> noDataValues;
+        noDataValues.resize(_dataLayout.numRasters);
+
+        for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+            preprocessData->maxValues[c] = -FLT_MAX;
+            preprocessData->minValues[c] = FLT_MAX;
+            preprocessData->hasMissingData[c] = false;
+            noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
         }
-        return format;
-    }
 
+        
 
+        float noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
 
-
-
-
-    GLuint TileDataset::getOpenGLDataType(GDALDataType gdalType) {
-        switch (gdalType) {
-        case GDT_Byte: return GL_UNSIGNED_BYTE; 
-        case GDT_UInt16: return GL_UNSIGNED_SHORT;
-        case GDT_Int16: return GL_SHORT;
-        case GDT_UInt32: return GL_UNSIGNED_INT;
-        case GDT_Int32: return GL_INT;
-        case GDT_Float32: return GL_FLOAT;
-        case GDT_Float64: return GL_DOUBLE; 
-        default:
-            LERROR("GDAL data type unknown to OpenGL: " << gdalType);
-            return GL_UNSIGNED_BYTE;
+        for (size_t y = 0; y < region.numPixels.y; y++) {
+            size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+            size_t i = 0;
+            for (size_t x = 0; x < region.numPixels.x; x++) {
+                
+                for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+                    float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
+                    if (val != noDataValue) {
+                        preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
+                        preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
+                    }
+                    else {
+                        preprocessData->hasMissingData[c] = true;
+                    }
+                    i += _dataLayout.bytesPerDatum;
+                }
+            }
         }
-    }
 
-    GDALDataType TileDataset::getGdalDataType(GLuint glType) {
-        switch (glType) {
-        case GL_UNSIGNED_BYTE: return GDT_Byte;
-        case GL_UNSIGNED_SHORT: return GDT_UInt16;
-        case GL_SHORT: return GDT_Int16;
-        case GL_UNSIGNED_INT: return GDT_UInt32;
-        case GL_INT: return GDT_Int32;
-        case GL_FLOAT: return GDT_Float32;
-        case GL_DOUBLE: return GDT_Float64;
-        default:
-            LERROR("OpenGL data type unknown to GDAL: " << glType);
-            return GDT_Unknown;
+        for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+            if (preprocessData->maxValues[c] > 8800.0f) {
+                //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.chunkIndex);
+            }
         }
+
+        return std::shared_ptr<TilePreprocessData>(preprocessData);
     }
 
+    CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const TileIOResult> result, const IODescription& io) const{
+        int success;
 
-    TileDataset::GdalDataRegion::GdalDataRegion(GDALDataset * dataSet,
-        const ChunkIndex& chunkIndex, int tileLevelDifference)
-        : chunkIndex(chunkIndex)
-    {
+        double missingDataValue = gdalRasterBand(io.read.overview)->GetNoDataValue(&success);
+        if (!success) {
+            missingDataValue = 32767; // missing data value for TERRAIN.wms. Should be specified in xml
+        }
 
-        GDALRasterBand* firstBand = dataSet->GetRasterBand(1);
-
-        // Assume all raster bands have the same data type
-
-        // Level = overviewCount - overview (default, levels may be overridden)
-        int numOverviews = firstBand->GetOverviewCount();
-
-
-        // Generate a patch from the chunkIndex, extract the bounds which
-        // are used to calculated where in the GDAL data set to read data. 
-        // pixelStart0 and pixelEnd0 defines the interval in the pixel space 
-        // at overview 0
-        GeodeticPatch patch = GeodeticPatch(chunkIndex);
-
-        glm::uvec2 pixelStart0 = geodeticToPixel(dataSet, patch.getCorner(Quad::NORTH_WEST));
-        glm::uvec2 pixelEnd0 = geodeticToPixel(dataSet, patch.getCorner(Quad::SOUTH_EAST));
-        glm::uvec2 numPixels0 = pixelEnd0 - pixelStart0;
-
-        // Calculate a suitable overview to choose from the GDAL dataset
-        int minNumPixels0 = glm::min(numPixels0.x, numPixels0.y);
-        int sizeLevel0 = firstBand->GetOverview(numOverviews - 1)->GetXSize();
-        int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) - tileLevelDifference;
-        ov = glm::clamp(ov, 0, numOverviews - 1);
-
-        // Convert the interval [pixelStart0, pixelEnd0] to pixel space at 
-        // the calculated suitable overview, ov. using a >> b = a / 2^b
-        int toShift = ov + 1;
-
-        // Set member variables
-        overview = ov;
-
-        pixelStart = glm::uvec2(pixelStart0.x >> toShift, pixelStart0.y >> toShift);
-        pixelEnd = glm::uvec2(pixelEnd0.x >> toShift, pixelEnd0.y >> toShift);
-        numPixels = pixelEnd - pixelStart;
+        bool hasMissingData = false;
+        
+        for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+            hasMissingData |= result->preprocessData->maxValues[c] == missingDataValue;
+        }
+        
+        bool onHighLevel = result->chunkIndex.level > 6;
+        if (hasMissingData && onHighLevel) {
+            return CE_Fatal;
+        }
+        // ugly test for heightmap overlay
+        if (_dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
+            // check the alpha
+            if (result->preprocessData->maxValues[1] == 0.0
+                && result->preprocessData->minValues[1] == 0.0) 
+            {
+                //return CE_Warning;
+            }
+        }
+        return CE_None;
     }
 
-    TileDataset::DataLayout::DataLayout() {
-
-    }
-
-    TileDataset::DataLayout::DataLayout(GDALDataset* dataSet, GLuint _glType) {
-        // Assume all raster bands have the same data type
-        gdalType = _glType != 0 ? getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
-        glType = getOpenGLDataType(gdalType);
-        numRasters = dataSet->GetRasterCount();
-        bytesPerDatum = numberOfBytes(gdalType);
-        bytesPerPixel = bytesPerDatum * numRasters;
-        textureFormat = getTextureFormat(numRasters, gdalType);
-    }
 
 }  // namespace openspace

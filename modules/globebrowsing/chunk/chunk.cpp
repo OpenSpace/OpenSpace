@@ -39,6 +39,8 @@ namespace {
 
 namespace openspace {
 
+    const float Chunk::DEFAULT_HEIGHT = 0.0f;
+
     Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible)
         : _owner(owner)
         , _surfacePatch(chunkIndex)
@@ -74,7 +76,7 @@ namespace openspace {
     }
 
     Chunk::Status Chunk::update(const RenderData& data) {
-        Camera* savedCamera = _owner->getSavedCamera();
+        auto savedCamera = _owner->getSavedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
@@ -94,34 +96,82 @@ namespace openspace {
 
     Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         BoundingHeights boundingHeights;
-        boundingHeights.max = _owner->chunkHeight;
+        boundingHeights.max = 0;
         boundingHeights.min = 0;
         boundingHeights.available = false;
 
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
-        auto tileProvidermanager = owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        if (heightMapProviders.size() > 0) {
-            TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
-            if (tileAndTransform.tile.status == Tile::Status::OK) {
-                std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
-                if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
-                    boundingHeights.max = preprocessData->maxValues[0];
-                    boundingHeights.min = preprocessData->minValues[0];
+        auto tileProviderManager = owner()->getTileProviderManager();
+        
+        
+        auto heightMapProviders = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+       
+        
+        size_t HEIGHT_CHANNEL = 0;
+        const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
+        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _index);
+        bool lastHadMissingData = true;
+        for (auto tile : tiles) {
+            bool goodTile = tile.tile.status == Tile::Status::OK;
+            bool hasPreprocessData = tile.tile.preprocessData != nullptr;
+
+            if (goodTile && hasPreprocessData) {
+                auto preprocessData = tile.tile.preprocessData;
+
+                if (!boundingHeights.available) {
+                    if (preprocessData->hasMissingData[HEIGHT_CHANNEL]) {
+                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
+                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                    }
+                    else {
+                        boundingHeights.min = preprocessData->minValues[HEIGHT_CHANNEL];
+                        boundingHeights.max = preprocessData->maxValues[HEIGHT_CHANNEL];
+                    }
                     boundingHeights.available = true;
+                }
+                else {
+                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
+                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                }
+                lastHadMissingData = preprocessData->hasMissingData[HEIGHT_CHANNEL];
+            }
+
+            // Allow for early termination
+            if (!lastHadMissingData) {
+                break;
+            }
+        }
+        
+        const TileProviderGroup& heightmapOverlays = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMapOverlays);
+        TileAndTransform mostHighResHeightmapOverlay = TileSelector::getHighestResolutionTile(heightmapOverlays, _index);
+        if (mostHighResHeightmapOverlay.tile.status == Tile::Status::OK) {
+            auto preprocessData = mostHighResHeightmapOverlay.tile.preprocessData;
+            if (preprocessData != nullptr && preprocessData->minValues[0] < preprocessData->maxValues[0]) {
+                if (boundingHeights.available) {
+                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[0]);
+                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[0]);
+                }
+                else {
+                    boundingHeights.min = preprocessData->minValues[0];
+                    boundingHeights.max = preprocessData->maxValues[0];
+                    boundingHeights.available = true;
+
+                    if (preprocessData->hasMissingData[0]) {
+                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[0]);
+                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[0]);
+                    }
                 }
             }
         }
+        
+                
+        
 
         return boundingHeights;
     }
 
     std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
-        // OBS!
-        // This implementation needs to be fixed! Its not completely bounding
-        // See DebugRenderer::renderBoxFaces to see whats wrong
-
         const Ellipsoid& ellipsoid = owner()->ellipsoid();
         const GeodeticPatch& patch = surfacePatch();
 
@@ -135,8 +185,18 @@ namespace openspace {
 
         // As the patch is curved, the maximum height offsets at the corners must be long 
         // enough to cover large enough to cover a boundingHeight.max at the center of the 
-        // patch. Below this is done by an approximation.
-        double scaleToCoverCenter = 1 / cos(halfSize.lat) + 1 / cos(halfSize.lon) - 1; 
+        // patch.
+        // Approximating scaleToCoverCenter by assuming the latitude and longitude angles
+        // of "halfSize" are equal to the angles they create from the center of the
+        // globe to the patch corners. This is true for the longitude direction when
+        // the ellipsoid can be approximated as a sphere and for the latitude for patches
+        // close to the equator. Close to the pole this will lead to a bigger than needed
+        // value for scaleToCoverCenter. However, this is a simple calculation and a good
+        // Approximation.
+        double y1 = tan(halfSize.lat);
+        double y2 = tan(halfSize.lon);
+        double scaleToCoverCenter = sqrt(1 + pow(y1, 2) + pow(y2, 2));
+        
         double maxCornerHeight = maxCenterRadius * scaleToCoverCenter - patchCenterRadius;
 
         bool chunkIsNorthOfEquator = patch.isNorthern();
@@ -160,7 +220,7 @@ namespace openspace {
             double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
             Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
             
-            bool cornerIsNorthern = i < 2;
+            bool cornerIsNorthern = !((i / 2) % 2);
             bool cornerCloseToEquator = chunkIsNorthOfEquator ^ cornerIsNorthern;
             if (cornerCloseToEquator) {
                 cornerGeodetic.geodetic2.lat += latDiff;
@@ -170,12 +230,6 @@ namespace openspace {
         }
         return corners;
     }
-
-
-    void Chunk::render(const RenderData& data) const {
-        _owner->getPatchRenderer().renderChunk(*this, data);
-    }
-
 
 
 } // namespace openspace

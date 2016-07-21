@@ -81,7 +81,7 @@ namespace openspace {
         static TimeFormat* getProvider(const std::string& format);
         static void init();
 
-        static std::unordered_map<std::string, TimeFormat*> _timeIdProviderMap;
+        static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
         static bool initialized;
     };
 
@@ -121,18 +121,20 @@ namespace openspace {
 
         // These methods implements TileProvider
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
-        virtual void prerender();
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
 
 
 
 
         typedef std::string TimeKey;
 
-        std::shared_ptr<CachingTileProvider> getTileProvider(Time t = Time::ref());
-        std::shared_ptr<CachingTileProvider> getTileProvider(TimeKey timekey);
+        std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
+        std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
 
     private:
 
@@ -143,10 +145,12 @@ namespace openspace {
         std::string getGdalDatasetXML(TimeKey key);
 
         
-        std::shared_ptr<CachingTileProvider> initTileProvider(TimeKey timekey);
+        std::shared_ptr<TileProvider> initTileProvider(TimeKey timekey);
 
         std::string consumeTemporalMetaData(const std::string &xml);
         std::string getXMLValue(CPLXMLNode*, const std::string& key, const std::string& defaultVal);
+
+        void ensureUpdated();
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Members variables                             //
@@ -155,8 +159,10 @@ namespace openspace {
         const std::string _datasetFile;
         std::string _gdalXmlTemplate;
 
-        std::unordered_map<TimeKey, std::shared_ptr<CachingTileProvider> > _tileProviderMap;
+        std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
         TileProviderInitData _tileProviderInitData;
+
+        Tile _defaultTile;
 
         std::shared_ptr<TileProvider> _currentTileProvider;
 

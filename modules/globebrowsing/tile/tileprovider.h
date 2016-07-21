@@ -34,6 +34,8 @@
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/font/fontrenderer.h>
+
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
@@ -46,11 +48,13 @@
 //									TILE PROVIDER									    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
+
 namespace openspace {
+    
+
     using namespace ghoul::opengl;
 
     
-
 
     struct Tile {
         std::shared_ptr<Texture> texture;
@@ -58,7 +62,15 @@ namespace openspace {
 
         enum class Status { Unavailable, OutOfRange, IOError, OK } status;
     
+        
+        /**
+         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
+         * color in rgba. Color values ranges between 0-255.
+         */
+        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
+
         static const Tile TileUnavailable;
+
     };
 
 
@@ -68,14 +80,61 @@ namespace openspace {
         virtual ~TileProvider() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
+        virtual Tile getDefaultTile() = 0;
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
         virtual TileDepthTransform depthTransform() = 0;
-        virtual void prerender() = 0;
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader() = 0;
+        virtual void update() = 0;
+        virtual void reset() = 0;
+        virtual int maxLevel() = 0;
     };
 
 
-    typedef LRUCache<HashKey, Tile> TileCache;
+    typedef LRUCache<ChunkHashKey, Tile> TileCache;
+
+    
+    class ChunkIndexTileProvider : public TileProvider {
+    public:
+        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
+        virtual ~ChunkIndexTileProvider();
+
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
+    private:
+        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
+
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+        
+        TileCache _tileCache;
+        glm::uvec2 _textureSize;
+        size_t _fontSize;
+        
+        GLuint _fbo;
+
+    };
+
+
+    class SingleImagePrivoder : public TileProvider {
+    public:
+        SingleImagePrivoder(const std::string& imagePath);
+        virtual ~SingleImagePrivoder() { }
+
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
+    private:
+        Tile _tile;
+        std::string _imagePath;
+    };
 
 
     /**
@@ -94,10 +153,12 @@ namespace openspace {
         virtual ~CachingTileProvider();
         
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
         virtual TileDepthTransform depthTransform();
-        virtual void prerender();
-        virtual std::shared_ptr<AsyncTileDataProvider> getAsyncTileReader();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
 
 
     private:
@@ -114,7 +175,8 @@ namespace openspace {
         /**
             Creates an OpenGL texture and pushes the data to the GPU.
         */
-        void initializeAndAddToCache(std::shared_ptr<TileIOResult> uninitedTexture);
+
+        Tile createTile(std::shared_ptr<TileIOResult> res);
 
         void clearRequestQueue();
 
@@ -127,6 +189,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         std::shared_ptr<TileCache> _tileCache;
+        Tile _defaultTile;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;

@@ -44,6 +44,7 @@ namespace openspace {
 
 
         void put(const KeyType& key, const ValueType& value);
+        void clear();
         bool exist(const KeyType& key) const;
         ValueType get(const KeyType& key);
         size_t size() const;

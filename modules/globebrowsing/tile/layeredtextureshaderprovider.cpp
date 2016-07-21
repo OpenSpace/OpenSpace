@@ -98,7 +98,7 @@ namespace openspace {
     {
         _updatedOnLastCall = false;
         if (!(preprocessingData == _preprocessingData) || _programObject == nullptr)
-        { // No need to recompile shader. Shader is up to date and can be returned.
+        {
             recompileShaderProgram(preprocessingData);
             _updatedOnLastCall = true;
         }

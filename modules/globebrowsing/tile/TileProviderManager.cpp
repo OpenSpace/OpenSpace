@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -36,7 +37,35 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(1);
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Tile Provider Group                                   //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    void TileProviderGroup::update() {
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                tileProviderWithName.tileProvider->update();
+            }
+        }
+    }
+
+
+    const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const {
+        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                activeTileProviders.push_back(tileProviderWithName.tileProvider);
+            }
+        }
+        return activeTileProviders;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                           Tile Provider Manager                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+
 
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
@@ -55,13 +84,14 @@ namespace openspace {
 
             if (i == LayeredTextures::ColorTextures ||
                 i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks) {
+                i == LayeredTextures::WaterMasks    ||
+                i == LayeredTextures::GrayScaleOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
             }
             else if (i == LayeredTextures::Overlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
             }
-            else if (i == LayeredTextures::HeightMaps) {
+            else if (i == LayeredTextures::HeightMaps || i == LayeredTextures::HeightMapOverlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
             }
             else {
@@ -69,14 +99,19 @@ namespace openspace {
             }
 
             initData.threads = 1;
-            initData.cacheSize = 500;
+            initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles = i == LayeredTextures::HeightMaps; // Only preprocess height maps.
+            initData.preprocessTiles =
+                i == LayeredTextures::HeightMaps ||
+                i == LayeredTextures::HeightMapOverlays; // Only preprocess height maps.
 
             initTexures(
-                _layerCategories[i],
+                _layerCategories[i].tileProviders,
                 texturesDict,
                 initData);
+
+            // init level blending to be true
+            _layerCategories[i].levelBlendingEnabled = true;
         }
     }
 
@@ -90,84 +125,55 @@ namespace openspace {
         // Create TileProviders for all textures within this category
         for (size_t i = 0; i < texturesDict.size(); i++) {
             std::string name, path;
-            // Default to enabled = true on case it's not defined in the dictionary
-            bool enabled = true;
+            
             std::string dictKey = std::to_string(i + 1);
             ghoul::Dictionary texDict = texturesDict.value<ghoul::Dictionary>(dictKey);
             texDict.getValue("Name", name);
             texDict.getValue("FilePath", path);
-            texDict.getValue("Enabled", enabled);
 
-            std::shared_ptr<TileProvider> tileProvider;
-            try {
-                tileProvider = initProvider(path, initData);
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERROR(e.message);
+            std::string type = "LRUCaching"; // if type is unspecified
+            texDict.getValue("Type", type);
+
+            
+            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+            if (tileProvider == nullptr) {
                 continue;
             }
+
+            bool enabled = false; // defaults to false if unspecified
+            texDict.getValue("Enabled", enabled);
+
             dest.push_back({ name, tileProvider, enabled });
         }
     }
 
-
-    std::shared_ptr<TileProvider> TileProviderManager::initProvider(const std::string& file,
-        const TileProviderInitData& initData)
-    {
-        std::shared_ptr<TileProvider> tileProvider;
-        CPLXMLNode * node = CPLParseXMLFile(file.c_str());
-        if (!node) {
-            throw ghoul::RuntimeError("Unable to parse XML:\n" + file);
-        }
-        if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
-            tileProvider = std::shared_ptr<TileProvider>(
-                new TemporalTileProvider(file, initData));
-            return tileProvider;
-        }
-
-        std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
-            new TileDataset(file, initData.minimumPixelSize, initData.preprocessTiles));
-
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(1));
-
-        std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
-            new AsyncTileDataProvider(tileDataset, threadPool));
-
-        std::shared_ptr<TileCache> tileCache = std::shared_ptr<TileCache>(new TileCache(initData.cacheSize));
-
-        tileProvider = std::shared_ptr<TileProvider>(
-            new CachingTileProvider(tileReader, tileCache, initData.framesUntilRequestQueueFlush));
-
-        return tileProvider;
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(size_t groupId) {
+        return _layerCategories[groupId];
     }
 
-    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)
-    {
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(LayeredTextures::TextureCategory category) {
         return _layerCategories[category];
     }
 
-    void TileProviderManager::prerender() {
+    void TileProviderManager::update() {
+        for (auto tileProviderGroup : _layerCategories) {
+            tileProviderGroup.update();
+        }
+    }
+
+    void TileProviderManager::reset(bool includingInactive) {
         for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory) {
+            for (auto tileProviderWithName : layerCategory.tileProviders) {
                 if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->prerender();
+                    tileProviderWithName.tileProvider->reset();
+                }
+                else if (includingInactive) {
+                    tileProviderWithName.tileProvider->reset();
                 }
             }
         }
     }
 
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActivatedLayerCategory(
-            LayeredTextures::TextureCategory textureCategory)
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto tileProviderWithName : _layerCategories[textureCategory]) {
-            if (tileProviderWithName.isActive) {
-                tileProviders.push_back(tileProviderWithName.tileProvider);
-            }
-        }
-        return tileProviders;
-    }
+   
 
 }  // namespace openspace
