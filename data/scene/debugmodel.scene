@@ -1,0 +1,53 @@
+-- TextureResolution = "low"
+TextureResolution = "med"
+-- TextureResolution = "high"
+
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime("2018-10-25T04:00:00.00")
+    openspace.time.setDeltaTime(0)
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+
+    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+
+    openspace.printInfo("Done setting default values")
+
+    openspace.resetCameraDirection()
+end
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "DebugModel",
+        Position = {292946.630948, 377755.961928, 366248.427057},
+        Rotation = {0.732615, -0.137003, 0.430036, 0.509485},
+    },
+    Modules = {
+        "sun",
+        "stars",
+        "debugmodel",
+    }
+}
+
