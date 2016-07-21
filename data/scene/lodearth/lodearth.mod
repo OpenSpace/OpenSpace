@@ -64,7 +64,7 @@ return {
                     {
                         Type = "SingleImage",
                         Name = "Debug Tiles",
-                        FilePath = "textures/test_tile.png",
+                        FilePath = "../debugglobe/textures/test_tile.png",
                     },
                     {
                         Type = "Temporal",
