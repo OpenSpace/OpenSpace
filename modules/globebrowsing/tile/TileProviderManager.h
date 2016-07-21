@@ -43,7 +43,7 @@
 namespace openspace {
 
     
-    struct TileProviderWithName {
+    struct NamedTileProvider {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
@@ -57,7 +57,7 @@ namespace openspace {
         const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const;
 
 
-        std::vector<TileProviderWithName> tileProviders;
+        std::vector<NamedTileProvider> tileProviders;
         bool levelBlendingEnabled;
 
     };
@@ -81,7 +81,7 @@ namespace openspace {
 
     private:
         static void initTexures(
-            std::vector<TileProviderWithName>& destination, 
+            std::vector<NamedTileProvider>& destination, 
             const ghoul::Dictionary& dict, 
             const TileProviderInitData& initData);
 

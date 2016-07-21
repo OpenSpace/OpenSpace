@@ -119,7 +119,7 @@ namespace openspace {
     {
     }
 
-    void TileProviderManager::initTexures(std::vector<TileProviderWithName>& dest,
+    void TileProviderManager::initTexures(std::vector<NamedTileProvider>& dest,
         const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
         // Create TileProviders for all textures within this category
