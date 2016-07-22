@@ -172,55 +172,54 @@ bool RenderableModel::deinitialize() {
 }
 
 void RenderableModel::render(const RenderData& data) {
+
     _programObject->activate();
-    _frameCount++;
-
-    double lt;
-    glm::mat4 transform = glm::mat4(1.f);
-
-    glm::mat4 tmp = glm::mat4(1);
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-    transform *= tmp;
     
+    double lt;
+    
+    // Fade away if it does not have spice coverage
     double time = openspace::Time::ref().currentTime();
     bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
-    if (!targetPositionCoverage){
+    if (!targetPositionCoverage) {
         int frame = _frameCount % 180;
-        
+
         float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
         _alpha = 0.5f + fadingFactor * 0.5f;
     }
     else
         _alpha = 1.0f;
 
-    glm::dvec3 p =
-    SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, time, lt);
-    psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-    glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
-    _programObject->setUniform("cam_dir", cam_dir);
-    _programObject->setUniform("transparency", _alpha);
-    _programObject->setUniform("sun_pos", _sunPosition.vec3());
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
-    _programObject->setUniform("_performShading", _performShading);
-
-    _geometry->setUniforms(*_programObject);
-
-    if (_performFade && _fading > 0.f){
+    // Fading
+    if (_performFade && _fading > 0.f) {
         _fading = _fading - 0.01f;
     }
-    else if (!_performFade && _fading < 1.f){
+    else if (!_performFade && _fading < 1.f) {
         _fading = _fading + 0.01f;
 
     }
 
+    // Calculate variables to be used as uniform variables in shader
+    glm::dvec3 bodyPosition = data.position.dvec3();
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
+        glm::dmat4(_stateMatrix); // Rotation
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::vec3 cameraDirectionWorldSpace = data.camera.viewDirectionWorldSpace();
+    glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
+    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+
+    _programObject->setUniform("cameraDirectionWorldSpace", cameraDirectionWorldSpace);
+    _programObject->setUniform("transparency", _alpha);
+    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("viewTransform", glm::mat4(data.camera.combinedViewMatrix()));
+    _programObject->setUniform("performShading", _performShading);
     _programObject->setUniform("fading", _fading);
+
+    _geometry->setUniforms(*_programObject);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;

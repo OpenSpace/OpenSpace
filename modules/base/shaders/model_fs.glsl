@@ -22,63 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform vec4 campos;
-uniform vec4 objpos;
-uniform vec3 cam_dir; // add this for specular
-
-uniform vec3 sun_pos;
-
-uniform bool _performShading = true;
+// Uniforms
 uniform float transparency;
-uniform int shadows;
-
 uniform float fading;
+uniform bool performShading = true;
 
-uniform float time;
+uniform vec3 directionToSunViewSpace;
+
 uniform sampler2D texture1;
 
+// Input from the vertex shader
 in vec2 vs_st;
-in vec4 vs_normal;
+in vec3 vs_normalViewSpace;
+in vec3 vs_cameraDirectionViewSpace;
 in vec4 vs_position;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-    //depth = length(campos - position);
-    vec4 diffuse = texture(texture1, vs_st);
+    vec4 textureSample = texture(texture1, vs_st);
+    
+    vec3 colorDiffuse = textureSample.rgb;
+    vec3 colorSpecular = vec3(1);
 
-    diffuse[3] = fading;
+    vec3 color;
 
-    if (_performShading) {
-        vec4 spec = vec4(0.0);
+    if (performShading) {
+        vec3 lightColorAmbient = vec3(1);    
+        vec3 lightColor = vec3(1);    
         
-        vec3 n = normalize(vs_normal.xyz);
-        vec3 l_pos = vec3(sun_pos); // sun.
-        vec3 l_dir = normalize(l_pos-objpos.xyz);
-        float intensity = min(max(1*dot(n,l_dir), 0.0), 1);
-    
-        float shine = 100;
-    
-        vec4 specular = vec4(1.0);
-        vec4 ambient =diffuse*0.4;
-        ambient[3] = transparency;
-         if(intensity > 0.0f){
-            // halfway vector
-            vec3 h = normalize(l_dir + normalize(cam_dir));
-            // specular factor
-            float intSpec = max(dot(n,h),0.0);
-            spec = specular * pow(intSpec, shine);
-        }
-        diffuse = vec4(max(intensity * diffuse , ambient).xyz,1) +spec*1.5*diffuse ;
+        vec3 n = normalize(vs_normalViewSpace);
+        vec3 l = directionToSunViewSpace;
+        vec3 c = normalize(vs_cameraDirectionViewSpace);
+        vec3 r = reflect(l, n);
+
+        float ambientIntensity = 0.2;
+        float diffuseIntensity = 1;
+        float specularIntensity = 1;
+
+        float diffuseCosineFactor = dot(n,l);
+        float specularCosineFactor = dot(c,r);
+        float specularPower = 10;
+
+        vec3 ambient = ambientIntensity * lightColorAmbient * colorDiffuse;
+        vec3 diffuse = specularIntensity * lightColor * colorDiffuse * max(diffuseCosineFactor, 0);
+        vec3 specular = specularIntensity * lightColor * colorSpecular * pow(max(specularCosineFactor, 0), specularPower);
+
+        color = ambient + diffuse + specular;
+    }
+    else {
+        color = colorDiffuse;
     }
 
-    diffuse[3] = fading*transparency;
+    float alpha = fading * transparency;
 
     Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
+    frag.color = vec4(color, alpha);
+    frag.depth = vs_position.w;
+
     return frag;
 }

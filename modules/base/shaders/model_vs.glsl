@@ -24,38 +24,39 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
-uniform float _magnification;
-
+// Vertex attributes
 layout(location = 0) in vec4 in_position;
-//in vec3 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
+// Uniforms
+uniform mat4 modelViewTransform;
+uniform mat4 viewTransform;
+uniform mat4 projectionTransform;
+
+uniform vec3 cameraDirectionWorldSpace;
+
+uniform float _magnification;
+
+// Outputs
 out vec2 vs_st;
-out vec4 vs_normal;
+out vec3 vs_normalViewSpace;
+out vec3 vs_cameraDirectionViewSpace;
 out vec4 vs_position;
-out float s;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    vec4 pos = in_position;
-    pos.w += _magnification;
+    vec4 position = in_position;
+    position.xyz *= pow(10, _magnification);
+    vec4 positionViewSpace = modelViewTransform * position;
+    vec4 positionClipSpace = projectionTransform * positionViewSpace;
 
-    // set variables
+    // Write output
     vs_st = in_st;
-    //vs_stp = in_position.xyz;
-    vs_position = pos;
-    vec4 tmp = pos;
-
-    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    vs_position = z_normalization(positionClipSpace);
+    gl_Position = vs_position;
+    // The normal transform should be the transposed inverse of the model transform?
+    vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
+    vs_cameraDirectionViewSpace = normalize(mat3(viewTransform) * cameraDirectionWorldSpace);
 }

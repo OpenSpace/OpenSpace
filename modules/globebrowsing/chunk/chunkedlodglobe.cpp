@@ -243,8 +243,8 @@ namespace openspace {
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _modelTransform =
-            translate(dmat4(1), data.position) *
-            dmat4(stateMatrix()); // Translation
+            translate(dmat4(1), data.position) * // Translation
+            dmat4(stateMatrix()); // Rotation
         _inverseModelTransform = glm::inverse(_modelTransform);
 
         _renderer->update();
