@@ -68,7 +68,7 @@ namespace openspace {
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
-        , stats(StatsCollector(absPath("test_stats"), 1))
+        , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     {
 
         auto geometry = std::make_shared<SkirtedGrid>(

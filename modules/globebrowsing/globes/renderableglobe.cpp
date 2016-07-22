@@ -58,7 +58,8 @@ namespace openspace {
 
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        : _isEnabled(properties::BoolProperty(" Enabled", " Enabled", true))
+        , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
@@ -97,6 +98,9 @@ namespace openspace {
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             _ellipsoid, patchSegments, _tileProviderManager);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
+
+        addProperty(_isEnabled);
+
 
         // Add debug options - must be after chunkedLodGlobe has been created as it 
         // references its members
@@ -157,20 +161,21 @@ namespace openspace {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
-        if (_saveOrThrowCamera.value()) {
-            _saveOrThrowCamera.setValue(false);
+        if (_isEnabled.value()) {
+            if (_saveOrThrowCamera.value()) {
+                _saveOrThrowCamera.setValue(false);
 
-            if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
-                LDEBUG("Saving snapshot of camera!");
-                _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
+                if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
+                    LDEBUG("Saving snapshot of camera!");
+                    _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
+                }
+                else { // throw camera
+                    LDEBUG("Throwing away saved camera!");
+                    _chunkedLodGlobe->setSaveCamera(nullptr);
+                }
             }
-            else { // throw camera
-                LDEBUG("Throwing away saved camera!");
-                _chunkedLodGlobe->setSaveCamera(nullptr);
-            }
+            _distanceSwitch.render(data);
         }
-
-        _distanceSwitch.render(data);
     }
 
     void RenderableGlobe::update(const UpdateData& data) {

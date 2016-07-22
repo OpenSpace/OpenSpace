@@ -143,11 +143,13 @@ namespace openspace {
 
         StatsCollector() = delete;
 
-        StatsCollector(const std::string& filename, int dumpEveryXRecord, const std::string& delimiter = ",", bool enabled = true)
+        enum class Enabled { Yes, No };
+
+        StatsCollector(const std::string& filename, int dumpEveryXRecord, Enabled enabled = Enabled::Yes, const std::string& delimiter = ",")
             : _filename(filename)
             , _dumpEveryXRecord(dumpEveryXRecord)
             , _recordsSinceLastDump(0)
-            , _enabled(enabled)
+            , _enabled(enabled == Enabled::Yes)
             , _delimiter(delimiter)
             , _hasWrittenHeader(false)
             , i(TemplatedStatsCollector<long long>(_enabled, delimiter))
