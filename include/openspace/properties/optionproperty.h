@@ -75,6 +75,13 @@ public:
     void addOption(int value, std::string desc);
 
     /**
+    * Appends options with vectors of values and descriptions
+    * \param values A std::vector<int> of values for the options
+    * \param descs A std::vector<string> of descriptions for each value
+    */
+    void addOptions(std::vector<int> values, std::vector<std::string> descs);
+
+    /**
      * Returns the list of available options.
      * /return The list of available options
      */

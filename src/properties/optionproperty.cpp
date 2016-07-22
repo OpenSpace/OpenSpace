@@ -61,6 +61,23 @@ void OptionProperty::addOption(int value, std::string desc) {
     _options.push_back(std::move(option));
 }
 
+void OptionProperty::addOptions(std::vector<int> values, std::vector<std::string> descs) {
+    if (values.size() != descs.size()) {
+        LERROR("Skipping " << this->fullyQualifiedIdentifier() << ": "
+            << "number of values (" << values.size() << ") "
+            << "does not equal number of descriptions (" << descs.size() << ")"
+        );
+        return;
+    }
+    for (int i = 0; i < values.size(); i++) {
+        LDEBUG(this->fullyQualifiedIdentifier() << ": Adding "
+            << descs[i]
+            << " (" << values[i] << ")"
+        );
+        this->addOption(values[i], descs[i]);
+    }
+}
+
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
     for (auto o : _options) {
