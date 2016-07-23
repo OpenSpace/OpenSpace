@@ -50,13 +50,20 @@ public:
         std::string description;
     };
 
+    enum class DisplayType {
+        RADIO,
+        DROPDOWN
+    };
+
     /**
      * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
      * to its super class.
      * \param identifier A unique identifier for this property
      * \param guiName The GUI name that should be used to represent this property
+     * \param displayType Optional DisplayType for GUI (default RADIO)
      */
     OptionProperty(std::string identifier, std::string guiName);
+    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType);
 
     /**
      * Returns the name of the class for reflection purposes.
@@ -64,6 +71,12 @@ public:
      */
     std::string className() const override;
     using IntProperty::operator=;
+
+    /**
+    * Returns the type for GUI display.
+    * \return OptionType for display purposes
+    */
+    DisplayType displayType() const;
 
     /**
      * Adds the passed option to the list of available options. The <code>value</code> of
@@ -100,6 +113,7 @@ private:
 
     /// The list of options which have been registered with this OptionProperty
     std::vector<Option> _options;
+    DisplayType _displayType;
 };
 
 } // namespace properties

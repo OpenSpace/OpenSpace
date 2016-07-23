@@ -71,13 +71,24 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
 
     int value = *p;
     std::vector<OptionProperty::Option> options = p->options();
-    for (const OptionProperty::Option& o : options) {
-        ImGui::RadioButton(name.c_str(), &value, o.value);
-
-        ImGui::SameLine();
-        ImGui::Text(o.description.c_str());
-        renderTooltip(prop);
-
+    switch (p->displayType()) {
+    case OptionProperty::DisplayType::RADIO: {
+        for (const OptionProperty::Option& o : options) {
+            ImGui::RadioButton(name.c_str(), &value, o.value);
+            ImGui::SameLine();
+            ImGui::Text(o.description.c_str());
+            renderTooltip(prop);
+        }
+        break;
+    }
+    case OptionProperty::DisplayType::DROPDOWN: {
+        std::string nodeNames = "";
+        for (const OptionProperty::Option& o : options) {
+            nodeNames += o.description + '\0';
+        }
+        ImGui::Combo(name.c_str(), &value, nodeNames.c_str());
+        break;
+    }
     }
     if (value != p->value())
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));

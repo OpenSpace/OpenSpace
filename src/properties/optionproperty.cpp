@@ -35,10 +35,21 @@ const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName)
     : IntProperty(std::move(identifier), std::move(guiName))
+    , _displayType(DisplayType::RADIO)
+{}
+
+OptionProperty::OptionProperty(std::string identifier, std::string guiName, DisplayType displayType) 
+    : IntProperty(std::move(identifier), std::move(guiName))
+    , _displayType(displayType)
 {}
 
 std::string OptionProperty::className() const {
     return "OptionProperty";
+}
+
+OptionProperty::DisplayType OptionProperty::displayType() const
+{
+    return _displayType;
 }
 
 const std::vector<OptionProperty::Option>& OptionProperty::options() const {
