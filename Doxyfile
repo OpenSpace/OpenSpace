@@ -26,8 +26,8 @@ QT_AUTOBRIEF           = YES
 # will result in a user-defined paragraph with heading "Side Effects:".
 # You can put \n's in the value part of an alias to insert newlines.
 
-ALIASES                =
 BUILTIN_STL_SUPPORT    = NO
+ALIASES                =
 
 SUBGROUPING            = YES
 
