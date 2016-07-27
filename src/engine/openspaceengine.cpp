@@ -415,32 +415,35 @@ bool OpenSpaceEngine::initialize() {
     configurationManager().getValue(
         ConfigurationManager::KeyShutdownCountdown, _shutdownWait
     );
+    
+    if (!commandlineArgumentPlaceholders.sceneName.empty())
+        configurationManager().setValue(
+            ConfigurationManager::KeyConfigScene, commandlineArgumentPlaceholders.sceneName);
+
+    // Initialize SettingsEngine
+    _settingsEngine->initialize();
 
     // Initialize the SettingsEngine
     _settingsEngine->initialize();
 
     // Load scenegraph
     Scene* sceneGraph = new Scene;
-    _renderEngine->setSceneGraph(sceneGraph);
-
-    // initialize the RenderEngine
-    _renderEngine->initialize();
     sceneGraph->initialize();
+    std::string scenePath = "";
+    configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
+    sceneGraph->scheduleLoadSceneFile(scenePath);
 
-    std::string sceneDescriptionPath = "";
-    if (commandlineArgumentPlaceholders.sceneName.empty()) {
-        success = configurationManager().getValue(
-            ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
-    }
-    else
-        sceneDescriptionPath = commandlineArgumentPlaceholders.sceneName;
-    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
+    // Initialize the RenderEngine
+    _renderEngine->setSceneGraph(sceneGraph);
+    _renderEngine->initialize();
+    
+
 
     //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
     //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
     // Run start up scripts
-    runPreInitializationScripts(sceneDescriptionPath);
+    runPreInitializationScripts(scenePath);
 
     // Load a light and a monospaced font
     loadFonts();
