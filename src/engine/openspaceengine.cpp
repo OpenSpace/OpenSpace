@@ -415,20 +415,19 @@ bool OpenSpaceEngine::initialize() {
     configurationManager().getValue(
         ConfigurationManager::KeyShutdownCountdown, _shutdownWait
     );
-    
+
     if (!commandlineArgumentPlaceholders.sceneName.empty())
         configurationManager().setValue(
-            ConfigurationManager::KeyConfigScene, commandlineArgumentPlaceholders.sceneName);
-
-    // Initialize SettingsEngine
-    _settingsEngine->initialize();
+            ConfigurationManager::KeyConfigScene,
+            commandlineArgumentPlaceholders.sceneName);
 
     // Initialize the SettingsEngine
     _settingsEngine->initialize();
 
-    // Load scenegraph
+    // Initialize the Scene
     Scene* sceneGraph = new Scene;
     sceneGraph->initialize();
+    
     std::string scenePath = "";
     configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
     sceneGraph->scheduleLoadSceneFile(scenePath);
@@ -436,8 +435,6 @@ bool OpenSpaceEngine::initialize() {
     // Initialize the RenderEngine
     _renderEngine->setSceneGraph(sceneGraph);
     _renderEngine->initialize();
-    
-
 
     //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
     //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
