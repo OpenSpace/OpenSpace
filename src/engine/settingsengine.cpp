@@ -72,8 +72,7 @@ void SettingsEngine::initSceneFiles() {
             std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
             OsEng.configurationManager().setValue(
                 ConfigurationManager::KeyConfigScene, sceneFile);
-            std::cout << "For a relatively atomic commit, just pretending to load "
-                << sceneFile << std::endl;
+            OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
         }
     );
 }
