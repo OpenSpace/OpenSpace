@@ -416,6 +416,9 @@ bool OpenSpaceEngine::initialize() {
         ConfigurationManager::KeyShutdownCountdown, _shutdownWait
     );
 
+    // Initialize the SettingsEngine
+    _settingsEngine->initialize();
+
     // Load scenegraph
     Scene* sceneGraph = new Scene;
     _renderEngine->setSceneGraph(sceneGraph);
