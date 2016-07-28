@@ -119,7 +119,7 @@ int toggleFade(lua_State* L) {
 
     double t = luaL_checknumber(L, -1);
     
-    float fadedIn = 0.0;
+    float fadedIn = 1.0;
     int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
 
     OsEng.renderEngine().startFading(direction, static_cast<float>(t));
