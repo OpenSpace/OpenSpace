@@ -45,12 +45,12 @@ namespace {
 
 namespace openspace {
 
-LabelParser::LabelParser(std::string name, const std::string& fileName,
-                         ghoul::Dictionary translationDictionary)
+LabelParser::LabelParser(std::string name, std::string fileName,
+                         const ghoul::Dictionary& translationDictionary)
     : _name(std::move(name))
     , _badDecoding(false)
+    , _fileName(std::move(fileName))
 {
-    _fileName = fileName;
     //get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
@@ -167,7 +167,6 @@ bool LabelParser::create() {
 
                     // open up label files
                     std::string line = "";
-                    std::string previousSequence;
                     TimeRange instrumentRange;
 
                     double startTime = 0.0;

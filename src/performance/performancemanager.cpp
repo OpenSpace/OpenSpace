@@ -57,7 +57,7 @@ PerformanceManager::PerformanceManager()
     void* ptr = _performanceMemory->memory();
     
     // Using the placement-new to create a PerformanceLayout in the shared memory
-    PerformanceLayout* layout = new (ptr) PerformanceLayout;
+    new (ptr) PerformanceLayout;
 }
 
 PerformanceManager::~PerformanceManager() {

@@ -229,7 +229,7 @@ bool HongKangParser::create() {
                                     image.startTime = scan_start;
                                     image.stopTime = scan_stop;
                                     image.path = _defaultCaptureImage;
-                                    image.activeInstruments = cameraSpiceID;
+                                    image.activeInstruments = scannerSpiceID;
                                     image.target = cameraTarget;
                                     image.isPlaceholder = true;
                                     image.projected = false;

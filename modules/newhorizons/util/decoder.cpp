@@ -32,7 +32,7 @@ const std::string _loggerCat = "Decoder";
 
 namespace openspace {
 
-Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type)
+Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory
         = FactoryManager::ref().factory<Decoder>();

@@ -29,8 +29,6 @@ namespace openspace {
 namespace {
 
 void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properties::Property*> properties, int type) {
-    static const std::string _loggerCat = "property_setValue";
-
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
@@ -42,10 +40,12 @@ void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properti
             // value change if the types agree
 
             if (type != prop->typeLua()) {
-                LERROR(errorLocation(L) << "Property '" <<
-                       prop->fullyQualifiedIdentifier() <<
-                       "' does not accept input of type '" << luaTypeToString(type) <<
-                       "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
+                LERRORC("property_setValue",
+                        errorLocation(L) << "Property '" <<
+                        prop->fullyQualifiedIdentifier() <<
+                        "' does not accept input of type '" << luaTypeToString(type) <<
+                        "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'"
+                );
             }
             else {
                 prop->setLuaValue(L);
@@ -74,25 +74,24 @@ namespace luascriptfunctions {
  * with the type the denoted Property expects
  */
 int property_setValueSingle(lua_State* L) {
-    static const std::string _loggerCat = "property_setValue";
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("property_setValueSingle", L, 2, nArguments);
 
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
 
     properties::Property* prop = property(uri);
     if (!prop) {
-        LERROR(errorLocation(L) << "Property with URI '" << uri << "' was not found");
+        LERRORC("property_setValue", errorLocation(L) << "Property with URI '" << uri << "' was not found");
         return 0;
     }
 
 
     if (type != prop->typeLua()) {
-        LERROR(errorLocation(L) << "Property '" << uri <<
+        LERRORC("property_setValue", errorLocation(L) << "Property '" << uri <<
             "' does not accept input of type '" << luaTypeToString(type) <<
             "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'");
         return 0;
@@ -116,12 +115,11 @@ int property_setValueSingle(lua_State* L) {
  * the regular expression. The regular expression has to be of the ECMAScript grammar.
 */
 int property_setValueRegex(lua_State* L) {
-    static const std::string _loggerCat = "property_setValueRegex";
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("property_setValueRegex<", L, 2, nArguments);
 
     std::string regex = luaL_checkstring(L, -2);
     try {
@@ -133,7 +131,7 @@ int property_setValueRegex(lua_State* L) {
         );
     }
     catch (const std::regex_error& e) {
-        LERROR("Malformed regular expression: '" << regex << "'");
+        LERRORC("property_setValueRegex", "Malformed regular expression: '" << regex << "'");
     }
 
     return 0;
@@ -148,12 +146,11 @@ int property_setValueRegex(lua_State* L) {
 */
 
 int property_setValue(lua_State* L) {
-    static const std::string _loggerCat = "property_setValueRegex";
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 2, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("property_setValue", L, 2, nArguments);
 
     std::string regex = luaL_checkstring(L, -2);
 
@@ -188,13 +185,16 @@ int property_getValue(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("property_getValue", L, 1, nArguments);
 
     std::string uri = luaL_checkstring(L, -1);
 
     openspace::properties::Property* prop = property(uri);
     if (!prop) {
-        LERROR(errorLocation(L) << "Property with URL '" << uri << "' was not found");
+        LERRORC(
+            "property_getValue",
+            errorLocation(L) << "Property with URL '" << uri << "' was not found"
+        );
         return 0;
     }
     else
@@ -209,10 +209,8 @@ int property_getValue(lua_State* L) {
  * be passed to the setPropertyValue method.
  */
 int loadScene(lua_State* L) {
-    static const std::string _loggerCat = "loadScene";
-
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("loadScene", L, 1, nArguments);
 
     std::string sceneFile = luaL_checkstring(L, -1);
 
@@ -222,18 +220,17 @@ int loadScene(lua_State* L) {
 }
 
 int addSceneGraphNode(lua_State* L) {
-    static const std::string _loggerCat = "addSceneGraphNode";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("addSceneGraphNode", L, 1, nArguments);
 
     ghoul::Dictionary d;
     try {
         ghoul::lua::luaDictionaryFromState(L, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERROR(e.what());
+        LERRORC("addSceneGraphNode", e.what());
         return 0;
     }
 
@@ -242,28 +239,32 @@ int addSceneGraphNode(lua_State* L) {
     std::string parent = d.value<std::string>(SceneGraphNode::KeyParentName);
     SceneGraphNode* parentNode = OsEng.renderEngine().scene()->sceneGraphNode(parent);
     if (!parentNode) {
-        LERROR(errorLocation(L) << "Could not find parent node '" << parent << "'");
+        LERRORC(
+            "addSceneGraphNode",
+            errorLocation(L) << "Could not find parent node '" << parent << "'"
+        );
         return 0;
     }
     node->setParent(parentNode);
     node->initialize();
     OsEng.renderEngine().scene()->sceneGraph().addSceneGraphNode(node);
-
         
-    return 1;
+    return 0;
 }
 
 int removeSceneGraphNode(lua_State* L) {
-    static const std::string _loggerCat = "removeSceneGraphNode";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("removeSceneGraphNode", L, 1, nArguments);
     
     std::string nodeName = luaL_checkstring(L, -1);
     SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(nodeName);
     if (!node) {
-        LERROR(errorLocation(L) << "Could not find node '" << nodeName << "'");
+        LERRORC(
+            "removeSceneGraphNode",
+            errorLocation(L) << "Could not find node '" << nodeName << "'"
+        );
         return 0;
     }
 

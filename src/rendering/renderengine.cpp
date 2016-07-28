@@ -1226,16 +1226,10 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std:
 
 void RenderEngine::renderInformation() {
     // TODO: Adjust font_size properly when using retina screen
-    const float fontSizeMono = 10.f;
-    const float fontSizeTime = 15.f;
-
     using Font = ghoul::fontrendering::Font;
     using ghoul::fontrendering::RenderFont;
 
-
     if (_showInfo && _fontDate && _fontInfo) {
-        double currentTime = Time::ref().currentTime();
-
         glm::vec2 penPosition = glm::vec2(
             10.f,
             OsEng.windowWrapper().viewportPixelCoordinates().w
@@ -1262,6 +1256,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+        double currentTime = Time::ref().currentTime();
 
         if (openspace::ImageSequencer::ref().isReady()) {
             penPosition.y -= 25.f;
@@ -1279,7 +1274,6 @@ void RenderEngine::renderInformation() {
                     SpiceManager::ref().getValue("PLUTO", "RADII", radii);
                     a = radii.x;
                     b = radii.y;
-                    c = radii.z;
                     float radius = (a + b) / 2.f;
                     float distToSurf = glm::length(nhPos.vec3()) - radius;
 
@@ -1348,11 +1342,14 @@ void RenderEngine::renderInformation() {
                 int minute = second / 60;
                 second = second % 60;
 
-                std::string hh, mm, ss, coundtown;
+                std::string hh, mm, ss;
 
-                if (hour   < 10) hh.append("0");
-                if (minute < 10) mm.append("0");
-                if (second < 10) ss.append("0");
+                if (hour   < 10)
+                    hh.append("0");
+                if (minute < 10)
+                    mm.append("0");
+                if (second < 10)
+                    ss.append("0");
 
                 hh.append(std::to_string(hour));
                 mm.append(std::to_string(minute));

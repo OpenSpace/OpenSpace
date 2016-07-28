@@ -1,6 +1,6 @@
 // This is not a memleak because the placement new operator does not
 // actually create any memory that could leak
-memleak:src/performance/performancemanager.cpp
+//memleak:src/performance/performancemanager.cpp
 
 
 missingInclude

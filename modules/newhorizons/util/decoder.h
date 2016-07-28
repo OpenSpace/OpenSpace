@@ -32,7 +32,7 @@ namespace openspace {
 
 class Decoder {
 public:
-    static Decoder* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string type);
+    static Decoder* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string& type);
 
     Decoder(const ghoul::Dictionary& dictionary);
     virtual ~Decoder();

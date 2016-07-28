@@ -298,7 +298,6 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
         std::ifstream temporary(requestFile);
         std::string line;
         int nFiles = 0;
-        int nFinished = 0;
         while (std::getline(temporary, line)) {
             ++nFiles;
 #ifdef __APPLE__

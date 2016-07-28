@@ -46,10 +46,10 @@ ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer::ImageSequencer()
     : _hasData(false)
-    //, _currentTime(0.0)
-    //, _previousTime(0.0)
-    //, _intervalLength(0.0)
-    //, _nextCapture(0.0)
+    , _currentTime(0.0)
+    , _previousTime(0.0)
+    , _intervalLength(0.0)
+    , _nextCapture(0.0)
 {}
 
 ImageSequencer& ImageSequencer::ref() {
@@ -162,7 +162,7 @@ double ImageSequencer::getNextCaptureTime(){
 
     return nextCaptureTime;
 }
-const Image ImageSequencer::getLatestImageForInstrument(const std::string _instrumentID){
+Image ImageSequencer::getLatestImageForInstrument(const std::string& _instrumentID){
     auto it = _latestImages.find(_instrumentID);
     if (it != _latestImages.end())
         return _latestImages[_instrumentID];
@@ -373,14 +373,13 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 
                 // find the smallest separation of images in time
                 double epsilon;
-                epsilon = findMin(source);
+                //epsilon = findMin(source);
                 epsilon = findMin(destination);
                 // set epsilon as 1% smaller than min
                 epsilon -= min*0.01;
                 
                 // IFF images have same time as mission planned capture, erase that event from 
                 // 'predicted event file' (mission-playbook)
-                std::vector<Image> tmp;
                 for (int i = 0; i < source.size(); i++){
                     for (int j = 0; j < destination.size(); j++){
                         double diff = abs(source[i].startTime - destination[j].startTime);

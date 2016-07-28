@@ -40,6 +40,8 @@
 #include <openspace/query/query.h>
 #include <glm/gtx/projection.hpp>
 
+#include <openspace/performance/performancemeasurement.h>
+
 #include <openspace/util/spicemanager.h>
 #include <iomanip>
 #include <utility>   
@@ -73,7 +75,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _drawFOV(false)
     , _mode(GL_LINES)
-    , _interceptTag{false, false, false, false, false, false, false, false}
+    //, _interceptTag{false, false, false, false, false, false, false, false}
     , _withinFOV(false)
     , _vBoundsSize(0)
     , _vPlaneSize(40)
@@ -204,6 +206,7 @@ void RenderableFov::sendToGPU() {
 }
 
 void RenderableFov::updateGPU() {
+    PerfMeasure("updateGPU");
     glBindBuffer(GL_ARRAY_BUFFER, _fovBoundsVBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vBoundsSize * sizeof(GLfloat), _fovBounds.data());
     if (!_rebuild){
@@ -459,6 +462,7 @@ void RenderableFov::computeColors() {
 }
 
 void RenderableFov::determineTarget() {
+    PerfMeasure("determineTarget");
     _fovTarget = _potentialTargets[0]; //default;
     for (int i = 0; i < _potentialTargets.size(); i++) {
         _withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
@@ -477,6 +481,7 @@ void RenderableFov::determineTarget() {
 }
 
 void RenderableFov::computeIntercepts(const RenderData& data) {
+    PerfMeasure("computeIntercepts");
     // for each FOV vector
     _fovBounds.clear();
     for (int i = 0; i <= _bounds.size(); i++){
@@ -563,9 +568,10 @@ void RenderableFov::render(const RenderData& data) {
     if (openspace::ImageSequencer::ref().isReady())
         _drawFOV = ImageSequencer::ref().instrumentActive(_instrumentID);
 
-    if (_drawFOV){
+    if (_drawFOV) {
         // update only when time progresses.
-        if (_oldTime != _time){
+        if (_oldTime != _time) {
+            PerfMeasure("Total");
             determineTarget();
             computeColors();
             computeIntercepts(data);

@@ -158,7 +158,6 @@ int fadeOut(lua_State* L) {
 }
 
 int registerScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "registerScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -170,7 +169,7 @@ int registerScreenSpaceRenderable(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERROR(e.what());
+        LERRORC("registerScreenSpaceRenderable", e.what());
         return 0;
     }
 
@@ -181,7 +180,6 @@ int registerScreenSpaceRenderable(lua_State* L) {
 }
 
 int unregisterScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "unregisterScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -192,7 +190,7 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
 
     std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
     if (!s) {
-        LERROR(errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        LERRORC("unregisterScreenSpaceRenderable", errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
         return 0;
     }
 

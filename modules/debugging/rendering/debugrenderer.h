@@ -58,10 +58,9 @@ namespace openspace {
 
 
         
-        std::shared_ptr<ProgramObject> _programObject;
+        std::unique_ptr<ProgramObject> _programObject;
 
 
-        static std::shared_ptr<DebugRenderer> _singleton;
 
     };
 

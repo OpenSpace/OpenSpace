@@ -37,8 +37,8 @@ class LabelParser : public SequenceParser{
 public:
     LabelParser();
     LabelParser(std::string name,
-                const std::string& fileName,
-                ghoul::Dictionary translationDictionary);
+                std::string fileName,
+                const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 

@@ -33,7 +33,6 @@ namespace luascriptfunctions {
  */
 int setOrigin(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setOrigin";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -47,7 +46,10 @@ int setOrigin(lua_State* L) {
 
     SceneGraphNode* node = sceneGraphNode(s);
     if (!node) {
-        LWARNING("Could not find a node in scenegraph called '" << s <<"'");
+        LWARNINGC(
+            "lua.setOrigin",
+            "Could not find a node in scenegraph called '" << s << "'"
+        );
         return 0;
     }
 
@@ -63,7 +65,6 @@ int setOrigin(lua_State* L) {
 */
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.bindKey";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 2)
@@ -79,7 +80,7 @@ int bindKey(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERROR("Could not find key '"<< key <<"'");
+        LERRORC("lua.bindKey", "Could not find key '"<< key << "'");
         return 0;
     }
 
@@ -100,7 +101,6 @@ int bindKey(lua_State* L) {
 */
 int clearKeys(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.clearKeys";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
@@ -118,7 +118,6 @@ int clearKeys(lua_State* L) {
 */
 int setInteractionMode(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setInteractionMode";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
