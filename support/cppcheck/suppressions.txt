@@ -1,10 +1,1 @@
-unreachableCode:src/properties/matrixproperty.cpp
-duplicateBreak:src/properties/matrixproperty.cpp
-unreachableCode:src/properties/scalarproperty.cpp
-duplicateBreak:src/properties/scalarproperty.cpp
-unreachableCode:src/properties/stringproperty.cpp
-duplicateBreak:src/properties/stringproperty.cpp
-unreachableCode:src/properties/vectorproperty.cpp
-duplicateBreak:src/properties/vectorproperty.cpp
-
-commaSeparatedReturn
+missingInclude
