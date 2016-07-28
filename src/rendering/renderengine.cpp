@@ -325,11 +325,19 @@ void RenderEngine::preSynchronization() {
 
 void RenderEngine::postSynchronizationPreDraw() {
     //temporary fade funtionality
+    float fadedIn = 1.0;
+    float fadedOut = 0.0;
+    // Don't restart the fade if you've already done it in that direction
+    if (  (_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
+       || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
+        _fadeDirection = 0;
+    }
+
     if (_fadeDirection != 0) {
         if (_currentFadeTime > _fadeDuration){
+            _globalBlackOutFactor = _fadeDirection > 0 ? fadedIn : fadedOut;
             _fadeDirection = 0;
-            _globalBlackOutFactor = fminf(1.f, fmaxf(0.f, _globalBlackOutFactor));
-        } 
+        }
         else {
             if (_fadeDirection < 0)
                 _globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
@@ -710,6 +718,13 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::setPerformanceMeasurement,
                 "bool",
                 "Sets the performance measurements"
+            },
+            {
+                "toggleFade",
+                &luascriptfunctions::toggleFade,
+                "number",
+                "Toggles fading in or out",
+                true
             },
             {
                 "fadeIn",

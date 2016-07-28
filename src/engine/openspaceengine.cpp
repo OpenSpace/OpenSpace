@@ -435,6 +435,9 @@ bool OpenSpaceEngine::initialize() {
     // Initialize the RenderEngine
     _renderEngine->setSceneGraph(sceneGraph);
     _renderEngine->initialize();
+    _renderEngine->setGlobalBlackOutFactor(0.0);
+    _renderEngine->startFading(1, 3.0);
+
 
     //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
     //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
