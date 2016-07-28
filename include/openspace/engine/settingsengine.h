@@ -27,18 +27,24 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/optionproperty.h>
 
 namespace openspace {
 
 class SettingsEngine : public properties::PropertyOwner {
 public:
-  SettingsEngine();
+    SettingsEngine();
+
+    void initialize();
 
 private:
-  properties::FloatProperty _eyeSeparation;
+    void initEyeSeparation();
+    void initSceneFiles();
+
+    properties::FloatProperty _eyeSeparation;
+    properties::OptionProperty _scenes;
 };
 
 } // namespace openspace
-
 
 #endif //#ifndef __SETTINGSENGINE_H__

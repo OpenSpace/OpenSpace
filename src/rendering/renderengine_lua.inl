@@ -109,6 +109,25 @@ int setPerformanceMeasurement(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* toggleFade(float):
+* Toggle a global fade over (float) seconds
+*/
+int toggleFade(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double t = luaL_checknumber(L, -1);
+    
+    float fadedIn = 1.0;
+    int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
+
+    OsEng.renderEngine().startFading(direction, static_cast<float>(t));
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
 * fadeIn(float):
 * start a global fadein over (float) seconds
 */

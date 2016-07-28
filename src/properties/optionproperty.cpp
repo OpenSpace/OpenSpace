@@ -103,6 +103,14 @@ void OptionProperty::setValue(int value) {
     LERROR("Could not find an option for value '" << value << "' in OptionProperty");
 }
 
+std::string OptionProperty::getDescriptionByValue(int value) {
+    for (auto option : _options) {
+        if (option.value == value) {
+            return option.description;
+        }
+    }
+}
+
 std::string OptionProperty::generateAdditionalDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
     std::string result;

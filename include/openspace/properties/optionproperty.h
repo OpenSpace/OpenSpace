@@ -96,7 +96,7 @@ public:
 
     /**
      * Returns the list of available options.
-     * /return The list of available options
+     * \return The list of available options
      */
     const std::vector<Option>& options() const;
 
@@ -106,6 +106,12 @@ public:
      * \param value The value of the Option that should be set
      */
     void setValue(int value) override;
+
+    /**
+    * Get the description of the option that matches <code>value</code>
+    * \param value The value of the option 
+    */
+    std::string getDescriptionByValue(int value);
 
 private:
     static const std::string OptionsKey;

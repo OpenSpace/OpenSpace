@@ -21,6 +21,8 @@ helper.setCommonKeys = function()
 
     openspace.bindKey("f", helper.property.invert('Interaction.rotationalFriction'))
     openspace.bindKey("Shift+f", helper.property.invert('Interaction.zoomFriction'))
+
+    openspace.bindKey("w", "openspace.toggleFade(3)")
 end
 
 helper.setDeltaTimeKeys = function(t)
