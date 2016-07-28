@@ -74,10 +74,8 @@
 #include <modules/iswa/util/iswamanager.h>
 #endif
 
-#ifdef _MSC_VER
-#ifdef OPENSPACE_ENABLE_VLD
+#if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
-#endif
 #endif
 
 #ifdef WIN32

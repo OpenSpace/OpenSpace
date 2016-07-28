@@ -48,7 +48,8 @@ namespace {
 }
 
 namespace openspace {
-    RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
+
+RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _numberOfPoints("amountOfPoints", "Points", 190, 1, 300)
     , _shadowLength("shadowLength", "Shadow Length", 0.1, 0.0, 0.5)
@@ -150,10 +151,9 @@ void RenderableShadowCylinder::render(const RenderData& data){
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
-    _time = data.time;
     if (_shader->isDirty())
         _shader->rebuildFromFile();
-    createCylinder();
+    createCylinder(data.time);
 }
 
 glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
@@ -169,7 +169,7 @@ glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
     }
 }
 
-void RenderableShadowCylinder::createCylinder() {
+void RenderableShadowCylinder::createCylinder(double time) {
     double targetEpoch;
     glm::dvec3 observerPosition;
     std::vector<psc> terminatorPoints;
@@ -180,7 +180,7 @@ void RenderableShadowCylinder::createCylinder() {
 //        t = SpiceManager::TerminatorType::Penumbral;
     
     auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
-        _lightSource, t, _aberration, _time, _numberOfPoints);
+        _lightSource, t, _aberration, time, _numberOfPoints);
     
     targetEpoch = res.targetEphemerisTime;
     observerPosition = std::move(res.observerPosition);
@@ -194,9 +194,9 @@ void RenderableShadowCylinder::createCylinder() {
     
     double lt;
     glm::dvec3 vecLightSource =
-        SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, _time, lt);
+        SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, time, lt);
 
-    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, _time));
+    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, time));
 
     vecLightSource = _stateMatrix * vecLightSource;
 

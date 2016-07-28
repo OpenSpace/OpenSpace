@@ -72,8 +72,6 @@ private:
     std::string _instrumentHostID;
     std::string _detectorType;
     std::string _sequenceID;
-    double _startTime;
-    double _stopTime;
     bool _badDecoding;
 };
 }

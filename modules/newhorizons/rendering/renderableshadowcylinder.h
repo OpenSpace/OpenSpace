@@ -69,7 +69,7 @@ namespace openspace {
             float x, y, z, e;
         };
 
-        void createCylinder();
+        void createCylinder(double time);
         properties::IntProperty _numberOfPoints;
         properties::FloatProperty _shadowLength;
         properties::Vec4Property _shadowColor;
@@ -90,8 +90,6 @@ namespace openspace {
         std::string _bodyFrame;
         std::string _mainFrame;
         SpiceManager::AberrationCorrection _aberration;
-        
-        double _time;
     };
 
 } // namespace openspace

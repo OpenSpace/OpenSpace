@@ -46,6 +46,10 @@ ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer::ImageSequencer()
     : _hasData(false)
+    //, _currentTime(0.0)
+    //, _previousTime(0.0)
+    //, _intervalLength(0.0)
+    //, _nextCapture(0.0)
 {}
 
 ImageSequencer& ImageSequencer::ref() {
@@ -63,22 +67,22 @@ void ImageSequencer::deinitialize() {
     _instance = nullptr;
 }
 
-bool ImageSequencer::isReady(){
+bool ImageSequencer::isReady() {
     return _hasData;
 }
 
-void ImageSequencer::updateSequencer(double time){
-    if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0){
+void ImageSequencer::updateSequencer(double time) {
+    if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0) {
         Time::ref().setDeltaTime(0.1);
     } // Time is not properly updated when time jump with dt = 0 
 
-    if (_currentTime != time){
+    if (_currentTime != time) {
         _previousTime = _currentTime;
         _currentTime = time;
     }
 }
 
-std::pair<double, std::string> ImageSequencer::getNextTarget(){
+std::pair<double, std::string> ImageSequencer::getNextTarget() {
     auto compareTime = [](const std::pair<double, std::string> &a,
                           const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
@@ -93,7 +97,7 @@ std::pair<double, std::string> ImageSequencer::getNextTarget(){
         return std::make_pair(0.0, "");
 }
 
-std::pair<double, std::string> ImageSequencer::getCurrentTarget(){
+std::pair<double, std::string> ImageSequencer::getCurrentTarget() {
     auto compareTime = [](const std::pair<double, std::string> &a,
                           const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
@@ -109,7 +113,7 @@ std::pair<double, std::string> ImageSequencer::getCurrentTarget(){
         return std::make_pair(0.0, "No Target");
 }
 
-std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(int range){
+std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(int range) {
     std::pair<double, std::vector<std::string>> incidentTargets;
 
     auto compareTime = [](const std::pair<double, std::string> &a,

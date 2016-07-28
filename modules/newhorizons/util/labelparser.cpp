@@ -170,6 +170,8 @@ bool LabelParser::create() {
                     std::string previousSequence;
                     TimeRange instrumentRange;
 
+                    double startTime = 0.0;
+                    double stopTime = 0.0;
                     do {
                         std::getline(file, line);
 
@@ -204,10 +206,11 @@ bool LabelParser::create() {
                     //        return false;
                     //    }
 
+                        
                         if (read == "START_TIME"){
                             std::string start = line.substr(line.find("=") + 2);
                             start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
-                            _startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
+                            startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                             count++;
 
                             getline(file, line);
@@ -222,7 +225,7 @@ bool LabelParser::create() {
                                     ),
                                     stop.end()
                                 );
-                                _stopTime = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                                stopTime = SpiceManager::ref().ephemerisTimeFromDate(stop);
                                 count++;
                             }
                             else{
@@ -244,12 +247,12 @@ bool LabelParser::create() {
                                 Image image;
                                 std::vector<std::string> spiceInstrument;
                                 spiceInstrument.push_back(_instrumentID);
-                                createImage(image, _startTime, _startTime, spiceInstrument, _target, path);
+                                createImage(image, startTime, stopTime, spiceInstrument, _target, path);
                                 
                                 _subsetMap[image.target]._subset.push_back(image);
-                                _subsetMap[image.target]._range.setRange(_startTime);
+                                _subsetMap[image.target]._range.setRange(startTime);
 
-                                _captureProgression.push_back(_startTime);
+                                _captureProgression.push_back(startTime);
                                 std::stable_sort(_captureProgression.begin(), _captureProgression.end());
                             }
     

@@ -28,17 +28,18 @@
 #include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/sequenceparser.h>
 
+#include <ghoul/misc/dictionary.h>
+
 #include <map>
 #include <string>
 #include <vector>
-#include <fstream>
 
 namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
     HongKangParser();
-    HongKangParser(std::string name, const std::string& fileName,
+    HongKangParser(std::string name, std::string fileName,
                     std::string spacecraft,
                     ghoul::Dictionary dictionary,
                     std::vector<std::string> potentialTargets);
@@ -47,19 +48,16 @@ public:
     void findPlaybookSpecifiedTarget(std::string line, std::string& target);
     virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
-    void writeUTCEventFile(const Image image);
-
 private:
     double getMetFromET(double et);
     double getETfromMet(std::string timestr);
     double getETfromMet(double met);
 
-    void createImage(Image& image,
-                        double startTime,
-                        double stopTime,
-                        std::vector<std::string> instr,
-                        std::string targ,
-                        std::string pot);
+    //Image createImage(double startTime,
+    //                    double stopTime,
+    //                    std::vector<std::string> instr,
+    //                    std::string targ,
+    //                    std::string pot);
 
     bool augmentWithSpice(Image& image, 
                             std::string spacecraft, 
@@ -74,7 +72,6 @@ private:
     std::string _spacecraft;
     std::map<std::string, Decoder*> _fileTranslation;
     std::vector<std::string> _potentialTargets;
-    std::ofstream _eventsAsUTCFile;
 };
 
 }

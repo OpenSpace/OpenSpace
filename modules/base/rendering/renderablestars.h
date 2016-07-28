@@ -37,7 +37,7 @@ namespace openspace {
 
 class RenderableStars : public Renderable {
 public:
-    RenderableStars(const ghoul::Dictionary& dictionary);
+    explicit RenderableStars(const ghoul::Dictionary& dictionary);
     ~RenderableStars();
 
     bool initialize() override;
