@@ -33,6 +33,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
@@ -54,6 +55,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanet.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablerings.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
@@ -84,6 +86,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/star_fs.glsl
