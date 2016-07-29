@@ -42,6 +42,8 @@ return {
         },
         GuiName = "/Solar/Planets/Saturn"
     },
+    -- The rings of Saturn
+    -- Using the 'Saturn's rings dark side mosaic' as a basis
     {
         Name = "SaturnRings",
         Parent = "Saturn",
@@ -49,7 +51,8 @@ return {
             Type = "RenderableRings",
             Frame = "IAU_SATURN",
             Texture = "textures/saturn_rings.png",
-            Size = { 0.140220, 9.0 }
+            Size = { 0.140445100671159, 9.0 }, -- 140445.100671159km
+            Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
         },
 
     },

@@ -30,8 +30,7 @@ in vec4 vs_position;
 
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
-
-const float Delta = 0.2;
+uniform float transparency;
 
 Fragment getFragment() {
     vec4 position = vs_position;
@@ -48,20 +47,20 @@ Fragment getFragment() {
         discard;
 
     // Remapping the texture coordinates
-    // Radius \in [0,1]
-    // -> texCoord \in [textureOffset.x, textureOffset.y]
+    // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
     // textureOffset.x -> 0
     // textureOffset.y -> 1
     float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-    // float texCoord = (1.f - radius) * textureOffset.x + radius * textureOffset.y;
     if (texCoord < 0.f || texCoord > 1.f)
         discard;
         
     vec4 diffuse = texture(texture1, texCoord);
-    if (length(diffuse.rgb) < Delta)
-        diffuse.a = 0.0;
-
-    // diffuse = vec4(vec3(texCoord), 1.0);
+    float colorValue = length(diffuse.rgb);
+    // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
+    // to normalize the transparency value to [0,1]
+    if (colorValue < 3*transparency) {
+        diffuse.a = pow(colorValue / (3*transparency), 1);
+    }
 
     Fragment frag;
     frag.color = diffuse;

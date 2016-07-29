@@ -40,6 +40,8 @@ namespace {
     const std::string KeySize = "Size";
     const std::string KeyTexture = "Texture";
     const std::string KeyFrame = "Frame";
+    const std::string KeyOffset = "Offset";
+    const std::string KeyTransparency = "Transparency";
 }
 
 namespace openspace {
@@ -49,6 +51,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _texturePath("texture", "Texture")
     , _size("size", "Size", glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f, 25.f))
     , _offset("offset", "Texture Offset", glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _transparency("transparency", "Transparency", 0.15f, 0.f, 1.f)
     , _shader(nullptr)
     , _texture(nullptr)
     , _textureFile(nullptr)
@@ -70,6 +73,16 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
     
+    if (dictionary.hasKeyAndValue<glm::vec2>(KeyOffset)) {
+        glm::vec2 off = dictionary.value<glm::vec2>(KeyOffset);
+        _offset = off;
+    }
+    
+    if (dictionary.hasKeyAndValue<float>(KeyTransparency)) {
+        float v = dictionary.value<float>(KeyTransparency);
+        _transparency = v;
+    }
+    
     addProperty(_offset);
     
     addProperty(_size);
@@ -81,6 +94,8 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _textureFile->setCallback(
         [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
     );
+    
+    addProperty(_transparency);
 
     setBoundingSphere(_size.value());
 }
@@ -134,6 +149,7 @@ void RenderableRings::render(const RenderData& data) {
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
     _shader->setUniform("ModelTransform", glm::mat4(_orientation));
     _shader->setUniform("textureOffset", _offset);
+    _shader->setUniform("transparency", _transparency);
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
@@ -177,9 +193,10 @@ void RenderableRings::loadTexture() {
             _texture = std::move(texture);
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
+//            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _texture->uploadTexture();
+            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
             
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback(

@@ -61,6 +61,7 @@ private:
     properties::StringProperty _texturePath;
     properties::Vec2Property _size;
     properties::Vec2Property _offset;
+    properties::FloatProperty _transparency;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
