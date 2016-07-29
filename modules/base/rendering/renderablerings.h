@@ -74,6 +74,7 @@ private:
     
     std::string _frame;
     glm::mat3 _orientation;
+    glm::mat3 _state;
 };
 
 } // namespace openspace

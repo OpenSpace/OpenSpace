@@ -40,6 +40,7 @@ namespace {
     const std::string KeySize = "Size";
     const std::string KeyTexture = "Texture";
     const std::string KeyFrame = "Frame";
+    const std::string KeyOrientation = "Orientation";
     const std::string KeyOffset = "Offset";
     const std::string KeyTransparency = "Transparency";
 }
@@ -66,6 +67,10 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     
     if (dictionary.hasKeyAndValue<std::string>(KeyFrame)) {
         _frame = dictionary.value<std::string>(KeyFrame);
+    }
+    
+    if (dictionary.hasKeyAndValue<glm::mat3>(KeyOrientation)) {
+        _orientation = dictionary.value<glm::mat3>(KeyOrientation);
     }
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
@@ -147,7 +152,7 @@ void RenderableRings::render(const RenderData& data) {
     _shader->activate();
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", glm::mat4(_orientation));
+    _shader->setUniform("ModelTransform", glm::mat4(_orientation * _state));
     _shader->setUniform("textureOffset", _offset);
     _shader->setUniform("transparency", _transparency);
     setPscUniforms(*_shader.get(), data.camera, data.position);
@@ -181,7 +186,7 @@ void RenderableRings::update(const UpdateData& data) {
     }
     
     if (!_frame.empty()) {
-        _orientation = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+        _state = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
     }
 }
 
