@@ -816,14 +816,13 @@ void OpenSpaceEngine::postDraw() {
     bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (showGui) {
         _renderEngine->renderScreenLog();
-
         if (_console->isVisible())
             _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled())
+        if (_gui->isEnabled() && _isMaster && _windowWrapper->isRegularRendering())
             _gui->endFrame();
-    }
 #endif
+    }
 
     if (_isInShutdownMode)
         _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);
