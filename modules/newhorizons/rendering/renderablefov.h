@@ -22,28 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RenderableFov_H__
-#define __RenderableFov_H__
+#ifndef __RENDERABLEFOV_H__
+#define __RENDERABLEFOV_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/query/query.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-//#include <openspace/util/runtimedata.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 
+#include <ghoul/glm.h>
+
+namespace ghoul {
+namespace opengl {
+    
+class ProgramObject;
+class Texture;
+    
+} // namespace opengl
+} // namespace ghoul
+
 namespace openspace {
-class RenderableFov : public Renderable{
+
+class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
-    ~RenderableFov();
-
+    
     bool initialize() override;
     bool deinitialize() override;
 
@@ -53,7 +55,6 @@ public:
     void update(const UpdateData& data) override;
 
  private:
-    // class methods
     void loadTexture();
     void allocateData();
     void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
@@ -63,7 +64,6 @@ public:
     void sendToGPU();
 
 
-    // helper methods
     void computeColors();
     void computeIntercepts(const RenderData& data);
     psc orthogonalProjection(glm::dvec3 camvec);
@@ -126,7 +126,8 @@ public:
     glm::vec4 col_end;     // intersection end color
     glm::vec4 col_blue;    // withinFov color
     glm::vec4 col_gray;    // no intersection color
-
 };
-}
-#endif
+    
+} // namespace openspace
+
+#endif // __RENDERABLEFOV_H__
