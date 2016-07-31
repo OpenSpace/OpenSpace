@@ -47,8 +47,10 @@ PerformanceManager::PerformanceManager()
     const int totalSize = sizeof(PerformanceLayout);
     LINFO("Create shared memory of " << totalSize << " bytes");
 
-    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData))
-        LWARNING("Shared memory for Performance measurements already existed.");
+    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData)) {
+        LWARNING("Shared memory for Performance measurements already existed. Removing.");
+        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+    }
 
     ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
 
