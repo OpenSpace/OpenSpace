@@ -29,13 +29,19 @@
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/optionproperty.h>
 
+#include <vector>
+
 namespace openspace {
+    
+class OpenSpaceModule;
 
 class SettingsEngine : public properties::PropertyOwner {
 public:
     SettingsEngine();
 
     void initialize();
+    
+    void setModules(std::vector<OpenSpaceModule*> modules);
 
 private:
     void initEyeSeparation();

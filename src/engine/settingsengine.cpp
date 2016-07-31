@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/scene/scene.h>
 
 #include <ghoul/ghoul.h>
@@ -45,7 +46,12 @@ void SettingsEngine::initialize() {
     initEyeSeparation();
     initSceneFiles();
 }
-
+    
+void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
+    for (OpenSpaceModule* m : modules) {
+        addPropertySubOwner(m);
+    }
+}
 
 void SettingsEngine::initEyeSeparation() {
     addProperty(_eyeSeparation);

@@ -421,6 +421,7 @@ bool OpenSpaceEngine::initialize() {
 
     // Initialize the SettingsEngine
     _settingsEngine->initialize();
+    _settingsEngine->setModules(_moduleEngine->modules());
 
     // Initialize the Scene
     Scene* sceneGraph = new Scene;
