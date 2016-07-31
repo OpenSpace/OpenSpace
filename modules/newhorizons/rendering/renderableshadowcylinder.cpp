@@ -22,29 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configurationmanager.h>
 #include <modules/newhorizons/rendering/renderableshadowcylinder.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 
-#include <ghoul/filesystem/filesystem>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 
 
 namespace {
     const std::string _loggerCat      = "RenderablePlane";
-    const std::string _keyType        = "TerminatorType";
-    const std::string _keyLightSource = "LightSource";
-    const std::string _keyObserver    = "Observer";
-    const std::string _keyBody        = "Body";
-    const std::string _keyBodyFrame   = "BodyFrame";
-    const std::string _keyMainFrame   = "MainFrame";
-    const std::string _keyAberration  = "Aberration";
+    
+    const std::string KeyType        = "TerminatorType";
+    const std::string KeyLightSource = "LightSource";
+    const std::string KeyObserver    = "Observer";
+    const std::string KeyBody        = "Body";
+    const std::string KeyBodyFrame   = "BodyFrame";
+    const std::string KeyMainFrame   = "MainFrame";
+    const std::string KeyAberration  = "Aberration"; 
 }
 
 namespace openspace {
@@ -63,49 +60,32 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     addProperty(_shadowLength);
     addProperty(_shadowColor);
 
-    bool success = dictionary.getValue(_keyType, _terminatorType);
-    ghoul_assert(success, "");
-    success = dictionary.getValue(_keyLightSource, _lightSource);
-    ghoul_assert(success, "");
-    success = dictionary.getValue(_keyObserver, _observer);
-    ghoul_assert(success, "");
-    success = dictionary.getValue(_keyBody, _body);
-    ghoul_assert(success, "");
-    success = dictionary.getValue(_keyBodyFrame, _bodyFrame);
-    ghoul_assert(success, "");
-    success = dictionary.getValue(_keyMainFrame, _mainFrame);
-    ghoul_assert(success, "");
-    std::string a = "NONE";
-    success = dictionary.getValue(_keyAberration, a);
-    _aberration = SpiceManager::AberrationCorrection(a);
-    ghoul_assert(success, "");
-}
-
-RenderableShadowCylinder::~RenderableShadowCylinder() {}
-
-bool RenderableShadowCylinder::isReady() const {
-    bool ready = true;
-    if (!_shader)
-        ready &= false;
-    return ready;
+    _terminatorType = dictionary.value<std::string>(KeyType);
+    _lightSource = dictionary.value<std::string>(KeyLightSource);
+    _observer = dictionary.value<std::string>(KeyObserver);
+    _body = dictionary.value<std::string>(KeyBody);
+    _bodyFrame = dictionary.value<std::string>(KeyBodyFrame);
+    _mainFrame = dictionary.value<std::string>(KeyMainFrame);
+    
+    _aberration = SpiceManager::AberrationCorrection(dictionary.value<std::string>(KeyAberration));
 }
 
 bool RenderableShadowCylinder::initialize() {
-    glGenVertexArrays(1, &_vao); // generate array
-    glGenBuffers(1, &_vbo); // generate buffer
-
-    bool completeSuccess = true;
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
 
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _shader = renderEngine.buildRenderProgram("ShadowProgram",
+    _shader = renderEngine.buildRenderProgram(
+        "ShadowProgram",
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
-        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl");
+        "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl"
+    );
 
     if (!_shader)
         return false;
 
 
-    return completeSuccess;
+    return true;
 }
 
 bool RenderableShadowCylinder::deinitialize() {
@@ -123,20 +103,16 @@ bool RenderableShadowCylinder::deinitialize() {
     return true;
 }
 
+bool RenderableShadowCylinder::isReady() const {
+    return true;
+}
+    
 void RenderableShadowCylinder::render(const RenderData& data){
-    glm::mat4 _transform = glm::mat4(1.0);
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            _transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-
     glDepthMask(false);
-    // Activate shader
     _shader->activate();
 
     _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", _transform);
+    _shader->setUniform("ModelTransform", glm::mat4(_stateMatrix));
     _shader->setUniform("shadowColor", _shadowColor);
     setPscUniforms(*_shader.get(), data.camera, data.position);
     
@@ -151,8 +127,9 @@ void RenderableShadowCylinder::render(const RenderData& data){
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
-    if (_shader->isDirty())
+    if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+    }
     createCylinder(data.time);
 }
 
@@ -170,51 +147,50 @@ glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
 }
 
 void RenderableShadowCylinder::createCylinder(double time) {
-    double targetEpoch;
-    glm::dvec3 observerPosition;
+    auto res = SpiceManager::ref().terminatorEllipse(
+        _body,
+        _observer,
+        _bodyFrame,
+        _lightSource,
+        SpiceManager::terminatorTypeFromString(_terminatorType),
+        _aberration,
+        time,
+        _numberOfPoints
+    );
+    
     std::vector<psc> terminatorPoints;
-    SpiceManager::TerminatorType t = SpiceManager::terminatorTypeFromString(_terminatorType);
-//    if (_terminatorType == "UMBRAL")
-//        t = SpiceManager::TerminatorType::Umbral;
-//    else if (_terminatorType == "PENUMBRAL")
-//        t = SpiceManager::TerminatorType::Penumbral;
-    
-    auto res = SpiceManager::ref().terminatorEllipse(_body, _observer, _bodyFrame,
-        _lightSource, t, _aberration, time, _numberOfPoints);
-    
-    targetEpoch = res.targetEphemerisTime;
-    observerPosition = std::move(res.observerPosition);
-    
-    std::vector<glm::dvec3> ps = std::move(res.terminatorPoints);
-    for (auto&& p : ps) {
-        PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-        psc[3] += 3;
-        terminatorPoints.push_back(psc);
-    }
+    std::transform(
+        res.terminatorPoints.begin(),
+        res.terminatorPoints.end(),
+        std::back_inserter(terminatorPoints),
+        [](const glm::dvec3& p) {
+            PowerScaledCoordinate psc = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+            psc[3] += 3;
+            return psc;
+        }
+    );
     
     double lt;
     glm::dvec3 vecLightSource =
         SpiceManager::ref().targetPosition(_body, _lightSource, _mainFrame, _aberration, time, lt);
 
-    glm::dmat3 _stateMatrix = glm::inverse(SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, time));
-
-    vecLightSource = _stateMatrix * vecLightSource;
+    vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
     vecLightSource *= _shadowLength;
     _vertices.clear();
 
     psc endpoint = psc::CreatePowerScaledCoordinate(vecLightSource.x, vecLightSource.y, vecLightSource.z);
-    for (auto v : terminatorPoints){
-        _vertices.push_back(CylinderVBOLayout(v[0], v[1], v[2], v[3]));
+    for (const auto& v : terminatorPoints) {
+        _vertices.push_back({ v[0], v[1], v[2], v[3] });
         glm::vec4 f = psc_addition(v.vec4(), endpoint.vec4());
-        _vertices.push_back(CylinderVBOLayout(f[0], f[1], f[2], f[3]));
+        _vertices.push_back({ f[0], f[1], f[2], f[3] });
     }
     _vertices.push_back(_vertices[0]);
     _vertices.push_back(_vertices[1]);
 
-    glBindVertexArray(_vao); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), NULL, GL_DYNAMIC_DRAW); // orphaning the buffer, sending NULL data.
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(CylinderVBOLayout), NULL, GL_DYNAMIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vertices.size() * sizeof(CylinderVBOLayout), &_vertices[0]);
 
     glEnableVertexAttribArray(0);

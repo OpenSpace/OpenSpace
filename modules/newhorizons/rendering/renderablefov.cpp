@@ -24,30 +24,16 @@
 
 #include <modules/newhorizons/rendering/renderablefov.h>
 
-#include <openspace/engine/configurationmanager.h>
+#include <modules/newhorizons/util/imagesequencer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/spicemanager.h>
 
-#include <modules/newhorizons/util/imagesequencer.h>
-#include <openspace/util/time.h>
-
-
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 
-#include <openspace/query/query.h>
 #include <glm/gtx/projection.hpp>
 
 #include <openspace/performance/performancemeasurement.h>
-
-#include <openspace/util/spicemanager.h>
-#include <iomanip>
-#include <utility>   
-#include <chrono>
 
 namespace {
     const std::string _loggerCat              = "RenderableFov";

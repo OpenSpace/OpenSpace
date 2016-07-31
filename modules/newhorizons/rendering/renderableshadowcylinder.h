@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLESHADOWCYLINDER_H_
-#define RENDERABLESHADOWCYLINDER_H_
+#ifndef __RENDERABLESHADOWCYLINDER_H__
+#define __RENDERABLESHADOWCYLINDER_H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -33,65 +33,52 @@
 #include <openspace/util/spicemanager.h>
 
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace opengl {
+class ProgramObject;
+}
 }
 
 namespace openspace {
-    struct LinePoint;
-    class RenderableShadowCylinder : public Renderable {
+    
+class RenderableShadowCylinder : public Renderable {
+public:
+    RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
 
-    public:
-        RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
-        ~RenderableShadowCylinder();
+    bool initialize() override;
+    bool deinitialize() override;
 
-        bool initialize() override;
-        bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
 
-        bool isReady() const override;
-
-        void render(const RenderData& data) override;
-        void update(const UpdateData& data) override;
-
-    private:
-        struct CylinderVBOLayout {
-            CylinderVBOLayout(double a1, double a2, double a3, double a4){
-                x = a1;
-                y = a2;
-                z = a3;
-                e = a4;
-            }
-            float x, y, z, e;
-        };
-
-        void createCylinder(double time);
-        properties::IntProperty _numberOfPoints;
-        properties::FloatProperty _shadowLength;
-        properties::Vec4Property _shadowColor;
-
-        std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-        
-        glm::dmat3 _stateMatrix;
-
-        GLuint _vao;
-        GLuint _vbo;
-
-        std::vector<CylinderVBOLayout> _vertices;
-
-        std::string _terminatorType;
-        std::string _lightSource;
-        std::string _observer;
-        std::string _body;
-        std::string _bodyFrame;
-        std::string _mainFrame;
-        SpiceManager::AberrationCorrection _aberration;
+private:
+    struct CylinderVBOLayout {
+        float x, y, z, e;
     };
 
-} // namespace openspace
-#endif // RENDERABLESHADOWCYLINDER_H_
+    void createCylinder(double time);
+    properties::IntProperty _numberOfPoints;
+    properties::FloatProperty _shadowLength;
+    properties::Vec4Property _shadowColor;
 
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    
+    glm::dmat3 _stateMatrix;
+
+    GLuint _vao;
+    GLuint _vbo;
+
+    std::vector<CylinderVBOLayout> _vertices;
+
+    std::string _terminatorType;
+    std::string _lightSource;
+    std::string _observer;
+    std::string _body;
+    std::string _bodyFrame;
+    std::string _mainFrame;
+    SpiceManager::AberrationCorrection _aberration;
+};
+
+} // namespace openspace
+
+#endif // __RENDERABLESHADOWCYLINDER_H__
