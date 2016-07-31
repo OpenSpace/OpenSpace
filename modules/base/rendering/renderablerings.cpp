@@ -39,9 +39,11 @@ namespace {
     
     const std::string KeySize = "Size";
     const std::string KeyTexture = "Texture";
+    const std::string KeyBody = "Body";
     const std::string KeyFrame = "Frame";
     const std::string KeyOrientation = "Orientation";
     const std::string KeyOffset = "Offset";
+    const std::string KeyNightFactor = "NightFactor";
     const std::string KeyTransparency = "Transparency";
 }
 
@@ -52,6 +54,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _texturePath("texture", "Texture")
     , _size("size", "Size", glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f, 25.f))
     , _offset("offset", "Texture Offset", glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _nightFactor("nightFactor", "Night Factor", 0.33f, 0.f, 1.f)
     , _transparency("transparency", "Transparency", 0.15f, 0.f, 1.f)
     , _shader(nullptr)
     , _texture(nullptr)
@@ -60,10 +63,16 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
+    , _hasSunPosition(false)
 {
     glm::vec2 size;
     dictionary.getValue(KeySize, size);
     _size = size;
+    
+    if (dictionary.hasKeyAndValue<std::string>(KeyBody)) {
+        _body = dictionary.value<std::string>(KeyBody);
+        _hasSunPosition = true;
+    }
     
     if (dictionary.hasKeyAndValue<std::string>(KeyFrame)) {
         _frame = dictionary.value<std::string>(KeyFrame);
@@ -83,6 +92,11 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         _offset = off;
     }
     
+    if (dictionary.hasKeyAndValue<float>(KeyNightFactor)) {
+        float v = dictionary.value<float>(KeyNightFactor);
+        _nightFactor = v;
+    }
+    
     if (dictionary.hasKeyAndValue<float>(KeyTransparency)) {
         float v = dictionary.value<float>(KeyTransparency);
         _transparency = v;
@@ -99,6 +113,8 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _textureFile->setCallback(
         [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
     );
+    
+    addProperty(_nightFactor);
     
     addProperty(_transparency);
 
@@ -118,6 +134,10 @@ bool RenderableRings::initialize() {
             );
         if (!_shader)
             return false;
+
+        _shader->setIgnoreUniformLocationError(
+            ghoul::opengl::ProgramObject::IgnoreError::Yes
+        );
     }
 
     glGenVertexArrays(1, &_quad); // generate array
@@ -155,6 +175,13 @@ void RenderableRings::render(const RenderData& data) {
     _shader->setUniform("ModelTransform", glm::mat4(_orientation * _state));
     _shader->setUniform("textureOffset", _offset);
     _shader->setUniform("transparency", _transparency);
+    
+    _shader->setUniform("hasSunPosition", _hasSunPosition);
+    if (_hasSunPosition) {
+        _shader->setUniform("_nightFactor", _nightFactor);
+        _shader->setUniform("sunPosition", _sunPosition);
+    }
+    
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
@@ -172,8 +199,9 @@ void RenderableRings::render(const RenderData& data) {
 }
 
 void RenderableRings::update(const UpdateData& data) {
-    if (_shader->isDirty())
+    if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+    }
 
     if (_planeIsDirty) {
         createPlane();
@@ -187,6 +215,18 @@ void RenderableRings::update(const UpdateData& data) {
     
     if (!_frame.empty()) {
         _state = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+    }
+    
+    if (!_body.empty()) {
+        double lt;
+        _sunPosition = SpiceManager::ref().targetPosition(
+            "SUN",
+            _body,
+            "GALACTIC",
+            {},
+            data.time,
+            lt
+        );
     }
 }
 

@@ -32,6 +32,10 @@ uniform sampler1D texture1;
 uniform vec2 textureOffset;
 uniform float transparency;
 
+uniform bool hasSunPosition;
+uniform vec3 sunPosition;
+uniform float _nightFactor;
+
 Fragment getFragment() {
     vec4 position = vs_position;
     float depth = pscDepth(position);
@@ -60,6 +64,25 @@ Fragment getFragment() {
     // to normalize the transparency value to [0,1]
     if (colorValue < 3*transparency) {
         diffuse.a = pow(colorValue / (3*transparency), 1);
+    }
+
+    if (hasSunPosition) {
+        // The normal for the one plane depends on whether we are dealing
+        // with a front facing or back facing fragment
+        vec3 normal;
+        // The plane is oriented on the xz plane
+        // WARNING: This might not be the case for Uranus
+        if (gl_FrontFacing) {
+            normal = vec3(0.0, 1.0, 0.0);
+        }
+        else {
+            normal = vec3(0.0, -1.0, 0.0);
+        }
+
+        // Reduce the color of the fragment by the user factor
+        // if we are facing away from the Sun
+        if (dot(sunPosition, normal) < 0)
+            diffuse.xyz *= _nightFactor;
     }
 
     Fragment frag;

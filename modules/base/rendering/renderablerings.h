@@ -61,6 +61,7 @@ private:
     properties::StringProperty _texturePath;
     properties::Vec2Property _size;
     properties::Vec2Property _offset;
+    properties::FloatProperty _nightFactor;
     properties::FloatProperty _transparency;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
@@ -75,6 +76,10 @@ private:
     std::string _frame;
     glm::mat3 _orientation;
     glm::mat3 _state;
+    
+    std::string _body;
+    glm::vec3 _sunPosition;
+    bool _hasSunPosition;
 };
 
 } // namespace openspace

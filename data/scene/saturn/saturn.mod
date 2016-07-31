@@ -49,6 +49,7 @@ return {
         Parent = "Saturn",
         Renderable = {
             Type = "RenderableRings",
+            Body = "SATURN BARYCENTER",
             Frame = "IAU_SATURN",
             Texture = "textures/saturn_rings.png",
             Size = { 0.140445100671159, 9.0 }, -- 140445.100671159km
