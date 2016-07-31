@@ -39,6 +39,9 @@ void renderOptionProperty(properties::Property* prop, const std::string& ownerNa
 void renderSelectionProperty(properties::Property* prop, const std::string& ownerName);
 void renderStringProperty(properties::Property* prop, const std::string& ownerName);
 void renderIntProperty(properties::Property* prop, const std::string& ownerName);
+void renderIVec2Property(properties::Property* prop, const std::string& ownerName);
+void renderIVec3Property(properties::Property* prop, const std::string& ownerName);
+void renderIVec4Property(properties::Property* prop, const std::string& ownerName);
 void renderFloatProperty(properties::Property* prop, const std::string& ownerName);
 void renderVec2Property(properties::Property* prop, const std::string& ownerName);
 void renderVec3Property(properties::Property* prop, const std::string& ownerName);
