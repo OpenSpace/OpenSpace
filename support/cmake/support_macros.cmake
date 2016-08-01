@@ -434,8 +434,13 @@ function (handle_internal_modules)
         endif ()
     endforeach ()
 
-    string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
-    string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+    if (NOT "${MODULE_HEADERS}" STREQUAL "")
+        string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
+    endif ()
+
+    if (NOT "${MODULE_CLASSES}" STREQUAL "")
+        string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+    endif ()
 
     configure_file(
         ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
