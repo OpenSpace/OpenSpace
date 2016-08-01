@@ -36,12 +36,17 @@ namespace {
     
     const std::string GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
     // Probably 255 performance blocks per node are enough, so we can get away with
-    // 256 bytes (one uint8_t for the number and 255 uint8_t for the names
-    const size_t GlobalSharedMemorySize = 256;
+    // 260 bytes (one uint8_t for the number, 255 uint8_t for the names,  one uint8_t
+    // for the reference count to keep the global memory alive, and 3 bytes to enforce
+    // alignment)
+    const size_t GlobalSharedMemorySize = 260;
     
     struct GlobalMemory {
         uint8_t number;
+        uint8_t referenceCount;
         std::array<uint8_t, 255> values;
+        
+        std::array<uint8_t, 3> alignment;
     };
     
     const uint8_t UnusedName = 255;
@@ -69,21 +74,26 @@ void PerformanceManager::createGlobalSharedMemory() {
     using ghoul::SharedMemory;
     
     if (SharedMemory::exists(GlobalSharedMemoryName)) {
-        LWARNING("Shared memory for Performance measurements already existed. Removing.");
-        SharedMemory::remove(GlobalSharedMemoryName);
+        SharedMemory sharedMemory(GlobalSharedMemoryName);
+        sharedMemory.acquireLock();
+        GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+        ++(m->referenceCount);
+        sharedMemory.releaseLock();
     }
-    
-    LINFO("Creating global shared memory block for performance measurements");
-    SharedMemory::create(GlobalSharedMemoryName, GlobalSharedMemorySize);
-    
-    // Initialize the data
-    SharedMemory sharedMemory(GlobalSharedMemoryName);
-    sharedMemory.acquireLock();
-    new (sharedMemory.memory()) GlobalMemory;
-    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
-    m->number = 0;
-    m->values.fill(UnusedName);
-    sharedMemory.releaseLock();
+    else {
+        LINFO("Creating global shared memory block for performance measurements");
+        SharedMemory::create(GlobalSharedMemoryName, GlobalSharedMemorySize);
+        
+        // Initialize the data
+        SharedMemory sharedMemory(GlobalSharedMemoryName);
+        sharedMemory.acquireLock();
+        new (sharedMemory.memory()) GlobalMemory;
+        GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+        m->number = 0;
+        m->referenceCount = 1;
+        m->values.fill(UnusedName);
+        sharedMemory.releaseLock();
+    }
 }
 
 void PerformanceManager::destroyGlobalSharedMemory() {
@@ -93,8 +103,14 @@ void PerformanceManager::destroyGlobalSharedMemory() {
         return;
     }
     
-    LINFO("Removing global shared memory block for performance measurements");
-    SharedMemory::remove(GlobalSharedMemoryName);
+    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    sharedMemory.acquireLock();
+    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+    --(m->referenceCount);
+    if (m->referenceCount == 0) {
+        SharedMemory::remove(GlobalSharedMemoryName);
+    }
+    sharedMemory.releaseLock();
 }
     
 PerformanceManager::PerformanceManager()
