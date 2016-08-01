@@ -156,3 +156,6 @@ data/scene/juno/juno/Juno.mtl
 data/scene/juno/juno/Juno.obj
 KeyboardMapping.txt
 saturn_rings.png
+data/scene/debugglobe/textures/earth_clouds.jpg
+data/scene/debugglobe/textures/earth_reflectance.png
+data/scene/rosetta/rosetta/obj/Rosetta.obj
