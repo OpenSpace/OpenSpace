@@ -759,11 +759,15 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
 
 void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
     if (performanceMeasurements) {
-        if (!_performanceManager)
+        if (!_performanceManager) {
+            performance::PerformanceManager::createGlobalSharedMemory();
             _performanceManager = std::make_unique<performance::PerformanceManager>();
+        }
     }
-    else
+    else {
         _performanceManager = nullptr;
+        performance::PerformanceManager::destroyGlobalSharedMemory();
+    }
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {

@@ -29,41 +29,114 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/sharedmemory.h>
+#include <ghoul/misc/onscopeexit.h>
 
 namespace {
     const std::string _loggerCat = "PerformanceManager";
+    
+    const std::string GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
+    // Probably 255 performance blocks per node are enough, so we can get away with
+    // 256 bytes (one uint8_t for the number and 255 uint8_t for the names
+    const size_t GlobalSharedMemorySize = 256;
+    
+    struct GlobalMemory {
+        uint8_t number;
+        std::array<uint8_t, 255> values;
+    };
+    
+    const uint8_t UnusedName = 255;
+    
+    
+    const std::string LocalSharedMemoryNameBase = "PerformanceMeasurement_";
 }
 
 namespace openspace {
 namespace performance {
 
-const std::string PerformanceManager::PerformanceMeasurementSharedData =
-    "OpenSpacePerformanceMeasurementSharedData";
+// The Performance Manager will use a level of indirection in order to support multiple
+// PerformanceManagers running in parallel:
+// The ghoul::SharedData block addressed by OpenSpacePerformanceMeasurementSharedData
+// will only get allocated once and contains the total number of allocated shared memory
+// blocks alongside a list of names of these blocks
+//
 
+void PerformanceManager::createGlobalSharedMemory() {
+    static_assert(
+        sizeof(GlobalMemory) == GlobalSharedMemorySize,
+        "The global memory struct does not fit the allocated global memory space"
+    );
+    
+    using ghoul::SharedMemory;
+    
+    if (SharedMemory::exists(GlobalSharedMemoryName)) {
+        LWARNING("Shared memory for Performance measurements already existed. Removing.");
+        SharedMemory::remove(GlobalSharedMemoryName);
+    }
+    
+    LINFO("Creating global shared memory block for performance measurements");
+    SharedMemory::create(GlobalSharedMemoryName, GlobalSharedMemorySize);
+    
+    // Initialize the data
+    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    sharedMemory.acquireLock();
+    new (sharedMemory.memory()) GlobalMemory;
+    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+    m->number = 0;
+    m->values.fill(UnusedName);
+    sharedMemory.releaseLock();
+}
+
+void PerformanceManager::destroyGlobalSharedMemory() {
+    using ghoul::SharedMemory;
+    if (!SharedMemory::exists(GlobalSharedMemoryName)) {
+        LWARNING("Global shared memory for Performance measurements did not exist");
+        return;
+    }
+    
+    LINFO("Removing global shared memory block for performance measurements");
+    SharedMemory::remove(GlobalSharedMemoryName);
+}
+    
 PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
 {
+    using ghoul::SharedMemory;
+    
+    SharedMemory sharedMemory(GlobalSharedMemoryName);
+    sharedMemory.acquireLock();
+    OnExit([&](){sharedMemory.releaseLock();});
+    
+    GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+
+    // The the first free block (which also coincides with the number of blocks
+    uint8_t blockIndex = m->number;
+    std::string localName = LocalSharedMemoryNameBase + std::to_string(blockIndex);
+    
     // Compute the total size
     const int totalSize = sizeof(PerformanceLayout);
     LINFO("Create shared memory of " << totalSize << " bytes");
 
-    if (ghoul::SharedMemory::exists(PerformanceMeasurementSharedData)) {
-        LWARNING("Shared memory for Performance measurements already existed. Removing.");
-        ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+    if (SharedMemory::exists(localName)) {
+        throw ghoul::RuntimeError("Shared Memory block already existed");
     }
-
-    ghoul::SharedMemory::create(PerformanceMeasurementSharedData, totalSize);
-
-    _performanceMemory = std::make_unique<ghoul::SharedMemory>(PerformanceMeasurementSharedData);
-        
-    void* ptr = _performanceMemory->memory();
     
+    ghoul::SharedMemory::create(localName, totalSize);
+
+    _performanceMemory = std::make_unique<ghoul::SharedMemory>(localName);
     // Using the placement-new to create a PerformanceLayout in the shared memory
-    new (ptr) PerformanceLayout;
+    new (_performanceMemory->memory()) PerformanceLayout;
 }
 
 PerformanceManager::~PerformanceManager() {
-    ghoul::SharedMemory::remove(PerformanceMeasurementSharedData);
+    if (_performanceMemory) {
+        ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
+        sharedMemory.acquireLock();
+        GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
+        m->number = m->number - 1;
+        sharedMemory.releaseLock();
+        
+        ghoul::SharedMemory::remove(_performanceMemory->name());
+    }
 }
 
 void PerformanceManager::resetPerformanceMeasurements() {
@@ -79,12 +152,16 @@ void PerformanceManager::resetPerformanceMeasurements() {
 bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
+    
+PerformanceLayout* PerformanceManager::performanceData() {
+    void* ptr = _performanceMemory->memory();
+    return reinterpret_cast<PerformanceLayout*>(ptr);
+}
 
 void PerformanceManager::storeIndividualPerformanceMeasurement
                                          (std::string identifier, long long microseconds)
 {
-    void* ptr = _performanceMemory->memory();
-    PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
+    PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
 
     auto it = individualPerformanceLocations.find(identifier);
@@ -119,8 +196,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 {
     using namespace performance;
 
-    void* ptr = _performanceMemory->memory();
-    PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(ptr);
+    PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
     
     int nNodes = static_cast<int>(sceneNodes.size());

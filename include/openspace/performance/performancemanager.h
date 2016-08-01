@@ -25,6 +25,8 @@
 #ifndef __PERFORMANCEMANAGER_H__
 #define __PERFORMANCEMANAGER_H__
 
+#include <openspace/performance/performancelayout.h>
+
 #include <ghoul/misc/sharedmemory.h>
 
 #include <map>
@@ -43,8 +45,9 @@ namespace performance {
 
 class PerformanceManager {
 public:
-    static const std::string PerformanceMeasurementSharedData;
-
+    static void createGlobalSharedMemory();
+    static void destroyGlobalSharedMemory();
+    
     PerformanceManager();
     ~PerformanceManager();
 
@@ -54,6 +57,8 @@ public:
 
     void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
+    
+    PerformanceLayout* performanceData();
 
 private:
     bool _doPerformanceMeasurements;
