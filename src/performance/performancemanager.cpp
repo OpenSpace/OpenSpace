@@ -78,6 +78,10 @@ void PerformanceManager::createGlobalSharedMemory() {
         sharedMemory.acquireLock();
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
         ++(m->referenceCount);
+        LINFO(
+            "Using global shared memory block for performance measurements. "
+            "Reference count: " << int(m->referenceCount)
+        );
         sharedMemory.releaseLock();
     }
     else {
@@ -107,7 +111,9 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     sharedMemory.acquireLock();
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
     --(m->referenceCount);
+    LINFO("Global shared performance memory reference count: " << m->referenceCount);
     if (m->referenceCount == 0) {
+        LINFO("Removing global shared performance memory");
         SharedMemory::remove(GlobalSharedMemoryName);
     }
     sharedMemory.releaseLock();
@@ -126,14 +132,17 @@ PerformanceManager::PerformanceManager()
 
     // The the first free block (which also coincides with the number of blocks
     uint8_t blockIndex = m->number;
+    ++(m->number);
     std::string localName = LocalSharedMemoryNameBase + std::to_string(blockIndex);
     
     // Compute the total size
     const int totalSize = sizeof(PerformanceLayout);
-    LINFO("Create shared memory of " << totalSize << " bytes");
+    LINFO("Create shared memory '" + localName + "' of " << totalSize << " bytes");
 
     if (SharedMemory::exists(localName)) {
-        throw ghoul::RuntimeError("Shared Memory block already existed");
+        throw ghoul::RuntimeError(
+            "Shared Memory '" + localName + "' block already existed"
+        );
     }
     
     ghoul::SharedMemory::create(localName, totalSize);
