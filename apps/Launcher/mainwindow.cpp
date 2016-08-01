@@ -49,7 +49,7 @@
 namespace {
     const QSize WindowSize = QSize(640, 480);
 
-    const QString NewsURL = "http://openspace.itn.liu.se/news.txt";
+    const QString NewsURL = "http://openspaceproject.com/news.txt";
 
     const std::string _configurationFile = "openspace.cfg";
 

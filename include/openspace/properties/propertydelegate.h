@@ -37,8 +37,9 @@ namespace properties {
  * NumericalProperty classes to outsource the definitions of class names, default values,
  * etc. Using the PropertyDelegate, it is possible to create new TemplateProperty types
  * without subclassing the TemplateProperty, but rather creating a specialized instance
- * of PropertyDelegate. See (http://openspace.itn.liu.se/trac/wiki/guides/properties) for
- * more detailed information.
+ * of PropertyDelegate. See
+ * (https://github.com/OpenSpace/OpenSpace/wiki/Concepts-Properties) for more detailed
+ * information.
  * \see TemplateProperty
  * \see NumericalProperty
  * \tparam T The full class for which this specialized instance of PropertyDelegate is

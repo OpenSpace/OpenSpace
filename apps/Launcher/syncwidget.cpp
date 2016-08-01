@@ -131,7 +131,7 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
 
     ghoul::initialize();
     _downloadManager = std::make_unique<openspace::DownloadManager>(
-        "http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
+        "http://data.openspaceproject.com/data/request", DownloadApplicationVersion);
 
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
