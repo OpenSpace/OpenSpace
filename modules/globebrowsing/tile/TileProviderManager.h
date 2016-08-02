@@ -54,7 +54,7 @@ namespace openspace {
     struct TileProviderGroup {
 
         void update();
-        const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const;
+        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
 
 
         std::vector<NamedTileProvider> tileProviders;

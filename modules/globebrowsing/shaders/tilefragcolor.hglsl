@@ -33,7 +33,7 @@
 
 // The heightmaps is only used in the fragment shader visually debugging 
 // the alignment and resolution of the heightmaps
-#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
+// #include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
 
 
 
