@@ -552,14 +552,16 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     position[0], position[1], position[2], position[3]
                 } };
                     
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
+
 
 #ifdef USING_STELLAR_TEST_GRID
                 layout.value.bvColor = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 3];
                 layout.value.absoluteMagnitude = _fullData[i + 3];
+#else
+                layout.value.bvColor = _fullData[i + 3];
+                layout.value.luminance = _fullData[i + 4];
+                layout.value.absoluteMagnitude = _fullData[i + 5];
 #endif
 
                 _slicedData.insert(_slicedData.end(),

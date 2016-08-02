@@ -136,7 +136,8 @@ public:
     /*
     * returns latest captured image
     */
-    const Image getLatestImageForInstrument(const std::string _instrumentID);
+    Image getLatestImageForInstrument(const std::string& instrumentID);
+
 private:
     void sortData();
     

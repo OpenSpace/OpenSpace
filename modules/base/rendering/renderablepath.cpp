@@ -109,9 +109,7 @@ bool RenderablePath::initialize() {
 
     bool intervalSet = hasTimeInterval();
     if (intervalSet) {
-        getInterval(_start, _stop);
-        std::string start = SpiceManager::ref().dateFromEphemerisTime(_start);
-        std::string stop = SpiceManager::ref().dateFromEphemerisTime(_stop);
+        completeSuccess &= getInterval(_start, _stop);
     }
 
     return completeSuccess;

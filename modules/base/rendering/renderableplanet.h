@@ -99,7 +99,7 @@ public:
     const unsigned int NU_SAMPLES = 16;*/
 
 public:
-    RenderablePlanet(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlanet(const ghoul::Dictionary& dictionary);
     ~RenderablePlanet();
 
     bool initialize() override;

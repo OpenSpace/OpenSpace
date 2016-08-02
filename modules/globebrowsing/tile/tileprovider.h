@@ -25,7 +25,7 @@
 #ifndef __TILE_PROVIDER_H__
 #define __TILE_PROVIDER_H__
 
-#include "gdal_priv.h"
+#include <gdal_priv.h>
 
 #include <openspace/engine/downloadmanager.h>
 #include <set>

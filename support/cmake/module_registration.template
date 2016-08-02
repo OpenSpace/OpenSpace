@@ -8,8 +8,10 @@
 @MODULE_HEADERS@
 namespace openspace {
 
-std::vector<OpenSpaceModule*> AllModules = {
-@MODULE_CLASSES@};
+auto AllModules = []() -> std::vector<OpenSpaceModule*> {
+    return {
+@MODULE_CLASSES@    };
+};
 
 } // namespace openspace
 

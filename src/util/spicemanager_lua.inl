@@ -35,10 +35,8 @@ namespace luascriptfunctions {
  */
 
 int loadKernel(lua_State* L) {
-    const std::string _loggerCat = "loadKernel";
-
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("loadKernel", L, 1, nArguments);
 
     bool isString = (lua_isstring(L, -1) == 1);
     if (!isString) {
@@ -59,16 +57,15 @@ int loadKernel(lua_State* L) {
  * automatically resolved.
  */
 int unloadKernel(lua_State* L) {
-    const std::string _loggerCat = "loadKernel";
-
     int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS(L, 1, nArguments);
+    SCRIPT_CHECK_ARGUMENTS("unloadKernel", L, 1, nArguments);
 
     bool isString = (lua_isstring(L, -1) == 1);
     bool isNumber = (lua_isnumber(L, -1) == 1);
 
     if (!isString && !isNumber) {
-        LERROR(
+        LERRORC(
+            "loadKernel",
             ghoul::lua::errorLocation(L) <<
             "Expected argument of type 'string' or 'number'"
         );
