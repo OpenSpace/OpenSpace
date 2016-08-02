@@ -30,13 +30,6 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 
-
-// The heightmaps is only used in the fragment shader visually debugging 
-// the alignment and resolution of the heightmaps
-// #include <${MODULE_GLOBEBROWSING}/shaders/tilevertexheight.hglsl>
-
-
-
 // Below are all the tiles that are used for contributing 
 // the actual fragment color
 
@@ -86,6 +79,54 @@ in vec3 ellipsoidNormalCameraSpace;
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
+
+
+
+///////////////////////////////////////////////////////////////////// 
+
+// The heightmaps is only used in the fragment shader visually debugging 
+// the alignment and resolution of the heightmaps
+
+#if USE_HEIGHTMAP
+uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
+uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
+#endif // USE_HEIGHTMAP
+
+#if USE_HEIGHTMAP_OVERLAY
+uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
+uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
+#endif // USE_HEIGHTMAP_OVERLAY
+
+float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
+	float height = CHUNK_DEFAULT_HEIGHT;
+
+#if USE_HEIGHTMAP
+	// Calculate desired level based on distance to the vertex on the ellipsoid
+    // Before any heightmapping is done
+	height = calculateUntransformedHeight(
+		uv,
+		levelWeights, 							// Variable to determine which texture to sample from
+		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
+
+#endif // USE_HEIGHTMAP
+
+#if USE_HEIGHTMAP_OVERLAY
+	height = calculateUntransformedHeightOverlay(
+		height,
+		uv,
+		levelWeights, 							// Variable to determine which texture to sample from
+		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
+
+#endif // USE_HEIGHTMAP_OVERLAY
+
+	return height;
+}
+
+/////////////////////////////////////////////////////////////////////
+
+
 
 
 /**
@@ -192,5 +233,6 @@ vec4 getTileFragColor(){
 
 	return color;
 }
+
 
 #endif ///TILE_FRAG_COLOR_HGLSL
