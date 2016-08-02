@@ -99,11 +99,11 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
     }
 
-    std::string parentName;
-    if (!dictionary.getValue(KeyParentName, parentName)) {
-        LWARNING("Could not find '" << KeyParentName << "' key, using 'Root'.");
-        parentName = "Root";
-    }
+    //std::string parentName;
+    //if (!dictionary.getValue(KeyParentName, parentName)) {
+    //    LWARNING("Could not find '" << KeyParentName << "' key, using 'Root'.");
+    //    parentName = "Root";
+    //}
 
     //SceneGraphNode* parentNode = sceneGraphNode(parentName);
     //if (parentNode == nullptr) {

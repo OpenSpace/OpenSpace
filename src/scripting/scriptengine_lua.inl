@@ -42,18 +42,18 @@ namespace luascriptfunctions {
             case LUA_TFUNCTION:
             case LUA_TUSERDATA:
             case LUA_TTHREAD:
-                LOG(level, "Function parameter was of type '" <<
+                LOGC(level, "print", "Function parameter was of type '" <<
                      luaTypeToString(type) << "'");
             case LUA_TNIL:
                 break;
             case LUA_TBOOLEAN:
-                LOG(level, lua_toboolean(L, -1));
+                LOGC(level, "print", lua_toboolean(L, -1));
                 break;
             case LUA_TNUMBER:
-                LOG(level, lua_tonumber(L, -1));
+                LOGC(level, "print", lua_tonumber(L, -1));
                 break;
             case LUA_TSTRING:
-                LOG(level, lua_tostring(L, -1));
+                LOGC(level, "print", lua_tostring(L, -1));
                 break;
         }
         return 0;

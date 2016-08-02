@@ -25,10 +25,10 @@
 #ifndef __SCRIPT_HELPER_H__
 #define __SCRIPT_HELPER_H__
 
-#define SCRIPT_CHECK_ARGUMENTS(__stack__, __reqArg__, __realArg__) \
+#define SCRIPT_CHECK_ARGUMENTS(__category__, __stack__, __reqArg__, __realArg__) \
     if (__realArg__ != __reqArg__) { \
-        LERROR(ghoul::lua::errorLocation(__stack__) << "Expected " << __reqArg__ << \
-               " arguments, got " << __realArg__); \
+        LERRORC(__category__, ghoul::lua::errorLocation(__stack__) << "Expected " << \
+            __reqArg__ << " arguments, got " << __realArg__); \
         return 0; \
         }
 

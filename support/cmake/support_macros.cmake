@@ -374,8 +374,10 @@ function (handle_internal_modules)
                 if (OPENSPACE_DEPENDENCIES)
                     foreach (dependency ${OPENSPACE_DEPENDENCIES})
                         create_option_name(${dependency} dependencyOptionName)
-                        set(${dependencyOptionName} ON CACHE BOOL "ff" FORCE)
-                        message(STATUS "${dependencyOptionName} was set to build, due to dependency towards ${optionName}")
+                        if (NOT ${dependencyOptionName})
+                            set(${dependencyOptionName} ON CACHE BOOL "ff" FORCE)
+                            message(STATUS "${dependencyOptionName} was set to build, due to dependency towards ${optionName}")
+                        endif ()
                     endforeach ()
                 endif ()
             endif ()
@@ -428,12 +430,17 @@ function (handle_internal_modules)
                 #"#endif\n\n"
             )
 
-            list(APPEND MODULE_CLASSES "    new ${MODULE_NAME},\n")
+            list(APPEND MODULE_CLASSES "        new ${MODULE_NAME},\n")
         endif ()
     endforeach ()
 
-    string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
-    string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+    if (NOT "${MODULE_HEADERS}" STREQUAL "")
+        string(REPLACE ";" "" MODULE_HEADERS ${MODULE_HEADERS})
+    endif ()
+
+    if (NOT "${MODULE_CLASSES}" STREQUAL "")
+        string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+    endif ()
 
     configure_file(
         ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template

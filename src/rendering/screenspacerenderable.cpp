@@ -270,9 +270,6 @@ glm::mat4 ScreenSpaceRenderable::rotationMatrix() {
     if (!_useEuclideanCoordinates) {
         glm::vec2 position = _sphericalPosition.value();
 
-        float theta = position.x;
-        float phi = position.y - M_PI_2;
-
         rotation = glm::rotate(rotation, position.x, glm::vec3(0.f, 1.f, 0.f));
         rotation = glm::rotate(
             rotation,

@@ -499,7 +499,7 @@ bool SceneGraph::removeSceneGraphNode(SceneGraphNode* node) {
     }
 
     // Remove internal node from the list of nodes
-    SceneGraphNodeInternal* internalNode = *it;
+    //SceneGraphNodeInternal* internalNode = *it;
     _nodes.erase(it);
 
     if (OsEng.interactionHandler().focusNode() == node)

@@ -109,6 +109,25 @@ int setPerformanceMeasurement(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* toggleFade(float):
+* Toggle a global fade over (float) seconds
+*/
+int toggleFade(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+
+    double t = luaL_checknumber(L, -1);
+    
+    float fadedIn = 1.0;
+    int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
+
+    OsEng.renderEngine().startFading(direction, static_cast<float>(t));
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
 * fadeIn(float):
 * start a global fadein over (float) seconds
 */
@@ -139,7 +158,6 @@ int fadeOut(lua_State* L) {
 }
 
 int registerScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "registerScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -151,7 +169,7 @@ int registerScreenSpaceRenderable(lua_State* L) {
         ghoul::lua::luaDictionaryFromState(L, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERROR(e.what());
+        LERRORC("registerScreenSpaceRenderable", e.what());
         return 0;
     }
 
@@ -162,7 +180,6 @@ int registerScreenSpaceRenderable(lua_State* L) {
 }
 
 int unregisterScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "unregisterScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
@@ -173,7 +190,7 @@ int unregisterScreenSpaceRenderable(lua_State* L) {
 
     std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
     if (!s) {
-        LERROR(errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        LERRORC("unregisterScreenSpaceRenderable", errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
         return 0;
     }
 

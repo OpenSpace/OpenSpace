@@ -22,105 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_H__
-#define __CHUNK_INDEX_H__
+#ifndef __RENDERABLERINGS_H__
+#define __RENDERABLERINGS_H__
 
-#include <glm/glm.hpp>
+#include <openspace/rendering/renderable.h>
 
-#include <string>
-#include <vector>
-#include <stdint.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/util/updatestructures.h>
 
-
+namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
+class RenderableRings : public Renderable {
+public:
+    RenderableRings(const ghoul::Dictionary& dictionary);
+
+    bool initialize() override;
+    bool deinitialize() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
+
+private:
+    void loadTexture();
+    void createPlane();
+
+    properties::StringProperty _texturePath;
+    properties::Vec2Property _size;
+    properties::Vec2Property _offset;
+    properties::FloatProperty _nightFactor;
+    properties::FloatProperty _transparency;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    bool _textureIsDirty;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+    bool _planeIsDirty;
     
-
-class Geodetic2;
-
-enum Quad {
-    NORTH_WEST = 0,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
+    std::string _frame;
+    glm::mat3 _orientation;
+    glm::mat3 _state;
+    
+    std::string _body;
+    glm::vec3 _sunPosition;
+    bool _hasSunPosition;
 };
-
-enum CardinalDirection {
-    WEST = 0,
-    EAST,
-    NORTH,
-    SOUTH,
-};
-
-
-
-using ChunkHashKey = uint64_t;
-
-
-struct ChunkIndex {
-    
-
-    int x, y, level;
-    
-
-    ChunkIndex() : x(0), y(0), level(0) { }
-    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
-    ChunkIndex(const Geodetic2& point, int level);
-
-
-    bool hasParent() const {
-        return level > 0;
-    }
-
-    ChunkIndex parent() const;
-    
-    ChunkIndex& operator--();
-    ChunkIndex operator--(int);
-
-    ChunkIndex& operator-=(unsigned int levels);
-
-    bool isWestChild() const {
-        return x % 2 == 0;
-    }
-
-    bool isEastChild() const {
-        return x % 2 == 1;
-    }
-
-    bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    bool isSouthChild() const {
-        return y % 2 == 1;
-    }
-
-
-    ChunkIndex child(Quad q) const;
-
-
-    std::string toString() const;
-
-    /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
-
-    int manhattan(const ChunkIndex& other) const;
-
-    ChunkHashKey hashKey() const;
-
-    bool operator==(const ChunkIndex& other) const;
-};
-
-
-std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
-
 
 } // namespace openspace
 
-
-
-#endif // __CHUNK_INDEX_H__
+#endif // __RENDERABLERINGS_H__

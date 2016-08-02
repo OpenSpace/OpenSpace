@@ -74,10 +74,8 @@
 #include <modules/iswa/util/iswamanager.h>
 #endif
 
-#ifdef _MSC_VER
-#ifdef OPENSPACE_ENABLE_VLD
+#if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
-#endif
 #endif
 
 #ifdef WIN32
@@ -416,28 +414,35 @@ bool OpenSpaceEngine::initialize() {
         ConfigurationManager::KeyShutdownCountdown, _shutdownWait
     );
 
-    // Load scenegraph
+    if (!commandlineArgumentPlaceholders.sceneName.empty())
+        configurationManager().setValue(
+            ConfigurationManager::KeyConfigScene,
+            commandlineArgumentPlaceholders.sceneName);
+
+    // Initialize the SettingsEngine
+    _settingsEngine->initialize();
+    _settingsEngine->setModules(_moduleEngine->modules());
+
+    // Initialize the Scene
     Scene* sceneGraph = new Scene;
-    _renderEngine->setSceneGraph(sceneGraph);
-
-    // initialize the RenderEngine
-    _renderEngine->initialize();
     sceneGraph->initialize();
+    
+    std::string scenePath = "";
+    configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
+    sceneGraph->scheduleLoadSceneFile(scenePath);
 
-    std::string sceneDescriptionPath = "";
-    if (commandlineArgumentPlaceholders.sceneName.empty()) {
-        success = configurationManager().getValue(
-            ConfigurationManager::KeyConfigScene, sceneDescriptionPath);
-    }
-    else
-        sceneDescriptionPath = commandlineArgumentPlaceholders.sceneName;
-    sceneGraph->scheduleLoadSceneFile(sceneDescriptionPath);
+    // Initialize the RenderEngine
+    _renderEngine->setSceneGraph(sceneGraph);
+    _renderEngine->initialize();
+    _renderEngine->setGlobalBlackOutFactor(0.0);
+    _renderEngine->startFading(1, 3.0);
+
 
     //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
     //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
 
     // Run start up scripts
-    runPreInitializationScripts(sceneDescriptionPath);
+    runPreInitializationScripts(scenePath);
 
     // Load a light and a monospaced font
     loadFonts();
@@ -813,14 +818,13 @@ void OpenSpaceEngine::postDraw() {
     bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (showGui) {
         _renderEngine->renderScreenLog();
-
         if (_console->isVisible())
             _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled())
+        if (_gui->isEnabled() && _isMaster && _windowWrapper->isRegularRendering())
             _gui->endFrame();
-    }
 #endif
+    }
 
     if (_isInShutdownMode)
         _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);

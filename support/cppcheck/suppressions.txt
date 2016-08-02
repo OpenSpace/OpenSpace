@@ -1,10 +1,7 @@
-unreachableCode:src/properties/matrixproperty.cpp
-duplicateBreak:src/properties/matrixproperty.cpp
-unreachableCode:src/properties/scalarproperty.cpp
-duplicateBreak:src/properties/scalarproperty.cpp
-unreachableCode:src/properties/stringproperty.cpp
-duplicateBreak:src/properties/stringproperty.cpp
-unreachableCode:src/properties/vectorproperty.cpp
-duplicateBreak:src/properties/vectorproperty.cpp
+// This is not a memleak because the placement new operator does not
+// actually create any memory that could leak
+//memleak:src/performance/performancemanager.cpp
 
-commaSeparatedReturn
+
+missingInclude
+noExplicitConstructor

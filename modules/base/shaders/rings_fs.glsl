@@ -22,105 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_H__
-#define __CHUNK_INDEX_H__
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include <glm/glm.hpp>
+in vec2 vs_st;
+in vec4 vs_position;
 
-#include <string>
-#include <vector>
-#include <stdint.h>
+uniform sampler1D texture1;
+uniform vec2 textureOffset;
+uniform float transparency;
 
+uniform bool hasSunPosition;
+uniform vec3 sunPosition;
+uniform float _nightFactor;
 
+Fragment getFragment() {
+    vec4 position = vs_position;
+    float depth = pscDepth(position);
 
-namespace openspace {
-    
+    // Moving the origin to the center
+    vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
-class Geodetic2;
+    // The length of the texture coordinates vector is our distance from the center
+    float radius = length(st);
 
-enum Quad {
-    NORTH_WEST = 0,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
-};
+    // We only want to consider ring-like objects so we need to discard everything else
+    if (radius > 1.0)
+        discard;
 
-enum CardinalDirection {
-    WEST = 0,
-    EAST,
-    NORTH,
-    SOUTH,
-};
-
-
-
-using ChunkHashKey = uint64_t;
-
-
-struct ChunkIndex {
-    
-
-    int x, y, level;
-    
-
-    ChunkIndex() : x(0), y(0), level(0) { }
-    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
-    ChunkIndex(const Geodetic2& point, int level);
-
-
-    bool hasParent() const {
-        return level > 0;
+    // Remapping the texture coordinates
+    // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+    // textureOffset.x -> 0
+    // textureOffset.y -> 1
+    float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+    if (texCoord < 0.f || texCoord > 1.f)
+        discard;
+        
+    vec4 diffuse = texture(texture1, texCoord);
+    float colorValue = length(diffuse.rgb);
+    // times 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
+    // to normalize the transparency value to [0,1]
+    if (colorValue < 3*transparency) {
+        diffuse.a = pow(colorValue / (3*transparency), 1);
     }
 
-    ChunkIndex parent() const;
-    
-    ChunkIndex& operator--();
-    ChunkIndex operator--(int);
+    if (hasSunPosition) {
+        // The normal for the one plane depends on whether we are dealing
+        // with a front facing or back facing fragment
+        vec3 normal;
+        // The plane is oriented on the xz plane
+        // WARNING: This might not be the case for Uranus
+        if (gl_FrontFacing) {
+            normal = vec3(0.0, 1.0, 0.0);
+        }
+        else {
+            normal = vec3(0.0, -1.0, 0.0);
+        }
 
-    ChunkIndex& operator-=(unsigned int levels);
-
-    bool isWestChild() const {
-        return x % 2 == 0;
+        // Reduce the color of the fragment by the user factor
+        // if we are facing away from the Sun
+        if (dot(sunPosition, normal) < 0)
+            diffuse.xyz *= _nightFactor;
     }
 
-    bool isEastChild() const {
-        return x % 2 == 1;
-    }
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = depth;
+    return frag;
 
-    bool isNorthChild() const {
-        return y % 2 == 0;
-    }
-
-    bool isSouthChild() const {
-        return y % 2 == 1;
-    }
-
-
-    ChunkIndex child(Quad q) const;
-
-
-    std::string toString() const;
-
-    /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
-
-    int manhattan(const ChunkIndex& other) const;
-
-    ChunkHashKey hashKey() const;
-
-    bool operator==(const ChunkIndex& other) const;
-};
-
-
-std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
-
-
-} // namespace openspace
-
-
-
-#endif // __CHUNK_INDEX_H__
+}

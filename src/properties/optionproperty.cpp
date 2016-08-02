@@ -35,10 +35,21 @@ const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName)
     : IntProperty(std::move(identifier), std::move(guiName))
+    , _displayType(DisplayType::RADIO)
+{}
+
+OptionProperty::OptionProperty(std::string identifier, std::string guiName, DisplayType displayType) 
+    : IntProperty(std::move(identifier), std::move(guiName))
+    , _displayType(displayType)
 {}
 
 std::string OptionProperty::className() const {
     return "OptionProperty";
+}
+
+OptionProperty::DisplayType OptionProperty::displayType() const
+{
+    return _displayType;
 }
 
 const std::vector<OptionProperty::Option>& OptionProperty::options() const {
@@ -61,6 +72,23 @@ void OptionProperty::addOption(int value, std::string desc) {
     _options.push_back(std::move(option));
 }
 
+void OptionProperty::addOptions(std::vector<int> values, std::vector<std::string> descs) {
+    if (values.size() != descs.size()) {
+        LERROR("Skipping " << this->fullyQualifiedIdentifier() << ": "
+            << "number of values (" << values.size() << ") "
+            << "does not equal number of descriptions (" << descs.size() << ")"
+        );
+        return;
+    }
+    for (int i = 0; i < values.size(); i++) {
+        LDEBUG(this->fullyQualifiedIdentifier() << ": Adding "
+            << descs[i]
+            << " (" << values[i] << ")"
+        );
+        this->addOption(values[i], descs[i]);
+    }
+}
+
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
     for (auto o : _options) {
@@ -73,6 +101,14 @@ void OptionProperty::setValue(int value) {
 
     // Otherwise, log an error
     LERROR("Could not find an option for value '" << value << "' in OptionProperty");
+}
+
+std::string OptionProperty::getDescriptionByValue(int value) {
+    for (auto option : _options) {
+        if (option.value == value) {
+            return option.description;
+        }
+    }
 }
 
 std::string OptionProperty::generateAdditionalDescription() const {

@@ -52,6 +52,8 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     , _imageSequenceTime(-1.f)
     , _vao(0)
     , _vbo(0)
+    , _frameCounter(0)
+    , _drawLine(false)
 {
     dictionary.getValue(KeySource, _source);
     dictionary.getValue(KeyTarget, _target);
@@ -75,7 +77,6 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 bool RenderableCrawlingLine::initialize() {
-    _frameCounter = 0;
     bool completeSuccess = true;
 
     RenderEngine& renderEngine = OsEng.renderEngine();

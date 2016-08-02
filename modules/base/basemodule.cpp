@@ -35,6 +35,7 @@
 #include <modules/base/rendering/renderablestars.h>
 #include <modules/base/rendering/renderabletrail.h>
 #include <modules/base/rendering/renderablepath.h>
+#include <modules/base/rendering/renderablerings.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
 #include <modules/base/rendering/renderableplanet.h>
@@ -71,15 +72,16 @@ void BaseModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
-    fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableConstellationBounds>("RenderableConstellationBounds");
+    fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePath>("RenderablePath");
-    fRenderable->registerClass<RenderableTrail>("RenderableTrail");
+    fRenderable->registerClass<RenderablePlane>("RenderablePlane");
+    fRenderable->registerClass<RenderablePlanet>("RenderablePlanet");
+    fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
-    fRenderable->registerClass<RenderableModel>("RenderableModel");
-    fRenderable->registerClass<RenderablePlane>("RenderablePlane");
+    fRenderable->registerClass<RenderableStars>("RenderableStars");
+    fRenderable->registerClass<RenderableTrail>("RenderableTrail");
 
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
