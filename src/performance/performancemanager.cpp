@@ -36,21 +36,18 @@ namespace {
     
     const std::string GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
     // Probably 255 performance blocks per node are enough, so we can get away with
-    // 260 bytes (one uint8_t for the number, 255 uint8_t for the names,  one uint8_t
-    // for the reference count to keep the global memory alive, and 3 bytes to enforce
-    // alignment)
-    const size_t GlobalSharedMemorySize = 260;
+    // 4 bytes (one uint8_t for the number, one uint8_t for the reference count to keep
+    // the global memory alive, and 2 bytes to enforce alignment)
+    const size_t GlobalSharedMemorySize = 4;
     
+    const int MaximumNumber = 256;
+
     struct GlobalMemory {
         uint8_t number;
         uint8_t referenceCount;
-        std::array<uint8_t, 255> values;
         
-        std::array<uint8_t, 3> alignment;
+        std::array<uint8_t, 2> alignment;
     };
-    
-    const uint8_t UnusedName = 255;
-    
     
     const std::string LocalSharedMemoryNameBase = "PerformanceMeasurement_";
 }
@@ -95,7 +92,6 @@ void PerformanceManager::createGlobalSharedMemory() {
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
         m->number = 0;
         m->referenceCount = 1;
-        m->values.fill(UnusedName);
         sharedMemory.releaseLock();
     }
 }
@@ -111,9 +107,21 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     sharedMemory.acquireLock();
     GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
     --(m->referenceCount);
-    LINFO("Global shared performance memory reference count: " << m->referenceCount);
+    LINFO("Global shared performance memory reference count: " << int(m->referenceCount));
     if (m->referenceCount == 0) {
         LINFO("Removing global shared performance memory");
+        
+        // When the global memory is deleted, we have to get rid of all local memory as
+        // well. In principle, none should be left, but OpenSpace crashing might leave
+        // some of the memory orphaned
+        for (int i = 0; i < std::numeric_limits<uint8_t>::max(); ++i) {
+            std::string localName = LocalSharedMemoryNameBase + std::to_string(i);
+            if (SharedMemory::exists(localName)) {
+                LINFO("Removing shared memory: " << localName);
+                SharedMemory::remove(localName);
+            }
+        }
+        
         SharedMemory::remove(GlobalSharedMemoryName);
     }
     sharedMemory.releaseLock();
@@ -123,6 +131,8 @@ PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
 {
     using ghoul::SharedMemory;
+    PerformanceManager::createGlobalSharedMemory();
+    
     
     SharedMemory sharedMemory(GlobalSharedMemoryName);
     sharedMemory.acquireLock();
@@ -133,6 +143,7 @@ PerformanceManager::PerformanceManager()
     // The the first free block (which also coincides with the number of blocks
     uint8_t blockIndex = m->number;
     ++(m->number);
+
     std::string localName = LocalSharedMemoryNameBase + std::to_string(blockIndex);
     
     // Compute the total size
@@ -157,11 +168,14 @@ PerformanceManager::~PerformanceManager() {
         ghoul::SharedMemory sharedMemory(GlobalSharedMemoryName);
         sharedMemory.acquireLock();
         GlobalMemory* m = reinterpret_cast<GlobalMemory*>(sharedMemory.memory());
-        m->number = m->number - 1;
+        --(m->number);
         sharedMemory.releaseLock();
         
+        LINFO("Remove shared memory '" << _performanceMemory->name() << "'");
         ghoul::SharedMemory::remove(_performanceMemory->name());
     }
+    
+    PerformanceManager::destroyGlobalSharedMemory();
 }
 
 void PerformanceManager::resetPerformanceMeasurements() {
