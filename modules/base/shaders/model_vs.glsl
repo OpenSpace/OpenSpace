@@ -31,7 +31,6 @@ layout(location = 2) in vec3 in_normal;
 
 // Uniforms
 uniform mat4 modelViewTransform;
-uniform mat4 viewTransform;
 uniform mat4 projectionTransform;
 
 uniform vec3 cameraDirectionWorldSpace;
@@ -41,22 +40,22 @@ uniform float _magnification;
 // Outputs
 out vec2 vs_st;
 out vec3 vs_normalViewSpace;
-out vec3 vs_cameraDirectionViewSpace;
-out vec4 vs_position;
+out vec4 vs_positionScreenSpace;
+out vec4 vs_positionCameraSpace;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
     vec4 position = in_position;
     position.xyz *= pow(10, _magnification);
-    vec4 positionViewSpace = modelViewTransform * position;
-    vec4 positionClipSpace = projectionTransform * positionViewSpace;
+    vs_positionCameraSpace = modelViewTransform * position;
+    vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
 
     // Write output
     vs_st = in_st;
-    vs_position = z_normalization(positionClipSpace);
-    gl_Position = vs_position;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
+    
     // The normal transform should be the transposed inverse of the model transform?
     vs_normalViewSpace = normalize(mat3(modelViewTransform) * in_normal);
-    vs_cameraDirectionViewSpace = normalize(mat3(viewTransform) * cameraDirectionWorldSpace);
 }

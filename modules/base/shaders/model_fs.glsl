@@ -34,8 +34,8 @@ uniform sampler2D texture1;
 // Input from the vertex shader
 in vec2 vs_st;
 in vec3 vs_normalViewSpace;
-in vec3 vs_cameraDirectionViewSpace;
-in vec4 vs_position;
+in vec4 vs_positionCameraSpace;
+in vec4 vs_positionScreenSpace;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -43,18 +43,19 @@ in vec4 vs_position;
 Fragment getFragment() {
     vec4 textureSample = texture(texture1, vs_st);
     
-    vec3 colorDiffuse = textureSample.rgb;
-    vec3 colorSpecular = vec3(1);
+    vec3 diffuseAlbedo = textureSample.rgb;
+    vec3 specularAlbedo = vec3(1);
 
     vec3 color;
 
     if (performShading) {
+        // Some of these values could be passed in as uniforms
         vec3 lightColorAmbient = vec3(1);    
         vec3 lightColor = vec3(1);    
         
         vec3 n = normalize(vs_normalViewSpace);
         vec3 l = directionToSunViewSpace;
-        vec3 c = normalize(vs_cameraDirectionViewSpace);
+        vec3 c = normalize(vs_positionCameraSpace.xyz);
         vec3 r = reflect(l, n);
 
         float ambientIntensity = 0.2;
@@ -63,23 +64,23 @@ Fragment getFragment() {
 
         float diffuseCosineFactor = dot(n,l);
         float specularCosineFactor = dot(c,r);
-        float specularPower = 10;
+        float specularPower = 100;
 
-        vec3 ambient = ambientIntensity * lightColorAmbient * colorDiffuse;
-        vec3 diffuse = specularIntensity * lightColor * colorDiffuse * max(diffuseCosineFactor, 0);
-        vec3 specular = specularIntensity * lightColor * colorSpecular * pow(max(specularCosineFactor, 0), specularPower);
+        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+        vec3 diffuseColor = specularIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
 
-        color = ambient + diffuse + specular;
+        color = ambientColor + diffuseColor + specularColor;
     }
     else {
-        color = colorDiffuse;
+        color = diffuseAlbedo;
     }
 
     float alpha = fading * transparency;
 
     Fragment frag;
     frag.color = vec4(color, alpha);
-    frag.depth = vs_position.w;
+    frag.depth = vs_positionScreenSpace.w;
 
     return frag;
 }

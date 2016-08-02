@@ -199,23 +199,20 @@ void RenderableModel::render(const RenderData& data) {
     }
 
     // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.position.dvec3();
+    glm::dvec3 bodyPosition = data.positionVec3;
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
         glm::dmat4(_stateMatrix); // Rotation
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    glm::vec3 cameraDirectionWorldSpace = data.camera.viewDirectionWorldSpace();
     glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
-    _programObject->setUniform("cameraDirectionWorldSpace", cameraDirectionWorldSpace);
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-    _programObject->setUniform("viewTransform", glm::mat4(data.camera.combinedViewMatrix()));
     _programObject->setUniform("performShading", _performShading);
     _programObject->setUniform("fading", _fading);
 

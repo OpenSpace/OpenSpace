@@ -150,7 +150,7 @@ InteractionMode::~InteractionMode() {
 
 void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
-    _previousFocusNodePosition = _focusNode->worldPosition().dvec3();
+    _previousFocusNodePosition = _focusNode->worldPosition();
     _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
 }
 
@@ -296,7 +296,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         dvec3 camPos = camera.positionVec3();
         
         // Follow focus nodes movement
-        dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        dvec3 centerPos = _focusNode->worldPosition();
         dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
@@ -417,7 +417,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
         // Read the current state of the camera and focusnode
         dvec3 camPos = camera.positionVec3();
-        dvec3 centerPos = _focusNode->worldPosition().dvec3();
+        dvec3 centerPos = _focusNode->worldPosition();
 
         // Follow focus nodes movement
         dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
