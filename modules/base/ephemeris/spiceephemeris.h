@@ -34,14 +34,14 @@ namespace openspace {
 class SpiceEphemeris : public Ephemeris {
 public:
     SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    virtual const psc& position() const;
+    virtual const glm::dvec3& position() const;
     virtual const glm::dmat3& worldRotationMatrix() const;
     void update(const UpdateData& data) override;
 
 private:
     std::string _targetName;
     std::string _originName;
-    psc _position;
+    glm::dvec3 _position;
     glm::dmat3 _worldRotationMatrix;
     bool _kernelsLoadedSuccessfully;
     //std::string _ghosting;

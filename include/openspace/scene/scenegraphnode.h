@@ -76,8 +76,8 @@ public:
     void setParent(SceneGraphNode* parent);
     //bool abandonChild(SceneGraphNode* child);
 
-    const psc& position() const;
-    psc worldPosition() const;
+    const glm::dvec3& position() const;
+    glm::dvec3 worldPosition() const;
 
     const glm::dmat3& worldRotationMatrix() const;
 
@@ -104,7 +104,7 @@ public:
 private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
-    psc calculateWorldPosition() const;
+    glm::dvec3 calculateWorldPosition() const;
 
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
@@ -118,7 +118,8 @@ private:
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
 
-    psc _worldPositionCached;
+    //psc _worldPositionCached;
+    glm::dvec3 _worldPositionCached;
 };
 
 } // namespace openspace

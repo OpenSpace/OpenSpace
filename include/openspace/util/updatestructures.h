@@ -46,8 +46,12 @@ struct UpdateData {
 
 struct RenderData {
     const Camera& camera;
+    // psc position to be removed in favor of the double precision position
+    // Now both are here due to dependencies of the psc position
     psc position;
     bool doPerformanceMeasurement;
+    glm::dvec3 positionVec3;
+
 };
 
 struct RaycasterTask {

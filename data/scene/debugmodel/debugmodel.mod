@@ -7,7 +7,7 @@ return {
             Body = "SUN",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/NewHorizonsCleanModel.obj",
+                GeometryFile = "models/OSIRIS-REx GSFC Animation/OSIRIS-REx GSFC Animation/OREXE1.obj",
                 Magnification = 4,
             }, 
             Textures = {

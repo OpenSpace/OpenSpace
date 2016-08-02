@@ -707,7 +707,7 @@ void InteractionHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
 
     glm::dquat rotation = _camera->rotationQuaternion();
-    glm::dvec3 focusPosition = focusNode()->worldPosition().dvec3();
+    glm::dvec3 focusPosition = focusNode()->worldPosition();
     glm::dvec3 cameraPosition = _camera->positionVec3();
     glm::dvec3 lookUpVector = _camera->lookUpVectorWorldSpace();
 

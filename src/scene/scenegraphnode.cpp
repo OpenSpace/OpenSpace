@@ -173,7 +173,7 @@ bool SceneGraphNode::deinitialize() {
 void SceneGraphNode::update(const UpdateData& data) {
     _worldPositionCached = calculateWorldPosition();
     UpdateData newUpdateData = data;
-    newUpdateData.position = worldPosition().dvec3();
+    newUpdateData.position = worldPosition();
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -246,9 +246,9 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPosition = _worldPositionCached;
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
 
-    RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
+    RenderData newData = {data.camera, thisPositionPSC, data.doPerformanceMeasurement, _worldPositionCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -273,8 +273,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = _worldPositionCached;
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement };
+    const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, _worldPositionCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -314,12 +314,12 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 //    return false;
 //}
 
-const psc& SceneGraphNode::position() const
+const glm::dvec3& SceneGraphNode::position() const
 {
     return _ephemeris->position();
 }
 
-psc SceneGraphNode::worldPosition() const
+glm::dvec3 SceneGraphNode::worldPosition() const
 {
     return _worldPositionCached;
 }
@@ -329,7 +329,7 @@ const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
     return _ephemeris->worldRotationMatrix();
 }
 
-psc SceneGraphNode::calculateWorldPosition() const {
+glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
         return _ephemeris->position() + _parent->calculateWorldPosition();

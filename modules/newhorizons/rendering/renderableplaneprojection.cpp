@@ -361,7 +361,7 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
                 found = SpiceManager::ref().isTargetInFieldOfView(targetBody, _spacecraft, _instrument, SpiceManager::FieldOfViewMethod::Ellipsoid, {}, currentTime);
                 if (found){
                     targets.push_back(node->name()); // get name from propertyOwner
-                    distance = (node->worldPosition() - spacecraftPos).length();
+                    distance = (psc::CreatePowerScaledCoordinate(node->worldPosition().x, node->worldPosition().y, node->worldPosition().z) - spacecraftPos).length();
                     if (distance < min)
                         closestTarget = targetBody;
                 }
