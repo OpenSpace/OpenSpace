@@ -90,12 +90,12 @@ bool Scene::deinitialize() {
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
-        try {
+        try {          
+            loadSceneInternal(_sceneGraphToLoad);
+
             // Reset the InteractionManager to Orbital/default mode
             // TODO: Decide if it belongs in the scene and/or how it gets reloaded
-            // OsEng.interactionHandler().setInteractionModeToOrbital();
-
-            loadSceneInternal(_sceneGraphToLoad);
+            OsEng.interactionHandler().setInteractionMode("Orbital");
 
             // After loading the scene, the keyboard bindings have been set
             
