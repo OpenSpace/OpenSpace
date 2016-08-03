@@ -60,7 +60,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     
 
@@ -101,9 +100,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
-    
-   
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

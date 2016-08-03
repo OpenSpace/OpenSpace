@@ -32,7 +32,7 @@
 #include <queue>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 
 #include <ghoul/misc/assert.h>
 
@@ -64,7 +64,7 @@ namespace openspace {
     template<typename P>
     class ConcurrentJobManager{
     public:
-        ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool)
+        ConcurrentJobManager(std::shared_ptr<ghoul::ThreadPool> pool) : threadPool(pool)
         {
 
         }
@@ -99,7 +99,7 @@ namespace openspace {
     private:
 
         ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-        std::shared_ptr<ThreadPool> threadPool;
+        std::shared_ptr<ghoul::ThreadPool> threadPool;
     };
 
 

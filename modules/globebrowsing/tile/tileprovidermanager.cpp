@@ -36,7 +36,7 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(1);
+    ghoul::ThreadPool TileProviderManager::tileRequestThreadPool(1);
 
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
@@ -128,8 +128,8 @@ namespace openspace {
         std::shared_ptr<TileDataset> tileDataset = std::shared_ptr<TileDataset>(
             new TileDataset(file, initData.minimumPixelSize, initData.preprocessTiles));
 
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(1));
+        std::shared_ptr<ghoul::ThreadPool> threadPool = std::shared_ptr<ghoul::ThreadPool>(
+            new ghoul::ThreadPool(1));
 
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));

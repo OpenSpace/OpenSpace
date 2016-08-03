@@ -188,8 +188,8 @@ namespace openspace {
                 _tileProviderInitData.minimumPixelSize,
                 _tileProviderInitData.preprocessTiles));
 
-        std::shared_ptr<ThreadPool> threadPool = std::shared_ptr<ThreadPool>(
-            new ThreadPool(_tileProviderInitData.threads));
+        std::shared_ptr<ghoul::ThreadPool> threadPool = std::shared_ptr<ghoul::ThreadPool>(
+            new ghoul::ThreadPool(_tileProviderInitData.threads));
 
         std::shared_ptr<AsyncTileDataProvider> tileReader = std::shared_ptr<AsyncTileDataProvider>(
             new AsyncTileDataProvider(tileDataset, threadPool));

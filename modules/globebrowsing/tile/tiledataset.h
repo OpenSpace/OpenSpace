@@ -30,7 +30,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 
 #include "gdal_priv.h"
 

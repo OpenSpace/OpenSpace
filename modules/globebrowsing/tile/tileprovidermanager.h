@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/tile/tileprovider.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 
 #include <ghoul/misc/dictionary.h>
 
@@ -58,7 +58,7 @@ namespace openspace {
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
 
-        static ThreadPool tileRequestThreadPool;
+        static ghoul::ThreadPool tileRequestThreadPool;
 
         LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
         const std::vector<std::shared_ptr<TileProvider> >
