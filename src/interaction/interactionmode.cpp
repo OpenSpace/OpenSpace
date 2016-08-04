@@ -152,7 +152,7 @@ void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     _focusNode = focusNode;
 
     if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition().dvec3();
+        _previousFocusNodePosition = _focusNode->worldPosition();
         _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
     }
 }
