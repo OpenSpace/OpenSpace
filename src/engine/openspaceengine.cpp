@@ -737,18 +737,24 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
-        _interactionHandler->update(dt);
+        //_interactionHandler->update(dt);
+        _interactionHandler->preSynchronization(dt);
+        _interactionHandler->postSynchronizationPreDraw();
 
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
-        
+
         _scriptEngine->preSynchronization();
+        
         _renderEngine->preSynchronization();
+        _renderEngine->camera()->preSynchronization();
+
         _parallelConnection->preSynchronization();
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+
     if (_isInShutdownMode) {
         if (_shutdownCountdown <= 0.f) {
             _windowWrapper->terminate();
@@ -759,8 +765,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     Time::ref().postSynchronizationPreDraw();
 
     _scriptEngine->postSynchronizationPreDraw();
+
     _renderEngine->postSynchronizationPreDraw();
-    
+    _renderEngine->camera()->postSynchronizationPreDraw();
+
+    //_renderEngine->camera()->preSynchronization();
+    //_renderEngine->camera()->postSynchronizationPreDraw();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
@@ -801,6 +811,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
 
     LogMgr.resetMessageCounters();
+
 }
 
 void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
@@ -900,6 +911,7 @@ void OpenSpaceEngine::encode() {
         Time::ref().serialize(_syncBuffer.get());
         _scriptEngine->serialize(_syncBuffer.get());
         _renderEngine->serialize(_syncBuffer.get());
+        _interactionHandler->serialize(_syncBuffer.get());
         
         _syncBuffer->write();
     }
@@ -914,6 +926,8 @@ void OpenSpaceEngine::decode() {
         Time::ref().deserialize(_syncBuffer.get());
         _scriptEngine->deserialize(_syncBuffer.get());
         _renderEngine->deserialize(_syncBuffer.get());
+        _interactionHandler->deserialize(_syncBuffer.get());
+
     }
 }
 

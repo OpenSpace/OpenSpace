@@ -173,7 +173,13 @@ public:
     void lockControls();
     void unlockControls();
 
-    void update(double deltaTime);
+    //void update(double deltaTime);
+
+    void preSynchronization(double deltaTime);
+    void postSynchronizationPreDraw();
+
+    void serialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer);
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
@@ -214,8 +220,6 @@ private:
 
     std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
-    //std::shared_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
-    //std::shared_ptr<GlobeBrowsingInteractionMode> _globebrowsingInteractionMode;
 
     // Properties
     properties::StringProperty _origin;

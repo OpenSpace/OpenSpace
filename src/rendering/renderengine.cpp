@@ -319,8 +319,8 @@ bool RenderEngine::initializeGL() {
 }
 
 void RenderEngine::preSynchronization() {
-    if (_mainCamera)
-        _mainCamera->preSynchronization();
+    //if (_mainCamera)
+    //    _mainCamera->preSynchronization();
 }
 
 void RenderEngine::postSynchronizationPreDraw() {
@@ -339,8 +339,8 @@ void RenderEngine::postSynchronizationPreDraw() {
         }
     }
 
-    if (_mainCamera)
-        _mainCamera->postSynchronizationPreDraw();
+    //if (_mainCamera)
+    //    _mainCamera->postSynchronizationPreDraw();
 
     bool windowResized = OsEng.windowWrapper().windowHasResized();
 

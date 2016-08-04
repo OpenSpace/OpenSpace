@@ -769,7 +769,7 @@ void InteractionHandler::unlockControls() {
 
 }
 
-void InteractionHandler::update(double deltaTime) { 
+void InteractionHandler::preSynchronization(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -777,9 +777,22 @@ void InteractionHandler::update(double deltaTime) {
         _cameraUpdatedFromScript = false;
     }
     else {
-        _currentInteractionMode->update(*_camera, *_inputState, deltaTime);
+        _currentInteractionMode->updateMouseStatesFromInput(*_inputState, deltaTime);
     }
 }
+
+void InteractionHandler::postSynchronizationPreDraw() {
+    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
+    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
+
+    if (_cameraUpdatedFromScript) {
+        _cameraUpdatedFromScript = false;
+    }
+    else {
+        _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+    }
+}
+
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();
@@ -997,6 +1010,20 @@ void InteractionHandler::addKeyframe(const network::datamessagestructures::Posit
 
 void InteractionHandler::clearKeyframes() {
     _inputState->clearKeyframes();
+}
+
+void InteractionHandler::serialize(SyncBuffer* syncBuffer) {
+    for each (auto var in _interactionModes)
+    {
+        var.second->serialize(syncBuffer);
+    }
+}
+
+void InteractionHandler::deserialize(SyncBuffer* syncBuffer) {
+    for each (auto var in _interactionModes)
+    {
+        var.second->deserialize(syncBuffer);
+    }
 }
 
 #endif // USE_OLD_INTERACTIONHANDLER

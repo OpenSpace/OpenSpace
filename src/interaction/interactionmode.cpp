@@ -167,8 +167,12 @@ KeyframeInteractionMode::~KeyframeInteractionMode() {
 
 }
 
-void KeyframeInteractionMode::update(double deltaTime) {
-    // TODO : Get keyframes from input state and use them to position and rotate the camera
+void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
+
+}
+
+void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+
 }
 
 // OrbitalInteractionMode
@@ -279,6 +283,58 @@ void OrbitalInteractionMode::MouseStates::setVelocityScaleFactor(double scaleFac
     _globalRollMouseState.setVelocityScaleFactor(scaleFactor);
 }
 
+glm::dvec2 OrbitalInteractionMode::MouseStates::synchedGlobalRotationMouseVelocity() {
+    return _synchedGlobalRotationMouseVelocity;
+}
+
+glm::dvec2 OrbitalInteractionMode::MouseStates::synchedLocalRotationMouseVelocity() {
+    return _synchedLocalRotationMouseVelocity;
+}
+
+glm::dvec2 OrbitalInteractionMode::MouseStates::synchedTruckMovementMouseVelocity() {
+    return _synchedTruckMovementMouseVelocity;
+}
+
+glm::dvec2 OrbitalInteractionMode::MouseStates::synchedLocalRollMouseVelocity() {
+    return _synchedLocalRollMouseVelocity;
+}
+
+glm::dvec2 OrbitalInteractionMode::MouseStates::synchedGlobalRollMouseVelocity() {
+    return _synchedGlobalRollMouseVelocity;
+}
+
+void OrbitalInteractionMode::MouseStates::preSynchronization() {
+    _sharedGlobalRotationMouseVelocity = _globalRotationMouseState.velocity.get();
+    _sharedLocalRotationMouseVelocity = _localRotationMouseState.velocity.get();
+    _sharedTruckMovementMouseVelocity = _truckMovementMouseState.velocity.get();
+    _sharedLocalRollMouseVelocity = _localRollMouseState.velocity.get();
+    _sharedGlobalRollMouseVelocity = _globalRollMouseState.velocity.get();
+}
+
+void OrbitalInteractionMode::MouseStates::postSynchronizationPreDraw() {
+    _synchedGlobalRotationMouseVelocity = _sharedGlobalRotationMouseVelocity;
+    _synchedLocalRotationMouseVelocity = _sharedLocalRotationMouseVelocity;
+    _synchedTruckMovementMouseVelocity = _sharedTruckMovementMouseVelocity;
+    _synchedLocalRollMouseVelocity = _sharedLocalRollMouseVelocity;
+    _synchedGlobalRollMouseVelocity = _sharedGlobalRollMouseVelocity;
+}
+
+void OrbitalInteractionMode::MouseStates::serialize(SyncBuffer* syncBuffer) {
+    syncBuffer->encode(_sharedGlobalRotationMouseVelocity);
+    syncBuffer->encode(_sharedLocalRotationMouseVelocity);
+    syncBuffer->encode(_sharedTruckMovementMouseVelocity);
+    syncBuffer->encode(_sharedLocalRollMouseVelocity);
+    syncBuffer->encode(_sharedGlobalRollMouseVelocity);
+}
+
+void OrbitalInteractionMode::MouseStates::deserialize(SyncBuffer* syncBuffer) {
+    syncBuffer->decode(_sharedGlobalRotationMouseVelocity);
+    syncBuffer->decode(_sharedLocalRotationMouseVelocity);
+    syncBuffer->decode(_sharedTruckMovementMouseVelocity);
+    syncBuffer->decode(_sharedLocalRollMouseVelocity);
+    syncBuffer->decode(_sharedGlobalRollMouseVelocity);
+}
+
 OrbitalInteractionMode::OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates)
     : InteractionMode()
     , _mouseStates(mouseStates){
@@ -290,6 +346,9 @@ OrbitalInteractionMode::~OrbitalInteractionMode() {
 }
 
 void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    // Update synched data
+    _mouseStates->postSynchronizationPreDraw();
+
     using namespace glm;
     if (_focusNode) {
         // Read the current state of the camera and focus node
@@ -322,17 +381,17 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
 
         { // Do local roll
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->_localRollMouseState.velocity.get().x, dvec3(0, 0, 1));
+                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x, dvec3(0, 0, 1));
             localCameraRotation = localCameraRotation * cameraRollRotation;
         }
         { // Do local rotation
-            dvec3 eulerAngles(_mouseStates->_localRotationMouseState.velocity.get().y, _mouseStates->_localRotationMouseState.velocity.get().x, 0);
+            dvec3 eulerAngles(_mouseStates->synchedLocalRotationMouseVelocity().y, _mouseStates->synchedLocalRotationMouseVelocity().x, 0);
             dquat rotationDiff = dquat(eulerAngles);
 
             localCameraRotation = localCameraRotation * rotationDiff;
         }
         { // Do global rotation
-            dvec2 smoothMouseVelocity = _mouseStates->_globalRotationMouseState.velocity.get();
+            dvec2 smoothMouseVelocity = _mouseStates->synchedGlobalRotationMouseVelocity();
             dvec3 eulerAngles(-smoothMouseVelocity.y, -smoothMouseVelocity.x, 0);
             dquat rotationDiffCamSpace = dquat(eulerAngles);
 
@@ -357,11 +416,11 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
                 -directionToCenter *
                 boundingSphere;
             camPos += -(centerToCamera - centerToBoundingSphere) *
-                _mouseStates->_truckMovementMouseState.velocity.get().y;
+                _mouseStates->synchedTruckMovementMouseVelocity().y;
         }
         { // Roll around sphere normal
             dquat cameraRollRotation =
-                angleAxis(_mouseStates->_globalRollMouseState.velocity.get().x, -directionToCenter);
+                angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x, -directionToCenter);
             globalCameraRotation = cameraRollRotation * globalCameraRotation;
         }
         { // Push up to surface
@@ -378,9 +437,17 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     }
 }
 
-void OrbitalInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
+void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     _mouseStates->updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates(camera);
+    _mouseStates->preSynchronization();
+}
+
+void OrbitalInteractionMode::serialize(SyncBuffer* syncBuffer) {
+    _mouseStates->serialize(syncBuffer);
+}
+
+void OrbitalInteractionMode::deserialize(SyncBuffer* syncBuffer) {
+    _mouseStates->deserialize(syncBuffer);
 }
 
 GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(std::shared_ptr<MouseStates> mouseStates)
@@ -408,6 +475,9 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    // Update synched data
+    _mouseStates->postSynchronizationPreDraw();
+
     using namespace glm;
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
@@ -467,19 +537,19 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
         { // Do local roll
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->_localRollMouseState.velocity.get().x, dvec3(0, 0, 1));
+                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x, dvec3(0, 0, 1));
             localCameraRotation = localCameraRotation * cameraRollRotation;
         }
         { // Do local rotation
-            glm::dvec3 eulerAngles(_mouseStates->_localRotationMouseState.velocity.get().y, _mouseStates->_localRotationMouseState.velocity.get().x, 0);
+            glm::dvec3 eulerAngles(_mouseStates->synchedLocalRotationMouseVelocity().y, _mouseStates->synchedLocalRotationMouseVelocity().x, 0);
             glm::dquat rotationDiff = glm::dquat(eulerAngles);
 
             localCameraRotation = localCameraRotation * rotationDiff;
         }
         { // Do global rotation (horizontal movement)
             glm::dvec3 eulerAngles = glm::dvec3(
-                -_mouseStates->_globalRotationMouseState.velocity.get().y,
-                -_mouseStates->_globalRotationMouseState.velocity.get().x,
+                -_mouseStates->synchedGlobalRotationMouseVelocity().y,
+                -_mouseStates->synchedGlobalRotationMouseVelocity().x,
                 0) * glm::clamp(distFromEllipsoidSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
@@ -528,11 +598,11 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         { // Move position towards or away from focus node
             distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
             camPos += -directionFromSurfaceToCamera * distFromEllipsoidSurfaceToCamera *
-                _mouseStates->_truckMovementMouseState.velocity.get().y;
+                _mouseStates->synchedTruckMovementMouseVelocity().y;
         }
         { // Roll around ellipsoid normal
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->_globalRollMouseState.velocity.get().x, directionFromSurfaceToCamera);
+                glm::angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x, directionFromSurfaceToCamera);
             globalCameraRotation = cameraRollRotation * globalCameraRotation;
         }
         { // Push up to surface
@@ -556,11 +626,6 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         camera.setPositionVec3(camPos); 
         camera.setRotation(globalCameraRotation * localCameraRotation);
     }
-}
-
-void GlobeBrowsingInteractionMode::update(Camera& camera, const InputState& inputState, double deltaTime) {
-    _mouseStates->updateMouseStatesFromInput(inputState, deltaTime);
-    updateCameraStateFromMouseStates(camera);
 }
 
 } // namespace interaction
