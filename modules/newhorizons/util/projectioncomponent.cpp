@@ -26,6 +26,7 @@
 
 #include <modules/newhorizons/util/hongkangparser.h>
 #include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/instrumenttimesparser.h>
 #include <modules/newhorizons/util/labelparser.h>
 
 #include <openspace/scene/scenegraphnode.h>
@@ -55,6 +56,7 @@ namespace {
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
     const std::string sequenceTypeHybrid = "hybrid";
+    const std::string sequenceTypeInstrumentTimes = "instrument-times";
 
     const std::string placeholderFile =
         "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
@@ -204,8 +206,13 @@ bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) 
                     LWARNING("No eventfile has been provided, please check modfiles");
                 }
             }
+            else if (sequenceType == sequenceTypeInstrumentTimes) {
+                parsers.push_back(new InstrumentTimesParser(
+                    name, 
+                    sequenceSource, 
+                    translationDictionary));
+            }
 
-            
             for(SequenceParser* parser : parsers){
                 openspace::ImageSequencer::ref().runSequenceParser(parser);
                 delete parser;
