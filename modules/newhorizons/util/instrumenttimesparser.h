@@ -45,12 +45,16 @@ public:
 
     bool create() override;
 
+    //virtual std::map<std::string, Decoder*> getTranslation() override;
+
     // temporary need to figure this out
-    std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+   std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
 private:
     
     std::regex _pattern;
+
+    std::map<std::string, std::vector<std::string>> _instrumentFiles;
 
     std::string _name;
     std::string _fileName;
@@ -59,8 +63,6 @@ private:
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;
-    std::string _instrumentID;
-    std::string _instrumentHostID;
     std::string _detectorType;
     std::string _sequenceID;
     bool _badDecoding;
