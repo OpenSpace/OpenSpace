@@ -71,6 +71,10 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     , _vBufferID(0)
     , _needsSweep(true)
     , _oldTime(std::numeric_limits<double>::max())
+    , _tropic(0.f)
+    , _ratio(0.f)
+    , _day(0.f)
+    , _increment(0.f)
 {
     _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);

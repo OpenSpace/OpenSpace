@@ -26,6 +26,8 @@
 #define __CHUNK_INDEX_H__
 
 #include <glm/glm.hpp>
+
+#include <string>
 #include <vector>
 #include <stdint.h>
 

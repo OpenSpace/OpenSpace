@@ -22,71 +22,50 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __INSTRUMENTTIMESPARSER_H__
+#define __INSTRUMENTTIMESPARSER_H__
 
-
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
-
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
+#include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/sequenceparser.h>
 
 #include <ghoul/misc/dictionary.h>
 
-#include <memory>
-#include <vector>
+#include <map>
 #include <string>
-
+#include <vector>
+#include <regex>
 
 namespace openspace {
+class InstrumentTimesParser : public SequenceParser{
+public:
+    InstrumentTimesParser(
+        const std::string& name,
+        const std::string& sequenceSource,
+        ghoul::Dictionary& parserDict);
 
+    bool create() override;
+
+    //virtual std::map<std::string, Decoder*> getTranslation() override;
+
+    // temporary need to figure this out
+   std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+
+private:
     
-    struct NamedTileProvider {
-        std::string name;
-        std::shared_ptr<TileProvider> tileProvider;
-        bool isActive;
-    };
+    std::regex _pattern;
 
+    std::map<std::string, std::vector<std::string>> _instrumentFiles;
 
+    std::string _name;
+    std::string _fileName;
+    std::string _spacecraft;
+    std::map<std::string, Decoder*> _fileTranslation;
+    std::vector<std::string> _specsOfInterest;
 
-    struct TileProviderGroup {
-
-        void update();
-        const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const;
-
-
-        std::vector<NamedTileProvider> tileProviders;
-        bool levelBlendingEnabled;
-
-    };
-
-
-
-    class TileProviderManager {
-    public:
-
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-        TileProviderGroup& getTileProviderGroup(size_t groupId);
-        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
-
-        void update();
-        void reset(bool includingInactive = false);
-
-
-    private:
-        static void initTexures(
-            std::vector<NamedTileProvider>& destination, 
-            const ghoul::Dictionary& dict, 
-            const TileProviderInitData& initData);
-
-        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
-    };
-
-} // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+    std::string _target;
+    std::string _detectorType;
+    std::string _sequenceID;
+    bool _badDecoding;
+};
+}
+#endif //__INSTRUMENTTIMESPARSER_H__

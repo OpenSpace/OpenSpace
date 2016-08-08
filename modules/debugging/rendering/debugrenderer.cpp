@@ -59,8 +59,10 @@ namespace openspace {
 
     DebugRenderer::~DebugRenderer()
     {
-
+        // nothing to do
     }
+
+
 
     const DebugRenderer& DebugRenderer::ref() {
         if (_reference == nullptr) {
@@ -102,6 +104,7 @@ namespace openspace {
             &clippingSpacePoints[0],
             GL_STATIC_DRAW);
 
+
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
 
@@ -121,6 +124,7 @@ namespace openspace {
         _programObject->deactivate();
     }
 
+
     void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners, RGBA rgba) const {
         ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
         const Vertices& V = clippingSpaceBoxCorners;
@@ -130,6 +134,7 @@ namespace openspace {
         // add "sides"
         T.push_back(V[1]); T.push_back(V[0]); T.push_back(V[4]);
         T.push_back(V[4]); T.push_back(V[5]); T.push_back(V[1]);
+
 
         T.push_back(V[3]); T.push_back(V[1]); T.push_back(V[5]);
         T.push_back(V[5]); T.push_back(V[7]); T.push_back(V[3]);
@@ -167,6 +172,7 @@ namespace openspace {
         lineVertices.push_back(V[1]); lineVertices.push_back(V[3]);
         lineVertices.push_back(V[4]); lineVertices.push_back(V[6]);
         lineVertices.push_back(V[5]); lineVertices.push_back(V[7]);
+
         DebugRenderer::ref().renderVertices(lineVertices, GL_LINES, rgba);
     }
 
@@ -246,3 +252,4 @@ namespace openspace {
 
 
 } // namespace openspace
+

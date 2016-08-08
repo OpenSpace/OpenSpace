@@ -682,7 +682,7 @@ public:
      * \param destinationFrame The name of the destination reference frame
      * \param ephemerisTimeFrom The time for the source reference frame
      * \param ephemerisTimeTo The time for the destination reference frame
-     * \return Thetransformation matrix that maps between the \p sourceFrame at time
+     * \return The transformation matrix that maps between the \p sourceFrame at time
      * \p ephemerisTimeFrom to the \p destinationFrame at the time \p ephemerisTimeTo.
      * \throws SpiceException If there is no coverage available for the specified
      * \p sourceFrame and \p destinationFrame

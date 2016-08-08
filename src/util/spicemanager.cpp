@@ -711,7 +711,6 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& fromFrame,
     throwOnSpiceError("");
     SpiceBoolean success = !(failed_c());
     reset_c();
-    bool estimated = false;
     if (!success)
         result = getEstimatedTransformMatrix(fromFrame, toFrame, ephemerisTime);
 
@@ -951,9 +950,6 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
         throw SpiceException(format("No position for '{}' at any time", target));
     }
     
-    
-    int observerId = naifId(observer);
-
     const std::set<double>& coveredTimes = _spkCoverageTimes.find(targetId)->second;
     
     glm::dvec3 pos;

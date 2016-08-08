@@ -158,7 +158,7 @@ else (WIN32)
     target_include_directories(
         openspace-module-globebrowsing
         SYSTEM PUBLIC
-        ${GDAL_INCLUDE}
+        ${GDAL_INCLUDE_DIR}
     )
 
     target_link_libraries(

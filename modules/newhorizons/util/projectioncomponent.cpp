@@ -26,6 +26,7 @@
 
 #include <modules/newhorizons/util/hongkangparser.h>
 #include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/instrumenttimesparser.h>
 #include <modules/newhorizons/util/labelparser.h>
 
 #include <openspace/scene/scenegraphnode.h>
@@ -55,6 +56,7 @@ namespace {
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
     const std::string sequenceTypeHybrid = "hybrid";
+    const std::string sequenceTypeInstrumentTimes = "instrument-times";
 
     const std::string placeholderFile =
         "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
@@ -152,7 +154,7 @@ bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
 
-    SequenceParser* parser;
+    std::vector<SequenceParser*> parsers;
 
     std::string sequenceSource;
     std::string sequenceType;
@@ -168,41 +170,52 @@ bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) 
             dictionary.getValue(keyTranslation, translationDictionary);
 
             if (sequenceType == sequenceTypePlaybook) {
-                parser = new HongKangParser(name,
-                                            sequenceSource,
-                                            _projectorID,
-                                            translationDictionary,
-                                            _potentialTargets);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
+                parsers.push_back(new HongKangParser(
+                    name, 
+                    sequenceSource, 
+                    _projectorID, 
+                    translationDictionary, 
+                    _potentialTargets));
             }
             else if (sequenceType == sequenceTypeImage) {
-                parser = new LabelParser(name,
-                                         sequenceSource,
-                                         translationDictionary);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
+                parsers.push_back(new LabelParser(
+                    name, 
+                    sequenceSource, 
+                    translationDictionary));
             }
             else if (sequenceType == sequenceTypeHybrid) {
                 //first read labels
-                parser = new LabelParser(name,
-                                         sequenceSource,
-                                         translationDictionary);
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
+                parsers.push_back(new LabelParser(
+                    name, 
+                    sequenceSource, 
+                    translationDictionary));
 
                 std::string _eventFile;
                 bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
                 if (foundEventFile) {
                     //then read playbook
                     _eventFile = absPath(_eventFile);
-                    parser = new HongKangParser(name,
-                                                _eventFile,
-                                                _projectorID,
-                                                translationDictionary,
-                                                _potentialTargets);
-                    openspace::ImageSequencer::ref().runSequenceParser(parser);
+                    parsers.push_back(new HongKangParser(
+                        name, 
+                        _eventFile, 
+                        _projectorID,
+                        translationDictionary, 
+                        _potentialTargets));
                 }
                 else {
                     LWARNING("No eventfile has been provided, please check modfiles");
                 }
+            }
+            else if (sequenceType == sequenceTypeInstrumentTimes) {
+                parsers.push_back(new InstrumentTimesParser(
+                    name, 
+                    sequenceSource, 
+                    translationDictionary));
+            }
+
+            for(SequenceParser* parser : parsers){
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
+                delete parser;
             }
         }
         else {

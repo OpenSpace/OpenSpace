@@ -146,6 +146,7 @@ namespace openspace {
     protected:
         std::unique_ptr<ProgramObject> _programObject;
 
+
         // A raw pointer for the reason that it should not be deleted by the static
         // destructor and the normal destructor. This class has ownership
         static DebugRenderer* _reference;

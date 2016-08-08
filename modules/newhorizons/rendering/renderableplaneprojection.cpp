@@ -207,7 +207,7 @@ void RenderablePlaneProjection::loadTexture() {
     }
 }
 
-void RenderablePlaneProjection::updatePlane(const Image img, double currentTime) {
+void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime) {
 
     std::string frame;
     std::vector<glm::dvec3> bounds;

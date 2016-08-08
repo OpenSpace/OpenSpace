@@ -325,11 +325,19 @@ void RenderEngine::preSynchronization() {
 
 void RenderEngine::postSynchronizationPreDraw() {
     //temporary fade funtionality
+    float fadedIn = 1.0;
+    float fadedOut = 0.0;
+    // Don't restart the fade if you've already done it in that direction
+    if (  (_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
+       || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
+        _fadeDirection = 0;
+    }
+
     if (_fadeDirection != 0) {
         if (_currentFadeTime > _fadeDuration){
+            _globalBlackOutFactor = _fadeDirection > 0 ? fadedIn : fadedOut;
             _fadeDirection = 0;
-            _globalBlackOutFactor = fminf(1.f, fmaxf(0.f, _globalBlackOutFactor));
-        } 
+        }
         else {
             if (_fadeDirection < 0)
                 _globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
@@ -711,6 +719,13 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::setPerformanceMeasurement,
                 "bool",
                 "Sets the performance measurements"
+            },
+            {
+                "toggleFade",
+                &luascriptfunctions::toggleFade,
+                "number",
+                "Toggles fading in or out",
+                true
             },
             {
                 "fadeIn",
@@ -1212,16 +1227,10 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std:
 
 void RenderEngine::renderInformation() {
     // TODO: Adjust font_size properly when using retina screen
-    const float fontSizeMono = 10.f;
-    const float fontSizeTime = 15.f;
-
     using Font = ghoul::fontrendering::Font;
     using ghoul::fontrendering::RenderFont;
 
-
     if (_showInfo && _fontDate && _fontInfo) {
-        double currentTime = Time::ref().currentTime();
-
         glm::vec2 penPosition = glm::vec2(
             10.f,
             OsEng.windowWrapper().viewportPixelCoordinates().w
@@ -1248,6 +1257,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+        double currentTime = Time::ref().currentTime();
 
         if (openspace::ImageSequencer::ref().isReady()) {
             penPosition.y -= 25.f;
@@ -1265,7 +1275,6 @@ void RenderEngine::renderInformation() {
                     SpiceManager::ref().getValue("PLUTO", "RADII", radii);
                     a = radii.x;
                     b = radii.y;
-                    c = radii.z;
                     float radius = (a + b) / 2.f;
                     float distToSurf = glm::length(nhPos.vec3()) - radius;
 
@@ -1334,11 +1343,14 @@ void RenderEngine::renderInformation() {
                 int minute = second / 60;
                 second = second % 60;
 
-                std::string hh, mm, ss, coundtown;
+                std::string hh, mm, ss;
 
-                if (hour   < 10) hh.append("0");
-                if (minute < 10) mm.append("0");
-                if (second < 10) ss.append("0");
+                if (hour   < 10)
+                    hh.append("0");
+                if (minute < 10)
+                    mm.append("0");
+                if (second < 10)
+                    ss.append("0");
 
                 hh.append(std::to_string(hour));
                 mm.append(std::to_string(minute));

@@ -53,7 +53,7 @@ TEST_F(GdalWmsTest, Simple) {
     
     std::cout << res << std::endl;
 
-    std::string testFile = absPath("../data/scene/debugglobe/map_service_configs/TERRA_CR_B143_2016-04-12.wms");
+    std::string testFile = absPath("${SCENE}/debugglobe/map_service_configs/TERRA_CR_B143_2016-04-12.wms");
 
     poDataset = (GDALDataset *)GDALOpen(testFile.c_str(), GA_ReadOnly);
 

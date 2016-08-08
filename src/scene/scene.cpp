@@ -90,10 +90,13 @@ bool Scene::deinitialize() {
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
-        try {
+        try {          
             loadSceneInternal(_sceneGraphToLoad);
-            _sceneGraphToLoad = "";
-            
+
+            // Reset the InteractionManager to Orbital/default mode
+            // TODO: Decide if it belongs in the scene and/or how it gets reloaded
+            OsEng.interactionHandler().setInteractionMode("Orbital");
+
             // After loading the scene, the keyboard bindings have been set
             
             std::string type;
@@ -109,6 +112,9 @@ void Scene::update(const UpdateData& data) {
             if (hasType && hasFile) {
                 OsEng.interactionHandler().writeKeyboardDocumentation(type, file);
             }
+
+            LINFO("Loaded " << _sceneGraphToLoad);
+            _sceneGraphToLoad = "";
         }
         catch (const ghoul::RuntimeError& e) {
             LERROR(e.what());
@@ -150,6 +156,7 @@ void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
 }
 
 void Scene::clearSceneGraph() {
+    LINFO("Clearing current scene graph");
     // deallocate the scene graph. Recursive deallocation will occur
     _graph.clear();
     //if (_root) {

@@ -46,6 +46,10 @@ ImageSequencer* ImageSequencer::_instance = nullptr;
 
 ImageSequencer::ImageSequencer()
     : _hasData(false)
+    , _currentTime(0.0)
+    , _previousTime(0.0)
+    , _intervalLength(0.0)
+    , _nextCapture(0.0)
 {}
 
 ImageSequencer& ImageSequencer::ref() {
@@ -63,22 +67,22 @@ void ImageSequencer::deinitialize() {
     _instance = nullptr;
 }
 
-bool ImageSequencer::isReady(){
+bool ImageSequencer::isReady() {
     return _hasData;
 }
 
-void ImageSequencer::updateSequencer(double time){
-    if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0){
+void ImageSequencer::updateSequencer(double time) {
+    if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0) {
         Time::ref().setDeltaTime(0.1);
     } // Time is not properly updated when time jump with dt = 0 
 
-    if (_currentTime != time){
+    if (_currentTime != time) {
         _previousTime = _currentTime;
         _currentTime = time;
     }
 }
 
-std::pair<double, std::string> ImageSequencer::getNextTarget(){
+std::pair<double, std::string> ImageSequencer::getNextTarget() {
     auto compareTime = [](const std::pair<double, std::string> &a,
                           const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
@@ -93,7 +97,7 @@ std::pair<double, std::string> ImageSequencer::getNextTarget(){
         return std::make_pair(0.0, "");
 }
 
-std::pair<double, std::string> ImageSequencer::getCurrentTarget(){
+std::pair<double, std::string> ImageSequencer::getCurrentTarget() {
     auto compareTime = [](const std::pair<double, std::string> &a,
                           const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
@@ -109,7 +113,7 @@ std::pair<double, std::string> ImageSequencer::getCurrentTarget(){
         return std::make_pair(0.0, "No Target");
 }
 
-std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(int range){
+std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(int range) {
     std::pair<double, std::vector<std::string>> incidentTargets;
 
     auto compareTime = [](const std::pair<double, std::string> &a,
@@ -158,7 +162,7 @@ double ImageSequencer::getNextCaptureTime(){
 
     return nextCaptureTime;
 }
-const Image ImageSequencer::getLatestImageForInstrument(const std::string _instrumentID){
+Image ImageSequencer::getLatestImageForInstrument(const std::string& _instrumentID){
     auto it = _latestImages.find(_instrumentID);
     if (it != _latestImages.end())
         return _latestImages[_instrumentID];
@@ -341,8 +345,11 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
         std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 
         // check for sanity
-        if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty())
+        if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty()) {
+            LERROR("Missing sequence data");
             return;
+        }
+            
 
         // append data
         _fileTranslation.insert(translations.begin(), translations.end());
@@ -369,14 +376,13 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 
                 // find the smallest separation of images in time
                 double epsilon;
-                epsilon = findMin(source);
+                //epsilon = findMin(source);
                 epsilon = findMin(destination);
                 // set epsilon as 1% smaller than min
                 epsilon -= min*0.01;
                 
                 // IFF images have same time as mission planned capture, erase that event from 
                 // 'predicted event file' (mission-playbook)
-                std::vector<Image> tmp;
                 for (int i = 0; i < source.size(); i++){
                     for (int j = 0; j < destination.size(); j++){
                         double diff = abs(source[i].startTime - destination[j].startTime);

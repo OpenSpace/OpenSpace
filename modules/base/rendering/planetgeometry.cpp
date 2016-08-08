@@ -54,24 +54,19 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
 }
 
 PlanetGeometry::PlanetGeometry()
-    //: _parent(nullptr)
+    : _parent(nullptr)
 {
     setName("PlanetGeometry");
 }
 
-PlanetGeometry::~PlanetGeometry()
-{
-}
+PlanetGeometry::~PlanetGeometry() {}
 
-bool PlanetGeometry::initialize(Renderable* parent)
-{
+bool PlanetGeometry::initialize(Renderable* parent) {
     _parent = parent;
     return true;
 }
 
-void PlanetGeometry::deinitialize()
-{
-}
+void PlanetGeometry::deinitialize() {}
 
 }  // namespace planetgeometry
 }  // namespace openspace

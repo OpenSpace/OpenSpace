@@ -48,7 +48,6 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyStopCommand, _stopCommand);
     }
 
-    std::vector<std::string> spice;
     ghoul::Dictionary spiceDictionary;
     success = dictionary.getValue(keySpice, spiceDictionary);
     ghoul_assert(success, "Instrument did not provide spice ids");
