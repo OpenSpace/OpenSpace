@@ -737,9 +737,8 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
-        //_interactionHandler->update(dt);
+        // Update the mouse velocities for interaction handler
         _interactionHandler->preSynchronization(dt);
-        _interactionHandler->postSynchronizationPreDraw();
 
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
@@ -763,14 +762,18 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     Time::ref().postSynchronizationPreDraw();
-
-    _scriptEngine->postSynchronizationPreDraw();
-
-    _renderEngine->postSynchronizationPreDraw();
+    // Sync the camera to match the previous frame
     _renderEngine->camera()->postSynchronizationPreDraw();
 
-    //_renderEngine->camera()->preSynchronization();
-    //_renderEngine->camera()->postSynchronizationPreDraw();
+    _scriptEngine->postSynchronizationPreDraw();
+    _renderEngine->postSynchronizationPreDraw();
+    
+    // Step the camera using the current mouse velocities which are synced
+    _interactionHandler->postSynchronizationPreDraw();
+
+    // Update the synched variables in the camera class
+    _renderEngine->camera()->preSynchronization();
+    _renderEngine->camera()->postSynchronizationPreDraw();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
