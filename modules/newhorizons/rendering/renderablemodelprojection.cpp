@@ -131,9 +131,7 @@ bool RenderableModelProjection::initialize() {
     );
 
     completeSuccess &= loadTextures();
-
     completeSuccess &= _projectionComponent.initialize();
-
     completeSuccess &= _geometry->initialize(this);
     completeSuccess &= !_source.empty();
     completeSuccess &= !_destination.empty();
@@ -174,13 +172,24 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     attitudeParameters(_time);
     _imageTimes.clear();
+
+    // Calculate variables to be used as uniform variables in shader
+    glm::dvec3 bodyPosition = data.positionVec3;
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
+        glm::dmat4(_stateMatrix); // Rotation
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
+    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
         
     _programObject->setUniform("_performShading", _performShading);
-    _programObject->setUniform("sun_pos", _sunPosition.vec3());
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", _transform);
+    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
-    setPscUniforms(*_programObject, data.camera, data.position);
+
 
     _geometry->setUniforms(*_programObject);
     
