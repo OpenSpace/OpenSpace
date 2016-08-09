@@ -13,7 +13,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris.obj",
-                Magnification = 4,
+                Magnification = 0,
             }, 
             Textures = {
                 Type = "simple",

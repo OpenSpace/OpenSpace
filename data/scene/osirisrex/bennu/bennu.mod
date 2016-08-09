@@ -14,7 +14,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/BennuUntextured.obj",
-                Magnification = 4,
+                Magnification = 3.3,
             }, 
             Shading = {
                 PerformShading = true,
