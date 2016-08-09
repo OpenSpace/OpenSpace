@@ -1,18 +1,19 @@
+local BENNU_BODY = "2101955"
+
 return {
     ------------------------
     --     Osiris Rex     --
     ------------------------
     {
         Name = "OsirisRex",
-        Parent = "SolarSystemBarycenter",
-
+        Parent = "Bennu2",
         Renderable = {
             Type = "RenderableModel",
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris.obj",
-                Magnification = 0.5,
+                Magnification = 4,
             }, 
             Textures = {
                 Type = "simple",
@@ -34,7 +35,7 @@ return {
             Body = "OSIRIS-REX",
             -- Reference = "ECLIPJ2000",
             Reference = "GALACTIC",
-            Observer = "SUN",
+            Observer = BENNU_BODY,
         },
 
         GuiName = "/Solar/OsirisRex"
@@ -42,14 +43,15 @@ return {
 
     {   
         Name = "OsirisRexPath",
-        Parent = "SolarSystemBarycenter",
+        Parent = "Bennu2",
         Renderable = {
             Type = "RenderablePath",
             Body = "OSIRIS-REX",
             Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.8, 0.8, 0.2},
+            Observer = BENNU_BODY,
+            RGB = { 0.8, 0.0, 0.5},
             TimeSteps = 900,
+            PointSteps = 4, -- Every fourth point is marked differently to show hours 
             Textures = {
                 Type = "simple",
                 Color = "textures/glare_blue.png",

@@ -104,8 +104,6 @@ return {
 
         GuiName = "/Solar/Bennu"
     },
-
-
     {   
         Name = "BennuTrail",
         Parent = "SolarSystemBarycenter",
