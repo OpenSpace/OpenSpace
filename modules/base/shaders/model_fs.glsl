@@ -67,7 +67,7 @@ Fragment getFragment() {
         float specularPower = 100;
 
         vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        vec3 diffuseColor = specularIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
         vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
 
         color = ambientColor + diffuseColor + specularColor;

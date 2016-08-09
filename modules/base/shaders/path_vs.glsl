@@ -30,6 +30,8 @@ uniform vec3 color;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform int pointSteps;
+uniform float lineFade;
+uniform int numVertices;
 
 out vec4 vs_positionScreenSpace;
 out vec4 vs_pointColor;
@@ -41,16 +43,20 @@ void main() {
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     
     gl_Position = vs_positionScreenSpace;
-        
-    int id = gl_VertexID;
-    
-    if(mod(id, pointSteps) == 0) {
+            
+    if(mod(gl_VertexID, pointSteps) == 0) {
         vs_pointColor.rgb = color;
-        vs_pointColor.a = 1.f;
         gl_PointSize = 10.0f;  
     }
     else {
-        vs_pointColor = vec4(0.6f, 0.6f, 0.6f, 0.8f);
+        vs_pointColor.rgb = (color + vec3(0.6f, 0.6f, 0.6f)) / 2;
         gl_PointSize = 5.f;  
+    }
+    if (lineFade == 0)
+        vs_pointColor.a = 1.0;
+    else
+    {
+        int threshHold = int(lineFade * numVertices);
+        vs_pointColor.a = float(gl_VertexID - threshHold) / (numVertices - threshHold);
     }
 }
