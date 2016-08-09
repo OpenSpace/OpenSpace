@@ -140,17 +140,40 @@ void RenderablePath::render(const RenderData& data) {
     if (_start > time || _stop < time)
         return;
 
-    //const psc& position = data.camera.position();
-    //const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
-    //const PowerScaledScalar& pssl = (position - origin).length();
-    //double properLength = static_cast<double>(pssl.lengthf());
-    //const PowerScaledScalar corrected = PowerScaledScalar::CreatePSS(properLength);
-    //float exp = corrected[1];
-    //
-    //if (exp > 11)
-    //    return;
-    
+
+    int nPointsToDraw = (time - _start) / (_stop - _start) * _vertexArray.size() + 3;
+
     _programObject->activate();
+
+    // Calculate variables to be used as uniform variables in shader
+    glm::dvec3 bodyPosition = data.positionVec3;
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), bodyPosition); // Translation
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("color", _lineColor);
+
+    if (_drawLine) {
+        glLineWidth(_lineWidth);
+        glBindVertexArray(_vaoID);
+        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(nPointsToDraw));
+        glBindVertexArray(0);
+        glLineWidth(1.f);
+    }
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
+    glBindVertexArray(_vaoID);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nPointsToDraw));
+    glBindVertexArray(0);
+
+    glDisable(GL_PROGRAM_POINT_SIZE);
+
+    /*
     psc currentPosition = data.position;
     glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
     glm::mat4 transform = glm::mat4(1);
@@ -188,6 +211,7 @@ void RenderablePath::render(const RenderData& data) {
     glBindVertexArray(0);
     
     glDisable(GL_PROGRAM_POINT_SIZE);
+    */
 
     _programObject->deactivate();
 }
@@ -219,15 +243,20 @@ void RenderablePath::calculatePath(std::string observer) {
     double currentTime = _start;
     _vertexArray.resize(segments);
 
-    psc pscPos;
+    //psc pscPos;
     //float r, g, b;
     //float g = _lineColor[1];
     //float b = _lineColor[2];
+    glm::vec3 position;
     for (int i = 0; i < segments; i++) {
-        glm::dvec3 p =
-        SpiceManager::ref().targetPosition(_target, observer, _frame, {}, currentTime, lightTime);
-        pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-        pscPos[3] += 3;
+        position =
+        glm::vec3(SpiceManager::ref().targetPosition(_target, observer, _frame, {}, currentTime, lightTime));
+        
+        // Convert from 100 m to m
+        position *= 10e2;
+        
+        //pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+        //pscPos[3] += 3;
             
         //if (!correctPosition) {
         //    r = 1.f;
@@ -242,12 +271,12 @@ void RenderablePath::calculatePath(std::string observer) {
         //    r = g = b = 0.6f;
         //}
         //add position
-        _vertexArray[i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
+        _vertexArray[i] = { position[0], position[1], position[2], 1.0f };
         //add color for position
         //_vertexArray[i + 1] = { r, g, b, a };
         currentTime += _increment;
     }
-    _lastPosition = pscPos.dvec4();
+    _lastPosition = glm::vec4(position, 1.0f);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() *  sizeof(VertexInfo), &_vertexArray[0]);
