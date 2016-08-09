@@ -34,7 +34,7 @@ return {
             Projection = {
                 Sequence   = "InstrumentTimes",
                 SequenceType = "instrument-times",
-                Observer   = "OSIRIS-REX",
+                Observer   = "SUN",
                 Target     = BENNU_BODY,
                 Aberration = "NONE",
             },
