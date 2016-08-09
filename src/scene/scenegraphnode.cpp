@@ -171,9 +171,7 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    _worldPositionCached = calculateWorldPosition();
     UpdateData newUpdateData = data;
-    newUpdateData.position = worldPosition();
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -203,6 +201,8 @@ void SceneGraphNode::update(const UpdateData& data) {
         else
             _renderable->update(newUpdateData);
     }
+    _worldPositionCached = calculateWorldPosition();
+    newUpdateData.position = worldPosition();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
