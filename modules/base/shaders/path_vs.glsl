@@ -29,6 +29,7 @@ in vec4 in_point_position;
 uniform vec3 color;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
+uniform int pointSteps;
 
 out vec4 vs_positionScreenSpace;
 out vec4 vs_pointColor;
@@ -42,15 +43,14 @@ void main() {
     gl_Position = vs_positionScreenSpace;
         
     int id = gl_VertexID;
-    bool isNewHour = mod(id * 900, 3600) > 0;
     
-    if(isNewHour) {
-        vs_pointColor = vec4(0.6f, 0.6f, 0.6f, 0.8f);
-        gl_PointSize = 5.f;    
-    }
-    else {  
+    if(mod(id, pointSteps) == 0) {
         vs_pointColor.rgb = color;
         vs_pointColor.a = 1.f;
-        gl_PointSize = 10.0f;
+        gl_PointSize = 10.0f;  
+    }
+    else {
+        vs_pointColor = vec4(0.6f, 0.6f, 0.6f, 0.8f);
+        gl_PointSize = 5.f;  
     }
 }

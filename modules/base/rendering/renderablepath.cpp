@@ -49,6 +49,7 @@ namespace {
     const std::string keyPathModule = "ModulePath";
     const std::string keyColor = "RGB";
     const std::string keyTimeSteps = "TimeSteps";
+    const std::string keyPointSteps = "PointSteps";
     const std::string keyDrawLine = "DrawLine";
 
 }
@@ -72,6 +73,9 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
     _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
     _successfullDictionaryFetch &= dictionary.getValue(keyFrame, _frame);
     _successfullDictionaryFetch &= dictionary.getValue(keyTimeSteps, _increment);
+
+    if (!dictionary.getValue(keyPointSteps, _pointSteps))
+        _pointSteps = 4;
 
     glm::vec3 color(0.f);
     if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
@@ -141,7 +145,7 @@ void RenderablePath::render(const RenderData& data) {
         return;
 
 
-    int nPointsToDraw = (time - _start) / (_stop - _start) * _vertexArray.size() + 3;
+    int nPointsToDraw = (time - _start) / (_stop - _start) * (_vertexArray.size()) + 1 + 0.5;
 
     _programObject->activate();
 
@@ -155,6 +159,7 @@ void RenderablePath::render(const RenderData& data) {
     
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("pointSteps", _pointSteps);
     _programObject->setUniform("color", _lineColor);
 
     if (_drawLine) {
@@ -172,46 +177,6 @@ void RenderablePath::render(const RenderData& data) {
     glBindVertexArray(0);
 
     glDisable(GL_PROGRAM_POINT_SIZE);
-
-    /*
-    psc currentPosition = data.position;
-    glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
-    glm::mat4 transform = glm::mat4(1);
-
-    // setup the data to the shader
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
-    _programObject->setUniform("color", _lineColor);
-    _programObject->setUniform("lastPosition", _lastPosition);
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
-
-    if (_drawLine) {
-        glLineWidth(_lineWidth);
-        glBindVertexArray(_vaoID);
-        glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexArray.size()));
-        glBindVertexArray(0);
-        glLineWidth(1.f);
-    }
-    
-    //float pointSize = std::min((11-exp),5.f);
-    //glPointSize(5);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    
-    //GLfloat distanceParams[] = { 1.0f, 5.0f, 10.f }; //a, b, c
-    //GLfloat fadeThreshold[] = { 0.1f };
-    //
-    //glPointParameterf(GL_POINT_SIZE_MAX, 5.0f);
-    //glPointParameterf(GL_POINT_SIZE_MIN, 1.0f);
-    //glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, distanceParams);
-    ////=> size = clamp(size*sqrt(1/(a+b*d+c*d^2)));
-    //glPointParameterfv(GL_POINT_FADE_THRESHOLD_SIZE, fadeThreshold);
-
-    glBindVertexArray(_vaoID);
-    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
-    glBindVertexArray(0);
-    
-    glDisable(GL_PROGRAM_POINT_SIZE);
-    */
 
     _programObject->deactivate();
 }

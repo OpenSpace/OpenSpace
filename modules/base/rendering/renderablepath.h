@@ -87,6 +87,7 @@ private:
     double _start;
     double _stop;
     float _distanceFade;
+    int _pointSteps;
 };
 
 } // namespace openspace
