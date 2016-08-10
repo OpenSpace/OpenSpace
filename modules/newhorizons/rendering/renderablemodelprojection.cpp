@@ -97,7 +97,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);
     
     openspace::SpiceManager::ref().addFrame(_target, _source);
-    setBoundingSphere(pss(1.f, 9.f));
+
+    double boundingRadius = _geometry->boundingRadius();
+    setBoundingSphere(PowerScaledScalar::CreatePSS(boundingRadius));
+    
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);

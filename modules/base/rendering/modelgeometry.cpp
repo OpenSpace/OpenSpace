@@ -90,6 +90,21 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     addProperty(_magnification);
 }
 
+double ModelGeometry::boundingRadius() const {
+    double maxDistSquared = 0;
+    double distSquared;
+    for (const Vertex& v : _vertices) {
+        distSquared = // x*x + y*y + z*z
+            v.location[0] * v.location[0] +
+            v.location[1] * v.location[1] +
+            v.location[2] * v.location[2];
+        maxDistSquared = glm::max(maxDistSquared, distSquared);
+    }
+    double maxDist = std::sqrt(maxDistSquared);
+    return maxDist;
+}
+
+
 ModelGeometry::~ModelGeometry() {
 }
 
