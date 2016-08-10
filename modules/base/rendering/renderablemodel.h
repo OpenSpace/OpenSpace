@@ -79,6 +79,7 @@ private:
     psc _sunPosition;
 
     properties::BoolProperty _performShading;
+    properties::Vec3Property _debugModelRotation;
 };
 
 }  // namespace openspace

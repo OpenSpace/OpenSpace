@@ -61,10 +61,11 @@ namespace {
 
 namespace openspace {
 
-RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
+    RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _performFade("performFading", "Perform Fading", false)
+    , _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
     , _fading("fading", "Fade", 0)
     , _programObject(nullptr)
     , _texture(nullptr)
@@ -91,9 +92,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _colorTexturePath = absPath(texturePath);
 
     addPropertySubOwner(_geometry);
-
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
+
+    addProperty(_debugModelRotation);
 
     dictionary.getValue(keySource, _source);
     dictionary.getValue(keyDestination, _destination);
@@ -198,13 +200,24 @@ void RenderableModel::render(const RenderData& data) {
 
     }
 
+
+
     // Calculate variables to be used as uniform variables in shader
     glm::dvec3 bodyPosition = data.positionVec3;
+
+    // debug rotation controlled from GUI
+    glm::mat4 unitMat4(1);
+    glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
+    glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
+    glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
+    glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
+    glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
-        glm::dmat4(_stateMatrix); // Rotation
+        glm::dmat4(_stateMatrix) *  // Spice rotation
+        debugModelRotation; // debug model rotation controlled from GUI
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
