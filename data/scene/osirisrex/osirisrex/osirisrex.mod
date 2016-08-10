@@ -12,7 +12,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/osiris.obj",
+                GeometryFile = "models/Osiris.obj",
                 Magnification = 0,
             }, 
             Textures = {

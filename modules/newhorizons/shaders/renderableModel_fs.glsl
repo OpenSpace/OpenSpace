@@ -66,9 +66,9 @@ Fragment getFragment() {
         vec3 c = normalize(vs_positionCameraSpace.xyz);
         vec3 r = reflect(l, n);
 
-        float ambientIntensity = 0.2;
+        float ambientIntensity = 0.15;
         float diffuseIntensity = 1;
-        float specularIntensity = 1;
+        float specularIntensity = 0.0;
 
         float diffuseCosineFactor = dot(n,l);
         float specularCosineFactor = dot(c,r);
