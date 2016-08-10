@@ -157,6 +157,9 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    -- Rotate Osiris Rex model to match the specification in the spice data
+    openspace.setPropertyValue("OsirisRex.renderable.modelrotation", {90.0, 0.0, 0.0})
+
     openspace.printInfo("Done setting default values")
 
     openspace.resetCameraDirection()
