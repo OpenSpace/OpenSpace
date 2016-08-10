@@ -13,8 +13,8 @@ return {
             Body = BENNU_BODY,
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/BennuUntextured.obj",
-                Magnification = 3.3,
+                GeometryFile = "models/BennuResized.obj",
+                Magnification = 0,
             }, 
             Shading = {
                 PerformShading = true,

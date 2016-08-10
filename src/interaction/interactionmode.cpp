@@ -370,7 +370,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         dvec3 camDirection = camera.viewDirectionWorldSpace();
 
         // Declare other variables used in interaction calculations
-        double minHeightAboveBoundingSphere = 10;
+        double minHeightAboveBoundingSphere = 1;
         dvec3 centerToCamera = camPos - centerPos;
         dvec3 centerToBoundingSphere;
 

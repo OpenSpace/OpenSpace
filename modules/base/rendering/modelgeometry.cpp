@@ -106,8 +106,15 @@ void ModelGeometry::changeRenderMode(const GLenum mode) {
 
 bool ModelGeometry::initialize(Renderable* parent) {
     _parent = parent;
-    PowerScaledScalar ps = PowerScaledScalar(1.0, 0.0); // will set proper bounding soon.
-    _parent->setBoundingSphere(ps);
+    float maximumDistanceSquared = 0;
+    for (auto v: _vertices)
+    {
+        maximumDistanceSquared = glm::max(
+            glm::pow(v.location[0], 2) +
+            glm::pow(v.location[1], 2) +
+            glm::pow(v.location[2], 2), maximumDistanceSquared);
+    }
+    _parent->setBoundingSphere(PowerScaledScalar(glm::sqrt(maximumDistanceSquared), 0.0));
 
     if (_vertices.empty())
         return false;

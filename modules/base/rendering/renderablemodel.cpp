@@ -105,7 +105,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     openspace::SpiceManager::ref().addFrame(_target, _source);
 
-    setBoundingSphere(pss(1.f, 9.f));
+    //setBoundingSphere(pss(1.f, 9.f));
     addProperty(_performShading);
 
     if (dictionary.hasKeyAndValue<bool>(keyFading)) {
