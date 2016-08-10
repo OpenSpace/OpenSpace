@@ -40,7 +40,7 @@ return {
             },
             DataInputTranslation = {
                 Instruments = {
-                    POLY_CAM = {
+                    ORX_OCAMS_POLYCAM = {
                         DetectorType = "Camera",
                         Spice = {"ORX_OCAMS_POLYCAM"},
                         Files = {
@@ -49,7 +49,7 @@ return {
                             "Recon_225m_Equatorial_PolyCam",
                         },
                     },
-                    SPECTOMETER = {
+                    ORX_REXIS = {
                         DetectorType = "Camera",
                         Spice = {"ORX_REXIS"},
                         Files = {

@@ -334,7 +334,8 @@ void RenderableModelProjection::attitudeParameters(double time) {
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
         attitudeParameters(img.startTime);
-        imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
+        auto projTexture = _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
+        imageProjectGPU(projTexture);
     }
     _capture = false;
 }

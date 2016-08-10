@@ -63,8 +63,6 @@ InstrumentTimesParser::InstrumentTimesParser(
     
 
     _detectorType = "CAMERA"; //default value
-        
-    
 
     for (const auto& instrumentKey : instruments.keys()) {
         ghoul::Dictionary instrumentDict; 
@@ -103,10 +101,6 @@ bool InstrumentTimesParser::create() {
         return false;
     }
 
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-
     for (auto it = _instrumentFiles.begin(); it != _instrumentFiles.end(); it++) {
         std::string instrumentID = it->first;
         for (std::string filename: it->second) {
@@ -133,7 +127,8 @@ bool InstrumentTimesParser::create() {
                     Image image;
                     image.startTime = timeRange._min;
                     image.stopTime = timeRange._max;
-                    image.path = filepath;
+                    image.path = "";
+                    image.isPlaceholder = true;
                     image.activeInstruments.push_back(instrumentID);
                     image.target = _target;
                     image.projected = false;
@@ -144,9 +139,6 @@ bool InstrumentTimesParser::create() {
             }
         }
     }
-    
-    
-  
     
     std::stable_sort(_captureProgression.begin(), _captureProgression.end());
     //std::stable_sort(_instrumentTimes.begin(), _instrumentTimes.end());
