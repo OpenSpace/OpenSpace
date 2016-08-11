@@ -75,14 +75,14 @@ namespace openspace {
 
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
-            threadPool->enqueue([this, job]() {
+            threadPool->queue([this, job]() {
                 job->execute();
                 _finishedJobs.push(job);
             });
         }
 
         void clearEnqueuedJobs() {
-            threadPool->clearTasks();
+            threadPool->clearRemainingTasks();
         }
 
         std::shared_ptr<Job<P>> popFinishedJob() {
