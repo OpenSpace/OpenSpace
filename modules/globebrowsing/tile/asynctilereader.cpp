@@ -117,7 +117,7 @@ namespace openspace {
 
     AsyncTileDataProvider::AsyncTileDataProvider(
         std::shared_ptr<TileDataset> tileDataset,
-        std::shared_ptr<ThreadPool> pool)
+        std::shared_ptr<ghoul::ThreadPool> pool)
         : _tileDataset(tileDataset)
         , _concurrentJobManager(pool)
     {

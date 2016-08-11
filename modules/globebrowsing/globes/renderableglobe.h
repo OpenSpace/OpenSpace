@@ -44,7 +44,7 @@
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 namespace ghoul {

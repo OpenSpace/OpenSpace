@@ -760,11 +760,13 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
 
 void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
     if (performanceMeasurements) {
-        if (!_performanceManager)
+        if (!_performanceManager) {
             _performanceManager = std::make_unique<performance::PerformanceManager>();
+        }
     }
-    else
+    else {
         _performanceManager = nullptr;
+    }
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {

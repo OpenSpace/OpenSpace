@@ -28,10 +28,7 @@
 
 #include <modules/globebrowsing/tile/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider.h>
-
 #include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
 
 #include <ghoul/misc/dictionary.h>
 
@@ -71,6 +68,7 @@ namespace openspace {
             const ghoul::Dictionary& textureCategoriesDictionary,
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
+
 
         TileProviderGroup& getTileProviderGroup(size_t groupId);
         TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
