@@ -40,6 +40,10 @@ namespace {
     const std::string _loggerCat = "InstrumentTimesParser";
 
     const std::string PlaybookIdentifierName = "InstrumentTimesParser";
+    const std::string KeyTargetBody = "Target.Body";
+    const std::string KeyInstruments = "Instruments";
+    const std::string KeyInstrument = "Instrument";
+    const std::string KeyInstrumentFiles = "Files";
 }
 
 namespace openspace {
@@ -52,35 +56,19 @@ InstrumentTimesParser::InstrumentTimesParser(
     , _fileName(sequenceSource) 
     , _pattern("\"(.{23})\" \"(.{23})\"")
     , _target("")
+    , _detectorType("CAMERA")
 {
-    ghoul::Dictionary target;
-    if (inputDict.getValue("Target", target)) {
-        target.getValue("Body", _target);
-    }
-
-    ghoul::Dictionary instruments;
-    if (!inputDict.getValue("Instruments", instruments)) {
-        throw std::runtime_error("Must define instruments");
-    }
     
-
-    _detectorType = "CAMERA"; //default value
-
+    _target = inputDict.value<std::string>(KeyTargetBody);
+    ghoul::Dictionary instruments = inputDict.value<ghoul::Dictionary>(KeyInstruments);
+    
     for (const auto& instrumentKey : instruments.keys()) {
-        ghoul::Dictionary instrumentDict; 
-        instruments.getValue(instrumentKey, instrumentDict);
-        
-        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(instrumentDict, "Instrument");
-
-        ghoul::Dictionary files;
-        if (instrumentDict.getValue("Files", files)) {
-            for (int i = 0; i < files.size(); i++) {
-                std::string id = std::to_string(i+1); // lua index starts at 1
-                std::string filename;
-                if (files.getValue(id, filename)) {
-                    _instrumentFiles[instrumentKey].push_back(filename);
-                }
-            }
+        ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(instrumentKey);
+        ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
+        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(instrument, KeyInstrument);
+        for (int i = 0; i < files.size(); i++) {
+            std::string filename = files.value<std::string>(std::to_string(i + 1));
+            _instrumentFiles[instrumentKey].push_back(filename);
         }
     }
 }
