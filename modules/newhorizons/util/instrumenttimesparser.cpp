@@ -59,7 +59,9 @@ InstrumentTimesParser::InstrumentTimesParser(
     }
 
     ghoul::Dictionary instruments;
-    ghoul_assert(inputDict.getValue("Instruments", instruments), "Must define instruments");
+    if (!inputDict.getValue("Instruments", instruments)) {
+        throw std::runtime_error("Must define instruments");
+    }
     
 
     _detectorType = "CAMERA"; //default value
