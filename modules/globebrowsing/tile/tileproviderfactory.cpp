@@ -24,6 +24,11 @@
 
 #include <modules/globebrowsing/tile/tileproviderfactory.h>
 
+#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/chunkindextileprovider.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
@@ -82,9 +87,9 @@ namespace openspace {
             TileDataset::Configuration config;
             config.doPreProcessing = initData.preprocessTiles;
             config.minimumTilePixelSize = initData.minimumPixelSize;
-
+            
             auto tileDataset = std::make_shared<TileDataset>(desc, config);
-            auto threadPool = std::make_shared<ThreadPool>(1);
+            auto threadPool = std::make_shared<ghoul::ThreadPool>(1);
             auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
             auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
             auto tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);

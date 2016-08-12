@@ -58,19 +58,7 @@ void GuiPerformanceComponent::render() {
 
     ImGui::Begin("Performance", &_isEnabled);
     if (OsEng.renderEngine().doesPerformanceMeasurements()) {
-        ghoul_assert(
-            SharedMemory::exists(PerformanceManager::PerformanceMeasurementSharedData),
-            "Shared Memory block was not allocated"
-        );
-
-        if (!_performanceMemory) {
-            _performanceMemory = std::make_unique<ghoul::SharedMemory>(
-                PerformanceManager::PerformanceMeasurementSharedData
-            );
-        }
-        PerformanceLayout* layout = reinterpret_cast<PerformanceLayout*>(
-            _performanceMemory->memory()
-        );
+        PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
 
         ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
         ImGui::Checkbox("Functions", &_functionsIsEnabled);

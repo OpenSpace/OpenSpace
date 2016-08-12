@@ -73,8 +73,6 @@ namespace openspace {
 
     };
 
-
-    
     class TileProvider {
     public:
         virtual ~TileProvider() { }
@@ -91,115 +89,13 @@ namespace openspace {
 
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
 
-    
-    class ChunkIndexTileProvider : public TileProvider {
-    public:
-        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-        virtual ~ChunkIndexTileProvider();
-
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-    private:
-        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
-
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-        
-        TileCache _tileCache;
-        glm::uvec2 _textureSize;
-        size_t _fontSize;
-        
-        GLuint _fbo;
-
+    struct TileProviderInitData {
+        int minimumPixelSize;
+        int threads;
+        int cacheSize;
+        int framesUntilRequestQueueFlush;
+        bool preprocessTiles = false;
     };
-
-
-    class SingleImagePrivoder : public TileProvider {
-    public:
-        SingleImagePrivoder(const std::string& imagePath);
-        virtual ~SingleImagePrivoder() { }
-
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-    private:
-        Tile _tile;
-        std::string _imagePath;
-    };
-
-
-    /**
-        Provides tiles through GDAL datasets which can be defined with xml files
-        for example for wms.
-    */
-    class CachingTileProvider : public TileProvider {
-    public:
-
-
-        CachingTileProvider(
-            std::shared_ptr<AsyncTileDataProvider> tileReader, 
-            std::shared_ptr<TileCache> tileCache,
-            int framesUntilFlushRequestQueue);
-
-        virtual ~CachingTileProvider();
-        
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-
-
-    private:
-
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //                                Helper functions                              //
-        //////////////////////////////////////////////////////////////////////////////////
-        
-        Tile getOrStartFetchingTile(ChunkIndex chunkIndex);
-
-
-        
-        /**
-            Creates an OpenGL texture and pushes the data to the GPU.
-        */
-
-        Tile createTile(std::shared_ptr<TileIOResult> res);
-
-        void clearRequestQueue();
-
-        void initTexturesFromLoadedData();
-
-
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //                                Member variables                              //
-        //////////////////////////////////////////////////////////////////////////////////
-
-        std::shared_ptr<TileCache> _tileCache;
-        Tile _defaultTile;
-
-        int _framesSinceLastRequestFlush;
-        int _framesUntilRequestFlush;
-
-
-        std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    };
-
-    
-
 
 }  // namespace openspace
 

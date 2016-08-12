@@ -22,69 +22,54 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __SINGLE_IMAGE_PROVIDER_H__
+#define __SINGLE_IMAGE_PROVIDER_H__
+
+#include <gdal_priv.h>
+
+#include <openspace/engine/downloadmanager.h>
+#include <set>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h> // absPath
+#include <ghoul/opengl/texture.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/font/fontrenderer.h>
 
 
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/tile/asynctilereader.h>
 
-#include <ghoul/misc/dictionary.h>
 
-#include <memory>
-#include <vector>
-#include <string>
 
 
 namespace openspace {
-
     
-    struct NamedTileProvider {
-        std::string name;
-        std::shared_ptr<TileProvider> tileProvider;
-        bool isActive;
-    };
+    using namespace ghoul::opengl;
+    
 
-
-
-    struct TileProviderGroup {
-
-        void update();
-        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
-
-
-        std::vector<NamedTileProvider> tileProviders;
-        bool levelBlendingEnabled;
-
-    };
-
-
-
-    class TileProviderManager {
+    class SingleImagePrivoder : public TileProvider {
     public:
+        SingleImagePrivoder(const std::string& imagePath);
+        virtual ~SingleImagePrivoder() { }
 
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-
-        TileProviderGroup& getTileProviderGroup(size_t groupId);
-        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
-
-        void update();
-        void reset(bool includingInactive = false);
-
-
+        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getDefaultTile();
+        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
     private:
-        static void initTexures(
-            std::vector<NamedTileProvider>& destination, 
-            const ghoul::Dictionary& dict, 
-            const TileProviderInitData& initData);
-
-        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        Tile _tile;
+        std::string _imagePath;
     };
 
-} // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+
+}  // namespace openspace
+
+
+
+
+#endif  // __SINGLE_IMAGE_PROVIDER_H__

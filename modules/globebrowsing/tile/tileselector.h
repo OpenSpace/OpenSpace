@@ -28,7 +28,7 @@
 #include "gdal_priv.h"
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <vector>

@@ -38,7 +38,6 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>
 #include <test_lrucache.inl>
-#include <test_threadpool.inl>
 #include <test_aabb.inl>
 #include <test_convexhull.inl>
 
