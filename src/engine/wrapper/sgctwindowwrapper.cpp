@@ -61,6 +61,10 @@ bool SGCTWindowWrapper::windowHasResized() const {
 double SGCTWindowWrapper::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
 }
+
+double SGCTWindowWrapper::deltaTime() const {
+	return sgct::Engine::instance()->getDt();
+}
     
 glm::vec2 SGCTWindowWrapper::mousePosition() const {
     int id = sgct::Engine::instance()->getCurrentWindowPtr()->getId();
