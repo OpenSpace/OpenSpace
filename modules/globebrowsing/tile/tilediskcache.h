@@ -27,7 +27,7 @@
 
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <ghoul/filesystem/filesystem>
 

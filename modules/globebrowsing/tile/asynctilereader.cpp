@@ -28,7 +28,7 @@
 #include <ghoul/misc/assert.h>
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 
@@ -117,9 +117,9 @@ namespace openspace {
 
     AsyncTileDataProvider::AsyncTileDataProvider(
         std::shared_ptr<TileDataset> tileDataset,
-        std::shared_ptr<ThreadPool> pool)
+        std::shared_ptr<ghoul::ThreadPool> pool)
         : _tileDataset(tileDataset)
-        , _concurrentJobManager(pool)
+        , _threadPool(pool)
     {
 
     }
@@ -133,59 +133,51 @@ namespace openspace {
         return _tileDataset;
     }
 
-    bool AsyncTileDataProvider::enqueueTextureData(const ChunkIndex& chunkIndex) {
-        //auto tileDiskCache = std::make_shared<TileDiskCache>("test");
+    bool AsyncTileDataProvider::enqueueTileIO(const ChunkIndex& chunkIndex) {
         if (satisfiesEnqueueCriteria(chunkIndex)) {
-            auto job = std::make_shared<TileLoadJob>(_tileDataset, chunkIndex);
-            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, chunkIndex, tileDiskCache, "ReadAndWrite");
-            _concurrentJobManager.enqueueJob(job);
-            _enqueuedTileRequests[chunkIndex.hashKey()] = chunkIndex;
+            const static auto job = [](const ChunkIndex& chunkIndex, std::shared_ptr<TileDataset> tileDataset) {
+                return tileDataset->readTileData(chunkIndex);
+            };
+
+            FutureResult futureResult = _threadPool->queue(job, chunkIndex, _tileDataset);
+            _futureTileIOResults[chunkIndex.hashKey()] = std::move(futureResult);
             return true;
         }
         return false;
     }
 
-    bool AsyncTileDataProvider::hasLoadedTextureData() const{
-        return _concurrentJobManager.numFinishedJobs() > 0;
-    }
-    
-    std::shared_ptr<TileIOResult> AsyncTileDataProvider::nextTileIOResult() {
-        auto tileIOResult = _concurrentJobManager.popFinishedJob()->product();
-        ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
-        if (_enqueuedTileRequests.find(key) != _enqueuedTileRequests.end()) {
-            _enqueuedTileRequests.erase(key);
-        }
-        return tileIOResult;
-    }
-
-
-    bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const ChunkIndex& chunkIndex) const {
-        auto it = _enqueuedTileRequests.begin();
-        auto end = _enqueuedTileRequests.end();
-        for (; it != end; it++) {
-            const ChunkIndex& otherChunk = it->second;
-            if (chunkIndex.level == otherChunk.level &&
-                chunkIndex.manhattan(otherChunk) < 1) {
-                return false;
+    std::vector<std::shared_ptr<TileIOResult>> AsyncTileDataProvider::getTileIOResults() {
+        std::vector<std::shared_ptr<TileIOResult>> readyResults;
+        auto it = _futureTileIOResults.begin();
+        while(it != _futureTileIOResults.end()) {
+            std::future_status status = it->second.wait_for(std::chrono::seconds(0));
+            if (status == std::future_status::ready) {
+                readyResults.push_back(it->second.get());
+                it = _futureTileIOResults.erase(it);
+            }
+            else {
+                it++;
             }
         }
-        return true;
+        return readyResults;
+    }
+   
+
+    bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const ChunkIndex& chunkIndex) const {
+        // only allow tile to be enqueued if it's not already enqueued
+        return _futureTileIOResults.find(chunkIndex.hashKey()) == _futureTileIOResults.end();
     }
 
     void AsyncTileDataProvider::reset() {
-        _enqueuedTileRequests.clear();
-        _concurrentJobManager.reset();
-        // also clear tiles that has just been finished loading
-        while (hasLoadedTextureData()) {
-            nextTileIOResult(); // get it and throw it away
-        }
+        _futureTileIOResults.clear();
+        _threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
+        _threadPool->start();
         getTextureDataProvider()->reset();
     }
 
-
     void AsyncTileDataProvider::clearRequestQueue() {
-        _concurrentJobManager.clearEnqueuedJobs();
-        _enqueuedTileRequests.clear();
+        _threadPool->clearRemainingTasks();
+        _futureTileIOResults.clear();
     }
 
 }  // namespace openspace

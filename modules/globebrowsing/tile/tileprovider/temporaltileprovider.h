@@ -29,14 +29,13 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <openspace/util/time.h>
 
 #include <unordered_map>
 
-#include "gdal_priv.h"
+#include <gdal_priv.h>
 
 
 
@@ -46,18 +45,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-
-       
-    struct TileProviderInitData {
-        int minimumPixelSize;
-        int threads;
-        int cacheSize;
-        int framesUntilRequestQueueFlush;
-        bool preprocessTiles = false;
-    };
-
-
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                                 Time Id Providers                                //

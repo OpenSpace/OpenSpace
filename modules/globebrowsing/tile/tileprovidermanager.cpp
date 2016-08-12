@@ -66,7 +66,6 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
 
 
-
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
         const ghoul::Dictionary& textureInitDictionary){

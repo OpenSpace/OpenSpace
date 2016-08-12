@@ -42,7 +42,7 @@
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/statscollector.h>
 
 

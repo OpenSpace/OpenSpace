@@ -26,8 +26,7 @@
 #define __TILE_PROVIDER_FACTORY_H__
 
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <ghoul/misc/dictionary.h>
 

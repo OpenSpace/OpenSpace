@@ -33,7 +33,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 
@@ -118,15 +118,13 @@ namespace openspace {
     public:
 
         AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-            std::shared_ptr<ThreadPool> pool);
+            std::shared_ptr<ghoul::ThreadPool> pool);
 
         ~AsyncTileDataProvider();
 
 
-
-        bool enqueueTextureData(const ChunkIndex& chunkIndex);
-        bool hasLoadedTextureData() const;
-        std::shared_ptr<TileIOResult> nextTileIOResult();
+        bool enqueueTileIO(const ChunkIndex& chunkIndex);        
+        std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
         void reset();
         void clearRequestQueue();
@@ -138,10 +136,12 @@ namespace openspace {
         virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
 
     private:
+        using FutureResult = std::future<std::shared_ptr<TileIOResult>>;
+
 
         std::shared_ptr<TileDataset> _tileDataset;
-        ConcurrentJobManager<TileIOResult> _concurrentJobManager;
-        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
+        std::shared_ptr<ghoul::ThreadPool> _threadPool;
+        std::unordered_map<ChunkHashKey, FutureResult> _futureTileIOResults;
 
     };
 

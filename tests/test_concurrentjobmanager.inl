@@ -25,7 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -68,7 +68,7 @@ private:
 
 
 TEST_F(ConcurrentJobManagerTest, Basic) {
-    std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
+    std::shared_ptr<ghoul::ThreadPool> pool = std::make_shared<ghoul::ThreadPool>(1);
     
     ConcurrentJobManager<int> jobManager(pool);
 
@@ -147,7 +147,7 @@ struct VerboseJob : public Job<VerboseProduct>{
 
 
 TEST_F(ConcurrentJobManagerTest, JobCreation) {
-    std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
+    std::shared_ptr<ghoul::ThreadPool> pool = std::make_shared<ghoul::ThreadPool>(1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
