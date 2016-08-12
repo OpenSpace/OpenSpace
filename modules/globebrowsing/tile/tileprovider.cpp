@@ -305,7 +305,7 @@ namespace openspace {
             return _tileCache->get(key);
         }
         else {
-            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
+            _asyncTextureDataProvider->enqueueTileIO(chunkIndex);
         }
         
         return tile;
@@ -320,7 +320,7 @@ namespace openspace {
 
 
     void CachingTileProvider::initTexturesFromLoadedData() {
-        auto readyTileIOResults = _asyncTextureDataProvider->getReadyTileIOResults();
+        auto readyTileIOResults = _asyncTextureDataProvider->getTileIOResults();
         for(auto tileIOResult : readyTileIOResults){
             ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
             Tile tile = createTile(tileIOResult);
@@ -355,7 +355,7 @@ namespace openspace {
             return _tileCache->get(hashkey);
         }
         else {
-            _asyncTextureDataProvider->enqueueTextureData(chunkIndex);
+            _asyncTextureDataProvider->enqueueTileIO(chunkIndex);
             return Tile::TileUnavailable;
         }
     }
