@@ -45,6 +45,10 @@ bool WindowWrapper::windowHasResized() const {
 double WindowWrapper::averageDeltaTime() const {
     return 0.0;
 }
+
+double WindowWrapper::deltaTime() const {
+	return 0.0;
+}
     
 glm::vec2 WindowWrapper::mousePosition() const {
     return glm::vec2(0.f);
