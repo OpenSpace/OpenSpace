@@ -11,6 +11,9 @@ helper.setCommonKeys = function()
     openspace.bindKey("F2", "openspace.setPerformanceMeasurement(true)")
     openspace.bindKey("F3", "openspace.setPerformanceMeasurement(false)")
 
+    openspace.bindKey("t", "openspace.toggleFrametimeType(1)")
+    openspace.bindKey("Shift+t", "openspace.toggleFrametimeType(0)")
+
     openspace.bindKey("ESC", "openspace.toggleShutdown()")
 
     openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
