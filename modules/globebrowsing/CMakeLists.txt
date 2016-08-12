@@ -48,8 +48,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/chunkindextileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
@@ -94,8 +98,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/chunkindextileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
+    
+
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp

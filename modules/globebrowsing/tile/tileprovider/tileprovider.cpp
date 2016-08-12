@@ -22,69 +22,69 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#include <modules/globebrowsing/geometry/geodetic2.h>
 
-
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/layeredtextures.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <modules/globebrowsing/chunk/chunkindex.h>
 
-#include <memory>
-#include <vector>
-#include <string>
+#include <openspace/engine/downloadmanager.h>
+
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/font/fontmanager.h>
+
+#include <openspace/engine/openspaceengine.h>
+
+#include <sstream>
+
+
+
+
+namespace {
+    const std::string _loggerCat = "TileProvider";
+}
 
 
 namespace openspace {
 
+    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
     
-    struct NamedTileProvider {
-        std::string name;
-        std::shared_ptr<TileProvider> tileProvider;
-        bool isActive;
-    };
+
+    Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
+        using namespace ghoul::opengl;
+        
+        // Create pixel data
+        int numBytes = size.x * size.y * 4 * 1;
+        char* pixels = new char[numBytes];
+        size_t numPixels = size.x * size.y;
+        size_t i = 0;
+        for (size_t p = 0; p < numPixels; p++){
+            pixels[i++] = color.r;
+            pixels[i++] = color.g;
+            pixels[i++] = color.b;
+            pixels[i++] = color.a;
+        }
+
+        // Create ghoul texture
+        auto texture = std::make_shared<Texture>(glm::uvec3(size, 1));
+        texture->setDataOwnership(Texture::TakeOwnership::Yes);
+        texture->setPixelData(pixels);
+        texture->uploadTexture();
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+        // Create tile
+        Tile tile;
+        tile.status = Tile::Status::OK;
+        tile.preprocessData = nullptr;
+        tile.texture = texture;
+
+        return tile;
+    }
 
 
 
-    struct TileProviderGroup {
-
-        void update();
-        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
-
-
-        std::vector<NamedTileProvider> tileProviders;
-        bool levelBlendingEnabled;
-
-    };
-
-
-
-    class TileProviderManager {
-    public:
-
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-
-        TileProviderGroup& getTileProviderGroup(size_t groupId);
-        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
-
-        void update();
-        void reset(bool includingInactive = false);
-
-
-    private:
-        static void initTexures(
-            std::vector<NamedTileProvider>& destination, 
-            const ghoul::Dictionary& dict, 
-            const TileProviderInitData& initData);
-
-        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
-    };
-
-} // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+}  // namespace openspace

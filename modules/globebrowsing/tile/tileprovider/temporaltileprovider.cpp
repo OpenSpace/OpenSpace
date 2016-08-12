@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>

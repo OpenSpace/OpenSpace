@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <ghoul/misc/threadpool.h>
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 
 // open space includes

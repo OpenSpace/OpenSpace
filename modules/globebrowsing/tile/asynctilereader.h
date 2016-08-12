@@ -123,8 +123,7 @@ namespace openspace {
         ~AsyncTileDataProvider();
 
 
-        bool enqueueTileIO(const ChunkIndex& chunkIndex);
-        
+        bool enqueueTileIO(const ChunkIndex& chunkIndex);        
         std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
         void reset();

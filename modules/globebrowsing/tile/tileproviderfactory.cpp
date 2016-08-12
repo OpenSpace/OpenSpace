@@ -24,6 +24,11 @@
 
 #include <modules/globebrowsing/tile/tileproviderfactory.h>
 
+#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/chunkindextileprovider.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"

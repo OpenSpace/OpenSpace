@@ -30,7 +30,7 @@
 #include <ghoul/misc/assert.h>
 
 #include <modules/globebrowsing/tile/tiledataset.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
 
