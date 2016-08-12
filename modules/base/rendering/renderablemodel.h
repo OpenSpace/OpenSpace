@@ -76,7 +76,7 @@ private:
     //bool _isGhost;
     int _frameCount;
 
-    psc _sunPosition;
+    glm::dvec3 _sunPos;
 
     properties::BoolProperty _performShading;
     properties::Vec3Property _debugModelRotation;

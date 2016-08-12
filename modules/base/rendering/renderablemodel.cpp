@@ -174,7 +174,6 @@ bool RenderableModel::deinitialize() {
 }
 
 void RenderableModel::render(const RenderData& data) {
-
     _programObject->activate();
     
     double lt;
@@ -199,11 +198,7 @@ void RenderableModel::render(const RenderData& data) {
         _fading = _fading + 0.01f;
 
     }
-
-
-
-    // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.positionVec3;
+    
 
     // debug rotation controlled from GUI
     glm::mat4 unitMat4(1);
@@ -215,11 +210,14 @@ void RenderableModel::render(const RenderData& data) {
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
+        glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation
         glm::dmat4(_stateMatrix) *  // Spice rotation
         debugModelRotation; // debug model rotation controlled from GUI
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-    glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
+
+    
+
+    glm::vec3 directionToSun = glm::normalize(_sunPos - data.positionVec3);
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
     _programObject->setUniform("transparency", _alpha);
@@ -264,15 +262,13 @@ void RenderableModel::update(const UpdateData& data) {
     //    _time = futureTime;
     //}
 
+    double  lt;
+    _sunPos = openspace::SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
+
     // set spice-orientation in accordance to timestamp
     if (!_source.empty()) {
         _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time) * _modelTransform;
-    }
-
-    double  lt;
-    glm::dvec3 p =
-    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
-    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    }    
 }
 
 void RenderableModel::loadTexture() {

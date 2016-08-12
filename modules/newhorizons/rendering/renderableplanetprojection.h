@@ -95,7 +95,7 @@ private:
 
     std::vector<Image> _imageTimes;
 
-    std::string _target;
+    std::string _body;
     std::string _frame;
 
     bool _capture;
