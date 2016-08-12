@@ -25,6 +25,8 @@
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
@@ -45,11 +47,13 @@ namespace {
     const std::string _loggerCat = "SceneGraphNode";
     const std::string KeyRenderable = "Renderable";
     const std::string KeyEphemeris = "Ephemeris";
+    const std::string keyRotation = "Rotation";
 }
 
 namespace openspace {
-    
-std::string SceneGraphNode::RootNodeName = "Root";
+
+// Constants used outside of this file
+const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
@@ -81,7 +85,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable);
-        LDEBUG("Successfully create renderable for '" << result->name() << "'");
+        LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
     if (dictionary.hasKey(KeyEphemeris)) {
@@ -96,7 +100,30 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             return nullptr;
         }
         //result->addPropertySubOwner(result->_ephemeris);
-        LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
+        LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(keyRotation)) {
+        bool rotationSuccess = true;
+
+        ghoul::Dictionary rotationDictionary;
+        rotationSuccess &= dictionary.getValue("Rotation.Source", result->_rotationSourceFrame);
+        rotationSuccess &= dictionary.getValue("Rotation.Destination", result->_rotationDestinationFrame);
+        
+        if (!rotationSuccess) {
+            LERROR("Failed to create rotation for SceneGraphNode '"
+                << result->name() << "'");
+            delete result;
+            return nullptr;
+        }
+        else
+            LDEBUG("Successfully created rotation for SceneGraphNode '" << result->name() << "'");
+    }
+    else {
+        LERROR("Rotation specification not found for SceneGraphNode '"
+                << result->name() << "'. Using static rotation instead");
+        result->_rotationSourceFrame = "GALACTIC";
+        result->_rotationDestinationFrame = "GALACTIC";
     }
 
     //std::string parentName;
@@ -122,6 +149,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
     , _ephemeris(new StaticEphemeris)
+    , _rotationMatrix(glm::dmat3(1.0))
     , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -201,8 +229,37 @@ void SceneGraphNode::update(const UpdateData& data) {
         else
             _renderable->update(newUpdateData);
     }
+
+    // TODO : Need to be checking for real if the frame is fixed since fixed frames
+    // do not have CK coverage.
+    bool sourceFrameIsFixed = _rotationSourceFrame == "GALACTIC";
+    bool destinationFrameIsFixed = _rotationDestinationFrame == "GALACTIC";
+
+    bool sourceHasCoverage =
+        !_rotationSourceFrame.empty() &&
+        SpiceManager::ref().hasFrameId(_rotationSourceFrame) &&
+        (SpiceManager::ref().hasCkCoverage(_rotationSourceFrame, data.time) ||
+            sourceFrameIsFixed);
+    bool destinationHasCoverage =
+        !_rotationDestinationFrame.empty() &&
+        SpiceManager::ref().hasFrameId(_rotationDestinationFrame) &&
+        (SpiceManager::ref().hasCkCoverage(_rotationDestinationFrame, data.time) ||
+            destinationFrameIsFixed);
+
+    if (sourceHasCoverage && destinationHasCoverage) {
+        _rotationMatrix = SpiceManager::ref().positionTransformMatrix(
+            _rotationSourceFrame,
+            _rotationDestinationFrame,
+            data.time);
+    }
+    else {
+        _rotationMatrix = glm::dmat3(1.0);
+    }
+
     _worldPositionCached = calculateWorldPosition();
     newUpdateData.position = worldPosition();
+
+    _worldRotationCached = calculateWorldRotation();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
@@ -248,7 +305,12 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
 
-    RenderData newData = {data.camera, thisPositionPSC, data.doPerformanceMeasurement, _worldPositionCached};
+    RenderData newData = {
+        data.camera,
+        thisPositionPSC,
+        data.doPerformanceMeasurement,
+        _worldPositionCached,
+        _worldRotationCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -326,7 +388,7 @@ glm::dvec3 SceneGraphNode::worldPosition() const
 
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 {
-    return _ephemeris->worldRotationMatrix();
+    return _worldRotationCached;
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
@@ -336,6 +398,16 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     }
     else {
         return _ephemeris->position();
+    }
+}
+
+glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
+    // recursive up the hierarchy if there are parents available
+    if (_parent) {
+        return _parent->calculateWorldRotation() * _rotationMatrix;
+    }
+    else {
+        return _rotationMatrix;
     }
 }
 

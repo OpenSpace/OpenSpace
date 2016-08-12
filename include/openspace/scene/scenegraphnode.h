@@ -50,8 +50,7 @@ public:
         long long updateTimeEphemeris;  // time in ns
     };
 
-    static std::string RootNodeName;
-
+    static const std::string RootNodeName;
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
@@ -105,10 +104,15 @@ private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
     glm::dvec3 calculateWorldPosition() const;
+    glm::dmat3 calculateWorldRotation() const;
 
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
     Ephemeris* _ephemeris;
+
+    std::string _rotationSourceFrame;
+    std::string _rotationDestinationFrame;
+    glm::dmat3 _rotationMatrix;
 
     PerformanceRecord _performanceRecord;
 
@@ -120,6 +124,7 @@ private:
 
     //psc _worldPositionCached;
     glm::dvec3 _worldPositionCached;
+    glm::dmat3 _worldRotationCached;
 };
 
 } // namespace openspace
