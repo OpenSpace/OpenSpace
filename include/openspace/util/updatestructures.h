@@ -51,7 +51,7 @@ struct RenderData {
     psc position;
     bool doPerformanceMeasurement;
     glm::dvec3 positionVec3;
-
+    glm::dmat3 rotation;
 };
 
 struct RaycasterTask {

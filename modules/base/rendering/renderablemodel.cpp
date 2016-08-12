@@ -46,8 +46,6 @@
 
 namespace { 
     const std::string _loggerCat     = "RenderableModel";
-    const std::string keySource      = "Rotation.Source";
-    const std::string keyDestination = "Rotation.Destination";
     const std::string keyGeometry    = "Geometry";
     const std::string keyBody        = "Body";
     const std::string keyStart       = "StartTime";
@@ -61,12 +59,12 @@ namespace {
 
 namespace openspace {
 
-    RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
+RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _performFade("performFading", "Perform Fading", false)
-    , _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
     , _fading("fading", "Fade", 0)
+    , _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
     , _programObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
@@ -92,20 +90,21 @@ namespace openspace {
         _colorTexturePath = absPath(texturePath);
 
     addPropertySubOwner(_geometry);
+
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
     addProperty(_debugModelRotation);
 
-    dictionary.getValue(keySource, _source);
-    dictionary.getValue(keyDestination, _destination);
+    //dictionary.getValue(keySource, _source);
+    //dictionary.getValue(keyDestination, _destination);
     if (dictionary.hasKeyAndValue<glm::dmat3>(keyModelTransform))
         dictionary.getValue(keyModelTransform, _modelTransform);
     else
         _modelTransform = glm::dmat3(1.f);
     dictionary.getValue(keyBody, _target);
 
-    openspace::SpiceManager::ref().addFrame(_target, _source);
+    //openspace::SpiceManager::ref().addFrame(_target, _source);
 
     //setBoundingSphere(pss(1.f, 9.f));
     addProperty(_performShading);
@@ -149,8 +148,8 @@ bool RenderableModel::initialize() {
 
     completeSuccess &= (_texture != nullptr);
     completeSuccess &= _geometry->initialize(this); 
-    completeSuccess &= !_source.empty();
-    completeSuccess &= !_destination.empty();
+    //completeSuccess &= !_source.empty();
+    //completeSuccess &= !_destination.empty();
 
     return completeSuccess;
 }
@@ -198,7 +197,7 @@ void RenderableModel::render(const RenderData& data) {
         _fading = _fading + 0.01f;
 
     }
-    
+
 
     // debug rotation controlled from GUI
     glm::mat4 unitMat4(1);
@@ -211,7 +210,7 @@ void RenderableModel::render(const RenderData& data) {
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation
-        glm::dmat4(_stateMatrix) *  // Spice rotation
+        glm::dmat4(data.rotation) *  // Spice rotation
         debugModelRotation; // debug model rotation controlled from GUI
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
@@ -264,11 +263,6 @@ void RenderableModel::update(const UpdateData& data) {
 
     double  lt;
     _sunPos = openspace::SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
-
-    // set spice-orientation in accordance to timestamp
-    if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time) * _modelTransform;
-    }    
 }
 
 void RenderableModel::loadTexture() {

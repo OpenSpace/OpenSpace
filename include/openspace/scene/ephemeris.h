@@ -39,7 +39,6 @@ public:
     virtual ~Ephemeris();
     virtual bool initialize();
     virtual const glm::dvec3& position() const = 0;
-    virtual const glm::dmat3& worldRotationMatrix() const = 0;
     virtual void update(const UpdateData& data);
 
 protected:

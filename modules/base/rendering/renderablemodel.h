@@ -67,10 +67,10 @@ private:
     glm::dmat3 _modelTransform;
 
     float _alpha;
-    glm::dmat3 _stateMatrix; 
+    //glm::dmat3 _stateMatrix; 
 
-    std::string _source;
-    std::string _destination;
+    //std::string _source;
+    //std::string _destination;
     std::string _target;
 
     //bool _isGhost;

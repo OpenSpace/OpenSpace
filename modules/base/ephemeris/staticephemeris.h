@@ -35,7 +35,6 @@ public:
                                 = ghoul::Dictionary());
     virtual ~StaticEphemeris();
     virtual const glm::dvec3& position() const;
-    virtual const glm::dmat3& worldRotationMatrix() const;
     virtual void update(const UpdateData& data) override;
 private:
     glm::dvec3 _position;
