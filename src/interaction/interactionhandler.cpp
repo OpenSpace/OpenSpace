@@ -639,6 +639,7 @@ InteractionHandler::InteractionHandler()
             return;
         }
         setFocusNode(node);
+        resetCameraDirection();
     });
 
     _coordinateSystem.onChange([this]() {
