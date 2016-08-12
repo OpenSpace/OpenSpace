@@ -790,6 +790,7 @@ void InteractionHandler::postSynchronizationPreDraw() {
     }
     else {
         _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+        _camera->setFocusPositionVec3(focusNode()->worldPosition());
     }
 }
 

@@ -80,11 +80,6 @@ namespace openspace {
     void Camera::setFocusPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
         _focusPosition = pos;
-      
-        _cachedViewDirection.isDirty = true;
-        _cachedLookupVector.isDirty = true;
-        _cachedViewRotationMatrix.isDirty = true;
-        _cachedCombinedViewMatrix.isDirty = true;
     }
 
     void Camera::setRotation(Quat rotation) {

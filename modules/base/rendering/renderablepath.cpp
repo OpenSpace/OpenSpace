@@ -51,6 +51,7 @@ namespace {
     const std::string keyTimeSteps = "TimeSteps";
     const std::string keyPointSteps = "PointSteps";
     const std::string keyDrawLine = "DrawLine";
+    const std::string keRenderDistanceInterval = "RenderDistanceInterval";
 
 }
 
@@ -74,8 +75,10 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
     _successfullDictionaryFetch &= dictionary.getValue(keyFrame, _frame);
     _successfullDictionaryFetch &= dictionary.getValue(keyTimeSteps, _increment);
 
-    if (!dictionary.getValue(keyPointSteps, _pointSteps))
-        _pointSteps = 4;
+    float fPointSteps; // Dictionary can not pick out ints...
+    if (!dictionary.getValue(keyPointSteps, fPointSteps))
+        fPointSteps = 4;
+    _pointSteps = fPointSteps;
 
     glm::vec3 color(0.f);
     if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
