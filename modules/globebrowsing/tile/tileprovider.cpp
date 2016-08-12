@@ -320,8 +320,8 @@ namespace openspace {
 
 
     void CachingTileProvider::initTexturesFromLoadedData() {
-        while (_asyncTextureDataProvider->hasLoadedTextureData()) {
-            std::shared_ptr<TileIOResult> tileIOResult = _asyncTextureDataProvider->nextTileIOResult();
+        auto readyTileIOResults = _asyncTextureDataProvider->getReadyTileIOResults();
+        for(auto tileIOResult : readyTileIOResults){
             ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
             Tile tile = createTile(tileIOResult);
             _tileCache->put(key, tile);

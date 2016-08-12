@@ -97,8 +97,7 @@ namespace openspace {
         LayeredTexturePreprocessingData preprocessingData)
     {
         _updatedOnLastCall = false;
-        if (!(preprocessingData == _preprocessingData) || _programObject == nullptr)
-        {
+        if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
             recompileShaderProgram(preprocessingData);
             _updatedOnLastCall = true;
         }

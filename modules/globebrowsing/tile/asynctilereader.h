@@ -123,10 +123,9 @@ namespace openspace {
         ~AsyncTileDataProvider();
 
 
-
-        bool enqueueTextureData(const ChunkIndex& chunkIndex);
-        bool hasLoadedTextureData() const;
-        std::shared_ptr<TileIOResult> nextTileIOResult();
+        bool enqueueTileIO(const ChunkIndex& chunkIndex);
+        
+        std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
         void reset();
         void clearRequestQueue();
@@ -138,10 +137,12 @@ namespace openspace {
         virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
 
     private:
+        using FutureResult = std::future<std::shared_ptr<TileIOResult>>;
+
 
         std::shared_ptr<TileDataset> _tileDataset;
-        ConcurrentJobManager<TileIOResult> _concurrentJobManager;
-        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
+        std::shared_ptr<ghoul::ThreadPool> _threadPool;
+        std::unordered_map<ChunkHashKey, FutureResult> _futureTileIOResults;
 
     };
 
