@@ -315,21 +315,8 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     bool hasBody, found = false;
     std::string targetBody;
 
-    for (auto node : nodes) {
-        possibleTarget = node->renderable();
-        if (possibleTarget != nullptr) {
-            hasBody = possibleTarget->hasBody();
-            if (hasBody && possibleTarget->getBody(targetBody) && (targetBody == body)) {
-                _target.node = node->name(); // get name from propertyOwner
-                found = true;
-                break;
-            }
-        }
-    }
-    if (found) {
-        _target.body = body;
-        _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
-    }
+    _target.body = body;
+    _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
 }
 
 std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
@@ -344,32 +331,9 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
     PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
     PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
 
-    std::string closestTarget = "";
-
-    double lt;
-    glm::dvec3 p =
-    SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, {}, currentTime, lt);
-    psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 
-    for (auto node : nodes)
-    {
-        possibleTarget = node->renderable();
-        if (possibleTarget != nullptr) {
-            hasBody = possibleTarget->hasBody();
-            if (hasBody && possibleTarget->getBody(targetBody)) {
-                found = SpiceManager::ref().isTargetInFieldOfView(targetBody, _spacecraft, _instrument, SpiceManager::FieldOfViewMethod::Ellipsoid, {}, currentTime);
-                if (found){
-                    targets.push_back(node->name()); // get name from propertyOwner
-                    distance = (psc::CreatePowerScaledCoordinate(node->worldPosition().x, node->worldPosition().y, node->worldPosition().z) - spacecraftPos).length();
-                    if (distance < min)
-                        closestTarget = targetBody;
-                }
-            }
-        }
-    }
-
-    return closestTarget;
+    return targetBody;
 }
 
 } // namespace openspace

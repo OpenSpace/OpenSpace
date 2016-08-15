@@ -90,8 +90,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     dictionary.getValue(keySource, _source);
     dictionary.getValue(keyDestination, _destination);
     dictionary.getValue(keyBody, _target);
-    if (_target != "")
-        setBody(_target);
+
 
     bool completeSuccess = true;
     completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);

@@ -83,9 +83,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     dictionary.getValue(keyFrame, _frame);
-    dictionary.getValue(keyBody, _target);
-    if (_target != "")
-        setBody(_target);
+    dictionary.getValue(keyBody, _body);
 
     success = _projectionComponent.initializeProjectionSettings(dictionary);
     ghoul_assert(success, "");

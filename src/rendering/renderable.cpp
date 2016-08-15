@@ -74,8 +74,6 @@ Renderable::Renderable()
     : _enabled("enabled", "Is Enabled", true)
     , _startTime("")
     , _endTime("")
-    , _targetBody("")
-    , _hasBody(false)
     , _hasTimeInterval(false)
 {
 
@@ -85,8 +83,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)
     , _startTime("")
     , _endTime("")
-    , _targetBody("")
-    , _hasBody(false)
     , _hasTimeInterval(false)
 {
     setName("renderable");
@@ -156,10 +152,6 @@ bool Renderable::hasTimeInterval() {
     return _hasTimeInterval;
 }
 
-bool Renderable::hasBody() {
-    return _hasBody;
-}
-
 bool Renderable::getInterval(double& start, double& end) {
     if (_startTime != "" && _endTime != "") {
         start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
@@ -168,20 +160,6 @@ bool Renderable::getInterval(double& start, double& end) {
     }
     else
         return false;
-}
-
-bool Renderable::getBody(std::string& body) {
-    if (_hasBody) {
-        body = _targetBody;
-        return true;
-    }
-    else
-        return false;
-}
-
-void Renderable::setBody(std::string& body) {
-    _targetBody = body;
-    _hasBody = true;
 }
 
 bool Renderable::isReady() const {
