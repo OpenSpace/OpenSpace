@@ -126,7 +126,7 @@ function (add_external_dependencies)
         libOpenSpace
         # sgct
         sgct_light glew glfw png16_static quat  tinythreadpp tinyxml2static turbojpeg-static
-        vrpn zlibstatic
+        vrpn
         ${GLFW_LIBRARIES}
     )
 
