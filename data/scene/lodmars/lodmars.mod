@@ -48,7 +48,6 @@ return {
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                        Enabled = true,
                     },
                     {
                         Name = "Mars Viking Clr",
