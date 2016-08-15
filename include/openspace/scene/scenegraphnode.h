@@ -75,9 +75,10 @@ public:
     void setParent(SceneGraphNode* parent);
     //bool abandonChild(SceneGraphNode* child);
 
-    const glm::dvec3& position() const;
+    glm::dvec3 position() const;
     glm::dvec3 worldPosition() const;
 
+    const glm::dmat3& rotationMatrix() const;
     const glm::dmat3& worldRotationMatrix() const;
 
     SceneGraphNode* parent() const;
@@ -122,7 +123,7 @@ private:
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
 
-    //psc _worldPositionCached;
+    glm::dvec3 _translation; // Relative translation added on the ephemeris position
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
 };

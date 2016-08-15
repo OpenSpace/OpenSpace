@@ -62,18 +62,19 @@ return {
             },
         },
         Ephemeris = {
-            Type = "Spice",
-            Body = "OSIRIS-REX",
-            -- Reference = "ECLIPJ2000",
-            Reference = "GALACTIC",
-            Observer = BENNU_BODY,
+            Type = "Static",
         },
         Rotation = {
-            Source = "ORX_SPACECRAFT",
-            Destination = "GALACTIC"
+            Source = "ORX_OCAMS_POLYCAM",
+            Destination = "ORX_SPACECRAFT"
         },
-
-        GuiName = "/Solar/OsirisRex"
+        Transform = {
+            Translation = {0,0,0}, -- Translation relative to parent
+            --Rotation = {0,0,0}, -- Euler angles relative to parent (not implemented)
+            --Scale = {1,1,1}, -- Scale relative to parent (not implemented)
+        },
+        
+        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
     },
 
     {   

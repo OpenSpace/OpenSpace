@@ -48,6 +48,8 @@ namespace {
     const std::string KeyRenderable = "Renderable";
     const std::string KeyEphemeris = "Ephemeris";
     const std::string keyRotation = "Rotation";
+
+    const std::string keyTranslation = "Transform.Translation";
 }
 
 namespace openspace {
@@ -125,6 +127,13 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         result->_rotationSourceFrame = "GALACTIC";
         result->_rotationDestinationFrame = "GALACTIC";
     }
+    
+    if (dictionary.hasKey(keyTranslation)) {
+        dictionary.getValue(keyTranslation, result->_translation);
+    }
+    else {
+        result->_translation = glm::dvec3(0, 0, 0);
+    }
 
     //std::string parentName;
     //if (!dictionary.getValue(KeyParentName, parentName)) {
@@ -150,6 +159,7 @@ SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
     , _ephemeris(new StaticEphemeris)
     , _rotationMatrix(glm::dmat3(1.0))
+    , _translation(glm::dvec3(0.0))
     , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -256,10 +266,10 @@ void SceneGraphNode::update(const UpdateData& data) {
         _rotationMatrix = glm::dmat3(1.0);
     }
 
+    _worldRotationCached = calculateWorldRotation();
+
     _worldPositionCached = calculateWorldPosition();
     newUpdateData.position = worldPosition();
-
-    _worldRotationCached = calculateWorldRotation();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
@@ -376,14 +386,20 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 //    return false;
 //}
 
-const glm::dvec3& SceneGraphNode::position() const
+glm::dvec3 SceneGraphNode::position() const
 {
-    return _ephemeris->position();
+    glm::dvec3 translationRotated = _parent->rotationMatrix() * _translation;
+    return _ephemeris->position() + translationRotated;
 }
 
 glm::dvec3 SceneGraphNode::worldPosition() const
 {
     return _worldPositionCached;
+}
+
+const glm::dmat3& SceneGraphNode::rotationMatrix() const
+{
+    return _rotationMatrix;
 }
 
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
@@ -394,7 +410,8 @@ const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->calculateWorldPosition();
+        glm::dvec3 translationRotated = _parent->rotationMatrix() * _translation;
+        return _ephemeris->position() + translationRotated + _parent->calculateWorldPosition();
     }
     else {
         return _ephemeris->position();
