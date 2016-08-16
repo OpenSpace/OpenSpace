@@ -69,13 +69,89 @@ return {
             Destination = "ORX_SPACECRAFT"
         },
         Transform = {
-            Translation = {0,0,0}, -- Translation relative to parent
+            Translation = {1,0,0}, -- Translation relative to parent
             --Rotation = {0,0,0}, -- Euler angles relative to parent (not implemented)
             --Scale = {1,1,1}, -- Scale relative to parent (not implemented)
         },
         
         GuiName = "/Solar/ORX_OCAMS_POLYCAM"
     },
+
+
+    --[[
+    {   
+        Name = "ORX_OCAMS_POLYCAM FOV",
+        Parent = "ORX_OCAMS_POLYCAM",
+        Renderable = {
+            Type  = "RenderableFov",
+            Body  = "OSIRIS-REX",
+            Frame = "GALACTIC",
+            RGB   = { 0.8, 0.7, 0.7 },
+            Textures = {
+                Type  = "simple",
+                Color = "textures/glare_blue.png",
+                -- need to add different texture
+            },
+            Instrument = {                
+                Name       = "ORX_OCAMS_POLYCAM",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",      
+            },
+            PotentialTargets = {
+                "Bennu2",
+            }
+        },
+        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
+    },
+]]
+
+
+
+
+    {   
+        Name = "POLYCAM",
+        Parent = "ORX_OCAMS_POLYCAM",
+        Renderable = {
+            Type  = "RenderableFov",
+            Body  = "OSIRIS-REX",
+            Frame = "ORX_OCAMS_POLYCAM",
+            RGB   = { 0.8, 0.7, 0.7 },
+            Textures = {
+                Type  = "simple",
+                Color = "textures/glare_blue.png",
+                -- need to add different texture
+            },
+            Instrument = {
+                Name       = "ORX_OCAMS_POLYCAM",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+            },
+            PotentialTargets = {
+                BENNU_BODY -- Bennu
+            }
+        },
+        GuiName = "/Solar/POLYCAM"
+    },
+    -- Latest image taken by POLYCAM
+    --[[
+    { 
+        Name = "ImagePlaneOsirisRex",
+        Parent = "OsirisRex",
+        Renderable = {
+            Type = "RenderablePlaneProjection",
+            Frame = "IAU_BENNU",
+            DefaultTarget = BENNU_BODY,
+            Spacecraft = "OSIRIS-REX",
+            Instrument = "ORX_OCAMS_POLYCAM",
+            Moving = false,
+            Texture = "textures/defaultProj.png",
+        },
+        Ephemeris = {
+            Type = "Static",
+            Position = {0, 0, 0, 1}
+        }, 
+    },
+    ]]
 
     {   
         Name = "OsirisRexPathSolar",

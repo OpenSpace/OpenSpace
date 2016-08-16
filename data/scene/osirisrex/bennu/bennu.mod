@@ -60,26 +60,7 @@ return {
                     },
                 },       
                 Target = {
-                    Body = BENNU_BODY,
-                    --[[
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID", 
-                        "START_TIME", 
-                        "STOP_TIME", 
-                    },
-                    Convert = {
-                        CHURYUMOV               = {"CHURYUMOV-GERASIMENKO"},
-                        ROSETTA                             = {"ROSETTA"              },
-                        --NAVCAM                                = {"NAVCAM"},
-                        ["ROSETTA-ORBITER"]                        = {"ROSETTA"              },
-                        CHURYUMOVGERASIMENKO11969R1           = {"CHURYUMOV-GERASIMENKO"},
-                        CHURYUMOVGERASIMENKO           = {"CHURYUMOV-GERASIMENKO"},
-                        ["CHURYUMOV-GERASIMENKO1(1969R1)"] = {"CHURYUMOV-GERASIMENKO"},
-                        --NAVIGATIONCAMERA                  = {"NAVCAM"               },
-                    },
-                    ]]
+                    Body = BENNU_BODY, -- Do we need this?
                 },
             },
 
