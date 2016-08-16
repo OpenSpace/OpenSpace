@@ -51,6 +51,7 @@ void main() {
     vec4 position = pscTransform(tmp, ModelTransform);
     vs_position = tmp;
 
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    vs_position = ViewProjection * position;
+    gl_Position =  z_normalization(vs_position);
+    vs_position.w = 0.0;
 }

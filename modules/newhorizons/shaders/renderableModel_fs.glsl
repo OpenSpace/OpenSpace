@@ -41,7 +41,7 @@ uniform vec3 sun_pos;
 
 Fragment getFragment() {
     vec4 position = vs_position;
-    float depth = pscDepth(position);
+    float depth = safeLength(position);
     
     // directional lighting
     vec3 origin = vec3(0.0);
