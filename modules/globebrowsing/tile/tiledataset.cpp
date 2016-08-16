@@ -63,9 +63,9 @@ namespace openspace {
 
     }
 
-    TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint _glType) {
+    TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
         // Assume all raster bands have the same data type
-        gdalType = _glType != 0 ? TileDataType::getGdalDataType(glType) : dataSet->GetRasterBand(1)->GetRasterDataType();
+        gdalType = preferredGlType != 0 ? TileDataType::getGdalDataType(preferredGlType) : dataSet->GetRasterBand(1)->GetRasterDataType();
         glType = TileDataType::getOpenGLDataType(gdalType);
         numRasters = dataSet->GetRasterCount();
         bytesPerDatum = TileDataType::numberOfBytes(gdalType);
