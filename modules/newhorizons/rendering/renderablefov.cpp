@@ -549,10 +549,6 @@ void RenderableFov::render(const RenderData& data) {
 
     _drawFOV = false;
     // setup the data to the shader
-    //_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_programObject->setUniform("ModelTransform", glm::translate(glm::mat4(1), glm::vec3(data.positionVec3)) );
-    //setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation

@@ -26,15 +26,13 @@ uniform float time;
 uniform sampler2D texture1;
 
 in vec2 vs_st;
-in vec4 vs_position;
+in vec4 vs_positionScreenSpace;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment()
 {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
     vec4 diffuse;
     if (gl_FrontFacing)
         diffuse = texture(texture1, vs_st);
@@ -44,6 +42,7 @@ Fragment getFragment()
 
     Fragment frag;
     frag.color = diffuse;
-    frag.depth = depth;
+    frag.depth = vs_positionScreenSpace.w;
+
     return frag;
 }

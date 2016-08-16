@@ -131,20 +131,18 @@ void RenderablePlaneProjection::render(const RenderData& data) {
     if (!_hasImage || (_moving && !active))
         return;
 
-    glm::mat4 transform = glm::mat4(1.0);
-
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-
     // Activate shader
     _shader->activate();
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation
+        glm::dmat4(_stateMatrix);
+    glm::mat4 modelViewProjectionTransform =
+        data.camera.projectionMatrix() *
+        glm::mat4(data.camera.combinedViewMatrix() *
+            modelTransform);
+
+    _shader->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
