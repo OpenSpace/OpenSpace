@@ -68,7 +68,7 @@ function (set_compile_settings project)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
-        target_compile_options(${project} PUBLIC "/MP" "/wd4201" "/wd4127")
+        target_compile_options(${project} PUBLIC "/MP" "/ZI" "/wd4201" "/wd4127")
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PUBLIC "/WX")
         endif ()
