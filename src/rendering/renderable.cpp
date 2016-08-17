@@ -37,7 +37,6 @@
 
 namespace {
     const std::string _loggerCat = "Renderable";
-    const std::string keyBody = "Body";
     const std::string keyStart = "StartTime";
     const std::string keyEnd = "EndTime";
     const std::string KeyType = "Type";
