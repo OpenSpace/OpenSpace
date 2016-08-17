@@ -211,10 +211,9 @@ void RenderableModel::render(const RenderData& data) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation
         glm::dmat4(data.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.scale)));
         debugModelRotation; // debug model rotation controlled from GUI
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
-    
 
     glm::vec3 directionToSun = glm::normalize(_sunPos - data.positionVec3);
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;

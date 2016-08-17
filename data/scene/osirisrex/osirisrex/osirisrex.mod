@@ -6,7 +6,7 @@ return {
     ------------------------
     {
         Name = "OsirisRex",
-        Parent = "Bennu2",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableModel",
             Body = "OSIRIS-REX",
@@ -25,18 +25,23 @@ return {
                 Ghosting = false,
             },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "OSIRIS-REX",
-            -- Reference = "ECLIPJ2000",
-            Reference = "GALACTIC",
-            Observer = BENNU_BODY,
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "OSIRIS-REX",
+                Reference = "GALACTIC",
+                Observer = "SUN",
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "ORX_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
-        Rotation = {
-            Source = "ORX_SPACECRAFT",
-            Destination = "GALACTIC"
-        },
-
         GuiName = "/Solar/OsirisRex"
     },
 
@@ -61,55 +66,67 @@ return {
                 Ghosting = false,
             },
         },
-        Ephemeris = {
-            Type = "Static",
+
+        Transform = {
+            Translation = {
+                Type = "StaticEphemeris",
+                Position = {1, 0, 0},
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "ORX_OCAMS_POLYCAM",
+                DestinationFrame = "ORX_SPACECRAFT",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
-        Rotation = {
-            Source = "ORX_OCAMS_POLYCAM",
-            Destination = "ORX_SPACECRAFT"
+        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
+    },
+
+    {
+        Name = "ORX_REXIS",
+        Parent = "OsirisRex",
+        Renderable = {
+            Type = "RenderableModel",
+            Body = "OSIRIS-REX",
+            Geometry = {
+                Type = "MultiModelGeometry",
+                GeometryFile = "models/Osiris.obj",
+                Magnification = 0,
+            }, 
+            Textures = {
+                Type = "simple",
+                Color =  "textures/osirisTex.png",
+            },
+            Shading = {
+                PerformShading = true,
+                Fadeable = false,
+                Ghosting = false,
+            },
         },
         Transform = {
-            Translation = {1,0,0}, -- Translation relative to parent
-            --Rotation = {0,0,0}, -- Euler angles relative to parent (not implemented)
-            --Scale = {1,1,1}, -- Scale relative to parent (not implemented)
+            Translation = {
+                Type = "StaticEphemeris",
+                Position = {-1, 0, 0},
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "ORX_REXIS",
+                DestinationFrame = "ORX_SPACECRAFT",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
         
-        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
+        GuiName = "/Solar/ORX_REXIS"
     },
 
-
-    --[[
     {   
-        Name = "ORX_OCAMS_POLYCAM FOV",
-        Parent = "ORX_OCAMS_POLYCAM",
-        Renderable = {
-            Type  = "RenderableFov",
-            Body  = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            RGB   = { 0.8, 0.7, 0.7 },
-            Textures = {
-                Type  = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },
-            Instrument = {                
-                Name       = "ORX_OCAMS_POLYCAM",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",      
-            },
-            PotentialTargets = {
-                "Bennu2",
-            }
-        },
-        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
-    },
-]]
-
-
-
-
-    {   
-        Name = "POLYCAM",
+        Name = "POLYCAM FOV",
         Parent = "ORX_OCAMS_POLYCAM",
         Renderable = {
             Type  = "RenderableFov",
@@ -130,10 +147,35 @@ return {
                 BENNU_BODY -- Bennu
             }
         },
-        GuiName = "/Solar/POLYCAM"
+        GuiName = "/Solar/POLYCAM FOV"
     },
-    -- Latest image taken by POLYCAM
+
+    {   
+        Name = "REXIS FOV",
+        Parent = "ORX_REXIS",
+        Renderable = {
+            Type  = "RenderableFov",
+            Body  = "OSIRIS-REX",
+            Frame = "ORX_REXIS",
+            RGB   = { 0.8, 0.7, 0.7 },
+            Textures = {
+                Type  = "simple",
+                Color = "textures/glare_blue.png",
+                -- need to add different texture
+            },
+            Instrument = {
+                Name       = "ORX_REXIS",
+                Method     = "ELLIPSOID",
+                Aberration = "NONE",
+            },
+            PotentialTargets = {
+                BENNU_BODY -- Bennu
+            }
+        },
+        GuiName = "/Solar/REXIS FOV"
+    },
     --[[
+    -- Latest image taken by POLYCAM
     { 
         Name = "ImagePlaneOsirisRex",
         Parent = "OsirisRex",
@@ -150,6 +192,24 @@ return {
             Type = "Static",
             Position = {0, 0, 0, 1}
         }, 
+    },
+    -- POLYCAM FoV square
+    {
+        Name = "FovImagePlane",
+        Parent = "OsirisRex",
+        Renderable = {
+            Type = "RenderablePlaneProjection",
+            Frame = "IAU_BENNU",
+            DefaultTarget = BENNU_BODY,
+            Spacecraft = "OSIRIS-REX",
+            Instrument = "ORX_OCAMS_POLYCAM",
+            Moving = true,
+            Texture = "textures/squarefov.png",
+        },
+        Ephemeris = {
+            Type = "Static",
+            Position = {0, 0, 0, 1}
+        },
     },
     ]]
 

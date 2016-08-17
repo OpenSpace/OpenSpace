@@ -147,7 +147,7 @@ function preInitialization()
     -- openspace.time.setTime("2015-07-12T22:19:20.00")
     -- openspace.time.setTime("2015-07-13T20:59:00.00")
     -- openspace.time.setTime("2015-07-14T02:41:55.00")
-    openspace.time.setTime("2016-09-08T00:00:00.00")
+    openspace.time.setTime("2018-12-20T22:47:00.00")
     openspace.time.setDeltaTime(0)
 end
 

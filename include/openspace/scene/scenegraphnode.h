@@ -28,6 +28,8 @@
 // open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/ephemeris.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scene.h>
@@ -76,10 +78,12 @@ public:
     //bool abandonChild(SceneGraphNode* child);
 
     glm::dvec3 position() const;
-    glm::dvec3 worldPosition() const;
-
     const glm::dmat3& rotationMatrix() const;
+    double scale() const;
+
+    glm::dvec3 worldPosition() const;
     const glm::dmat3& worldRotationMatrix() const;
+    double worldScale() const;
 
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
@@ -96,6 +100,7 @@ public:
     Renderable* renderable();
 
     // @TODO Remove once the scalegraph is in effect ---abock
+    
     void setEphemeris(Ephemeris* eph) {
         delete _ephemeris;
         _ephemeris = eph;
@@ -106,14 +111,19 @@ private:
 
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
+    double calculateWorldScale() const;
+
+    // Transformation defined by ephemeris, rotation and scale
+    Ephemeris* _ephemeris;
+    Rotation* _rotation;
+    Scale* _scale;
+
+    glm::dvec3 _worldPositionCached;
+    glm::dmat3 _worldRotationCached;
+    double _worldScaleCached;
 
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
-    Ephemeris* _ephemeris;
-
-    std::string _rotationSourceFrame;
-    std::string _rotationDestinationFrame;
-    glm::dmat3 _rotationMatrix;
 
     PerformanceRecord _performanceRecord;
 
@@ -123,9 +133,6 @@ private:
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
 
-    glm::dvec3 _translation; // Relative translation added on the ephemeris position
-    glm::dvec3 _worldPositionCached;
-    glm::dmat3 _worldRotationCached;
 };
 
 } // namespace openspace

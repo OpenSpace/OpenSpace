@@ -50,6 +50,11 @@
 #include <modules/base/ephemeris/staticephemeris.h>
 #include <modules/base/ephemeris/spiceephemeris.h>
 
+#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/rotation/spicerotation.h>
+
+#include <modules/base/scale/staticscale.h>
+
 #include <ghoul/filesystem/filesystem>
 
 namespace openspace {
@@ -61,7 +66,10 @@ BaseModule::BaseModule()
 void BaseModule::internalInitialize() {
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
     FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
-            FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
+
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Rotation>>());
+    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Scale>>());
 
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
@@ -85,8 +93,20 @@ void BaseModule::internalInitialize() {
 
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
-    fEphemeris->registerClass<StaticEphemeris>("Static");
-    fEphemeris->registerClass<SpiceEphemeris>("Spice");
+
+    fEphemeris->registerClass<StaticEphemeris>("StaticEphemeris");
+    fEphemeris->registerClass<SpiceEphemeris>("SpiceEphemeris");
+
+    auto fRotation = FactoryManager::ref().factory<Rotation>();
+    ghoul_assert(fRotation, "Rotation factory was not created");
+
+    fRotation->registerClass<StaticRotation>("StaticRotation");
+    fRotation->registerClass<SpiceRotation>("SpiceRotation");
+
+    auto fScale = FactoryManager::ref().factory<Scale>();
+    ghoul_assert(fScale, "Scale factory was not created");
+
+    fScale->registerClass <StaticScale> ("StaticScale");
 
     auto fPlanetGeometry = FactoryManager::ref().factory<planetgeometry::PlanetGeometry>();
     ghoul_assert(fPlanetGeometry, "Planet geometry factory was not created");

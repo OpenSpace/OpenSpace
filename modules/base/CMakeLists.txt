@@ -43,6 +43,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -65,6 +68,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

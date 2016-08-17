@@ -37,6 +37,9 @@
 #include <ghoul/opengl/shaderobject.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/scale/staticscale.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
@@ -46,10 +49,10 @@
 namespace {
     const std::string _loggerCat = "SceneGraphNode";
     const std::string KeyRenderable = "Renderable";
-    const std::string KeyEphemeris = "Ephemeris";
-    const std::string keyRotation = "Rotation";
 
-    const std::string keyTranslation = "Transform.Translation";
+    const std::string keyTransformTranslation = "Transform.Translation";
+    const std::string keyTransformRotation = "Transform.Rotation";
+    const std::string keyTransformScale = "Transform.Scale";
 }
 
 namespace openspace {
@@ -90,49 +93,46 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
-    if (dictionary.hasKey(KeyEphemeris)) {
-        ghoul::Dictionary ephemerisDictionary;
-        dictionary.getValue(KeyEphemeris, ephemerisDictionary);
-        delete result->_ephemeris;
-        result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
+    if (dictionary.hasKey(keyTransformTranslation)) {
+        ghoul::Dictionary translationDictionary;
+        dictionary.getValue(keyTransformTranslation, translationDictionary);
+        result->_ephemeris = 
+            (Ephemeris::createFromDictionary(translationDictionary));
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
-                   << result->name() << "'");
+                << result->name() << "'");
             delete result;
             return nullptr;
         }
-        //result->addPropertySubOwner(result->_ephemeris);
         LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
     }
 
-    if (dictionary.hasKey(keyRotation)) {
-        bool rotationSuccess = true;
-
+    if (dictionary.hasKey(keyTransformRotation)) {
         ghoul::Dictionary rotationDictionary;
-        rotationSuccess &= dictionary.getValue("Rotation.Source", result->_rotationSourceFrame);
-        rotationSuccess &= dictionary.getValue("Rotation.Destination", result->_rotationDestinationFrame);
-        
-        if (!rotationSuccess) {
+        dictionary.getValue(keyTransformRotation, rotationDictionary);
+        result->_rotation = 
+            (Rotation::createFromDictionary(rotationDictionary));
+        if (result->_rotation == nullptr) {
             LERROR("Failed to create rotation for SceneGraphNode '"
                 << result->name() << "'");
             delete result;
             return nullptr;
         }
-        else
-            LDEBUG("Successfully created rotation for SceneGraphNode '" << result->name() << "'");
+        LDEBUG("Successfully created rotation for '" << result->name() << "'");
     }
-    else {
-        LERROR("Rotation specification not found for SceneGraphNode '"
-                << result->name() << "'. Using static rotation instead");
-        result->_rotationSourceFrame = "GALACTIC";
-        result->_rotationDestinationFrame = "GALACTIC";
-    }
-    
-    if (dictionary.hasKey(keyTranslation)) {
-        dictionary.getValue(keyTranslation, result->_translation);
-    }
-    else {
-        result->_translation = glm::dvec3(0, 0, 0);
+
+    if (dictionary.hasKey(keyTransformScale)) {
+        ghoul::Dictionary scaleDictionary;
+        dictionary.getValue(keyTransformScale, scaleDictionary);
+        result->_scale = 
+            (Scale::createFromDictionary(scaleDictionary));
+        if (result->_scale == nullptr) {
+            LERROR("Failed to create scale for SceneGraphNode '"
+                << result->name() << "'");
+            delete result;
+            return nullptr;
+        }
+        LDEBUG("Successfully created scale for '" << result->name() << "'");
     }
 
     //std::string parentName;
@@ -157,9 +157,9 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _ephemeris(new StaticEphemeris)
-    , _rotationMatrix(glm::dmat3(1.0))
-    , _translation(glm::dvec3(0.0))
+    , _ephemeris(new StaticEphemeris())
+    , _rotation(new StaticRotation())
+    , _scale(new StaticScale())
     , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -177,6 +177,10 @@ bool SceneGraphNode::initialize() {
 
     if (_ephemeris)
         _ephemeris->initialize();
+    if (_rotation)
+        _rotation->initialize();
+    if (_scale)
+        _scale->initialize();
 
     return true;
 }
@@ -190,8 +194,8 @@ bool SceneGraphNode::deinitialize() {
         _renderable = nullptr;
     }
 
-    delete _ephemeris;
-    _ephemeris = nullptr;
+    //delete _ephemeris;
+    //_ephemeris = nullptr;
 
  //   for (SceneGraphNode* child : _children) {
     //    child->deinitialize();
@@ -225,6 +229,36 @@ void SceneGraphNode::update(const UpdateData& data) {
             _ephemeris->update(newUpdateData);
     }
 
+    if (_rotation) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
+
+            _rotation->update(newUpdateData);
+
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeEphemeris = (end - start).count();
+        }
+        else
+            _rotation->update(newUpdateData);
+    }
+
+    if (_scale) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
+
+            _scale->update(newUpdateData);
+
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeEphemeris = (end - start).count();
+        }
+        else
+            _scale->update(newUpdateData);
+    }
+
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -240,35 +274,12 @@ void SceneGraphNode::update(const UpdateData& data) {
             _renderable->update(newUpdateData);
     }
 
-    // TODO : Need to be checking for real if the frame is fixed since fixed frames
-    // do not have CK coverage.
-    bool sourceFrameIsFixed = _rotationSourceFrame == "GALACTIC";
-    bool destinationFrameIsFixed = _rotationDestinationFrame == "GALACTIC";
-
-    bool sourceHasCoverage =
-        !_rotationSourceFrame.empty() &&
-        SpiceManager::ref().hasFrameId(_rotationSourceFrame) &&
-        (SpiceManager::ref().hasCkCoverage(_rotationSourceFrame, data.time) ||
-            sourceFrameIsFixed);
-    bool destinationHasCoverage =
-        !_rotationDestinationFrame.empty() &&
-        SpiceManager::ref().hasFrameId(_rotationDestinationFrame) &&
-        (SpiceManager::ref().hasCkCoverage(_rotationDestinationFrame, data.time) ||
-            destinationFrameIsFixed);
-
-    if (sourceHasCoverage && destinationHasCoverage) {
-        _rotationMatrix = SpiceManager::ref().positionTransformMatrix(
-            _rotationSourceFrame,
-            _rotationDestinationFrame,
-            data.time);
-    }
-    else {
-        _rotationMatrix = glm::dmat3(1.0);
-    }
-
     _worldRotationCached = calculateWorldRotation();
+    _worldScaleCached = calculateWorldScale();
 
+    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
     _worldPositionCached = calculateWorldPosition();
+
     newUpdateData.position = worldPosition();
 }
 
@@ -320,7 +331,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         thisPositionPSC,
         data.doPerformanceMeasurement,
         _worldPositionCached,
-        _worldRotationCached};
+        _worldRotationCached,
+        _worldScaleCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -388,8 +400,17 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 
 glm::dvec3 SceneGraphNode::position() const
 {
-    glm::dvec3 translationRotated = _parent->rotationMatrix() * _translation;
-    return _ephemeris->position() + translationRotated;
+    return _ephemeris->position();
+}
+
+const glm::dmat3& SceneGraphNode::rotationMatrix() const
+{
+    return _rotation->matrix();
+}
+
+double SceneGraphNode::scale() const
+{
+    return _scale->scaleValue();
 }
 
 glm::dvec3 SceneGraphNode::worldPosition() const
@@ -397,34 +418,47 @@ glm::dvec3 SceneGraphNode::worldPosition() const
     return _worldPositionCached;
 }
 
-const glm::dmat3& SceneGraphNode::rotationMatrix() const
-{
-    return _rotationMatrix;
-}
-
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 {
     return _worldRotationCached;
 }
 
+double SceneGraphNode::worldScale() const
+{
+    return _worldScaleCached;
+}
+
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        glm::dvec3 translationRotated = _parent->rotationMatrix() * _translation;
-        return _ephemeris->position() + translationRotated + _parent->calculateWorldPosition();
+        return
+            _parent->calculateWorldPosition() +
+            _parent->worldRotationMatrix() *
+            _parent->worldScale() *
+            position();
     }
     else {
-        return _ephemeris->position();
+        return position();
     }
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _parent->calculateWorldRotation() * _rotationMatrix;
+        return rotationMatrix() * _parent->calculateWorldRotation();
     }
     else {
-        return _rotationMatrix;
+        return rotationMatrix();
+    }
+}
+
+double SceneGraphNode::calculateWorldScale() const {
+    // recursive up the hierarchy if there are parents available
+    if (_parent) {
+        return _parent->calculateWorldScale() * scale();
+    }
+    else {
+        return scale();
     }
 }
 

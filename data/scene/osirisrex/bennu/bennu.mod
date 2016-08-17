@@ -75,12 +75,22 @@ return {
             },
         },
 
-        Ephemeris = {
-            Type = "Spice",
-            Body = BENNU_BODY,
-            -- Reference = "ECLIPJ2000",
-            Reference = "GALACTIC",
-            Observer = "SUN",
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = BENNU_BODY,
+                Reference = "GALACTIC",
+                Observer = "SUN",
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_BENNU",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
 
         GuiName = "/Solar/Bennu"
