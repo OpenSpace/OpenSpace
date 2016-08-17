@@ -113,15 +113,6 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
-    // Transformation defined by ephemeris, rotation and scale
-    Ephemeris* _ephemeris;
-    Rotation* _rotation;
-    Scale* _scale;
-
-    glm::dvec3 _worldPositionCached;
-    glm::dmat3 _worldRotationCached;
-    double _worldScaleCached;
-
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
 
@@ -133,6 +124,15 @@ private:
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
 
+    // Transformation defined by ephemeris, rotation and scale
+    Ephemeris* _ephemeris;
+    Rotation* _rotation;
+    Scale* _scale;
+
+    // Cached transform data
+    glm::dvec3 _worldPositionCached;
+    glm::dmat3 _worldRotationCached;
+    double _worldScaleCached;
 };
 
 } // namespace openspace

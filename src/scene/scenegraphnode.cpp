@@ -474,7 +474,9 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
     _boundingSphere = 0.0;
-    
+    /*
+    This is not how to calculate a bounding sphere, better to leave it at 0 if not a
+    renderable. --KB
     if (!_children.empty()) {  // node
         PowerScaledScalar maxChild;
 
@@ -492,7 +494,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         }
         _boundingSphere += maxChild;
     } 
-
+    */
     // if has a renderable, use that boundingsphere
     if (_renderable ) {
         PowerScaledScalar renderableBS = _renderable->getBoundingSphere();
