@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,54 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec4 in_position;
+in vec2 vs_uv;
+out vec4 color;
 
-out vec4 vs_position;
+uniform sampler2D tex;
+
+vec2 offsets[8] = {
+    vec2(-1.0, -1.0),
+    vec2(-1.0,  0.0),
+    vec2(-1.0,  1.0),
+    vec2(0.0,  -1.0),
+    vec2(0.0,   1.0),
+    vec2(1.0,  -1.0),
+    vec2(1.0,   0.0),
+    vec2(1.0,   1.0)
+};
+
+vec3 gatherColors(vec2 position) {
+    vec2 texSize = textureSize(tex, 0);
+    vec2 h = vec2(1.0) / texSize;
+
+    int nContributions = 0;
+    vec3 totalColor = vec3(0.0);
+
+    vec4 colors[8];
+    for (int i = 0; i < 8; i++) {
+        colors[i] = texture(tex, position + h * offsets[i]);
+
+        if (colors[i].a != 0.0) {
+            totalColor.rgb += colors[i].rgb;
+            nContributions++;
+        }
+    }
+
+    return totalColor / nContributions;
+}
 
 void main() {
-    vs_position  = in_position;
-    gl_Position  = vec4(in_position.xy, 0.0, 1.0);
+    vec4 c = texture(tex, vs_uv); 
+
+    if (c.a == 0.0) {
+        // This means that the current fragment/texel we are looking at has not been
+        // projected on and we only want to do the dilation into these texels
+
+        color = vec4(gatherColors(vs_uv), 0.0);
+    }
+    else {
+        // We are in a region where an image has been projected, so we can reuse the
+        // already sampled version
+        color = c;
+    }
 }

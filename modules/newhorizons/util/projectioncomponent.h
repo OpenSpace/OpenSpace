@@ -32,6 +32,14 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 
+namespace ghoul {
+namespace opengl {
+
+class ProgramObject;
+
+} // namespace opengl
+} // namespace ghoul
+
 namespace openspace {
 
 class ProjectionComponent : public properties::PropertyOwner {
@@ -108,6 +116,15 @@ protected:
 
     GLint _defaultFBO;
     GLint _viewport[4];
+
+    bool _needsTextureMapDilation;
+    struct {
+        GLuint fbo;
+        GLuint vao;
+        GLuint vbo;
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+    } _dilation;
 };
 
 } // namespace openspace
