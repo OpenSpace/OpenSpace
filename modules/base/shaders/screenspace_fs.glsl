@@ -32,9 +32,7 @@ in vec4 vs_position;
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
-
-
-Fragment getFragment(){
+Fragment getFragment() {
     Fragment frag;
 
     // power scale coordinates for depth. w value is set to 1.0.
@@ -44,6 +42,7 @@ Fragment getFragment(){
     if(frag.color.a == 0.0f){
         discard;
     }    
+
     frag.depth = denormalizeFloat(depth);
 
     return frag;

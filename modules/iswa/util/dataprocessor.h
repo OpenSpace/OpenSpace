@@ -76,4 +76,5 @@ protected:
 };
 
 } // namespace openspace
+
 #endif //__DATAPROCESSOR_H__
