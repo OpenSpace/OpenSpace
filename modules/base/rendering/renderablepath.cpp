@@ -148,7 +148,7 @@ void RenderablePath::render(const RenderData& data) {
         return;
 
 
-    int nPointsToDraw = (time - _start) / (_stop - _start) * (_vertexArray.size()) + 1 + 0.5;
+    int nPointsToDraw = _vertexArray.size();// (time - _start) / (_stop - _start) * (_vertexArray.size()) + 1 + 0.5;
 
     _programObject->activate();
 

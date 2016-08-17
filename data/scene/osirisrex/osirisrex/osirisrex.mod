@@ -211,8 +211,7 @@ return {
             Position = {0, 0, 0, 1}
         },
     },
-    ]]
-
+    
     {   
         Name = "OsirisRexPathSolar",
         Parent = "SolarSystemBarycenter",
@@ -259,10 +258,11 @@ return {
         },
         GuiName = "/Solar/OsirisRexPathLocal"
     },
+]]
 
-    -- Comet Dance trail
+    -- Asteroid Dance trail
     {   
-        Name = "OsirisRexAsteroidTrail",
+        Name = "OsirisRexTrailLocal",
         Parent = "Bennu2",
         Renderable = {
             Type = "RenderableTrail",
@@ -280,6 +280,28 @@ return {
             StartTime = "2016 SEP 8 12:00:00",
             EndTime = "2023 SEP 24 12:00:00"
         },
-        GuiName = "OsirisRexAsteroidTrail"
+        GuiName = "OsirisRexTrailLocal"
+    },
+    -- Trail relative to Solar system
+    {   
+        Name = "OsirisRexTrailSolar",
+        Parent = "SolarSystemBarycenter",
+        Renderable = {
+            Type = "RenderableTrail",
+            Body = "OSIRIS-REX",
+            Frame = "GALACTIC",
+            Observer = "SUN",
+            TropicalOrbitPeriod = 20000.0,
+            EarthOrbitRatio = 2,
+            DayLength = 25,
+            RGB = { 0.2, 0.9, 0.2 },
+            Textures = {
+                Type = "simple",
+                Color = "textures/glare_blue.png"
+            },  
+            StartTime = "2016 SEP 8 12:00:00",
+            EndTime = "2023 SEP 24 12:00:00"
+        },
+        GuiName = "OsirisRexTrailSolar"
     },
 }
