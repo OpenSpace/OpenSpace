@@ -448,14 +448,22 @@ void RenderableFov::determineTarget() {
     PerfMeasure("determineTarget");
     _fovTarget = _potentialTargets[0]; //default;
     for (int i = 0; i < _potentialTargets.size(); ++i) {
-        _withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
-            _potentialTargets[i],
-            _spacecraft,                          
-            _instrumentID,
-            SpiceManager::FieldOfViewMethod::Ellipsoid,
-            _aberrationCorrection,
-            _time
-        );
+        try
+        {
+            _withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
+                _potentialTargets[i],
+                _spacecraft,
+                _instrumentID,
+                SpiceManager::FieldOfViewMethod::Ellipsoid,
+                _aberrationCorrection,
+                _time
+                );
+        }
+        catch (const openspace::SpiceManager::SpiceException e)
+        {
+            _withinFOV = false;
+        }
+
         if (_withinFOV) {
             _fovTarget = _potentialTargets[i];
             break;

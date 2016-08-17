@@ -12,7 +12,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/Osiris.obj",
+                GeometryFile = "models/osiris_BASE.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -53,7 +53,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/Osiris.obj",
+                GeometryFile = "models/osiris_POLYCAM.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -70,7 +70,7 @@ return {
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
-                Position = {1, 0, 0},
+                Position = {-2.476, 2.710, 3.364},
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -93,7 +93,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/Osiris.obj",
+                GeometryFile = "models/osiris_REXIS.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -109,7 +109,7 @@ return {
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
-                Position = {-1, 0, 0},
+                Position = {0, 3.371, 2.712},
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -258,5 +258,28 @@ return {
             EndTime = "2023 SEP 24 12:00:00"
         },
         GuiName = "/Solar/OsirisRexPathLocal"
+    },
+
+    -- Comet Dance trail
+    {   
+        Name = "OsirisRexAsteroidTrail",
+        Parent = "Bennu2",
+        Renderable = {
+            Type = "RenderableTrail",
+            Body = "OSIRIS-REX",
+            Frame = "GALACTIC",
+            Observer = BENNU_BODY,
+            TropicalOrbitPeriod = 20000.0,
+            EarthOrbitRatio = 2,
+            DayLength = 25,
+            RGB = { 0.9, 0.2, 0.9 },
+            Textures = {
+                Type = "simple",
+                Color = "textures/glare_blue.png"
+            },  
+            StartTime = "2016 SEP 8 12:00:00",
+            EndTime = "2023 SEP 24 12:00:00"
+        },
+        GuiName = "OsirisRexAsteroidTrail"
     },
 }

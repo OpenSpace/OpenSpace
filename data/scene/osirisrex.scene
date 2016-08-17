@@ -141,13 +141,8 @@ function preInitialization()
     -- Load planetary constants
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    -- openspace.time.setTime("2015-07-08T15:57:45.00")
-    -- openspace.time.setTime("2015-07-12T07:41:00.00")
-    -- openspace.time.setTime("2015-07-12T15:43:00.00")
-    -- openspace.time.setTime("2015-07-12T22:19:20.00")
-    -- openspace.time.setTime("2015-07-13T20:59:00.00")
-    -- openspace.time.setTime("2015-07-14T02:41:55.00")
-    openspace.time.setTime("2018-12-20T22:47:00.00")
+    -- openspace.time.setTime("2018-12-20T22:47:00.00")
+    openspace.time.setTime("2019-05-25T03:57:55.00")
     openspace.time.setDeltaTime(0)
 end
 
@@ -181,7 +176,7 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "OsirisRex",
-        Position = {690952831942.419800, 665640329630.609375, 131488636639.521881},
+        Position = {100, 0, 0},
         Rotation = {0.668258, -0.089482, 0.589040, 0.445484},
     },
     Modules = {
