@@ -65,6 +65,12 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
         dictionary.getValue("Name", _nodeName);
     }
 
+    if (dictionary.hasKey("Texture")) {
+        int t;
+        dictionary.getValue("Texture", t);
+        _texture = t;
+    }
+
     std::string origin;
     if (dictionary.getValue("Origin", origin)) {
         if (origin == "LowerLeft") {
