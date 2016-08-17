@@ -137,12 +137,13 @@ namespace openspace {
         virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
 
     private:
-        using FutureResult = std::future<std::shared_ptr<TileIOResult>>;
+        
 
 
         std::shared_ptr<TileDataset> _tileDataset;
-        std::shared_ptr<ghoul::ThreadPool> _threadPool;
-        std::unordered_map<ChunkHashKey, FutureResult> _futureTileIOResults;
+        ConcurrentJobManager<TileIOResult> _concurrentJobManager;
+        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
+
 
     };
 

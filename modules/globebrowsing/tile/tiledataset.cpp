@@ -640,6 +640,7 @@ namespace openspace {
         size_t largestIndex = (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _dataLayout.bytesPerPixel;
         ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 
+
         char * dataDest = dataDestination;
 
         // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
