@@ -33,7 +33,8 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <ghoul/misc/threadpool.h>
+#include <modules/globebrowsing/other/threadpool.h>
+//#include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 
@@ -118,7 +119,7 @@ namespace openspace {
     public:
 
         AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-            std::shared_ptr<ghoul::ThreadPool> pool);
+            std::shared_ptr<ThreadPool> pool);
 
         ~AsyncTileDataProvider();
 

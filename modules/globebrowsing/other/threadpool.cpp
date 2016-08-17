@@ -22,10 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONCURRENT_JOB_MANAGER_H__
-#define __CONCURRENT_JOB_MANAGER_H__
-
-#include <glm/glm.hpp>
 #include <memory>
 #include <ostream>
 #include <thread>
@@ -33,88 +29,95 @@
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
-//#include <ghoul/misc/threadpool.h>
 
 #include <ghoul/misc/assert.h>
+#include <iostream>
 
 
 
 namespace openspace {
 
+    Worker::Worker(ThreadPool& pool)
+        : pool(pool)
+    {
 
-    // Templated abstract base class representing a job to be done.
-    // Client code derive from this class and implement the virtual execute() method
-    template<typename P>
-    struct Job {
+    }
 
-        Job() { }
-        virtual ~Job() { }
+    void Worker::operator()() {
+        std::function<void()> task;
+        while (true) {
 
-        virtual void execute() = 0;
-        virtual std::shared_ptr<P> product() = 0;
+            // acquire lock
+            {
+                std::unique_lock<std::mutex> lock(pool.queue_mutex);
+
+                // look for a work item
+                while (!pool.stop && pool.tasks.empty()) {
+                    // if there are none wait for notification
+                    pool.condition.wait(lock);
+                }
+
+                if (pool.stop) { // exit if the pool is stopped
+                    return;
+                }
+
+                // get the task from the queue
+                task = pool.tasks.front();
+                pool.tasks.pop_front();
+
+            }// release lock
+
+            // execute the task
+            task();
+        }
+
+        
+    }
+
+
+
+
+
+    ThreadPool::ThreadPool(size_t numThreads)
+        : stop(false)
+    {
+        for (size_t i = 0; i < numThreads; ++i) {
+            workers.push_back(std::thread(Worker(*this)));
+        }
+    }
+
+    // the destructor joins all threads
+    ThreadPool::~ThreadPool() {
+        // stop all threads
+        stop = true;
+        condition.notify_all();
+
+        // join them
+        for (size_t i = 0; i < workers.size(); ++i) {
+            workers[i].join();
+        }
+    }
     
-    };
 
+    // add new work item to the pool
+    void ThreadPool::enqueue(std::function<void()> f) {
+        { // acquire lock
+            std::unique_lock<std::mutex> lock(queue_mutex);
 
+            // add the task
+            tasks.push_back(f);
+        } // release lock
 
+          // wake up one thread
+        condition.notify_one();
+    }
 
-    /* 
-     * Templated Concurrent Job Manager
-     * This class is used execute specific jobs on one (1) parallell thread
-     */
-    template<typename P>
-    class ConcurrentJobManager{
-    public:
-        ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool)
-        {
-
-        }
-
-        ~ConcurrentJobManager() {
-
-        }
-
-
-        void enqueueJob(std::shared_ptr<Job<P>> job) {
-            //threadPool->queue([this, job]() {
-            //    job->execute();
-            //    _finishedJobs.push(job);
-            //});
-            threadPool->enqueue([this, job]() {
-                job->execute();
-                _finishedJobs.push(job);
-            });
-        }
-
-        void clearEnqueuedJobs() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-        std::shared_ptr<Job<P>> popFinishedJob() {
-            ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
-            return _finishedJobs.pop();
-        }
-
-        size_t numFinishedJobs() const{
-            return _finishedJobs.size();
-        }
-
-        void reset() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-    
-    private:
-
-        ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-        std::shared_ptr<ThreadPool> threadPool;
-    };
+    void ThreadPool::clearTasks() {
+        { // acquire lock
+            std::unique_lock<std::mutex> lock(queue_mutex);
+            tasks.clear();
+        } // release lock
+    }
 
 
 } // namespace openspace
-
-
-
-#endif // __CONCURRENT_JOB_MANAGER_H__

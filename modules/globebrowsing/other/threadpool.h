@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONCURRENT_JOB_MANAGER_H__
-#define __CONCURRENT_JOB_MANAGER_H__
+#ifndef __THREAD_POOL_H__
+#define __THREAD_POOL_H__
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -32,84 +32,45 @@
 #include <queue>
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
-#include <modules/globebrowsing/other/threadpool.h>
-//#include <ghoul/misc/threadpool.h>
 
 #include <ghoul/misc/assert.h>
 
 
 
+// Implementatin based on http://progsch.net/wordpress/?p=81
+
 namespace openspace {
-
-
-    // Templated abstract base class representing a job to be done.
-    // Client code derive from this class and implement the virtual execute() method
-    template<typename P>
-    struct Job {
-
-        Job() { }
-        virtual ~Job() { }
-
-        virtual void execute() = 0;
-        virtual std::shared_ptr<P> product() = 0;
     
+
+    class ThreadPool;
+
+    class Worker {
+    public: 
+        Worker(ThreadPool& pool);
+        void operator()();
+    private:
+        ThreadPool& pool;
     };
 
-
-
-
-    /* 
-     * Templated Concurrent Job Manager
-     * This class is used execute specific jobs on one (1) parallell thread
-     */
-    template<typename P>
-    class ConcurrentJobManager{
+    class ThreadPool {
     public:
-        ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool)
-        {
+        ThreadPool(size_t numThreads);
+        ~ThreadPool();
 
-        }
+        void enqueue(std::function<void()> f);
+        void clearTasks();
 
-        ~ConcurrentJobManager() {
-
-        }
-
-
-        void enqueueJob(std::shared_ptr<Job<P>> job) {
-            //threadPool->queue([this, job]() {
-            //    job->execute();
-            //    _finishedJobs.push(job);
-            //});
-            threadPool->enqueue([this, job]() {
-                job->execute();
-                _finishedJobs.push(job);
-            });
-        }
-
-        void clearEnqueuedJobs() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-        std::shared_ptr<Job<P>> popFinishedJob() {
-            ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
-            return _finishedJobs.pop();
-        }
-
-        size_t numFinishedJobs() const{
-            return _finishedJobs.size();
-        }
-
-        void reset() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-    
     private:
+        friend class Worker;
 
-        ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-        std::shared_ptr<ThreadPool> threadPool;
+        std::vector<std::thread> workers;
+
+        std::deque<std::function<void()>> tasks;
+
+        std::mutex queue_mutex;
+        std::condition_variable condition;
+
+        bool stop;
     };
 
 
@@ -117,4 +78,4 @@ namespace openspace {
 
 
 
-#endif // __CONCURRENT_JOB_MANAGER_H__
+#endif // __THREAD_POOL_H__
