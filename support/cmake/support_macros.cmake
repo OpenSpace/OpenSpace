@@ -68,7 +68,12 @@ function (set_compile_settings project)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
-        target_compile_options(${project} PUBLIC "/MP" "/wd4201" "/wd4127")
+        target_compile_options(${project} PUBLIC
+            "/MP"       # Multi-threading support
+            "/ZI"       # Edit and continue support
+            "/wd4201"   # Disable "nameless struct" warning
+            "/wd4127"   # Disable "conditional expression is constant" warning
+        )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PUBLIC "/WX")
         endif ()
