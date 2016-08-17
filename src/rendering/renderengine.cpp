@@ -107,9 +107,9 @@ namespace openspace {
 const std::string RenderEngine::KeyFontMono = "Mono";
 const std::string RenderEngine::KeyFontLight = "Light";
 const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
-	RenderEngine::FrametimeType::DtTimeAvg,
-	RenderEngine::FrametimeType::FPS,
-	RenderEngine::FrametimeType::FPSAvg
+    RenderEngine::FrametimeType::DtTimeAvg,
+    RenderEngine::FrametimeType::FPS,
+    RenderEngine::FrametimeType::FPSAvg
 });
 
 RenderEngine::RenderEngine()
@@ -126,7 +126,7 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-	, _frametimeType(FrametimeType::DtTimeAvg)
+    , _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
     _onScreenInformation = {
@@ -735,12 +735,12 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "bool",
                 "Toggles the showing of render information on-screen text"
             },
-			{
-				"toggleFrametimeType",
-				&luascriptfunctions::toggleFrametimeType,
-				"int",
-				"Toggle showing FPS or Average Frametime in heads up info"
-			},
+            {
+                "toggleFrametimeType",
+                &luascriptfunctions::toggleFrametimeType,
+                "int",
+                "Toggle showing FPS or Average Frametime in heads up info"
+            },
             {
                 "setPerformanceMeasurement",
                 &luascriptfunctions::setPerformanceMeasurement,

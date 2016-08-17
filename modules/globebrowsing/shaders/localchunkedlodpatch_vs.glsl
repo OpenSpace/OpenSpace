@@ -49,39 +49,39 @@ out LevelWeights levelWeights;
 
 
 vec3 bilinearInterpolation(vec2 uv) {
-	vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
-	vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
-	vec3 p = (1 - uv.y) * p0 + uv.y * p1;
-	return p;
+    vec3 p0 = (1 - uv.x) * p00 + uv.x * p10;
+    vec3 p1 = (1 - uv.x) * p01 + uv.x * p11;
+    vec3 p = (1 - uv.y) * p0 + uv.y * p1;
+    return p;
 }
 
 void main() {
 
-	// Position in cameraspace
-	vec3 p = bilinearInterpolation(in_uv);
-	
+    // Position in cameraspace
+    vec3 p = bilinearInterpolation(in_uv);
+    
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
-	float distToVertexOnEllipsoid = length(p);
-	float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
+    float distToVertexOnEllipsoid = length(p);
+    float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
 
-	// use level weight for height sampling, and output to fragment shader
-	levelWeights = getLevelWeights(levelInterpolationParameter);
+    // use level weight for height sampling, and output to fragment shader
+    levelWeights = getLevelWeights(levelInterpolationParameter);
 
-	// Get the height value
-	float height = getTileVertexHeight(in_uv, levelWeights);
+    // Get the height value
+    float height = getTileVertexHeight(in_uv, levelWeights);
 
-	// Apply skirts
-	height -= getTileVertexSkirtLength();
-	
-	// Translate the point along normal
-	p += patchNormalCameraSpace * height;
+    // Apply skirts
+    height -= getTileVertexSkirtLength();
+    
+    // Translate the point along normal
+    p += patchNormalCameraSpace * height;
 
-	vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
-	
-	// Write output
-	fs_uv = in_uv;
-	fs_position = z_normalization(positionClippingSpace);
-	gl_Position = fs_position;
-	ellipsoidNormalCameraSpace = patchNormalCameraSpace;
+    vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
+    
+    // Write output
+    fs_uv = in_uv;
+    fs_position = z_normalization(positionClippingSpace);
+    gl_Position = fs_position;
+    ellipsoidNormalCameraSpace = patchNormalCameraSpace;
 }

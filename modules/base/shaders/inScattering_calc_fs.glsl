@@ -59,9 +59,9 @@ void getMuMuSNu(const float r, vec4 dhdH, out float mu, out float mu_s, out floa
 }
 
 vec3 transmittanceFromTexture(const float r, const float mu) {
-	float u_r  = sqrt((r - Rg) / (Rt - Rg));
+    float u_r  = sqrt((r - Rg) / (Rt - Rg));
     // See Colliene to understand the different mapping.
-	float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+    float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
     
     return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }

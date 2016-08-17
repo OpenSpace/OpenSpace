@@ -88,7 +88,7 @@ struct Geodetic3 {
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-//							 	GEODETICPATCH										//
+//                                 GEODETICPATCH                                        //
 //////////////////////////////////////////////////////////////////////////////////////
 class GeodeticPatch {
 public:
@@ -108,7 +108,7 @@ public:
 
 
     void setCenter(const Geodetic2&);
-    void setHalfSize(const Geodetic2&);	
+    void setHalfSize(const Geodetic2&);    
 
     /**
         returns the latitude boundary which is closest to the equator

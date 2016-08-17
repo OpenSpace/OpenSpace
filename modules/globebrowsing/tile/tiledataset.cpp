@@ -662,8 +662,8 @@ namespace openspace {
             dataDest,                           // Where to put data
             io.write.region.numPixels.x,        // width to write x in destination
             io.write.region.numPixels.y,        // width to write y in destination
-            _dataLayout.gdalType,		        // Type
-            _dataLayout.bytesPerPixel,	        // Pixel spacing
+            _dataLayout.gdalType,                // Type
+            _dataLayout.bytesPerPixel,            // Pixel spacing
             -io.write.bytesPerLine);             // Line spacing
     }
 

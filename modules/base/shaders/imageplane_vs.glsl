@@ -37,7 +37,7 @@ out float s;
 
 void main()
 {
-	vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
     vec4 positionClipSpace = modelViewProjectionTransform * position;
 
     // Write output

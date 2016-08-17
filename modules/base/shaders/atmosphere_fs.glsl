@@ -205,7 +205,7 @@ float phaseFunctionR(float mu) {
 
 // Mie phase function
 float phaseFunctionM(float mu) {
-	return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG);
+    return 1.5 * 1.0 / (4.0 * M_PI) * (1.0 - mieG*mieG) * pow(1.0 + (mieG*mieG) - 2.0*mieG*mu, -3.0/2.0) * (1.0 + mu * mu) / (2.0 + mieG*mieG);
 }
 
 float opticalDepth(float H, float r, float mu, float d) {
@@ -225,7 +225,7 @@ vec4 texture4D(sampler3D table, float r, float mu, float muS, float nu)
     float rmu = r * mu;
     float delta = rmu * rmu - r * r + Rg * Rg;
     vec4 cst = rmu < 0.0 && delta > 0.0 ? vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : vec4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU));
-	float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
+    float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
     float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU));
     float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S));
     float lerp = (nu + 1.0) / 2.0 * (float(RES_NU) - 1.0);
@@ -240,18 +240,18 @@ vec3 analyticTransmittance(float r, float mu, float d) {
 }
 
 vec3 getMie(vec4 rayMie) {
-	return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaR.r / betaR);
+    return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaR.r / betaR);
 }
 
 vec2 getTransmittanceUV(float r, float mu) {
     float uR, uMu;
-	uR = sqrt((r - Rg) / (Rt - Rg));
-	uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+    uR = sqrt((r - Rg) / (Rt - Rg));
+    uMu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
     return vec2(uMu, uR);
 }
 
 vec3 transmittanceFromTexture(float r, float mu) {
-	vec2 uv = getTransmittanceUV(r, mu);
+    vec2 uv = getTransmittanceUV(r, mu);
     return texture(transmittanceTexture, uv).rgb;
 }
 

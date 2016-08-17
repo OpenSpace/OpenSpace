@@ -302,7 +302,7 @@ void InteractionHandler::orbit(const float &dx, const float &dy, const float &dz
     }
 
     //new camera position
-    relative = origin + relative_focus_coordinate; 	
+    relative = origin + relative_focus_coordinate;     
 
 
     psc target = relative + relative_focus_coordinate * dist * zoomSpeed;

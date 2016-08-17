@@ -41,16 +41,16 @@ namespace openspace {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #endif
 class TransformationManager : public ghoul::Singleton<TransformationManager> {
-	friend class ghoul::Singleton<TransformationManager>;
+    friend class ghoul::Singleton<TransformationManager>;
 
 public:
-	TransformationManager();
-	~TransformationManager();
+    TransformationManager();
+    ~TransformationManager();
 
-	glm::dmat3 frameTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 frameTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
 
 private:
-	glm::dmat3 kameleonTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
+    glm::dmat3 kameleonTransformationMatrix(std::string from, std::string to, double ephemerisTime) const;
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     std::shared_ptr<ccmc::Kameleon> _kameleon;

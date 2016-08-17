@@ -26,14 +26,14 @@
 #include "fragment.glsl"
 
 Fragment getFragment() {
-	Fragment frag;
-	frag.color = getTileFragColor();
+    Fragment frag;
+    frag.color = getTileFragColor();
 
 #if SHOW_CHUNK_EDGES
-	frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
+    frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
 #endif // SHOW_CHUNK_EDGES
 
-	frag.depth = fs_position.w;
-	return frag;
+    frag.depth = fs_position.w;
+    return frag;
 }
 

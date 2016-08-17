@@ -60,10 +60,10 @@ public:
     virtual int ySegments() const;
 
 private:
-    virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
-    virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
-    virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
-    virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
+    virtual std::vector<GLuint>        CreateElements(int xRes, int yRes);
+    virtual std::vector<glm::vec4>    CreatePositions(int xRes, int yRes);
+    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xRes, int yRes);
+    virtual std::vector<glm::vec3>    CreateNormals(int xRes, int yRes);
 
     void validate(int xSegments, int ySegments);
 

@@ -27,7 +27,7 @@
 #include <fstream>
 
 namespace {
-	const std::string _loggerCat = "DataProcessor";
+    const std::string _loggerCat = "DataProcessor";
 }
 
 namespace openspace {

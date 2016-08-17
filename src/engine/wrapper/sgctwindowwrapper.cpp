@@ -63,7 +63,7 @@ double SGCTWindowWrapper::averageDeltaTime() const {
 }
 
 double SGCTWindowWrapper::deltaTime() const {
-	return sgct::Engine::instance()->getDt();
+    return sgct::Engine::instance()->getDt();
 }
     
 glm::vec2 SGCTWindowWrapper::mousePosition() const {
