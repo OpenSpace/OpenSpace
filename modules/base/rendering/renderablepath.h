@@ -64,7 +64,6 @@ private:
 
     glm::vec3 _lineColor;
     glm::vec4 _lastPosition;
-    properties::FloatProperty _lineFade;
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawLine;
 

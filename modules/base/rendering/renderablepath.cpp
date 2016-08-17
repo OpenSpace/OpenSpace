@@ -59,7 +59,6 @@ namespace openspace {
 
 RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 1.f)
     , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
     , _drawLine("drawline", "Draw Line", false)
     , _programObject(nullptr)
@@ -90,7 +89,6 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
         dictionary.getValue(keyDrawLine, drawLine);
     _drawLine = drawLine;
     addProperty(_drawLine);
-    addProperty(_lineFade);
     addProperty(_lineWidth);
     _distanceFade = 1.0;
 }
@@ -164,8 +162,6 @@ void RenderablePath::render(const RenderData& data) {
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("pointSteps", _pointSteps);
     _programObject->setUniform("color", _lineColor);
-    _programObject->setUniform("lineFade", _lineFade);
-    _programObject->setUniform("numVertices", nPointsToDraw);
 
     if (_drawLine) {
         glLineWidth(_lineWidth);

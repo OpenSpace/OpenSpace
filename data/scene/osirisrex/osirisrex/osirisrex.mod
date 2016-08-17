@@ -235,32 +235,8 @@ return {
         },
         GuiName = "/Solar/OsirisRexPathSolar"
     },
-    {   
-        Name = "OsirisRexPathLocal",
-        Parent = "Bennu2",
-        Renderable = {
-            Type = "RenderablePath",
-            Body = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            Observer = BENNU_BODY,
-            RGB = { 0.8, 0.0, 0.5},
-            TimeSteps = 900,
-            PointSteps = 4, -- Every fourth point is marked differently to show hours 
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },  
-            DrawLine = true,
-            
-            StartTime = "2016 SEP 8 12:00:00",
-            EndTime = "2023 SEP 24 12:00:00"
-        },
-        GuiName = "/Solar/OsirisRexPathLocal"
-    },
-]]
-
-    -- Asteroid Dance trail
+    ]]
+    -- Trail relative to Bennu
     {   
         Name = "OsirisRexTrailLocal",
         Parent = "Bennu2",

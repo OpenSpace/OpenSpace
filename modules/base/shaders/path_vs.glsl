@@ -30,8 +30,6 @@ uniform vec3 color;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform int pointSteps;
-uniform float lineFade;
-uniform int numVertices;
 
 out vec4 vs_positionScreenSpace;
 out vec4 vs_pointColor;
@@ -39,24 +37,26 @@ out vec4 vs_pointColor;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {    
-    vec4 positionClipSpace = projectionTransform * modelViewTransform * in_point_position;
+    vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     
     gl_Position = vs_positionScreenSpace;
             
     if(mod(gl_VertexID, pointSteps) == 0) {
         vs_pointColor.rgb = color;
-        gl_PointSize = 10.0f;  
+        gl_PointSize = 5.0f;  
     }
     else {
         vs_pointColor.rgb = (color + vec3(0.6f, 0.6f, 0.6f)) / 2;
-        gl_PointSize = 5.f;  
+        gl_PointSize = 2.f;  
     }
-    if (lineFade == 0)
-        vs_pointColor.a = 1.0;
-    else
-    {
-        int threshHold = int(lineFade * numVertices);
-        vs_pointColor.a = float(gl_VertexID - threshHold) / (numVertices - threshHold);
-    }
+
+    // I don't like this random variable k defined in powerScalingMath.hglsl.
+    // Will ignore it and use 10 in protest of psc dependencies. /KB
+    // float maximumDistance = pow(k, 10);
+    float maximumDistance = pow(10, 10);
+    float distanceToCamera = length(positionCameraSpace.xyz);
+    
+    vs_pointColor.a = maximumDistance / (distanceToCamera/100);
 }
