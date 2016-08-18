@@ -78,31 +78,15 @@ const glm::dmat3& SpiceRotation::matrix() const {
 void SpiceRotation::update(const UpdateData& data) {
     if (!_kernelsLoadedSuccessfully)
         return;
-
-    // TODO : Need to be checking for real if the frame is fixed since fixed frames
-    // do not have CK coverage.
-    bool sourceFrameIsFixed = _sourceFrame == "GALACTIC";
-    bool destinationFrameIsFixed = _destinationFrame == "GALACTIC";
-
-    bool sourceHasCoverage =
-        !_sourceFrame.empty() &&
-        SpiceManager::ref().hasFrameId(_sourceFrame) &&
-        (SpiceManager::ref().hasCkCoverage(_sourceFrame, data.time) ||
-            sourceFrameIsFixed);
-    bool destinationHasCoverage =
-        !_destinationFrame.empty() &&
-        SpiceManager::ref().hasFrameId(_destinationFrame) &&
-        (SpiceManager::ref().hasCkCoverage(_destinationFrame, data.time) ||
-            destinationFrameIsFixed);
-
-    if (sourceHasCoverage && destinationHasCoverage) {
+    try {
         _rotationMatrix = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
             data.time);
     }
-    else {
-        _rotationMatrix = glm::dmat3(1.0);
+    catch (const ghoul::RuntimeError&) {
+        // In case of missing coverage
+        _rotationMatrix = glm::dmat3(1);
     }
 }
 

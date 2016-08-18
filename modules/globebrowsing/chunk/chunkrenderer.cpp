@@ -370,7 +370,6 @@ namespace openspace {
         Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
         auto patchSize = chunk.surfacePatch().size();
         
-        // TODO : Model transform should be fetched as a matrix directly.
         dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewTransform = mat4(viewTransform * modelTransform);

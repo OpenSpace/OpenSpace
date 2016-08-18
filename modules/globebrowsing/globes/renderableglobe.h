@@ -112,13 +112,11 @@ public:
 
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
     const Ellipsoid& ellipsoid();
-    const glm::dmat3& stateMatrix();
     float getHeight(glm::dvec3 position);
     float cameraMinHeight();
     double interactionDepthBelowEllipsoid();
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
-    
     // Properties 
     properties::BoolProperty _isEnabled;
     properties::FloatProperty lodScaleFactor;
@@ -128,9 +126,6 @@ public:
     properties::BoolProperty _saveOrThrowCamera;
     properties::BoolProperty _resetTileProviders;
     
-    
-
-
 private:
     double _interactionDepthBelowEllipsoid;
 
@@ -142,7 +137,6 @@ private:
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     
-
     DistanceSwitch _distanceSwitch;
 
     properties::FloatProperty _cameraMinHeight;

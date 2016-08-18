@@ -38,6 +38,8 @@ struct InitializeData {
 
 struct UpdateData {
     glm::dvec3 position;
+    glm::dmat3 rotation;
+    double scale;
     double time;
     bool isTimeJump;
     double delta;

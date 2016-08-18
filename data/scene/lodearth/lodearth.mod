@@ -3,6 +3,20 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "StaticEphemeris",
+                Position = {0,0,0},
+            },
+            Rotation = {
+                Type = "StaticRotation",
+                EulerAngles = {0,0,0},
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        },
     },
     -- EarthTrail module
     {   
@@ -46,8 +60,6 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Frame = "IAU_EARTH",
-            Body = "EARTH",
             Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
