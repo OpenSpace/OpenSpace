@@ -43,18 +43,16 @@ vec2 offsets[8] = {
 
 vec3 gatherColors(vec2 position) {
     vec2 texSize = textureSize(tex, 0);
-    vec2 h = vec2(1.0) / texSize;
 
     int nContributions = 0;
     vec3 totalColor = vec3(0.0);
 
-    vec4 colors[8];
     for (int i = 0; i < 8; i++) {
-        colors[i] = texture(tex, position + h * offsets[i]);
-        float s = texture(stencil, position + h * offsets[i]).r;
+        vec2 samplePosition = (gl_FragCoord.xy + offsets[i]) / texSize;
 
-        if (s != 0.0) {
-            totalColor.rgb += colors[i].rgb;
+        if (texture(stencil, samplePosition).r != 0.0) {
+            vec3 c = texture(tex, samplePosition).rgb;
+            totalColor += c;
             nContributions++;
         }
     }
@@ -70,7 +68,7 @@ void main() {
         // This means that the current fragment/texel we are looking at has not been
         // projected on and we only want to do the dilation into these texels
 
-        color = vec4(gatherColors(vs_uv), 0.0);
+        color = vec4(gatherColors(vs_uv), 1.0);
     }
     else {
         // We are in a region where an image has been projected, so we can reuse the

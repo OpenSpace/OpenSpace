@@ -32,7 +32,7 @@ in vec2 vs_uv;
 in vec4 ProjTexCoord;
 
 layout (location = 0) out vec4 color; 
-layout (location = 1) out float stencil;
+layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
 
@@ -59,10 +59,10 @@ void main() {
     if ((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
         color = texture(projectionTexture, projected.xy);
         color.a = 1.0;
-        stencil = 1.0;
+        stencil = vec4(1.0);
     }
     else {
       color = vec4(vec3(0.0), 1.0);
-      stencil = 0.0;
+      stencil = vec4(0.0);
     }
 }
