@@ -142,7 +142,8 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     -- openspace.time.setTime("2018-12-20T22:47:00.00")
-    openspace.time.setTime("2019-05-25T03:57:55.00")
+    --openspace.time.setTime("2019-05-25T03:57:55.00")
+    openspace.time.setTime("2016-09-08T23:05:00.00")
     openspace.time.setDeltaTime(0)
 end
 
@@ -183,7 +184,7 @@ return {
         "sun",
         "mercury",
         "venus",
-        "earth",
+        "lodearth",
         "mars",
         "saturn",
         "uranus",
