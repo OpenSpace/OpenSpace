@@ -77,7 +77,7 @@ InstrumentTimesParser::InstrumentTimesParser(
 
 bool InstrumentTimesParser::create() {
     auto imageComparer = [](const Image &a, const Image &b)->bool{
-        return a.startTime < b.startTime;
+        return a.timeRange.start < b.timeRange.start;
     };
     auto targetComparer = [](const std::pair<double, std::string> &a,
         const std::pair<double, std::string> &b)->bool{
@@ -121,8 +121,7 @@ bool InstrumentTimesParser::create() {
                     _captureProgression.push_back(captureTimeRange.start);
 
                     Image image;
-                    image.startTime = captureTimeRange.start;
-                    image.stopTime = captureTimeRange.end;
+                    image.timeRange = captureTimeRange;
                     image.path = "";
                     image.isPlaceholder = true;
                     image.activeInstruments.push_back(instrumentID);

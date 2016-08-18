@@ -166,14 +166,14 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
     
-    double timePast = abs(img.startTime - _previousTime);
+    double timePast = abs(img.timeRange.start - _previousTime);
     
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
         updatePlane(img, time);
 
     else if (timePast > DBL_EPSILON) {
-        _previousTime = time = img.startTime;
+        _previousTime = time = img.timeRange.start;
         updatePlane(img, time);
     }
 

@@ -132,7 +132,7 @@ std::string LabelParser::encode(std::string line) {
 
 bool LabelParser::create() {
     auto imageComparer = [](const Image &a, const Image &b)->bool{
-        return a.startTime < b.startTime;
+        return a.timeRange.start < b.timeRange.start;
     };
     auto targetComparer = [](const std::pair<double, std::string> &a,
         const std::pair<double, std::string> &b)->bool{
@@ -273,7 +273,7 @@ bool LabelParser::create() {
     for (auto image : tmp){
         if (previousTarget != image.target){
             previousTarget = image.target;
-            std::pair<double, std::string> v_target = std::make_pair(image.startTime, image.target);
+            std::pair<double, std::string> v_target = std::make_pair(image.timeRange.start, image.target);
             _targetTimes.push_back(v_target);
             std::sort(_targetTimes.begin(), _targetTimes.end(), targetComparer);
         }
@@ -309,8 +309,8 @@ bool LabelParser::create() {
 }
 
 void LabelParser::createImage(Image& image, double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string pot) {
-    image.startTime = startTime;
-    image.stopTime = stopTime;
+    image.timeRange = { startTime , stopTime };
+    ghoul_assert(image.timeRange.isDefined(), "Invalid time range!");
     image.path = pot;
     for (int i = 0; i < instr.size(); i++){
         image.activeInstruments.push_back(instr[i]);

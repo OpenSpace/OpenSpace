@@ -178,8 +178,7 @@ bool HongKangParser::create() {
                             //fill image
 
                             Image image;
-                            image.startTime = time;
-                            image.stopTime = time + shutter;
+                            image.timeRange = TimeRange(time, time + shutter);
                             image.path = _defaultCaptureImage;
                             image.activeInstruments = cameraSpiceID;
                             image.target = cameraTarget;
@@ -220,14 +219,13 @@ bool HongKangParser::create() {
                                     findPlaybookSpecifiedTarget(line, scannerTarget);
                                     scannerSpiceID = it->second->getTranslation();
 
-                                    scanRange.start = scan_start;
-                                    scanRange.end = scan_stop;
+                                    scanRange = { scan_start, scan_stop };
+                                    ghoul_assert(scanRange.isDefined(), "Invalid time range!");
                                     _instrumentTimes.push_back(std::make_pair(it->first, scanRange));
 
                                     //store individual image
                                     Image image;
-                                    image.startTime = scan_start;
-                                    image.stopTime = scan_stop;
+                                    image.timeRange = scanRange;
                                     image.path = _defaultCaptureImage;
                                     image.activeInstruments = scannerSpiceID;
                                     image.target = cameraTarget;
@@ -246,8 +244,8 @@ bool HongKangParser::create() {
                         if (capture_start != -1){
                             //end of capture sequence for camera, store end time of this sequence
                             capture_stop = time;
-                            cameraRange.start = capture_start;
-                            cameraRange.end = capture_stop;
+                            cameraRange = { capture_start, capture_stop };
+                            ghoul_assert(cameraRange.isDefined(), "Invalid time range!");
                             _instrumentTimes.push_back(std::make_pair(previousCamera, cameraRange));
 
                             capture_start = -1;
@@ -272,7 +270,8 @@ bool HongKangParser::augmentWithSpice(Image& image,
     // we have (?) to cast to int, unfortunately
     // Why? --abock
     // because: old comment --m
-    int exposureTime = image.stopTime - image.startTime;
+    
+    int exposureTime = image.timeRange.duration();
     if (exposureTime == 0) {
         exposureTime = 1;
     }
@@ -280,7 +279,7 @@ bool HongKangParser::augmentWithSpice(Image& image,
     for (int i = 0; i < potentialTargets.size(); ++i) {
         bool _withinFOV = false;
         for (int j = 0; j < image.activeInstruments.size(); ++j) {
-            double time = image.startTime;
+            double time = image.timeRange.start;
             for (int k = 0; k < exposureTime; k++){
                 time += k;
                 _withinFOV = SpiceManager::ref().isTargetInFieldOfView(

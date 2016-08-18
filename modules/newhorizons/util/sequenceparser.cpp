@@ -130,11 +130,11 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
 
     for (auto target : _subsetMap){
         for (auto image : target.second._subset){
-            writeToBuffer(buffer, currentWriteLocation, image.startTime);
-            writeToBuffer(buffer, currentWriteLocation, image.stopTime);
+            writeToBuffer(buffer, currentWriteLocation, image.timeRange.start);
+            writeToBuffer(buffer, currentWriteLocation, image.timeRange.end);
 
-            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.startTime);
-            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.stopTime);
+            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.start);
+            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.end);
 
             writeToBuffer(buffer, currentWriteLocation, timeBegin);
             writeToBuffer(buffer, currentWriteLocation, timeEnd);
