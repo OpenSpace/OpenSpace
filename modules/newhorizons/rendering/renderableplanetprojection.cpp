@@ -368,6 +368,8 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _programObject->rebuildFromFile();
     }
 
+    _projectionComponent.update();
+
     _time = Time::ref().currentTime();
     _capture = false;
 

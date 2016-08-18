@@ -57,6 +57,8 @@ public:
     void imageProjectBegin();
     void imageProjectEnd();
 
+    void update();
+
     bool generateProjectionLayerTexture();
     bool auxiliaryRendertarget();
 

@@ -186,9 +186,9 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
 
         _potentialTargets.resize(potentialTargets.size());
         for (int i = 0; i < potentialTargets.size(); ++i) {
-std::string target;
-potentialTargets.getValue(std::to_string(i + 1), target);
-_potentialTargets[i] = target;
+            std::string target;
+            potentialTargets.getValue(std::to_string(i + 1), target);
+            _potentialTargets[i] = target;
         }
     }
 
@@ -267,13 +267,6 @@ bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) 
 }
 
 void ProjectionComponent::imageProjectBegin() {
-    if (_needsTextureMapDilation) {
-        if (_dilation.program->isDirty()) {
-            _dilation.program->rebuildFromFile();
-        }
-    }
-
-
     // keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
@@ -319,6 +312,14 @@ void ProjectionComponent::imageProjectEnd() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+}
+
+void ProjectionComponent::update() {
+    if (_needsTextureMapDilation) {
+        if (_dilation.program->isDirty()) {
+            _dilation.program->rebuildFromFile();
+        }
+    }
 }
 
 bool ProjectionComponent::auxiliaryRendertarget() {
@@ -402,18 +403,24 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
     glm::vec3 e3 = glm::normalize(boreSight);
     glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                         e1.y, e2.y, e3.y, 0.f,
-                                         e1.z, e2.z, e3.z, 0.f,
-                                         -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
+    glm::mat4 projViewMatrix = glm::mat4(
+        e1.x, e2.x, e3.x, 0.f,
+        e1.y, e2.y, e3.y, 0.f,
+        e1.z, e2.z, e3.z, 0.f,
+        -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f
+    );
     // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane);
+    glm::mat4 projProjectionMatrix = glm::perspective(
+        glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
+    );
     // bias matrix
-    glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
-                                                  0, 0.5f, 0, 0,
-                                                  0, 0, 0.5f, 0,
-                                                  0.5f, 0.5f, 0.5f, 1);
-    return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
+    glm::mat4 projNormalizationMatrix = glm::mat4(
+        0.5f, 0.f, 0.f, 0.f,
+        0.f, 0.5f, 0.f, 0.f,
+        0.f, 0.f, 0.5f, 0.f,
+        0.5f, 0.5f, 0.5f, 1.f
+    );
+    return projNormalizationMatrix * projProjectionMatrix * projViewMatrix;
 }
 
 bool ProjectionComponent::doesPerformProjection() const {
