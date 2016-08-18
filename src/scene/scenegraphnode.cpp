@@ -276,9 +276,9 @@ void SceneGraphNode::update(const UpdateData& data) {
     // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
     _worldPositionCached = calculateWorldPosition();
 
-    newUpdateData.position = worldPosition();
-    newUpdateData.rotation = worldRotationMatrix();
-    newUpdateData.scale = worldScale();
+    newUpdateData.modelTransform.translation = worldPosition();
+    newUpdateData.modelTransform.rotation = worldRotationMatrix();
+    newUpdateData.modelTransform .scale = worldScale();
 
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {

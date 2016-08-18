@@ -5,16 +5,13 @@ return {
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
-                Position = {0,0,0},
-            },
-            Rotation = {
-                Type = "StaticRotation",
-                EulerAngles = {0,0,0},
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
+                Type = "SpiceEphemeris",
+                Body = "EARTH",
+                Reference = "ECLIPJ2000",
+                Observer = "SUN",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+                }
             },
         },
     },
@@ -39,15 +36,6 @@ return {
         Name = "LodEarth",
         Parent = "EarthBarycenter",
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = "EARTH",
-                Reference = "ECLIPJ2000",
-                Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
