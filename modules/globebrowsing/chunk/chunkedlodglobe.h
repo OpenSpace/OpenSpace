@@ -76,16 +76,12 @@ namespace openspace {
         const ChunkNode& findChunkNode(const Geodetic2 location) const;
         ChunkNode& findChunkNode(const Geodetic2 location);
 
-        void setStateMatrix(const glm::dmat3& stateMatrix);
-
         bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
         int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
         double minDistToCamera;
 
-        //Scalar globeRadius;
         const Ellipsoid& ellipsoid() const;
-        const glm::dmat3& stateMatrix();
         const glm::dmat4& modelTransform();
         const glm::dmat4& inverseModelTransform();
 
@@ -145,7 +141,6 @@ namespace openspace {
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
         const Ellipsoid& _ellipsoid;
-        glm::dmat3 _stateMatrix;
         glm::dmat4 _modelTransform;
         glm::dmat4 _inverseModelTransform;
 

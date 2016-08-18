@@ -151,7 +151,7 @@ void RenderablePath::render(const RenderData& data) {
     _programObject->activate();
 
     // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.positionVec3;
+    glm::dvec3 bodyPosition = data.modelTransform.translation;
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =

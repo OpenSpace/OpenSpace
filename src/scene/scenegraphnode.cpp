@@ -193,6 +193,18 @@ bool SceneGraphNode::deinitialize() {
         delete _renderable;
         _renderable = nullptr;
     }
+    if (_ephemeris) {
+        delete _ephemeris;
+        _ephemeris = nullptr;
+    }
+    if (_rotation) {
+        delete _rotation;
+        _rotation = nullptr;
+    }
+    if (_scale) {
+        delete _scale;
+        _scale = nullptr;
+    }
 
     //delete _ephemeris;
     //_ephemeris = nullptr;
@@ -213,20 +225,19 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    UpdateData newUpdateData = data;
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(newUpdateData);
+            _ephemeris->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _ephemeris->update(newUpdateData);
+            _ephemeris->update(data);
     }
 
     if (_rotation) {
@@ -234,14 +245,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _rotation->update(newUpdateData);
+            _rotation->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _rotation->update(newUpdateData);
+            _rotation->update(data);
     }
 
     if (_scale) {
@@ -249,15 +260,25 @@ void SceneGraphNode::update(const UpdateData& data) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _scale->update(newUpdateData);
+            _scale->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _scale->update(newUpdateData);
+            _scale->update(data);
     }
+    UpdateData newUpdateData = data;
+
+    _worldRotationCached = calculateWorldRotation();
+    _worldScaleCached = calculateWorldScale();
+    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
+    _worldPositionCached = calculateWorldPosition();
+
+    newUpdateData.modelTransform.translation = worldPosition();
+    newUpdateData.modelTransform.rotation = worldRotationMatrix();
+    newUpdateData.modelTransform .scale = worldScale();
 
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
@@ -273,14 +294,6 @@ void SceneGraphNode::update(const UpdateData& data) {
         else
             _renderable->update(newUpdateData);
     }
-
-    _worldRotationCached = calculateWorldRotation();
-    _worldScaleCached = calculateWorldScale();
-
-    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
-    _worldPositionCached = calculateWorldPosition();
-
-    newUpdateData.position = worldPosition();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {

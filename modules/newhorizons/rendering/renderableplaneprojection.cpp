@@ -135,7 +135,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
     _shader->activate();
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.positionVec3) * // Translation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(_stateMatrix);
     glm::mat4 modelViewProjectionTransform =
         data.camera.projectionMatrix() *

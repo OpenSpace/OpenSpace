@@ -3,27 +3,30 @@ return {
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Static"
-        }
     },
     -- RenderableGlobe module
     {   
         Name = "LodMars",
         Parent = "MarsBarycenter",
-        Ephemeris = {
-            Type = "Spice",
-            Body = "MARS BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_MARS",
-            Reference = "ECLIPJ2000"
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "MARS BARYCENTER",
+                Reference = "ECLIPJ2000",
+                Observer = "SUN",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+                }
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_MARS",
+                DestinationFrame = "ECLIPJ2000",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
         Renderable = {
             Type = "RenderableGlobe",
@@ -48,6 +51,7 @@ return {
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        Enabled = true,
                     },
                     {
                         Name = "Mars Viking Clr",

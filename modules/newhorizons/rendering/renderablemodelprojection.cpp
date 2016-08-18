@@ -176,12 +176,13 @@ void RenderableModelProjection::render(const RenderData& data) {
     _imageTimes.clear();
 
     // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.positionVec3;
+    glm::dvec3 bodyPosition = data.modelTransform.translation;
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), bodyPosition) * // Translation
-        glm::dmat4(_stateMatrix); // Rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) * // Rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)); // Scale
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
     glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
     glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
