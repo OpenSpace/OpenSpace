@@ -47,7 +47,7 @@ namespace openspace {
 
     struct TileDataLayout {
         TileDataLayout();
-        TileDataLayout(GDALDataset* dataSet, GLuint glType);
+        TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType);
 
         GDALDataType gdalType;
         GLuint glType;

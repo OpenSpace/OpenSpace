@@ -22,21 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_H__
-#define __OPENSPACE_H__
+#ifndef __THREAD_POOL_H__
+#define __THREAD_POOL_H__
 
-#include <string>
+#include <glm/glm.hpp>
+#include <memory>
+#include <ostream>
+#include <thread>
+#include <queue>
+
+#include <modules/globebrowsing/other/concurrentqueue.h>
+
+#include <ghoul/misc/assert.h>
+
+
+
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
+    
 
-std::string licenseText();
-    
-const int OPENSPACE_VERSION_MAJOR = 0;
-const int OPENSPACE_VERSION_MINOR = 4;
-const int OPENSPACE_VERSION_PATCH = 0;
-    
-const std::string OPENSPACE_VERSION_STRING = "prerelease-9 (IPS)";
+    class ThreadPool;
+
+    class Worker {
+    public: 
+        Worker(ThreadPool& pool);
+        void operator()();
+    private:
+        ThreadPool& pool;
+    };
+
+    class ThreadPool {
+    public:
+        ThreadPool(size_t numThreads);
+        ~ThreadPool();
+
+        void enqueue(std::function<void()> f);
+        void clearTasks();
+
+    private:
+        friend class Worker;
+
+        std::vector<std::thread> workers;
+
+        std::deque<std::function<void()>> tasks;
+
+        std::mutex queue_mutex;
+        std::condition_variable condition;
+
+        bool stop;
+    };
+
 
 } // namespace openspace
 
-#endif // __OPENSPACE_H__
+
+
+#endif // __THREAD_POOL_H__

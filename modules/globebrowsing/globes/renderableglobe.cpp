@@ -61,7 +61,7 @@ namespace openspace {
         , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
-        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
+        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 10.0f, 1.0f, 50.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
         , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
     {
