@@ -214,6 +214,7 @@ bool SceneGraphNode::deinitialize() {
 
 void SceneGraphNode::update(const UpdateData& data) {
     UpdateData newUpdateData = data;
+
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -259,6 +260,14 @@ void SceneGraphNode::update(const UpdateData& data) {
             _scale->update(newUpdateData);
     }
 
+    _worldRotationCached = calculateWorldRotation();
+    _worldScaleCached = calculateWorldScale();
+
+    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
+    _worldPositionCached = calculateWorldPosition();
+
+    newUpdateData.position = worldPosition();
+
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
             glFinish();
@@ -273,14 +282,6 @@ void SceneGraphNode::update(const UpdateData& data) {
         else
             _renderable->update(newUpdateData);
     }
-
-    _worldRotationCached = calculateWorldRotation();
-    _worldScaleCached = calculateWorldScale();
-
-    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
-    _worldPositionCached = calculateWorldPosition();
-
-    newUpdateData.position = worldPosition();
 }
 
 void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
