@@ -21,12 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+  
+#version 330
 
-layout(location = 1) out vec4 renderTarget1;
+#include "atmosphere_common.glsl"
+
+out vec4 renderTarget1;
 
 uniform int layer;
 
@@ -37,7 +37,7 @@ float phaseFunctionR(const float mu) {
     return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
 }
 
-Fragment getFragment() {
+void main(void) {
     float x = gl_FragCoord.x - 0.5;
     float y = gl_FragCoord.y - 0.5;
 
@@ -45,10 +45,4 @@ Fragment getFragment() {
     vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
 
     renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / phaseFunctionR(nu), 1.0);
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
-}
+ }

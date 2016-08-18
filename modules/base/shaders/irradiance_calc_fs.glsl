@@ -21,12 +21,11 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version 330
 
 #include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
 
-layout(location = 1) out vec4 renderTableColor;
+out vec4 renderTableColor;
 
 uniform sampler2D transmittanceTexture;
 
@@ -44,14 +43,8 @@ vec3 transmittance(const float r, const float mu) {
     return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }
 
-Fragment getFragment() {
+void main(void) {
     float mu, r;
     getRAndMu(r, mu);
     renderTableColor = vec4(transmittance(r, mu) * max(mu, 0.0), 1.0);     
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }

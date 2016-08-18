@@ -21,12 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
 
-layout(location = 1) out vec4 renderTarget1;
+#version 330
+
+#include "atmosphere_common.glsl"
+
+out vec4 renderTarget1;
 
 uniform float r;
 uniform vec4 dhdH;
@@ -141,15 +141,9 @@ vec3 inscatter(float r, float mu, float muS, float nu) {
     return raymie;
 }
 
-Fragment getFragment() {
+void main(void) {
     float mu, muS, nu;
     getMuMuSNu(r, dhdH, mu, muS, nu);
     
     renderTarget1 = vec4(inscatter(r, mu, muS, nu), 1.0);
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }

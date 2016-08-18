@@ -21,13 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#version 330
 
-layout(location = 1) out vec4 renderTarget1;
-layout(location = 2) out vec4 renderTarget2;
+#include "atmosphere_common.glsl"
+
+layout(location = 0) out vec4 renderTarget1;
+layout(location = 1) out vec4 renderTarget2;
 
 uniform float r;
 uniform vec4 dhdH;
@@ -135,7 +134,7 @@ void inscatter(float r, float mu, float muS, float nu, out vec3 ray, out vec3 mi
     mie *= betaMSca;
 }
 
-Fragment getFragment() {
+void main(void) {
     vec3 ray;
     vec3 mie;
     float mu, muS, nu;
@@ -145,10 +144,4 @@ Fragment getFragment() {
     // (cf "Angular precision")
     renderTarget1 = vec4(ray, 1.0);
     renderTarget2 = vec4(mie, 1.0);
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }

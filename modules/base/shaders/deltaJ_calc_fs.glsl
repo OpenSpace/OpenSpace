@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#version 330
 
-layout(location = 1) out vec4 renderTarget1;
+#include "atmosphere_common.glsl"
+
+out vec4 renderTarget1;
 
 uniform float r;
 uniform vec4 dhdH;
@@ -176,17 +176,11 @@ void inscatter(float r, float mu, float mu_s, float nu, out vec3 raymie) {
     }
 }
 
-Fragment getFragment() {
+void main(void) {
     vec3 raymie;
     float mu, mu_s, nu;
     getMuMuSNu(r, dhdH, mu, mu_s, nu);
     inscatter(r, mu, mu_s, nu, raymie);
     
     renderTarget1 = vec4(raymie, 1.0);
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }

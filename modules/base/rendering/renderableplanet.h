@@ -128,6 +128,7 @@ private:
         const int layer, const bool doCalc = true);
     void saveTextureToPPMFile(const GLenum color_buffer_attachment, const std::string & fileName, 
                             const int width, const int height) const;
+    void checkFrameBufferState(const std::string & codePosition) const;
 
 private:
     properties::StringProperty _colorTexturePath;
@@ -147,8 +148,8 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSSupTermsProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
     ghoul::opengl::TextureUnit _dummyTextureUnit;
-    ghoul::opengl::TextureUnit _dummy3DTextureUnit;
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
     ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
@@ -170,8 +171,8 @@ private:
     GLuint _deltaSMieTableTexture;
     GLuint _deltaJTableTexture;
     GLuint _dummyTexture;
-    GLuint _dummy3DTexture;
     GLuint _atmosphereTexture;
+    GLuint _atmosphereDepthTexture;
     GLuint _atmosphereFBO;
     GLuint _atmosphereRenderVAO;
     GLuint _atmosphereRenderVBO;
@@ -181,6 +182,11 @@ private:
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
+
+    // DEBUG Properties:
+    properties::BoolProperty _saveDeferredFramebuffer;
+
+
     float _alpha;
     std::vector< ShadowConf > _shadowConfArray;
     float _planetRadius;

@@ -21,12 +21,12 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version __CONTEXT__
 
 #include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
 
-layout(location = 1) out vec4 renderTableColor;
+//layout(location = 1) out vec4 renderTableColor;
+out vec4 renderTableColor;
 
 // In the following shaders r (altitude) is the length of vector/position x in the
 // atmosphere (or on the top of it when considering an observer in space),
@@ -93,17 +93,11 @@ void getRandMU(out float r, out float mu) {
     mu = -0.15 + tan(1.5 * u_mu) / tan(1.5) * (1.0 + 0.15);
 }
 
-Fragment getFragment() {
+void main(void) {
     float r, mu;
     
     getRandMU(r, mu);
     vec3 depth = betaMEx * opticalDepth(r, mu, HM) + betaR * opticalDepth(r, mu, HR);
     
-    renderTableColor = vec4(exp(-depth), 1.0);
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag; 
+    renderTableColor = vec4(exp(-depth), 1.0); 
 }

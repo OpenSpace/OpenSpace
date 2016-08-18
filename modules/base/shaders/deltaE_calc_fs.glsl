@@ -21,28 +21,21 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#version 330
 
-layout(location = 1) out vec4 renderTableColor;
+#include "atmosphere_common.glsl"
+
+out vec4 renderTableColor;
 
 // See paper algorithm
 uniform int line; 
 uniform sampler2D deltaETexture;
 
-Fragment getFragment() {   
+void main(void) {   
     if (line == 4)
         renderTableColor = vec4(0.0);
     else if (line == 10) {
         vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H); 
         renderTableColor = texture(deltaETexture, uv); 
     }
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }

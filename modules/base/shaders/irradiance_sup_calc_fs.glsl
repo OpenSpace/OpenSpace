@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#version 330
 
-layout(location = 1) out vec4 renderTableColor;
+#include "atmosphere_common.glsl"
+
+out vec4 renderTableColor;
 
 uniform float first;
 
@@ -67,7 +67,7 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
            texture(table, vec3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp;
 }
 
-Fragment getFragment() {
+void main(void) {
     float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY_H) - 1.0) * (Rt - Rg);
     float mu_s = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY_W) - 1.0) * (1.0 + 0.2);
     vec3 s = vec3(max(sqrt(1.0 - mu_s * mu_s), 0.0), 0.0, mu_s);
@@ -92,10 +92,5 @@ Fragment getFragment() {
         }
     }
 
-    renderTableColor = vec4(result, 0.0); 
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;   
+    renderTableColor = vec4(result, 0.0);    
 }

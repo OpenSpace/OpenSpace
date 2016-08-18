@@ -22,18 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#include "atmosphere_common.glsl"
-#include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#version 330
 
-layout(location = 1) out vec4 renderTarget1;
+#include "atmosphere_common.glsl"
+
+out vec4 renderTarget1;
 
 uniform int layer;
 
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
-Fragment getFragment() {
+void main(void) {
     vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
     vec4 ray = texture(deltaSRTexture, uvw);
     vec4 mie = texture(deltaSMTexture, uvw);
@@ -42,10 +42,4 @@ Fragment getFragment() {
     // See the Precomputed Atmosphere Scattering paper for details about
     // the angular precision. 
     renderTarget1 = vec4(ray.rgb, mie.r); 
-    
-    Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
-    return frag;
 }
