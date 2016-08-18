@@ -42,6 +42,7 @@
 
 #include <modules/globebrowsing/chunk/chunknode.h>
 
+#include <ghoul/opengl/textureunit.h>
 
 
 namespace ghoul {

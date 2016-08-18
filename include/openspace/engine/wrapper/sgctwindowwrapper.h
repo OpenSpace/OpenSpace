@@ -42,7 +42,7 @@ public:
     bool windowHasResized() const override;
 
     double averageDeltaTime() const override;
-	double deltaTime() const override;
+    double deltaTime() const override;
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
     glm::ivec2 currentWindowSize() const override;

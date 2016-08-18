@@ -21,9 +21,11 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/iswa/rendering/textureplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     const std::string _loggerCat = "TexturePlane";
