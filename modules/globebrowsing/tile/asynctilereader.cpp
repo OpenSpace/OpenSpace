@@ -117,9 +117,9 @@ namespace openspace {
 
     AsyncTileDataProvider::AsyncTileDataProvider(
         std::shared_ptr<TileDataset> tileDataset,
-        std::shared_ptr<ghoul::ThreadPool> pool)
+        std::shared_ptr<ThreadPool> pool)
         : _tileDataset(tileDataset)
-        , _threadPool(pool)
+        , _concurrentJobManager(pool)
     {
 
     }
@@ -135,12 +135,11 @@ namespace openspace {
 
     bool AsyncTileDataProvider::enqueueTileIO(const ChunkIndex& chunkIndex) {
         if (satisfiesEnqueueCriteria(chunkIndex)) {
-            const static auto job = [](const ChunkIndex& chunkIndex, std::shared_ptr<TileDataset> tileDataset) {
-                return tileDataset->readTileData(chunkIndex);
-            };
+            auto job = std::make_shared<TileLoadJob>(_tileDataset, chunkIndex);
+            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, chunkIndex, tileDiskCache, "ReadAndWrite");
+            _concurrentJobManager.enqueueJob(job);
+            _enqueuedTileRequests[chunkIndex.hashKey()] = chunkIndex;
 
-            FutureResult futureResult = _threadPool->queue(job, chunkIndex, _tileDataset);
-            _futureTileIOResults[chunkIndex.hashKey()] = std::move(futureResult);
             return true;
         }
         return false;
@@ -148,16 +147,8 @@ namespace openspace {
 
     std::vector<std::shared_ptr<TileIOResult>> AsyncTileDataProvider::getTileIOResults() {
         std::vector<std::shared_ptr<TileIOResult>> readyResults;
-        auto it = _futureTileIOResults.begin();
-        while(it != _futureTileIOResults.end()) {
-            std::future_status status = it->second.wait_for(std::chrono::seconds(0));
-            if (status == std::future_status::ready) {
-                readyResults.push_back(it->second.get());
-                it = _futureTileIOResults.erase(it);
-            }
-            else {
-                it++;
-            }
+        while (_concurrentJobManager.numFinishedJobs() > 0) {
+            readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
         }
         return readyResults;
     }
@@ -165,19 +156,28 @@ namespace openspace {
 
     bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const ChunkIndex& chunkIndex) const {
         // only allow tile to be enqueued if it's not already enqueued
-        return _futureTileIOResults.find(chunkIndex.hashKey()) == _futureTileIOResults.end();
+        //return _futureTileIOResults.find(chunkIndex.hashKey()) == _futureTileIOResults.end();
+        return _enqueuedTileRequests.find(chunkIndex.hashKey()) == _enqueuedTileRequests.end();
+
     }
 
     void AsyncTileDataProvider::reset() {
-        _futureTileIOResults.clear();
-        _threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
-        _threadPool->start();
+        //_futureTileIOResults.clear();
+        //_threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
+        //_threadPool->start();
+        _enqueuedTileRequests.clear();
+        _concurrentJobManager.reset();
+        while (_concurrentJobManager.numFinishedJobs() > 0) {
+            _concurrentJobManager.popFinishedJob();
+        }
         getTextureDataProvider()->reset();
     }
 
     void AsyncTileDataProvider::clearRequestQueue() {
-        _threadPool->clearRemainingTasks();
-        _futureTileIOResults.clear();
+        //_threadPool->clearRemainingTasks();
+        //_futureTileIOResults.clear();
+        _concurrentJobManager.clearEnqueuedJobs();
+        _enqueuedTileRequests.clear();
     }
 
 }  // namespace openspace

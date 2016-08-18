@@ -71,6 +71,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     
 
 )
@@ -122,6 +123,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

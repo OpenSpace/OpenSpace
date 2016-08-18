@@ -1,6 +1,7 @@
 return {
     FileRequest = {
-        { Identifier = "67p_textures", Destination = "textures", Version = 2 }
+        { Identifier = "67p_textures", Destination = "textures", Version = 2 },
+        { Identifier = "rosettaimages", Destination = "rosettaimages", Version = 1}
     },
     TorrentFiles = {
         { File = "67P_rotated_5_130.obj.torrent", Destination = "obj" },

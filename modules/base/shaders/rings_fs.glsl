@@ -73,10 +73,10 @@ Fragment getFragment() {
         // The plane is oriented on the xz plane
         // WARNING: This might not be the case for Uranus
         if (gl_FrontFacing) {
-            normal = vec3(0.0, 1.0, 0.0);
+            normal = vec3(-1.0, 0.0, 0.0);
         }
         else {
-            normal = vec3(0.0, -1.0, 0.0);
+            normal = vec3(1.0, 0.0, 0.0);
         }
 
         // Reduce the color of the fragment by the user factor

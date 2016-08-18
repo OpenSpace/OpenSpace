@@ -1,23 +1,9 @@
 return {
-    -- Earth barycenter module
-    {
-        Name = "EarthBarycenter",
-        Parent = "SolarSystemBarycenter",
-        Static = true,
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-    },
+
     -- RenderableGlobe module
     {   
         Name = "DebugGlobe",
-        Parent = "EarthBarycenter",
+        Parent = "Root",
         Renderable = {
             Type = "RenderableGlobe",
             Frame = "IAU_EARTH",
@@ -67,11 +53,7 @@ return {
                         Enabled = true,
                     },
                     --[[
-                    {
-                        Name = "Mars Viking Clr",
-                        FilePath = "textures/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
-                        Enabled = true,
-                    },
+
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/mercury/OnMercuryColor.xml",
@@ -86,7 +68,7 @@ return {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
-                        Enabled = false,
+                        Enabled = true,
                     },
 
                     --[[
@@ -129,7 +111,6 @@ return {
                     },
                 },
                 HeightMaps = {
-
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/mars/Mola_Elevation.xml",
@@ -173,30 +154,4 @@ return {
         },
         GuiName = "/Solar/Planets/DebugGlobe"
     },
-    -- EarthTrail module
-    {   
-        Name = "EarthTrail",
-        Parent = "SolarSystemBarycenter",
-        Renderable = {
-            Type = "RenderableTrail",
-            Body = "EARTH",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.5, 0.8, 1.0},
-            TropicalOrbitPeriod = 365.242,
-            EarthOrbitRatio = 1,
-            DayLength = 24
-        },
-        GuiName = "/Solar/EarthTrail"
-    }
-    --[[,
-    {
-        Name = "DebugPlane",
-        Parent = "DebugGlobe",
-        Renderable = {
-            Type = "RenderableDebugPlane",
-            Texture = 34,
-            Size = { 1, 7 }
-        }
-    }]]
 }
