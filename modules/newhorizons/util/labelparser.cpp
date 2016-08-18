@@ -249,7 +249,7 @@ bool LabelParser::create() {
                                 createImage(image, startTime, stopTime, spiceInstrument, _target, path);
                                 
                                 _subsetMap[image.target]._subset.push_back(image);
-                                _subsetMap[image.target]._range.setRange(startTime);
+                                _subsetMap[image.target]._range.include(startTime);
 
                                 _captureProgression.push_back(startTime);
                                 std::stable_sort(_captureProgression.begin(), _captureProgression.end());

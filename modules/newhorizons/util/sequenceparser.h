@@ -46,19 +46,30 @@ struct Image {
 };
 
 struct TimeRange {
-    TimeRange() : _min(-1), _max(-1){};
-    void setRange(double val){
-        if (_min > val) _min = val;
-        if (_max < val) _max = val;
+
+    TimeRange() : start(DBL_MAX), end(-DBL_MAX) { };
+    TimeRange(double startTime, double endTime) : start(startTime) , end(endTime) { };
+
+    void include(double val){
+        if (start > val) start = val;
+        if (end < val) end = val;
     };
+
+    void include(const TimeRange& other) {
+        if (other.start < start) start = other.start;
+        if (other.end > end) end = other.end;
+    }
+
     bool inRange(double min, double max){
-        return (min >= _min && max <= _max);
+        return (min >= start && max <= end);
     }
-    bool inRange(double val) const {
-        return (val >= _min && val <= _max);
+
+    bool includes(double val) const {
+        return (start <= val && val <= end);
     }
-    double _min;
-    double _max;
+
+    double start;
+    double end;
 };
 
 struct ImageSubset {

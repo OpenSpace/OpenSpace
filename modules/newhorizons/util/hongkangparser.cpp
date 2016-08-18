@@ -197,7 +197,7 @@ bool HongKangParser::create() {
                             //store actual image in map. All targets get _only_ their corresp. subset.
                             _subsetMap[image.target]._subset.push_back(image);
                             //compute and store the range for each subset 
-                            _subsetMap[image.target]._range.setRange(time);
+                            _subsetMap[image.target]._range.include(time);
                         }
                         if (it->second->getDecoderType() == "SCANNER"){ // SCANNER START 
                             scan_start = time;
@@ -220,8 +220,8 @@ bool HongKangParser::create() {
                                     findPlaybookSpecifiedTarget(line, scannerTarget);
                                     scannerSpiceID = it->second->getTranslation();
 
-                                    scanRange._min = scan_start;
-                                    scanRange._max = scan_stop;
+                                    scanRange.start = scan_start;
+                                    scanRange.end = scan_stop;
                                     _instrumentTimes.push_back(std::make_pair(it->first, scanRange));
 
                                     //store individual image
@@ -235,7 +235,7 @@ bool HongKangParser::create() {
                                     image.projected = false;
 
                                     _subsetMap[scannerTarget]._subset.push_back(image);
-                                    _subsetMap[scannerTarget]._range.setRange(scan_start);
+                                    _subsetMap[scannerTarget]._range.include(scan_start);
                                 }
                             }
                             //go back to stored position in file
@@ -246,8 +246,8 @@ bool HongKangParser::create() {
                         if (capture_start != -1){
                             //end of capture sequence for camera, store end time of this sequence
                             capture_stop = time;
-                            cameraRange._min = capture_start;
-                            cameraRange._max = capture_stop;
+                            cameraRange.start = capture_start;
+                            cameraRange.end = capture_stop;
                             _instrumentTimes.push_back(std::make_pair(previousCamera, cameraRange));
 
                             capture_start = -1;

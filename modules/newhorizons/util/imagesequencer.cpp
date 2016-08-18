@@ -199,7 +199,7 @@ std::map<std::string, bool> ImageSequencer::getActiveInstruments(){
 bool ImageSequencer::instrumentActive(std::string instrumentID) {
     for (const auto& i : _instrumentTimes) {
         //check if this instrument is in range
-        if (i.second.inRange(_currentTime)) { 
+        if (i.second.includes(_currentTime)) { 
             //if so, then get the corresponding spiceID
             std::vector<std::string> spiceIDs = _fileTranslation[i.first]->getTranslation(); 
             //check which specific subinstrument is firing
@@ -216,13 +216,13 @@ bool ImageSequencer::instrumentActive(std::string instrumentID) {
 float ImageSequencer::instrumentActiveTime(const std::string& instrumentID) const {
     for (const auto& i : _instrumentTimes){
         //check if this instrument is in range
-        if (i.second.inRange(_currentTime)){
+        if (i.second.includes(_currentTime)){
             //if so, then get the corresponding spiceID
             std::vector<std::string> spiceIDs = _fileTranslation.at(i.first)->getTranslation();
             //check which specific subinstrument is firing
             for (auto s : spiceIDs){
                 if (s == instrumentID) {
-                    return static_cast<float>((_currentTime - i.second._min) / (i.second._max - i.second._min));
+                    return static_cast<float>((_currentTime - i.second.start) / (i.second.end - i.second.start));
                 }
             }
         }
@@ -240,8 +240,8 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
 
 
     //if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)
-    if (_subsetMap[projectee]._range.inRange(_currentTime) ||
-        _subsetMap[projectee]._range.inRange(_previousTime)){
+    if (_subsetMap[projectee]._range.includes(_currentTime) ||
+        _subsetMap[projectee]._range.includes(_previousTime)){
         auto compareTime = [](const Image &a,
                               const Image &b)->bool{
             return a.startTime < b.startTime;
@@ -329,7 +329,7 @@ void ImageSequencer::sortData() {
         _instrumentTimes.begin(),
         _instrumentTimes.end(),
         [](const std::pair<std::string, TimeRange>& a, const std::pair<std::string, TimeRange>& b) {
-            return a.second._min < b.second._min;
+            return a.second.start < b.second.start;
         }
     );
 }
