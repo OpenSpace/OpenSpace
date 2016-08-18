@@ -186,9 +186,9 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
 
         _potentialTargets.resize(potentialTargets.size());
         for (int i = 0; i < potentialTargets.size(); ++i) {
-            std::string target;
-            potentialTargets.getValue(std::to_string(i + 1), target);
-            _potentialTargets[i] = target;
+std::string target;
+potentialTargets.getValue(std::to_string(i + 1), target);
+_potentialTargets[i] = target;
         }
     }
 
@@ -285,6 +285,11 @@ void ProjectionComponent::imageProjectBegin() {
         static_cast<GLsizei>(_projectionTexture->width()),
         static_cast<GLsizei>(_projectionTexture->height())
     );
+
+    if (_needsTextureMapDilation) {
+        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, buffers);
+    }
 }
 
 void ProjectionComponent::imageProjectEnd() {
@@ -293,12 +298,16 @@ void ProjectionComponent::imageProjectEnd() {
 
         glDisable(GL_BLEND);
 
-        ghoul::opengl::TextureUnit unit;
-        unit.activate();
+        ghoul::opengl::TextureUnit unit[2];
+        unit[0].activate();
         _projectionTexture->bind();
 
+        unit[1].activate();
+        _dilation.stencilTexture->bind();
+
         _dilation.program->activate();
-        _dilation.program->setUniform("tex", unit);
+        _dilation.program->setUniform("tex", unit[0]);
+        _dilation.program->setUniform("stencil", unit[1]);
 
         glBindVertexArray(_dilation.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -337,6 +346,22 @@ bool ProjectionComponent::auxiliaryRendertarget() {
 
 
     if (_needsTextureMapDilation) {
+        // We only need the stencil texture if we need to dilate
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT1,
+            GL_TEXTURE_2D,
+            *_dilation.stencilTexture,
+            0
+        );
+
+        // check FBO status
+        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Main Framebuffer incomplete");
+            completeSuccess &= false;
+        }
+
         glGenFramebuffers(1, &_dilation.fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
         glFramebufferTexture2D(
@@ -348,7 +373,7 @@ bool ProjectionComponent::auxiliaryRendertarget() {
         );
 
         // check FBO status
-        GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Dilation Framebuffer incomplete");
             completeSuccess &= false;
@@ -521,6 +546,16 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
 
         if (_dilation.texture) {
             _dilation.texture->uploadTexture();
+            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        }
+
+        _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
+            glm::uvec3(maxSize, maxSize / 2, 1),
+            ghoul::opengl::Texture::Format::RGBA
+        );
+
+        if (_dilation.stencilTexture) {
+            _dilation.stencilTexture->uploadTexture();
             //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         }
     }

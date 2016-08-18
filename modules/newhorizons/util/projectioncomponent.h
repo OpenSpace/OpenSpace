@@ -124,6 +124,7 @@ protected:
         GLuint vbo;
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::opengl::Texture> stencilTexture;
     } _dilation;
 };
 

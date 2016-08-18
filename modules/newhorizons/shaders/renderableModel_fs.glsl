@@ -70,13 +70,13 @@ Fragment getFragment() {
     
     vec4 textureColor  = texture(baseTexture, vs_st);
     vec4 projectionColor = texture(projectionTexture, vs_st);
-    // if (projectionColor.a != 0.0) {
+    if (projectionColor.a != 0.0) {
         textureColor.rgb = mix(
             textureColor.rgb,
             projectionColor.rgb,
             _projectionFading
         );
-    // }
+    }
 
     Fragment frag;
     frag.color = max(intensity * textureColor, ambient);

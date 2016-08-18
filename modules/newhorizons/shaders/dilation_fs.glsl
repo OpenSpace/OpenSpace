@@ -28,6 +28,7 @@ in vec2 vs_uv;
 out vec4 color;
 
 uniform sampler2D tex;
+uniform sampler2D stencil;
 
 vec2 offsets[8] = {
     vec2(-1.0, -1.0),
@@ -50,8 +51,9 @@ vec3 gatherColors(vec2 position) {
     vec4 colors[8];
     for (int i = 0; i < 8; i++) {
         colors[i] = texture(tex, position + h * offsets[i]);
+        float s = texture(stencil, position + h * offsets[i]).r;
 
-        if (colors[i].a != 0.0) {
+        if (s != 0.0) {
             totalColor.rgb += colors[i].rgb;
             nContributions++;
         }
@@ -62,8 +64,9 @@ vec3 gatherColors(vec2 position) {
 
 void main() {
     vec4 c = texture(tex, vs_uv); 
+    float s = texture(stencil, vs_uv).r;
 
-    if (c.a == 0.0) {
+    if (s == 0.0) {
         // This means that the current fragment/texel we are looking at has not been
         // projected on and we only want to do the dilation into these texels
 
