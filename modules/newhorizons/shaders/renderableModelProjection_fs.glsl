@@ -24,14 +24,14 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec4 vs_position;
 in vec4 vs_normal;
 in vec2 vs_uv;
 in vec4 ProjTexCoord;
 
-layout (location = 0) out vec4 color; 
+layout (location = 0) out vec4 color;
+// Even though the stencel texture is only a single channel, we still need to
+// output a vec4, or the result will disappear
 layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
