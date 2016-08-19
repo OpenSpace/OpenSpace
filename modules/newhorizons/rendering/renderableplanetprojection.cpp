@@ -364,8 +364,11 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _fboProgramObject->rebuildFromFile();
     }
 
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
+
+    _projectionComponent.update();
 
     _time = Time::ref().currentTime();
     _capture = false;

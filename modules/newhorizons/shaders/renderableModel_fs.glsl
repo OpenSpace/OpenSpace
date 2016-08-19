@@ -74,7 +74,7 @@ Fragment getFragment() {
         textureColor.rgb = mix(
             textureColor.rgb,
             projectionColor.rgb,
-            min(_projectionFading, projectionColor.a)
+            _projectionFading
         );
     }
 

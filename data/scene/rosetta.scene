@@ -31,6 +31,8 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    openspace.setPropertyValue('67P.renderable.performShading', false);
+
     openspace.printInfo("Done setting default values")
 end
 
