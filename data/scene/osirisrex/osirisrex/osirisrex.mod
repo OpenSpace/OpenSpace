@@ -9,7 +9,6 @@ return {
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableModel",
-            Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris_BASE.obj",
@@ -50,7 +49,6 @@ return {
         Parent = "OsirisRex",
         Renderable = {
             Type = "RenderableModel",
-            Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris_POLYCAM.obj",
@@ -90,7 +88,6 @@ return {
         Parent = "OsirisRex",
         Renderable = {
             Type = "RenderableModel",
-            Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris_REXIS.obj",
