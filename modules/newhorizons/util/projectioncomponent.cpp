@@ -53,6 +53,8 @@ namespace {
     const std::string keySequenceType = "Projection.SequenceType";
     const std::string keyTranslation = "DataInputTranslation";
 
+    const std::string keyNeedsTextureMapDilation = "Projection.TextureMap";
+
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
     const std::string sequenceTypeHybrid = "hybrid";
@@ -74,6 +76,7 @@ ProjectionComponent::ProjectionComponent()
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _projectionTexture(nullptr)
+    , _needsTextureMapDilation(false)
 {
     setName("ProjectionComponent");
 
@@ -100,6 +103,42 @@ bool ProjectionComponent::initialize() {
     }
     _placeholderTexture = std::move(texture);
     
+
+    if (_needsTextureMapDilation) {
+        _dilation.program = ghoul::opengl::ProgramObject::Build(
+            "Dilation",
+            "${MODULE_NEWHORIZONS}/shaders/dilation_vs.glsl",
+            "${MODULE_NEWHORIZONS}/shaders/dilation_fs.glsl"
+        );
+        
+        const GLfloat plane[] = {
+            -1, -1,
+            1,  1,
+            -1,  1,
+            -1, -1,
+            1, -1,
+            1,  1,
+        };
+
+        glGenVertexArrays(1, &_dilation.vao);
+        glGenBuffers(1, &_dilation.vbo);
+
+        glBindVertexArray(_dilation.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, _dilation.vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(plane), plane, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(
+            0,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            sizeof(GLfloat) * 2,
+            reinterpret_cast<void*>(0)
+        );
+
+        glBindVertexArray(0);
+    }
+
     return a && b;
 }
 
@@ -107,6 +146,15 @@ bool ProjectionComponent::deinitialize() {
     _projectionTexture = nullptr;
 
     glDeleteFramebuffers(1, &_fboID);
+
+    if (_needsTextureMapDilation) {
+        glDeleteFramebuffers(1, &_dilation.fbo);
+        glDeleteVertexArrays(1, &_dilation.vao);
+        glDeleteBuffers(1, &_dilation.vbo);
+
+        _dilation.program = nullptr;
+        _dilation.texture = nullptr;
+    }
 
     return true;
 }
@@ -145,6 +193,11 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
             _potentialTargets[i] = target;
         }
     }
+
+    if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
+        _needsTextureMapDilation = dictionary.value<bool>(keyNeedsTextureMapDilation);
+    }
+
     return completeSuccess;
 }
 
@@ -238,11 +291,48 @@ void ProjectionComponent::imageProjectBegin() {
         static_cast<GLsizei>(_projectionTexture->width()),
         static_cast<GLsizei>(_projectionTexture->height())
     );
+
+    if (_needsTextureMapDilation) {
+        GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, buffers);
+    }
 }
 
 void ProjectionComponent::imageProjectEnd() {
+    if (_needsTextureMapDilation) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
+
+        glDisable(GL_BLEND);
+
+        ghoul::opengl::TextureUnit unit[2];
+        unit[0].activate();
+        _projectionTexture->bind();
+
+        unit[1].activate();
+        _dilation.stencilTexture->bind();
+
+        _dilation.program->activate();
+        _dilation.program->setUniform("tex", unit[0]);
+        _dilation.program->setUniform("stencil", unit[1]);
+
+        glBindVertexArray(_dilation.vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        _dilation.program->deactivate();
+    
+        glEnable(GL_BLEND);
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+}
+
+void ProjectionComponent::update() {
+    if (_needsTextureMapDilation) {
+        if (_dilation.program->isDirty()) {
+            _dilation.program->rebuildFromFile();
+        }
+    }
 }
 
 bool ProjectionComponent::auxiliaryRendertarget() {
@@ -263,8 +353,47 @@ bool ProjectionComponent::auxiliaryRendertarget() {
     );
     // check FBO status
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE)
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Main Framebuffer incomplete");
         completeSuccess &= false;
+    }
+
+
+    if (_needsTextureMapDilation) {
+        // We only need the stencil texture if we need to dilate
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT1,
+            GL_TEXTURE_2D,
+            *_dilation.stencilTexture,
+            0
+        );
+
+        // check FBO status
+        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Main Framebuffer incomplete");
+            completeSuccess &= false;
+        }
+
+        glGenFramebuffers(1, &_dilation.fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *_dilation.texture,
+            0
+        );
+
+        // check FBO status
+        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Dilation Framebuffer incomplete");
+            completeSuccess &= false;
+        }
+    }
+
     // switch back to window-system-provided framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
@@ -287,18 +416,24 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
     glm::vec3 e3 = glm::normalize(boreSight);
     glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
-    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
-                                         e1.y, e2.y, e3.y, 0.f,
-                                         e1.z, e2.z, e3.z, 0.f,
-                                         -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f);
+    glm::mat4 projViewMatrix = glm::mat4(
+        e1.x, e2.x, e3.x, 0.f,
+        e1.y, e2.y, e3.y, 0.f,
+        e1.z, e2.z, e3.z, 0.f,
+        -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f
+    );
     // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane);
+    glm::mat4 projProjectionMatrix = glm::perspective(
+        glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
+    );
     // bias matrix
-    glm::mat4 projNormalizationMatrix = glm::mat4(0.5f, 0, 0, 0,
-                                                  0, 0.5f, 0, 0,
-                                                  0, 0, 0.5f, 0,
-                                                  0.5f, 0.5f, 0.5f, 1);
-    return projNormalizationMatrix*projProjectionMatrix*projViewMatrix;
+    glm::mat4 projNormalizationMatrix = glm::mat4(
+        0.5f, 0.f, 0.f, 0.f,
+        0.f, 0.5f, 0.f, 0.f,
+        0.f, 0.f, 0.5f, 0.f,
+        0.5f, 0.5f, 0.5f, 1.f
+    );
+    return projNormalizationMatrix * projProjectionMatrix * projViewMatrix;
 }
 
 bool ProjectionComponent::doesPerformProjection() const {
@@ -314,7 +449,12 @@ float ProjectionComponent::projectionFading() const {
 }
 
 ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
-    return *_projectionTexture;
+    if (_needsTextureMapDilation) {
+        return *_dilation.texture;
+    }
+    else {
+        return *_projectionTexture;
+    }
 }
 
 std::string ProjectionComponent::projectorId() const {
@@ -357,14 +497,18 @@ void ProjectionComponent::clearAllProjections() {
     GLint m_viewport[4];
     glGetIntegerv(GL_VIEWPORT, m_viewport);
     //counter = 0;
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
     glViewport(0, 0, static_cast<GLsizei>(_projectionTexture->width()), static_cast<GLsizei>(_projectionTexture->height()));
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    //bind back to default
+    if (_needsTextureMapDilation) {
+        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(m_viewport[0], m_viewport[1],
                m_viewport[2], m_viewport[3]);
@@ -381,8 +525,9 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     using ghoul::io::TextureReader;
 
 
-    if (isPlaceholder)
+    if (isPlaceholder) {
         return _placeholderTexture;
+    }
 
 
     unique_ptr<Texture> texture = TextureReader::ref().loadTexture(absPath(texturePath));
@@ -408,9 +553,35 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
         glm::uvec3(maxSize, maxSize / 2, 1),
         ghoul::opengl::Texture::Format::RGBA
     );
-    if (_projectionTexture)
+    if (_projectionTexture) {
         _projectionTexture->uploadTexture();
+        //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    }
     
+    if (_needsTextureMapDilation) {
+        _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
+            glm::uvec3(maxSize, maxSize / 2, 1),
+            ghoul::opengl::Texture::Format::RGBA
+        );
+
+        if (_dilation.texture) {
+            _dilation.texture->uploadTexture();
+            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        }
+
+        _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
+            glm::uvec3(maxSize, maxSize / 2, 1),
+            ghoul::opengl::Texture::Format::Red,
+            ghoul::opengl::Texture::Format::Red
+        );
+
+        if (_dilation.stencilTexture) {
+            _dilation.stencilTexture->uploadTexture();
+            //_dilation.texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        }
+    }
+
+
     return _projectionTexture != nullptr;
 
 }

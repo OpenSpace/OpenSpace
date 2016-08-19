@@ -22,74 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#version __CONTEXT__
 
-uniform sampler2D baseTexture;
-uniform sampler2D projectionTexture;
+layout(location = 0) in vec2 in_position;
 
-uniform bool _performShading;
-uniform float _projectionFading;
-uniform vec3 directionToSunViewSpace;
+out vec2 vs_uv;
 
-in vec2 vs_st;
-in vec3 vs_normalViewSpace;
-in vec4 vs_positionScreenSpace;
-in vec4 vs_positionCameraSpace;
-
-
-
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
-
-Fragment getFragment() {
-    vec4 textureColor = texture(baseTexture, vs_st);
-    vec4 projectionColor = texture(projectionTexture, vs_st);
-    if (projectionColor.a > 0.0) {
-        textureColor.rgb = mix(
-            textureColor.rgb,
-            projectionColor.rgb,
-            _projectionFading
-        );
-    }
-    
-    vec3 diffuseAlbedo = textureColor.rgb;
-    vec3 specularAlbedo = vec3(1);
-
-    vec3 color;
-
-    if (_performShading) {
-        // Some of these values could be passed in as uniforms
-        vec3 lightColorAmbient = vec3(1);
-        vec3 lightColor = vec3(1);    
-        
-        vec3 n = normalize(vs_normalViewSpace);
-        vec3 l = directionToSunViewSpace;
-        vec3 c = normalize(vs_positionCameraSpace.xyz);
-        vec3 r = reflect(l, n);
-
-        float ambientIntensity = 0.15;
-        float diffuseIntensity = 1;
-        float specularIntensity = 0.0;
-
-        float diffuseCosineFactor = dot(n,l);
-        float specularCosineFactor = dot(c,r);
-        float specularPower = 100;
-
-        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
-        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
-        vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
-
-        color = ambientColor + diffuseColor + specularColor;
-    }
-    else {
-        color = diffuseAlbedo;
-    }
-
-    float transparency = 1.0;
-    float alpha = _projectionFading * transparency;
-
-
-    Fragment frag;
-    frag.color = vec4(color, alpha);
-    frag.depth = vs_positionScreenSpace.w;
-    return frag;
+void main() {
+    vs_uv  = (in_position + vec2(1.0)) / vec2(2.0);
+    gl_Position  = vec4(in_position, 0.0, 1.0);
 }

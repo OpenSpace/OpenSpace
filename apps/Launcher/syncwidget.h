@@ -83,6 +83,13 @@ private:
         QString baseDir;
     };
 
+
+    struct ModuleInformation {
+        QString moduleName;
+        QString moduleDatafile;
+        QString modulePath;
+    };
+
     void clear();
     QStringList selectedScenes() const;
 
