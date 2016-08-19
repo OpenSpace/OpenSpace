@@ -1256,6 +1256,19 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std:
         return RendererImplementation::Invalid;
 }
 
+std::string RenderEngine::progressToStr(int size, double t) {
+    std::string progress = "|";
+    int g = static_cast<int>((t * 24) + 1);
+    g = std::max(g, 0);
+    for (int i = 0; i < g; i++)
+        progress.append("-");
+    progress.append(">");
+    for (int i = 0; i < 25 - g; i++)
+        progress.append(" ");
+    progress.append("|");
+    return progress;
+}
+
 void RenderEngine::renderInformation() {
     // TODO: Adjust font_size properly when using retina screen
     using Font = ghoul::fontrendering::Font;
@@ -1345,16 +1358,48 @@ void RenderEngine::renderInformation() {
                 }
             }
 
+            struct MissionPhase {
+                std::string name;
+                TimeRange timeRange;
+            };
+
+            std::vector<MissionPhase> missionPhases = {
+                { "test phase 1",{ 526647968.0, 526647968.0 + 60.0*15.0} },
+                { "anotyer test phase (2)",{ 526647968.0 + 5000, 600000000.0} },
+                { "The last phase - 3",{ 600000000.0, 700000000.0 } },
+            };
+
+            if (missionPhases.size() > 0) {
+                glm::vec4 activeMissionColor(0.0, 0.6, 1.0, 1);
+                glm::vec4 inactiveColor(0.3, 0.3, 0.3, 1);
+
+                RenderFontCr(*_fontInfo,
+                    penPosition,
+                    activeMissionColor,
+                    "Mission Phases:"
+                    );
+
+                for (const MissionPhase& missionPhase : missionPhases) {
+                    if (missionPhase.timeRange.includes(currentTime)) {
+                        double remaining = missionPhase.timeRange.end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / missionPhase.timeRange.duration());
+                        std::string progress = progressToStr(25, t);
+                        RenderFontCr(*_fontInfo,
+                            penPosition,
+                            activeMissionColor,
+                            "%s %s %.1f %%",
+                            missionPhase.name.c_str(), progress.c_str(), t * 100
+                            );
+                    }
+                    else {
+                        RenderFontCr(*_fontInfo, penPosition, inactiveColor, missionPhase.name.c_str());
+                    }
+                }
+                RenderFontCr(*_fontInfo, penPosition, inactiveColor, " " );
+            }
+
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
             float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
-            std::string progress = "|";
-            int g = static_cast<int>((t * 24) + 1);
-            g = std::max(g, 0);
-            for (int i = 0; i < g; i++)
-                progress.append("-");
-            progress.append(">");
-            for (int i = 0; i < 25 - g; i++)
-                progress.append(" ");
 
             std::string str = SpiceManager::ref().dateFromEphemerisTime(
                 ImageSequencer::ref().getNextCaptureTime(),
@@ -1364,8 +1409,10 @@ void RenderEngine::renderInformation() {
             glm::vec4 active(0.6, 1, 0.00, 1);
             glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
-            progress.append("|");
+         
             if (remaining > 0) {
+                
+                std::string progress = progressToStr(25, t);
                 brigther_active *= (1 - t);
 
                 RenderFontCr(*_fontInfo,

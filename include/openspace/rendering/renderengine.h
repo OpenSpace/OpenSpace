@@ -142,6 +142,8 @@ public:
         const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
         RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
+    std::string progressToStr(int size, double t);
+
     void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
     /**
