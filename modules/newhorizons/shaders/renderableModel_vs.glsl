@@ -45,7 +45,7 @@ out vec4 vs_positionCameraSpace;
 
 
 void main() {
-    vec4 position = in_position;
+    vec4 position = in_position; // Position already in homogenous coordinates
     position.xyz *= pow(10, _magnification);
     vs_positionCameraSpace = modelViewTransform * position;
     vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;

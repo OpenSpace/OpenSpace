@@ -20,65 +20,72 @@ return {
                 Destination = "J2000"
             },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "ROSETTA",
-            Reference = "GALACTIC",
-            Observer = "SUN",
-            Kernels = {
-                --needed
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
-                -- SPK  
-                --long term orbits loaded first
-                -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORL_DL_006_01____H__00156.BSP',
-                -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORL_DL_006_01____H__00156.BSP',
-                -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORL_DL_006_01____H__00156.BSP',
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "ROSETTA",
+                Reference = "GALACTIC",
+                Observer = "SUN",
+                Kernels = {
+                    --needed
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
+                    -- SPK  
+                    --long term orbits loaded first
+                    -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORL_DL_006_01____H__00156.BSP',
+                    -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORL_DL_006_01____H__00156.BSP',
+                    -- '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORL_DL_006_01____H__00156.BSP',
 
-                --Jan 2014 - May 2015 (version match with 00162 ck files)
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORB_DV_097_01_______00162.BSP",
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORB_DV_097_01_______00162.BSP",
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORB_DV_097_01_______00162.BSP",
+                    --Jan 2014 - May 2015 (version match with 00162 ck files)
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORB_DV_097_01_______00162.BSP",
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORB_DV_097_01_______00162.BSP",
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORB_DV_097_01_______00162.BSP",
 
-                --IK
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/IK/ROS_NAVCAM_V01.TI",
-                "${OPENSPACE_DATA}/spice/RosettaKernels/IK/ROS_NAVCAM_V00-20130102.TI",
+                    --IK
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/IK/ROS_NAVCAM_V01.TI",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels/IK/ROS_NAVCAM_V00-20130102.TI",
 
-                --SCLK
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
+                    --SCLK
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
 
-                -- FK
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_CHURYUMOV_V01.TF",
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
+                    -- FK
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_CHURYUMOV_V01.TF",
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
 
-                -- CK
-                -- '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
+                    -- CK
+                    -- '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
 
-                --SCLK
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SCLK/ROS_160425_STEP.TSC",
-                
-                -- FK
+                    --SCLK
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/SCLK/ROS_150227_STEP.TSC",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/SCLK/ROS_160425_STEP.TSC",
+                    
+                    -- FK
 
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_CHURYUMOV_V01.TF",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_V26.TF",
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
-                -- CK
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/RATT_DV_211_01_01____00288.BC",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/CATT_DV_211_01_______00288.BC",
-                '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
-                "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_CHURYUMOV_V01.TF",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/FK/ROS_V26.TF",
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/FK/ROS_V24.TF",
+                    -- CK
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/RATT_DV_211_01_01____00288.BC",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/CATT_DV_211_01_______00288.BC",
+                    '${OPENSPACE_DATA}/spice/RosettaKernels/CK/RATT_DV_097_01_01____00162.BC',
+                    "${OPENSPACE_DATA}/spice/RosettaKernels/CK/CATT_DV_097_01_______00162.BC",
 
-                -- PCK
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/PCK/ROS_CGS_RSOC_V03.TPC",
-                -- "${OPENSPACE_DATA}/spice/RosettaKernels/PCK/ROS_CGS_RSOC_V03.TPC",
-                
+                    -- PCK
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/PCK/ROS_CGS_RSOC_V03.TPC",
+                    -- "${OPENSPACE_DATA}/spice/RosettaKernels/PCK/ROS_CGS_RSOC_V03.TPC",
+                    
 
 
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2014_V0047.BC",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2015_V0042.BC",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2016_V0019.BC",
-            }
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2014_V0047.BC",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2015_V0042.BC",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/CK/ROS_SA_2016_V0019.BC",
+                }
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "ROS_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
         },
         GuiName = "/Solar/Rosetta"
     },
@@ -153,7 +160,7 @@ return {
     -- Latest image taken by NAVCAM
     { 
         Name = "ImagePlaneRosetta",
-        Parent = "Rosetta",
+        Parent = "67P",
         Renderable = {
             Type = "RenderablePlaneProjection",
             Frame = "67P/C-G_CK",
@@ -162,10 +169,6 @@ return {
             Instrument = "ROS_NAVCAM-A",
             Moving = false,
             Texture = "textures/defaultProj.png",
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
-        }, 
+        }
     }
 }

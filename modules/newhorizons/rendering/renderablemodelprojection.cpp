@@ -321,7 +321,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
             time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
-    position[3] += (3 + _camScaling[1]);
+    position[3] += (3 + _camScaling[1]) + 1;
     glm::vec3 cpos = position.vec3();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
