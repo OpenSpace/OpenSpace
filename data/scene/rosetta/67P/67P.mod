@@ -62,10 +62,9 @@ return {
                 Method     = "ELLIPSOID",
                 Aberration = "NONE",
                 Fovy       = 5.00,
-                Aspect     = 1,
-                Near       = 0.01,
-                Far        = 1000000,
+                Aspect     = 1
             },
+            BoundingSphereRadius = 5000.0
         },
 
         Ephemeris = {

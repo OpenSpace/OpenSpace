@@ -40,6 +40,7 @@ namespace {
     const std::string keyDestination = "Rotation.Destination";
     const std::string keyBody = "Body";
     const std::string keyGeometry = "Geometry";
+    const std::string keyBoundingSphereRadius = "BoundingSphereRadius";
 
     const std::string keyTextureColor = "Textures.Color";
     const std::string keyTextureProject = "Textures.Project";
@@ -97,7 +98,10 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);
     
     openspace::SpiceManager::ref().addFrame(_target, _source);
-    setBoundingSphere(pss(1.f, 9.f));
+    
+    float boundingSphereRadius = 1.0e9;
+    dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
+    setBoundingSphere(PowerScaledScalar::CreatePSS(boundingSphereRadius));
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);
@@ -130,11 +134,20 @@ bool RenderableModelProjection::initialize() {
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
+    _depthFboProgramObject = ghoul::opengl::ProgramObject::Build("DepthPass",
+        "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_vs.glsl",
+        "${MODULE_NEWHORIZONS}/shaders/renderableModelDepth_fs.glsl");
+
+
     completeSuccess &= loadTextures();
 
     completeSuccess &= _projectionComponent.initialize();
 
+
+    auto bs = getBoundingSphere();
     completeSuccess &= _geometry->initialize(this);
+    setBoundingSphere(bs); // ignore bounding sphere set by geometry.
+
     completeSuccess &= !_source.empty();
     completeSuccess &= !_destination.empty();
 
@@ -164,7 +177,6 @@ void RenderableModelProjection::render(const RenderData& data) {
     if (_projectionComponent.needsClearProjection())
         _projectionComponent.clearAllProjections();
 
-    _camScaling = data.camera.scaling();
     _up = data.camera.lookUpVectorCameraSpace();
 
     if (_capture && _projectionComponent.doesPerformProjection())
@@ -205,6 +217,9 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_fboProgramObject->isDirty())
         _fboProgramObject->rebuildFromFile();
         
+    if (_depthFboProgramObject->isDirty())
+        _depthFboProgramObject->rebuildFromFile();
+
     _time = data.time;
 
     if (openspace::ImageSequencer::ref().isReady()) {
@@ -236,8 +251,18 @@ void RenderableModelProjection::update(const UpdateData& data) {
 void RenderableModelProjection::imageProjectGPU(
                                 std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
 {
-    _projectionComponent.imageProjectBegin();
+    _projectionComponent.depthMapRenderBegin();
+    _depthFboProgramObject->activate();
+    _depthFboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
+    _depthFboProgramObject->setUniform("ModelTransform", _transform);
+    _geometry->setUniforms(*_fboProgramObject);
 
+    _geometry->render();
+
+    _depthFboProgramObject->deactivate();
+    _projectionComponent.depthMapRenderEnd();
+
+    _projectionComponent.imageProjectBegin();
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
@@ -245,9 +270,17 @@ void RenderableModelProjection::imageProjectGPU(
     projectionTexture->bind();
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
 
+    ghoul::opengl::TextureUnit unitDepthFbo;
+    unitDepthFbo.activate();
+    _projectionComponent.depthTexture().bind();
+    _fboProgramObject->setUniform("depthTexture", unitDepthFbo);
+
+    glm::vec4 debugVector(0.0, 0.0, 0.0, 1.0);
+    glm::vec4 debugTransformed =  _projectorMatrix * _transform * debugVector;
+    debugTransformed /= debugTransformed.w;
+
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform", _transform);
-    _fboProgramObject->setUniform("_scaling", _camScaling);
     _fboProgramObject->setUniform("boresight", _boresight);
 
     _geometry->setUniforms(*_fboProgramObject);
@@ -309,18 +342,23 @@ void RenderableModelProjection::attitudeParameters(double time) {
             time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
-    position[3] += (3 + _camScaling[1]);
+    position[3] += 3;
     glm::vec3 cpos = position.vec3();
+
+    float distance = glm::length(cpos);
+    float radius = getBoundingSphere().lengthf();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos, boresight, _up, _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        _projectionComponent.nearPlane(),
-        _projectionComponent.farPlane(),
+        distance - radius,
+        distance + radius,
         _boresight
     );
 }
+
+
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {

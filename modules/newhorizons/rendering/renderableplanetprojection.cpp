@@ -47,6 +47,7 @@ namespace {
 
     const std::string keyFrame = "Frame";
     const std::string keyGeometry = "Geometry";
+    const std::string keyRadius = "Geometry.Radius";
     const std::string keyShading = "PerformShading";
     const std::string keyBody = "Body";
     const std::string _mainFrame = "GALACTIC";
@@ -103,6 +104,10 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     if (success)
         _heightMapTexturePath = absPath(heightMapPath);
 
+    glm::vec2 radius = glm::vec2(1.0, 9.0);
+    dictionary.getValue(keyRadius, radius);
+    setBoundingSphere(pss(radius));
+
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
@@ -136,7 +141,6 @@ bool RenderablePlanetProjection::initialize() {
 
     completeSuccess &= loadTextures();
     completeSuccess &= _projectionComponent.initialize();
-
     completeSuccess &= _geometry->initialize(this);
 
     if (completeSuccess) {
@@ -287,6 +291,9 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     //position[3] += 3;
     glm::vec3 cpos = position.vec3();
 
+    float distance = glm::length(cpos);
+    float radius = getBoundingSphere().lengthf();
+
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos,
         bs,
@@ -294,8 +301,8 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         _instrumentMatrix,
         _projectionComponent.fieldOfViewY(),
         _projectionComponent.aspectRatio(),
-        _projectionComponent.nearPlane(),
-        _projectionComponent.farPlane(),        
+        distance - radius,
+        distance + radius,
         _boresight
     );
 }
