@@ -106,6 +106,7 @@ return {
                 Ghosting = false,
             },
         },
+        --[[
         Ephemeris = {
                 Type = "Spice",
                 Body = "NEW HORIZONS",
@@ -116,6 +117,16 @@ return {
                 -- Observer = "JUPITER BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
+            ]]
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "NEW HORIZONS",
+                Reference = "GALACTIC",
+                Observer = "SUN",
+                Kernels = NewHorizonsKernels
+            },
+        },
         GuiName = "/Solar/NewHorizons"
     },
     --NewHorizonsTrail module
@@ -169,9 +180,6 @@ return {
                 Ghosting = false,
             },
         },
-        Ephemeris = {
-                Type = "Static",
-            },
         GuiName = "/Solar/NewHorizons"
     },
 
