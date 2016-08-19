@@ -311,7 +311,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     if (_capture && _projectionComponent.doesPerformProjection()) {
         for (const Image& img : _imageTimes) {
-            RenderablePlanetProjection::attitudeParameters(img.startTime);
+            RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
             imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
         }
         _capture = false;

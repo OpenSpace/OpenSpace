@@ -77,12 +77,13 @@ InstrumentTimesParser::InstrumentTimesParser(
 
 bool InstrumentTimesParser::create() {
     auto imageComparer = [](const Image &a, const Image &b)->bool{
-        return a.startTime < b.startTime;
+        return a.timeRange.start < b.timeRange.start;
     };
     auto targetComparer = [](const std::pair<double, std::string> &a,
         const std::pair<double, std::string> &b)->bool{
         return a.first < b.first;
     };
+
     
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
@@ -100,23 +101,27 @@ bool InstrumentTimesParser::create() {
             std::ifstream in(filepath);
             std::string line;
             std::smatch matches;
+
+            TimeRange instrumentActiveTimeRange;
+
             while (std::getline(in, line)) {
                 if (std::regex_match(line, matches, _pattern)) {
                     ghoul_assert(matches.size() == 3, "Bad event data formatting. Must have regex 3 matches (source string, start time, stop time).");
                     std::string start = matches[1].str();
                     std::string stop = matches[2].str();
 
-                    TimeRange timeRange;
-                    timeRange._min = SpiceManager::ref().ephemerisTimeFromDate(start);
-                    timeRange._max = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                    TimeRange captureTimeRange;
+                    captureTimeRange.start = SpiceManager::ref().ephemerisTimeFromDate(start);
+                    captureTimeRange.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
 
-                    _instrumentTimes.push_back({ instrumentID, timeRange });
-                    _targetTimes.push_back({ timeRange._min, _target });
-                    _captureProgression.push_back(timeRange._min);
+                    instrumentActiveTimeRange.include(captureTimeRange);
+
+                    //_instrumentTimes.push_back({ instrumentID, timeRange });
+                    _targetTimes.push_back({ captureTimeRange.start, _target });
+                    _captureProgression.push_back(captureTimeRange.start);
 
                     Image image;
-                    image.startTime = timeRange._min;
-                    image.stopTime = timeRange._max;
+                    image.timeRange = captureTimeRange;
                     image.path = "";
                     image.isPlaceholder = true;
                     image.activeInstruments.push_back(instrumentID);
@@ -124,9 +129,10 @@ bool InstrumentTimesParser::create() {
                     image.projected = false;
 
                     _subsetMap[_target]._subset.push_back(image);
-                    _subsetMap[_target]._range.setRange(image.startTime);
                 }
             }
+            _subsetMap[_target]._range = instrumentActiveTimeRange;
+            _instrumentTimes.push_back({ instrumentID, instrumentActiveTimeRange });
         }
     }
     
