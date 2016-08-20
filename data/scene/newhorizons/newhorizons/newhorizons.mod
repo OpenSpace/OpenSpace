@@ -96,10 +96,6 @@ return {
                 Type = "simple",
                 Color =  "textures/NHTexture.jpg",
             },
-            Rotation = {
-                Source = "NH_SPACECRAFT",
-                Destination = "GALACTIC"
-            },
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
@@ -125,6 +121,11 @@ return {
                 Reference = "GALACTIC",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NH_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
             },
         },
         GuiName = "/Solar/NewHorizons"

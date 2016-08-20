@@ -133,13 +133,25 @@ return {
         },
         GuiName = "RosettaCometTrail"
     },
-    {   
+    {
         Name = "NAVCAM",
         Parent = "Rosetta",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NAVCAM",
+                DestinationFrame = "ROS_SPACECRAFT",
+            },
+        },
+        GuiName = "/Solar/Rosetta_navcam"
+    },
+    {   
+        Name = "NAVCAM FOV",
+        Parent = "NAVCAM",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "ROSETTA",
-            Frame = "GALACTIC",
+            Frame = "ROS_NAVCAM-A",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
