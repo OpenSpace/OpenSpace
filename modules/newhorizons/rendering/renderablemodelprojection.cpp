@@ -211,11 +211,15 @@ void RenderableModelProjection::render(const RenderData& data) {
 }
 
 void RenderableModelProjection::update(const UpdateData& data) {
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
 
-    if (_fboProgramObject->isDirty())
+    if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
+    }
+
+    _projectionComponent.update();
         
     _time = data.time;
 

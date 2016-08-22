@@ -24,45 +24,71 @@
 
 #version __CONTEXT__
 
-in vec4 vs_position;
-in vec4 vs_normal;
 in vec2 vs_uv;
-in vec4 ProjTexCoord;
+out vec4 color;
 
-layout (location = 0) out vec4 color;
-// Even though the stencel texture is only a single channel, we still need to
-// output a vec4, or the result will disappear
-layout (location = 1) out vec4 stencil;
+uniform sampler2D tex;
+uniform sampler2D stencil;
 
-uniform sampler2D projectionTexture;
+// We conside the 8-neighborhood of a texel, so going a stepsize of '1' in both
+// directions
+vec2 offsets[8] = {
+    vec2(-1.0, -1.0),
+    vec2(-1.0,  0.0),
+    vec2(-1.0,  1.0),
+    vec2(0.0,  -1.0),
+    vec2(0.0,   1.0),
+    vec2(1.0,  -1.0),
+    vec2(1.0,   0.0),
+    vec2(1.0,   1.0)
+};
 
-uniform mat4 ModelTransform;
-uniform vec2 _scaling;
-uniform vec3 boresight;
+// Collect the contributing colors from the neighboring texels and return the
+// averaged value of all texels that passed the masking test based on 'stencil'
+vec3 gatherNeighboringColors() {
+    vec2 texSize = textureSize(tex, 0);
 
-bool inRange(float x, float a, float b) {
-    return (x >= a && x <= b);
-} 
+    // The total number of contributing texels
+    int nContributions = 0;
 
-void main() {
-    vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
+    // The summed color of all contributing texels
+    vec3 totalColor = vec3(0.0);
 
-    vec3 n = normalize(vs_normal.xyz);
-    vec4 projected = ProjTexCoord;
+    for (int i = 0; i < 8; i++) {
+        // gl_FragCoord is in pixel coordinates; the ProjectionComponent sets
+        // the viewport such that pixels=texels, so we can use gl_FragCoord as an
+        // integer texel coordinate
+        // First offsetting them, then dividing by the texture size to get to [0,1]
+        vec2 samplePosition = (gl_FragCoord.xy + offsets[i]) / texSize;
 
-    // normalize
-    projected.x /= projected.w;
-    projected.y /= projected.w;
-    // invert gl coordinates
-    projected.x = 1 - projected.x;
+        // The stencelling determines the areas that we have to enlarge, such that we
+        // do not enlarge a previously enlarged area
+        if (texture(stencil, samplePosition).r != 0.0) {
+            totalColor += texture(tex, samplePosition).rgb;
+            nContributions++;
+        }
+    }
 
-    if ((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
-        color = texture(projectionTexture, projected.xy);
-        color.a = 1.0;
-        stencil = vec4(1.0);
+    // GLSL normally doesn't have a problem taking vec3(0.0)/0.0 but we don't want to
+    // tempt the compiler gods
+    if (nContributions > 0) {
+        return totalColor / nContributions;
     }
     else {
-      color = vec4(vec3(0.0), 1.0);
-      stencil = vec4(0.0);
+        return vec3(0.0);
+    }
+
+}
+
+void main() {
+    if (texture(stencil, vs_uv).r == 0.0) {
+        // This means that the current fragment/texel we are looking at has not been
+        // projected on and we only want to do the dilation into these texels
+        color = vec4(gatherNeighboringColors(), 1.0);
+    }
+    else {
+        // We are in a region where an image has been projected, so we can reuse the
+        // already sampled version
+        color = texture(tex, vs_uv);
     }
 }

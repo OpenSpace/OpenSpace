@@ -11,10 +11,6 @@ return {
             Instrument = "NH_LORRI",
             Moving = false,
             Texture = "textures/test.jpg",
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
         }, 
     },
     -- LORRI FoV square
@@ -29,10 +25,6 @@ return {
             Instrument = "NH_LORRI",
             Moving = true,
             Texture = "textures/squarefov.png",
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
         },
     }
 

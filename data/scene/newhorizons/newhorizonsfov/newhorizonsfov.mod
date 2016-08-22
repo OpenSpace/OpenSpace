@@ -6,7 +6,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -33,7 +33,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -61,7 +61,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -88,7 +88,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -116,7 +116,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -144,7 +144,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -171,7 +171,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -198,7 +198,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -225,7 +225,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -252,7 +252,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -279,7 +279,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",

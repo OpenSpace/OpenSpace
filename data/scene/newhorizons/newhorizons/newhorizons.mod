@@ -96,16 +96,13 @@ return {
                 Type = "simple",
                 Color =  "textures/NHTexture.jpg",
             },
-            Rotation = {
-                Source = "NH_SPACECRAFT",
-                Destination = "GALACTIC"
-            },
             Shading = {
                 PerformShading = true,
                 Fadeable = false,
                 Ghosting = false,
             },
         },
+        --[[
         Ephemeris = {
                 Type = "Spice",
                 Body = "NEW HORIZONS",
@@ -116,6 +113,21 @@ return {
                 -- Observer = "JUPITER BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
+            ]]
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "NEW HORIZONS",
+                Reference = "GALACTIC",
+                Observer = "SUN",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NH_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+        },
         GuiName = "/Solar/NewHorizons"
     },
     --NewHorizonsTrail module
@@ -169,9 +181,6 @@ return {
                 Ghosting = false,
             },
         },
-        Ephemeris = {
-                Type = "Static",
-            },
         GuiName = "/Solar/NewHorizons"
     },
 

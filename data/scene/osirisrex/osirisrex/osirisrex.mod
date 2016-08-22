@@ -37,14 +37,9 @@ return {
                 SourceFrame = "ORX_SPACECRAFT",
                 DestinationFrame = "GALACTIC",
             },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
         },
         GuiName = "/Solar/OsirisRex"
     },
-
     {
         Name = "ORX_OCAMS_POLYCAM",
         Parent = "OsirisRex",
@@ -66,7 +61,6 @@ return {
                 Ghosting = false,
             },
         },
-
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
@@ -76,10 +70,6 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "ORX_OCAMS_POLYCAM",
                 DestinationFrame = "ORX_SPACECRAFT",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
             },
         },
         GuiName = "/Solar/ORX_OCAMS_POLYCAM"
@@ -115,12 +105,7 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "ORX_REXIS",
                 DestinationFrame = "ORX_SPACECRAFT",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
-        },
+            },        },
         
         GuiName = "/Solar/ORX_REXIS"
     },
