@@ -4,7 +4,7 @@ return {
     -- One phase per line. A little messy bracket-wise, but easy to overview the data
     Phases = {
         { Name = "Pre Launch", Phases = {
-            { Name = "Planning", TimeRange = { Start = "2016 SEP 06 23:05:05", End = "2016 SEP 07 23:05:00" } },
+            { Name = "Planning", TimeRange = { Start = "2016 SEP 06 23:05:05", End = "2016 SEP 07 23:05:00" }, Description = "Gonna do some planning yea"},
             { Name = "Pre check", TimeRange = { Start = "2016 SEP 07 23:05:05", End = "2016 SEP 08 23:00:00" } },
             { Name = "Last minute check", Phases = {
                 { Name = "Check 1", TimeRange = { Start = "2016 SEP 08 23:00:05", End = "2016 SEP 08 23:02:00" } },

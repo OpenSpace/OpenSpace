@@ -34,6 +34,7 @@ namespace {
     const std::string _loggerCat = "MissionPhaseSequencer";
 
     const std::string KEY_PHASE_NAME = "Name";
+    const std::string KEY_PHASE_DESCRIPTION = "Description";
     const std::string KEY_PHASE_SUBPHASES = "Phases";
     const std::string KEY_TIME_RANGE = "TimeRange";
 }
@@ -50,6 +51,11 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     };
 
     _name = dict.value<std::string>(KEY_PHASE_NAME);
+    if (!dict.getValue(KEY_PHASE_DESCRIPTION, _description)) {
+        // If no description specified, just init to empty string
+        _description = "";
+    }
+    
     ghoul::Dictionary childDicts;
     if (dict.getValue(KEY_PHASE_SUBPHASES, childDicts)) {
         // This is a nested mission phase

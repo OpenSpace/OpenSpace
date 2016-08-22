@@ -45,12 +45,14 @@ namespace openspace {
 */
 class MissionPhase {
 public:
-    MissionPhase() {};
+    MissionPhase() : _name(""), _description("") {};
     MissionPhase(const ghoul::Dictionary& dict);
 
     const std::string& name() const { return _name; }
 
-    const TimeRange timeRange() const { return _timeRange; };
+    const TimeRange& timeRange() const { return _timeRange; };
+
+    const std::string& description() const { return _description; };
 
     /**
     * Returns all subphases sorted by start time
@@ -65,6 +67,7 @@ public:
 protected:
 
     std::string _name;
+    std::string _description;
     TimeRange _timeRange;
     std::vector<MissionPhase> _subphases;
 };
