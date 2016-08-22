@@ -32,6 +32,10 @@
 
 namespace {
     const std::string _loggerCat = "MissionPhaseSequencer";
+
+    const std::string KEY_PHASE_NAME = "Name";
+    const std::string KEY_PHASE_SUBPHASES = "Phases";
+    const std::string KEY_TIME_RANGE = "TimeRange";
 }
 
 
@@ -45,61 +49,50 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
         return a.timeRange().start < b.timeRange().start;
     };
 
-    _name = dict.value<std::string>("Name");
+    _name = dict.value<std::string>(KEY_PHASE_NAME);
     ghoul::Dictionary childDicts;
-    if (dict.getValue("Phases", childDicts)) {
+    if (dict.getValue(KEY_PHASE_SUBPHASES, childDicts)) {
         // This is a nested mission phase
-        size_t numSubPhases = childDicts.size();
-        _subphases.resize(numSubPhases);
-        for (size_t i = 0; i < numSubPhases; ++i) {
+        _subphases.resize(childDicts.size());
+        for (size_t i = 0; i < childDicts.size(); ++i) {
             std::string key = std::to_string(i + 1);
             _subphases[i] = MissionPhase(childDicts.value<ghoul::Dictionary>(key));
         }
-            
+
+        // Ensure subphases are sorted
         std::stable_sort(_subphases.begin(), _subphases.end(), byPhaseStartTime);
 
-        // The subphases will have a total time phases
+        // Calculate the total time range of all subphases
         TimeRange timeRangeSubPhases;
         timeRangeSubPhases.start = _subphases[0].timeRange().start;
         timeRangeSubPhases.end = _subphases.back().timeRange().end;
 
         // user may specify an overall time range. In that case expand this timerange.
-        TimeRange overallTimeRange;
-        try {
-            overallTimeRange = parseTimeRange(dict);
+        ghoul::Dictionary timeRangeDict;
+        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+            TimeRange overallTimeRange(timeRangeDict);
             ghoul_assert(overallTimeRange.includes(timeRangeSubPhases),
                 "User specified time range must at least include its subphases'");
             _timeRange.include(overallTimeRange);
         }
-        catch (...) {
+        else {
             // Its OK to not specify an overall time range, the time range for the 
             // subphases will simply be used. 
             _timeRange.include(timeRangeSubPhases);
         }
     }
     else {
-        _timeRange = parseTimeRange(dict);
+        ghoul::Dictionary timeRangeDict;
+        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+            _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
+        }
+        else {
+            throw std::runtime_error("Must specify key: " + KEY_TIME_RANGE);
+        }
     }
 };
 
-TimeRange MissionPhase::parseTimeRange(const ghoul::Dictionary& dict) {
-    std::string startTimeStr;
-    std::string endTimeStr;
-    bool success = true;
-    success &= dict.getValue("StartTime", startTimeStr);
-    success &= dict.getValue("EndTime", endTimeStr);
-    
-    if (!success) {
-        // Had to do this because ghoul::Dictionary::value<>(std::string key) throws 
-        // uncatchable xtree error on my AMNH windwos machine/ eb)
-        throw "meh";
-    }
-    // Parse to date
-    TimeRange timeRange;
-    timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
-    timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
-    return timeRange;
-}
+
 
 
 

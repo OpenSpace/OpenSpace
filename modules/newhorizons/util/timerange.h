@@ -22,15 +22,63 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <ghoul/misc/dictionary.h>
+#include <openspace/util/spicemanager.h> // ephemerisTimeFromDate
+
 #ifndef __TIMERANGE_H__
 #define __TIMERANGE_H__
+
+namespace {
+    const std::string KEY_START = "Start";
+    const std::string KEY_END = "End";
+}
 
 namespace openspace {
 
 struct TimeRange {
 
+    /**
+    * Default constructor initializes an empty time range.
+    */
     TimeRange() : start(DBL_MAX), end(-DBL_MAX) { };
+
+    /**
+    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
+    * is OK.
+    */
     TimeRange(double startTime, double endTime) : start(startTime) , end(endTime) { };
+    
+    /**
+    * Throws exception if unable to parse the provided \class ghoul::Dictionary
+    */
+    TimeRange(const ghoul::Dictionary& dict) {
+        if (!initializeFromDictionary(dict, *this)) {
+            throw std::runtime_error("Unable to read TimeRange from dictionary");
+        }
+    }
+
+    /**
+    * \returns true if timeRange could be initialized from the dictionary, false otherwise.
+    */
+    static bool initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange) {
+        std::string startTimeStr;
+        std::string endTimeStr;
+
+        bool success = true;
+        success &= dict.getValue(KEY_START, startTimeStr);
+        success &= dict.getValue(KEY_END, endTimeStr);
+        if (success) {
+            // Parse to date. 
+            // @TODO converting string to time stamp should not rely on Spice
+            timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
+            timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
+            return true;
+        }
+        else {
+            // Could not read TimeRange from Dict
+            return false;
+        }
+    }
 
     void include(double val){
         if (start > val) start = val;
@@ -48,6 +96,10 @@ struct TimeRange {
 
     bool isDefined() const { 
         return start <= end; 
+    }
+
+    bool isEmpty() const {
+        return !isDefined();
     }
 
     bool inRange(double min, double max){

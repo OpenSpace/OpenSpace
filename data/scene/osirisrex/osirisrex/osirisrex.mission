@@ -6,25 +6,33 @@ return {
 			Phases = {
 				{
 					Name = "Planning",
-					StartTime = "2016 SEP 06 23:05:05",
-					EndTime = "2016 SEP 07 23:05:00",
+					TimeRange = {
+						Start = "2016 SEP 06 23:05:05",
+						End = "2016 SEP 07 23:05:00",
+					}
 				},
 				{
 					Name = "Pre check",
-					StartTime = "2016 SEP 07 23:05:05",
-					EndTime = "2016 SEP 08 23:05:00",
+					TimeRange = {
+						Start = "2016 SEP 07 23:05:05",
+						End = "2016 SEP 08 23:05:00",
+					}
 				}
 			},
 		},
 		{
 			Name = "Launch",
-			StartTime = "2016 SEP 08 23:05:05",
-			EndTime = "2016 OCT 08 23:05:00",
+			TimeRange = {
+				Start = "2016 SEP 08 23:05:05",
+				End = "2016 OCT 08 23:05:00",
+			}
 		},
 		{
 			Name = "Here we go",
-			StartTime = "2016 OCT 08 23:05:05",
-			EndTime = "2016 NOV 08 23:05:00",
+			TimeRange = {
+				Start = "2016 OCT 08 23:05:05",
+				End = "2016 NOV 08 23:05:00",
+			}
 		},
 	}
 }

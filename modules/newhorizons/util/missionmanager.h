@@ -64,8 +64,6 @@ public:
 
 protected:
 
-    static TimeRange parseTimeRange(const ghoul::Dictionary& dict);
-
     std::string _name;
     TimeRange _timeRange;
     std::vector<MissionPhase> _subphases;
