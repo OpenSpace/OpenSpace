@@ -26,6 +26,7 @@
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/missionmanager.h>
 #endif
 
 #include <openspace/rendering/renderer.h>
@@ -150,6 +151,10 @@ bool RenderEngine::deinitialize() {
         screenspacerenderable->deinitialize();
     }
 
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+    MissionManager::deinitialize();
+#endif
+
     _sceneGraph->clearSceneGraph();
     return true;
 }
@@ -217,6 +222,10 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+    MissionManager::initialize();
+#endif
 
     return true;
 }
@@ -390,7 +399,7 @@ void RenderEngine::postSynchronizationPreDraw() {
     }
     
     for (auto screenspacerenderable : _screenSpaceRenderables) {
-            screenspacerenderable->update();
+        screenspacerenderable->update();
     }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
@@ -1358,45 +1367,64 @@ void RenderEngine::renderInformation() {
                 }
             }
 
-            struct MissionPhase {
-                std::string name;
-                TimeRange timeRange;
-            };
+            const Mission& mission = MissionManager::ref().currentMission();
 
-            std::vector<MissionPhase> missionPhases = {
-                { "test phase 1",{ 526647968.0, 526647968.0 + 60.0*15.0} },
-                { "anotyer test phase (2)",{ 526647968.0 + 5000, 600000000.0} },
-                { "The last phase - 3",{ 600000000.0, 700000000.0 } },
-            };
-
-            if (missionPhases.size() > 0) {
-                glm::vec4 activeMissionColor(0.0, 0.6, 1.0, 1);
+            if (mission.phases().size() > 0) {
                 glm::vec4 inactiveColor(0.3, 0.3, 0.3, 1);
+                glm::vec4 nextMissionColor(0.3, 0.4, 0.7, 1);
+                glm::vec4 activeMissionColor(0.3, 0.6, 1.0, 1);
 
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    activeMissionColor,
-                    "Mission Phases:"
-                    );
-
-                for (const MissionPhase& missionPhase : missionPhases) {
-                    if (missionPhase.timeRange.includes(currentTime)) {
-                        double remaining = missionPhase.timeRange.end - currentTime;
-                        float t = static_cast<float>(1.0 - remaining / missionPhase.timeRange.duration());
+                size_t nextMissionPhaseIndex = -1;
+                size_t currentMissionPhaseIndex = -1;
+                
+                for (size_t i = 0; i < mission.phases().size(); i++) {
+                    if (mission.phase(i).timeRange().includes(currentTime)) {
+                        RenderFontCr(*_fontInfo, penPosition, activeMissionColor, "Current Mission Phase Progress:" );
+                        double remaining = mission.phase(i).timeRange().end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / mission.phase(i).timeRange().duration());
                         std::string progress = progressToStr(25, t);
                         RenderFontCr(*_fontInfo,
                             penPosition,
                             activeMissionColor,
-                            "%s %s %.1f %%",
-                            missionPhase.name.c_str(), progress.c_str(), t * 100
+                            "%s %.1f %%",
+                            progress.c_str(), t * 100
+                            );
+                        currentMissionPhaseIndex = i;
+                        break;
+                    }
+                    else if (mission.phase(i).timeRange().start > currentTime) {
+                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission Phase:");
+                        if (i > 0) {
+                            double remaining = mission.phase(i).timeRange().start - currentTime;
+                            double duration = mission.phase(i).timeRange().start - mission.phase(i - 1).timeRange().end;
+                            float t = static_cast<float>(1.0 - remaining / duration);
+                            std::string progress = progressToStr(25, t);
+                            RenderFontCr(*_fontInfo,
+                                penPosition,
+                                nextMissionColor,
+                                "%s %.1f %%",
+                                progress.c_str(), t * 100
+                                );
+                        }
+                        nextMissionPhaseIndex = i;
+                        break;
+                    }
+                }
+
+                for (size_t i = 0; i < mission.phases().size(); i++) {
+                    if (i == currentMissionPhaseIndex || i == nextMissionPhaseIndex) {
+                        RenderFontCr(*_fontInfo,
+                            penPosition,
+                            currentMissionPhaseIndex != -1 ? activeMissionColor : nextMissionColor,
+                            mission.phase(i).name().c_str()
                             );
                     }
                     else {
-                        RenderFontCr(*_fontInfo, penPosition, inactiveColor, missionPhase.name.c_str());
+                        RenderFontCr(*_fontInfo, penPosition, inactiveColor, mission.phase(i).name().c_str());
                     }
                 }
                 RenderFontCr(*_fontInfo, penPosition, inactiveColor, " " );
-            }
+            } 
 
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
             float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
@@ -1409,7 +1437,6 @@ void RenderEngine::renderInformation() {
             glm::vec4 active(0.6, 1, 0.00, 1);
             glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
-         
             if (remaining > 0) {
                 
                 std::string progress = progressToStr(25, t);

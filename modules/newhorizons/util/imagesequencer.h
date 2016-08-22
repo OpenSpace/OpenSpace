@@ -33,7 +33,9 @@
 #include <map>
 #include <vector>
 
+#include <modules/newhorizons/util/timerange.h>
 #include <modules/newhorizons/util/sequenceparser.h>
+
 
 namespace openspace {
     /**

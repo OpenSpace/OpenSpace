@@ -22,54 +22,50 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __SEQUENCEPARSER_H__
-#define __SEQUENCEPARSER_H__
-
-#include <openspace/network/networkengine.h>
-#include <modules/newhorizons/util/timerange.h>
-
-#include <map>
-#include <string>
-#include <vector>
+#ifndef __TIMERANGE_H__
+#define __TIMERANGE_H__
 
 namespace openspace {
 
-class Decoder;
+struct TimeRange {
 
-struct Image {
-    TimeRange timeRange;
-    std::string path;
-    std::vector<std::string> activeInstruments;
-    std::string target;
-    bool isPlaceholder = false;
-    bool projected = false;
-};
+    TimeRange() : start(DBL_MAX), end(-DBL_MAX) { };
+    TimeRange(double startTime, double endTime) : start(startTime) , end(endTime) { };
 
-struct ImageSubset {
-    TimeRange _range;
-    std::vector<Image> _subset;
-};
+    void include(double val){
+        if (start > val) start = val;
+        if (end < val) end = val;
+    };
 
-class SequenceParser {
-public:
-    virtual bool create() = 0;
-    virtual std::map<std::string, ImageSubset> getSubsetMap() final;
-    virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
-    virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
-    virtual std::map<std::string, Decoder*> getTranslation() = 0;
-    virtual std::vector<double> getCaptureProgression() final;
+    void include(const TimeRange& other) {
+        if (other.start < start) start = other.start;
+        if (other.end > end) end = other.end;
+    }
 
-protected:
-    void sendPlaybookInformation(const std::string& name);
+    double duration() const {
+        return end - start;
+    }
 
-    std::map<std::string, ImageSubset> _subsetMap;
-    std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
-    std::vector<std::pair<double, std::string>> _targetTimes;
-    std::vector<double> _captureProgression;
+    bool isDefined() const { 
+        return start <= end; 
+    }
 
-    NetworkEngine::MessageIdentifier _messageIdentifier;
+    bool inRange(double min, double max){
+        return (min >= start && max <= end);
+    }
+
+    bool includes(double val) const {
+        return (start <= val && val <= end);
+    }
+
+    bool includes(const TimeRange& o) const {
+        return start <= o.start && o.end <= end;
+    }
+
+    double start;
+    double end;
 };
 
 } // namespace openspace
 
-#endif //__SEQUENCEPARSER_H__
+#endif //__TIMERANGE_H__
