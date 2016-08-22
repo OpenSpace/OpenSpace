@@ -1267,12 +1267,12 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std:
 
 std::string RenderEngine::progressToStr(int size, double t) {
     std::string progress = "|";
-    int g = static_cast<int>((t * 24) + 1);
+    int g = static_cast<int>((t * (size - 1)) + 1);
     g = std::max(g, 0);
     for (int i = 0; i < g; i++)
         progress.append("-");
     progress.append(">");
-    for (int i = 0; i < 25 - g; i++)
+    for (int i = 0; i < size - g; i++)
         progress.append(" ");
     progress.append("|");
     return progress;
@@ -1370,60 +1370,59 @@ void RenderEngine::renderInformation() {
             const Mission& mission = MissionManager::ref().currentMission();
 
             if (mission.phases().size() > 0) {
-                glm::vec4 inactiveColor(0.3, 0.3, 0.3, 1);
-                glm::vec4 nextMissionColor(0.3, 0.4, 0.7, 1);
-                glm::vec4 activeMissionColor(0.3, 0.6, 1.0, 1);
+                static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
+                static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+                static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+                static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
-                size_t nextMissionPhaseIndex = -1;
-                size_t currentMissionPhaseIndex = -1;
+                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+
+                if (phaseTrace.size()) {
+                    std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
+                    RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
+                    double remaining = phaseTrace.back()->timeRange().end - currentTime;
+                    float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
+                    std::string progress = progressToStr(25, t);
+                    RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+                        "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+                }
+                else {
+                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
+                    double remaining = mission.timeRange().start - currentTime;
+                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
+                        "%.0f s", remaining);
+                }
                 
-                for (size_t i = 0; i < mission.phases().size(); i++) {
-                    if (mission.phase(i).timeRange().includes(currentTime)) {
-                        RenderFontCr(*_fontInfo, penPosition, activeMissionColor, "Current Mission Phase Progress:" );
-                        double remaining = mission.phase(i).timeRange().end - currentTime;
-                        float t = static_cast<float>(1.0 - remaining / mission.phase(i).timeRange().duration());
-                        std::string progress = progressToStr(25, t);
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            activeMissionColor,
-                            "%s %.1f %%",
-                            progress.c_str(), t * 100
-                            );
-                        currentMissionPhaseIndex = i;
-                        break;
-                    }
-                    else if (mission.phase(i).timeRange().start > currentTime) {
-                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission Phase:");
-                        if (i > 0) {
-                            double remaining = mission.phase(i).timeRange().start - currentTime;
-                            double duration = mission.phase(i).timeRange().start - mission.phase(i - 1).timeRange().end;
-                            float t = static_cast<float>(1.0 - remaining / duration);
-                            std::string progress = progressToStr(25, t);
-                            RenderFontCr(*_fontInfo,
-                                penPosition,
-                                nextMissionColor,
-                                "%s %.1f %%",
-                                progress.c_str(), t * 100
-                                );
-                        }
-                        nextMissionPhaseIndex = i;
-                        break;
-                    }
-                }
+                bool showAllPhases = true;
 
-                for (size_t i = 0; i < mission.phases().size(); i++) {
-                    if (i == currentMissionPhaseIndex || i == nextMissionPhaseIndex) {
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            currentMissionPhaseIndex != -1 ? activeMissionColor : nextMissionColor,
-                            mission.phase(i).name().c_str()
-                            );
-                    }
-                    else {
-                        RenderFontCr(*_fontInfo, penPosition, inactiveColor, mission.phase(i).name().c_str());
+                typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+                std::stack<PhaseWithDepth> S;
+                int pixelIndentation = 20;
+                S.push({ &mission, 0 });
+                while (!S.empty()) {
+                    const MissionPhase* phase = S.top().first;
+                    int depth = S.top().second;
+                    S.pop();
+
+                    bool isCurrentPhase = phase->timeRange().includes(currentTime);
+                    bool isCurrentLeafPhase = phaseTrace.size() && phase == phaseTrace.back();
+                    const auto& color = isCurrentLeafPhase ? currentLeafMissionColor : isCurrentPhase ? currentMissionColor : nonCurrentMissionColor;
+
+                    penPosition.x += depth * pixelIndentation;
+                    RenderFontCr(*_fontInfo, penPosition, color, phase->name().c_str());
+                    penPosition.x -= depth * pixelIndentation;
+
+                    if(isCurrentPhase || showAllPhases){
+                        // phases are sorted increasingly by start time, and will be popped
+                        // last-in-first-out from the stack, so add them in reversed order.
+                        int indexLastPhase = phase->phases().size() - 1;
+                        for (int i = indexLastPhase; 0 <= i; --i) {
+                            S.push({ &phase->phase(i), depth + 1 });
+                        }
                     }
                 }
-                RenderFontCr(*_fontInfo, penPosition, inactiveColor, " " );
+                RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " " );
             } 
 
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
