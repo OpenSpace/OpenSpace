@@ -1,38 +1,17 @@
 return {
-	Name = "OSIRIS-REx",
-	Phases = {
-		{
-			Name = "Pre Launch",
-			Phases = {
-				{
-					Name = "Planning",
-					TimeRange = {
-						Start = "2016 SEP 06 23:05:05",
-						End = "2016 SEP 07 23:05:00",
-					}
-				},
-				{
-					Name = "Pre check",
-					TimeRange = {
-						Start = "2016 SEP 07 23:05:05",
-						End = "2016 SEP 08 23:05:00",
-					}
-				}
-			},
-		},
-		{
-			Name = "Launch",
-			TimeRange = {
-				Start = "2016 SEP 08 23:05:05",
-				End = "2016 OCT 08 23:05:00",
-			}
-		},
-		{
-			Name = "Here we go",
-			TimeRange = {
-				Start = "2016 OCT 08 23:05:05",
-				End = "2016 NOV 08 23:05:00",
-			}
-		},
-	}
+    Name = "OSIRIS-REx",
+
+    -- One phase per line. A little messy bracket-wise, but easy to overview the data
+    Phases = {
+        { Name = "Pre Launch", Phases = {
+            { Name = "Planning", TimeRange = { Start = "2016 SEP 06 23:05:05", End = "2016 SEP 07 23:05:00" } },
+            { Name = "Pre check", TimeRange = { Start = "2016 SEP 07 23:05:05", End = "2016 SEP 08 23:00:00" } },
+            { Name = "Last minute check", Phases = {
+                { Name = "Check 1", TimeRange = { Start = "2016 SEP 08 23:00:05", End = "2016 SEP 08 23:02:00" } },
+                { Name = "Check 2", TimeRange = { Start = "2016 SEP 08 23:03:05", End = "2016 SEP 08 23:05:00" } },
+            }},
+        }}, 
+        { Name = "Launch", TimeRange = { Start = "2016 SEP 08 23:05:05", End = "2016 OCT 08 23:05:00" } },
+        { Name = "Here we go", TimeRange = { Start = "2016 OCT 08 23:05:05", End = "2016 NOV 08 23:05:00" } },
+    }
 }
