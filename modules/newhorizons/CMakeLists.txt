@@ -32,7 +32,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableshadowcylinder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/timerange.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.h

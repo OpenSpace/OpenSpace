@@ -29,7 +29,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
-#include <modules/newhorizons/util/timerange.h>
+#include <openspace/util/timerange.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>

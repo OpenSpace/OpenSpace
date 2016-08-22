@@ -26,7 +26,7 @@
 #define __SEQUENCEPARSER_H__
 
 #include <openspace/network/networkengine.h>
-#include <modules/newhorizons/util/timerange.h>
+#include <openspace/util/timerange.h>
 
 #include <map>
 #include <string>
