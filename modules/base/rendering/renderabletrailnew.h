@@ -43,8 +43,10 @@ namespace opengl {
 namespace openspace {
 
 /**
-    * This class currently has a temporary name until it is merged
-    * with or replaces RenderableTrail.
+    * This class currently has a temporary name until it is merged with or replaces
+    * RenderableTrail. It renders the trail with higher precision close to the
+    * position of the body of a renderable. The lua mod dictionary describing the
+    * renderable trail is changed.
 */
 class RenderableTrailNew : public Renderable {
 public:

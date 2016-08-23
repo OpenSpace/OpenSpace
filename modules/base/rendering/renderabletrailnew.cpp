@@ -302,8 +302,6 @@ void RenderableTrailNew::render(const RenderData& data) {
             renderLines(_vaoLocalID, 2);
         }
     }
-    
-    
     _programObject->deactivate();
 }
 
