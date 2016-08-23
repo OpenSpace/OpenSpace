@@ -149,8 +149,8 @@ ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
         return missionDict;
     }
     catch (ghoul::RuntimeError& e) {
-        LWARNING("Unable to load mission phases");
-        LWARNING(e.message);
+        LERROR("Unable to load mission phases");
+        LERROR(e.message);
     }
     return {};
 }
