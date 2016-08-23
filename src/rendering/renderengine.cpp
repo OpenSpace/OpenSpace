@@ -1377,8 +1377,8 @@ void RenderEngine::renderInformation() {
                 static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                 static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
-                int maxDepth = 2;
-                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime, maxDepth);
+                
+                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
 
                 if (phaseTrace.size()) {
                     std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
@@ -1429,7 +1429,7 @@ void RenderEngine::renderInformation() {
                     }
                     penPosition.x -= depth * pixelIndentation;
 
-                    if((isCurrentPhase || showAllPhases) && depth < maxDepth){
+                    if(isCurrentPhase || showAllPhases){
                         // phases are sorted increasingly by start time, and will be popped
                         // last-in-first-out from the stack, so add them in reversed order.
                         int indexLastPhase = phase->phases().size() - 1;
