@@ -27,6 +27,7 @@
 
 
 #include <vector>
+#include <list>
 #include <string>
 #include <unordered_map>
 #include <openspace/util/timerange.h>
@@ -64,7 +65,12 @@ public:
     */
     const MissionPhase& phase(size_t i) const { return _subphases[i]; }
 
+    std::list<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
+
 protected:
+
+    bool phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const;
+
 
     std::string _name;
     std::string _description;

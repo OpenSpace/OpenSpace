@@ -98,7 +98,33 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
 };
 
+std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
+    std::list<const MissionPhase*> trace;
+    if (_timeRange.includes(time)) {
+        trace.push_back(this);
+        phaseTrace(time, trace, maxDepth);
+    }
+    return std::move(trace);
+}
 
+bool MissionPhase::phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const {
+    if (maxDepth == 0) {
+        return false;
+    }
+
+    for (int i = 0; i < _subphases.size(); ++i) {
+        if (_subphases[i]._timeRange.includes(time)) {
+            trace.push_back(&_subphases[i]);
+            _subphases[i].phaseTrace(time, trace, maxDepth - 1);
+            return true; // only add the first one
+        }
+        // Since time ranges are sorted we can do early termination
+        else if (_subphases[i]._timeRange.start > time) {
+            return false;
+        }
+    }
+    return true;
+}
 
 
 
