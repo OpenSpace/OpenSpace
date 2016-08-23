@@ -5,8 +5,22 @@ return {
     --        Bennu       --
     ------------------------
     {   
-        Name = "Bennu2",
+        Name = "BennuBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = BENNU_BODY,
+                Reference = "GALACTIC",
+                Observer = "SUN",
+            },
+        },
+
+        GuiName = "/Solar/Bennu"
+    },
+    {   
+        Name = "Bennu2",
+        Parent = "BennuBarycenter",
 
         Renderable = {
             Type = "RenderableModelProjection",
@@ -76,20 +90,10 @@ return {
         },
 
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = BENNU_BODY,
-                Reference = "GALACTIC",
-                Observer = "SUN",
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_BENNU",
                 DestinationFrame = "GALACTIC",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
             },
         },
 
@@ -99,15 +103,26 @@ return {
         Name = "BennuTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
+            Type = "RenderableTrailNew",
+            -- Spice
             Body = BENNU_BODY,
             Frame = "GALACTIC",
             Observer = "SUN",
-            RGB = { 0.4, 0.0, 0.7},
-            TropicalOrbitPeriod = 436.649,
-            EarthOrbitRatio = 1.3559, -- worst parameter I've ever seen
-            DayLength = 4.288 -- why this for a path??
+            -- Optional rendering properties
+            LineColor = { 0.4, 0.0, 0.7},
+            PointColor = { 0.4, 0.0, 0.7},
+            LineFade = 0, -- [0,1]
+            RenderPart = 0.12,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2015 JAN 01 00:00:00.000",
+                End = "2023 MAY 31 00:00:00.000",
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 0, 
         },
-        GuiName = "/Solar/BennuTrail"
+        GuiName = "OsirisRexTrailLocal"
     },
 }

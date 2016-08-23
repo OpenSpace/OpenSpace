@@ -14,7 +14,7 @@ return {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/osiris_BASE.obj",
                 Magnification = 0,
-            }, 
+            },
             Textures = {
                 Type = "simple",
                 Color =  "textures/osirisTex.png",
@@ -196,72 +196,85 @@ return {
             Position = {0, 0, 0, 1}
         },
     },
-    
-    {   
-        Name = "OsirisRexPathSolar",
-        Parent = "SolarSystemBarycenter",
-        Renderable = {
-            Type = "RenderablePath",
-            Body = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.0, 1.0, 0.5},
-            TimeSteps = 86400, -- Number of seconds in a day
-            PointSteps = 10, -- Every 10 days
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },  
-            DrawLine = true,
-            
-            StartTime = "2016 SEP 8 12:00:00",
-            EndTime = "2023 SEP 24 12:00:00"
-        },
-        GuiName = "/Solar/OsirisRexPathSolar"
-    },
     ]]
-    -- Trail relative to Bennu
     {   
         Name = "OsirisRexTrailLocal",
-        Parent = "Bennu2",
+        Parent = "BennuBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
+            Type = "RenderableTrailNew",
+            -- Spice
             Body = "OSIRIS-REX",
             Frame = "GALACTIC",
             Observer = BENNU_BODY,
-            TropicalOrbitPeriod = 20000.0,
-            EarthOrbitRatio = 2,
-            DayLength = 25,
-            RGB = { 0.9, 0.2, 0.9 },
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare_blue.png"
-            },  
-            StartTime = "2016 SEP 8 12:00:00",
-            EndTime = "2023 SEP 24 12:00:00"
+            -- Optional rendering properties
+            LineColor = { 0.9, 0.2, 0.9 },
+            PointColor = { 0.9, 0.2, 0.9 },
+            LineFade = 0.5, -- [0,1]
+            RenderPart = 0.06,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2016 SEP 8 23:05:00.50",
+                End = "2023 SEP 24 12:00:00",
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 3, 
         },
         GuiName = "OsirisRexTrailLocal"
     },
-    -- Trail relative to Solar system
+    {   
+        Name = "OsirisRexTrailGlobal",
+        Parent = "LodEarth",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "OSIRIS-REX",
+            Frame = "IAU_EARTH",
+            Observer = "EARTH",
+            -- Optional rendering properties
+            LineColor = { 0.9, 0.9, 0.0 },
+            PointColor = { 0.9, 0.9, 0.0 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 1,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2016 SEP 8 23:05:00.50",
+                End = "2016 SEP 9 00:05:00",
+            },
+            SampleDeltaTime = 60, -- Seconds between each point
+            SubSamples = 59, 
+        },
+        GuiName = "OsirisRexTrailGlobal"
+    },
     {   
         Name = "OsirisRexTrailSolar",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
+            Type = "RenderableTrailNew",
+            -- Spice
             Body = "OSIRIS-REX",
             Frame = "GALACTIC",
             Observer = "SUN",
-            TropicalOrbitPeriod = 20000.0,
-            EarthOrbitRatio = 2,
-            DayLength = 25,
-            RGB = { 0.2, 0.9, 0.2 },
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare_blue.png"
-            },  
-            StartTime = "2016 SEP 8 12:00:00",
-            EndTime = "2023 SEP 24 12:00:00"
+            -- Optional rendering properties
+            LineColor = { 0.2, 0.9, 0.2 },
+            PointColor = { 0.2, 0.9, 0.2 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 0.13,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2016 SEP 8 23:05:00.50",
+                End = "2023 SEP 24 12:00:00",
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 0, 
         },
         GuiName = "OsirisRexTrailSolar"
     },

@@ -166,7 +166,9 @@ void RenderableTrail::render(const RenderData& data) {
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), bodyPosition); // Only care about translation
+        glm::translate(glm::dmat4(1.0), bodyPosition) * 
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));

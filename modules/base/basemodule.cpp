@@ -34,6 +34,7 @@
 #include <modules/base/rendering/renderableconstellationbounds.h>
 #include <modules/base/rendering/renderablestars.h>
 #include <modules/base/rendering/renderabletrail.h>
+#include <modules/base/rendering/renderabletrailnew.h>
 #include <modules/base/rendering/renderablepath.h>
 #include <modules/base/rendering/renderablerings.h>
 #include <modules/base/rendering/renderablesphere.h>
@@ -90,6 +91,7 @@ void BaseModule::internalInitialize() {
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTrail>("RenderableTrail");
+    fRenderable->registerClass<RenderableTrailNew>("RenderableTrailNew");
 
     auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
     ghoul_assert(fEphemeris, "Ephemeris factory was not created");
