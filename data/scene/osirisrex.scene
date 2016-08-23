@@ -169,7 +169,7 @@ function postInitialization()
     openspace.setPropertyValue("OsirisRex.renderable.modelrotation", {90.0, 0.0, 0.0})
 
     openspace.printInfo("Done setting default values")
-    openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
+    openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/spice_kernel_times.mission")
 
     openspace.resetCameraDirection()
 end
@@ -184,16 +184,16 @@ return {
     },
     Modules = {
         "sun",
-        "mercury",
-        "venus",
+        --"mercury",
+        --"venus",
         "lodearth",
-        "mars",
-        "saturn",
-        "uranus",
-        "neptune",
-        "stars",
+        --"mars",
+        --"saturn",
+        --"uranus",
+        --"neptune",
+        --"stars",
         -- "stars-denver",
-        "milkyway",
+        --"milkyway",
         -- "milkyway-eso",
         --"imageplane",
         "osirisrex",

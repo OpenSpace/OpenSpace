@@ -1371,12 +1371,14 @@ void RenderEngine::renderInformation() {
 
             if (mission.phases().size() > 0) {
                 static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-                static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+                //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                 static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+                static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
                 static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                 static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
-                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+                int maxDepth = 2;
+                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime, maxDepth);
 
                 if (phaseTrace.size()) {
                     std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
@@ -1384,8 +1386,8 @@ void RenderEngine::renderInformation() {
                     double remaining = phaseTrace.back()->timeRange().end - currentTime;
                     float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
                     std::string progress = progressToStr(25, t);
-                    RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
-                        "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+                    //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+                    //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
                 }
                 else {
                     RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
@@ -1394,7 +1396,7 @@ void RenderEngine::renderInformation() {
                         "%.0f s", remaining);
                 }
                 
-                bool showAllPhases = true;
+                bool showAllPhases = false;
 
                 typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
                 std::stack<PhaseWithDepth> S;
@@ -1406,14 +1408,28 @@ void RenderEngine::renderInformation() {
                     S.pop();
 
                     bool isCurrentPhase = phase->timeRange().includes(currentTime);
-                    bool isCurrentLeafPhase = phaseTrace.size() && phase == phaseTrace.back();
-                    const auto& color = isCurrentLeafPhase ? currentLeafMissionColor : isCurrentPhase ? currentMissionColor : nonCurrentMissionColor;
+                    //bool isCurrentLeafPhase = phaseTrace.size() && phase == phaseTrace.back();
+                    glm::vec4 color = /*isCurrentLeafPhase ? currentLeafMissionColor :*/ isCurrentPhase ? currentMissionColor : nonCurrentMissionColor;
+
 
                     penPosition.x += depth * pixelIndentation;
-                    RenderFontCr(*_fontInfo, penPosition, color, phase->name().c_str());
+                    if (isCurrentPhase) {
+                        double remaining = phase->timeRange().end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+                        std::string progress = progressToStr(25, t);
+                        RenderFontCr(*_fontInfo, penPosition, color, 
+                            "%s  %s %.1f %%",
+                            phase->name().c_str(),
+                            progress.c_str(),
+                            t * 100
+                            );
+                    }
+                    else {
+                        RenderFontCr(*_fontInfo, penPosition, color, phase->name().c_str());
+                    }
                     penPosition.x -= depth * pixelIndentation;
 
-                    if(isCurrentPhase || showAllPhases){
+                    if((isCurrentPhase || showAllPhases) && depth < maxDepth){
                         // phases are sorted increasingly by start time, and will be popped
                         // last-in-first-out from the stack, so add them in reversed order.
                         int indexLastPhase = phase->phases().size() - 1;
