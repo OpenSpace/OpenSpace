@@ -38,6 +38,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailnew.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
@@ -63,6 +64,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailnew.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
@@ -79,6 +81,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ephemeris_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ephemeris_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrailnew_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrailnew_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
