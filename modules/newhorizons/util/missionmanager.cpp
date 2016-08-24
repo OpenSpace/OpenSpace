@@ -149,8 +149,8 @@ ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
         return missionDict;
     }
     catch (ghoul::RuntimeError& e) {
-        LWARNING("Unable to load mission phases");
-        LWARNING(e.message);
+        LERROR("Unable to load mission phases");
+        LERROR(e.message);
     }
     return {};
 }
@@ -197,6 +197,7 @@ void MissionManager::loadMission(const std::string& filepath) {
 const Mission& MissionManager::currentMission() {
     if (_currentMissionIter == _missionMap.end()) {
         LWARNING("No current mission has been specified. returning dummy mission");
+        return Mission();
     }
     return _currentMissionIter->second;
 }

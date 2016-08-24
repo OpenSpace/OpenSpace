@@ -115,6 +115,11 @@ public:
     void setCurrentMission(const std::string missionName);
 
     /**
+    * Returns true if a current mission exists
+    */
+    bool hasCurrentMission() const { return _currentMissionIter != _missionMap.end(); }
+
+    /**
     * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
     * been specified, the first mission loaded will be returned. If no mission has been 
     * loaded, a warning will be printed and a dummy mission will be returned.
