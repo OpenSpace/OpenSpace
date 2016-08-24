@@ -1338,9 +1338,11 @@ void RenderEngine::renderInformation() {
         double currentTime = Time::ref().currentTime();
 
         if (MissionManager::ref().hasCurrentMission()) {
+
             const Mission& mission = MissionManager::ref().currentMission();
 
             if (mission.phases().size() > 0) {
+
                 static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
                 //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                 static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
@@ -1348,6 +1350,8 @@ void RenderEngine::renderInformation() {
                 static const glm::vec4 currentLeafMissionColor = missionProgressColor;
                 static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
+                // Add spacing
+                RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
                 std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
 
@@ -1379,16 +1383,13 @@ void RenderEngine::renderInformation() {
                     S.pop();
 
                     bool isCurrentPhase = phase->timeRange().includes(currentTime);
-                    //bool isCurrentLeafPhase = phaseTrace.size() && phase == phaseTrace.back();
-                    glm::vec4 color = /*isCurrentLeafPhase ? currentLeafMissionColor :*/ isCurrentPhase ? currentMissionColor : nonCurrentMissionColor;
-
 
                     penPosition.x += depth * pixelIndentation;
                     if (isCurrentPhase) {
                         double remaining = phase->timeRange().end - currentTime;
                         float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
                         std::string progress = progressToStr(25, t);
-                        RenderFontCr(*_fontInfo, penPosition, color,
+                        RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
                             "%s  %s %.1f %%",
                             phase->name().c_str(),
                             progress.c_str(),
@@ -1396,7 +1397,7 @@ void RenderEngine::renderInformation() {
                             );
                     }
                     else {
-                        RenderFontCr(*_fontInfo, penPosition, color, phase->name().c_str());
+                        RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
                     }
                     penPosition.x -= depth * pixelIndentation;
 
@@ -1409,7 +1410,6 @@ void RenderEngine::renderInformation() {
                         }
                     }
                 }
-                RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
             }
         }
 
