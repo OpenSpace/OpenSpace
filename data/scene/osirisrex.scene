@@ -169,7 +169,7 @@ function postInitialization()
     openspace.setPropertyValue("OsirisRex.renderable.modelrotation", {90.0, 0.0, 0.0})
 
     openspace.printInfo("Done setting default values")
-    openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/spice_kernel_times.mission")
+    openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
 
     openspace.resetCameraDirection()
 end
