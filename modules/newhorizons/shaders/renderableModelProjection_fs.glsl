@@ -56,7 +56,7 @@ void main() {
 
   if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
       dot(n, boresight) < 0 && thisDepth <= closestDepth + epsilon) {
-        color = texture(projectionTexture, uv);
+        color = texture(projectionTexture, vec2(1.0) - uv);
         color.a = 1.0;
   } else {
     color = vec4(vec3(0.0), 0.0);
