@@ -112,7 +112,7 @@ return {
         GuiName = "RosettaTrail"
     }, --]]
     -- Comet Dance trail
-    {   
+    --[[{   
         Name = "RosettaCometTrail",
         Parent = "67P",
         Renderable = {
@@ -132,6 +132,34 @@ return {
             EndTime = "2016 MAY 26 12:00:00"
         },
         GuiName = "RosettaCometTrail"
+    },
+    ]]
+    {   
+        Name = "RosettaCometTrail",
+        Parent = "67PBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "ROSETTA",
+            Frame = "GALACTIC",
+            Observer = "CHURYUMOV-GERASIMENKO",
+            -- Optional rendering properties
+            LineColor = { 0.9, 0.2, 0.9 },
+            PointColor = { 0.9, 0.2, 0.9 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 0.5, -- [0,1]
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2014 AUG 01 12:00:00",
+                End = "2016 MAY 26 12:00:00"
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 3,
+        },
+        GuiName = "/Solar/RosettaCometTrail"
     },
     {
         Name = "NAVCAM",

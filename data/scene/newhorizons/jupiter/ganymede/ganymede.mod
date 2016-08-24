@@ -80,10 +80,6 @@ return {
             Billboard = true,
             Texture = "textures/Ganymede-Text.png"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, -1, 0, 7}
-        }
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
