@@ -73,14 +73,14 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "CHARON",
-                Reference = "ECLIPJ2000",
+                Reference = "GALACTIC",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_CHARON",
-                DestinationFrame = "ECLIPJ2000"
+                DestinationFrame = "GALACTIC"
             },
         },
         GuiName = "/Solar/Planets/Charon"

@@ -184,6 +184,34 @@ return {
         GuiName = "/Solar/NewHorizons"
     },
 
+    {   
+        Name = "NewHorizonsTrailPluto",
+        Parent = "PlutoBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "NEW HORIZONS",
+            Frame = "GALACTIC",
+            Observer = "PLUTO BARYCENTER",
+            -- Optional rendering properties
+            LineColor = { 1.0, 0.8, 0.4 },
+            PointColor = { 1.0, 0.8, 0.4 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 1,
+            LineWidth = 2,
+            ShowTimeStamps = true,
+            RenderFullTrail = true,
+            -- Time interval
+            TimeRange = {
+                Start = "2015 JUL 07 12:00:00",
+                End = "2015 JUL 17 12:00:00"
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 3, 
+        },
+        GuiName = "/Solar/NewHorizonsTrailPluto"
+    },
+    --[[
     -- NewHorizonsPath module
     {   
         Name = "NewHorizonsPathPluto",
@@ -230,5 +258,6 @@ return {
             EndTime = "2007 MAR 15 12:00:00"
         },
         GuiName = "/Solar/NewHorizonsPathJupiter"
-    }, 
+    },
+    ]]
 }
