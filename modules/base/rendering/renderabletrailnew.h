@@ -105,6 +105,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::vector<glm::vec3> _vertexPositionArray;
     
+    // Data updated in update function
     double _currentTimeClamped; // Time clamped to time range
     glm::dmat4 _modelTransform;
     glm::dvec3 _clampedBodyPosition; // Position of body clamped to time range
