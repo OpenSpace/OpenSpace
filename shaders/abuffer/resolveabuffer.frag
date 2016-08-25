@@ -113,7 +113,7 @@ void main() {
 
                 //normalBlend(finalColor, color);
             } else if (blend == BLEND_MODE_ADDITIVE) {
-                accumulatedColor += (1 - accumulatedAlpha) * color.rgb;
+                accumulatedColor += (1 - accumulatedAlpha) * color.rgb * color.a;
                 //additiveBlend(finalColor, color);
             }
         }

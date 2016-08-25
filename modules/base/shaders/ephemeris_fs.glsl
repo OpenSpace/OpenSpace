@@ -36,10 +36,11 @@ Fragment getFragment() {
     vec4 position = vs_point_position;
     float depth = pscDepth(position);
 
-    vec4 c = vec4(color, fade*forceFade);
+    vec4 c = vec4(color * fade * forceFade, 1.0);
     Fragment frag;
     frag.color = c;
     frag.depth = depth;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
     return frag;
 }

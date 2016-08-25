@@ -36,10 +36,19 @@ void main() {
     if (frag.depth < 0) {
 //         discard;
     }
-    
-    //frag.forceFboRendering = true;
-    // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
-    if (!frag.forceFboRendering && (frag.color.a < 1.0 || sampleMask != 255)) {
+
+    bool storeInAbuffer = false;
+
+    if (frag.forceFboRendering) {
+        storeInAbuffer = false;
+    } else {
+        storeInAbuffer = frag.color.a < 1.0 ||
+                          sampleMask != 255 ||
+                          frag.blend != BLEND_MODE_NORMAL;
+        // todo: calculate full sample mask from nAaSamples instead of hardcoded 255.
+    }
+
+    if (storeInAbuffer) {
         uint newHead = atomicCounterIncrement(atomicCounterBuffer);
         if (newHead >= #{rendererData.maxTotalFragments}) {
             discard; // ABuffer is full!

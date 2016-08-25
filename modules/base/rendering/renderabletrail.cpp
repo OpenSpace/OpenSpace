@@ -179,6 +179,14 @@ void RenderableTrail::render(const RenderData& data) {
     //    _programObject->setUniform("forceFade", _distanceFade);
     //}
 
+    bool usingFramebufferRenderer =
+        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+
+    if (usingFramebufferRenderer) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+
     glLineWidth(_lineWidth);
 
     glBindVertexArray(_vaoID);
@@ -192,6 +200,12 @@ void RenderableTrail::render(const RenderData& data) {
         glBindVertexArray(_vaoID);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
         glBindVertexArray(0);
+    }
+
+
+    if (usingFramebufferRenderer) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(true);
     }
 
     _programObject->deactivate();
