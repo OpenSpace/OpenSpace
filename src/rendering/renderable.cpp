@@ -72,6 +72,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 
 Renderable::Renderable()
     : _enabled("enabled", "Is Enabled", true)
+    , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _targetBody("")
@@ -83,6 +84,7 @@ Renderable::Renderable()
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)
+    , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _targetBody("")
@@ -146,6 +148,18 @@ void Renderable::setPscUniforms(
     program.setUniform("objpos", position.vec4());
     program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
     program.setUniform("scaling", camera.scaling());
+}
+
+Renderable::RenderBin Renderable::renderBin() const {
+    return _renderBin;
+}
+
+void Renderable::setRenderBin(RenderBin bin) {
+    _renderBin = bin;
+}
+
+bool Renderable::matchesRenderBinMask(int binMask) {
+    return binMask & static_cast<int>(renderBin());
 }
 
 bool Renderable::isVisible() const {

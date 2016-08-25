@@ -43,10 +43,12 @@ struct UpdateData {
     bool doPerformanceMeasurement;
 };
 
+
 struct RenderData {
     const Camera& camera;
     psc position;
     bool doPerformanceMeasurement;
+    int renderBinMask;
 };
 
 struct RaycasterTask {

@@ -124,6 +124,7 @@ bool RenderableTrail::initialize() {
         "${MODULE_BASE}/shaders/ephemeris_vs.glsl",
         "${MODULE_BASE}/shaders/ephemeris_fs.glsl");
 
+    setRenderBin(Renderable::RenderBin::Overlay);
 
     if (!_programObject)
         return false;
