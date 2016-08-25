@@ -24,6 +24,7 @@
 
 uniform float time;
 uniform sampler2D texture1;
+uniform bool additiveBlending;
 
 in vec2 vs_st;
 in vec4 vs_position;
@@ -52,6 +53,11 @@ Fragment getFragment() {
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;
+
+    if (additiveBlending) {
+        frag.blend = BLEND_MODE_ADDITIVE;
+    }
+
     return frag;
 
 }
