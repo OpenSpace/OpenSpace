@@ -382,7 +382,9 @@ namespace openspace {
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
         if (_tileProviderManager->getTileProviderGroup(
-            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
@@ -459,7 +461,9 @@ namespace openspace {
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
         if (_tileProviderManager->getTileProviderGroup(
-            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =

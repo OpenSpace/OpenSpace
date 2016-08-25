@@ -118,7 +118,7 @@ namespace openspace {
         // Add all tile layers as being toggleable for each category
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
-            std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            std::string categoryName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
             
             auto& categoryProviders = _tileProviderManager->getTileProviderGroup(category);

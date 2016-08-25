@@ -43,7 +43,6 @@ uniform Tile ColorTexturesParent2[NUMLAYERS_COLORTEXTURE];
 uniform Tile NightTextures[NUMLAYERS_NIGHTTEXTURE];
 uniform Tile NightTexturesParent1[NUMLAYERS_NIGHTTEXTURE];
 uniform Tile NightTexturesParent2[NUMLAYERS_NIGHTTEXTURE];
-uniform vec3 lightDirectionCameraSpace;
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
@@ -68,10 +67,13 @@ uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
 uniform vec2 vertexResolution;
 #endif
 
-
 #if USE_ATMOSPHERE
 // TODO atmosphere uniforms here
 #endif // USE_ATMOSPHERE
+
+#if USE_NIGHTTEXTURE || USE_WATERMASK
+	uniform vec3 lightDirectionCameraSpace;
+#endif
 
 in vec4 fs_position;
 in vec2 fs_uv;
