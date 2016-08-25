@@ -44,6 +44,7 @@ out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 out LevelWeights levelWeights;
+out vec3 positionCameraSpace;
 
 PositionNormalPair globalInterpolation() {
     vec2 lonLatInput;
@@ -77,4 +78,5 @@ void main() {
     fs_position = z_normalization(positionClippingSpace);
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
+    positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1));
 }

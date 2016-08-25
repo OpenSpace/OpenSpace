@@ -381,11 +381,17 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_tileProviderManager->getTileProviderGroup(LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+        if (_tileProviderManager->getTileProviderGroup(
+            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+            glm::vec3 directionToSunWorldSpace =
+                glm::normalize(-data.modelTransform.translation);
+            glm::vec3 directionToSunCameraSpace =
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+            data.modelTransform.translation;
             programObject->setUniform("modelViewTransform", modelViewTransform);
+            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
         }
 
-        
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -430,8 +436,6 @@ namespace openspace {
         }
 
         // Calculate other uniform variables needed for rendering
-
-        // TODO : Model transform should be fetched as a matrix directly.
         dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
@@ -453,6 +457,16 @@ namespace openspace {
 
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+        if (_tileProviderManager->getTileProviderGroup(
+            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+            glm::vec3 directionToSunWorldSpace =
+                glm::normalize(-data.modelTransform.translation);
+            glm::vec3 directionToSunCameraSpace =
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+            data.modelTransform.translation;
+            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
+        }
 
 
         // OpenGL rendering settings
