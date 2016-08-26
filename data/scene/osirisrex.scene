@@ -10,8 +10,6 @@ function preInitialization()
     critical objects.
     ]]--
 
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
-
     -- Load Spice Kernels
     openspace.spice.loadKernel("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp")
 
@@ -141,6 +139,9 @@ function preInitialization()
     
     -- Load planetary constants
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
 
     -- openspace.time.setTime("2018-12-20T22:47:00.00")
     --openspace.time.setTime("2019-05-25T03:57:55.00")

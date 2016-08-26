@@ -104,54 +104,50 @@ bool InstrumentTimesParser::create() {
 
             // Read file into string 
             std::ifstream inFile(filepath);
-
             std::string line;
             std::smatch matches;
-
             TimeRange instrumentActiveTimeRange;
-            bool sucessfulRead = false;
-
+            bool successfulRead = true;
             while (std::getline(inFile, line)) {
                 if (std::regex_match(line, matches, _pattern)) {
-                    try {
-                        if (matches.size() != 3) {
-                            throw ghoul::RuntimeError("Bad event data formatting. Must \
+                    if (matches.size() != 3) {
+                        LERROR("Bad event data formatting. Must \
                                 have regex 3 matches (source string, start time, stop time).");
-                        }
+                        successfulRead = false;
+                        break;
+                    }
+                    
+                    TimeRange captureTimeRange;
+                    try { // parse date strings
                         std::string start = matches[1].str();
                         std::string stop = matches[2].str();
-
-                        TimeRange captureTimeRange;
                         captureTimeRange.start = SpiceManager::ref().ephemerisTimeFromDate(start);
                         captureTimeRange.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
-
-                        instrumentActiveTimeRange.include(captureTimeRange);
-
-                        //_instrumentTimes.push_back({ instrumentID, timeRange });
-                        _targetTimes.push_back({ captureTimeRange.start, _target });
-                        _captureProgression.push_back(captureTimeRange.start);
-
-                        Image image;
-                        image.timeRange = captureTimeRange;
-                        image.path = "";
-                        image.isPlaceholder = true;
-                        image.activeInstruments.push_back(instrumentID);
-                        image.target = _target;
-                        image.projected = false;
-
-                        _subsetMap[_target]._subset.push_back(image);
-                        
-                        sucessfulRead = true;
                     }
-                    catch (const ghoul::RuntimeError& e) {
+                    catch (const SpiceManager::SpiceException& e){
                         LERROR(e.what());
-                        sucessfulRead = false;
-                        continue;
+                        successfulRead = false;
+                        break;
                     }
+
+                    instrumentActiveTimeRange.include(captureTimeRange);
+
+                    //_instrumentTimes.push_back({ instrumentID, timeRange });
+                    _targetTimes.push_back({ captureTimeRange.start, _target });
+                    _captureProgression.push_back(captureTimeRange.start);
+
+                    Image image;
+                    image.timeRange = captureTimeRange;
+                    image.path = "";
+                    image.isPlaceholder = true;
+                    image.activeInstruments.push_back(instrumentID);
+                    image.target = _target;
+                    image.projected = false;
+
+                    _subsetMap[_target]._subset.push_back(image);
                 }
             }
-            if (sucessfulRead)
-            {
+            if (successfulRead){
                 _subsetMap[_target]._range.include(instrumentActiveTimeRange);
                 _instrumentTimes.push_back({ instrumentID, instrumentActiveTimeRange });
             }
