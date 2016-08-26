@@ -194,7 +194,8 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Pluto-Text.png"
+            Texture = "textures/Pluto-Text.png",
+            BlendMode = "Additive"
         },
         Ephemeris = {
             Type = "Static",

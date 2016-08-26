@@ -60,7 +60,8 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Io-Text.png"
+            Texture = "textures/Io-Text.png",
+            BlendMode = "Additive"
         },
         Ephemeris = {
             Type = "Static",
