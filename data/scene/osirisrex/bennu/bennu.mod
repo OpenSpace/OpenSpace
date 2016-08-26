@@ -51,7 +51,6 @@ return {
                 Observer   = "OSIRIS-REX",
                 Target     = BENNU_BODY,
                 Aberration = "NONE",
-                TextureMap = true,
             },
             DataInputTranslation = {
                 Instruments = {

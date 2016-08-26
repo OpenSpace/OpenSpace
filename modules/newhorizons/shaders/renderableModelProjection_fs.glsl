@@ -62,7 +62,7 @@ void main() {
         stencil = vec4(1.0);
     }
     else {
-      color = vec4(vec3(0.0), 1.0);
+      color = vec4(0.0);//vec4(vec3(0.0), 1.0);
       stencil = vec4(0.0);
     }
 }
