@@ -96,43 +96,65 @@ bool InstrumentTimesParser::create() {
         std::string instrumentID = it->first;
         for (std::string filename: it->second) {
             std::string filepath = FileSys.pathByAppendingComponent(sequenceDir.path(), filename);
+            
+            if (!FileSys.fileExists(filepath)) {
+                LERROR("Unable to read file " << filepath << ". Skipping file.");
+                continue;
+            }
 
             // Read file into string 
-            std::ifstream in(filepath);
+            std::ifstream inFile(filepath);
+
             std::string line;
             std::smatch matches;
 
             TimeRange instrumentActiveTimeRange;
+            bool sucessfulRead = false;
 
-            while (std::getline(in, line)) {
+            while (std::getline(inFile, line)) {
                 if (std::regex_match(line, matches, _pattern)) {
-                    ghoul_assert(matches.size() == 3, "Bad event data formatting. Must have regex 3 matches (source string, start time, stop time).");
-                    std::string start = matches[1].str();
-                    std::string stop = matches[2].str();
+                    try {
+                        if (matches.size() != 3) {
+                            throw ghoul::RuntimeError("Bad event data formatting. Must \
+                                have regex 3 matches (source string, start time, stop time).");
+                        }
+                        std::string start = matches[1].str();
+                        std::string stop = matches[2].str();
 
-                    TimeRange captureTimeRange;
-                    captureTimeRange.start = SpiceManager::ref().ephemerisTimeFromDate(start);
-                    captureTimeRange.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
+                        TimeRange captureTimeRange;
+                        captureTimeRange.start = SpiceManager::ref().ephemerisTimeFromDate(start);
+                        captureTimeRange.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
 
-                    instrumentActiveTimeRange.include(captureTimeRange);
+                        instrumentActiveTimeRange.include(captureTimeRange);
 
-                    //_instrumentTimes.push_back({ instrumentID, timeRange });
-                    _targetTimes.push_back({ captureTimeRange.start, _target });
-                    _captureProgression.push_back(captureTimeRange.start);
+                        //_instrumentTimes.push_back({ instrumentID, timeRange });
+                        _targetTimes.push_back({ captureTimeRange.start, _target });
+                        _captureProgression.push_back(captureTimeRange.start);
 
-                    Image image;
-                    image.timeRange = captureTimeRange;
-                    image.path = "";
-                    image.isPlaceholder = true;
-                    image.activeInstruments.push_back(instrumentID);
-                    image.target = _target;
-                    image.projected = false;
+                        Image image;
+                        image.timeRange = captureTimeRange;
+                        image.path = "";
+                        image.isPlaceholder = true;
+                        image.activeInstruments.push_back(instrumentID);
+                        image.target = _target;
+                        image.projected = false;
 
-                    _subsetMap[_target]._subset.push_back(image);
+                        _subsetMap[_target]._subset.push_back(image);
+                        
+                        sucessfulRead = true;
+                    }
+                    catch (const ghoul::RuntimeError& e) {
+                        LERROR(e.what());
+                        sucessfulRead = false;
+                        continue;
+                    }
                 }
             }
-            _subsetMap[_target]._range = instrumentActiveTimeRange;
-            _instrumentTimes.push_back({ instrumentID, instrumentActiveTimeRange });
+            if (sucessfulRead)
+            {
+                _subsetMap[_target]._range.include(instrumentActiveTimeRange);
+                _instrumentTimes.push_back({ instrumentID, instrumentActiveTimeRange });
+            }
         }
     }
     

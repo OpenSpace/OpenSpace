@@ -74,7 +74,7 @@ return {
         },
         GuiName = "/Solar/ORX_OCAMS_POLYCAM"
     },
-
+    --[[
     {
         Name = "ORX_REXIS",
         Parent = "OsirisRex",
@@ -108,7 +108,7 @@ return {
             },        },
         
         GuiName = "/Solar/ORX_REXIS"
-    },
+    },]]
 
     {   
         Name = "POLYCAM FOV",
@@ -134,7 +134,7 @@ return {
         },
         GuiName = "/Solar/POLYCAM FOV"
     },
-
+    --[[
     {   
         Name = "REXIS FOV",
         Parent = "ORX_REXIS",
@@ -159,6 +159,7 @@ return {
         },
         GuiName = "/Solar/REXIS FOV"
     },
+    ]]
     --[[
     -- Latest image taken by POLYCAM
     { 

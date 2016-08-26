@@ -27,7 +27,7 @@ return {
             Body = BENNU_BODY,
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/BennuResized.obj",
+                GeometryFile = "models/BennuResizedTextured.obj",
                 Magnification = 0,
             }, 
             Shading = {
@@ -48,9 +48,10 @@ return {
             Projection = {
                 Sequence   = "InstrumentTimes",
                 SequenceType = "instrument-times",
-                Observer   = "SUN",
+                Observer   = "OSIRIS-REX",
                 Target     = BENNU_BODY,
                 Aberration = "NONE",
+                TextureMap = true,
             },
             DataInputTranslation = {
                 Instruments = {
@@ -60,9 +61,9 @@ return {
                         Files = {
                             "BaseballDiamond_PolyCam.txt", 
                             "OrbitalB_Site08_PolyCamImages.txt",
-                            "Recon_225m_Equatorial_PolyCam",
+                            "Recon_225m_Equatorial_PolyCam.txt",
                         },
-                    },
+                    },--[[
                     ORX_REXIS = {
                         DetectorType = "Camera",
                         Spice = {"ORX_REXIS"},
@@ -71,7 +72,7 @@ return {
                             "Recon_225m_Equatorial_spectrometers.txt",
                             "Recon_525m_Equatorial_spectrometers.txt",
                         },
-                    },
+                    },]]
                 },       
                 Target = {
                     Body = BENNU_BODY, -- Do we need this?
@@ -82,7 +83,7 @@ return {
                 Name       = "ORX_OCAMS_POLYCAM",
                 Method     = "ELLIPSOID",
                 Aberration = "NONE",
-                Fovy       = 5.00,
+                Fovy       = 0.792,
                 Aspect     = 1,
                 Near       = 0.01,
                 Far        = 1000000,
