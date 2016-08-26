@@ -4,7 +4,7 @@
 dofile(openspace.absPath('${SCRIPTS}/common.lua'))
 
 --openspace.clearKeys()
-helper.setCommonKeys()
+--helper.setCommonKeys()
 
 -- Set focuses
 openspace.bindKey("o", "openspace.setPropertyValue('Interaction.origin', 'OsirisRex')")
