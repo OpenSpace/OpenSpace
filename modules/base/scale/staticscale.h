@@ -31,13 +31,13 @@ namespace openspace {
     
 class StaticScale: public Scale {
 public:
-    StaticScale(const ghoul::Dictionary& dictionary
-                                = ghoul::Dictionary());
+    StaticScale(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
     virtual ~StaticScale();
     virtual double scaleValue() const;
     virtual void update(const UpdateData& data) override;
 private:
-    double _scaleValue;
+    properties::FloatProperty _scaleValue;
+    //double _scaleValue;
 };
     
 } // namespace openspace

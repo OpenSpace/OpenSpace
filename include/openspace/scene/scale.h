@@ -27,10 +27,11 @@
 
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/properties/propertyowner.h>
 
 namespace openspace {
 
-class Scale {
+class Scale : public properties::PropertyOwner {
 public:
     static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
 
