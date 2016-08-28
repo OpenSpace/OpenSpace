@@ -31,7 +31,6 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <gdal_priv.h>
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/texture.h>

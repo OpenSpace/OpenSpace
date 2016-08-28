@@ -39,6 +39,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include <gdal_priv.h>
 
 
 
