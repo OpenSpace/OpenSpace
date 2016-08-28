@@ -31,15 +31,14 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
 
-
+#include <list>
 
 namespace openspace {
 
 class Camera;
 class SceneGraphNode;
-
+class RenderableGlobe;
 
 namespace interaction {
 

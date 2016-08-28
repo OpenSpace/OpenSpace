@@ -35,6 +35,7 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
 
 namespace {
