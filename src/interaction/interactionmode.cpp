@@ -35,8 +35,10 @@
 
 #include <glm/gtx/quaternion.hpp>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#endif
 
 
 namespace {
@@ -468,6 +470,7 @@ GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
 void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     InteractionMode::setFocusNode(focusNode);
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     Renderable* baseRenderable = _focusNode->renderable();
     if (RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(baseRenderable)) {
         _globe = globe;
@@ -476,13 +479,14 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
         LWARNING("Focus node is not a renderable globe. GlobeBrowsingInteraction is not possible");
         _globe = nullptr;
     }
-
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     // Update synched data
     _mouseStates->postSynchronizationPreDraw();
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     using namespace glm;
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
@@ -631,6 +635,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         camera.setPositionVec3(camPos); 
         camera.setRotation(globalCameraRotation * localCameraRotation);
     }
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
 
 } // namespace interaction
