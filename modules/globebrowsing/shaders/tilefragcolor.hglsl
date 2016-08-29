@@ -167,8 +167,6 @@ vec4 getTileFragColor(){
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
-	// TODO: Jonathas magic goes here here
-	// TODO: This function needs more parameters and should update the fragment color for water
 	color = calculateWater(
 		color,
 		fs_uv,
@@ -176,15 +174,13 @@ vec4 getTileFragColor(){
 		WaterMasks,
 		WaterMasksParent1,
 		WaterMasksParent2,
-		ellipsoidNormalCameraSpace,
-		lightDirectionCameraSpace,
+		normalize(ellipsoidNormalCameraSpace),
+		lightDirectionCameraSpace, // Should already be normalized
 		positionCameraSpace);
 
 #endif // USE_WATERMASK
 
 #if USE_NIGHTTEXTURE
-	// TODO: Jonathas magic goes here here
-	// TODO: This function needs more parameters and should update the fragment color for night texture
 	color = calculateNight(
 		color,
 		fs_uv,
@@ -192,13 +188,12 @@ vec4 getTileFragColor(){
 		NightTextures,
 		NightTexturesParent1,
 		NightTexturesParent2,
-		ellipsoidNormalCameraSpace,
-		lightDirectionCameraSpace);
+		normalize(ellipsoidNormalCameraSpace),
+		lightDirectionCameraSpace); // Should already be normalized
 
 #endif // USE_NIGHTTEXTURE
 
 #if USE_ATMOSPHERE
-	// TODO: Jonathas magic goes here here
 	color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
 #endif // USE_ATMOSPHERE
 
