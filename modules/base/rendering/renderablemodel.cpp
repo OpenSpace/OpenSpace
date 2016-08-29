@@ -211,7 +211,7 @@ void RenderableModel::render(const RenderData& data) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
         debugModelRotation; // debug model rotation controlled from GUI
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
