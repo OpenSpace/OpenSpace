@@ -42,8 +42,6 @@ namespace {
     const std::string keyInstrument = "Instrument.Name";
     const std::string keyInstrumentFovy = "Instrument.Fovy";
     const std::string keyInstrumentAspect = "Instrument.Aspect";
-    const std::string keyInstrumentNear = "Instrument.Near";
-    const std::string keyInstrumentFar = "Instrument.Far";
 
     const std::string keyProjObserver = "Projection.Observer";
     const std::string keyProjTarget = "Projection.Target";
@@ -86,8 +84,10 @@ ProjectionComponent::ProjectionComponent()
 }
 
 bool ProjectionComponent::initialize() {
-    bool a = generateProjectionLayerTexture();
-    bool b = auxiliaryRendertarget();
+    bool success = generateProjectionLayerTexture();
+    success &= generateDepthTexture();
+    success &= auxiliaryRendertarget();
+    success &= depthRendertarget();
 
     using std::unique_ptr;
     using ghoul::opengl::Texture;
@@ -103,7 +103,6 @@ bool ProjectionComponent::initialize() {
     }
     _placeholderTexture = std::move(texture);
     
-
     if (_needsTextureMapDilation) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
@@ -139,7 +138,7 @@ bool ProjectionComponent::initialize() {
         glBindVertexArray(0);
     }
 
-    return a && b;
+    return success;
 }
 
 bool ProjectionComponent::deinitialize() {
@@ -170,8 +169,7 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
     completeSuccess &= dictionary.getValue(keyProjTarget, _projecteeID);
     completeSuccess &= dictionary.getValue(keyInstrumentFovy, _fovy);
     completeSuccess &= dictionary.getValue(keyInstrumentAspect, _aspectRatio);
-    completeSuccess &= dictionary.getValue(keyInstrumentNear, _nearPlane);
-    completeSuccess &= dictionary.getValue(keyInstrumentFar, _farPlane);
+
     ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
 
     std::string a = "NONE";
@@ -298,6 +296,34 @@ void ProjectionComponent::imageProjectBegin() {
     }
 }
 
+ghoul::opengl::Texture& ProjectionComponent::depthTexture() {
+    return *_depthTexture;
+}
+
+void ProjectionComponent::depthMapRenderBegin() {
+    // keep handle to the current bound FBO
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
+    glGetIntegerv(GL_VIEWPORT, _viewport);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthFboID);
+    glEnable(GL_DEPTH_TEST);
+
+    glViewport(
+        0, 0,
+        static_cast<GLsizei>(_depthTexture->width()),
+        static_cast<GLsizei>(_depthTexture->height())
+        );
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void ProjectionComponent::depthMapRenderEnd() {
+    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
+    glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+}
+
+
+
 void ProjectionComponent::imageProjectEnd() {
     if (_needsTextureMapDilation) {
         glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
@@ -333,6 +359,29 @@ void ProjectionComponent::update() {
             _dilation.program->rebuildFromFile();
         }
     }
+}
+
+bool ProjectionComponent::depthRendertarget() {
+    GLint defaultFBO;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
+    // setup FBO
+    glGenFramebuffers(1, &_depthFboID);
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthFboID);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        *_depthTexture,
+        0);
+
+    glDrawBuffer(GL_NONE);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+        return false;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    return true;
 }
 
 bool ProjectionComponent::auxiliaryRendertarget() {
@@ -408,32 +457,24 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3 loc, glm::
                                                       float nearPlane, float farPlane,
                                                       glm::vec3& boreSight)
 {
+
     //rotate boresight into correct alignment
     boreSight = instrumentMatrix*aim;
     glm::vec3 uptmp(instrumentMatrix*glm::dvec3(up));
 
     // create view matrix
-    glm::vec3 e3 = glm::normalize(boreSight);
+    glm::vec3 e3 = glm::normalize(-boreSight);
     glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
-    glm::mat4 projViewMatrix = glm::mat4(
-        e1.x, e2.x, e3.x, 0.f,
-        e1.y, e2.y, e3.y, 0.f,
-        e1.z, e2.z, e3.z, 0.f,
-        -glm::dot(e1, loc), -glm::dot(e2, loc), -glm::dot(e3, loc), 1.f
-    );
+
+    glm::mat4 projViewMatrix = glm::mat4(e1.x, e2.x, e3.x, 0.f,
+                                         e1.y, e2.y, e3.y, 0.f,
+                                         e1.z, e2.z, e3.z, 0.f,
+                                         glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f);
     // create perspective projection matrix
-    glm::mat4 projProjectionMatrix = glm::perspective(
-        glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
-    );
-    // bias matrix
-    glm::mat4 projNormalizationMatrix = glm::mat4(
-        0.5f, 0.f, 0.f, 0.f,
-        0.f, 0.5f, 0.f, 0.f,
-        0.f, 0.f, 0.5f, 0.f,
-        0.5f, 0.5f, 0.5f, 1.f
-    );
-    return projNormalizationMatrix * projProjectionMatrix * projViewMatrix;
+    glm::mat4 projProjectionMatrix = glm::perspective(glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane);
+
+    return projProjectionMatrix*projViewMatrix;
 }
 
 bool ProjectionComponent::doesPerformProjection() const {
@@ -479,14 +520,6 @@ float ProjectionComponent::fieldOfViewY() const {
 
 float ProjectionComponent::aspectRatio() const {
     return _aspectRatio;
-}
-
-float ProjectionComponent::nearPlane() const {
-    return _nearPlane;
-}
-
-float ProjectionComponent::farPlane() const {
-    return _farPlane;
 }
 
 void ProjectionComponent::clearAllProjections() {
@@ -583,6 +616,26 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
 
 
     return _projectionTexture != nullptr;
+
+}
+
+bool ProjectionComponent::generateDepthTexture() {
+    int maxSize = OpenGLCap.max2DTextureSize() / 2;
+
+    LINFO(
+        "Creating depth texture of size '" << maxSize / 2 << ", " << maxSize / 2 << "'"
+        );
+
+    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(maxSize / 2, maxSize / 2, 1),
+        ghoul::opengl::Texture::Format::DepthComponent,
+        GL_DEPTH_COMPONENT32F
+        );
+
+    if (_depthTexture)
+        _depthTexture->uploadTexture();
+
+    return _depthTexture != nullptr;
 
 }
 

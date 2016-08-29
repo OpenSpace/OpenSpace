@@ -54,13 +54,19 @@ public:
     bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
     bool initializeParser(const ghoul::Dictionary& dictionary);
 
+    ghoul::opengl::Texture& ProjectionComponent::depthTexture();
     void imageProjectBegin();
     void imageProjectEnd();
+    void depthMapRenderBegin();
+    void depthMapRenderEnd();
+
 
     void update();
 
     bool generateProjectionLayerTexture();
+    bool generateDepthTexture();
     bool auxiliaryRendertarget();
+    bool depthRendertarget();
 
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
         const std::string& texturePath,
@@ -92,8 +98,6 @@ public:
 
     float fieldOfViewY() const;
     float aspectRatio() const;
-    float nearPlane() const;
-    float farPlane() const;
 
 protected:
     properties::BoolProperty _performProjection;
@@ -101,7 +105,7 @@ protected:
     properties::FloatProperty _projectionFading;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
-
+    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
 
     std::string _instrumentID;
@@ -111,10 +115,9 @@ protected:
     std::vector<std::string> _potentialTargets;
     float _fovy;
     float _aspectRatio;
-    float _nearPlane;
-    float _farPlane;
 
     GLuint _fboID;
+    GLuint _depthFboID;
 
     GLint _defaultFBO;
     GLint _viewport[4];

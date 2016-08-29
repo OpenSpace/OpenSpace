@@ -343,6 +343,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         data.camera,
         thisPositionPSC,
         data.doPerformanceMeasurement,
+        data.renderBinMask,
         _worldPositionCached,
         _worldRotationCached,
         _worldScaleCached};
@@ -378,7 +379,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
 void SceneGraphNode::postRender(const RenderData& data) {
     const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, _worldPositionCached};
+    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, data.renderBinMask, _worldPositionCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
