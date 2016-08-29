@@ -10,6 +10,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime("2014-08-15T03:05:18.101")
+    -- openspace.time.setTime("2016-08-20T03:05:18.101")
     -- openspace.time.setTime("2014-11-17T03:05:18.101")
     -- openspace.time.setTime("2015-07-29T06:02:10.000")
     -- openspace.time.setTime("2014 AUG 21 18:00:00")
@@ -50,7 +51,7 @@ return {
         "venus",
         "earth",
         "mars",
-        "jupiter",
+        "jupiter/jupiter",
         "saturn",
         "uranus",
         "neptune",
