@@ -31,6 +31,8 @@
 #include <ghoul/filesystem/file.h>
 
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+
 #include "gdal_priv.h"
 
 
@@ -74,10 +76,7 @@ namespace openspace {
 
     };
 
-    struct TileDepthTransform {
-        float depthScale;
-        float depthOffset;
-    };
+
 
 
 } // namespace openspace

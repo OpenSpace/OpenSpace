@@ -26,6 +26,7 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>

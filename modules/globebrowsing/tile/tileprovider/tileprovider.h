@@ -35,10 +35,10 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/font/fontrenderer.h>
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
 
 #include <modules/globebrowsing/other/lrucache.h>
 
@@ -50,10 +50,11 @@
 
 namespace openspace {
     
+class TilePreprocessData;
 
+    // TODO: Remove using directive in header file ---abock
     using namespace ghoul::opengl;
 
-    
 
     struct Tile {
         std::shared_ptr<Texture> texture;

@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 #include <modules/globebrowsing/tile/tileproviderfactory.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
 #include <ghoul/logging/logmanager.h>
 

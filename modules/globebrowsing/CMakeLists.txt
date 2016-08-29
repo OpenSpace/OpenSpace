@@ -58,6 +58,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
