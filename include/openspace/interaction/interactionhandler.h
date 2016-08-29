@@ -36,7 +36,6 @@
 
 
 #include <list>
-#include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <mutex>
 

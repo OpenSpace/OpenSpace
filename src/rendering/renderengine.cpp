@@ -81,6 +81,7 @@
 #include <array>
 #include <fstream>
 #include <sgct.h>
+#include <stack>
 
 // These are temporary ---abock
 #include <modules/base/ephemeris/spiceephemeris.h>

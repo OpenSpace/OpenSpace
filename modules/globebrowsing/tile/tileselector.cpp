@@ -24,11 +24,14 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include <sstream>
 #include <algorithm>
 
+#include "gdal_priv.h"
 
 
 

@@ -25,7 +25,6 @@
 #ifndef __TILE_PROVIDER_H__
 #define __TILE_PROVIDER_H__
 
-#include <gdal_priv.h>
 
 #include <openspace/engine/downloadmanager.h>
 #include <set>
@@ -36,10 +35,10 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/font/fontrenderer.h>
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
 
 #include <modules/globebrowsing/other/lrucache.h>
 
@@ -51,10 +50,11 @@
 
 namespace openspace {
     
+class TilePreprocessData;
 
+    // TODO: Remove using directive in header file ---abock
     using namespace ghoul::opengl;
 
-    
 
     struct Tile {
         std::shared_ptr<Texture> texture;

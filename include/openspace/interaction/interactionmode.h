@@ -31,15 +31,14 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
-#include <modules/globebrowsing/globes/renderableglobe.h>
 
-
+#include <list>
 
 namespace openspace {
 
 class Camera;
 class SceneGraphNode;
-
+class RenderableGlobe;
 
 namespace interaction {
 
@@ -117,11 +116,11 @@ protected:
         void set(T value, double dt) {
             _targetValue = value;
             _currentValue = _currentValue + (_targetValue - _currentValue) *
-                min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+                std::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
         }
         void decelerate(double dt) {
             _currentValue = _currentValue + (- _currentValue) *
-                min(_scaleFactor * _friction * dt, 1.0); // less or equal to 1.0 keeps it stable
+                std::min(_scaleFactor * _friction * dt, 1.0); // less or equal to 1.0 keeps it stable
         }
         void setHard(T value) {
             _targetValue = value;

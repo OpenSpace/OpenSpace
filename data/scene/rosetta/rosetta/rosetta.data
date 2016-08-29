@@ -1,7 +1,7 @@
 return {
     FileRequest = {
-        { Identifier = "rosetta_model", Destination = "obj", Version = 2 },
-        { Identifier = "rosetta_textures", Destination = "textures", Version = 1 }
+        { Identifier = "rosetta_model", Destination = "rosetta", Version = 3 },
+        { Identifier = "rosetta_textures", Destination = "textures", Version = 2 }
     },
     TorrentFiles = {
         { File = "RosettaKernels.torrent", Destination = "${SPICE}" },

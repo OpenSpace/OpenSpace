@@ -31,13 +31,11 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <gdal_priv.h>
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/threadpool.h>
 
-#include <modules/globebrowsing/tile/tileioresult.h>
 #include <modules/globebrowsing/tile/tiledatatype.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
