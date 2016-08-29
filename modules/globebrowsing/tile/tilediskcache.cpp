@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
+#include <modules/globebrowsing/tile/tileioresult.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include <sstream>
