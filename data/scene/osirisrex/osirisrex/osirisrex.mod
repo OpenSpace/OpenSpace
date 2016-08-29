@@ -198,35 +198,10 @@ return {
         },
     },
     ]]
+
+    -- Trail relative to Earth
     {   
-        Name = "OsirisRexTrailLocal",
-        Parent = "BennuBarycenter",
-        Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            Observer = BENNU_BODY,
-            -- Optional rendering properties
-            LineColor = { 0.9, 0.2, 0.9 },
-            PointColor = { 0.9, 0.2, 0.9 },
-            LineFade = 0.5, -- [0,1]
-            RenderPart = 0.06,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2016 SEP 8 23:05:00.50",
-                End = "2023 SEP 24 12:00:00",
-            },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 3, 
-        },
-        GuiName = "OsirisRexTrailLocal"
-    },
-    {   
-        Name = "OsirisRexTrailGlobal",
+        Name = "OsirisRexTrailEarth",
         Parent = "LodEarth",
         Renderable = {
             Type = "RenderableTrailNew",
@@ -250,10 +225,12 @@ return {
             SampleDeltaTime = 60, -- Seconds between each point
             SubSamples = 59, 
         },
-        GuiName = "OsirisRexTrailGlobal"
+        GuiName = "OsirisRexTrailEarth"
     },
+
+    -- Trail relative to solar system barycenter
     {   
-        Name = "OsirisRexTrailSolar",
+        Name = "OsirisRexTrailSolarSystem",
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrailNew",
@@ -277,6 +254,37 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 0, 
         },
-        GuiName = "OsirisRexTrailSolar"
+        GuiName = "OsirisRexTrailSolarSystem"
     },
+
+    -- Trail relative to Bennu
+    {   
+        Name = "OsirisRexTrailBennu",
+        Parent = "BennuBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "OSIRIS-REX",
+            Frame = "GALACTIC",
+            Observer = BENNU_BODY,
+            -- Optional rendering properties
+            LineColor = { 0.9, 0.2, 0.9 },
+            PointColor = { 0.9, 0.2, 0.9 },
+            LineFade = 0.5, -- [0,1]
+            RenderPart = 0.06,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2016 SEP 8 23:05:00.50",
+                End = "2023 SEP 24 12:00:00",
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 3, 
+        },
+        GuiName = "OsirisRexTrailBennu"
+    },
+
+
 }
