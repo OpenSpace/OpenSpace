@@ -150,6 +150,9 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     //parentNode->addNode(result);
 
+    result->_scale->setName("Transform");
+    result->addPropertySubOwner(result->_scale);
+
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
     return result;

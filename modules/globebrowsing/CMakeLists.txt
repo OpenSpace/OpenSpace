@@ -58,6 +58,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
@@ -148,6 +149,7 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
+
 if (WIN32)
     target_include_directories(
         openspace-module-globebrowsing
@@ -159,6 +161,9 @@ if (WIN32)
         openspace-module-globebrowsing
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
     )
+
+    set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+
 else (WIN32)
     find_package(GDAL REQUIRED)
 

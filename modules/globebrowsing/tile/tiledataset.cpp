@@ -31,6 +31,7 @@
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileioresult.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
 
@@ -39,6 +40,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include <gdal_priv.h>
 
 
 

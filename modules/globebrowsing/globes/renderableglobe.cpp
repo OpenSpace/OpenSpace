@@ -27,6 +27,9 @@
 #include <ghoul/misc/threadpool.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 
+#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
+
 // open space includes
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -35,6 +38,7 @@
 
 // ghoul includes
 #include <ghoul/misc/assert.h>
+
 
 namespace {
     const std::string _loggerCat = "RenderableGlobe";

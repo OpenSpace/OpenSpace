@@ -174,8 +174,9 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
-    -- Rotate Osiris Rex model to match the specification in the spice data
-    openspace.setPropertyValue("OsirisRex.renderable.modelrotation", {90.0, 0.0, 0.0})
+    -- Activate night textures and water masks
+    openspace.setPropertyValue("LodEarth.RenderableGlobe.WaterMasks", {0, 1});
+    openspace.setPropertyValue("LodEarth.RenderableGlobe.NightTextures", {0, 1});
 
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")

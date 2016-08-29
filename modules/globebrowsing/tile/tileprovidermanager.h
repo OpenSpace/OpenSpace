@@ -26,7 +26,6 @@
 #define __TILE_PROVIDER_MANAGER_H__
 
 
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 

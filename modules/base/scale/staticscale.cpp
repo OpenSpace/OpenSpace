@@ -25,24 +25,28 @@
 #include <modules/base/scale/staticscale.h>
 
 namespace {
+    const std::string _loggerCat = "StaticScale";
     const std::string KeyValue = "Scale";
 }
 
 namespace openspace {
 
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
-    : _scaleValue(1.0)
+    : _scaleValue("scale", "Scale", 1.0, 1.0, 1000.0)
 {
     const bool hasValue = dictionary.hasKeyAndValue<glm::vec3>(KeyValue);
     if (hasValue) {
-        dictionary.getValue(KeyValue, _scaleValue);
+        float value;
+        dictionary.getValue(KeyValue, value);
+        _scaleValue.setValue(value);
     }
+    Scale::addProperty(_scaleValue);
 }
 
 StaticScale::~StaticScale() {}
 
 double StaticScale::scaleValue() const {
-    return _scaleValue;
+    return _scaleValue.value();
 }
 
 void StaticScale::update(const UpdateData&) {}

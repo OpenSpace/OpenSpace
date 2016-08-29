@@ -64,7 +64,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
-    , _magnification("magnification", "Magnification", 0.f, 0.f, 10.f)
+    , _magnification("magnification", "Magnification", 1.f, 0.f, 10.f)
     , _mode(GL_TRIANGLES)
 {
     setName("ModelGeometry");

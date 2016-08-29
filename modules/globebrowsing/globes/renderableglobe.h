@@ -38,14 +38,13 @@
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <ghoul/misc/threadpool.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
+
+#include <unordered_map>
 
 namespace ghoul {
 namespace opengl {
@@ -55,6 +54,9 @@ namespace opengl {
 
 
 namespace openspace {
+
+class ChunkedLodGlobe;
+class TileProviderManager;
 
 struct ReferencedBoolSelection : public properties::SelectionProperty {
     ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)

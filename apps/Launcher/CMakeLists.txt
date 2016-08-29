@@ -44,8 +44,9 @@ set(HEADER_FILES
     ${application_path}/syncwidget.h
 ) 
 
-find_package(Qt5Widgets)
-find_package(Qt5Network)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Network REQUIRED)
 
 set(MOC_FILES "")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})

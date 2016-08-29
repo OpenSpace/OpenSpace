@@ -37,6 +37,8 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <openspace/util/time.h>
+
 // ghoul includes
 #include <ghoul/misc/assert.h>
 

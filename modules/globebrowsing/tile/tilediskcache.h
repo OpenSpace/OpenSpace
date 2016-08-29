@@ -34,6 +34,8 @@
 
 namespace openspace {
 
+struct TileIOResult;
+
     using namespace ghoul::filesystem;
 
     class TileDiskCache {
