@@ -78,7 +78,8 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Europa-Text.png"
+            Texture = "textures/Europa-Text.png",
+            BlendMode = "Additive"
         },
         --[[
         Ephemeris = {

@@ -60,6 +60,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     , _textureIsDirty(false)
     , _texture(nullptr)
+    , _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
@@ -67,7 +68,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Size", size);
     _size = size;
 
-    if (dictionary.hasKey("Name")){
+    if (dictionary.hasKey("Name")) {
         dictionary.getValue("Name", _nodeName);
     }
 
@@ -102,6 +103,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     }
 
+    std::string blendMode;
+    if (dictionary.getValue("BlendMode", blendMode)) {
+        if (blendMode == "Additive") {
+            _blendMode = BlendMode::Additive;
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
+    }
 
     std::string texturePath = "";
     bool success = dictionary.getValue("Texture", texturePath);
@@ -228,8 +236,29 @@ void RenderablePlane::render(const RenderData& data) {
     _texture->bind();
     _shader->setUniform("texture1", unit);
 
+    bool usingFramebufferRenderer =
+        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+
+    bool usingABufferRenderer =
+        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+
+    if (usingABufferRenderer) {
+        _shader->setUniform("additiveBlending", _blendMode == BlendMode::Additive);
+    }
+
+    bool additiveBlending = _blendMode == BlendMode::Additive && usingFramebufferRenderer;
+    if (additiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    if (additiveBlending) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(true);
+    }
 
     _shader->deactivate();
 }

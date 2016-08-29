@@ -32,10 +32,11 @@ in float fade;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 c = vec4(color, fade*forceFade);
-
+    vec4 c = vec4(color * fade * forceFade, 1.0);
     Fragment frag;
     frag.color = c;
     frag.depth = vs_positionScreenSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
+
     return frag;
 }

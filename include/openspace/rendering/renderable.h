@@ -51,6 +51,13 @@ class PowerScaledCoordinate;
 
 class Renderable : public properties::PropertyOwner {
 public:
+    enum class RenderBin : int {
+        Background = 1,
+        Opaque = 2,
+        Transparent = 4,
+        Overlay = 8
+    };
+
     static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
@@ -72,6 +79,10 @@ public:
     virtual void postRender(const RenderData& data);
     virtual void update(const UpdateData& data);
 
+    RenderBin renderBin() const;
+    void setRenderBin(RenderBin bin);
+    bool matchesRenderBinMask(int binMask);
+
     bool isVisible() const;
     
     bool hasTimeInterval();
@@ -85,6 +96,7 @@ protected:
     properties::BoolProperty _enabled;
     
 private:
+    RenderBin _renderBin;
     PowerScaledScalar boundingSphere_;
     std::string _startTime;
     std::string _endTime;

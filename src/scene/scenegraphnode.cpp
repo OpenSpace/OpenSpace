@@ -348,7 +348,14 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _worldScaleCached};
 
     _performanceRecord.renderTime = 0;
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
+
+    bool visible = _renderableVisible &&
+        _renderable->isVisible() &&
+        _renderable->isReady() &&
+        _renderable->isEnabled() &&
+        _renderable->matchesRenderBinMask(data.renderBinMask);
+
+    if (visible) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();

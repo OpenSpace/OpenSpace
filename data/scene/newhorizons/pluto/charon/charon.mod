@@ -93,7 +93,8 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Charon-Text.png"
+            Texture = "textures/Charon-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {
