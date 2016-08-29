@@ -41,6 +41,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/ephemeris.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
@@ -48,6 +49,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
+
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
@@ -64,6 +66,7 @@
 #include <ghoul/misc/onscopeexit.h>
 
 #include <fstream>
+#include <queue>
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
 #include <modules/onscreengui/include/gui.h>
@@ -123,6 +126,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new scripting::ScriptEngine)
+    , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
@@ -386,6 +390,7 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(gui::GUI::luaLibrary());
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
     _scriptEngine->addLibrary(ModuleEngine::luaLibrary());
+    _scriptEngine->addLibrary(ScriptScheduler::luaLibrary());
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _scriptEngine->addLibrary(IswaManager::luaLibrary());
@@ -748,6 +753,12 @@ void OpenSpaceEngine::preSynchronization() {
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
 
+        auto scheduledScripts = _scriptScheduler->scheduledScripts(Time::ref().currentTime());
+        while(scheduledScripts.size()){
+            _scriptEngine->queueScript(scheduledScripts.front());
+            scheduledScripts.pop();
+        }
+
         _scriptEngine->preSynchronization();
         
         _renderEngine->preSynchronization();
@@ -771,7 +782,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     Time::ref().postSynchronizationPreDraw();
-    
+
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
@@ -782,6 +793,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _interactionHandler->postSynchronizationPreDraw();
 
     // Update the synched variables in the camera class
+
     _renderEngine->camera()->preSynchronization();
     _renderEngine->camera()->postSynchronizationPreDraw();
 
@@ -1017,6 +1029,11 @@ RenderEngine& OpenSpaceEngine::renderEngine() {
 ScriptEngine& OpenSpaceEngine::scriptEngine() {
     ghoul_assert(_scriptEngine, "ScriptEngine must not be nullptr");
     return *_scriptEngine;
+}
+
+ScriptScheduler& OpenSpaceEngine::scriptScheduler(){
+    ghoul_assert(_scriptScheduler, "ScriptScheduler must not be nullptr");
+    return *_scriptScheduler;
 }
 
 LuaConsole& OpenSpaceEngine::console() {
