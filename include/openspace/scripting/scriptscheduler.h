@@ -58,7 +58,7 @@ struct ScheduledScript {
 class ScriptScheduler {
 public:
 
-    void loadScripts(const std::string& filename);
+    void loadScripts(const std::string& filename, lua_State* L = nullptr);
     void loadScripts(const ghoul::Dictionary& dict);
 
     void skipTo(double time);

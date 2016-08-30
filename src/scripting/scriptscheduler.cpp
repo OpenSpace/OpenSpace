@@ -63,10 +63,10 @@ ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict)
     }
 }
 
-void ScriptScheduler::loadScripts(const std::string& filepath) {
+void ScriptScheduler::loadScripts(const std::string& filepath, lua_State* L) {
     ghoul::Dictionary timedScriptsDict;
     try {
-        ghoul::lua::loadDictionaryFromFile(absPath(filepath), timedScriptsDict);
+        ghoul::lua::loadDictionaryFromFile(absPath(filepath), timedScriptsDict, L);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.what());
@@ -145,7 +145,7 @@ namespace luascriptfunctions {
             return luaL_error(L, "filepath string is empty");
         }
         
-        OsEng.scriptScheduler().loadScripts(missionFileName);
+        OsEng.scriptScheduler().loadScripts(missionFileName, L);
     }
 
     int skipTo(lua_State* L) {
