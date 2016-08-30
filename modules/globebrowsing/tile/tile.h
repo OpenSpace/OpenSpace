@@ -22,18 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#ifndef __TILE_H__
+#define __TILE_H__
 
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h> // Texture
 
-
-
-
-namespace {
-    const std::string _loggerCat = "TileProvider";
-}
+#include <modules/globebrowsing/tile/asynctilereader.h> // TilePreprocessData
 
 
 namespace openspace {
+    
+    using namespace ghoul::opengl;    
+
+    struct Tile {
+        std::shared_ptr<Texture> texture;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+
+        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
+    
+        
+        /**
+         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
+         * color in rgba. Color values ranges between 0-255.
+         */
+        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
+
+        static const Tile TileUnavailable;
+
+    };
 
 }  // namespace openspace
+
+
+
+
+#endif  // __TILE_H__

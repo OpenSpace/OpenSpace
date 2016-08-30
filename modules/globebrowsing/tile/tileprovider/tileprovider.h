@@ -25,27 +25,17 @@
 #ifndef __TILE_PROVIDER_H__
 #define __TILE_PROVIDER_H__
 
-#include <gdal_priv.h>
-
-#include <openspace/engine/downloadmanager.h>
-#include <set>
-
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/font/fontrenderer.h>
 
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
-#include <modules/globebrowsing/tile/asynctilereader.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 #include <modules/globebrowsing/other/lrucache.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
+//                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -56,22 +46,7 @@ namespace openspace {
 
     
 
-    struct Tile {
-        std::shared_ptr<Texture> texture;
-        std::shared_ptr<TilePreprocessData> preprocessData;
 
-        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
-    
-        
-        /**
-         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
-         * color in rgba. Color values ranges between 0-255.
-         */
-        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
-
-        static const Tile TileUnavailable;
-
-    };
 
     class TileProvider {
     public:
