@@ -82,6 +82,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
@@ -169,6 +170,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h

@@ -158,11 +158,17 @@ function preInitialization()
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
 
-    -- openspace.time.setTime("2018-12-20T22:47:00.00")
-    --openspace.time.setTime("2019-05-25T03:57:55.00")
-    openspace.time.setTime("2016 SEP 8 23:05:00.50")
-    --openspace.time.setTime("2019 APR 16 12:03:00.00")
+    --local startTime = "2019 APR 16 12:03:00.00"
+    local startTime = "2016 SEP 8 23:05:00.50"
+    
+    openspace.time.setTime(startTime)
     openspace.time.setDeltaTime(0)
+
+    openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
+
+    -- Removing the line below will cause all scripts prior to <startTime> to be executed during initialization
+    openspace.scriptScheduler.skipTo(startTime);
+
 end
 
 function postInitialization()
@@ -188,6 +194,8 @@ function postInitialization()
 
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
+
+    
 
     openspace.resetCameraDirection()
 end
