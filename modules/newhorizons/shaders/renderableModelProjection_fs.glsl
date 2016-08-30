@@ -58,8 +58,8 @@ void main() {
 
     if ((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
         color = texture(projectionTexture, projected.xy);
-        color.a = 1.0;
-        stencil = vec4(1.0);
+        //color.a = 1.0;
+        stencil =  vec4(1.0);
     }
     else {
       color = vec4(0.0);//vec4(vec3(0.0), 1.0);
