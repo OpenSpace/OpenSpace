@@ -74,7 +74,6 @@ return {
         },
         GuiName = "/Solar/ORX_OCAMS_POLYCAM"
     },
-    --[[
     {
         Name = "ORX_REXIS",
         Parent = "OsirisRex",
@@ -108,8 +107,7 @@ return {
             },        },
         
         GuiName = "/Solar/ORX_REXIS"
-    },]]
-
+    },
     {   
         Name = "POLYCAM FOV",
         Parent = "ORX_OCAMS_POLYCAM",
@@ -134,7 +132,6 @@ return {
         },
         GuiName = "/Solar/POLYCAM FOV"
     },
-    --[[
     {   
         Name = "REXIS FOV",
         Parent = "ORX_REXIS",
@@ -159,12 +156,11 @@ return {
         },
         GuiName = "/Solar/REXIS FOV"
     },
-    ]]
     --[[
     -- Latest image taken by POLYCAM
     { 
         Name = "ImagePlaneOsirisRex",
-        Parent = "OsirisRex",
+        Parent = "Bennu2",
         Renderable = {
             Type = "RenderablePlaneProjection",
             Frame = "IAU_BENNU",
@@ -182,7 +178,7 @@ return {
     -- POLYCAM FoV square
     {
         Name = "FovImagePlane",
-        Parent = "OsirisRex",
+        Parent = "Bennu2",
         Renderable = {
             Type = "RenderablePlaneProjection",
             Frame = "IAU_BENNU",
@@ -190,7 +186,7 @@ return {
             Spacecraft = "OSIRIS-REX",
             Instrument = "ORX_OCAMS_POLYCAM",
             Moving = true,
-            Texture = "textures/squarefov.png",
+            Texture = "textures/defaultProj.png",
         },
         Ephemeris = {
             Type = "Static",
