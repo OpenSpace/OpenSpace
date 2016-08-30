@@ -167,7 +167,7 @@ function preInitialization()
     openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
 
     -- Removing the line below will cause all scripts prior to <startTime> to be executed during initialization
-    openspace.scriptScheduler.skipTo(startTime);
+    -- openspace.scriptScheduler.skipTo(startTime);
 
 end
 
