@@ -37,7 +37,7 @@ return {
             },
             Textures = {
                 Type = "simple",
-                Color =  "textures/white.png",
+                Color =  "textures/gray.png",
                 Project = "textures/defaultProj.png",
                 Default = "textures/defaultProj.png"
             },
