@@ -100,6 +100,10 @@ void ScriptScheduler::skipTo(const std::string& timeStr) {
     skipTo(SpiceManager::ref().ephemerisTimeFromDate(timeStr));
 }
 
+void ScriptScheduler::clearSchedule() {
+    _scheduledScripts.clear();
+    _currentIndex = 0;
+}
 
 std::queue<std::string> ScriptScheduler::scheduledScripts(double newTime) {
     std::queue<std::string> triggeredScripts;
@@ -157,6 +161,15 @@ namespace luascriptfunctions {
 
         OsEng.scriptScheduler().skipTo(dateStr);
     }
+
+    int clear(lua_State* L) {
+        using ghoul::lua::luaTypeToString;
+        int nArguments = lua_gettop(L);
+        if (nArguments != 0)
+            return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+        OsEng.scriptScheduler().clearSchedule();
+    }
 } // namespace luascriptfunction
 
 
@@ -176,6 +189,12 @@ LuaLibrary ScriptScheduler::luaLibrary() {
                 &luascriptfunctions::skipTo,
                 "string",
                 "skip to a time without executing scripts"
+            },
+            {
+                "clear",
+                &luascriptfunctions::clear,
+                "",
+                "clears all scheduled scripts"
             },
         }
     };

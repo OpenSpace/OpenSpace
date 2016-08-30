@@ -64,6 +64,8 @@ public:
     void skipTo(double time);
     void skipTo(const std::string& timeStr);
 
+    void clearSchedule();
+
     std::queue<std::string> scheduledScripts(double newTime);
     std::queue<std::string> scheduledScripts(const std::string& timeStr);
 
