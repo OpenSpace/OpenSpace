@@ -1,4 +1,7 @@
 RosettaKernels = {
+    "${OPENSPACE_DATA}/spice/Rosetta/SCLK/ROS_160718_STEP.TSC",
+    "${OPENSPACE_DATA}/spice/Rosetta/SCLK/ros_triv.tsc",
+
     "${OPENSPACE_DATA}/spice/Rosetta/SPK/CORB_DV_243_01___T19_00325.BSP",
     "${OPENSPACE_DATA}/spice/Rosetta/SPK/CORB_DV_223_01___T19_00302.BSP",
     "${OPENSPACE_DATA}/spice/Rosetta/SPK/CORB_DV_145_01___T19_00216.BSP",
@@ -17,9 +20,6 @@ RosettaKernels = {
 
     "${OPENSPACE_DATA}/spice/Rosetta/IK/ROS_NAVCAM_V01.TI",
     
-    "${OPENSPACE_DATA}/spice/Rosetta/SCLK/ROS_160718_STEP.TSC",
-    "${OPENSPACE_DATA}/spice/Rosetta/SCLK/ros_triv.tsc",
-
     "${OPENSPACE_DATA}/spice/Rosetta/FK/ROS_CHURYUMOV_V01.TF",
     "${OPENSPACE_DATA}/spice/Rosetta/FK/ROS_V26.TF",
 
@@ -137,13 +137,13 @@ return {
             Rotation = { ModelTransform = RotationMatrix }
 
         },
-        Transform = {
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "-226071", -- ROS_HGA
-                DestinationFrame = "ROS_SPACECRAFT",
-            }
-        }
+        -- Transform = {
+        --     Rotation = {
+        --         Type = "SpiceRotation",
+        --         SourceFrame = "-226071", -- ROS_HGA
+        --         DestinationFrame = "ROS_SPACECRAFT",
+        --     }
+        -- }
     },
     {
         Name = "Rosetta_parts",
@@ -216,13 +216,13 @@ return {
             Rotation = { ModelTransform = RotationMatrix }
 
         },
-        Transform = {
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "-226015", -- ROS_SA
-                DestinationFrame = "ROS_SPACECRAFT",
-            }
-        }
+        -- Transform = {
+        --     Rotation = {
+        --         Type = "SpiceRotation",
+        --         SourceFrame = "-226015", -- ROS_SA
+        --         DestinationFrame = "ROS_SPACECRAFT",
+        --     }
+        -- }
     },
     {
         Name = "Rosetta_wing_b",
@@ -241,13 +241,13 @@ return {
             Rotation = { ModelTransform = RotationMatrix }
 
         },
-        Transform = {
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "-226025", -- ROS_SA
-                DestinationFrame = "ROS_SPACECRAFT",
-            }
-        }
+        -- Transform = {
+        --     Rotation = {
+        --         Type = "SpiceRotation",
+        --         SourceFrame = "-226025", -- ROS_SA
+        --         DestinationFrame = "ROS_SPACECRAFT",
+        --     }
+        -- }
     },
     {
         Name = "Rosetta_yellow_foil",
@@ -269,9 +269,18 @@ return {
     },
     {
         Name = "Philae",
-        Parent = "RosettaModel"
+        Parent = "RosettaModel",
         -- This should need a transform, but currently the model is intrinsically
         -- translated
+        -- Transform = {
+        --     Translation = {
+        --         Type = "SpiceEphemeris",
+        --         Body = "PHILAE",
+        --         Reference = "GALACTIC",
+        --         Observer = "ROSETTA",
+        --         Kernels = RosettaKernels
+        --     }
+        -- }
     },
     {
         Name = "Philae_foil",
@@ -368,20 +377,40 @@ return {
                 End = "2016 SEP 30 12:00:00"
             },
             SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 0,
+            SubSamples = 3,
         },
         GuiName = "/Solar/RosettaCometTrail"
     },
     {
+        Name = "PhilaeTrail",
+        Parent = "67PBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "PHILAE",
+            Frame = "GALACTIC",
+            Observer = "CHURYUMOV-GERASIMENKO",
+            -- Optional rendering properties
+            LineColor = { 1.0, 1.0, 1.0 },
+            PointColor = { 0.9, 0.2, 0.9 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 0.5, -- [0,1]
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2014 NOV 12 08:35:00",
+                End = "2014 NOV 12 17:00:00"
+            },
+            SampleDeltaTime = 2, -- Seconds between each point
+            SubSamples = 0,
+        },
+        GuiName = "/Solar/RosettaCometTrail"
+    },    
+    {
         Name = "NAVCAM",
         Parent = "Rosetta",
-        Transform = {
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "NAVCAM",
-                DestinationFrame = "ROS_SPACECRAFT",
-            },
-        },
         GuiName = "/Solar/Rosetta_navcam"
     },
     {   
