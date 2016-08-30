@@ -755,7 +755,9 @@ void OpenSpaceEngine::preSynchronization() {
 
         auto scheduledScripts = _scriptScheduler->scheduledScripts(Time::ref().currentTime());
         while(scheduledScripts.size()){
-            _scriptEngine->queueScript(scheduledScripts.front());
+            auto scheduledScript = scheduledScripts.front();
+            LINFO(scheduledScript);
+            _scriptEngine->queueScript(scheduledScript);
             scheduledScripts.pop();
         }
 
