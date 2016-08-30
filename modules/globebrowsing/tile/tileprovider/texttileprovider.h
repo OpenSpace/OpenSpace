@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_TILE_PROVIDER_H__
-#define __CHUNK_INDEX_TILE_PROVIDER_H__
+#ifndef __TEXT_TILE_PROVIDER_H__
+#define __TEXT_TILE_PROVIDER_H__
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
@@ -45,12 +45,21 @@
 
 
 namespace openspace {
-    
-    
-    class ChunkIndexTileProvider : public TileProvider {
+    using namespace ghoul::fontrendering;
+
+    /**
+     * This abstract class implements the TilProvider interface and enables a simple way 
+     * of providing tiles with any type of rendered text. 
+     * Internally it handles setting up a FBO for rendering the text, and defines a new 
+     * interface, consisting of only a single method for subclasses to implement: 
+     * \code  renderText(const FontRenderer&, const ChunkIndex&) const \endcode 
+     */
+    class TextTileProvider : public TileProvider {
     public:
-        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-        virtual ~ChunkIndexTileProvider();
+        TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
+        virtual ~TextTileProvider();
+
+        // Methods below are implemented in this class
 
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile getDefaultTile();
@@ -59,18 +68,31 @@ namespace openspace {
         virtual void update();
         virtual void reset();
         virtual int maxLevel();
-    private:
-        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
 
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         
-        TileCache _tileCache;
+        // This method is pure and should be implemented by subclasses
+
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
+
+    protected:
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
         glm::uvec2 _textureSize;
         size_t _fontSize;
-        
-        GLuint _fbo;
 
+    private:
+        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+
+        TileCache _tileCache;
+        GLuint _fbo;
+    };
+
+    /**
+     * Provides \class Tiles with the chunk index rendered as text onto its tiles.
+     */
+    class ChunkIndexTileProvider : public TextTileProvider {
+    public:
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
     };
 
 
@@ -79,4 +101,4 @@ namespace openspace {
 
 
 
-#endif  // __CHUNK_INDEX_TILE_PROVIDER_H__
+#endif  // __TEXT_TILE_PROVIDER_H__

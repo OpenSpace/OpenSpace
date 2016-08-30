@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tileprovider/chunkindextileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -40,18 +40,17 @@
 
 
 namespace {
-    const std::string _loggerCat = "TileProvider";
+    const std::string _loggerCat = "TextTileProvider";
 }
 
 
 namespace openspace {
 
-    ChunkIndexTileProvider::ChunkIndexTileProvider(const glm::uvec2& textureSize, size_t fontSize)
+    TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
         : _tileCache(500)
         , _textureSize(textureSize)
         , _fontSize(fontSize)
     {
-        using namespace ghoul::fontrendering;
 
         _font = OsEng.fontManager().font("Mono", _fontSize);
         _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
@@ -61,11 +60,11 @@ namespace openspace {
         glGenFramebuffers(1, &_fbo);
     }
 
-    ChunkIndexTileProvider::~ChunkIndexTileProvider() {
+    TextTileProvider::~TextTileProvider() {
         glDeleteFramebuffers(1, &_fbo);
     }
 
-    Tile ChunkIndexTileProvider::getTile(const ChunkIndex& chunkIndex) {
+    Tile TextTileProvider::getTile(const ChunkIndex& chunkIndex) {
         ChunkHashKey key = chunkIndex.hashKey();
         
         if (!_tileCache.exist(key)) {
@@ -75,31 +74,31 @@ namespace openspace {
         return _tileCache.get(key);
     }
 
-    Tile ChunkIndexTileProvider::getDefaultTile() {
+    Tile TextTileProvider::getDefaultTile() {
         return Tile::TileUnavailable;
     }
 
 
-    Tile::Status ChunkIndexTileProvider::getTileStatus(const ChunkIndex& index) {
+    Tile::Status TextTileProvider::getTileStatus(const ChunkIndex& index) {
         return Tile::Status::OK;
     }
 
-    TileDepthTransform ChunkIndexTileProvider::depthTransform() {
+    TileDepthTransform TextTileProvider::depthTransform() {
         TileDepthTransform transform;
         transform.depthOffset = 0.0f;
         transform.depthScale = 1.0f;
         return transform;
     }
 
-    void ChunkIndexTileProvider::update() {
+    void TextTileProvider::update() {
         // nothing to be done
     }
 
-    void ChunkIndexTileProvider::reset() {
+    void TextTileProvider::reset() {
         _tileCache.clear();
     }
 
-    Tile ChunkIndexTileProvider::createChunkIndexTile(const ChunkIndex& chunkIndex) {
+    Tile TextTileProvider::createChunkIndexTile(const ChunkIndex& chunkIndex) {
         glm::uvec4 color = { 0, 0, 0, 0 };
         Tile tile = Tile::createPlainTile(_textureSize, color);
 
@@ -128,15 +127,8 @@ namespace openspace {
             static_cast<GLsizei>(tile.texture->height())
             );
         
-        _fontRenderer->render(
-            *_font,
-            glm::vec2(
-                _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << chunkIndex.level),
-                _textureSize.y / 2 + _fontSize),
-            glm::vec4(1.0, 0.0, 0.0, 1.0),
-            "level: %i \nx: %i \ny: %i",
-            chunkIndex.level, chunkIndex.x, chunkIndex.y
-            );
+        ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");
+        renderText(*_fontRenderer, chunkIndex);
 
         // Reset state: bind default FBO and set viewport to what it was
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -145,10 +137,27 @@ namespace openspace {
         return tile;
     }
 
-
-    int ChunkIndexTileProvider::maxLevel() {
+    int TextTileProvider::maxLevel() {
         return 1337; // unlimited
     }
+
+
+
+
+    void ChunkIndexTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
+        fontRenderer.render(
+            *_font,
+            glm::vec2(
+                _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << chunkIndex.level),
+                _textureSize.y / 2 + _fontSize),
+            glm::vec4(1.0, 0.0, 0.0, 1.0),
+            "level: %i \nx: %i \ny: %i",
+            chunkIndex.level, chunkIndex.x, chunkIndex.y
+            );
+    }
+
+
+
 
 
 }  // namespace openspace
