@@ -77,10 +77,6 @@ public:
     bool hasTimeInterval();
     bool getInterval(double& start, double& end);
     
-    bool hasBody();
-    bool getBody(std::string& body);
-    void setBody(std::string& body);
-
     void onEnabledChange(std::function<void(bool)> callback);
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
@@ -92,8 +88,6 @@ private:
     PowerScaledScalar boundingSphere_;
     std::string _startTime;
     std::string _endTime;
-    std::string _targetBody;
-    bool _hasBody;
     bool _hasTimeInterval;
 };
 

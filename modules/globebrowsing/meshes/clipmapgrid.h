@@ -33,7 +33,7 @@
 namespace openspace {
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//							CLIPMAP GRID	(Abstract class)							//
+//                            CLIPMAP GRID    (Abstract class)                            //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -48,23 +48,23 @@ snap to the outer layers grid cells.
 class ClipMapGrid : public Grid
 {
 public:
-	ClipMapGrid(unsigned int segments);
+    ClipMapGrid(unsigned int segments);
 
-	~ClipMapGrid();
+    ~ClipMapGrid();
 
-	virtual int xSegments() const;
-	virtual int ySegments() const;
+    virtual int xSegments() const;
+    virtual int ySegments() const;
 
-	/**
-	Returns the segments of the grid. A ClipMapGrid must have the segments in x and
-	y direction equal so this function works as a wrapper for xSegments() and
-	ySegments().
-	*/
-	int segments() const;
+    /**
+    Returns the segments of the grid. A ClipMapGrid must have the segments in x and
+    y direction equal so this function works as a wrapper for xSegments() and
+    ySegments().
+    */
+    int segments() const;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//									OUTER CLIPMAP GRID									//
+//                                    OUTER CLIPMAP GRID                                    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -75,30 +75,30 @@ a smaller ClipMapGrid of half the size can fit.
 class OuterClipMapGrid : public ClipMapGrid
 {
 public:
-	OuterClipMapGrid(unsigned int segments);
+    OuterClipMapGrid(unsigned int segments);
 
-	~OuterClipMapGrid();
+    ~OuterClipMapGrid();
 
 protected:
-	virtual std::vector<GLuint>		CreateElements(int xSegments, int ySegments);
-	virtual std::vector<glm::vec4>	CreatePositions(int xSegments, int ySegments);
-	virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xSegments, int ySegments);
-	virtual std::vector<glm::vec3>	CreateNormals(int xSegments, int ySegments);
+    virtual std::vector<GLuint>        CreateElements(int xSegments, int ySegments);
+    virtual std::vector<glm::vec4>    CreatePositions(int xSegments, int ySegments);
+    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xSegments, int ySegments);
+    virtual std::vector<glm::vec3>    CreateNormals(int xSegments, int ySegments);
 
 private:
-	void validate(int xSegments, int ySegments);
+    void validate(int xSegments, int ySegments);
 
-	static size_t numVerticesBottom(int segments);
-	static size_t numVerticesLeft(int segments);
-	static size_t numVerticesRight(int segments);
-	static size_t numVerticesTop(int segments);
+    static size_t numVerticesBottom(int segments);
+    static size_t numVerticesLeft(int segments);
+    static size_t numVerticesRight(int segments);
+    static size_t numVerticesTop(int segments);
 
-	static size_t numElements(int segments);
-	static size_t numVertices(int segments);
+    static size_t numElements(int segments);
+    static size_t numVertices(int segments);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//									INNER CLIPMAP GRID									//
+//                                    INNER CLIPMAP GRID                                    //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -109,20 +109,20 @@ a whole where a smaller ClipMapGrid can be positioned.
 class InnerClipMapGrid : public ClipMapGrid
 {
 public:
-	InnerClipMapGrid(unsigned int segments);
+    InnerClipMapGrid(unsigned int segments);
 
-	~InnerClipMapGrid();
+    ~InnerClipMapGrid();
 
 private:
-	virtual std::vector<GLuint>		CreateElements(	int xSegments, int ySegments);
-	virtual std::vector<glm::vec4>	CreatePositions(int xSegments, int ySegments);
-	virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xSegments, int ySegments);
-	virtual std::vector<glm::vec3>	CreateNormals(int xSegments, int ySegments);
+    virtual std::vector<GLuint>        CreateElements(    int xSegments, int ySegments);
+    virtual std::vector<glm::vec4>    CreatePositions(int xSegments, int ySegments);
+    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xSegments, int ySegments);
+    virtual std::vector<glm::vec3>    CreateNormals(int xSegments, int ySegments);
 
-	void validate(int xSegments, int ySegments);
+    void validate(int xSegments, int ySegments);
 
-	static size_t numElements(int segments);
-	static size_t numVertices(int segments);
+    static size_t numElements(int segments);
+    static size_t numVertices(int segments);
 };
 
 } // namespace openspace

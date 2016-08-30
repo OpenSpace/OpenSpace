@@ -143,8 +143,8 @@ namespace openspace {
     {
         Vec3 normal = geodeticSurfaceNormalForGeocentricallyProjectedPoint(p);
         return Geodetic2(
-            asin(normal.z / length(normal)),	// Latitude
-            atan2(normal.y, normal.x));			// Longitude
+            asin(normal.z / length(normal)),    // Latitude
+            atan2(normal.y, normal.x));            // Longitude
     }
 
     Vec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const

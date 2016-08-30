@@ -150,16 +150,29 @@ bool RenderableTrail::isReady() const {
 
 void RenderableTrail::render(const RenderData& data) {
     _programObject->activate();
-    psc currentPosition = data.position;
-    psc campos = data.camera.position();
-    glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
+    //psc currentPosition = data.position;
+    //psc campos = data.camera.position();
+    //glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
 
-    glm::mat4 transform = glm::mat4(1);
+    //glm::mat4 transform = glm::mat4(1);
 
     // setup the data to the shader
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    //_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    //_programObject->setUniform("ModelTransform", transform);
+    //setPscUniforms(*_programObject.get(), data.camera, data.position);
+
+    // Calculate variables to be used as uniform variables in shader
+    glm::dvec3 bodyPosition = data.modelTransform.translation;
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), bodyPosition) * 
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
     _programObject->setUniform("color", _lineColor);
     _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));

@@ -104,16 +104,16 @@ int showRenderInformation(lua_State* L) {
 * Cycle through showing FPS or Average Frametime in heads up info
 */
 int toggleFrametimeType(lua_State* L) {
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1)
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-	const int type = lua_type(L, -1);
-	if (type != LUA_TNUMBER)
-		return luaL_error(L, "Expected argument of type 'number'");
-	int t = lua_tonumber(L, -1);
-	OsEng.renderEngine().toggleFrametimeType(t);
-	return 0;
+    const int type = lua_type(L, -1);
+    if (type != LUA_TNUMBER)
+        return luaL_error(L, "Expected argument of type 'number'");
+    int t = lua_tonumber(L, -1);
+    OsEng.renderEngine().toggleFrametimeType(t);
+    return 0;
 }
 
 /**

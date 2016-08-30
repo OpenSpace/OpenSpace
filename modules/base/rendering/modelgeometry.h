@@ -55,6 +55,8 @@ public:
     bool getVertices(std::vector<Vertex>* vertexList);
     bool getIndices(std::vector<int>* indexList);
 
+    double boundingRadius() const;
+
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
 protected:

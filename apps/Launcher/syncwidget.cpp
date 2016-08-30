@@ -369,13 +369,7 @@ void SyncWidget::syncButtonPressed() {
             LERROR("Could not find 'Modules'");
             return;
         }
-        
-        struct ModuleInformation {
-            QString moduleName;
-            QString moduleDatafile;
-            QString modulePath;
-        };
-        
+
         QDir sceneDir(scene);
         sceneDir.cdUp();
         QList<ModuleInformation> modulesList;
@@ -527,7 +521,7 @@ void SyncWidget::syncButtonPressed() {
     //// Make the lists unique
     {
         auto equal = [](const DirectFile& lhs, const DirectFile& rhs) -> bool {
-            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination;
+            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination && lhs.baseDir == rhs.baseDir;
         };
 
         QList<DirectFile> files;
@@ -552,6 +546,7 @@ void SyncWidget::syncButtonPressed() {
                 lhs.module == rhs.module &&
                 lhs.identifier == rhs.identifier &&
                 lhs.destination == rhs.destination &&
+                lhs.baseDir == rhs.baseDir &&
                 lhs.version == rhs.version;
         };
 
@@ -576,7 +571,8 @@ void SyncWidget::syncButtonPressed() {
             return
                 lhs.module == rhs.module &&
                 lhs.file == rhs.file &&
-                lhs.destination == rhs.destination;
+                lhs.destination == rhs.destination &&
+                lhs.baseDir == rhs.baseDir;
         };
 
         QList<TorrentFile> files;

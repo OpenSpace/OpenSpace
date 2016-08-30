@@ -155,15 +155,6 @@ namespace openspace {
         stats.startNewRecord();
         
         int j2000s = Time::now().unsyncedJ2000Seconds();
-        /*
-        int lastJ2000s = stats.i.previous("time");
-        if (j2000s == lastJ2000s) {
-            stats.disable();
-        }
-        else {
-            stats.enable();
-        }
-        */
 
         auto duration = std::chrono::system_clock::now().time_since_epoch();
         auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -197,11 +188,9 @@ namespace openspace {
         _leftRoot->reverseBreadthFirst(renderJob);
         _rightRoot->reverseBreadthFirst(renderJob);
 
-
         if (_savedCamera != nullptr) {
             DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
-        
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 
@@ -242,22 +231,15 @@ namespace openspace {
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
-        _modelTransform =
-            translate(dmat4(1), data.position) *
-            dmat4(stateMatrix()); // Translation
+        glm::dmat4 translation = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+        glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+        glm::dmat4 scaling = glm::scale(glm::dmat4(1.0),
+            glm::dvec3(data.modelTransform.scale, data.modelTransform.scale, data.modelTransform.scale));
+
+        _modelTransform = translation * rotation * scaling;
         _inverseModelTransform = glm::inverse(_modelTransform);
 
         _renderer->update();
-    }
-
-    void ChunkedLodGlobe::setStateMatrix(const glm::dmat3& stateMatrix)
-    {
-        _stateMatrix = stateMatrix;
-    }
-
-    const glm::dmat3& ChunkedLodGlobe::stateMatrix()
-    {
-        return _stateMatrix;
     }
 
     const glm::dmat4& ChunkedLodGlobe::modelTransform() {

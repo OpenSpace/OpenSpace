@@ -26,6 +26,7 @@
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/missionmanager.h>
 #endif
 
 #include <openspace/rendering/renderer.h>
@@ -126,7 +127,7 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
-	, _frametimeType(FrametimeType::DtTimeAvg)
+    , _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
     _onScreenInformation = {
@@ -149,6 +150,10 @@ bool RenderEngine::deinitialize() {
     for (auto screenspacerenderable : _screenSpaceRenderables) {
         screenspacerenderable->deinitialize();
     }
+
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+    MissionManager::deinitialize();
+#endif
 
     _sceneGraph->clearSceneGraph();
     return true;
@@ -217,6 +222,10 @@ bool RenderEngine::initialize() {
 #endif // GHOUL_USE_SOIL
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+
+#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+    MissionManager::initialize();
+#endif
 
     return true;
 }
@@ -325,8 +334,8 @@ bool RenderEngine::initializeGL() {
 }
 
 void RenderEngine::preSynchronization() {
-    if (_mainCamera)
-        _mainCamera->preSynchronization();
+    //if (_mainCamera)
+    //    _mainCamera->preSynchronization();
 }
 
 void RenderEngine::postSynchronizationPreDraw() {
@@ -353,8 +362,8 @@ void RenderEngine::postSynchronizationPreDraw() {
         }
     }
 
-    if (_mainCamera)
-        _mainCamera->postSynchronizationPreDraw();
+    //if (_mainCamera)
+    //    _mainCamera->postSynchronizationPreDraw();
 
     bool windowResized = OsEng.windowWrapper().windowHasResized();
 
@@ -367,6 +376,8 @@ void RenderEngine::postSynchronizationPreDraw() {
     // update and evaluate the scene starting from the root node
     _sceneGraph->update({
         glm::dvec3(0),
+        glm::dmat3(1),
+        1,
         Time::ref().currentTime(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
@@ -388,7 +399,7 @@ void RenderEngine::postSynchronizationPreDraw() {
     }
     
     for (auto screenspacerenderable : _screenSpaceRenderables) {
-            screenspacerenderable->update();
+        screenspacerenderable->update();
     }
     //Allow focus node to update camera (enables camera-following)
     //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
@@ -1254,6 +1265,19 @@ RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std:
         return RendererImplementation::Invalid;
 }
 
+std::string RenderEngine::progressToStr(int size, double t) {
+    std::string progress = "|";
+    int g = static_cast<int>((t * (size - 1)) + 1);
+    g = std::max(g, 0);
+    for (int i = 0; i < g; i++)
+        progress.append("-");
+    progress.append(">");
+    for (int i = 0; i < size - g; i++)
+        progress.append(" ");
+    progress.append("|");
+    return progress;
+}
+
 void RenderEngine::renderInformation() {
     // TODO: Adjust font_size properly when using retina screen
     using Font = ghoul::fontrendering::Font;
@@ -1313,6 +1337,84 @@ void RenderEngine::renderInformation() {
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = Time::ref().currentTime();
 
+        if (MissionManager::ref().hasCurrentMission()) {
+
+            const Mission& mission = MissionManager::ref().currentMission();
+
+            if (mission.phases().size() > 0) {
+
+                static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
+                //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+                static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+                static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
+                static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+
+                // Add spacing
+                RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
+
+                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+
+                if (phaseTrace.size()) {
+                    std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
+                    RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
+                    double remaining = phaseTrace.back()->timeRange().end - currentTime;
+                    float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
+                    std::string progress = progressToStr(25, t);
+                    //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+                    //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
+                }
+                else {
+                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
+                    double remaining = mission.timeRange().start - currentTime;
+                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
+                        "%.0f s", remaining);
+                }
+
+                bool showAllPhases = false;
+
+                typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+                std::stack<PhaseWithDepth> S;
+                int pixelIndentation = 20;
+                S.push({ &mission, 0 });
+                while (!S.empty()) {
+                    const MissionPhase* phase = S.top().first;
+                    int depth = S.top().second;
+                    S.pop();
+
+                    bool isCurrentPhase = phase->timeRange().includes(currentTime);
+
+                    penPosition.x += depth * pixelIndentation;
+                    if (isCurrentPhase) {
+                        double remaining = phase->timeRange().end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+                        std::string progress = progressToStr(25, t);
+                        RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
+                            "%s  %s %.1f %%",
+                            phase->name().c_str(),
+                            progress.c_str(),
+                            t * 100
+                            );
+                    }
+                    else {
+                        RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
+                    }
+                    penPosition.x -= depth * pixelIndentation;
+
+                    if (isCurrentPhase || showAllPhases) {
+                        // phases are sorted increasingly by start time, and will be popped
+                        // last-in-first-out from the stack, so add them in reversed order.
+                        int indexLastPhase = phase->phases().size() - 1;
+                        for (int i = indexLastPhase; 0 <= i; --i) {
+                            S.push({ &phase->phase(i), depth + 1 });
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         if (openspace::ImageSequencer::ref().isReady()) {
             penPosition.y -= 25.f;
 
@@ -1345,14 +1447,6 @@ void RenderEngine::renderInformation() {
 
             double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
             float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
-            std::string progress = "|";
-            int g = static_cast<int>((t * 24) + 1);
-            g = std::max(g, 0);
-            for (int i = 0; i < g; i++)
-                progress.append("-");
-            progress.append(">");
-            for (int i = 0; i < 25 - g; i++)
-                progress.append(" ");
 
             std::string str = SpiceManager::ref().dateFromEphemerisTime(
                 ImageSequencer::ref().getNextCaptureTime(),
@@ -1362,8 +1456,9 @@ void RenderEngine::renderInformation() {
             glm::vec4 active(0.6, 1, 0.00, 1);
             glm::vec4 brigther_active(0.9, 1, 0.75, 1);
 
-            progress.append("|");
             if (remaining > 0) {
+                
+                std::string progress = progressToStr(25, t);
                 brigther_active *= (1 - t);
 
                 RenderFontCr(*_fontInfo,

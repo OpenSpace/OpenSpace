@@ -1,4 +1,4 @@
-UseAccurateNewHorizonsKernels = false
+UseAccurateNewHorizonsKernels = true
 -- TextureResolution = "low"
 TextureResolution = "med"
 -- TextureResolution = "high"

@@ -25,19 +25,19 @@
 #include <modules/globebrowsing/meshes/grid.h>
 
 namespace {
-	const std::string _loggerCat = "Grid";
+    const std::string _loggerCat = "Grid";
 }
 
 namespace openspace {
 
-	Grid::Grid(
-		int xSegments,
-		int ySegments,
-		TriangleSoup::Positions usePositions,
-		TriangleSoup::TextureCoordinates useTextures,
-		TriangleSoup::Normals useNormals)
-	: _xSegments(xSegments)
-	, _ySegments(ySegments)
+    Grid::Grid(
+        int xSegments,
+        int ySegments,
+        TriangleSoup::Positions usePositions,
+        TriangleSoup::TextureCoordinates useTextures,
+        TriangleSoup::Normals useNormals)
+    : _xSegments(xSegments)
+    , _ySegments(ySegments)
 {
 
 }
@@ -49,7 +49,7 @@ Grid::~Grid()
 
 TriangleSoup& Grid::geometry()
 {
-	return *_geometry;
+    return *_geometry;
 }
 
 }// namespace openspace

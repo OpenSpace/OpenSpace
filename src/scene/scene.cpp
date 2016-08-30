@@ -209,7 +209,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
-            node->update({glm::dvec3(0), Time::ref().currentTime() });
+            node->update({
+                glm::dvec3(0),
+                glm::dmat3(1),
+                1,
+                Time::ref().currentTime() });
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);

@@ -44,37 +44,39 @@ out vec2 fs_uv;
 out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 out LevelWeights levelWeights;
+out vec3 positionCameraSpace;
 
 PositionNormalPair globalInterpolation() {
-	vec2 lonLatInput;
-	lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
-	lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_uv.x; // Lon
-	PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
-	return positionPairModelSpace;
+    vec2 lonLatInput;
+    lonLatInput.y = minLatLon.y + lonLatScalingFactor.y * in_uv.y; // Lat
+    lonLatInput.x = minLatLon.x + lonLatScalingFactor.x * in_uv.x; // Lon
+    PositionNormalPair positionPairModelSpace = geodetic2ToCartesian(lonLatInput.y, lonLatInput.x, radiiSquared);
+    return positionPairModelSpace;
 }
 
 void main() {
-	PositionNormalPair pair = globalInterpolation();
-	float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
+    PositionNormalPair pair = globalInterpolation();
+    float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
 
-	float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
+    float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
 
-	// use level weight for height sampling, and output to fragment shader
-	levelWeights = getLevelWeights(levelInterpolationParameter);
+    // use level weight for height sampling, and output to fragment shader
+    levelWeights = getLevelWeights(levelInterpolationParameter);
 
-	// Get the height value
-	float height = getTileVertexHeight(in_uv, levelWeights);
+    // Get the height value
+    float height = getTileVertexHeight(in_uv, levelWeights);
 
-	// Apply skirts
-	height -= getTileVertexSkirtLength();
-	
-	// Add the height in the direction of the normal
-	pair.position += pair.normal * height;
-	vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
+    // Apply skirts
+    height -= getTileVertexSkirtLength();
+    
+    // Add the height in the direction of the normal
+    pair.position += pair.normal * height;
+    vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1);
 
-	// Write output
-	fs_uv = in_uv;
-	fs_position = z_normalization(positionClippingSpace);
-	gl_Position = fs_position;
-	ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
+    // Write output
+    fs_uv = in_uv;
+    fs_position = z_normalization(positionClippingSpace);
+    gl_Position = fs_position;
+    ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
+    positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1));
 }

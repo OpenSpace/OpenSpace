@@ -37,38 +37,38 @@ namespace openspace {
 class BasicGrid : public Grid
 {
 public:
-	/**
-	\param xSegments is the number of grid cells in the x direction.
-	\param ySegments is the number of grid cells in the y direction.
-	\param usePositions determines whether or not to upload any vertex position data
-	to the GPU.
-	\param useTextureCoordinates determines whether or not to upload any vertex texture
-	coordinate data to the GPU.
-	\param useNormals determines whether or not to upload any vertex normal data
-	to the GPU.
-	*/
-	BasicGrid(
-		unsigned int xSegments,
-		unsigned int ySegments,
-		TriangleSoup::Positions usePositions,
-		TriangleSoup::TextureCoordinates useTextureCoordinates,
-		TriangleSoup::Normals useNormals);
-	~BasicGrid();
+    /**
+    \param xSegments is the number of grid cells in the x direction.
+    \param ySegments is the number of grid cells in the y direction.
+    \param usePositions determines whether or not to upload any vertex position data
+    to the GPU.
+    \param useTextureCoordinates determines whether or not to upload any vertex texture
+    coordinate data to the GPU.
+    \param useNormals determines whether or not to upload any vertex normal data
+    to the GPU.
+    */
+    BasicGrid(
+        unsigned int xSegments,
+        unsigned int ySegments,
+        TriangleSoup::Positions usePositions,
+        TriangleSoup::TextureCoordinates useTextureCoordinates,
+        TriangleSoup::Normals useNormals);
+    ~BasicGrid();
 
 
-	virtual int xSegments() const;
-	virtual int ySegments() const;
+    virtual int xSegments() const;
+    virtual int ySegments() const;
 
 private:
-	virtual std::vector<GLuint>		CreateElements(				int xRes, int yRes);
-	virtual std::vector<glm::vec4>	CreatePositions(			int xRes, int yRes);
-	virtual std::vector<glm::vec2>	CreateTextureCoordinates(	int xRes, int yRes);
-	virtual std::vector<glm::vec3>	CreateNormals(				int xRes, int yRes);
+    virtual std::vector<GLuint>        CreateElements(                int xRes, int yRes);
+    virtual std::vector<glm::vec4>    CreatePositions(            int xRes, int yRes);
+    virtual std::vector<glm::vec2>    CreateTextureCoordinates(    int xRes, int yRes);
+    virtual std::vector<glm::vec3>    CreateNormals(                int xRes, int yRes);
 
-	void validate(int xSegments, int ySegments);
+    void validate(int xSegments, int ySegments);
 
-	inline size_t numElements(int xSegments, int ySegments);
-	inline size_t numVertices(int xSegments, int ySegments);
+    inline size_t numElements(int xSegments, int ySegments);
+    inline size_t numVertices(int xSegments, int ySegments);
 };
 } // namespace openspace
 #endif // __BASICGRIDGEOMETRY_H__

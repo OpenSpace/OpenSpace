@@ -43,6 +43,7 @@ uniform Tile ColorTexturesParent2[NUMLAYERS_COLORTEXTURE];
 uniform Tile NightTextures[NUMLAYERS_NIGHTTEXTURE];
 uniform Tile NightTexturesParent1[NUMLAYERS_NIGHTTEXTURE];
 uniform Tile NightTexturesParent2[NUMLAYERS_NIGHTTEXTURE];
+uniform vec3 lightDirectionCameraSpace;
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
@@ -75,6 +76,8 @@ uniform vec2 vertexResolution;
 in vec4 fs_position;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
+in vec3 positionCameraSpace;
+
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
@@ -170,7 +173,10 @@ vec4 getTileFragColor(){
 		levelWeights,
 		WaterMasks,
 		WaterMasksParent1,
-		WaterMasksParent2);
+		WaterMasksParent2,
+		ellipsoidNormalCameraSpace,
+		lightDirectionCameraSpace,
+		positionCameraSpace);
 
 #endif // USE_WATERMASK
 
@@ -184,7 +190,8 @@ vec4 getTileFragColor(){
 		NightTextures,
 		NightTexturesParent1,
 		NightTexturesParent2,
-		ellipsoidNormalCameraSpace);
+		ellipsoidNormalCameraSpace,
+		lightDirectionCameraSpace);
 
 #endif // USE_NIGHTTEXTURE
 

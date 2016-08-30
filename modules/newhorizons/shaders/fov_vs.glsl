@@ -24,30 +24,38 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+//uniform mat4 ViewProjection;
+//uniform mat4 ModelTransform;
 //uniform vec4 etColor;
-uniform vec4 objectVelocity;
+//uniform vec4 objectVelocity;
 
 layout(location = 0) in vec4 in_point_position;
 layout(location = 1) in vec4 in_point_velocity;
 layout(location = 2) in vec2 in_point_timeindex;
 
 
-out vec4 vs_point_position;
+//out vec4 vs_point_position;
 out vec4 vs_point_velocity;
+
+// Uniforms
+uniform mat4 modelViewProjectionTransform;
+
+// Outputs
+out vec4 vs_positionScreenSpace;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main()
 {
+    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
+    vec4 positionClipSpace = modelViewProjectionTransform * position;
+
+    // Write output
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
+
     vs_point_velocity = in_point_velocity;
 
-    vec4 tmp = in_point_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_point_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
 /*
     //vs_point_position = objpos;
 

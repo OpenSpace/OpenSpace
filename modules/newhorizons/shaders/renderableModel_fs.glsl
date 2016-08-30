@@ -22,64 +22,74 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
-
-in vec4 vs_position;
-in vec4 vs_normal;
-in vec2 vs_st;
-
-uniform vec4 campos;
-uniform vec4 objpos;
-uniform vec3 camdir;
 
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
+
 uniform bool _performShading;
 uniform float _projectionFading;
-uniform vec3 sun_pos;
+uniform vec3 directionToSunViewSpace;
+
+in vec2 vs_st;
+in vec3 vs_normalViewSpace;
+in vec4 vs_positionScreenSpace;
+in vec4 vs_positionCameraSpace;
+
+
+
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = safeLength(position);
-    
-    // directional lighting
-    vec3 origin = vec3(0.0);
-    vec4 spec = vec4(0.0);
-    
-    vec3 n = normalize(vs_normal.xyz);
-    vec3 e = normalize(camdir);
-    vec3 l_pos = sun_pos;
-    vec3 l_dir = normalize(l_pos-objpos.xyz);
-    float intensity = 1;
-    
-    if (_performShading) {
-        const float terminatorBrightness = 0.4;
-        intensity = min(max(5*dot(n,l_dir), terminatorBrightness), 1.0);
-    }
-    
-    float shine = 0.0001;
-    vec4 specular = vec4(0.1);
-    vec4 ambient = vec4(vec3(0.0), 1.0);
-     //Specular
-    if (intensity > 0.0) {
-        vec3 h = normalize(l_dir + e);
-        float intSpec = max(dot(h,n),0.0);
-        spec = specular * pow(intSpec, shine);
-    }
-    
-    vec4 textureColor  = texture(baseTexture, vs_st);
+    vec4 textureColor = texture(baseTexture, vs_st);
     vec4 projectionColor = texture(projectionTexture, vs_st);
-    if (projectionColor.a != 0.0) {
+    if (projectionColor.a > 0.0) {
         textureColor.rgb = mix(
             textureColor.rgb,
             projectionColor.rgb,
-            min(_projectionFading, projectionColor.a)
+            _projectionFading
         );
     }
+    
+    vec3 diffuseAlbedo = textureColor.rgb;
+    vec3 specularAlbedo = vec3(1);
+
+    vec3 color;
+
+    if (_performShading) {
+        // Some of these values could be passed in as uniforms
+        vec3 lightColorAmbient = vec3(1);
+        vec3 lightColor = vec3(1);    
+        
+        vec3 n = normalize(vs_normalViewSpace);
+        vec3 l = directionToSunViewSpace;
+        vec3 c = normalize(vs_positionCameraSpace.xyz);
+        vec3 r = reflect(l, n);
+
+        float ambientIntensity = 0.15;
+        float diffuseIntensity = 1;
+        float specularIntensity = 0.0;
+
+        float diffuseCosineFactor = dot(n,l);
+        float specularCosineFactor = dot(c,r);
+        float specularPower = 100;
+
+        vec3 ambientColor = ambientIntensity * lightColorAmbient * diffuseAlbedo;
+        vec3 diffuseColor = diffuseIntensity * lightColor * diffuseAlbedo * max(diffuseCosineFactor, 0);
+        vec3 specularColor = specularIntensity * lightColor * specularAlbedo * pow(max(specularCosineFactor, 0), specularPower);
+
+        color = ambientColor + diffuseColor + specularColor;
+    }
+    else {
+        color = diffuseAlbedo;
+    }
+
+    float transparency = 1.0;
+    float alpha = _projectionFading * transparency;
+
 
     Fragment frag;
-    frag.color = max(intensity * textureColor, ambient);
-    frag.depth = depth;
+    frag.color = vec4(color, alpha);
+    frag.depth = vs_positionScreenSpace.w;
     return frag;
 }

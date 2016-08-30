@@ -448,14 +448,22 @@ void RenderableFov::determineTarget() {
     PerfMeasure("determineTarget");
     _fovTarget = _potentialTargets[0]; //default;
     for (int i = 0; i < _potentialTargets.size(); ++i) {
-        _withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
-            _potentialTargets[i],
-            _spacecraft,                          
-            _instrumentID,
-            SpiceManager::FieldOfViewMethod::Ellipsoid,
-            _aberrationCorrection,
-            _time
-        );
+        try
+        {
+            _withinFOV = openspace::SpiceManager::ref().isTargetInFieldOfView(
+                _potentialTargets[i],
+                _spacecraft,
+                _instrumentID,
+                SpiceManager::FieldOfViewMethod::Ellipsoid,
+                _aberrationCorrection,
+                _time
+                );
+        }
+        catch (const openspace::SpiceManager::SpiceException e)
+        {
+            _withinFOV = false;
+        }
+
         if (_withinFOV) {
             _fovTarget = _potentialTargets[i];
             break;
@@ -549,10 +557,19 @@ void RenderableFov::render(const RenderData& data) {
 
     _drawFOV = false;
     // setup the data to the shader
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", glm::mat4(1));
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        
+    glm::mat4 modelViewProjectionTransform =
+        data.camera.projectionMatrix() *
+        glm::mat4(data.camera.combinedViewMatrix() *
+        modelTransform);
+
+    _programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
+
     if (openspace::ImageSequencer::ref().isReady()) {
         _drawFOV = ImageSequencer::ref().instrumentActive(_instrumentID);
     }

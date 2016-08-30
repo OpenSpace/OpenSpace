@@ -43,12 +43,12 @@ public:
 private:
     void initializeKameleonWrapper(std::string kwPath);
 
-	std::shared_ptr<KameleonWrapper> _kw;
-	std::string _kwPath;
-	std::vector<std::string> _loadedVariables;
-	bool _initialized;
-	float _slice;
-	// std::vector<float*> _data;
+    std::shared_ptr<KameleonWrapper> _kw;
+    std::string _kwPath;
+    std::vector<std::string> _loadedVariables;
+    bool _initialized;
+    float _slice;
+    // std::vector<float*> _data;
 };
 
 }// namespace

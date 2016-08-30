@@ -142,6 +142,8 @@ public:
         const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
         RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
 
+    std::string progressToStr(int size, double t);
+
     void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
     /**
@@ -207,7 +209,7 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
-	FrametimeType _frametimeType;
+    FrametimeType _frametimeType;
 
     bool _showInfo;
     bool _showLog;

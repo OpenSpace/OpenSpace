@@ -25,6 +25,11 @@ return {
                 Type = "simple",
                 Color = "textures/venus.jpg",
             },
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
+            }
         },
         Ephemeris = {
             Type = "Spice",

@@ -27,6 +27,7 @@ return {
                 Color = "textures/gray.jpg",
             }
         },
+        --[[
         Ephemeris = {
             Type = "Spice",
             Body = "KERBEROS",
@@ -38,6 +39,21 @@ return {
             Type = "Spice",
             Frame = "IAU_PLUTO",
             Reference = "ECLIPJ2000"
+        },
+        ]]
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "KERBEROS",
+                Reference = "ECLIPJ2000",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_PLUTO",
+                DestinationFrame = "ECLIPJ2000"
+            },
         },
         GuiName = "/Solar/Planets/Kerberos"
     },
@@ -51,10 +67,18 @@ return {
             Billboard = true,
             Texture = "textures/Kerberos-Text.png"
         },
+        --[[
         Ephemeris = {
             Type = "Static",
             Position = {1, 0, 1, 6}
         }
+        ]]
+        Transform = {
+            Translation = {
+                Type = "StaticEphemeris",
+                Position = {1000000, 0, 1000000},
+            },
+        },
     },    
     -- StyxTrail module
     {   

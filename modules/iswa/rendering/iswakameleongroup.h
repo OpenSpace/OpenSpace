@@ -28,10 +28,10 @@
 namespace openspace{
 class IswaKameleonGroup : public IswaDataGroup{
 public:
-	IswaKameleonGroup(std::string name, std::string type);
-	~IswaKameleonGroup();
+    IswaKameleonGroup(std::string name, std::string type);
+    ~IswaKameleonGroup();
 
-	virtual void clearGroup();
+    virtual void clearGroup();
     
     std::vector<int> fieldlineValue();
     void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);

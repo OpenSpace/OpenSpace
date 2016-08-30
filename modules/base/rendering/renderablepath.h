@@ -59,12 +59,11 @@ private:
         //float r, g, b, a;
     };
     void sendToGPU();
-    void addPosition(psc pos);
+    void addPosition(glm::vec3 pos);
     void addColor(glm::vec4 col);
 
     glm::vec3 _lineColor;
     glm::vec4 _lastPosition;
-    properties::FloatProperty _lineFade;
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawLine;
 
@@ -87,6 +86,7 @@ private:
     double _start;
     double _stop;
     float _distanceFade;
+    int _pointSteps;
 };
 
 } // namespace openspace

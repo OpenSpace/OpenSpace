@@ -1,8 +1,43 @@
 return {
     -- Comet 67P Body module
     {   
-        Name = "67P",
+        Name = "67PBarycenter",
         Parent = "SolarSystemBarycenter", 
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "CHURYUMOV-GERASIMENKO",
+                Reference = "GALACTIC",
+                Observer = "SUN",
+                Kernels = {
+                    --needed
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
+                    -- SPK  
+                    --long term orbits loaded first
+                    '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORL_DL_009_02____P__00268.BSP',
+                    '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORL_DL_009_02____P__00268.BSP',
+                    '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORL_DL_009_02____P__00268.BSP',
+
+                    '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORL_DL_006_01____H__00156.BSP',
+                    '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORL_DL_006_01____H__00156.BSP',
+                    '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORL_DL_006_01____H__00156.BSP',
+                    
+                    --Jan 2014 - May 2015 (version match with 00162 ck files)
+                    "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORB_DV_097_01_______00162.BSP",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORB_DV_097_01_______00162.BSP",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORB_DV_097_01_______00162.BSP",
+
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORB_DV_211_01_______00288.BSP",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORB_DV_211_01_______00288.BSP",
+                    "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORB_DV_211_01_______00288.BSP",
+                    }
+            },
+        },
+        GuiName = "/Solar/67PBarycenter",
+    },
+    {   
+        Name = "67P",
+        Parent = "67PBarycenter", 
 
         Renderable = {
             Type = "RenderableModelProjection",
@@ -28,6 +63,7 @@ return {
                 Observer   = "ROSETTA",
                 Target     = "CHURYUMOV-GERASIMENKO",
                 Aberration = "NONE",
+                TextureMap = true
             },
             DataInputTranslation = {
                 Instrument = {
@@ -67,40 +103,44 @@ return {
                 Far        = 1000000,
             },
         },
-
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CHURYUMOV-GERASIMENKO",
-            Reference = "GALACTIC",
-            Observer = "SUN",
-            Kernels = {
-                --needed
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
-                -- SPK  
-                --long term orbits loaded first
-                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORL_DL_009_02____P__00268.BSP',
-                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORL_DL_009_02____P__00268.BSP',
-                '${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORL_DL_009_02____P__00268.BSP',
-
-                '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORL_DL_006_01____H__00156.BSP',
-                '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORL_DL_006_01____H__00156.BSP',
-                '${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORL_DL_006_01____H__00156.BSP',
-                
-                --Jan 2014 - May 2015 (version match with 00162 ck files)
-                "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/CORB_DV_097_01_______00162.BSP",
-                "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/RORB_DV_097_01_______00162.BSP",
-                "${OPENSPACE_DATA}/spice/RosettaKernels/SPK/LORB_DV_097_01_______00162.BSP",
-
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/CORB_DV_211_01_______00288.BSP",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/RORB_DV_211_01_______00288.BSP",
-                "${OPENSPACE_DATA}/spice/RosettaKernels_New/SPK/LORB_DV_211_01_______00288.BSP",
-
-
-            }
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "67P/C-G_CK",
+                DestinationFrame = "GALACTIC",
+            },
         },
-        GuiName = "/Solar/67P"
+        GuiName = "/Solar/67P",
     },
     -- 67P Trail Module
+    {   
+        Name = "67PTrail",
+        Parent = "SolarSystemBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "CHURYUMOV-GERASIMENKO",
+            Frame = "GALACTIC",
+            Observer = "SUN",
+            -- Optional rendering properties
+            LineColor = { 0.1, 0.9, 0.2 },
+            PointColor = { 0.1, 0.9, 0.2 },
+            LineFade = 0.5, -- [0,1]
+            RenderPart = 0.5,
+            LineWidth = 2,
+            ShowTimeStamps = false,
+            RenderFullTrail = false,
+            -- Time interval
+            TimeRange = {
+                Start = "2014 JAN 01 00:00:00.000",
+                End = "2017 JAN 01 00:00:00.000",
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 0,
+        },
+        GuiName = "/Solar/67PTrail"
+    },
+    --[[
     {   
         Name = "67PTrail",
         Parent = "SolarSystemBarycenter",
@@ -124,4 +164,5 @@ return {
         },
         GuiName = "/Solar/67PTrail"
     }
+    ]]
 }

@@ -27,6 +27,21 @@ return {
                 Color = "textures/gray.jpg",
             }
         },
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "NIX",
+                Reference = "ECLIPJ2000",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_PLUTO",
+                DestinationFrame = "ECLIPJ2000"
+            },
+        },
+        --[[
         Ephemeris = {
             Type = "Spice",
             Body = "NIX",
@@ -39,6 +54,7 @@ return {
             Frame = "IAU_PLUTO",
             Reference = "ECLIPJ2000"
         },
+        ]]
         GuiName = "/Solar/Planets/Nix"
     },
     {
@@ -51,10 +67,12 @@ return {
             Billboard = true,
             Texture = "textures/Nix-Text.png"
         },
+        --[[
         Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 0}
         }
+        ]]
     },
     -- StyxTrail module
     {   

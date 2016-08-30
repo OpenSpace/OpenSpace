@@ -38,9 +38,9 @@ public:
     virtual std::vector<float*> processData(std::string data, properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 
 private:
-	// void initialize(int numOptions);
-	// void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
-	// void calculateFilterValues(std::vector<int> selectedOptions);
+    // void initialize(int numOptions);
+    // void add(std::vector<std::vector<float>>& optionValues, std::vector<float>& sum);
+    // void calculateFilterValues(std::vector<int> selectedOptions);
 };
 
 }// namespace

@@ -234,8 +234,10 @@ bool OpenSpaceEngine::create(int argc, char** argv,
         return false;
 
     // Parse commandline arguments
+    std::vector<std::string> args(argv, argv + argc);
     std::shared_ptr<const std::vector<std::string>> arguments =
-        _engine->_commandlineParser->setCommandLine(argc, argv);
+        _engine->_commandlineParser->setCommandLine(args);
+
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
         _engine->_commandlineParser->displayHelp();
@@ -742,18 +744,25 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
-        _interactionHandler->update(dt);
 
         Time::ref().advanceTime(dt);
         Time::ref().preSynchronization();
-        
+
         _scriptEngine->preSynchronization();
+        
         _renderEngine->preSynchronization();
+
+        // Update the mouse velocities for interaction handler
+        _interactionHandler->preSynchronization(dt);
+
+        _renderEngine->camera()->preSynchronization();
+
         _parallelConnection->preSynchronization();
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+
     if (_isInShutdownMode) {
         if (_shutdownCountdown <= 0.f) {
             _windowWrapper->terminate();
@@ -762,10 +771,19 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     Time::ref().postSynchronizationPreDraw();
-
+    
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
+    // Sync the camera to match the previous frame
+    _renderEngine->camera()->postSynchronizationPreDraw();
+
+    // Step the camera using the current mouse velocities which are synced
+    _interactionHandler->postSynchronizationPreDraw();
+
+    // Update the synched variables in the camera class
+    _renderEngine->camera()->preSynchronization();
+    _renderEngine->camera()->postSynchronizationPreDraw();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
@@ -806,6 +824,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
 
     LogMgr.resetMessageCounters();
+
 }
 
 void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
@@ -904,6 +923,7 @@ void OpenSpaceEngine::encode() {
         Time::ref().serialize(_syncBuffer.get());
         _scriptEngine->serialize(_syncBuffer.get());
         _renderEngine->serialize(_syncBuffer.get());
+        _interactionHandler->serialize(_syncBuffer.get());
         
         _syncBuffer->write();
     }
@@ -918,6 +938,8 @@ void OpenSpaceEngine::decode() {
         Time::ref().deserialize(_syncBuffer.get());
         _scriptEngine->deserialize(_syncBuffer.get());
         _renderEngine->deserialize(_syncBuffer.get());
+        _interactionHandler->deserialize(_syncBuffer.get());
+
     }
 }
 

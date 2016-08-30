@@ -47,7 +47,7 @@ double WindowWrapper::averageDeltaTime() const {
 }
 
 double WindowWrapper::deltaTime() const {
-	return 0.0;
+    return 0.0;
 }
     
 glm::vec2 WindowWrapper::mousePosition() const {

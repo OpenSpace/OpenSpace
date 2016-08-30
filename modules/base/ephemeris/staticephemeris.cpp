@@ -31,24 +31,18 @@ namespace {
 namespace openspace {
 
 StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.f, 0.f, 0.f, 0.f)
+    : _position(0.0, 0.0, 0.0)
 {
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec4>(KeyPosition);
+    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec3>(KeyPosition);
     if (hasPosition) {
-        glm::vec4 tmp;
-        dictionary.getValue(KeyPosition, tmp);
-        _position = tmp;
+        dictionary.getValue(KeyPosition, _position);
     }
 }
 
 StaticEphemeris::~StaticEphemeris() {}
 
-const psc& StaticEphemeris::position() const {
+const glm::dvec3& StaticEphemeris::position() const {
     return _position;
-}
-
-const glm::dmat3& StaticEphemeris::worldRotationMatrix() const {
-    return glm::dmat3(1.0);
 }
 
 void StaticEphemeris::update(const UpdateData&) {}

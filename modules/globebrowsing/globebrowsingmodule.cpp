@@ -35,33 +35,33 @@
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
+    GlobeBrowsingModule::GlobeBrowsingModule()
+    : OpenSpaceModule("GlobeBrowsing")
 {}
 
 void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
+    /*
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
+    fRenderable->registerClass<Planet>("Planet");
+    fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
+    //fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
 
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
+    auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
+    ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
+    fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
 
-	*/
-
-
+    */
 
 
 
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
+
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+
+    fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 }
 
 } // namespace openspace

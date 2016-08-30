@@ -22,11 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+/*
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
 in vec4 vs_point_position;
 in vec4 vs_point_velocity;
+*/
+
+//out vec4 vs_point_position;
+in vec4 vs_point_velocity;
+in vec4 vs_positionScreenSpace;
 
 
 //out vec4 diffuse;
@@ -35,19 +41,9 @@ in vec4 vs_point_velocity;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-
-    vec4 position = vs_point_position;
-    float depth = pscDepth(position);
-    
-    // set the depth
-    //gl_FragDepth = depth;
-
-    //float l = length(vs_point_velocity);
-    
-    vec4 diffuse = vs_point_velocity;
-
     Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
+    frag.color = vs_point_velocity;
+    frag.depth = vs_positionScreenSpace.w;
+
     return frag;
 }

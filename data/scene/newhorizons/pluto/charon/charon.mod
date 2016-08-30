@@ -55,6 +55,7 @@ return {
                 "CHARON"
             }
         },
+        --[[
         Ephemeris = {
             Type = "Spice",
             Body = "CHARON",
@@ -66,6 +67,21 @@ return {
             Type = "Spice",
             Frame = "IAU_CHARON",
             Reference = "ECLIPJ2000"
+        },
+        ]]
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "CHARON",
+                Reference = "GALACTIC",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_CHARON",
+                DestinationFrame = "GALACTIC"
+            },
         },
         GuiName = "/Solar/Planets/Charon"
     },
@@ -79,10 +95,18 @@ return {
             Billboard = true,
             Texture = "textures/Charon-Text.png"
         },
+        Transform = {
+            Translation = {
+                Type = "StaticEphemeris",
+                Position = {0, -1000000, 0}
+            },
+        },
+        --[[
         Ephemeris = {
             Type = "Static",
              Position = {0, -10, 0, 5}
         }
+        ]]
     },
     {
         Name = "CharonShadow",
@@ -97,10 +121,6 @@ return {
             MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 5}
-        }
     },    
     -- CharonTrail module
     {   

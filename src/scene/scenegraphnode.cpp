@@ -25,6 +25,8 @@
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 
 // ghoul includes
 #include <ghoul/logging/logmanager.h>
@@ -35,6 +37,9 @@
 #include <ghoul/opengl/shaderobject.h>
 
 #include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/scale/staticscale.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/factorymanager.h>
 
@@ -44,12 +49,16 @@
 namespace {
     const std::string _loggerCat = "SceneGraphNode";
     const std::string KeyRenderable = "Renderable";
-    const std::string KeyEphemeris = "Ephemeris";
+
+    const std::string keyTransformTranslation = "Transform.Translation";
+    const std::string keyTransformRotation = "Transform.Rotation";
+    const std::string keyTransformScale = "Transform.Scale";
 }
 
 namespace openspace {
-    
-std::string SceneGraphNode::RootNodeName = "Root";
+
+// Constants used outside of this file
+const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
@@ -81,22 +90,49 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable);
-        LDEBUG("Successfully create renderable for '" << result->name() << "'");
+        LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
-    if (dictionary.hasKey(KeyEphemeris)) {
-        ghoul::Dictionary ephemerisDictionary;
-        dictionary.getValue(KeyEphemeris, ephemerisDictionary);
-        delete result->_ephemeris;
-        result->_ephemeris = Ephemeris::createFromDictionary(ephemerisDictionary);
+    if (dictionary.hasKey(keyTransformTranslation)) {
+        ghoul::Dictionary translationDictionary;
+        dictionary.getValue(keyTransformTranslation, translationDictionary);
+        result->_ephemeris = 
+            (Ephemeris::createFromDictionary(translationDictionary));
         if (result->_ephemeris == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
-                   << result->name() << "'");
+                << result->name() << "'");
             delete result;
             return nullptr;
         }
-        //result->addPropertySubOwner(result->_ephemeris);
-        LDEBUG("Successfully create ephemeris for '" << result->name() << "'");
+        LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(keyTransformRotation)) {
+        ghoul::Dictionary rotationDictionary;
+        dictionary.getValue(keyTransformRotation, rotationDictionary);
+        result->_rotation = 
+            (Rotation::createFromDictionary(rotationDictionary));
+        if (result->_rotation == nullptr) {
+            LERROR("Failed to create rotation for SceneGraphNode '"
+                << result->name() << "'");
+            delete result;
+            return nullptr;
+        }
+        LDEBUG("Successfully created rotation for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(keyTransformScale)) {
+        ghoul::Dictionary scaleDictionary;
+        dictionary.getValue(keyTransformScale, scaleDictionary);
+        result->_scale = 
+            (Scale::createFromDictionary(scaleDictionary));
+        if (result->_scale == nullptr) {
+            LERROR("Failed to create scale for SceneGraphNode '"
+                << result->name() << "'");
+            delete result;
+            return nullptr;
+        }
+        LDEBUG("Successfully created scale for '" << result->name() << "'");
     }
 
     //std::string parentName;
@@ -121,7 +157,9 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _ephemeris(new StaticEphemeris)
+    , _ephemeris(new StaticEphemeris())
+    , _rotation(new StaticRotation())
+    , _scale(new StaticScale())
     , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -139,6 +177,10 @@ bool SceneGraphNode::initialize() {
 
     if (_ephemeris)
         _ephemeris->initialize();
+    if (_rotation)
+        _rotation->initialize();
+    if (_scale)
+        _scale->initialize();
 
     return true;
 }
@@ -151,9 +193,21 @@ bool SceneGraphNode::deinitialize() {
         delete _renderable;
         _renderable = nullptr;
     }
+    if (_ephemeris) {
+        delete _ephemeris;
+        _ephemeris = nullptr;
+    }
+    if (_rotation) {
+        delete _rotation;
+        _rotation = nullptr;
+    }
+    if (_scale) {
+        delete _scale;
+        _scale = nullptr;
+    }
 
-    delete _ephemeris;
-    _ephemeris = nullptr;
+    //delete _ephemeris;
+    //_ephemeris = nullptr;
 
  //   for (SceneGraphNode* child : _children) {
     //    child->deinitialize();
@@ -171,23 +225,60 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    _worldPositionCached = calculateWorldPosition();
-    UpdateData newUpdateData = data;
-    newUpdateData.position = worldPosition().dvec3();
     if (_ephemeris) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(newUpdateData);
+            _ephemeris->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _ephemeris->update(newUpdateData);
+            _ephemeris->update(data);
     }
+
+    if (_rotation) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
+
+            _rotation->update(data);
+
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeEphemeris = (end - start).count();
+        }
+        else
+            _rotation->update(data);
+    }
+
+    if (_scale) {
+        if (data.doPerformanceMeasurement) {
+            glFinish();
+            auto start = std::chrono::high_resolution_clock::now();
+
+            _scale->update(data);
+
+            glFinish();
+            auto end = std::chrono::high_resolution_clock::now();
+            _performanceRecord.updateTimeEphemeris = (end - start).count();
+        }
+        else
+            _scale->update(data);
+    }
+    UpdateData newUpdateData = data;
+
+    _worldRotationCached = calculateWorldRotation();
+    _worldScaleCached = calculateWorldScale();
+    // Assumes _worldRotationCached and _worldScaleCached have been calculated for parent
+    _worldPositionCached = calculateWorldPosition();
+
+    newUpdateData.modelTransform.translation = worldPosition();
+    newUpdateData.modelTransform.rotation = worldRotationMatrix();
+    newUpdateData.modelTransform .scale = worldScale();
 
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
@@ -246,9 +337,15 @@ void SceneGraphNode::evaluate(const Camera* camera, const psc& parentPosition) {
 }
 
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
-    const psc thisPosition = _worldPositionCached;
+    const psc thisPositionPSC = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
 
-    RenderData newData = {data.camera, thisPosition, data.doPerformanceMeasurement};
+    RenderData newData = {
+        data.camera,
+        thisPositionPSC,
+        data.doPerformanceMeasurement,
+        _worldPositionCached,
+        _worldRotationCached,
+        _worldScaleCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -273,8 +370,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = _worldPositionCached;
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement };
+    const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
+    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, _worldPositionCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -314,28 +411,67 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 //    return false;
 //}
 
-const psc& SceneGraphNode::position() const
+glm::dvec3 SceneGraphNode::position() const
 {
     return _ephemeris->position();
 }
 
-psc SceneGraphNode::worldPosition() const
+const glm::dmat3& SceneGraphNode::rotationMatrix() const
+{
+    return _rotation->matrix();
+}
+
+double SceneGraphNode::scale() const
+{
+    return _scale->scaleValue();
+}
+
+glm::dvec3 SceneGraphNode::worldPosition() const
 {
     return _worldPositionCached;
 }
 
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 {
-    return _ephemeris->worldRotationMatrix();
+    return _worldRotationCached;
 }
 
-psc SceneGraphNode::calculateWorldPosition() const {
+double SceneGraphNode::worldScale() const
+{
+    return _worldScaleCached;
+}
+
+glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
-        return _ephemeris->position() + _parent->calculateWorldPosition();
+        return
+            _parent->calculateWorldPosition() +
+            _parent->worldRotationMatrix() *
+            _parent->worldScale() *
+            position();
     }
     else {
-        return _ephemeris->position();
+        return position();
+    }
+}
+
+glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
+    // recursive up the hierarchy if there are parents available
+    if (_parent) {
+        return rotationMatrix() * _parent->calculateWorldRotation();
+    }
+    else {
+        return rotationMatrix();
+    }
+}
+
+double SceneGraphNode::calculateWorldScale() const {
+    // recursive up the hierarchy if there are parents available
+    if (_parent) {
+        return _parent->calculateWorldScale() * scale();
+    }
+    else {
+        return scale();
     }
 }
 
@@ -351,7 +487,9 @@ const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
     _boundingSphere = 0.0;
-    
+    /*
+    This is not how to calculate a bounding sphere, better to leave it at 0 if not a
+    renderable. --KB
     if (!_children.empty()) {  // node
         PowerScaledScalar maxChild;
 
@@ -369,7 +507,7 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         }
         _boundingSphere += maxChild;
     } 
-
+    */
     // if has a renderable, use that boundingsphere
     if (_renderable ) {
         PowerScaledScalar renderableBS = _renderable->getBoundingSphere();

@@ -1,22 +1,20 @@
 return {
     -- Latest image taken by LORRI
+    --[[
     { 
         Name = "ImagePlane",
-        Parent = "NewHorizons",
+        Parent = "PlutoProjection",
         Renderable = {
             Type = "RenderablePlaneProjection",
-            Frame = "IAU_JUPITER",
-            DefaultTarget = "JUPITER",
+            Frame = "NH_SPACECRAFT",
+            DefaultTarget = "PLUTO",
             Spacecraft = "NEW HORIZONS",
             Instrument = "NH_LORRI",
             Moving = false,
-            Texture = "textures/test.jpg",
-        },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
+            Texture = "textures/squarefov.png",
         }, 
     },
+    
     -- LORRI FoV square
     {
         Name = "ImagePlane2",
@@ -30,11 +28,7 @@ return {
             Moving = true,
             Texture = "textures/squarefov.png",
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 1}
-        },
     }
-
+    ]]
 }
 

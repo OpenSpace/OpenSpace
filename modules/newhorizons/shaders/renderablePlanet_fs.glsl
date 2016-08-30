@@ -25,7 +25,8 @@
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-in vec4 vs_position;
+//in vec4 vs_position;
+in vec4 vs_positionScreenSpace;
 in vec4 vs_normal;
 in vec2 vs_st;
 
@@ -38,9 +39,6 @@ uniform vec4 objpos;
 uniform vec3 sun_pos;
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-
     // directional lighting
     vec3 origin = vec3(0.0);
     vec4 spec = vec4(0.0);
@@ -70,7 +68,7 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color =  max(intensity * textureColor, ambient);
-    frag.depth = depth;
+    frag.depth = vs_positionScreenSpace.w;
 
     return frag;
 }

@@ -26,6 +26,7 @@
 #define __SEQUENCEPARSER_H__
 
 #include <openspace/network/networkengine.h>
+#include <openspace/util/timerange.h>
 
 #include <map>
 #include <string>
@@ -36,29 +37,12 @@ namespace openspace {
 class Decoder;
 
 struct Image {
-    double startTime = 0.0;
-    double stopTime = 0.0;
+    TimeRange timeRange;
     std::string path;
     std::vector<std::string> activeInstruments;
     std::string target;
     bool isPlaceholder = false;
     bool projected = false;
-};
-
-struct TimeRange {
-    TimeRange() : _min(-1), _max(-1){};
-    void setRange(double val){
-        if (_min > val) _min = val;
-        if (_max < val) _max = val;
-    };
-    bool inRange(double min, double max){
-        return (min >= _min && max <= _max);
-    }
-    bool inRange(double val) const {
-        return (val >= _min && val <= _max);
-    }
-    double _min;
-    double _max;
 };
 
 struct ImageSubset {

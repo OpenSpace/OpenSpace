@@ -35,67 +35,67 @@
 namespace openspace {
 
 /**
-	Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
-	has all data needed such as position buffer and normal buffer but all data is not
-	necessarily needed for all purpouses so the Geometry can disable use of normals for
-	example.
+    Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
+    has all data needed such as position buffer and normal buffer but all data is not
+    necessarily needed for all purpouses so the Geometry can disable use of normals for
+    example.
 */
 
-	// TODO : Possibly render triangle strips in this class instead of triangles since
-	// that is faster
+    // TODO : Possibly render triangle strips in this class instead of triangles since
+    // that is faster
 
 class TriangleSoup
 {
 public:
-	enum class Positions { Yes, No };
-	enum class TextureCoordinates { Yes, No };
-	enum class Normals { Yes, No };
+    enum class Positions { Yes, No };
+    enum class TextureCoordinates { Yes, No };
+    enum class Normals { Yes, No };
 
-	TriangleSoup(
-		std::vector<unsigned int> elements, // At least elements are required
-		Positions usePositions = Positions::No,
-		TextureCoordinates useTextures = TextureCoordinates::No,
-		Normals useNormals = Normals::No);
-	~TriangleSoup();
+    TriangleSoup(
+        std::vector<unsigned int> elements, // At least elements are required
+        Positions usePositions = Positions::No,
+        TextureCoordinates useTextures = TextureCoordinates::No,
+        Normals useNormals = Normals::No);
+    ~TriangleSoup();
 
-	// Setters
-	void setVertexPositions(std::vector<glm::vec4> positions);
-	void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
-	void setVertexNormals(std::vector<glm::vec3> normals);
-	void setElements(std::vector<unsigned int> elements);
+    // Setters
+    void setVertexPositions(std::vector<glm::vec4> positions);
+    void setVertexTextureCoordinates(std::vector<glm::vec2> textures);
+    void setVertexNormals(std::vector<glm::vec3> normals);
+    void setElements(std::vector<unsigned int> elements);
 
 
-	
-	void drawUsingActiveProgram();
+    
+    void drawUsingActiveProgram();
 
 protected:
-	// Determines what attribute data is in use
-	bool _useVertexPositions;
-	bool _useTextureCoordinates;
-	bool _useVertexNormals;
+    // Determines what attribute data is in use
+    bool _useVertexPositions;
+    bool _useTextureCoordinates;
+    bool _useVertexNormals;
 
-	typedef struct {
-	public:
-		GLfloat position[4];
-		GLfloat texture[2];
-		GLfloat normal[3];
-	private:
-		GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-	} Vertex;
+    typedef struct {
+    public:
+        GLfloat position[4];
+        GLfloat texture[2];
+        GLfloat normal[3];
+    private:
+        GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
+    } Vertex;
 
-	// Vertex data
-	std::vector<Vertex> _vertexData;
-	std::vector<GLuint> _elementData;
+    // Vertex data
+    std::vector<Vertex> _vertexData;
+    std::vector<GLuint> _elementData;
 private:
 
-	bool updateDataInGPU();
+    bool updateDataInGPU();
 
-	// GL handles
-	GLuint _vaoID;
-	GLuint _vertexBufferID;
-	GLuint _elementBufferID;
+    // GL handles
+    GLuint _vaoID;
+    GLuint _vertexBufferID;
+    GLuint _elementBufferID;
 
-	bool _gpuDataNeedUpdate;
+    bool _gpuDataNeedUpdate;
 };
 
 } // namespace openspace

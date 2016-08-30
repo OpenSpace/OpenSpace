@@ -83,9 +83,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     }
 
     dictionary.getValue(keyFrame, _frame);
-    dictionary.getValue(keyBody, _target);
-    if (_target != "")
-        setBody(_target);
+    dictionary.getValue(keyBody, _body);
 
     success = _projectionComponent.initializeProjectionSettings(dictionary);
     ghoul_assert(success, "");
@@ -313,7 +311,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     if (_capture && _projectionComponent.doesPerformProjection()) {
         for (const Image& img : _imageTimes) {
-            RenderablePlanetProjection::attitudeParameters(img.startTime);
+            RenderablePlanetProjection::attitudeParameters(img.timeRange.start);
             imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
         }
         _capture = false;
@@ -329,8 +327,30 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     // Main renderpass
     _programObject->activate();
     _programObject->setUniform("sun_pos", sun_pos.vec3());
-    _programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform" , _transform);
+    //_programObject->setUniform("ViewProjection" ,  data.camera.viewProjectionMatrix());
+    //_programObject->setUniform("ModelTransform" , _transform);
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
+    // This is apparently the transform needed to get the model in the coordinate system
+    // Used by SPICE. Don't ask me why, it was defined in the function attitudeParameters.
+    // SPICE needs a planet to be defined with z in the north pole, x in the prime
+    // meridian and y completes the right handed coordinate system.
+    // Doing this is part of changing from using the transforms defined by the
+    // scenegraph node (data.modelTransform) to achieve higher precision rendering. //KB
+    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
+    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    modelTransform = modelTransform * rot * roty;
+
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _programObject->setUniform("modelTransform", glm::mat4(modelTransform));
+    _programObject->setUniform("modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
     _programObject->setUniform("_hasHeightMap", _heightMapTexture != nullptr);
     _programObject->setUniform("_heightExaggeration", _heightExaggeration);
@@ -338,7 +358,7 @@ void RenderablePlanetProjection::render(const RenderData& data) {
 
     //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
+    //setPscUniforms(*_programObject.get(), data.camera, data.position);
     
     ghoul::opengl::TextureUnit unit[3];
     unit[0].activate();
@@ -364,8 +384,11 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         _fboProgramObject->rebuildFromFile();
     }
 
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
+
+    _projectionComponent.update();
 
     _time = Time::ref().currentTime();
     _capture = false;

@@ -259,10 +259,8 @@ vec4 calculateNight(
 	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
-	const vec3 ellipsoidNormalCameraSpace) {
-
-	vec3 lightDirection = normalize(vec3(-1,-1,-1));
-	float cosineFactor = clamp(dot(-lightDirection, ellipsoidNormalCameraSpace), 0, 1);
+	const vec3 ellipsoidNormalCameraSpace,
+	const vec3 lightDirectionCameraSpace) {
 
 	vec4 nightColor = vec4(0,0,0,0);
 
@@ -283,8 +281,10 @@ vec4 calculateNight(
 	}
 	#endfor
 
+	float cosineFactor = clamp(dot(-lightDirectionCameraSpace, ellipsoidNormalCameraSpace) * 3, 0, 1);
+
 	// Blend night color with base color
-	vec4 color = vec4(cosineFactor * vec3(currentColor) + (1 - cosineFactor) * vec3(nightColor), currentColor.a);
+	vec4 color = vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * vec3(nightColor * nightColor * 0.7), currentColor.a);
 
 	return color;
 }
@@ -371,7 +371,10 @@ vec4 calculateWater(
 	LevelWeights levelWeights,
 	const Tile waterTiles[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
-	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
+	const Tile waterTilesParent2[NUMLAYERS_WATERMASK],
+	const vec3 ellipsoidNormalCameraSpace,
+	const vec3 lightDirectionCameraSpace,
+	const vec3 positionCameraSpace) {
 
 	vec4 waterColor = vec4(0,0,0,0);
 
@@ -392,7 +395,18 @@ vec4 calculateWater(
 	}
 	#endfor
 
-	return blendOver(currentColor, waterColor);
+	vec3 directionToFragmentCameraSpace = normalize(positionCameraSpace - vec3(0, 0, 0));
+	vec3 reflectionDirectionCameraSpace = reflect(lightDirectionCameraSpace, ellipsoidNormalCameraSpace);
+	float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
+	cosineFactor = pow(cosineFactor, 30);
+
+	vec3 specularColor = vec3(1, 1, 1);
+	float specularIntensity = 0.4;
+
+	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
+
+	//return blendOver(currentColor, waterColor);
+	return currentColor + vec4(specularTotal, 1);
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL

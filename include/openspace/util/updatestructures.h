@@ -36,8 +36,14 @@ struct InitializeData {
 
 };
 
+struct TransformData {
+    glm::dvec3 translation;
+    glm::dmat3 rotation;
+    double scale;
+};
+
 struct UpdateData {
-    glm::dvec3 position;
+    TransformData modelTransform;
     double time;
     bool isTimeJump;
     double delta;
@@ -46,8 +52,11 @@ struct UpdateData {
 
 struct RenderData {
     const Camera& camera;
+    // psc position to be removed in favor of the double precision position defined in
+    // the translation in transform.
     psc position;
     bool doPerformanceMeasurement;
+    TransformData modelTransform;
 };
 
 struct RaycasterTask {

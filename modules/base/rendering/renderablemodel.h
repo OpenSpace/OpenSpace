@@ -67,18 +67,19 @@ private:
     glm::dmat3 _modelTransform;
 
     float _alpha;
-    glm::dmat3 _stateMatrix; 
+    //glm::dmat3 _stateMatrix; 
 
-    std::string _source;
-    std::string _destination;
+    //std::string _source;
+    //std::string _destination;
     std::string _target;
 
     //bool _isGhost;
     int _frameCount;
 
-    psc _sunPosition;
+    glm::dvec3 _sunPos;
 
     properties::BoolProperty _performShading;
+    properties::Vec3Property _debugModelRotation;
 };
 
 }  // namespace openspace

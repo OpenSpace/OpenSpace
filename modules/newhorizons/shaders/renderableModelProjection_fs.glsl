@@ -24,14 +24,15 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec4 vs_position;
 in vec4 vs_normal;
 in vec2 vs_uv;
 in vec4 ProjTexCoord;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
+// Even though the stencel texture is only a single channel, we still need to
+// output a vec4, or the result will disappear
+layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
 
@@ -44,22 +45,24 @@ bool inRange(float x, float a, float b) {
 } 
 
 void main() {
-  vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
+    vec2 uv = vec2(0.5,0.5)*vs_uv+vec2(0.5,0.5);
 
-  vec3 n = normalize(vs_normal.xyz);
-  vec4 projected = ProjTexCoord;
+    vec3 n = normalize(vs_normal.xyz);
+    vec4 projected = ProjTexCoord;
 
-  //normalize
-  projected.x /= projected.w;
-  projected.y /= projected.w;
-  //invert gl coordinates
-  projected.x = 1 - projected.x;
-  
-  if ((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
+    // normalize
+    projected.x /= projected.w;
+    projected.y /= projected.w;
+    // invert gl coordinates
+    projected.x = 1 - projected.x;
+
+    if ((inRange(projected.x, 0, 1) && inRange(projected.y, 0, 1)) && (dot(n, boresight) < 0)) {
         color = texture(projectionTexture, projected.xy);
         color.a = 1.0;
-  }
-  else {
-    color = vec4(vec3(0.0), 1.0);
-  }
+        stencil = vec4(1.0);
+    }
+    else {
+      color = vec4(vec3(0.0), 1.0);
+      stencil = vec4(0.0);
+    }
 }

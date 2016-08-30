@@ -90,14 +90,16 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     dictionary.getValue(keySource, _source);
     dictionary.getValue(keyDestination, _destination);
     dictionary.getValue(keyBody, _target);
-    if (_target != "")
-        setBody(_target);
+
 
     bool completeSuccess = true;
     completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);
     
     openspace::SpiceManager::ref().addFrame(_target, _source);
-    setBoundingSphere(pss(1.f, 9.f));
+
+    double boundingRadius = _geometry->boundingRadius();
+    setBoundingSphere(PowerScaledScalar::CreatePSS(boundingRadius));
+    
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);
@@ -131,9 +133,7 @@ bool RenderableModelProjection::initialize() {
     );
 
     completeSuccess &= loadTextures();
-
     completeSuccess &= _projectionComponent.initialize();
-
     completeSuccess &= _geometry->initialize(this);
     completeSuccess &= !_source.empty();
     completeSuccess &= !_destination.empty();
@@ -174,13 +174,25 @@ void RenderableModelProjection::render(const RenderData& data) {
 
     attitudeParameters(_time);
     _imageTimes.clear();
+
+    // Calculate variables to be used as uniform variables in shader
+    glm::dvec3 bodyPosition = data.modelTransform.translation;
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) * // Rotation
+        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)); // Scale
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    glm::vec3 directionToSun = glm::normalize(_sunPosition.vec3() - glm::vec3(bodyPosition));
+    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
         
     _programObject->setUniform("_performShading", _performShading);
-    _programObject->setUniform("sun_pos", _sunPosition.vec3());
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", _transform);
+    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
     _programObject->setUniform("_projectionFading", _projectionComponent.projectionFading());
-    setPscUniforms(*_programObject, data.camera, data.position);
+
 
     _geometry->setUniforms(*_programObject);
     
@@ -199,11 +211,15 @@ void RenderableModelProjection::render(const RenderData& data) {
 }
 
 void RenderableModelProjection::update(const UpdateData& data) {
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
 
-    if (_fboProgramObject->isDirty())
+    if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
+    }
+
+    _projectionComponent.update();
         
     _time = data.time;
 
@@ -309,7 +325,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
             time, lightTime);
     psc position = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
  
-    position[3] += (3 + _camScaling[1]);
+    position[3] += (3 + _camScaling[1]) + 1;
     glm::vec3 cpos = position.vec3();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
@@ -324,8 +340,9 @@ void RenderableModelProjection::attitudeParameters(double time) {
 
 void RenderableModelProjection::project() {
     for (auto img : _imageTimes) {
-        attitudeParameters(img.startTime);
-        imageProjectGPU(_projectionComponent.loadProjectionTexture(img.path));
+        attitudeParameters(img.timeRange.start);
+        auto projTexture = _projectionComponent.loadProjectionTexture(img.path, img.isPlaceholder);
+        imageProjectGPU(projTexture);
     }
     _capture = false;
 }

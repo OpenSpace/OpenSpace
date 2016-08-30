@@ -79,11 +79,11 @@ public:
      */
     virtual double averageDeltaTime() const;
 
-	/**
-	* Returns the frametime in seconds. On default, this method returns <code>0.0</code>.
-	* \return The frametime in seconds
-	*/
-	virtual double deltaTime() const;
+    /**
+    * Returns the frametime in seconds. On default, this method returns <code>0.0</code>.
+    * \return The frametime in seconds
+    */
+    virtual double deltaTime() const;
 
     /**
      * Returns the location of the mouse cursor in pixel screen coordinates. On default,

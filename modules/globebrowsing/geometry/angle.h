@@ -36,137 +36,137 @@ template <typename T>
 class Angle {
 public:
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                             STATIC CONSTANTS                                     //
-	//////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                             STATIC CONSTANTS                                     //
+    //////////////////////////////////////////////////////////////////////////////////////
 
-	static const T PI;
-	static const T EPSILON;
+    static const T PI;
+    static const T EPSILON;
 
-	
-	/** = 0 radians = 0 degrees = no revolution */
-	static const Angle<T> ZERO;
+    
+    /** = 0 radians = 0 degrees = no revolution */
+    static const Angle<T> ZERO;
 
-	/** = PI/2 radians = 90 degrees = quarter of a revolution */
-	static const Angle<T> QUARTER;
+    /** = PI/2 radians = 90 degrees = quarter of a revolution */
+    static const Angle<T> QUARTER;
 
-	/** = PI radians = 180 degrees = half a revolution */
-	static const Angle<T> HALF;
+    /** = PI radians = 180 degrees = half a revolution */
+    static const Angle<T> HALF;
 
-	/** = 2PI radians = 360 degrees = a full revolution */
-	static const Angle<T> FULL;
-
-
+    /** = 2PI radians = 360 degrees = a full revolution */
+    static const Angle<T> FULL;
 
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                                 Factory Methods                                  //
-	//////////////////////////////////////////////////////////////////////////////////////
 
-	static Angle<T> fromRadians(T radians);
-	static Angle<T> fromDegrees(T degrees);
-	static Angle<T> fromRevolutions(T revs);
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                 Factory Methods                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    static Angle<T> fromRadians(T radians);
+    static Angle<T> fromDegrees(T degrees);
+    static Angle<T> fromRevolutions(T revs);
 
 
 public:
-	/** Copy constructor */
-	Angle<T>(const Angle<T>& other);
+    /** Copy constructor */
+    Angle<T>(const Angle<T>& other);
 
 private:
-	/** Private constructor. Use factory methods to avoid unit confusion */
-	Angle<T>(T rad);
+    /** Private constructor. Use factory methods to avoid unit confusion */
+    Angle<T>(T rad);
 
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                                     Conversions                                  //
-	//////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                     Conversions                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
 public:
-	inline T asRadians() const;
-	inline T asDegrees() const;
-	inline T asRevolutions() const;
+    inline T asRadians() const;
+    inline T asDegrees() const;
+    inline T asRevolutions() const;
 
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                          Operators (boilerplate, I know.. /eb)                   //
-	//////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                          Operators (boilerplate, I know.. /eb)                   //
+    //////////////////////////////////////////////////////////////////////////////////////
 
-	Angle<T> operator+(const Angle<T>& rhs) const;
-	Angle<T> operator-(const Angle<T>& rhs) const;
-	Angle<T> operator*(T rhs) const;
-	Angle<T> operator/(T rhs) const;
+    Angle<T> operator+(const Angle<T>& rhs) const;
+    Angle<T> operator-(const Angle<T>& rhs) const;
+    Angle<T> operator*(T rhs) const;
+    Angle<T> operator/(T rhs) const;
 
-	Angle<T> operator-() const;
+    Angle<T> operator-() const;
 
-	void operator+=(const Angle<T>& rhs);
-	void operator-=(const Angle<T>& rhs);
-	void operator*=(T rhs);
-	void operator/=(T rhs);
+    void operator+=(const Angle<T>& rhs);
+    void operator-=(const Angle<T>& rhs);
+    void operator*=(T rhs);
+    void operator/=(T rhs);
 
-	bool operator<(const Angle<T>& rhs) const;
-	bool operator<=(const Angle<T>& rhs) const;
-	bool operator>(const Angle<T>& rhs) const;
-	bool operator>=(const Angle<T>& rhs) const;
-	bool operator==(const Angle<T>& rhs) const;
-	bool operator!=(const Angle<T>& rhs) const;
-
-
-
-
-
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                            Chainable Relative Mutators                           //
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Normalizes the angle to the interval [0, 2pi[
-	 */
-	Angle<T>& normalize();
-
-	/**
-	* Normalizes the angle to the interval [center - pi, center + pi[
-	*/
-	Angle<T>& normalizeAround(const Angle<T>& center);
-
-	/**
-	* Clamps the angle to the interval [min, max]. 
-	* Default arguments are [0, 2pi]. 
-	*/
-	Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
-
-
-	Angle<T>& abs();
+    bool operator<(const Angle<T>& rhs) const;
+    bool operator<=(const Angle<T>& rhs) const;
+    bool operator>(const Angle<T>& rhs) const;
+    bool operator>=(const Angle<T>& rhs) const;
+    bool operator==(const Angle<T>& rhs) const;
+    bool operator!=(const Angle<T>& rhs) const;
 
 
 
 
-	//////////////////////////////////////////////////////////////////////////////////////
-	//                         Chainable Relative Factory Methods                       //
-	//////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	* Returns a new angle normalized to the interval [0, 2pi[
-	*/
-	Angle<T> getNormalized() const;
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Chainable Relative Mutators                           //
+    //////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	* Returns a new angle normalized to the interval [center - pi, center + pi[
-	*/
-	Angle<T> getNormalizedAround(const Angle<T>& center) const;
+    /**
+     * Normalizes the angle to the interval [0, 2pi[
+     */
+    Angle<T>& normalize();
 
-	/**
-	* Returns a new angle clamped to the interval [min, max].
-	* Default arguments are [0, 2pi].
-	*/
-	Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
+    /**
+    * Normalizes the angle to the interval [center - pi, center + pi[
+    */
+    Angle<T>& normalizeAround(const Angle<T>& center);
+
+    /**
+    * Clamps the angle to the interval [min, max]. 
+    * Default arguments are [0, 2pi]. 
+    */
+    Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 
 
-	Angle<T> getAbs() const;
-	
+    Angle<T>& abs();
+
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                         Chainable Relative Factory Methods                       //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+    * Returns a new angle normalized to the interval [0, 2pi[
+    */
+    Angle<T> getNormalized() const;
+
+    /**
+    * Returns a new angle normalized to the interval [center - pi, center + pi[
+    */
+    Angle<T> getNormalizedAround(const Angle<T>& center) const;
+
+    /**
+    * Returns a new angle clamped to the interval [min, max].
+    * Default arguments are [0, 2pi].
+    */
+    Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
+
+
+    Angle<T> getAbs() const;
+    
 
 
 private:
 
-	T _radians;
+    T _radians;
 
 };
 
