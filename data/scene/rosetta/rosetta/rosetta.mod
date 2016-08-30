@@ -269,18 +269,28 @@ return {
     },
     {
         Name = "Philae",
-        Parent = "RosettaModel",
+        Parent = "67PBarycenter",
         -- This should need a transform, but currently the model is intrinsically
         -- translated
-        -- Transform = {
-        --     Translation = {
-        --         Type = "SpiceEphemeris",
-        --         Body = "PHILAE",
-        --         Reference = "GALACTIC",
-        --         Observer = "ROSETTA",
-        --         Kernels = RosettaKernels
-        --     }
-        -- }
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "PHILAE",
+                Reference = "GALACTIC",
+                Observer = "CHURYUMOV-GERASIMENKO",
+                Kernels = RosettaKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "ROS_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                -- The scale of the model is in cm; OpenSpace is in m
+                Scale = 0.01
+            }
+        }
     },
     {
         Name = "Philae_foil",
