@@ -37,7 +37,7 @@ return {
             },
             Textures = {
                 Type = "simple",
-                Color =  "textures/osirisTex.png",
+                Color =  "textures/white.png",
                 Project = "textures/defaultProj.png",
                 Default = "textures/defaultProj.png"
             },
@@ -62,7 +62,7 @@ return {
                             "OrbitalB_Site08_PolyCamImages.txt",
                             "Recon_225m_Equatorial_PolyCam.txt",
                         },
-                    },--[[
+                    },
                     ORX_REXIS = {
                         DetectorType = "Camera",
                         Spice = {"ORX_REXIS"},
@@ -71,7 +71,7 @@ return {
                             "Recon_225m_Equatorial_spectrometers.txt",
                             "Recon_525m_Equatorial_spectrometers.txt",
                         },
-                    },]]
+                    },
                 },       
                 Target = {
                     Body = BENNU_BODY, -- Do we need this?
