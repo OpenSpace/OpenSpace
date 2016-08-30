@@ -25,6 +25,8 @@ openspace.bindKey("F11", "openspace.printInfo('Set time: Recon');              o
 --    kernel32.dll!BaseThreadInitThunk()
 --    ntdll.dll!RtUserThreadStart()
 
+openspace.bindKey("F4", "openspace.scriptScheduler.clear(); openspace.scriptScheduler.load('${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua');")
+
 openspace.bindKey("q", helper.property.invert('SunMarker.renderable.enabled'))
 openspace.bindKey("e", helper.property.invert('EarthMarker.renderable.enabled'))
 
