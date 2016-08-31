@@ -109,7 +109,7 @@ namespace openspace {
         }});
         
         _factoryMap.insert({ "SingleImage", [](const std::string& file, const TileProviderInitData& initData) {
-            auto tileProvider = std::make_shared<SingleImagePrivoder>(file);
+            auto tileProvider = std::make_shared<SingleImageProvider>(file);
             return tileProvider;
         } });
 

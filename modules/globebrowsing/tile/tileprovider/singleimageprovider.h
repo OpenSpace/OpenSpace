@@ -49,10 +49,10 @@ namespace openspace {
     using namespace ghoul::opengl;
     
 
-    class SingleImagePrivoder : public TileProvider {
+    class SingleImageProvider : public TileProvider {
     public:
-        SingleImagePrivoder(const std::string& imagePath);
-        virtual ~SingleImagePrivoder() { }
+        SingleImageProvider(const std::string& imagePath);
+        virtual ~SingleImageProvider() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile getDefaultTile();
