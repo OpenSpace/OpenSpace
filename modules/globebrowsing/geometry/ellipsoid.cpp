@@ -115,15 +115,20 @@ namespace openspace {
             sin(geodetic2.lat));
     }
 
-    Vec3 Ellipsoid::radiiSquared() const {
+    const Vec3& Ellipsoid::radii() const {
+        return _radii;
+    }
+
+
+    const Vec3& Ellipsoid::radiiSquared() const {
         return _cached._radiiSquared;
     }
 
-    Vec3 Ellipsoid::oneOverRadiiSquared() const {
+    const Vec3& Ellipsoid::oneOverRadiiSquared() const {
         return _cached._oneOverRadiiSquared;
     }
 
-    Vec3 Ellipsoid::radiiToTheFourth() const {
+    const Vec3& Ellipsoid::radiiToTheFourth() const {
         return _cached._radiiToTheFourth;
     }
 
