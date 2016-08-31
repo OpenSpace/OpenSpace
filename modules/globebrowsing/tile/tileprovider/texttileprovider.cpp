@@ -141,6 +141,11 @@ namespace openspace {
         return 1337; // unlimited
     }
 
+    ChunkHashKey TextTileProvider::toHash(const ChunkIndex& chunkIndex) const {
+        return chunkIndex.hashKey();
+    }
+
+
     Tile TextTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
         glm::uvec4 color = { 0, 0, 0, 0 };
         return Tile::createPlainTile(_textureSize, color);
@@ -198,14 +203,11 @@ namespace openspace {
     void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
         GeodeticPatch patch(chunkIndex);
         bool aboveEquator = patch.isNorthern();
-        double lat = aboveEquator ? patch.minLat() : patch.maxLat();
-        double lon1 = patch.minLon();
-        double lon2 = patch.maxLon();
-        double tileLongitudalLength = _ellipsoid.longitudalDistance(lat, lon1, lon2);
-
+        
+        double tileLongitudalLength = roundedLongitudalLength(chunkIndex);
 
         std::string unit = "m";
-        if (tileLongitudalLength > 10000) {
+        if (tileLongitudalLength > 9999) {
             tileLongitudalLength *= 0.001;
             unit = "km";
         }
@@ -222,6 +224,28 @@ namespace openspace {
             " %.0f %s",
             tileLongitudalLength, unit.c_str()
             );
+    }
+
+    int SizeReferenceTileProvider::roundedLongitudalLength(const ChunkIndex& chunkIndex) const {
+        GeodeticPatch patch(chunkIndex);
+        bool aboveEquator = patch.isNorthern();
+        double lat = aboveEquator ? patch.minLat() : patch.maxLat();
+        double lon1 = patch.minLon();
+        double lon2 = patch.maxLon();
+        int l = static_cast<int>(_ellipsoid.longitudalDistance(lat, lon1, lon2));
+
+        bool useKm = l > 9999;
+        if (useKm) l /= 1000;
+        l = std::round(l);
+        if (useKm) l *= 1000;
+
+        return l;
+    }
+
+    ChunkHashKey SizeReferenceTileProvider::toHash(const ChunkIndex& chunkIndex) const {
+        int l = roundedLongitudalLength(chunkIndex);
+        ChunkHashKey key = static_cast<ChunkHashKey>(l);
+        return key;
     }
 
     Tile SizeReferenceTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
