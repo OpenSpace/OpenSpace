@@ -90,6 +90,7 @@ return {
                         Type = "SizeReference",
                         Name = "Size Reference",
                         Radii = marsEllipsoid,
+                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
                     },
                 },
                 HeightMaps = {

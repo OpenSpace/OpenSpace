@@ -100,8 +100,7 @@ namespace openspace {
     }
 
     Tile TextTileProvider::createChunkIndexTile(const ChunkIndex& chunkIndex) {
-        glm::uvec4 color = { 0, 0, 0, 0 };
-        Tile tile = Tile::createPlainTile(_textureSize, color);
+        Tile tile = backgroundTile(chunkIndex);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
@@ -142,6 +141,11 @@ namespace openspace {
         return 1337; // unlimited
     }
 
+    Tile TextTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
+        glm::uvec4 color = { 0, 0, 0, 0 };
+        return Tile::createPlainTile(_textureSize, color);
+    }
+
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                             Chunk Index Tile Provider                            //
@@ -165,16 +169,30 @@ namespace openspace {
 
     namespace {
         const std::string KeyRadii = "Radii";
+        const std::string KeyBackgroundImagePath = "BackgroundImagePath";
     }
 
     SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary) {
         _fontSize = 64;
         _font = OsEng.fontManager().font("Mono", _fontSize);
+
         glm::dvec3 radii(1,1,1);
         if (!dictionary.getValue(KeyRadii, radii)) {
             throw std::runtime_error("Must define key '" + KeyRadii + "'");
         }
         _ellipsoid = Ellipsoid(radii);
+
+        _backgroundTile.status = Tile::Status::Unavailable;
+        std::string backgroundImagePath;
+        if (dictionary.getValue(KeyBackgroundImagePath, backgroundImagePath)) {
+            using namespace ghoul::io;
+            std::string imgAbsPath = absPath(backgroundImagePath);
+            _backgroundTile.texture = TextureReader::ref().loadTexture(imgAbsPath);
+            _backgroundTile.texture->uploadTexture();
+            _backgroundTile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            _backgroundTile.status = Tile::Status::OK;
+        }
+
     }
 
     void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
@@ -205,6 +223,27 @@ namespace openspace {
             tileLongitudalLength, unit.c_str()
             );
     }
+
+    Tile SizeReferenceTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
+        if (_backgroundTile.status == Tile::Status::OK) {
+            Tile tile;
+            auto t = _backgroundTile.texture;
+            void* pixelData = new char[t->expectedPixelDataSize()];
+            memcpy(pixelData, t->pixelData(), t->expectedPixelDataSize());
+            tile.texture = std::make_shared<Texture>(
+                pixelData, t->dimensions(), t->format(), t->internalFormat(), t->dataType(), t->filter(), t->wrapping());
+            tile.texture->uploadTexture();
+            tile.texture->setDataOwnership(Texture::TakeOwnership::Yes);
+            tile.status = Tile::Status::OK;
+            return tile;
+        }
+        else {
+            // use default background
+            return TextTileProvider::backgroundTile(chunkIndex);
+        }
+    }
+
+
 
 
 }  // namespace openspace

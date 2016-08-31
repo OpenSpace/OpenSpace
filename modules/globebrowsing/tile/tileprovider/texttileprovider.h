@@ -73,6 +73,9 @@ namespace openspace {
         virtual void reset();
         virtual int maxLevel();
 
+        // Returns the tile which will be used to draw text onto.
+        // Default implementation returns a tile with a plain transparent texture.
+        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
         
         // This method is pure and should be implemented by subclasses
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
@@ -102,10 +105,13 @@ namespace openspace {
     class SizeReferenceTileProvider : public TextTileProvider {
     public:
         SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
+        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
 
     private:
         Ellipsoid _ellipsoid;
+        Tile _backgroundTile;
     };
 
 }  // namespace openspace
