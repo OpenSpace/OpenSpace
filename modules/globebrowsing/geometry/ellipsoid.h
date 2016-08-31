@@ -86,6 +86,9 @@ public:
     Scalar maximumRadius() const;
     Scalar averageRadius() const;
 
+    Scalar longitudalDistance(Scalar lat, Scalar lon1, Scalar lon2) const;
+    Scalar greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const;
+
     Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
     Vec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
     Vec3 cartesianPosition(const Geodetic3& geodetic3) const;
