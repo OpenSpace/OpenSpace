@@ -22,8 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <openspace/util/factorymanager.h>
+
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
-#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -133,16 +134,18 @@ namespace openspace {
             std::string type = "LRUCaching"; // if type is unspecified
             texDict.getValue("Type", type);
 
-            
-            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+
+            auto tileProviderFactory = FactoryManager::ref().factory<TileProvider>();
+            TileProvider* tileProvider = tileProviderFactory->create(type, texDict);
             if (tileProvider == nullptr) {
+                LERROR("Unable to create TileProvider '" << name << "' of type '" << type << "'");
                 continue;
             }
 
             bool enabled = false; // defaults to false if unspecified
             texDict.getValue("Enabled", enabled);
 
-            dest.push_back({ name, tileProvider, enabled });
+            dest.push_back({ name, std::shared_ptr<TileProvider>(tileProvider), enabled });
         }
     }
 

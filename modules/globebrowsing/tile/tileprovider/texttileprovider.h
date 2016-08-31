@@ -56,6 +56,7 @@ namespace openspace {
      */
     class TextTileProvider : public TileProvider {
     public:
+
         TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
         virtual ~TextTileProvider();
 

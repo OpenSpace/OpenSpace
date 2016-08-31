@@ -38,12 +38,69 @@
 
 
 namespace {
-    const std::string _loggerCat = "TileProvider";
+    const std::string _loggerCat = "CachingTileProvider";
+
+    const std::string KeyDoPreProcessing = "DoPreProcessing";
+    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
+    const std::string KeyFilePath = "FilePath";
+    const std::string KeyCacheSize = "CacheSize";
+    const std::string KeyFlushInterval = "FlushInterval";
 }
 
 
 namespace openspace {
 
+    CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
+    : _framesSinceLastRequestFlush(0)
+    {
+        // 
+        std::string name = "Name unspecified";
+        dictionary.getValue("Name", name);
+        std::string _loggerCat = "CachingTileProvider : " + name;
+
+
+        // 1. Get required Keys
+        std::string filePath;
+        if (!dictionary.getValue<std::string>(KeyFilePath, filePath)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
+
+        // 2. Initialize default values for any optional Keys
+        TileDataset::Configuration config;
+        config.doPreProcessing = false;
+        config.minimumTilePixelSize = 512;
+        
+        // getValue does not work for integers
+        double minimumPixelSize; 
+        double cacheSize = 512;
+        double framesUntilRequestFlush = 60;
+
+        // 3. Check for used spcified optional keys
+        if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
+            LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
+        }
+        if (dictionary.getValue<double>(KeyMinimumPixelSize, minimumPixelSize)) {
+            LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
+            config.minimumTilePixelSize = static_cast<int>(minimumPixelSize); 
+        }
+        if (dictionary.getValue<double>(KeyCacheSize, cacheSize)) {
+            LDEBUG("Default cacheSize overridden: " << cacheSize);
+        }
+        if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
+            LDEBUG("Default framesUntilRequestFlush overridden: " << framesUntilRequestFlush);
+        }
+
+
+        // Initialize instance variables
+        auto tileDataset = std::make_shared<TileDataset>(filePath, config);
+
+        // only one thread per provider supported atm
+        auto threadPool = std::make_shared<ThreadPool>(1);
+
+        _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
+        _tileCache = std::make_shared<TileCache>(cacheSize);
+        _framesUntilRequestFlush = framesUntilRequestFlush;
+    }
 
     CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,

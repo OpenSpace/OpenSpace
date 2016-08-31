@@ -38,11 +38,21 @@
 
 namespace {
     const std::string _loggerCat = "SingleImageProvider";
+
+    const std::string KeyFilePath = "FilePath";
 }
 
 
 namespace openspace {
 
+    SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
+        // Required input
+        if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
+
+        reset();
+    }
 
 
     SingleImageProvider::SingleImageProvider(const std::string& imagePath)

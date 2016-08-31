@@ -27,6 +27,7 @@
 
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
 
 
 #include <modules/globebrowsing/tile/tile.h>
@@ -41,15 +42,15 @@
 
 namespace openspace {
     
-
     using namespace ghoul::opengl;
-
     
-
-
-
     class TileProvider {
     public:
+        static TileProvider* createFromDictionary(const ghoul::Dictionary& dictionary);
+
+        TileProvider() {};
+        TileProvider(const ghoul::Dictionary& dictionary);
+
         virtual ~TileProvider() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;

@@ -51,6 +51,8 @@ namespace openspace {
 
     class SingleImageProvider : public TileProvider {
     public:
+        
+        SingleImageProvider(const ghoul::Dictionary& dictionary);
         SingleImageProvider(const std::string& imagePath);
         virtual ~SingleImageProvider() { }
 

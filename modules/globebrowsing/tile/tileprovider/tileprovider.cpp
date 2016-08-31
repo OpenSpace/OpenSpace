@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <openspace/util/factorymanager.h>
+
 #include <ghoul/logging/logmanager.h>
 
 
@@ -31,9 +33,33 @@
 
 namespace {
     const std::string _loggerCat = "TileProvider";
+
+    const std::string KeyType = "Type";
 }
 
 
 namespace openspace {
+
+TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    if (!dictionary.hasValue<std::string>(KeyType)) {
+        LERROR("TileProvider did not have key '" << KeyType << "'");
+        return nullptr;
+    }
+
+    std::string type;
+    dictionary.getValue(KeyType, type);
+    ghoul::TemplateFactory<TileProvider>* factory
+        = FactoryManager::ref().factory<TileProvider>();
+    TileProvider* result = factory->create(type, dictionary);
+
+    if (result == nullptr) {
+        LERROR("Failed creating Ephemeris object of type '" << type << "'");
+        return nullptr;
+    }
+
+    return result;
+}
+
+TileProvider::TileProvider(const ghoul::Dictionary& dictionary) { };
 
 }  // namespace openspace

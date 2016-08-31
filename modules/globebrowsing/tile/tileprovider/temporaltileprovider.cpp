@@ -25,7 +25,8 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileproviderfactory.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -46,6 +47,12 @@
 
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
+
+    const std::string KeyDoPreProcessing = "DoPreProcessing";
+    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
+    const std::string KeyFilePath = "FilePath";
+    const std::string KeyCacheSize = "CacheSize";
+    const std::string KeyFlushInterval = "FlushInterval";
 }
 
 
@@ -53,16 +60,21 @@ namespace openspace {
 
     const std::string TemporalTileProvider::TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
-    TemporalTileProvider::TemporalTileProvider(const std::string& datasetFile, 
-        const TileProviderInitData& tileProviderInitData)
-        : _datasetFile(datasetFile)
-        , _tileProviderInitData(tileProviderInitData)
+
+    TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+        : _initDict(dictionary) 
     {
-        std::ifstream in(datasetFile.c_str());
-        ghoul_assert(errno == 0, strerror(errno) << std::endl << datasetFile);
+
+        if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
+
+
+        std::ifstream in(_datasetFile.c_str());
+        ghoul_assert(errno == 0, strerror(errno) << std::endl << _datasetFile);
 
         // read file
-        std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
+        std::string xml((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
         _defaultTile = getTileProvider()->getDefaultTile();
     }
@@ -185,7 +197,8 @@ namespace openspace {
 
     std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
-        return TileProviderFactory::ref()->create("LRUCaching", gdalDatasetXml, _tileProviderInitData);
+        _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
+        return std::make_shared<CachingTileProvider>(_initDict);
     }
     
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {

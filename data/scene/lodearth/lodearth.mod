@@ -1,7 +1,7 @@
 return {
     -- Earth barycenter module
     {
-        Name = "EarthBarycenter",
+        Name = "EarthCenterOfMass",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
@@ -34,7 +34,7 @@ return {
     -- RenderableGlobe module
     {
         Name = "LodEarth",
-        Parent = "EarthBarycenter",
+        Parent = "EarthCenterOfMass",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -118,6 +118,8 @@ return {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
                         Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                 },
                 HeightMapOverlays = {

@@ -25,7 +25,6 @@
 #ifndef __CACHING_TILE_PROVIDER_H__
 #define __CACHING_TILE_PROVIDER_H__
 
-#include <gdal_priv.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
@@ -51,6 +50,7 @@ namespace openspace {
     class CachingTileProvider : public TileProvider {
     public:
 
+        CachingTileProvider(const ghoul::Dictionary& dictionary);
 
         CachingTileProvider(
             std::shared_ptr<AsyncTileDataProvider> tileReader, 
@@ -100,7 +100,6 @@ namespace openspace {
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;
-
 
         std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
     };
