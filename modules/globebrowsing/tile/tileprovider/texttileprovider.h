@@ -25,6 +25,8 @@
 #ifndef __TEXT_TILE_PROVIDER_H__
 #define __TEXT_TILE_PROVIDER_H__
 
+#include <memory>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
@@ -37,6 +39,7 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/geometry/ellipsoid.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +63,7 @@ namespace openspace {
         TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
         virtual ~TextTileProvider();
 
-        // Methods below are implemented in this class
+        // The TileProvider interface below is implemented in this class
 
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile getDefaultTile();
@@ -72,7 +75,6 @@ namespace openspace {
 
         
         // This method is pure and should be implemented by subclasses
-
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
 
     protected:
@@ -96,6 +98,15 @@ namespace openspace {
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
     };
 
+
+    class SizeReferenceTileProvider : public TextTileProvider {
+    public:
+        SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
+
+    private:
+        Ellipsoid _ellipsoid;
+    };
 
 }  // namespace openspace
 

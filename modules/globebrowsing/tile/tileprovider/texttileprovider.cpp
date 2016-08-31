@@ -53,6 +53,7 @@ namespace openspace {
     {
 
         _font = OsEng.fontManager().font("Mono", _fontSize);
+        
         _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
         _fontRenderer->setFramebufferSize(textureSize);
 
@@ -142,7 +143,9 @@ namespace openspace {
     }
 
 
-
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                             Chunk Index Tile Provider                            //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     void ChunkIndexTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
         fontRenderer.render(
@@ -156,8 +159,52 @@ namespace openspace {
             );
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                         Tile Size Reference Tile Provider                        //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    namespace {
+        const std::string KeyRadii = "Radii";
+    }
+
+    SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary) {
+        _fontSize = 64;
+        _font = OsEng.fontManager().font("Mono", _fontSize);
+        glm::dvec3 radii(1,1,1);
+        if (!dictionary.getValue(KeyRadii, radii)) {
+            throw std::runtime_error("Must define key '" + KeyRadii + "'");
+        }
+        _ellipsoid = Ellipsoid(radii);
+    }
+
+    void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
+        GeodeticPatch patch(chunkIndex);
+        bool aboveEquator = patch.isNorthern();
+        double lat = aboveEquator ? patch.minLat() : patch.maxLat();
+        double lon1 = patch.minLon();
+        double lon2 = patch.maxLon();
+        double tileLongitudalLength = _ellipsoid.longitudalDistance(lat, lon1, lon2);
 
 
+        std::string unit = "m";
+        if (tileLongitudalLength > 10000) {
+            tileLongitudalLength *= 0.001;
+            unit = "km";
+        }
+
+        glm::vec2 textPosition;
+        textPosition.x = 0;
+        textPosition.y = aboveEquator ? _fontSize / 2 : _textureSize.y - 3 * _fontSize / 2;
+        glm::vec4 color(1.0, 1.0, 1.0, 1.0);
+
+        fontRenderer.render(
+            *_font,
+            textPosition,
+            color,
+            " %.0f %s",
+            tileLongitudalLength, unit.c_str()
+            );
+    }
 
 
 }  // namespace openspace

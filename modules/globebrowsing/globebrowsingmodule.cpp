@@ -63,6 +63,7 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<SingleImageProvider>("SingleImage");
     fTileProvider->registerClass<TemporalTileProvider>("Temporal");
     fTileProvider->registerClass<ChunkIndexTileProvider>("ChunkIndex");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReference");
     
 }
 

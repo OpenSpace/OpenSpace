@@ -86,6 +86,11 @@ return {
                         Type = "ChunkIndex",
                         Name = "Indices",
                     },
+                    {
+                        Type = "SizeReference",
+                        Name = "Size Reference",
+                        Radii = marsEllipsoid,
+                    },
                 },
                 HeightMaps = {
                     {
