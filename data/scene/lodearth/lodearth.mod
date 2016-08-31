@@ -1,3 +1,4 @@
+earthEllipsoid = {6378137.0, 6378137.0, 6356752.314245} -- Earth's radii
 return {
     -- Earth barycenter module
     {
@@ -48,7 +49,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            Radii = earthEllipsoid,
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
@@ -111,6 +112,12 @@ return {
                     {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/Reference_Labels.xml",
+                    },
+                    {
+                        Type = "SizeReference",
+                        Name = "Size Reference",
+                        Radii = earthEllipsoid,
+                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
                     },
                 },
                 HeightMaps = {
