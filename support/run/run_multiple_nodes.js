@@ -4,7 +4,7 @@ const exec = require('child_process').exec;
 
 var path = process.argv[2];
 var nNodes = +process.argv[3];
-var PATH_TO_GENERATED_CONF = 'generated_sgct_config.xml';
+var PATH_TO_GENERATED_CONF = __dirname + '/generated_sgct_config.xml';
 
 run();
 
