@@ -108,6 +108,8 @@ protected:
     std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
 
+    float _projectionTextureAspectRatio;
+
     std::string _instrumentID;
     std::string _projectorID;
     std::string _projecteeID;

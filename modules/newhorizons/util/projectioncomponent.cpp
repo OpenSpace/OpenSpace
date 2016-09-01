@@ -52,6 +52,7 @@ namespace {
     const std::string keyTranslation = "DataInputTranslation";
 
     const std::string keyNeedsTextureMapDilation = "Projection.TextureMap";
+    const std::string keyTextureMapAspectRatio = "Projection.AspectRatio";
 
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
@@ -194,6 +195,12 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
 
     if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
         _needsTextureMapDilation = dictionary.value<bool>(keyNeedsTextureMapDilation);
+    }
+
+    _projectionTextureAspectRatio = 1.f;
+    if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
+        _projectionTextureAspectRatio = 
+            static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
     }
 
     return completeSuccess;
@@ -579,11 +586,22 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 bool ProjectionComponent::generateProjectionLayerTexture() {
     int maxSize = OpenGLCap.max2DTextureSize() / 2;
 
+    glm::ivec2 size;
+    if (_projectionTextureAspectRatio > 1.f) {
+        size.x = maxSize;
+        size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
+    }
+    else {
+        size.x = static_cast<int>(maxSize * _projectionTextureAspectRatio);
+        size.y = maxSize;
+    }
+
+
     LINFO(
-        "Creating projection texture of size '" << maxSize << ", " << maxSize / 2 << "'"
+        "Creating projection texture of size '" << size.x << ", " << size.y << "'"
     );
     _projectionTexture = std::make_unique<ghoul::opengl::Texture> (
-        glm::uvec3(maxSize, maxSize / 2, 1),
+        glm::uvec3(size, 1),
         ghoul::opengl::Texture::Format::RGBA
     );
     if (_projectionTexture) {
@@ -593,7 +611,7 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
     
     if (_needsTextureMapDilation) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(maxSize, maxSize / 2, 1),
+            glm::uvec3(size, 1),
             ghoul::opengl::Texture::Format::RGBA
         );
 
@@ -603,7 +621,7 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
         }
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(maxSize, maxSize / 2, 1),
+            glm::uvec3(size, 1),
             ghoul::opengl::Texture::Format::Red,
             ghoul::opengl::Texture::Format::Red
         );
@@ -622,12 +640,23 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
 bool ProjectionComponent::generateDepthTexture() {
     int maxSize = OpenGLCap.max2DTextureSize() / 2;
 
+    glm::ivec2 size;
+
+    if (_projectionTextureAspectRatio > 1.f) {
+        size.x = maxSize;
+        size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
+    }
+    else {
+        size.x = static_cast<int>(maxSize * _projectionTextureAspectRatio);
+        size.y = maxSize;
+    }
+
     LINFO(
-        "Creating depth texture of size '" << maxSize / 2 << ", " << maxSize / 2 << "'"
+        "Creating depth texture of size '" << size.x << ", " << size.y << "'"
         );
 
     _depthTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(maxSize / 2, maxSize / 2, 1),
+        glm::uvec3(size, 1),
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
         );

@@ -40,6 +40,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             Instrument = {                
                 Name       = "NH_LORRI",

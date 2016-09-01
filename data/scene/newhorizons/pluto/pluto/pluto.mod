@@ -67,6 +67,7 @@ return {
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
                 Aberration     = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instrument = {

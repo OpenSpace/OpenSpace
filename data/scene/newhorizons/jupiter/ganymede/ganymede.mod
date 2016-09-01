@@ -22,6 +22,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "GANYMEDE",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             Instrument = {                
                 Name       = "NH_LORRI",
