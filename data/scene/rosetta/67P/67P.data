@@ -5,6 +5,5 @@ return {
     },
     TorrentFiles = {
         { File = "67P_rotated_5_130.obj.torrent", Destination = "obj" },
-        { File = "RosettaKernels.torrent", Destination = "${SPICE}" }
     }
 }
