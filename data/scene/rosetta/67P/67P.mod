@@ -28,6 +28,7 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/gray.jpg",
+                -- Color = "textures/may9_map.jpg",
                 Project = "textures/defaultProj.png",
                 Default = "textures/defaultProj.png"
             },
