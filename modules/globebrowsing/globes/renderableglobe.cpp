@@ -62,6 +62,7 @@ namespace openspace {
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _isEnabled(properties::BoolProperty(" Enabled", " Enabled", true))
+        , _toggleEnabledEveryFrame(properties::BoolProperty("Toggle enabled every frame", "Toggle enabled every frame", false))
         , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
@@ -103,6 +104,7 @@ namespace openspace {
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
 
         addProperty(_isEnabled);
+        addProperty(_toggleEnabledEveryFrame);
 
 
         // Add debug options - must be after chunkedLodGlobe has been created as it 
@@ -164,6 +166,9 @@ namespace openspace {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
+        if (_toggleEnabledEveryFrame.value()) {
+            _isEnabled.setValue(!_isEnabled.value());
+        }
         if (_isEnabled.value()) {
             if (_saveOrThrowCamera.value()) {
                 _saveOrThrowCamera.setValue(false);
