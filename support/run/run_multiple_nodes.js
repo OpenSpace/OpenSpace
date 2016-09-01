@@ -3,25 +3,23 @@ const exec = require('child_process').exec;
 
 
 var path = process.argv[2];
-var confPath = process.argv[3];
-var nNodes = +process.argv[4];
-
+var nNodes = +process.argv[3];
+var PATH_TO_GENERATED_CONF = 'generated_sgct_config.xml';
 
 run();
 
 function run(){
-	if(process.argv.length !== 5){
-		console.log("Error! Expected 3 arguments:");
-		console.log("<path/to/openspace-binary> <path/to/output-sgct-config> <# nodes to generate>");
+	if(process.argv.length !== 4){
+		console.log("Error! Expected 2 arguments:");
+		console.log("<path/to/openspace-binary> <# nodes to generate>");
 		return;
 	}
 	if(!path) return new Error("bad path!");
 	if(!nNodes) return new Error("bad nNodes!");
-	if(!confPath) return new Error("bad confPath!");
 
 	var s = generateConfigSrcForN_nodes();
 
-	fs.writeFile(confPath, s, function(err) {
+	fs.writeFile(PATH_TO_GENERATED_CONF, s, function(err) {
 	    if(err) {
 	        return console.log(err);
 	    }
@@ -33,8 +31,9 @@ function run(){
 
 function execChildProcesses(){
 	for (var i = 0; i < nNodes; i++) {
-
-		var cmd = path + " -local " + i;
+		var cmd = path;
+		cmd += " -sgct " + PATH_TO_GENERATED_CONF
+		cmd += " -local " + i;
 		if(i > 0){
 			cmd += " --slave";
 		}
@@ -56,7 +55,7 @@ function generateConfigSrcForN_nodes(){
 	var s = "";
 	s += '\
 <?xml version="1.0" ?>\n\
-<Cluster masterAddress="127.0.0.1" firmSync="true">';
+<Cluster masterAddress="127.0.0.1" firmSync="false">';
 	
 	for (var i = 0; i < nNodes; i++) {
 		s += generateNode(i);
@@ -75,7 +74,7 @@ function generateNode(i){
 	var x = i > 0 ? ((640 + i * 578) % 1920) : 10;
 	var y = i > 0 ? ((300 + i * 258) % 1080) : 30;
 	return '\n\
-	<Node address="127.0.0.' + (i+1) + '" port="2040' + (i+1) + '" swapLock="true">\n\
+	<Node address="127.0.0.' + (i+1) + '" port="2040' + (i+1) + '" swapLock="false">\n\
 		<Window fullScreen="false">\n\
 			<Pos x="'+ x +'" y="' + y + '" />\n\
 			<!-- 16:9 aspect ratio -->\n\
