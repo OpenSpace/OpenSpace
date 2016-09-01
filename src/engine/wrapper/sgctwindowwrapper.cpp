@@ -111,8 +111,7 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-}
-
+} 
     
 bool SGCTWindowWrapper::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock
@@ -136,6 +135,15 @@ bool SGCTWindowWrapper::hasGuiWindow() const {
 bool SGCTWindowWrapper::isGuiWindow() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
 }
+
+bool SGCTWindowWrapper::isSwapGroupMaster() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+}
+
+bool SGCTWindowWrapper::isUsingSwapGroups() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+}
+
     
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();

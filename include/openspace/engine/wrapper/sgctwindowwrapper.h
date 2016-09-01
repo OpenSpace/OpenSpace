@@ -53,6 +53,8 @@ public:
     bool isRegularRendering() const override;
     bool hasGuiWindow() const override;
     bool isGuiWindow() const override;
+    bool isUsingSwapGroups() const override;
+    bool isSwapGroupMaster() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;

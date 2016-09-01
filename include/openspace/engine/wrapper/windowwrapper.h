@@ -153,6 +153,11 @@ public:
      */
     virtual bool isGuiWindow() const;
 
+
+    virtual bool isUsingSwapGroups() const;
+
+    virtual bool isSwapGroupMaster() const;
+
     /**
      * Returns the currently employed view-projection matrix. On default, this method will
      * return the identity matrix.

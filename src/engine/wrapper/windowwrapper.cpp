@@ -86,6 +86,15 @@ bool WindowWrapper::isGuiWindow() const {
     return false;
 }
 
+bool WindowWrapper::isSwapGroupMaster() const {
+    return false;
+}
+
+bool WindowWrapper::isUsingSwapGroups() const {
+    return false;
+}
+
+
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
 }
