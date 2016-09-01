@@ -165,6 +165,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
+    LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
+    LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui->deinitializeGL();
 #endif
@@ -726,6 +728,10 @@ bool OpenSpaceEngine::initializeGL() {
     }
 #endif
     LINFO("Finished initializing OpenGL");
+
+    // If using swapgroups, 
+    LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
+    LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
     return success;
 }
 
