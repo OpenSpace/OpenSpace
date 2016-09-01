@@ -153,9 +153,14 @@ public:
      */
     virtual bool isGuiWindow() const;
 
-
+    /**
+    * Returns <code>true</code> if the current rendering window is using swap groups.
+    */
     virtual bool isUsingSwapGroups() const;
 
+    /**
+    * Returns <code>true</code> if the current rendering window is master of the swap its group. 
+    */
     virtual bool isSwapGroupMaster() const;
 
     /**
