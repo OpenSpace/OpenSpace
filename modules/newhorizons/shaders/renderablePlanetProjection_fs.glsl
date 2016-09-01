@@ -73,6 +73,8 @@ void main() {
     projected.x /= projected.w;
     projected.y /= projected.w;
 
+    projected = projected * 0.5 + vec4(0.5);
+
     vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
 
     vec3 v_b = normalize(boresight);
