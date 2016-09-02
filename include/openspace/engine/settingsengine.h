@@ -46,9 +46,11 @@ public:
 private:
     void initEyeSeparation();
     void initSceneFiles();
+    void initShowFrameNumber();
 
     properties::FloatProperty _eyeSeparation;
     properties::OptionProperty _scenes;
+    properties::BoolProperty _showFrameNumber;
 };
 
 } // namespace openspace

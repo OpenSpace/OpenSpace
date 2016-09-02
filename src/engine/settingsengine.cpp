@@ -38,6 +38,7 @@ namespace openspace {
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::DROPDOWN)
+    , _showFrameNumber("showFrameNumber", "Show frame number", false)
 {
     setName("Global Properties");
 }
@@ -45,6 +46,7 @@ SettingsEngine::SettingsEngine()
 void SettingsEngine::initialize() {
     initEyeSeparation();
     initSceneFiles();
+    initShowFrameNumber();
 }
     
 void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
@@ -59,6 +61,13 @@ void SettingsEngine::initEyeSeparation() {
     // Set interaction to change the window's (SGCT's) eye separation
     _eyeSeparation.onChange(
         [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
+}
+
+void SettingsEngine::initShowFrameNumber() {
+    addProperty(_showFrameNumber);
+
+    _showFrameNumber.onChange(
+        [this]() { OsEng.renderEngine().setShowFrameNumber(_showFrameNumber.value()); } );
 }
 
 void SettingsEngine::initSceneFiles() {

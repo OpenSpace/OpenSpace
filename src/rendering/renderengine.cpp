@@ -128,6 +128,7 @@ RenderEngine::RenderEngine()
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+    , _frameNumber(0)
     , _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
@@ -180,6 +181,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 bool RenderEngine::initialize() {
+    _frameNumber = 0;
     std::string renderingMethod = DefaultRenderingMethod;
     
     // If the user specified a rendering method that he would like to use, use that
@@ -228,6 +230,7 @@ bool RenderEngine::initialize() {
     MissionManager::initialize();
 #endif
 
+
     return true;
 }
 
@@ -240,6 +243,8 @@ bool RenderEngine::initializeGL() {
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
     try {
+        const float fontSizeBig = 50.f;
+        _fontBig = OsEng.fontManager().font(KeyFontMono, fontSizeBig);
         const float fontSizeTime = 15.f;
         _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
         const float fontSizeMono = 10.f;
@@ -409,7 +414,6 @@ void RenderEngine::postSynchronizationPreDraw() {
     //}
 
 }
-
 void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
@@ -424,6 +428,18 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
             renderInformation();
         }
     }
+
+    glm::vec2 penPosition = glm::vec2(
+        OsEng.windowWrapper().viewportPixelCoordinates().y / 2 - 50,
+        OsEng.windowWrapper().viewportPixelCoordinates().w / 3
+        );
+
+    if(_showFrameNumber) {
+        RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
+    }
+    
+    _frameNumber++;
+
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
         if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
@@ -1203,6 +1219,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
     }
 
     LFATAL("This function is being misused with an argument of '" << origin << "'");
+}
+
+void RenderEngine::setShowFrameNumber(bool enabled){
+    _showFrameNumber = enabled;
 }
 
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {

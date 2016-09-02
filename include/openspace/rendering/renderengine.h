@@ -117,7 +117,7 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
     void setNAaSamples(int nAaSamples);
-
+    void setShowFrameNumber(bool enabled);
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -214,16 +214,19 @@ private:
     bool _showInfo;
     bool _showLog;
     bool _takeScreenshot;
+    bool _showFrameNumber;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
     int _nAaSamples;
+    unsigned int _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
