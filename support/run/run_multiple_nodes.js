@@ -6,6 +6,9 @@ var path = process.argv[2];
 var nNodes = +process.argv[3];
 var PATH_TO_GENERATED_CONF = __dirname + '/generated_sgct_config.xml';
 
+var WINDOW_SIZE = {x: 640, y: 360};
+var WINDOW_COLUMNS = 4;
+
 run();
 
 function run(){
@@ -18,6 +21,7 @@ function run(){
 	if(!nNodes) return new Error("bad nNodes!");
 
 	var s = generateConfigSrcForN_nodes();
+
 
 	fs.writeFile(PATH_TO_GENERATED_CONF, s, function(err) {
 	    if(err) {
@@ -71,14 +75,14 @@ function generateConfigSrcForN_nodes(){
 }
 
 function generateNode(i){
-	var x = i > 0 ? ((640 + i * 578) % 1920) : 10;
-	var y = i > 0 ? ((300 + i * 258) % 1080) : 30;
+	var x = 10 + (i%WINDOW_COLUMNS) * (WINDOW_SIZE.x + 5);;
+	var y = 30 + Math.floor(i/WINDOW_COLUMNS) * (WINDOW_SIZE.y + 30);
 	return '\n\
 	<Node address="127.0.0.' + (i+1) + '" port="2040' + (i+1) + '" swapLock="false">\n\
 		<Window fullScreen="false">\n\
 			<Pos x="'+ x +'" y="' + y + '" />\n\
 			<!-- 16:9 aspect ratio -->\n\
-			<Size x="640" y="360" />\n\
+			<Size x="' + WINDOW_SIZE.x + '" y="' + WINDOW_SIZE.y + '" />\n\
 			<Viewport>\n\
 				<Pos x="0.0" y="0.0" />\n\
 				<Size x="1.0" y="1.0" />\n\
