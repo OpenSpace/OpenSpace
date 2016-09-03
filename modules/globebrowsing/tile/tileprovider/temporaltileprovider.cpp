@@ -250,8 +250,8 @@ namespace openspace {
     //                                  Time Quantizer                                  //
     //////////////////////////////////////////////////////////////////////////////////////
     TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, double resolution)
-        : _start(start.unsyncedJ2000Seconds())
-        , _end(end.unsyncedJ2000Seconds())
+        : _start(start.j2000Seconds())
+        , _end(end.j2000Seconds())
         , _resolution(resolution)
     {
 
@@ -291,7 +291,7 @@ namespace openspace {
     }
 
     bool TimeQuantizer::quantize(Time& t) const {
-        double unquantized = t.unsyncedJ2000Seconds();
+        double unquantized = t.j2000Seconds();
         if (_start <= unquantized && unquantized <= _end) {
             double quantized = std::floor((unquantized - _start) / _resolution) * _resolution + _start;
             t.setTime(quantized);

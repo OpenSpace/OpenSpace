@@ -912,7 +912,7 @@ void ParallelConnection::preSynchronization(){
         tf._dt = Time::ref().deltaTime();
         tf._paused = Time::ref().paused();
         tf._requiresTimeJump = Time::ref().timeJumped();
-        tf._time = Time::ref().currentTime();
+        tf._time = Time::ref().j2000Seconds();
                 
         //create a buffer and serialize message
         std::vector<char> tbuffer;

@@ -44,18 +44,8 @@ Time* Time::_instance = nullptr;
 Time::Time(double secondsJ2000)
     : _time(secondsJ2000)
     , _dt(1.0)
-    //local copies
     , _timeJumped(false)
     , _timePaused(false)
-    , _jockeHasToFixThisLater(false)
-    //shared copies
-    , _sharedTime(-1.0)
-    , _sharedDt(1.0)
-    , _sharedTimeJumped(false)
-    //synced copies
-    , _syncedTime(-1.0)
-    , _syncedDt(1.0)
-    , _syncedTimeJumped(false)
 {
 
 }
@@ -64,18 +54,8 @@ Time::Time(double secondsJ2000)
 Time::Time(const Time& other)
     : _time(other._time)
     , _dt(other._dt)
-    //local copies
     , _timeJumped(other._timeJumped)
     , _timePaused(other._timePaused)
-    , _jockeHasToFixThisLater(other._jockeHasToFixThisLater)
-    //shared copies
-    , _sharedTime(other._sharedTime)
-    , _sharedDt(other._sharedDt)
-    , _sharedTimeJumped(other._sharedTimeJumped)
-    //synced copies
-    , _syncedTime(other._syncedTime)
-    , _syncedDt(other._syncedDt)
-    , _syncedTimeJumped(other._syncedTimeJumped)
 {
 
 }
@@ -116,11 +96,7 @@ void Time::setTime(double value, bool requireJump) {
     _timeJumped = requireJump;
 }
 
-double Time::currentTime() const {
-    return _syncedTime;
-}
-
-double Time::unsyncedJ2000Seconds() const {
+double Time::j2000Seconds() const {
     return _time;
 }
 
@@ -136,7 +112,7 @@ void Time::setDeltaTime(double deltaT) {
 }
 
 double Time::deltaTime() const {
-    return _syncedDt;
+    return _dt;
 }
 
 void Time::setPause(bool pause) {
@@ -153,12 +129,12 @@ void Time::setTime(std::string time, bool requireJump) {
     _timeJumped = requireJump;
 }
 
-std::string Time::currentTimeUTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
+std::string Time::UTC() const {
+    return SpiceManager::ref().dateFromEphemerisTime(_time);
 }
 
 std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_syncedTime);
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     std::string month = datetime.substr(5, 3);
 
     std::string MM = "";
@@ -183,9 +159,9 @@ std::string Time::ISO8601() const {
 void Time::serialize(SyncBuffer* syncBuffer) {
     _syncMutex.lock();
 
-    syncBuffer->encode(_sharedTime);
-    syncBuffer->encode(_sharedDt);
-    syncBuffer->encode(_sharedTimeJumped);
+    syncBuffer->encode(_time);
+    syncBuffer->encode(_dt);
+    syncBuffer->encode(_timeJumped);
 
     _syncMutex.unlock();
 }
@@ -193,43 +169,23 @@ void Time::serialize(SyncBuffer* syncBuffer) {
 void Time::deserialize(SyncBuffer* syncBuffer) {
     _syncMutex.lock();
 
-    syncBuffer->decode(_sharedTime);
-    syncBuffer->decode(_sharedDt);
-    syncBuffer->decode(_sharedTimeJumped);
-
-    if (_sharedTimeJumped)
-        _jockeHasToFixThisLater = true;
+    syncBuffer->decode(_time);
+    syncBuffer->decode(_dt);
+    syncBuffer->decode(_timeJumped);
 
     _syncMutex.unlock();
 }
 
 void Time::postSynchronizationPreDraw() {
-    _syncMutex.lock();
 
-    _syncedTime = _sharedTime;
-    _syncedDt = _sharedDt;
-    _syncedTimeJumped = _sharedTimeJumped;
-
-    if (_jockeHasToFixThisLater) {
-        _syncedTimeJumped = true;
-        _jockeHasToFixThisLater = false;
-    }
-
-    _syncMutex.unlock();    
 }
 
 void Time::preSynchronization() {
-    _syncMutex.lock();
 
-    _sharedTime = _time;
-    _sharedDt = _dt;
-    _sharedTimeJumped = _timeJumped;
-
-    _syncMutex.unlock();
 }
 
 bool Time::timeJumped() const {
-    return _syncedTimeJumped;
+    return _timeJumped;
 }
 
 void Time::setTimeJumped(bool jumped) {
@@ -292,7 +248,7 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "the J2000 epoch"
             },
             {
-                "currentTimeUTC",
+                "UTC",
                 &luascriptfunctions::time_currentTimeUTC,
                 "",
                 "Returns the current time as an ISO 8601 date string "

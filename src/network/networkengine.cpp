@@ -95,8 +95,8 @@ void NetworkEngine::publishStatusMessage() {
 
     uint16_t messageSize = 0;
     
-    double time = Time::ref().currentTime();
-    std::string timeString = Time::ref().currentTimeUTC();
+    double time = Time::ref().j2000Seconds();
+    std::string timeString = Time::ref().UTC();
     double delta = Time::ref().deltaTime();
 
     messageSize += sizeof(time);

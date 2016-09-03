@@ -178,7 +178,7 @@ void RenderableModel::render(const RenderData& data) {
     double lt;
     
     // Fade away if it does not have spice coverage
-    double time = openspace::Time::ref().currentTime();
+    double time = openspace::Time::ref().j2000Seconds();
     bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
     if (!targetPositionCoverage) {
         int frame = _frameCount % 180;

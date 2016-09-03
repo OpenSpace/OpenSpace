@@ -40,7 +40,7 @@ namespace openspace {
  * a valid date string in accordance to the Spice library
  * (http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/str2et_c.html). The time can
  * be retrieved as the number of seconds since the J2000 epoch with currentTime() or as a
- * UTC string following ISO 8601 with the method currentTimeUTC().
+ * UTC string following ISO 8601 with the method UTC().
  *
  * In addition to the time itself, it also stores a delta time value. This value denotes
  * the number of seconds that pass for each real-time second. This value is set with
@@ -102,7 +102,7 @@ public:
      * time-jump; defaults to true as most calls to set time will require recomputation of
      * planetary paths etc.
      */
-    void setTime(double value, bool requireJump = true);
+    void setTime(double j2000Seconds, bool requireJump = true);
 
     /**
      * Sets the current time to the specified value given as a Spice compliant string as
@@ -120,16 +120,14 @@ public:
      * current time is a date before that epoch, the returned value will be negative.
      * \return The current time as the number of seconds past the J2000 epoch
      */
-    double currentTime() const;
-
-    double unsyncedJ2000Seconds() const;
+    double j2000Seconds() const;
 
     /**
      * Returns the current time as a formatted date string compliant with ISO 8601 and
      * thus also compliant with the Spice library.
      * \return The current time as a formatted date string
      */
-    std::string currentTimeUTC() const;
+    std::string UTC() const;
 
     /**
     * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ
@@ -211,24 +209,12 @@ public:
 
 private:
     static Time* _instance; ///< The singleton instance
-        
-    //local copies
+           
     /// The time stored as the number of seconds past the J2000 epoch
     double _time = -1.0;
     double _dt = 1.0;
     bool _timeJumped = false;
     bool _timePaused = false;
-    bool _jockeHasToFixThisLater;
-
-    //shared copies
-    double _sharedTime = -1.0;
-    double _sharedDt = 1.0;
-    bool _sharedTimeJumped = false;
-
-    //synced copies
-    double _syncedTime = -1.0;
-    double _syncedDt = 1.0;
-    bool _syncedTimeJumped = false;
     
     std::mutex _syncMutex;
 };

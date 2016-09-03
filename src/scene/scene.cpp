@@ -213,7 +213,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
                 glm::dvec3(0),
                 glm::dmat3(1),
                 1,
-                Time::ref().currentTime() });
+                Time::ref().j2000Seconds() });
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);

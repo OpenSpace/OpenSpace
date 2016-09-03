@@ -384,7 +384,7 @@ void RenderEngine::postSynchronizationPreDraw() {
         glm::dvec3(0),
         glm::dmat3(1),
         1,
-        Time::ref().currentTime(),
+        Time::ref().j2000Seconds(),
         Time::ref().timeJumped(),
         Time::ref().deltaTime(),
         _performanceManager != nullptr
@@ -1314,7 +1314,7 @@ void RenderEngine::renderInformation() {
         RenderFontCr(*_fontDate,
             penPosition,
             "Date: %s",
-            Time::ref().currentTimeUTC().c_str()
+            Time::ref().UTC().c_str()
             );
 
         RenderFontCr(*_fontInfo,
@@ -1356,7 +1356,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-        double currentTime = Time::ref().currentTime();
+        double currentTime = Time::ref().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
 

@@ -115,7 +115,7 @@ protected:
      * this should be the data file.
      * @return true if update was successfull
      */
-    virtual bool downloadTextureResource(double timestamp = Time::ref().currentTime()) = 0;
+    virtual bool downloadTextureResource(double timestamp = Time::ref().j2000Seconds()) = 0;
     virtual bool readyToRender() const = 0;
      /**
      * should set all uniforms needed to render
