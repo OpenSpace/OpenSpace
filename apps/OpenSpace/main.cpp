@@ -244,6 +244,10 @@ const std::string EXPECTED_SLAVE_LOG =  (slavelog << PRE_SYNC << DECODE << POST_
 
 #define LOG_BEGIN(x) minilog << (x).begin
 #define LOG_END(x) minilog << (x).end
+#define BUSY_WAIT_FOR(x) \
+    while (minilog.str().size() && minilog.str().back() != (x)) { \
+        std::this_thread::sleep_for(std::chrono::microseconds(10)); \
+    }\
 
 void mainPreSyncFunc() {
     LOG_BEGIN(PRE_SYNC);
@@ -253,6 +257,9 @@ void mainPreSyncFunc() {
 }
 
 void mainPostSyncPreDrawFunc() {
+    if (!sgct::Engine::instance()->isMaster()) {
+        BUSY_WAIT_FOR(DECODE.end);
+    }
     LOG_BEGIN(POST_SYNC);
     OsEng.postSynchronizationPreDraw();
     LOG_END(POST_SYNC);
