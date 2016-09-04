@@ -178,30 +178,23 @@ namespace openspace {
         const glm::mat4& viewProjectionMatrix() const;
 
     private:
-        /**
-        Class encapsulating data that needs to be synched between SGCT nodes.
-        Are all three variables (i.e. local, shared, synced) really neccessary? /EB
-        */
-        template <typename T>
         struct SyncData {
-            SyncData() {}
-            SyncData(const SyncData& d)
-                : local(d.local), shared(d.shared), synced(d.synced) {}
+            void serialize(SyncBuffer* syncBuffer) { 
+                syncBuffer->encode(position); 
+                syncBuffer->encode(rotation);
+                syncBuffer->encode(scaling);
+            }
+            void deserialize(SyncBuffer* syncBuffer) { 
+                syncBuffer->decode(position);
+                syncBuffer->decode(rotation);
+                syncBuffer->decode(scaling);
+            }
+            
+            Vec3 position;
+            Quat rotation;
+            glm::vec2 scaling;
+        } syncData;
 
-            void serialize(SyncBuffer* syncBuffer) { syncBuffer->encode(shared); }
-            void deserialize(SyncBuffer* syncBuffer) { syncBuffer->decode(shared); }
-            void postSynchronizationPreDraw() { synced = shared; }
-            void preSynchronization() { shared = local; }
-
-            T local;
-            T shared;
-            T synced;
-        };
-
-        // State of the camera
-        SyncData<Vec3> _position;
-        SyncData<Quat> _rotation;
-        SyncData<glm::vec2> _scaling;
 
         // _focusPosition to be removed
         Vec3 _focusPosition;
