@@ -291,55 +291,23 @@ void OrbitalInteractionMode::MouseStates::setVelocityScaleFactor(double scaleFac
 }
 
 glm::dvec2 OrbitalInteractionMode::MouseStates::synchedGlobalRotationMouseVelocity() {
-    return _synchedGlobalRotationMouseVelocity;
+    return _globalRotationMouseState.velocity.get();
 }
 
 glm::dvec2 OrbitalInteractionMode::MouseStates::synchedLocalRotationMouseVelocity() {
-    return _synchedLocalRotationMouseVelocity;
+    return _localRotationMouseState.velocity.get();
 }
 
 glm::dvec2 OrbitalInteractionMode::MouseStates::synchedTruckMovementMouseVelocity() {
-    return _synchedTruckMovementMouseVelocity;
+    return _truckMovementMouseState.velocity.get();
 }
 
 glm::dvec2 OrbitalInteractionMode::MouseStates::synchedLocalRollMouseVelocity() {
-    return _synchedLocalRollMouseVelocity;
+    return _localRollMouseState.velocity.get();
 }
 
 glm::dvec2 OrbitalInteractionMode::MouseStates::synchedGlobalRollMouseVelocity() {
-    return _synchedGlobalRollMouseVelocity;
-}
-
-void OrbitalInteractionMode::MouseStates::preSynchronization() {
-    _sharedGlobalRotationMouseVelocity = _globalRotationMouseState.velocity.get();
-    _sharedLocalRotationMouseVelocity = _localRotationMouseState.velocity.get();
-    _sharedTruckMovementMouseVelocity = _truckMovementMouseState.velocity.get();
-    _sharedLocalRollMouseVelocity = _localRollMouseState.velocity.get();
-    _sharedGlobalRollMouseVelocity = _globalRollMouseState.velocity.get();
-}
-
-void OrbitalInteractionMode::MouseStates::postSynchronizationPreDraw() {
-    _synchedGlobalRotationMouseVelocity = _sharedGlobalRotationMouseVelocity;
-    _synchedLocalRotationMouseVelocity = _sharedLocalRotationMouseVelocity;
-    _synchedTruckMovementMouseVelocity = _sharedTruckMovementMouseVelocity;
-    _synchedLocalRollMouseVelocity = _sharedLocalRollMouseVelocity;
-    _synchedGlobalRollMouseVelocity = _sharedGlobalRollMouseVelocity;
-}
-
-void OrbitalInteractionMode::MouseStates::serialize(SyncBuffer* syncBuffer) {
-    syncBuffer->encode(_sharedGlobalRotationMouseVelocity);
-    syncBuffer->encode(_sharedLocalRotationMouseVelocity);
-    syncBuffer->encode(_sharedTruckMovementMouseVelocity);
-    syncBuffer->encode(_sharedLocalRollMouseVelocity);
-    syncBuffer->encode(_sharedGlobalRollMouseVelocity);
-}
-
-void OrbitalInteractionMode::MouseStates::deserialize(SyncBuffer* syncBuffer) {
-    syncBuffer->decode(_sharedGlobalRotationMouseVelocity);
-    syncBuffer->decode(_sharedLocalRotationMouseVelocity);
-    syncBuffer->decode(_sharedTruckMovementMouseVelocity);
-    syncBuffer->decode(_sharedLocalRollMouseVelocity);
-    syncBuffer->decode(_sharedGlobalRollMouseVelocity);
+    return _globalRollMouseState.velocity.get();
 }
 
 OrbitalInteractionMode::OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates)
@@ -354,7 +322,6 @@ OrbitalInteractionMode::~OrbitalInteractionMode() {
 
 void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     // Update synched data
-    _mouseStates->postSynchronizationPreDraw();
 
     using namespace glm;
     if (_focusNode) {
@@ -446,15 +413,6 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
 
 void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     _mouseStates->updateMouseStatesFromInput(inputState, deltaTime);
-    _mouseStates->preSynchronization();
-}
-
-void OrbitalInteractionMode::serialize(SyncBuffer* syncBuffer) {
-    _mouseStates->serialize(syncBuffer);
-}
-
-void OrbitalInteractionMode::deserialize(SyncBuffer* syncBuffer) {
-    _mouseStates->deserialize(syncBuffer);
 }
 
 GlobeBrowsingInteractionMode::GlobeBrowsingInteractionMode(std::shared_ptr<MouseStates> mouseStates)
@@ -483,9 +441,7 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 }
 
 void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
-    // Update synched data
-    _mouseStates->postSynchronizationPreDraw();
-
+    
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     using namespace glm;
     if (_focusNode && _globe) {

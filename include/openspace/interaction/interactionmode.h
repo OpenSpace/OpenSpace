@@ -205,11 +205,6 @@ public:
         glm::dvec2 synchedLocalRollMouseVelocity();
         glm::dvec2 synchedGlobalRollMouseVelocity();
 
-        void preSynchronization();
-        void postSynchronizationPreDraw();
-
-        void serialize(SyncBuffer* syncBuffer);
-        void deserialize(SyncBuffer* syncBuffer);
     private:
         double _sensitivity;
 
@@ -218,31 +213,18 @@ public:
         MouseState _truckMovementMouseState;
         MouseState _localRollMouseState;
         MouseState _globalRollMouseState;
-
-        // MouseStates have synched variables
-        glm::dvec2 _sharedGlobalRotationMouseVelocity;
-        glm::dvec2 _sharedLocalRotationMouseVelocity;
-        glm::dvec2 _sharedTruckMovementMouseVelocity;
-        glm::dvec2 _sharedLocalRollMouseVelocity;
-        glm::dvec2 _sharedGlobalRollMouseVelocity;
-
-        glm::dvec2 _synchedGlobalRotationMouseVelocity;
-        glm::dvec2 _synchedLocalRotationMouseVelocity;
-        glm::dvec2 _synchedTruckMovementMouseVelocity;
-        glm::dvec2 _synchedLocalRollMouseVelocity;
-        glm::dvec2 _synchedGlobalRollMouseVelocity;
     };
 
     OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~OrbitalInteractionMode();
 
+    virtual void serialize(SyncBuffer* syncBuffer) {};
+    virtual void deserialize(SyncBuffer* syncBuffer) {};
+
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera);
-
-    virtual void serialize(SyncBuffer* syncBuffer);
-    virtual void deserialize(SyncBuffer* syncBuffer);
 
 protected:
     //void updateCameraStateFromMouseStates(Camera& camera);
