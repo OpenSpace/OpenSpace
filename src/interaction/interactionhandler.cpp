@@ -734,10 +734,6 @@ void InteractionHandler::resetCameraDirection() {
 
     // Update camera Rotation
     _camera->setRotation(rotationLookAtFocusNode);
-
-    // Explicitly synch
-    _camera->preSynchronization();
-    _camera->postSynchronizationPreDraw();
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
@@ -865,10 +861,6 @@ void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& c
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
-
-    // Explicitly synch
-    _camera->preSynchronization();
-    _camera->postSynchronizationPreDraw();
 }
 
 ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {

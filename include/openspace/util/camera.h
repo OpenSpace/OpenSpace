@@ -118,9 +118,9 @@ namespace openspace {
         // of the old calls to the function wrong..
         const Mat4& combinedViewMatrix() const;
 
+        void invalidateCache();
+
         // Synchronization
-        void postSynchronizationPreDraw();
-        void preSynchronization();
         void serialize(SyncBuffer* syncBuffer);
         void deserialize(SyncBuffer* syncBuffer);
         

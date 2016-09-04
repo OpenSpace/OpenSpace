@@ -200,9 +200,7 @@ namespace openspace {
         syncData.deserialize(syncBuffer);
     }
 
-    void Camera::postSynchronizationPreDraw() {
-        std::lock_guard<std::mutex> _lock(_mutex);
-
+    void Camera::invalidateCache() {
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
@@ -224,11 +222,6 @@ namespace openspace {
         is >> q.x >> q.y >> q.z >> q.w;
         setPositionVec3(p);
         setRotation(q);
-    }
-
-    void Camera::preSynchronization() {
-        std::lock_guard<std::mutex> _lock(_mutex);
-
     }
 
     //////////////////////////////////////////////////////////////////////////////////////

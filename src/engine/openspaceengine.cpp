@@ -774,8 +774,6 @@ void OpenSpaceEngine::preSynchronization() {
         // Update the mouse velocities for interaction handler
         _interactionHandler->preSynchronization(dt);
 
-        _renderEngine->camera()->preSynchronization();
-
         _parallelConnection->preSynchronization();
     }
 }
@@ -794,16 +792,11 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();
     
-    // Sync the camera to match the previous frame
-    _renderEngine->camera()->postSynchronizationPreDraw();
+    _renderEngine->camera()->invalidateCache();
 
     // Step the camera using the current mouse velocities which are synced
     _interactionHandler->postSynchronizationPreDraw();
 
-    // Update the synched variables in the camera class
-
-    _renderEngine->camera()->preSynchronization();
-    _renderEngine->camera()->postSynchronizationPreDraw();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
