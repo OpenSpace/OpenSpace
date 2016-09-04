@@ -2,19 +2,32 @@ var fs = require('fs');
 const exec = require('child_process').exec;
 
 var REQUIRED_ARGUMENTS = 2;
-var path = process.argv[2];
-var nNodes = +process.argv[3];
+var PATH_TO_OPENSPACE = process.argv[2];
+var NUM_NODES = +process.argv[3];
 
 var PATH_TO_GENERATED_CONF = __dirname + '/generated_sgct_config.xml';
 
+// Optional params
+var FIRM_SYNC = false;
+var WINDOW_SIZE = {x: 640, y: 360};
+var WINDOW_COLUMNS = 2;
+
+// Parse optional arguments
 function argIndexOf(param){
 	return process.argv.indexOf(param, REQUIRED_ARGUMENTS+2);
 }
 
-var FIRM_SYNC = argIndexOf("--firmsync") != -1;
+var paramIndex = -1;
+if( (paramIndex = argIndexOf("--firmsync")) != -1){
+	FIRM_SYNC = true;
+}
+if( (paramIndex = argIndexOf("-size")) != -1){
+	WINDOW_SIZE = { x: +process.argv[paramIndex + 1], y: +process.argv[paramIndex + 2] };
+}
+if( (paramIndex = argIndexOf("-cols")) != -1){
+	WINDOW_COLUMNS = +process.argv[paramIndex + 1];
+}
 
-var WINDOW_SIZE = {x: 640, y: 360};
-var WINDOW_COLUMNS = 2;
 
 run();
 
@@ -24,11 +37,10 @@ function run(){
 		console.log("<path/to/openspace-binary> <# nodes to generate>");
 		return;
 	}
-	if(!path) return new Error("bad path!");
-	if(!nNodes) return new Error("bad nNodes!");
+	if(!PATH_TO_OPENSPACE) return new Error("bad path to openspace!");
+	if(!NUM_NODES) return new Error("bad number of nodes!");
 
 	var s = generateConfigSrcForN_nodes();
-
 
 	fs.writeFile(PATH_TO_GENERATED_CONF, s, function(err) {
 	    if(err) {
@@ -41,8 +53,8 @@ function run(){
 }
 
 function execChildProcesses(){
-	for (var i = 0; i < nNodes; i++) {
-		var cmd = path;
+	for (var i = 0; i < NUM_NODES; i++) {
+		var cmd = PATH_TO_OPENSPACE;
 		cmd += " -sgct " + PATH_TO_GENERATED_CONF
 		cmd += " -local " + i;
 		if(i > 0){
@@ -68,7 +80,7 @@ function generateConfigSrcForN_nodes(){
 <?xml version="1.0" ?>\n\
 <Cluster masterAddress="127.0.0.1" firmSync="' + FIRM_SYNC + '">';
 	
-	for (var i = 0; i < nNodes; i++) {
+	for (var i = 0; i < NUM_NODES; i++) {
 		s += generateNode(i);
 	}
 	
