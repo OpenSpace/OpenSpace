@@ -757,7 +757,6 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
 
         Time::ref().advanceTime(dt);
-        Time::ref().preSynchronization();
 
         auto scheduledScripts = _scriptScheduler->scheduledScripts(Time::ref().j2000Seconds());
         while(scheduledScripts.size()){
@@ -786,8 +785,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         }
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
-
-    Time::ref().postSynchronizationPreDraw();
 
     _scriptEngine->postSynchronizationPreDraw();
     _renderEngine->postSynchronizationPreDraw();

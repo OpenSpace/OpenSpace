@@ -176,14 +176,6 @@ void Time::deserialize(SyncBuffer* syncBuffer) {
     _syncMutex.unlock();
 }
 
-void Time::postSynchronizationPreDraw() {
-
-}
-
-void Time::preSynchronization() {
-
-}
-
 bool Time::timeJumped() const {
     return _timeJumped;
 }

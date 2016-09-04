@@ -184,10 +184,6 @@ public:
 
     void deserialize(SyncBuffer* syncBuffer);
 
-    void postSynchronizationPreDraw();
-
-    void preSynchronization();
-
     bool timeJumped() const;
 
     void setTimeJumped(bool jumped);
