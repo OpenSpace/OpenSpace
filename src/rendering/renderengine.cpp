@@ -339,23 +339,69 @@ bool RenderEngine::initializeGL() {
     return true;
 }
 
-void RenderEngine::preSynchronization() {
-    //if (_mainCamera)
-    //    _mainCamera->preSynchronization();
+void RenderEngine::updateSceneGraph() {
+    _sceneGraph->update({
+        glm::dvec3(0),
+        glm::dmat3(1),
+        1,
+        Time::ref().j2000Seconds(),
+        Time::ref().timeJumped(),
+        Time::ref().deltaTime(),
+        _performanceManager != nullptr
+    });
+
+    _sceneGraph->evaluate(_mainCamera);
+    
+    //Allow focus node to update camera (enables camera-following)
+    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
+    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
+    //node->updateCamera(_mainCamera);
+    //}
 }
 
-void RenderEngine::postSynchronizationPreDraw() {
+void RenderEngine::updateShaderPrograms() {
+    for (auto program : _programs) {
+        try {
+            if (program->isDirty()) {
+                program->rebuildFromFile();
+            }
+        }
+        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
+}
+
+void RenderEngine::updateRenderer() {
+    bool windowResized = OsEng.windowWrapper().windowHasResized();
+
+    if (windowResized) {
+        glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
+        _renderer->setResolution(res);
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
+    }
+
+    _renderer->update();
+}
+
+void RenderEngine::updateScreenSpaceRenderables() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->update();
+    }
+}
+
+void RenderEngine::updateFade() {
     //temporary fade funtionality
     float fadedIn = 1.0;
     float fadedOut = 0.0;
     // Don't restart the fade if you've already done it in that direction
-    if (  (_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
-       || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
+    if ((_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
+        || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
         _fadeDirection = 0;
     }
 
     if (_fadeDirection != 0) {
-        if (_currentFadeTime > _fadeDuration){
+        if (_currentFadeTime > _fadeDuration) {
             _globalBlackOutFactor = _fadeDirection > 0 ? fadedIn : fadedOut;
             _fadeDirection = 0;
         }
@@ -367,53 +413,8 @@ void RenderEngine::postSynchronizationPreDraw() {
             _currentFadeTime += static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
         }
     }
-
-    //if (_mainCamera)
-    //    _mainCamera->postSynchronizationPreDraw();
-
-    bool windowResized = OsEng.windowWrapper().windowHasResized();
-
-    if (windowResized) {
-        glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
-        _renderer->setResolution(res);
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
-    }
-
-    // update and evaluate the scene starting from the root node
-    _sceneGraph->update({
-        glm::dvec3(0),
-        glm::dmat3(1),
-        1,
-        Time::ref().j2000Seconds(),
-        Time::ref().timeJumped(),
-        Time::ref().deltaTime(),
-        _performanceManager != nullptr
-    });
-    _sceneGraph->evaluate(_mainCamera);
-
-    _renderer->update();
-
-    for (auto program : _programs) {
-        try {
-            if (program->isDirty()) {
-                program->rebuildFromFile();
-            }
-        }
-        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
-            LERRORC(e.component, e.what());
-        }
-    }
-    
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
-    }
-    //Allow focus node to update camera (enables camera-following)
-    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
-    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
-        //node->updateCamera(_mainCamera);
-    //}
-
 }
+
 void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);

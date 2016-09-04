@@ -94,8 +94,12 @@ public:
 
     // sgct wrapped functions
     bool initializeGL();
-    void postSynchronizationPreDraw();
-    void preSynchronization();
+    
+    void updateSceneGraph();
+    void updateShaderPrograms();
+    void updateFade();
+    void updateRenderer();
+    void updateScreenSpaceRenderables();
     void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
 
     void renderScreenLog();

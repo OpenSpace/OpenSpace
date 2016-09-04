@@ -767,8 +767,6 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         _scriptEngine->preSynchronization();
-        
-        _renderEngine->preSynchronization();
 
         // Update the mouse velocities for interaction handler
         _interactionHandler->preSynchronization(dt);
@@ -787,7 +785,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }
 
     _scriptEngine->postSynchronizationPreDraw();
-    _renderEngine->postSynchronizationPreDraw();
+
+    _renderEngine->updateFade();
+    _renderEngine->updateRenderer();
+    _renderEngine->updateScreenSpaceRenderables();
+    _renderEngine->updateSceneGraph();
+    _renderEngine->updateShaderPrograms();
     
     _renderEngine->camera()->invalidateCache();
 
