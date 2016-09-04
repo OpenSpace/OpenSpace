@@ -770,19 +770,13 @@ void InteractionHandler::unlockControls() {
 
 }
 
-void InteractionHandler::preSynchronization(double deltaTime) {
+void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-
-    if (_cameraUpdatedFromScript) {
-        _cameraUpdatedFromScript = false;
-    }
-    else {
-        _currentInteractionMode->updateMouseStatesFromInput(*_inputState, deltaTime);
-    }
+    _currentInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 
-void InteractionHandler::postSynchronizationPreDraw() {
+void InteractionHandler::updateCamera() {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -794,7 +788,6 @@ void InteractionHandler::postSynchronizationPreDraw() {
         _camera->setFocusPositionVec3(focusNode()->worldPosition());
     }
 }
-
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();

@@ -173,9 +173,8 @@ public:
     void unlockControls();
 
     //void update(double deltaTime);
-
-    void preSynchronization(double deltaTime);
-    void postSynchronizationPreDraw();
+    void updateCamera();
+    void updateInputStates(double timeSinceLastUpdate);    
 
     void serialize(SyncBuffer* syncBuffer);
     void deserialize(SyncBuffer* syncBuffer);
