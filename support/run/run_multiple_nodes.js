@@ -1,19 +1,26 @@
 var fs = require('fs');
 const exec = require('child_process').exec;
 
-
+var REQUIRED_ARGUMENTS = 2;
 var path = process.argv[2];
 var nNodes = +process.argv[3];
+
 var PATH_TO_GENERATED_CONF = __dirname + '/generated_sgct_config.xml';
 
+function argIndexOf(param){
+	return process.argv.indexOf(param, REQUIRED_ARGUMENTS+2);
+}
+
+var FIRM_SYNC = argIndexOf("--firmsync") != -1;
+
 var WINDOW_SIZE = {x: 640, y: 360};
-var WINDOW_COLUMNS = 4;
+var WINDOW_COLUMNS = 2;
 
 run();
 
 function run(){
-	if(process.argv.length !== 4){
-		console.log("Error! Expected 2 arguments:");
+	if(process.argv.length < REQUIRED_ARGUMENTS + 2){
+		console.log("Expected at least " + REQUIRED_ARGUMENTS + " arguments:");
 		console.log("<path/to/openspace-binary> <# nodes to generate>");
 		return;
 	}
@@ -59,7 +66,7 @@ function generateConfigSrcForN_nodes(){
 	var s = "";
 	s += '\
 <?xml version="1.0" ?>\n\
-<Cluster masterAddress="127.0.0.1" firmSync="false">';
+<Cluster masterAddress="127.0.0.1" firmSync="' + FIRM_SYNC + '">';
 	
 	for (var i = 0; i < nNodes; i++) {
 		s += generateNode(i);
@@ -75,8 +82,8 @@ function generateConfigSrcForN_nodes(){
 }
 
 function generateNode(i){
-	var x = 10 + (i%WINDOW_COLUMNS) * (WINDOW_SIZE.x + 5);;
-	var y = 30 + Math.floor(i/WINDOW_COLUMNS) * (WINDOW_SIZE.y + 30);
+	var x = 10 + (i%WINDOW_COLUMNS) * (WINDOW_SIZE.x + 15);;
+	var y = 30 + Math.floor(i/WINDOW_COLUMNS) * (WINDOW_SIZE.y + 40);
 	return '\n\
 	<Node address="127.0.0.' + (i+1) + '" port="2040' + (i+1) + '" swapLock="false">\n\
 		<Window fullScreen="false">\n\
