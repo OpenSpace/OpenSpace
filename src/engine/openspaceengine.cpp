@@ -767,8 +767,11 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         _scriptEngine->preSynchronization();
-
         _interactionHandler->updateInputStates(dt);
+        
+        _renderEngine->updateSceneGraph();
+        _renderEngine->camera()->invalidateCache();
+        _interactionHandler->updateCamera();
 
         _parallelConnection->preSynchronization();
     }
@@ -787,13 +790,18 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();
-    _renderEngine->updateSceneGraph();
+    
     _renderEngine->updateShaderPrograms();
     
-    _renderEngine->camera()->invalidateCache();
+    if (!_isMaster) {
+        _renderEngine->updateSceneGraph();
+        _renderEngine->camera()->invalidateCache();
+    }
+    
 
     // Step the camera using the current mouse velocities which are synced
-    _interactionHandler->updateCamera();
+    //_interactionHandler->updateCamera();
+    
     
 
 

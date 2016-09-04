@@ -785,7 +785,9 @@ void InteractionHandler::updateCamera() {
     }
     else {
         _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
-        _camera->setFocusPositionVec3(focusNode()->worldPosition());
+        if (focusNode() != nullptr) {
+            _camera->setFocusPositionVec3(focusNode()->worldPosition());
+        }
     }
 }
 
