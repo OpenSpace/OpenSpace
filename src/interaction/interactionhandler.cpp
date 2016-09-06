@@ -1005,19 +1005,6 @@ void InteractionHandler::clearKeyframes() {
     _inputState->clearKeyframes();
 }
 
-void InteractionHandler::serialize(SyncBuffer* syncBuffer) {
-    for each (auto var in _interactionModes)
-    {
-        var.second->serialize(syncBuffer);
-    }
-}
-
-void InteractionHandler::deserialize(SyncBuffer* syncBuffer) {
-    for each (auto var in _interactionModes)
-    {
-        var.second->deserialize(syncBuffer);
-    }
-}
 
 #endif // USE_OLD_INTERACTIONHANDLER
 

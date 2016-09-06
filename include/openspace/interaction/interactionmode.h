@@ -97,9 +97,6 @@ public:
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;
     virtual void updateCameraStateFromMouseStates(Camera& camera) = 0;
 
-    virtual void serialize(SyncBuffer* syncBuffer) = 0;
-    virtual void deserialize(SyncBuffer* syncBuffer) = 0;
-
 protected:
     /**
         Inner class that acts as a smoothing filter to a variable. The filter has a step
@@ -170,10 +167,6 @@ public:
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera);
 
-    // Need implementation
-
-    virtual void serialize(SyncBuffer* syncBuffer) {};
-    virtual void deserialize(SyncBuffer* syncBuffer) {};
 private:
     double _currentKeyframeTime;
 };
@@ -217,9 +210,6 @@ public:
 
     OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
     ~OrbitalInteractionMode();
-
-    virtual void serialize(SyncBuffer* syncBuffer) {};
-    virtual void deserialize(SyncBuffer* syncBuffer) {};
 
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 

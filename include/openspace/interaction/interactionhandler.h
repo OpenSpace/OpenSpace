@@ -176,9 +176,6 @@ public:
     void updateCamera();
     void updateInputStates(double timeSinceLastUpdate);    
 
-    void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer);
-
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
     SceneGraphNode* const focusNode() const;
