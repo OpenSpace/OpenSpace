@@ -32,13 +32,26 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <string>
+
+
+namespace {
+    const std::string _loggerCat = "SettingsEngine";
+}
+
 
 namespace openspace {
+
+
 
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::DROPDOWN)
     , _showFrameNumber("showFrameNumber", "Show frame number", false)
+    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
+    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
 {
     setName("Global Properties");
 }
@@ -47,6 +60,8 @@ void SettingsEngine::initialize() {
     initEyeSeparation();
     initSceneFiles();
     initShowFrameNumber();
+    initBusyWaitForDecode();
+    initLogSGCTOutOfOrderErrors();
 }
     
 void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
@@ -68,6 +83,30 @@ void SettingsEngine::initShowFrameNumber() {
 
     _showFrameNumber.onChange(
         [this]() { OsEng.renderEngine().setShowFrameNumber(_showFrameNumber.value()); } );
+}
+
+void SettingsEngine::initBusyWaitForDecode() {
+    addProperty(_busyWaitForDecode);
+    _busyWaitForDecode.onChange(
+        [this]() { 
+        LINFO((_busyWaitForDecode.value() ? "Busy wait for decode" : "Async decode"));
+    });
+}
+
+bool SettingsEngine::busyWaitForDecode() {
+    return _busyWaitForDecode.value();
+}
+
+void SettingsEngine::initLogSGCTOutOfOrderErrors() {
+    addProperty(_logSGCTOutOfOrderErrors);
+    _logSGCTOutOfOrderErrors.onChange(
+        [this]() {
+        LINFO("Turn " << (_logSGCTOutOfOrderErrors.value() ? "on" : "off") << " SGCT out of order logging");
+    });
+}
+
+bool SettingsEngine::logSGCTOutOfOrderErrors() {
+    return _logSGCTOutOfOrderErrors.value();
 }
 
 void SettingsEngine::initSceneFiles() {

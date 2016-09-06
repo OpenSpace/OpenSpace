@@ -115,6 +115,9 @@ public:
     void disableBarrier();
 
     void toggleShutdownMode();
+    
+    bool useBusyWaitForDecode();
+    bool logSGCTOutOfOrderErrors();
 
     void runPostInitializationScripts(const std::string& sceneDescription);
 

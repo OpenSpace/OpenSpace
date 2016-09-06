@@ -228,26 +228,23 @@ std::stringstream& operator<<(std::stringstream& o, const FunctionLogKey& l) {
 
 
 
-const FunctionLogKey PRE_SYNC = {'1', '2'};
-const FunctionLogKey ENCODE = {'E', 'e'};
-const FunctionLogKey DECODE = {'D', 'd'};
+const FunctionLogKey PRE_SYNC = { '1', '2' };
+const FunctionLogKey ENCODE = { 'E', 'e' };
+const FunctionLogKey DECODE = { 'D', 'd' };
 const FunctionLogKey POST_SYNC = { '3', '4' };
-const FunctionLogKey RENDER = {'R', 'r'};
-const FunctionLogKey POST_DRAW = {'P', 'p'};
+const FunctionLogKey RENDER = { 'R', 'r' };
+const FunctionLogKey POST_DRAW = { 'P', 'p' };
 
 std::stringstream minilog;
 std::stringstream masterlog;
 std::stringstream slavelog;
 
 const std::string EXPECTED_MASTER_LOG = (masterlog << PRE_SYNC << ENCODE << POST_SYNC << RENDER << POST_DRAW).str();
-const std::string EXPECTED_SLAVE_LOG =  (slavelog << PRE_SYNC << DECODE << POST_SYNC << RENDER << POST_DRAW).str();
+const std::string EXPECTED_SLAVE_LOG = (slavelog << PRE_SYNC << DECODE << POST_SYNC << RENDER << POST_DRAW).str();
 
 #define LOG_BEGIN(x) minilog << (x).begin
 #define LOG_END(x) minilog << (x).end
-#define BUSY_WAIT_FOR(x) \
-    while (minilog.str().size() && minilog.str().back() != (x)) { \
-        std::this_thread::sleep_for(std::chrono::microseconds(10)); \
-    }\
+
 
 void mainPreSyncFunc() {
     LOG_BEGIN(PRE_SYNC);
@@ -256,9 +253,12 @@ void mainPreSyncFunc() {
     LOG_END(PRE_SYNC);
 }
 
+volatile bool busyWaitDecode = false;
 void mainPostSyncPreDrawFunc() {
-    if (!sgct::Engine::instance()->isMaster()) {
-        BUSY_WAIT_FOR(DECODE.end);
+    if (OsEng.useBusyWaitForDecode() && !sgct::Engine::instance()->isMaster()) {
+        while (minilog.str().size() && minilog.str().back() != DECODE.end) {
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
+        }
     }
     LOG_BEGIN(POST_SYNC);
     OsEng.postSynchronizationPreDraw();
@@ -270,11 +270,11 @@ void mainRenderFunc() {
     using glm::mat4;
     using glm::translate;
     //not the most efficient, but for clarity @JK
-    
+
     mat4 userMatrix = translate(mat4(1.f), _sgctEngine->getDefaultUserPtr()->getPos());
     mat4 sceneMatrix = _sgctEngine->getModelMatrix();
     mat4 viewMatrix = _sgctEngine->getCurrentViewMatrix() * userMatrix;
-    
+
     //dont shift nav-direction on master, makes it very tricky to navigate @JK
     if (!OsEng.ref().isMaster())
         viewMatrix = viewMatrix * sceneMatrix;
@@ -289,17 +289,20 @@ void mainPostDrawFunc() {
     OsEng.postDraw();
     LOG_END(POST_DRAW);
 
-    if (sgct::Engine::instance()->isMaster()) {
-        if (minilog.str() != EXPECTED_MASTER_LOG) {
-            LERRORC("Minilog", "Bad combination: " << minilog.str());
+    if (OsEng.logSGCTOutOfOrderErrors()) {
+        if (sgct::Engine::instance()->isMaster()) {
+            if (minilog.str() != EXPECTED_MASTER_LOG) {
+                LERRORC("Minilog", "Bad combination: " << minilog.str());
+            }
         }
-    }
-    else {
-        if (minilog.str() != EXPECTED_SLAVE_LOG) {
-            LERRORC("Minilog", "Bad combination: " << minilog.str());
+        else {
+            if (minilog.str() != EXPECTED_SLAVE_LOG) {
+                LERRORC("Minilog", "Bad combination: " << minilog.str());
+            }
         }
     }
     
+
     // clear
     minilog.str(std::string());
 }
@@ -315,7 +318,7 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
             openspace::Key(key),
             openspace::KeyModifier(mods),
             openspace::KeyAction(action)
-        );
+            );
     }
 }
 
@@ -324,7 +327,7 @@ void mainMouseButtonCallback(int key, int action) {
         OsEng.mouseButtonCallback(
             openspace::MouseButton(key),
             openspace::MouseAction(action)
-        );
+            );
     }
 }
 

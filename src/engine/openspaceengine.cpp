@@ -770,8 +770,8 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler->updateInputStates(dt);
         
         _renderEngine->updateSceneGraph();
-        _renderEngine->camera()->invalidateCache();
         _interactionHandler->updateCamera();
+        _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
     }
@@ -999,6 +999,14 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             }
         }
     };
+}
+
+bool OpenSpaceEngine::useBusyWaitForDecode() {
+    return _settingsEngine->busyWaitForDecode();
+}
+
+bool OpenSpaceEngine::logSGCTOutOfOrderErrors() {
+    return _settingsEngine->logSGCTOutOfOrderErrors();
 }
 
 void OpenSpaceEngine::enableBarrier() {

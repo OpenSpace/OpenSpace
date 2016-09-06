@@ -43,14 +43,22 @@ public:
     
     void setModules(std::vector<OpenSpaceModule*> modules);
 
+    bool busyWaitForDecode();
+    bool logSGCTOutOfOrderErrors();
+
 private:
     void initEyeSeparation();
     void initSceneFiles();
     void initShowFrameNumber();
+    void initBusyWaitForDecode();
+    void initLogSGCTOutOfOrderErrors();
 
     properties::FloatProperty _eyeSeparation;
     properties::OptionProperty _scenes;
     properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _busyWaitForDecode;
+    properties::BoolProperty _logSGCTOutOfOrderErrors;
+
 };
 
 } // namespace openspace
