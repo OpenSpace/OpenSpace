@@ -285,6 +285,8 @@ void RenderableModelProjection::imageProjectGPU(
     projectionTexture->bind();
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
 
+    _fboProgramObject->setUniform("needShadowMap", _projectionComponent.needsShadowMap());
+
     ghoul::opengl::TextureUnit unitDepthFbo;
     if (_projectionComponent.needsShadowMap()) {
         unitDepthFbo.activate();
