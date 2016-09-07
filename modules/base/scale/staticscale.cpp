@@ -33,9 +33,9 @@ namespace openspace {
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     : _scaleValue(1.0)
 {
-    const bool hasValue = dictionary.hasKeyAndValue<glm::vec3>(KeyValue);
+    bool hasValue = dictionary.hasKeyAndValue<double>(KeyValue);
     if (hasValue) {
-        dictionary.getValue(KeyValue, _scaleValue);
+        _scaleValue = dictionary.value<double>(KeyValue);
     }
 }
 

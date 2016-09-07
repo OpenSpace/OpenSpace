@@ -71,6 +71,8 @@ public:
      * \param identifier A unique identifier for this property. It has to be unique to the
      * PropertyOwner and cannot contain any <code>.</code>s
      * \param guiName The human-readable GUI name for this Property
+     * \pre \p identifier must not be empty
+     * \pre \p guiName must not be empty
      */
     Property(std::string identifier, std::string guiName);
 

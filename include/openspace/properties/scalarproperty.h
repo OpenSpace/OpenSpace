@@ -25,6 +25,77 @@
 #ifndef __SCALARPROPERTY_H__
 #define __SCALARPROPERTY_H__
 
+ /**
+ * \file scalarproperty.h
+ *
+ * \addtogroup openspace 
+ * @{
+ * \addtogroup properties 
+ * @{
+ 
+ * \class BoolProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>bool</code>.
+
+ * \class CharProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>char</code>.
+
+ * \class SignedCharProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>signed char</code>.
+
+ * \class UCharProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>unsigned char</code>.
+
+ * \class ShortProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>short</code>.
+
+ * \class UShortProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>unsigned short</code>.
+
+ * \class IntProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>int</code>.
+
+ * \class UIntProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>unsigned int</code>.
+
+ * \class LongProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>long</code>.
+
+ * \class ULongProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>unsigned long</code>.
+
+ * \class LongLongProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>long long</code>.
+
+ * \class ULongLongProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>unsigned long long</code>.
+
+ * \class FloatProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>float</code>.
+
+ * \class DoubleProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>double</code>.
+
+ * \class LongDoubleProperty
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type <code>long double</code>.
+
+ * @} @}
+ */
+
 #include "openspace/properties/numericalproperty.h"
 
 namespace openspace {

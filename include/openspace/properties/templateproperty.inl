@@ -38,7 +38,7 @@ namespace properties {
 //              C++ class name for which a typedef will be created
 // TYPE       = The template parameter T for which the TemplateProperty is specialized
 #define REGISTER_TEMPLATEPROPERTY_HEADER(CLASS_NAME, TYPE)                               \
-    typedef TemplateProperty<TYPE> CLASS_NAME;                                           \
+    using CLASS_NAME = TemplateProperty<TYPE>;                                           \
                                                                                          \
     template <>                                                                          \
     std::string PropertyDelegate<TemplateProperty<TYPE>>::className();                   \

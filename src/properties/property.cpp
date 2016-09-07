@@ -55,10 +55,8 @@ Property::Property(std::string identifier, std::string guiName)
     : _owner(nullptr)
     , _identifier(std::move(identifier))
 {
-    if (_identifier.empty())
-        LWARNING("Property identifier is empty");
-    if (guiName.empty())
-        LWARNING("Property GUI name is empty");
+    ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
+    ghoul_assert(!guiName.empty(), "guiName must not be empty");
 
     setVisible(true);
     _metaData.setValue(MetaDataKeyGuiName, std::move(guiName));
@@ -75,8 +73,9 @@ std::string Property::fullyQualifiedIdentifier() const {
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
         std::string ownerId = currentOwner->name();
-        if (!ownerId.empty())
+        if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
+        }
         currentOwner = currentOwner->owner();
     }
     return identifier;
@@ -162,19 +161,18 @@ void Property::onChange(std::function<void()> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-PropertyOwner* Property::owner() const
-{
+PropertyOwner* Property::owner() const {
     return _owner;
 }
 
-void Property::setPropertyOwner(PropertyOwner* owner)
-{
+void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
 }
 
 void Property::notifyListener() {
-    if (_onChangeCallback)
+    if (_onChangeCallback) {
         _onChangeCallback();
+    }
 }
 
 std::string Property::generateBaseDescription() const {

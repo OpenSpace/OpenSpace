@@ -67,6 +67,7 @@ return {
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
                 Aberration     = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instrument = {
@@ -223,7 +224,8 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Pluto-Text.png"
+            Texture = "textures/Pluto-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {

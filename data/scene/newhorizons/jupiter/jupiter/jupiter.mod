@@ -41,6 +41,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "JUPITER",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instrument = {
@@ -106,7 +107,8 @@ return {
             Size = {1.0, 7.5},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Jupiter-text.png"
+            Texture = "textures/Jupiter-text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {

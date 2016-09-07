@@ -51,6 +51,7 @@ return {
                 Observer   = "SUN",
                 Target     = BENNU_BODY,
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instruments = {

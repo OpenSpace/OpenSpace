@@ -105,7 +105,7 @@ private:
     /**
      * When a volume is attached or detached from the scene graph,
      * the resolve program needs to be recompiled.
-     * The #_volumes map keeps track of which volumes that can
+     * The _volumes map keeps track of which volumes that can
      * be rendered using the current resolve program, along with their raycast data
      * (id, namespace, etc)
      */ 
