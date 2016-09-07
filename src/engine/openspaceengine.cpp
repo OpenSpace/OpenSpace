@@ -943,7 +943,6 @@ void OpenSpaceEngine::encode() {
         Time::ref().serialize(_syncBuffer.get());
         _scriptEngine->serialize(_syncBuffer.get());
         _renderEngine->serialize(_syncBuffer.get());
-        _interactionHandler->serialize(_syncBuffer.get());
         
         _syncBuffer->write();
     }
@@ -958,7 +957,6 @@ void OpenSpaceEngine::decode() {
         Time::ref().deserialize(_syncBuffer.get());
         _scriptEngine->deserialize(_syncBuffer.get());
         _renderEngine->deserialize(_syncBuffer.get());
-        _interactionHandler->deserialize(_syncBuffer.get());
 
     }
 }
