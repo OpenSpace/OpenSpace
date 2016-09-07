@@ -129,6 +129,7 @@ RenderEngine::RenderEngine()
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _frameNumber(0)
+    , _showFrameNumber(false)
     , _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
