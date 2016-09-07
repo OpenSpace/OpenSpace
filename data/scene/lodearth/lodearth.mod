@@ -6,7 +6,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
-                Body = "EARTH",
+                Body = "EARTH BARYCENTER",
                 Reference = "ECLIPJ2000",
                 Observer = "SUN",
                 Kernels = {
@@ -33,9 +33,18 @@ return {
     },
     -- RenderableGlobe module
     {
-        Name = "LodEarth",
+        Name = "Earth",
         Parent = "EarthBarycenter",
         Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "EARTH",
+                Reference = "ECLIPJ2000",
+                Observer = "EARTH BARYCENTER",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+                }
+            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
@@ -125,6 +134,6 @@ return {
                 },
             },
         },
-        GuiName = "/Solar/Planets/LodEarth"
+        GuiName = "/Solar/Planets/Earth"
     },
 }

@@ -189,8 +189,9 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     -- Activate night textures and water masks
-    openspace.setPropertyValue("LodEarth.RenderableGlobe.WaterMasks", {0, 1});
-    openspace.setPropertyValue("LodEarth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.WaterMasks", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true);
 
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
@@ -205,15 +206,17 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "OsirisRex",
-        Position = {100, 0, 0},
-        Rotation = {0.668258, -0.089482, 0.589040, 0.445484},
+        Position = {26974590199.661884, 76314608558.908020, -127086452897.101791},
+        Rotation = {0.729548, -0.126024, 0.416827, 0.527382},
     },
     Modules = {
         "sun",
         "mercury",
         "venus",
         "lodearth",
-        "mars",
+        "lodmoon",
+        "lodmars",
+        "jupiter",
         "saturn",
         "uranus",
         "neptune",

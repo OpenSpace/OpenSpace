@@ -198,7 +198,7 @@ return {
     -- Trail relative to Earth
     {   
         Name = "OsirisRexTrailEarth",
-        Parent = "LodEarth",
+        Parent = "Earth",
         Renderable = {
             Type = "RenderableTrailNew",
             -- Spice

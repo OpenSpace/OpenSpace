@@ -6,7 +6,7 @@ return {
     },
     -- RenderableGlobe module
     {   
-        Name = "LodMars",
+        Name = "Mars",
         Parent = "MarsBarycenter",
         Transform = {
             Translation = {
@@ -21,7 +21,7 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC",
             },
             Scale = {
                 Type = "StaticScale",
@@ -30,8 +30,6 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Frame = "IAU_MARS",
-            Body = "MARS BARYCENTER",
             Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
@@ -76,7 +74,11 @@ return {
                     },
                 },
                 NightTextures = {
-
+                    {
+                        Name = "Mars Night Texture",
+                        FilePath = "map_datasets/MarsNight.vrt",
+                        Enabled = true,
+                    },
                 },
                 WaterMasks = {
 
