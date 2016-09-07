@@ -281,10 +281,12 @@ vec4 calculateNight(
 	}
 	#endfor
 
-	float cosineFactor = clamp(dot(-lightDirectionCameraSpace, ellipsoidNormalCameraSpace) * 3, 0, 1);
-
+	//float cosineFactor = clamp(dot(-lightDirectionCameraSpace, ellipsoidNormalCameraSpace) * 3, 0, 1);
+	float shadowLight = 0.1;
+	float cosineFactor = clamp(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)) * 3, -shadowLight, 1) + shadowLight;
+	
 	// Blend night color with base color
-	vec4 color = vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * vec3(nightColor * nightColor * 0.7), currentColor.a);
+	vec4 color = currentColor * 0.1 + 0.9 * vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * vec3(nightColor * nightColor), currentColor.a);
 
 	return color;
 }
