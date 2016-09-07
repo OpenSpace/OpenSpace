@@ -286,9 +286,11 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->setUniform("projectionTexture", unitFbo);
 
     ghoul::opengl::TextureUnit unitDepthFbo;
-    unitDepthFbo.activate();
-    _projectionComponent.depthTexture().bind();
-    _fboProgramObject->setUniform("depthTexture", unitDepthFbo);
+    if (_projectionComponent.needsShadowMap()) {
+        unitDepthFbo.activate();
+        _projectionComponent.depthTexture().bind();
+        _fboProgramObject->setUniform("depthTexture", unitDepthFbo);
+    }
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform", _transform);

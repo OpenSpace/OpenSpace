@@ -33,6 +33,7 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -69,12 +70,16 @@ namespace {
 namespace openspace {
 
 using ghoul::Dictionary;
+using glm::ivec2;
 
 ProjectionComponent::ProjectionComponent()
     : properties::PropertyOwner()
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
+    , _textureSize("textureSize", "Texture Size", ivec2(16), ivec2(16), ivec2(32768))
+    , _applyTextureSize("applyTextureSize", "Apply Texture Size")
+    , _textureSizeDirty(false)
     , _projectionTexture(nullptr)
 {
     setName("ProjectionComponent");
@@ -85,11 +90,33 @@ ProjectionComponent::ProjectionComponent()
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
     addProperty(_projectionFading);
+
+    addProperty(_textureSize);
+    addProperty(_applyTextureSize);
+    _applyTextureSize.onChange([this]() { _textureSizeDirty = true; });
 }
 
 bool ProjectionComponent::initialize() {
-    bool success = generateProjectionLayerTexture();
-    success &= generateDepthTexture();
+    int maxSize = OpenGLCap.max2DTextureSize();
+    glm::ivec2 size;
+
+    if (_projectionTextureAspectRatio > 1.f) {
+        size.x = maxSize;
+        size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
+    }
+    else {
+        size.x = static_cast<int>(maxSize * _projectionTextureAspectRatio);
+        size.y = maxSize;
+    }
+
+    _textureSize.setMaxValue(size);
+    _textureSize = size / 2;
+
+    // We only want to use half the resolution per default:
+    size /= 2;
+
+    bool success = generateProjectionLayerTexture(size);
+    success &= generateDepthTexture(size);
     success &= auxiliaryRendertarget();
     success &= depthRendertarget();
 
@@ -295,6 +322,190 @@ void ProjectionComponent::imageProjectBegin() {
     // keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
+    if (_textureSizeDirty) {
+        LDEBUG("Changing texture size to " << std::to_string(_textureSize));
+
+        // If the texture size has changed, we have to allocate new memory and copy
+        // the image texture to the new target
+
+        using ghoul::opengl::Texture;
+        using ghoul::opengl::FramebufferObject;
+
+        // Make a copy of the old textures
+        std::unique_ptr<Texture> oldProjectionTexture = std::move(_projectionTexture);
+        std::unique_ptr<Texture> oldDilationStencil = std::move(_dilation.stencilTexture);
+        std::unique_ptr<Texture> oldDilationTexture = std::move(_dilation.texture);
+        std::unique_ptr<Texture> oldDepthTexture = std::move(_shadowing.texture);
+
+        // Generate the new textures
+        generateProjectionLayerTexture(_textureSize);
+
+        if (_shadowing.isEnabled) { 
+            generateDepthTexture(_textureSize);
+        }
+
+        auto copyFramebuffers = [](Texture* src, Texture* dst, const std::string& msg) {
+            glFramebufferTexture(
+                GL_READ_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                *src,
+                0
+            );
+
+            GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
+            if (!FramebufferObject::errorChecking(status).empty()) {
+                LERROR(
+                    "Read Buffer (" << msg << "): " <<
+                    FramebufferObject::errorChecking(status)
+                );
+            }
+
+            glFramebufferTexture(
+                GL_DRAW_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                *dst,
+                0
+            );
+
+            status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+            if (!FramebufferObject::errorChecking(status).empty()) {
+                LERROR(
+                    "Draw Buffer (" << msg << "): " <<
+                    FramebufferObject::errorChecking(status)
+                );
+            }
+
+            glBlitFramebuffer(
+                0, 0,
+                src->dimensions().x, src->dimensions().y,
+                0, 0,
+                dst->dimensions().x, dst->dimensions().y,
+                GL_COLOR_BUFFER_BIT,
+                GL_LINEAR
+            );
+        };
+
+        auto copyDepthBuffer = [](Texture* src, Texture* dst, const std::string& msg) {
+            glFramebufferTexture(
+                GL_READ_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT,
+                *src,
+                0
+            );
+
+            GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
+            if (!FramebufferObject::errorChecking(status).empty()) {
+                LERROR(
+                    "Read Buffer (" << msg << "): " <<
+                    FramebufferObject::errorChecking(status)
+                );
+            }
+
+            glFramebufferTexture(
+                GL_DRAW_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT,
+                *dst,
+                0
+            );
+
+            status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+            if (!FramebufferObject::errorChecking(status).empty()) {
+                LERROR(
+                    "Draw Buffer (" << msg << "): " <<
+                    FramebufferObject::errorChecking(status)
+                );
+            }
+
+            glBlitFramebuffer(
+                0, 0,
+                src->dimensions().x, src->dimensions().y,
+                0, 0,
+                dst->dimensions().x, dst->dimensions().y,
+                GL_DEPTH_BUFFER_BIT,
+                GL_NEAREST
+            );
+        };
+
+        GLuint fbos[2];
+        glGenFramebuffers(2, fbos);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
+
+        copyFramebuffers(
+            oldProjectionTexture.get(),
+            _projectionTexture.get(),
+            "Projection"
+        );
+
+        if (_dilation.isEnabled) {
+            copyFramebuffers(
+                oldDilationStencil.get(),
+                _dilation.stencilTexture.get(),
+                "Dilation Stencil"
+            );
+
+            copyFramebuffers(
+                oldDilationTexture.get(),
+                _dilation.texture.get(),
+                "Dilation Texture"
+            );
+        }
+
+        if (_shadowing.isEnabled) {
+            copyDepthBuffer(
+                oldDepthTexture.get(),
+                _shadowing.texture.get(),
+                "Shadowing"
+            );
+        }
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        glDeleteFramebuffers(2, fbos);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
+        glFramebufferTexture2D(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            GL_TEXTURE_2D,
+            *_projectionTexture,
+            0
+        );
+
+        if (_dilation.isEnabled) {
+            // We only need the stencil texture if we need to dilate
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT1,
+                GL_TEXTURE_2D,
+                *_dilation.stencilTexture,
+                0
+            );
+
+            glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_2D,
+                *_dilation.texture,
+                0
+            );
+        }
+
+        if (_shadowing.isEnabled) {
+            glBindFramebuffer(GL_FRAMEBUFFER, _depthFboID);
+            glFramebufferTexture2D(
+                GL_FRAMEBUFFER,
+                GL_DEPTH_ATTACHMENT,
+                GL_TEXTURE_2D,
+                *_shadowing.texture,
+                0
+            );
+        }
+
+        _textureSizeDirty = false;
+    }
+
     glGetIntegerv(GL_VIEWPORT, _viewport);
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
 
@@ -341,8 +552,6 @@ void ProjectionComponent::depthMapRenderEnd() {
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
 }
-
-
 
 void ProjectionComponent::imageProjectEnd() {
     if (_dilation.isEnabled) {
@@ -594,20 +803,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     return std::move(texture);
 }
 
-bool ProjectionComponent::generateProjectionLayerTexture() {
-    int maxSize = OpenGLCap.max2DTextureSize() / 2;
-
-    glm::ivec2 size;
-    if (_projectionTextureAspectRatio > 1.f) {
-        size.x = maxSize;
-        size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
-    }
-    else {
-        size.x = static_cast<int>(maxSize * _projectionTextureAspectRatio);
-        size.y = maxSize;
-    }
-
-
+bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
     LINFO(
         "Creating projection texture of size '" << size.x << ", " << size.y << "'"
     );
@@ -648,20 +844,7 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
 
 }
 
-bool ProjectionComponent::generateDepthTexture() {
-    int maxSize = OpenGLCap.max2DTextureSize() / 2;
-
-    glm::ivec2 size;
-
-    if (_projectionTextureAspectRatio > 1.f) {
-        size.x = maxSize;
-        size.y = static_cast<int>(maxSize / _projectionTextureAspectRatio);
-    }
-    else {
-        size.x = static_cast<int>(maxSize * _projectionTextureAspectRatio);
-        size.y = maxSize;
-    }
-
+bool ProjectionComponent::generateDepthTexture(const ivec2& size) {
     LINFO(
         "Creating depth texture of size '" << size.x << ", " << size.y << "'"
         );
