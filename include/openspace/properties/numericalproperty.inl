@@ -330,8 +330,18 @@ T NumericalProperty<T>::minValue() const {
 }
 
 template <typename T>
+void NumericalProperty<T>::setMinValue(T value) {
+    _minimumValue = std::move(value);
+}
+
+template <typename T>
 T NumericalProperty<T>::maxValue() const {
     return _maximumValue;
+}
+
+template <typename T>
+void NumericalProperty<T>::setMaxValue(T value) {
+    _maximumValue = std::move(value);
 }
 
 template <typename T>
