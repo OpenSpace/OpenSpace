@@ -18,7 +18,7 @@ return {
 
     -- RenderableGlobe module
     {   
-        Name = "LodMercury",
+        Name = "Mercury",
         Parent = "MercuryBarycenter",
         Transform = {
             Rotation = {
