@@ -50,10 +50,11 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/chunkindextileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
@@ -62,7 +63,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
@@ -102,11 +102,11 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/chunkindextileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
     
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
@@ -114,7 +114,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileproviderfactory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp

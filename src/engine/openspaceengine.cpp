@@ -432,6 +432,9 @@ bool OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
+    // Load a light and a monospaced font
+    loadFonts();
+
     // Initialize the Scene
     Scene* sceneGraph = new Scene;
     sceneGraph->initialize();
@@ -453,8 +456,6 @@ bool OpenSpaceEngine::initialize() {
     // Run start up scripts
     runPreInitializationScripts(scenePath);
 
-    // Load a light and a monospaced font
-    loadFonts();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");

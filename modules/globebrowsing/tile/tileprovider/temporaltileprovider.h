@@ -27,6 +27,7 @@
 
 
 #include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
@@ -102,8 +103,7 @@ namespace openspace {
 
     class TemporalTileProvider : public TileProvider {
     public:
-        TemporalTileProvider(const std::string& datasetFile, const TileProviderInitData& tileProviderInitData);
-
+        TemporalTileProvider(const ghoul::Dictionary& dictionary);
 
 
         // These methods implements TileProvider
@@ -143,16 +143,20 @@ namespace openspace {
         //                                Members variables                             //
         //////////////////////////////////////////////////////////////////////////////////
 
-        const std::string _datasetFile;
+        std::string _datasetFile;
         std::string _gdalXmlTemplate;
 
         std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
-        TileProviderInitData _tileProviderInitData;
+
+        // Used for creation of time specific instances of CachingTileProvider
+        ghoul::Dictionary _initDict;
+
 
         Tile _defaultTile;
 
         std::shared_ptr<TileProvider> _currentTileProvider;
 
+        
         TimeFormat * _timeFormat;
         TimeQuantizer _timeQuantizer;
     };

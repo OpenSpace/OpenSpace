@@ -1,13 +1,9 @@
+local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
 return {
     -- Mars barycenter module
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
-    },
-    -- RenderableGlobe module
-    {   
-        Name = "Mars",
-        Parent = "MarsBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
@@ -18,6 +14,13 @@ return {
                     "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
                 }
             },
+        },
+    },
+    -- RenderableGlobe module
+    {   
+        Name = "Mars",
+        Parent = "MarsBarycenter",
+        Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
@@ -30,7 +33,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            Radii = marsEllipsoid,
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 90,
@@ -49,7 +52,6 @@ return {
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                        Enabled = true,
                     },
                     {
                         Name = "Mars Viking Clr",
@@ -74,11 +76,11 @@ return {
                     },
                 },
                 NightTextures = {
-                    {
+                    --[[{
                         Name = "Mars Night Texture",
                         FilePath = "map_datasets/MarsNight.vrt",
                         Enabled = true,
-                    },
+                    },]]
                 },
                 WaterMasks = {
 
@@ -88,21 +90,33 @@ return {
                         Type = "ChunkIndex",
                         Name = "Indices",
                     },
+                    {
+                        Type = "SizeReference",
+                        Name = "Size Reference",
+                        Radii = marsEllipsoid,
+                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
+                    },
                 },
                 HeightMaps = {
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                     {
                         Name = "West_Candor_Chasma_DEM_longlat_global",
                         FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_DEM.vrt",
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                 },
                 HeightMapOverlays = {
@@ -115,7 +129,7 @@ return {
     -- MarsTrail module
     {   
         Name = "MarsTrail",
-        Parent = "MarsBarycenter",
+        Parent = "Sun",
         Renderable = {
             Type = "RenderableTrail",
             Body = "MARS BARYCENTER",

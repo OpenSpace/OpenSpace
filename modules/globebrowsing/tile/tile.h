@@ -22,61 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_TILE_PROVIDER_H__
-#define __CHUNK_INDEX_TILE_PROVIDER_H__
+#ifndef __TILE_H__
+#define __TILE_H__
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // absPath
-#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/texture.h> // Texture
 
-#include <ghoul/io/texture/texturereader.h>
-
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/font/fontmanager.h>
-
-#include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/other/lrucache.h>
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
-//////////////////////////////////////////////////////////////////////////////////////////
+#include <modules/globebrowsing/tile/asynctilereader.h> // TilePreprocessData
 
 
 namespace openspace {
     
+    using namespace ghoul::opengl;    
+
+    struct Tile {
+        std::shared_ptr<Texture> texture;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+
+        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
     
-    class ChunkIndexTileProvider : public TileProvider {
-    public:
-        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-        virtual ~ChunkIndexTileProvider();
-
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-    private:
-        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
-
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         
-        TileCache _tileCache;
-        glm::uvec2 _textureSize;
-        size_t _fontSize;
-        
-        GLuint _fbo;
+        /**
+         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
+         * color in rgba. Color values ranges between 0-255.
+         */
+        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
+
+        static const Tile TileUnavailable;
 
     };
-
 
 }  // namespace openspace
 
 
 
 
-#endif  // __CHUNK_INDEX_TILE_PROVIDER_H__
+#endif  // __TILE_H__

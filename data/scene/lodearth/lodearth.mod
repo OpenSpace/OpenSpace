@@ -1,3 +1,4 @@
+earthEllipsoid = {6378137.0, 6378137.0, 6356752.314245} -- Earth's radii
 return {
     -- Earth barycenter module
     {
@@ -6,7 +7,7 @@ return {
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
-                Body = "EARTH BARYCENTER",
+                Body = "EARTH",
                 Reference = "ECLIPJ2000",
                 Observer = "SUN",
                 Kernels = {
@@ -36,15 +37,6 @@ return {
         Name = "Earth",
         Parent = "EarthBarycenter",
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = "EARTH",
-                Reference = "ECLIPJ2000",
-                Observer = "EARTH BARYCENTER",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
@@ -57,7 +49,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {6378137.0, 6378137.0, 6356752.314245}, -- Earth's radii
+            Radii = earthEllipsoid,
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
@@ -121,12 +113,20 @@ return {
                         Name = "Reference_Labels",
                         FilePath = "map_service_configs/Reference_Labels.xml",
                     },
+                    {
+                        Type = "SizeReference",
+                        Name = "Size Reference",
+                        Radii = earthEllipsoid,
+                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
+                    },
                 },
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/TERRAIN.wms",
                         Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                 },
                 HeightMapOverlays = {
@@ -134,6 +134,6 @@ return {
                 },
             },
         },
-        GuiName = "/Solar/Planets/Earth"
+        GuiName = "/Solar/Planets/LodEarth"
     },
 }

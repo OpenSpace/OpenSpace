@@ -22,18 +22,24 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CACHING_TILE_PROVIDER_H__
-#define __CACHING_TILE_PROVIDER_H__
+#ifndef __TEXT_TILE_PROVIDER_H__
+#define __TEXT_TILE_PROVIDER_H__
 
+#include <memory>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
+
 #include <ghoul/io/texture/texturereader.h>
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <ghoul/font/fontrenderer.h>
+#include <ghoul/font/fontmanager.h>
+
 #include <modules/globebrowsing/tile/asynctilereader.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/geometry/ellipsoid.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -42,23 +48,23 @@
 
 
 namespace openspace {
+    using namespace ghoul::fontrendering;
 
     /**
-        Provides tiles through GDAL datasets which can be defined with xml files
-        for example for wms.
-    */
-    class CachingTileProvider : public TileProvider {
+     * This abstract class implements the TilProvider interface and enables a simple way 
+     * of providing tiles with any type of rendered text. 
+     * Internally it handles setting up a FBO for rendering the text, and defines a new 
+     * interface, consisting of only a single method for subclasses to implement: 
+     * \code  renderText(const FontRenderer&, const ChunkIndex&) const \endcode 
+     */
+    class TextTileProvider : public TileProvider {
     public:
 
-        CachingTileProvider(const ghoul::Dictionary& dictionary);
+        TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
+        virtual ~TextTileProvider();
 
-        CachingTileProvider(
-            std::shared_ptr<AsyncTileDataProvider> tileReader, 
-            std::shared_ptr<TileCache> tileCache,
-            int framesUntilFlushRequestQueue);
+        // The TileProvider interface below is implemented in this class
 
-        virtual ~CachingTileProvider();
-        
         virtual Tile getTile(const ChunkIndex& chunkIndex);
         virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const ChunkIndex& index);
@@ -67,41 +73,54 @@ namespace openspace {
         virtual void reset();
         virtual int maxLevel();
 
+        // Returns the tile which will be used to draw text onto.
+        // Default implementation returns a tile with a plain transparent texture.
+        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
+
+        // Default implementation uses ChunkIndex::hashKey()
+        virtual ChunkHashKey toHash(const ChunkIndex& chunkIndex) const;
+        
+        // This method is pure and should be implemented by subclasses
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
+
+    protected:
+        std::shared_ptr<ghoul::fontrendering::Font> _font;
+        glm::uvec2 _textureSize;
+        size_t _fontSize;
+
+    private:
+        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
+        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+
+        TileCache _tileCache;
+        GLuint _fbo;
+    };
+
+    /**
+     * Provides \class Tiles with the chunk index rendered as text onto its tiles.
+     */
+    class ChunkIndexTileProvider : public TextTileProvider {
+    public:
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
+    };
+
+
+    class SizeReferenceTileProvider : public TextTileProvider {
+    public:
+        SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+
+        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
+        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
+
+        virtual ChunkHashKey toHash(const ChunkIndex& chunkIndex) const;
+
 
     private:
 
+        int roundedLongitudalLength(const ChunkIndex& chunkIndex) const;
 
-        //////////////////////////////////////////////////////////////////////////////////
-        //                                Helper functions                              //
-        //////////////////////////////////////////////////////////////////////////////////
-        
-        Tile getOrStartFetchingTile(ChunkIndex chunkIndex);
-
-
-        
-        /**
-            Creates an OpenGL texture and pushes the data to the GPU.
-        */
-
-        Tile createTile(std::shared_ptr<TileIOResult> res);
-
-        void clearRequestQueue();
-
-        void initTexturesFromLoadedData();
-
-
-
-        //////////////////////////////////////////////////////////////////////////////////
-        //                                Member variables                              //
-        //////////////////////////////////////////////////////////////////////////////////
-
-        std::shared_ptr<TileCache> _tileCache;
-        Tile _defaultTile;
-
-        int _framesSinceLastRequestFlush;
-        int _framesUntilRequestFlush;
-
-        std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+        Ellipsoid _ellipsoid;
+        Tile _backgroundTile;
     };
 
 }  // namespace openspace
@@ -109,4 +128,4 @@ namespace openspace {
 
 
 
-#endif  // __CACHING_TILE_PROVIDER_H__
+#endif  // __TEXT_TILE_PROVIDER_H__

@@ -26,55 +26,31 @@
 #define __TILE_PROVIDER_H__
 
 
-#include <openspace/engine/downloadmanager.h>
-#include <set>
-
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
-
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/other/lrucache.h>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
+//                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
 namespace openspace {
     
-class TilePreprocessData;
-
-    // TODO: Remove using directive in header file ---abock
     using namespace ghoul::opengl;
-
-
-    struct Tile {
-        std::shared_ptr<Texture> texture;
-        std::shared_ptr<TilePreprocessData> preprocessData;
-
-        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
     
-        
-        /**
-         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
-         * color in rgba. Color values ranges between 0-255.
-         */
-        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
-
-        static const Tile TileUnavailable;
-
-    };
-
     class TileProvider {
     public:
+        static TileProvider* createFromDictionary(const ghoul::Dictionary& dictionary);
+
+        TileProvider() {};
+        TileProvider(const ghoul::Dictionary& dictionary);
+
         virtual ~TileProvider() { }
 
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
