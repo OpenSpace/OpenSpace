@@ -52,6 +52,7 @@ namespace {
     const std::string keyTranslation = "DataInputTranslation";
 
     const std::string keyNeedsTextureMapDilation = "Projection.TextureMap";
+    const std::string keyNeedsShadowing = "Projection.ShadowMap";
     const std::string keyTextureMapAspectRatio = "Projection.AspectRatio";
 
     const std::string sequenceTypeImage = "image-sequence";
@@ -75,9 +76,11 @@ ProjectionComponent::ProjectionComponent()
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
     , _projectionTexture(nullptr)
-    , _needsTextureMapDilation(false)
 {
     setName("ProjectionComponent");
+
+    _shadowing.isEnabled = false;
+    _dilation.isEnabled = false;
 
     addProperty(_performProjection);
     addProperty(_clearAllProjections);
@@ -104,7 +107,7 @@ bool ProjectionComponent::initialize() {
     }
     _placeholderTexture = std::move(texture);
     
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
             "Dilation",
             "${MODULE_NEWHORIZONS}/shaders/dilation_vs.glsl",
@@ -147,7 +150,7 @@ bool ProjectionComponent::deinitialize() {
 
     glDeleteFramebuffers(1, &_fboID);
 
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         glDeleteFramebuffers(1, &_dilation.fbo);
         glDeleteVertexArrays(1, &_dilation.vao);
         glDeleteBuffers(1, &_dilation.vbo);
@@ -194,7 +197,11 @@ bool ProjectionComponent::initializeProjectionSettings(const Dictionary& diction
     }
 
     if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
-        _needsTextureMapDilation = dictionary.value<bool>(keyNeedsTextureMapDilation);
+        _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
+    }
+    
+    if (dictionary.hasKeyAndValue<bool>(keyNeedsShadowing)) {
+        _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
     }
 
     _projectionTextureAspectRatio = 1.f;
@@ -297,17 +304,23 @@ void ProjectionComponent::imageProjectBegin() {
         static_cast<GLsizei>(_projectionTexture->height())
     );
 
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, buffers);
     }
 }
 
+bool ProjectionComponent::needsShadowMap() const {
+    return _shadowing.isEnabled;
+}
+
 ghoul::opengl::Texture& ProjectionComponent::depthTexture() {
-    return *_depthTexture;
+    return *_shadowing.texture;
 }
 
 void ProjectionComponent::depthMapRenderBegin() {
+    ghoul_assert(_shadowing.isEnabled, "Shadowing is not enabled");
+
     // keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glGetIntegerv(GL_VIEWPORT, _viewport);
@@ -317,8 +330,8 @@ void ProjectionComponent::depthMapRenderBegin() {
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(_depthTexture->width()),
-        static_cast<GLsizei>(_depthTexture->height())
+        static_cast<GLsizei>(_shadowing.texture->width()),
+        static_cast<GLsizei>(_shadowing.texture->height())
         );
 
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -332,7 +345,7 @@ void ProjectionComponent::depthMapRenderEnd() {
 
 
 void ProjectionComponent::imageProjectEnd() {
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
 
         glDisable(GL_BLEND);
@@ -361,10 +374,8 @@ void ProjectionComponent::imageProjectEnd() {
 }
 
 void ProjectionComponent::update() {
-    if (_needsTextureMapDilation) {
-        if (_dilation.program->isDirty()) {
-            _dilation.program->rebuildFromFile();
-        }
+    if (_dilation.isEnabled && _dilation.program->isDirty()) {
+        _dilation.program->rebuildFromFile();
     }
 }
 
@@ -378,7 +389,7 @@ bool ProjectionComponent::depthRendertarget() {
         GL_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D,
-        *_depthTexture,
+        *_shadowing.texture,
         0);
 
     glDrawBuffer(GL_NONE);
@@ -415,7 +426,7 @@ bool ProjectionComponent::auxiliaryRendertarget() {
     }
 
 
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         // We only need the stencil texture if we need to dilate
         glFramebufferTexture2D(
             GL_FRAMEBUFFER,
@@ -497,7 +508,7 @@ float ProjectionComponent::projectionFading() const {
 }
 
 ghoul::opengl::Texture& ProjectionComponent::projectionTexture() const {
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         return *_dilation.texture;
     }
     else {
@@ -544,7 +555,7 @@ void ProjectionComponent::clearAllProjections() {
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
         glClear(GL_COLOR_BUFFER_BIT);
     }
@@ -609,7 +620,7 @@ bool ProjectionComponent::generateProjectionLayerTexture() {
         //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     }
     
-    if (_needsTextureMapDilation) {
+    if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
             ghoul::opengl::Texture::Format::RGBA
@@ -655,16 +666,17 @@ bool ProjectionComponent::generateDepthTexture() {
         "Creating depth texture of size '" << size.x << ", " << size.y << "'"
         );
 
-    _depthTexture = std::make_unique<ghoul::opengl::Texture>(
+    _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
         ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F
         );
 
-    if (_depthTexture)
-        _depthTexture->uploadTexture();
+    if (_shadowing.texture) {
+        _shadowing.texture->uploadTexture();
+    }
 
-    return _depthTexture != nullptr;
+    return _shadowing.texture != nullptr;
 
 }
 

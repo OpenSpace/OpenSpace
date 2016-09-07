@@ -42,7 +42,8 @@ return {
                 Observer   = "ROSETTA",
                 Target     = "CHURYUMOV-GERASIMENKO",
                 Aberration = "NONE",
-                TextureMap = true
+                TextureMap = true,
+                ShadowMap = true
             },
             DataInputTranslation = {
                 Instrument = {

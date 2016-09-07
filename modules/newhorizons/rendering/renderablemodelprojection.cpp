@@ -264,16 +264,18 @@ void RenderableModelProjection::update(const UpdateData& data) {
 void RenderableModelProjection::imageProjectGPU(
                                 std::shared_ptr<ghoul::opengl::Texture> projectionTexture)
 {
-    _projectionComponent.depthMapRenderBegin();
-    _depthFboProgramObject->activate();
-    _depthFboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
-    _depthFboProgramObject->setUniform("ModelTransform", _transform);
-    _geometry->setUniforms(*_fboProgramObject);
+    if (_projectionComponent.needsShadowMap()) {
+        _projectionComponent.depthMapRenderBegin();
+        _depthFboProgramObject->activate();
+        _depthFboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
+        _depthFboProgramObject->setUniform("ModelTransform", _transform);
+        _geometry->setUniforms(*_fboProgramObject);
 
-    _geometry->render();
+        _geometry->render();
 
-    _depthFboProgramObject->deactivate();
-    _projectionComponent.depthMapRenderEnd();
+        _depthFboProgramObject->deactivate();
+        _projectionComponent.depthMapRenderEnd();
+    }
 
     _projectionComponent.imageProjectBegin();
     _fboProgramObject->activate();
@@ -287,10 +289,6 @@ void RenderableModelProjection::imageProjectGPU(
     unitDepthFbo.activate();
     _projectionComponent.depthTexture().bind();
     _fboProgramObject->setUniform("depthTexture", unitDepthFbo);
-
-    glm::vec4 debugVector(0.0, 0.0, 0.0, 1.0);
-    glm::vec4 debugTransformed =  _projectorMatrix * _transform * debugVector;
-    debugTransformed /= debugTransformed.w;
 
     _fboProgramObject->setUniform("ProjectorMatrix", _projectorMatrix);
     _fboProgramObject->setUniform("ModelTransform", _transform);

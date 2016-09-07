@@ -87,6 +87,8 @@ public:
     bool needsClearProjection() const;
     float projectionFading() const;
 
+    bool needsShadowMap() const;
+
     void clearAllProjections();
 
     ghoul::opengl::Texture& projectionTexture() const;
@@ -105,7 +107,6 @@ protected:
     properties::FloatProperty _projectionFading;
 
     std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
-    std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
 
     float _projectionTextureAspectRatio;
@@ -124,8 +125,13 @@ protected:
     GLint _defaultFBO;
     GLint _viewport[4];
 
-    bool _needsTextureMapDilation;
     struct {
+        bool isEnabled;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+    } _shadowing;
+
+    struct {
+        bool isEnabled;
         GLuint fbo;
         GLuint vao;
         GLuint vbo;
