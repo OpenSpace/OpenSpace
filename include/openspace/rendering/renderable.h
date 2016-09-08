@@ -71,8 +71,8 @@ public:
     virtual bool isReady() const = 0;
     bool isEnabled() const;
 
-    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
-    const PowerScaledScalar& getBoundingSphere();
+    void setBoundingSphere(PowerScaledScalar boundingSphere);
+    PowerScaledScalar getBoundingSphere();
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);

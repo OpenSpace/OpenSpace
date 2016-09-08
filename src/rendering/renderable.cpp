@@ -22,14 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
-// ghoul
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -75,9 +73,7 @@ Renderable::Renderable()
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
-{
-
-}
+{}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)
@@ -87,52 +83,41 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     , _hasTimeInterval(false)
 {
     setName("renderable");
-#ifndef NDEBUG
-    std::string name;
-    ghoul_assert(dictionary.getValue(SceneGraphNode::KeyName, name),
-                 "Scenegraphnode need to specify '" << SceneGraphNode::KeyName
-        << "' because renderables is going to use this for debugging!");
-#endif
+
+    ghoul_assert(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "SceneGraphNode must specify '" << SceneGraphNode::KeyName << "'"
+    );
 
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
-    if (_startTime != "" && _endTime != "")
+    if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
+    }
 
     addProperty(_enabled);
 }
 
-Renderable::~Renderable() {
+Renderable::~Renderable() {}
+
+void Renderable::setBoundingSphere(PowerScaledScalar boundingSphere) {
+    boundingSphere_ = std::move(boundingSphere);
 }
 
-void Renderable::setBoundingSphere(const PowerScaledScalar& boundingSphere)
-{
-    boundingSphere_ = boundingSphere;
-}
-
-const PowerScaledScalar& Renderable::getBoundingSphere()
-{
+PowerScaledScalar Renderable::getBoundingSphere() {
     return boundingSphere_;
 }
 
-void Renderable::update(const UpdateData&)
-{
-}
+void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks& tasks)
-{
-    (void) tasks;
+void Renderable::render(const RenderData& data, RendererTasks&) {
     render(data);
 }
 
-void Renderable::render(const RenderData& data)
-{
-}
+void Renderable::render(const RenderData& data) {}
 
-void Renderable::postRender(const RenderData& data)
-{
-}
+void Renderable::postRender(const RenderData& data) {}
 
 void Renderable::setPscUniforms(
     ghoul::opengl::ProgramObject& program, 

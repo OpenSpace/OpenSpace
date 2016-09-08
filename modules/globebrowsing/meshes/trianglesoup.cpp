@@ -36,9 +36,9 @@ TriangleSoup::TriangleSoup(std::vector<unsigned int> elements,
     : _vaoID(0)
     ,_vertexBufferID(0)
     ,_elementBufferID(0)
-    ,_useVertexPositions(usePositions == Positions::Yes)
-    ,_useTextureCoordinates(useTextures == TextureCoordinates::Yes)
-    ,_useVertexNormals(useNormals == Normals::Yes)
+    ,_useVertexPositions(usePositions)
+    ,_useTextureCoordinates(useTextures)
+    ,_useVertexNormals(useNormals)
 {
     setElements(elements);
 }
