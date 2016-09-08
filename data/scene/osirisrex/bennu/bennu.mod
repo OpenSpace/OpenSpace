@@ -27,7 +27,7 @@ return {
             Body = BENNU_BODY,
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/BennuResizedTextured.obj",
+                GeometryFile = "models/BennuTextured.obj",
                 Magnification = 0,
             }, 
             Shading = {

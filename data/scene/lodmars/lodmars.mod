@@ -74,6 +74,13 @@ return {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_A.vrt",
                     },
+                    --[[
+                    {
+                        Name = "MER_Meridianni_Endeavor_Basemap_25cm",
+                        FilePath = "map_datasets/MER_Meridianni_Endeavor_Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
+                        Enabled = false,
+                    },
+                    ]]
                 },
                 NightTextures = {
                     --[[{
