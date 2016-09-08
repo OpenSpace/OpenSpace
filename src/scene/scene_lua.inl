@@ -52,10 +52,10 @@ void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properti
                 //ensure properties are synced over parallel connection
                 std::string value;
                 prop->getStringValue(value);
-                OsEng.parallelConnection().scriptMessage(
+/*                OsEng.parallelConnection().scriptMessage(
                     prop->fullyQualifiedIdentifier(),
                     value
-                );
+                );*/
             }
 
         }
@@ -101,7 +101,7 @@ int property_setValueSingle(lua_State* L) {
         //ensure properties are synced over parallel connection
         std::string value;
         prop->getStringValue(value);
-        OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
+        //OsEng.parallelConnection().scriptMessage(prop->fullyQualifiedIdentifier(), value);
     }
 
     return 0;

@@ -57,22 +57,18 @@ namespace interaction {
 
     }
 
-    void InputState::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
-        _keyframeMutex.lock();
-
+    void InputState::addKeyframe(const network::datamessagestructures::CameraKeyframe &kf) {
+        
         //save a maximum of 10 samples (1 seconds of buffer)
         if (_keyframes.size() >= 10) {
             _keyframes.erase(_keyframes.begin());
         }
         _keyframes.push_back(kf);
 
-        _keyframeMutex.unlock();
     }
 
     void InputState::clearKeyframes() {
-        _keyframeMutex.lock();
         _keyframes.clear();
-        _keyframeMutex.unlock();
     }
 
     void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {

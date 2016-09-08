@@ -161,7 +161,7 @@ bool ScriptEngine::runScript(const std::string& script) {
     if (OsEng.parallelConnection().isHost()) {
         std::string lib, func;
         if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
-//            OsEng.parallelConnection()->sendScript(script);
+            OsEng.parallelConnection().sendScript(script);
 //            cacheScript(lib, func, script);
         }
     }

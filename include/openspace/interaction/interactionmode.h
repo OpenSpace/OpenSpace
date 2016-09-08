@@ -56,7 +56,7 @@ namespace interaction {
         void mouseScrollWheelCallback(double mouseScrollDelta);
 
         // Mutators
-        void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+        void addKeyframe(const network::datamessagestructures::CameraKeyframe &kf);
         void clearKeyframes();
 
         // Accessors
@@ -64,7 +64,7 @@ namespace interaction {
         const std::list<MouseButton>& getPressedMouseButtons() const;
         glm::dvec2 getMousePosition() const;
         double getMouseScrollDelta() const;
-        std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames() const;
+        std::vector<network::datamessagestructures::CameraKeyframe>& getKeyFrames() const;
 
         bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
         bool isMouseButtonPressed(MouseButton mouseButton) const;
@@ -76,8 +76,7 @@ namespace interaction {
         double _mouseScrollDelta;
 
         // Remote input via keyframes
-        std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
-        std::mutex _keyframeMutex;
+        std::vector<network::datamessagestructures::CameraKeyframe> _keyframes;
     };
 
 

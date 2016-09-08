@@ -36,9 +36,9 @@
 //std includes
 #include <string>
 #include <vector>
+#include <deque>
 #include <atomic>
 #include <thread>
-#include <sstream>
 #include <mutex>
 #include <map>
 #include <condition_variable>
@@ -63,6 +63,35 @@ namespace openspace{
     
     namespace network{
         
+        enum class MessageType : uint32_t {
+            Authentication = 0,
+            Data,
+            HostInformation,
+            HostshipRequest,
+            HostshipResignation
+        };
+
+        struct Message {
+            Message() {};
+            Message(MessageType t, const std::vector<char>& c)
+                : type(t)
+                , content(c)
+            {};
+
+            MessageType type;
+            std::vector<char> content;
+        };
+
+        struct DataMessage {
+            DataMessage() {};
+            DataMessage(network::datamessagestructures::Type t, const std::vector<char>& c)
+                : type(t)
+                , content(c)
+            {};
+            network::datamessagestructures::Type type;
+            std::vector<char> content;
+        };
+
         class ParallelConnection{
         public:
             
@@ -82,24 +111,19 @@ namespace openspace{
             
             void requestHostship(const std::string &password);
 
+            void resignHostship();
+
             void setPassword(const std::string &password);
             
             void signalDisconnect();
             
             void preSynchronization();
+
+            void sendScript(const std::string& script);
             
-            void scriptMessage(const std::string propIdentifier, const std::string propValue);
+            //void scriptMessage(const std::string propIdentifier, const std::string propValue);
             
-            enum MessageTypes{
-                Authentication=0,
-                Initialization,
-                Data,
-                Script, //obsolete now 
-                HostInfo,
-                InitializationRequest,
-                HostshipRequest,
-                InitializationCompleted
-            };
+
             
             /**
              * Returns the Lua library that contains all Lua functions available to affect the
@@ -114,28 +138,15 @@ namespace openspace{
             
         private:
             //@TODO change this into the ghoul hasher for client AND server
-            uint32_t hash(const std::string &val){
-                uint32_t hashVal = 0, i;
-                size_t len = val.length();
-
-                for (hashVal = i = 0; i < len; ++i){
-                    hashVal += val.c_str()[i];
-                    hashVal += (hashVal << 10);
-                    hashVal ^= (hashVal >> 6);
-                }
-
-                hashVal += (hashVal << 3);
-                hashVal ^= (hashVal >> 11);
-                hashVal += (hashVal << 15);
-
-                return hashVal;
-            };
+            uint32_t hash(const std::string &val);
             
-            void queueMessage(std::vector<char> message);
-            
+            void queueOutMessage(const Message& message);
+
+            void queueOutDataMessage(const DataMessage& dataMessage);
+
+            void queueInMessage(const Message& message);
+
             void disconnect();
-            
-            void writeHeader(std::vector<char> &buffer, uint32_t messageType);
 
             void closeSocket();
 
@@ -147,25 +158,17 @@ namespace openspace{
 
             void listenCommunication();
 
-            void delegateDecoding(uint32_t type);
+            void handleMessage(const Message&);
 
-            void initializationMessageReceived();
+            void dataMessageReceived(const std::vector<char>& messageContent);
 
-            void dataMessageReceived();
-
-            void hostInfoMessageReceived();
+            void hostInfoMessageReceived(const std::vector<char>& messageContent);
             
-            void initializationRequestMessageReceived();
-
             void broadcast();
             
-            int headerSize();
-
             int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
             
             void sendFunc();
-            
-            bool parseHints(addrinfo &info);
             
             void threadManagement();
             
@@ -176,24 +179,27 @@ namespace openspace{
             std::string _address;
             std::string _name;
             _SOCKET _clientSocket;
-            std::thread *_connectionThread;
-            std::thread *_broadcastThread;
-            std::thread *_sendThread;
-            std::thread *_listenThread;
-            std::thread *_handlerThread;
+            std::unique_ptr<std::thread> _connectionThread;
+            std::unique_ptr<std::thread> _broadcastThread;
+            std::unique_ptr<std::thread> _sendThread;
+            std::unique_ptr<std::thread> _listenThread;
+            std::unique_ptr<std::thread> _handlerThread;
             std::atomic<bool> _isHost;
             std::atomic<bool> _isConnected;
-            std::atomic<bool> _performDisconnect;
             std::atomic<bool> _isRunning;
             std::atomic<bool> _tryConnect;
+            std::atomic<bool> _disconnect;
             std::atomic<bool> _initializationTimejumpRequired;
 
             std::condition_variable _disconnectCondition;
             std::mutex _disconnectMutex;
             
-            std::vector<std::vector<char>> _sendBuffer;
-            std::mutex _sendBufferMutex;
             std::condition_variable _sendCondition;
+            std::deque<Message> _sendBuffer;
+            std::mutex _sendBufferMutex;
+
+            std::deque<Message> _receiveBuffer;
+            std::mutex _receiveBufferMutex;
             
             network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
             std::mutex _timeKeyframeMutex;
