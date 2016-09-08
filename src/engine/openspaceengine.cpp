@@ -778,6 +778,11 @@ void OpenSpaceEngine::preSynchronization() {
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
+    if (_settingsEngine->useDoubleBuffering() && !_isMaster) {
+        Time::ref().updateDoubleBuffer();
+        _renderEngine->camera()->updateDoubleBuffer();
+    }
+
     if (_isInShutdownMode) {
         if (_shutdownCountdown <= 0.f) {
             _windowWrapper->terminate();

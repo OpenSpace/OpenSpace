@@ -42,20 +42,14 @@ namespace openspace {
 Time* Time::_instance = nullptr;
 
 Time::Time(double secondsJ2000)
-    : _time(secondsJ2000)
-    , _dt(1.0)
-    , _timeJumped(false)
-    , _timePaused(false)
 {
-
+    local.time = secondsJ2000;
 }
 
 
 Time::Time(const Time& other)
-    : _time(other._time)
-    , _dt(other._dt)
-    , _timeJumped(other._timeJumped)
-    , _timePaused(other._timePaused)
+    : local(other.local)
+    , synced(other.synced)
 {
 
 }
@@ -92,31 +86,31 @@ bool Time::isInitialized() {
 }
 
 void Time::setTime(double value, bool requireJump) {
-    _time = value;
-    _timeJumped = requireJump;
+    local.time = value;
+    local.timeJumped = requireJump;
 }
 
 double Time::j2000Seconds() const {
-    return _time;
+    return local.time;
 }
 
 double Time::advanceTime(double tickTime) {
     if (_timePaused)
-        return _time;
+        return local.time;
     else
-        return _time += _dt * tickTime;
+        return local.time += local.dt * tickTime;
 }
 
 void Time::setDeltaTime(double deltaT) {
-    _dt = deltaT;
+    local.dt = deltaT;
 }
 
 double Time::deltaTime() const {
-    return _dt;
+    return local.dt;
 }
 
 void Time::setPause(bool pause) {
-    _timePaused = pause;
+    _timePaused = pause;    
 }
 
 bool Time::togglePause() {
@@ -125,16 +119,16 @@ bool Time::togglePause() {
 }
 
 void Time::setTime(std::string time, bool requireJump) {
-    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
-    _timeJumped = requireJump;
+    local.time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+    local.timeJumped = requireJump;
 }
 
 std::string Time::UTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(_time);
+    return SpiceManager::ref().dateFromEphemerisTime(local.time);
 }
 
 std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(local.time);
     std::string month = datetime.substr(5, 3);
 
     std::string MM = "";
@@ -158,35 +152,31 @@ std::string Time::ISO8601() const {
 
 void Time::serialize(SyncBuffer* syncBuffer) {
     _syncMutex.lock();
-
-    syncBuffer->encode(_time);
-    syncBuffer->encode(_dt);
-    syncBuffer->encode(_timeJumped);
-
+    local.serialize(syncBuffer);
     _syncMutex.unlock();
 }
 
 void Time::deserialize(SyncBuffer* syncBuffer) {
     _syncMutex.lock();
-
-    syncBuffer->decode(_time);
-    syncBuffer->decode(_dt);
-    syncBuffer->decode(_timeJumped);
-
+    synced.deserialize(syncBuffer);
     _syncMutex.unlock();
 }
 
 bool Time::timeJumped() const {
-    return _timeJumped;
+    return local.timeJumped;
 }
 
 void Time::setTimeJumped(bool jumped) {
-    _timeJumped = jumped;
+    local.timeJumped = jumped;
 }
     
 bool Time::paused() const {
     return _timePaused;
 }
+void Time::updateDoubleBuffer() {
+    local = synced;
+}
+
 
 scripting::LuaLibrary Time::luaLibrary() {
     return {

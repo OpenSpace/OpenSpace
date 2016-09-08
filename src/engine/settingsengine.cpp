@@ -52,6 +52,7 @@ SettingsEngine::SettingsEngine()
     , _showFrameNumber("showFrameNumber", "Show frame number", false)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
+    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
 {
     setName("Global Properties");
 }
@@ -62,6 +63,7 @@ void SettingsEngine::initialize() {
     initShowFrameNumber();
     initBusyWaitForDecode();
     initLogSGCTOutOfOrderErrors();
+    initUseDoubleBuffering();
 }
     
 void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
@@ -107,6 +109,20 @@ void SettingsEngine::initLogSGCTOutOfOrderErrors() {
 
 bool SettingsEngine::logSGCTOutOfOrderErrors() {
     return _logSGCTOutOfOrderErrors.value();
+}
+
+
+void SettingsEngine::initUseDoubleBuffering() {
+    addProperty(_useDoubleBuffering);
+    _useDoubleBuffering.onChange(
+        [this]() {
+        LINFO("Turn " << (_useDoubleBuffering.value() ? "on" : "off") << " double buffering");
+    });
+}
+
+
+bool SettingsEngine::useDoubleBuffering() {
+    return _useDoubleBuffering.value();
 }
 
 void SettingsEngine::initSceneFiles() {

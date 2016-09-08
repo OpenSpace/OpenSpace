@@ -177,6 +177,8 @@ namespace openspace {
         [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
         const glm::mat4& viewProjectionMatrix() const;
 
+        void updateDoubleBuffer();
+
     private:
         struct SyncData {
             void serialize(SyncBuffer* syncBuffer) { 
@@ -193,8 +195,10 @@ namespace openspace {
             Vec3 position;
             Quat rotation;
             glm::vec2 scaling;
-        } syncData;
+        };
 
+        SyncData local;
+        SyncData synced;
 
         // _focusPosition to be removed
         Vec3 _focusPosition;

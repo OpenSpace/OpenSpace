@@ -26,7 +26,7 @@
 #define __TIME_H__
 
 #include <openspace/scripting/scriptengine.h>
-
+#include <openspace/util/syncbuffer.h>
 #include <mutex>
 #include <string>
 
@@ -190,6 +190,8 @@ public:
     
     bool paused() const;
 
+    void updateDoubleBuffer();
+
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * current time, retrieve the current time etc. The functions contained are
@@ -205,11 +207,29 @@ public:
 
 private:
     static Time* _instance; ///< The singleton instance
-           
-    /// The time stored as the number of seconds past the J2000 epoch
-    double _time = -1.0;
-    double _dt = 1.0;
-    bool _timeJumped = false;
+
+    struct SyncData {
+        void serialize(SyncBuffer* syncBuffer) { 
+            syncBuffer->encode(time);
+            syncBuffer->encode(dt);
+            syncBuffer->encode(timeJumped);
+        };
+
+        void deserialize(SyncBuffer* syncBuffer) { 
+            syncBuffer->decode(time);
+            syncBuffer->decode(dt);
+            syncBuffer->decode(timeJumped);
+        }
+        
+        double time = -1.0;
+        double dt = 1.0;
+        bool timeJumped = false;
+        
+    };
+
+    SyncData local;
+    SyncData synced;
+
     bool _timePaused = false;
     
     std::mutex _syncMutex;
