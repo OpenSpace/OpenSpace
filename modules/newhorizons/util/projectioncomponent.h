@@ -56,7 +56,7 @@ public:
     bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
     bool initializeParser(const ghoul::Dictionary& dictionary);
 
-    ghoul::opengl::Texture& ProjectionComponent::depthTexture();
+    ghoul::opengl::Texture& depthTexture();
     void imageProjectBegin();
     void imageProjectEnd();
     void depthMapRenderBegin();

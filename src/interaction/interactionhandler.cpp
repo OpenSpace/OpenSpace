@@ -1019,14 +1019,14 @@ void InteractionHandler::clearKeyframes() {
 }
 
 void InteractionHandler::serialize(SyncBuffer* syncBuffer) {
-    for each (auto var in _interactionModes)
+    for (auto var : _interactionModes)
     {
         var.second->serialize(syncBuffer);
     }
 }
 
 void InteractionHandler::deserialize(SyncBuffer* syncBuffer) {
-    for each (auto var in _interactionModes)
+    for (auto var : _interactionModes)
     {
         var.second->deserialize(syncBuffer);
     }
