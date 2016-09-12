@@ -26,7 +26,6 @@
 #define __TIME_H__
 
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/syncbuffer.h>
 #include <mutex>
 #include <string>
 
@@ -209,17 +208,9 @@ private:
     static Time* _instance; ///< The singleton instance
 
     struct SyncData {
-        void serialize(SyncBuffer* syncBuffer) { 
-            syncBuffer->encode(time);
-            syncBuffer->encode(dt);
-            syncBuffer->encode(timeJumped);
-        };
+        void serialize(SyncBuffer* syncBuffer);
 
-        void deserialize(SyncBuffer* syncBuffer) { 
-            syncBuffer->decode(time);
-            syncBuffer->decode(dt);
-            syncBuffer->decode(timeJumped);
-        }
+        void deserialize(SyncBuffer* syncBuffer);
         
         double time = -1.0;
         double dt = 1.0;

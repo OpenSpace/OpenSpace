@@ -299,6 +299,18 @@ namespace openspace {
     }
 
     void Camera::updateDoubleBuffer(){
+        std::lock_guard<std::mutex> _lock(_mutex);
         local = synced;
+    }
+
+    void Camera::SyncData::serialize(SyncBuffer* syncBuffer) {
+        syncBuffer->encode(position);
+        syncBuffer->encode(rotation);
+        syncBuffer->encode(scaling);
+    }
+    void Camera::SyncData::deserialize(SyncBuffer* syncBuffer) {
+        syncBuffer->decode(position);
+        syncBuffer->decode(rotation);
+        syncBuffer->decode(scaling);
     }
 } // namespace openspace

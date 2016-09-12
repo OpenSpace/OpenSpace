@@ -29,7 +29,6 @@
 
 // open space includes
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/syncbuffer.h>
 #include <openspace/rendering/renderengine.h>
 
 // glm includes
@@ -181,16 +180,8 @@ namespace openspace {
 
     private:
         struct SyncData {
-            void serialize(SyncBuffer* syncBuffer) { 
-                syncBuffer->encode(position); 
-                syncBuffer->encode(rotation);
-                syncBuffer->encode(scaling);
-            }
-            void deserialize(SyncBuffer* syncBuffer) { 
-                syncBuffer->decode(position);
-                syncBuffer->decode(rotation);
-                syncBuffer->decode(scaling);
-            }
+            void serialize(SyncBuffer* syncBuffer);
+            void deserialize(SyncBuffer* syncBuffer);
             
             Vec3 position;
             Quat rotation;

@@ -174,7 +174,21 @@ bool Time::paused() const {
     return _timePaused;
 }
 void Time::updateDoubleBuffer() {
+    _syncMutex.lock();
     local = synced;
+    _syncMutex.unlock();
+}
+
+void Time::SyncData::serialize(SyncBuffer* syncBuffer) {
+    syncBuffer->encode(time);
+    syncBuffer->encode(dt);
+    syncBuffer->encode(timeJumped);
+};
+
+void Time::SyncData::deserialize(SyncBuffer* syncBuffer) {
+    syncBuffer->decode(time);
+    syncBuffer->decode(dt);
+    syncBuffer->decode(timeJumped);
 }
 
 
