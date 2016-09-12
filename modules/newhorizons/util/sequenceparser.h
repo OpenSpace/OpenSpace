@@ -55,7 +55,7 @@ class SequenceParser {
 public:
     virtual bool create() = 0;
     virtual std::map<std::string, ImageSubset> getSubsetMap() final;
-    virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
+    virtual std::vector<std::pair<std::string, TimeRange>> getInstrumentTimes() final;
     virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
     std::map<std::string, std::unique_ptr<Decoder>>& getTranslation();
     virtual std::vector<double> getCaptureProgression() final;

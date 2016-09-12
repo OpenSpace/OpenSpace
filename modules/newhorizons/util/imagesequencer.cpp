@@ -340,7 +340,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
         // get new data 
         std::map<std::string, std::unique_ptr<Decoder>>& translations = parser->getTranslation(); // in1
         std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();   // in2
-        std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getIstrumentTimes(); //in3
+        std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getInstrumentTimes(); //in3
         std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();  //in4
         std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 

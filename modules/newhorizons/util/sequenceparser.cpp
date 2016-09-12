@@ -42,7 +42,7 @@ namespace openspace {
 std::map<std::string, ImageSubset> SequenceParser::getSubsetMap(){
     return _subsetMap;
 }
-std::vector<std::pair<std::string, TimeRange>> SequenceParser::getIstrumentTimes(){
+std::vector<std::pair<std::string, TimeRange>> SequenceParser::getInstrumentTimes(){
     return _instrumentTimes;
 }
 std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
