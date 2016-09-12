@@ -338,7 +338,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
     bool parserComplete = parser->create();
     if (parserComplete){
         // get new data 
-        std::map<std::string, Decoder*> translations = parser->getTranslation(); // in1
+        std::map<std::string, std::unique_ptr<Decoder>>& translations = parser->getTranslation(); // in1
         std::map<std::string, ImageSubset> imageData = parser->getSubsetMap();   // in2
         std::vector<std::pair<std::string, TimeRange>> instrumentTimes = parser->getIstrumentTimes(); //in3
         std::vector<std::pair<double, std::string>> targetTimes = parser->getTargetTimes();  //in4
@@ -349,11 +349,14 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
             LERROR("Missing sequence data");
             return;
         }
-            
+         
 
         // append data
-        _fileTranslation.insert(translations.begin(), translations.end());
-        for (auto it : imageData){
+        for (auto& it : translations) {
+            _fileTranslation[it.first] = std::move(it.second);
+        }
+
+        for (auto& it : imageData){
             if (_subsetMap.find(it.first) == _subsetMap.end()) {
                 // if key not exist yet - add sequence data for key (target)
                 _subsetMap.insert(it);
@@ -404,7 +407,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
         sortData();
 
         // extract payload from _fileTranslation 
-        for (auto t : _fileTranslation){
+        for (auto& t : _fileTranslation){
             if (t.second->getDecoderType() == "CAMERA" ||
                 t.second->getDecoderType() == "SCANNER"){
                 std::vector<std::string> spiceIDs = t.second->getTranslation();

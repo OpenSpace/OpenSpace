@@ -52,6 +52,9 @@ std::vector<double> SequenceParser::getCaptureProgression(){
     return _captureProgression;
 };
 
+std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
+    return _fileTranslation;
+}
 
 template <typename T>
 void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T value) {

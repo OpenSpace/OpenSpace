@@ -152,7 +152,7 @@ private:
      * \see Decoder
      * \see (projection mod files)
      */
-    std::map<std::string, Decoder*> _fileTranslation;
+    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     /*
      * This is the main container of image data. The key is the target name, 

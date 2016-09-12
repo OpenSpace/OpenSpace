@@ -23,8 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/newhorizons/util/decoder.h>
+
 #include <openspace/util/factorymanager.h>
+
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 
 namespace {
 const std::string _loggerCat = "Decoder";
@@ -32,29 +35,22 @@ const std::string _loggerCat = "Decoder";
 
 namespace openspace {
 
-Decoder* Decoder::createFromDictionary(const ghoul::Dictionary& dictionary, const std::string& type)
+std::unique_ptr<Decoder> Decoder::createFromDictionary(
+    const ghoul::Dictionary& dictionary, const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory
         = FactoryManager::ref().factory<Decoder>();
     Decoder* result = factory->create(type, dictionary);
 
     if (result == nullptr) {
-        LERROR("Failed creating Payload object of type '" << type << "'");
-        return nullptr;
+        throw ghoul::RuntimeError(
+            "Failed creating payload object of type '" + type + '"',
+            "Decoder"
+        );
     }
-    return result;
+    return std::unique_ptr<Decoder>(result);
 }
 
-Decoder::Decoder()
-{
-}
-    
-Decoder::Decoder(const ghoul::Dictionary& dictionary)
-{
-}
-    
-Decoder::~Decoder()
-{
-}
+Decoder::~Decoder() {}
     
 } // namespace openspace

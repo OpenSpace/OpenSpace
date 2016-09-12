@@ -28,13 +28,14 @@
 #include <openspace/network/networkengine.h>
 #include <openspace/util/timerange.h>
 
+#include <modules/newhorizons/util/decoder.h>
+
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace openspace {
-
-class Decoder;
 
 struct Image {
     TimeRange timeRange;
@@ -56,7 +57,7 @@ public:
     virtual std::map<std::string, ImageSubset> getSubsetMap() final;
     virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
     virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
-    virtual std::map<std::string, Decoder*> getTranslation() = 0;
+    std::map<std::string, std::unique_ptr<Decoder>>& getTranslation();
     virtual std::vector<double> getCaptureProgression() final;
 
 protected:
@@ -66,6 +67,8 @@ protected:
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
     std::vector<std::pair<double, std::string>> _targetTimes;
     std::vector<double> _captureProgression;
+
+    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     NetworkEngine::MessageIdentifier _messageIdentifier;
 };

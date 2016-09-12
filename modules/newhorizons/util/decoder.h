@@ -26,20 +26,23 @@
 #define __DECODER_H__
 
 #include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
+
+#include <memory>
 
 namespace openspace {
 
 class Decoder {
 public:
-    static Decoder* createFromDictionary(const ghoul::Dictionary& dictionary, const std::string& type);
+    static std::unique_ptr<Decoder> createFromDictionary(
+        const ghoul::Dictionary& dictionary, const std::string& type);
 
-    Decoder(const ghoul::Dictionary& dictionary);
     virtual ~Decoder();
+
     virtual std::string getDecoderType() = 0;
     virtual std::vector<std::string> getTranslation() = 0;
+
 protected:
-    Decoder();
+    Decoder() = default;
 };
 
 }  // namespace openspace
