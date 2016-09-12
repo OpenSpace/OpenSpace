@@ -31,6 +31,7 @@
 
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <fstream>
@@ -236,29 +237,31 @@ bool LabelParser::create() {
                                 LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
                             }
                         }
-                        if (count == _specsOfInterest.size()){
-                            count = 0;
-                            std::string ext = "jpg";
-                            path.replace(path.begin() + position, path.end(), ext);
-                            bool fileExists = FileSys.fileExists(path);
-                            if (!fileExists) {
-                                ext = "JPG";
-                                path.replace(path.begin() + position, path.end(), ext);
-                                fileExists = FileSys.fileExists(path);
-                            }
-                            if (fileExists) {
-                                Image image;
-                                std::vector<std::string> spiceInstrument;
-                                spiceInstrument.push_back(_instrumentID);
-                                createImage(image, startTime, stopTime, spiceInstrument, _target, path);
-                                
-                                _subsetMap[image.target]._subset.push_back(image);
-                                _subsetMap[image.target]._range.include(startTime);
+                        if (count == _specsOfInterest.size()) {
+                            using ghoul::io::TextureReader;
+                            auto extensions = TextureReader::ref().supportedExtensions();
 
-                                _captureProgression.push_back(startTime);
-                                std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+                            count = 0;
+
+                            using namespace std::literals;
+                            std::string p = path.substr(0, path.size() - ("lbl"s).size());
+                            for (const std::string& ext : extensions) {
+                                path = p + ext;
+                                if (FileSys.fileExists(path)) {
+                                    Image image;
+                                    std::vector<std::string> spiceInstrument;
+                                    spiceInstrument.push_back(_instrumentID);
+                                    createImage(image, startTime, stopTime, spiceInstrument, _target, path);
+
+                                    _subsetMap[image.target]._subset.push_back(image);
+                                    _subsetMap[image.target]._range.include(startTime);
+
+                                    _captureProgression.push_back(startTime);
+                                    std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+
+                                    break;
+                                }
                             }
-    
                         }
                     } while (!file.eof());
                 }
