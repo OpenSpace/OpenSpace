@@ -1,0 +1,1444 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include "gtest/gtest.h"
+
+#include <openspace/util/documentation.h>
+
+#include <ghoul/misc/dictionary.h>
+
+#include <string>
+
+/*
+ * To test:
+ * optional values
+ *
+ * to add:
+ * external template instantiations
+*/
+
+class DocumentationTest : public testing::Test {};
+
+TEST_F(DocumentationTest, Constructor) {
+    using namespace openspace::documentation;
+
+    Documentation doc;
+
+    // Basic Verifiers
+    doc.emplace_back("BoolVerifier", new BoolVerifier);
+    doc.emplace_back("DoubleVerifier", new DoubleVerifier);
+    doc.emplace_back("IntVerifier", new IntVerifier);
+    doc.emplace_back("StringVerifier", new StringVerifier);
+    doc.emplace_back("TableVerifier", new TableVerifier);
+
+    // Operator Verifiers
+    doc.emplace_back("LessDouble", new DoubleLessVerifier(0.0));
+    doc.emplace_back("LessInt", new IntLessVerifier(0));
+
+    doc.emplace_back("LessEqualDouble", new DoubleLessEqualVerifier(0.0));
+    doc.emplace_back("LessEqualInt", new IntLessEqualVerifier(0));
+
+    doc.emplace_back("GreaterDouble", new DoubleGreaterVerifier(0.0));
+    doc.emplace_back("GreaterInt", new IntGreaterVerifier(0));
+
+    doc.emplace_back("GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0));
+    doc.emplace_back("GreaterEqualInt", new IntGreaterEqualVerifier(0));
+
+    doc.emplace_back("EqualBool", new BoolEqualVerifier(false));
+    doc.emplace_back("EqualDouble", new DoubleEqualVerifier(0.0));
+    doc.emplace_back("EqualInt", new IntEqualVerifier(0));
+    doc.emplace_back("EqualString", new StringEqualVerifier(""));
+
+    doc.emplace_back("UnequalBool", new BoolUnequalVerifier(false));
+    doc.emplace_back("UnequalDouble", new DoubleUnequalVerifier(0.0));
+    doc.emplace_back("UnequalInt", new IntUnequalVerifier(0));
+    doc.emplace_back("UnequalString", new StringUnequalVerifier(""));
+
+    // List Verifiers
+    doc.emplace_back("InListBool", new BoolInListVerifier({ true, false }));
+    doc.emplace_back("InListDouble", new DoubleInListVerifier({ 0.0, 1.0}));
+    doc.emplace_back("InListInt", new IntInListVerifier({ 0, 1 }));
+    doc.emplace_back("InListString", new StringInListVerifier({ "", "a" }));
+
+    doc.emplace_back("NotInListBool", new BoolNotInListVerifier({ true, false }));
+    doc.emplace_back("NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 }));
+    doc.emplace_back("NotInListInt", new IntNotInListVerifier({ 0, 1 }));
+    doc.emplace_back("NotInListString", new StringNotInListVerifier({ "", "a" }));
+
+    // Misc Verifiers
+    doc.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"));
+    doc.emplace_back("AnnotationDouble", new DoubleAnnotationVerifier("Double"));
+    doc.emplace_back("AnnotationInt", new IntAnnotationVerifier("Int"));
+    doc.emplace_back("AnnotationString", new StringAnnotationVerifier("String"));
+    doc.emplace_back("AnnotationTable", new TableAnnotationVerifier("Table"));
+}
+
+TEST_F(DocumentationTest, InitializerConstructor) {
+    using namespace openspace::documentation;
+    
+    Documentation doc{
+        // Basic Verifiers
+        {"BoolVerifier", new BoolVerifier },
+        {"DoubleVerifier", new DoubleVerifier},
+        {"IntVerifier", new IntVerifier},
+        {"StringVerifier", new StringVerifier},
+        {"TableVerifier", new TableVerifier},
+
+        // Operator Verifiers
+        { "LessDouble", new DoubleLessVerifier(0.0)},
+        { "LessInt", new IntLessVerifier(0)},
+
+        {"LessEqualDouble", new DoubleLessEqualVerifier(0.0)},
+        {"LessEqualInt", new IntLessEqualVerifier(0)},
+
+        {"GreaterDouble", new DoubleGreaterVerifier(0.0)},
+        {"GreaterInt", new IntGreaterVerifier(0)},
+
+        {"GreaterEqualDouble", new DoubleGreaterEqualVerifier(0.0)},
+        {"GreaterEqualInt", new IntGreaterEqualVerifier(0)},
+
+        {"EqualBool", new BoolEqualVerifier(false)},
+        {"EqualDouble", new DoubleEqualVerifier(0.0)},
+        {"EqualInt", new IntEqualVerifier(0)},
+        {"EqualString", new StringEqualVerifier("")},
+
+        {"UnequalBool", new BoolUnequalVerifier(false)},
+        {"UnequalDouble", new DoubleUnequalVerifier(0.0)},
+        {"UnequalInt", new IntUnequalVerifier(0)},
+        {"UnequalString", new StringUnequalVerifier("")},
+
+        // List Verifiers
+        {"InListBool", new BoolInListVerifier({ true, false })},
+        {"InListDouble", new DoubleInListVerifier({ 0.0, 1.0 })},
+        {"InListInt", new IntInListVerifier({ 0, 1 })},
+        {"InListString", new StringInListVerifier({ "", "a" })},
+
+        {"NotInListBool", new BoolNotInListVerifier({ true, false })},
+        {"NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 })},
+        {"NotInListInt", new IntNotInListVerifier({ 0, 1 })},
+        {"NotInListString", new StringNotInListVerifier({ "", "a" })},
+
+        // Misc Verifiers
+        {"AnnotationBool", new BoolAnnotationVerifier("Bool")},
+        {"AnnotationDouble", new DoubleAnnotationVerifier("Double")},
+        {"AnnotationInt", new IntAnnotationVerifier("Int")},
+        {"AnnotationString", new StringAnnotationVerifier("String")},
+        {"AnnotationTable", new TableAnnotationVerifier("Table")}
+    };
+}
+
+TEST_F(DocumentationTest, BoolVerifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc{
+        { "Bool", new BoolVerifier },
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", true }
+    };
+
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", 0}
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+    
+    ghoul::Dictionary negativeExist {
+        { "Bool2", 0}
+    };
+    negativeRes = testSpecification(doc, negativeExist);
+
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, DoubleVerifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 0.0 }
+    };
+
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 0 }
+    };
+
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeExist{
+        { "Double2" , 0.0 }
+    };
+    negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, IntVerifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Int", 0.0 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 0.1 }
+    };
+
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeExist{
+        { "Int2", 0 }
+    };
+    negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, StringVerifier) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String", new StringVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", ""s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeExist{
+        { "String2", ""s }
+    };
+    negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, TableVerifierType) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Table", new TableVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "Table", ghoul::Dictionary{} }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Table", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Table", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeExist {
+        { "Table2", ghoul::Dictionary{} }
+    };
+    negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Table", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, MixedVerifiers) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "Bool", new BoolVerifier },
+        { "Double", new DoubleVerifier },
+        { "Int", new IntVerifier },
+        { "String", new StringVerifier },
+        { "Table", new TableVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", true },
+        { "Double", 0.0 },
+        { "Int", 0 },
+        { "String", ""s },
+        { "Table", ghoul::Dictionary{} }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative1 {
+        { "Bool", true },
+        { "Double", 1 },
+        { "Int", 0 },
+        { "String", ""s },
+        { "Table", ghoul::Dictionary{} }
+    };
+    TestResult negativeRes = testSpecification(doc, negative1);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "Bool", true },
+        { "Double", 0.0 },
+        { "Int", ""s },
+        { "String", 1 },
+        { "Table", ghoul::Dictionary{} }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+    EXPECT_EQ("String", negativeRes.offenders[1]);
+}
+
+TEST_F(DocumentationTest, NestedTables) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "Outer_Int", new IntVerifier },
+        { "Outer_Table", new TableVerifier({
+            { "Inner_Double", new DoubleVerifier },
+            { "Inner_String", new StringVerifier }
+        })},
+        { "Outer_Double", new DoubleVerifier },
+        { "Outer_Table2" , new TableVerifier({
+            { "Inner_Double2", new DoubleVerifier },
+            { "Inner_String2", new StringVerifier },
+            { "Inner_Table" , new TableVerifier({
+                { "Inner_Inner_Int", new IntVerifier }
+            })}
+        })}
+    };
+
+    ghoul::Dictionary positive {
+        { "Outer_Int", 1 },
+        { "Outer_Table", ghoul::Dictionary {
+            { "Inner_Double", 0.0 },
+            { "Inner_String", ""s }
+        }},
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", 0.0 },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", 0 }
+            }}
+        }}
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negativeSimple {
+        { "Outer_Int", 1 },
+        { "Outer_Table", 0},
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", 0.0 },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", 0 }
+            }}
+        }}
+    };
+    TestResult negativeRes = testSpecification(doc, negativeSimple);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Outer_Table", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeInner {
+        { "Outer_Int", 1 },
+        { "Outer_Table", ghoul::Dictionary {
+            { "Inner_Double", ""s },
+            { "Inner_String", ""s }
+        }},
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", 0.0 },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", 0 }
+            }}
+        }}
+    };
+    negativeRes = testSpecification(doc, negativeInner);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negativeInner2 {
+        { "Outer_Int", 1 },
+        { "Outer_Table", ghoul::Dictionary {
+            { "Inner_Double", ""s },
+            { "Inner_String", 0.0 }
+        }},
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", 0.0 },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", 0 }
+            }}
+        }}
+    };
+    negativeRes = testSpecification(doc, negativeInner2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0]);
+    EXPECT_EQ("Outer_Table.Inner_String", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negativeInnerSeparate {
+        { "Outer_Int", 1 },
+        { "Outer_Table", ghoul::Dictionary {
+            { "Inner_Double", ""s },
+            { "Inner_String", ""s }
+        } },
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", ""s },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", 0 }
+            }}
+        }}
+    };
+    negativeRes = testSpecification(doc, negativeInnerSeparate);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0]);
+    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negativeInnerFull {
+        { "Outer_Int", 1 },
+        { "Outer_Table", ghoul::Dictionary {
+            { "Inner_Double", ""s },
+            { "Inner_String", ""s }
+        } },
+        { "Outer_Double", 0.0 },
+        { "Outer_Table2", ghoul::Dictionary {
+            { "Inner_Double2", ""s },
+            { "Inner_String2", ""s },
+            { "Inner_Table", ghoul::Dictionary {
+                { "Inner_Inner_Int", ""s }
+            }}
+        }}
+    };
+    negativeRes = testSpecification(doc, negativeInnerFull);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(3, negativeRes.offenders.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0]);
+    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenders[1]);
+    EXPECT_EQ("Outer_Table2.Inner_Table.Inner_Inner_Int", negativeRes.offenders[2]);
+}
+
+TEST_F(DocumentationTest, LessInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntLessVerifier(5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 10 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, LessDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleLessVerifier(5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 0.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 10.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, LessEqualInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntLessEqualVerifier(5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positiveEqual {
+        { "Int", 5 }
+    };
+    positiveRes = testSpecification(doc, positiveEqual);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 10 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, LessEqualDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleLessEqualVerifier(5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 0.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positiveEqual {
+        { "Double", 5.0 }
+    };
+    positiveRes = testSpecification(doc, positiveEqual);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 10.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, GreaterInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntGreaterVerifier(5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 10 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 00 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, GreaterDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleGreaterVerifier(5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 10.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 0.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, GreaterEqualInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntGreaterEqualVerifier(5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 10 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positiveEqual {
+        { "Int", 5 }
+    };
+    positiveRes = testSpecification(doc, positiveEqual);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, GreaterEqualDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleGreaterEqualVerifier(5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 10.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positiveEqual {
+        { "Double", 5.0 }
+    };
+    positiveRes = testSpecification(doc, positiveEqual);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 0.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+
+TEST_F(DocumentationTest, EqualBool) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool", new BoolEqualVerifier(true) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", true}
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", false }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, EqualInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntEqualVerifier(1) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 1}
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, EqualDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleEqualVerifier(1.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 1.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 0.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, EqualString) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String", new StringEqualVerifier("string"s) }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", "string"s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", "no_string"s }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, UnequalBool) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool", new BoolUnequalVerifier(true) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", false }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", true }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, UnequalInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntUnequalVerifier(1) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, UnequalDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleUnequalVerifier(1.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 0.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 1.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, UnequalString) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String", new StringUnequalVerifier("string"s) }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", "no_string"s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", "string"s }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, ListBool) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool" , new BoolInListVerifier({ true }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", true }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", false }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, ListInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int" , new IntInListVerifier({ 0, 1, 2 }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 1 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Int", 2 }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 5 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, ListDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 1.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Double", 2.0 }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 5.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, ListString) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", "1"s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "String", "2"s }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", "5"s }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotListBool) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool" , new BoolNotInListVerifier({ true }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", false }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", true }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotListInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int" , new IntNotInListVerifier({ 0, 1, 2 }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", -1 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Int", 3 }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 2 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotListDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", -1.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Double", 3.0 }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 1.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotListString) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }) }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", "string"s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "String", "foo_string"s }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", "1"s }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, AnnotationBool) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool", new BoolAnnotationVerifier("Bool") }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool", true }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Bool", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, AnnotationInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new IntAnnotationVerifier("Int") }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 1 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 1.1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, AnnotationDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new DoubleAnnotationVerifier("Double") }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 0.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", true }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, AnnotationString) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "String", new StringAnnotationVerifier("String") }
+    };
+
+    ghoul::Dictionary positive {
+        { "String", ""s }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "String", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("String", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, AnnotationTable) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Table", new TableAnnotationVerifier("Table") }
+    };
+
+    ghoul::Dictionary positive {
+        { "Table", ghoul::Dictionary{} }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Table", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Table", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, InRangeInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new InRangeVerifier<IntVerifier>(0, 5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", 2 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Int", 0 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive3 {
+        { "Int", 5 }
+    };
+    positiveRes = testSpecification(doc, positive3);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 10 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, InRangeDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", 2.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Double", 0.0 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive3 {
+        { "Double", 5.0 }
+    };
+    positiveRes = testSpecification(doc, positive3);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive4 {
+        { "Double", 1.5 }
+    };
+    positiveRes = testSpecification(doc, positive4);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 10.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotInRangeInt) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Int", new NotInRangeVerifier<IntVerifier>(0, 5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Int", -1 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Int", 6 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Int", 2 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "Int", 0 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative3 {
+        { "Int", 5 }
+    };
+    negativeRes = testSpecification(doc, negative3);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Int", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, NotInRangeDouble) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0) }
+    };
+
+    ghoul::Dictionary positive {
+        { "Double", -1.0 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Double", 6.0 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Double", 0.0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "Double", 5.0 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative3 {
+        { "Double", 2.5 }
+    };
+    negativeRes = testSpecification(doc, negative3);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+
+//TEST_F(DocumentationTest, LessBool) {
+//    using namespace openspace::documentation;
+//
+//    Documentation doc {
+//    };
+//
+//    ghoul::Dictionary positive {
+//    };
+//    TestResult positiveRes = testSpecification(doc, positive);
+//    EXPECT_TRUE(positiveRes.success);
+//    EXPECT_EQ(0, positiveRes.offenders.size());
+//
+//    ghoul::Dictionary negative {
+//    };
+//    TestResult negativeRes = testSpecification(doc, negative);
+//    EXPECT_FALSE(negativeRes.success);
+//    ASSERT_EQ(1, negativeRes.offenders.size());
+//    EXPECT_EQ("", negativeRes.offenders[0]);
+//}

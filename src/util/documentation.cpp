@@ -64,6 +64,13 @@ template struct InRangeVerifier<DoubleVerifier>;
 template struct NotInRangeVerifier<IntVerifier>;
 template struct NotInRangeVerifier<DoubleVerifier>;
 
+template struct AnnotationVerifier<BoolVerifier>;
+template struct AnnotationVerifier<IntVerifier>;
+template struct AnnotationVerifier<DoubleVerifier>;
+template struct AnnotationVerifier<StringVerifier>;
+template struct AnnotationVerifier<TableVerifier>;
+
+
 TestResult Verifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const {
     bool testSuccess = test(dict, key);

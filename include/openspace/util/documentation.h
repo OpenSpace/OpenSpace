@@ -271,6 +271,44 @@ struct AnnotationVerifier : public T {
     std::string annotation;
 };
 
+using IntLessVerifier = LessVerifier<IntVerifier>;
+using DoubleLessVerifier = LessVerifier<DoubleVerifier>;
+using IntLessEqualVerifier = LessEqualVerifier<IntVerifier>;
+using DoubleLessEqualVerifier = LessEqualVerifier<DoubleVerifier>;
+using IntGreaterVerifier = GreaterVerifier<IntVerifier>;
+using DoubleGreaterVerifier = GreaterVerifier<DoubleVerifier>;
+using IntGreaterEqualVerifier = GreaterEqualVerifier<IntVerifier>;
+using DoubleGreaterEqualVerifier = GreaterEqualVerifier<DoubleVerifier>;
+using BoolEqualVerifier = EqualVerifier<BoolVerifier>;
+using IntEqualVerifier = EqualVerifier<IntVerifier>;
+using DoubleEqualVerifier = EqualVerifier<DoubleVerifier>;
+using StringEqualVerifier = EqualVerifier<StringVerifier>;
+using BoolUnequalVerifier = UnequalVerifier<BoolVerifier>;
+using IntUnequalVerifier = UnequalVerifier<IntVerifier>;
+using DoubleUnequalVerifier = UnequalVerifier<DoubleVerifier>;
+using StringUnequalVerifier = UnequalVerifier<StringVerifier>;
+
+using BoolInListVerifier = InListVerifier<BoolVerifier>;
+using IntInListVerifier = InListVerifier<IntVerifier>;
+using DoubleInListVerifier = InListVerifier<DoubleVerifier>;
+using StringInListVerifier = InListVerifier<StringVerifier>;
+using BoolNotInListVerifier = NotInListVerifier<BoolVerifier>;
+using IntNotInListVerifier = NotInListVerifier<IntVerifier>;
+using DoubleNotInListVerifier = NotInListVerifier<DoubleVerifier>;
+using StringNotInListVerifier = NotInListVerifier<StringVerifier>;
+
+using IntInRangeVerifier = InRangeVerifier<IntVerifier>;
+using DoubleInRangeVerifier = InRangeVerifier<DoubleVerifier>;
+using IntNotInRangeVerifier = NotInRangeVerifier<IntVerifier>;
+using DoubleNotInRangeVerifier = NotInRangeVerifier<DoubleVerifier>;
+
+using BoolAnnotationVerifier = AnnotationVerifier<BoolVerifier>;
+using IntAnnotationVerifier = AnnotationVerifier<IntVerifier>;
+using DoubleAnnotationVerifier = AnnotationVerifier<DoubleVerifier>;
+using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
+using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
+
+
 extern template struct LessVerifier<IntVerifier>;
 extern template struct LessVerifier<DoubleVerifier>;
 extern template struct LessEqualVerifier<IntVerifier>;
@@ -301,6 +339,12 @@ extern template struct InRangeVerifier<IntVerifier>;
 extern template struct InRangeVerifier<DoubleVerifier>;
 extern template struct NotInRangeVerifier<IntVerifier>;
 extern template struct NotInRangeVerifier<DoubleVerifier>;
+
+extern template struct AnnotationVerifier<BoolVerifier>;
+extern template struct AnnotationVerifier<IntVerifier>;
+extern template struct AnnotationVerifier<DoubleVerifier>;
+extern template struct AnnotationVerifier<StringVerifier>;
+extern template struct AnnotationVerifier<TableVerifier>;
 
 } // namespace documentation
 } // namespace openspace
