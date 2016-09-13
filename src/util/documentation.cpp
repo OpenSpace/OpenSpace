@@ -24,6 +24,12 @@
 
 #include <openspace/util/documentation.h>
 
+namespace std {
+std::string to_string(std::string value) {
+    return value; 
+}
+} // namespace std
+
 namespace openspace {
 namespace documentation {
 
@@ -87,20 +93,19 @@ bool BoolVerifier::test(const ghoul::Dictionary& dict, const std::string& key) c
     return dict.hasKeyAndValue<Type>(key);
 }
 
-inline std::string BoolVerifier::documentation() const {
+std::string BoolVerifier::documentation() const {
     return "Type: Boolean";
 }
 
-
-inline bool DoubleVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
+bool DoubleVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
     return dict.hasKeyAndValue<Type>(key);
 }
 
-inline std::string DoubleVerifier::documentation() const {
+std::string DoubleVerifier::documentation() const {
     return "Type: Double";
 }
 
-inline bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
+bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
     if (dict.hasKeyAndValue<int>(key)) {
         return true;
     }
@@ -118,19 +123,21 @@ inline bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string 
     }
 }
 
-inline std::string IntVerifier::documentation() const {
+std::string IntVerifier::documentation() const {
     return "Type: Integer";
 }
 
-inline bool StringVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
+bool StringVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
     return dict.hasKeyAndValue<Type>(key);
 }
 
-inline std::string StringVerifier::documentation() const {
+std::string StringVerifier::documentation() const {
     return "Type: String";
 }
 
-inline TableVerifier::TableVerifier(Documentation d) : doc(std::move(d)) {}
+TableVerifier::TableVerifier(Documentation d) 
+    : doc(std::move(d))
+{}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict, const std::string& key) const {
     if (dict.hasKeyAndValue<Type>(key)) {
@@ -143,10 +150,10 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict, const std::s
 
         return res;
     }
-    return{ dict.hasKeyAndValue<Type>(key),{} };
+    return{ dict.hasKeyAndValue<Type>(key), { key } };
 }
 
-inline std::string TableVerifier::documentation() const {
+std::string TableVerifier::documentation() const {
     return "Type: Table" + '\n' + generateDocumentation(doc);
 }
 

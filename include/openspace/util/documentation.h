@@ -32,6 +32,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace openspace {
@@ -99,7 +100,7 @@ struct StringVerifier : public TemplateVerifier<std::string> {
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
-    TableVerifier(Documentation d);
+    TableVerifier(Documentation d = {});
 
     TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
 
@@ -112,6 +113,10 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
 
 template <typename T>
 struct LessVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
     LessVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -123,6 +128,10 @@ struct LessVerifier : public T {
 
 template <typename T>
 struct LessEqualVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
     LessEqualVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -134,6 +143,10 @@ struct LessEqualVerifier : public T {
 
 template <typename T>
 struct GreaterVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
     GreaterVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -145,6 +158,10 @@ struct GreaterVerifier : public T {
 
 template <typename T>
 struct GreaterEqualVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
     GreaterEqualVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -156,6 +173,8 @@ struct GreaterEqualVerifier : public T {
 
 template <typename T>
 struct EqualVerifier : public T {
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
     EqualVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -167,6 +186,8 @@ struct EqualVerifier : public T {
 
 template <typename T>
 struct UnequalVerifier : public T {
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    
     UnequalVerifier(typename T::Type value);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -180,6 +201,8 @@ struct UnequalVerifier : public T {
 
 template <typename T>
 struct InListVerifier : public T {
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    
     InListVerifier(std::vector<typename T::Type> values);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -191,6 +214,8 @@ struct InListVerifier : public T {
 
 template <typename T>
 struct NotInListVerifier : public T {
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    
     NotInListVerifier(std::vector<typename T::Type> values);
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
@@ -198,6 +223,39 @@ struct NotInListVerifier : public T {
     std::string documentation() const override;
 
     std::vector<typename T::Type> values;
+};
+
+// Range Verifiers
+template <typename T>
+struct InRangeVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
+    InRangeVerifier(typename T::Type lower, typename T::Type upper);
+    
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    typename T::Type lower;
+    typename T::Type upper;
+};
+
+template <typename T>
+struct NotInRangeVerifier : public T {
+    static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
+    static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
+    static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+
+    NotInRangeVerifier(typename T::Type lower, typename T::Type upper);
+
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    typename T::Type lower;
+    typename T::Type upper;
 };
 
 // Misc Verifiers
