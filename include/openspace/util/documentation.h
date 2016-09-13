@@ -26,6 +26,7 @@
 #define __DOCUMENTATION_H__
 
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <iterator>
@@ -43,6 +44,8 @@ struct TestResult {
     std::vector<std::string> offenders;
 };
 
+using Optional = ghoul::Boolean;
+
 struct Verifier {
     virtual TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const;
@@ -54,7 +57,7 @@ struct Verifier {
 
 
 struct DocumentationEntry {
-    DocumentationEntry(std::string key, Verifier* t, bool optional = false,
+    DocumentationEntry(std::string key, Verifier* t, Optional optional = Optional::No,
                        std::string doc = "");
 
     std::string key;

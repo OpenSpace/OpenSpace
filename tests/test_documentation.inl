@@ -30,14 +30,6 @@
 
 #include <string>
 
-/*
- * To test:
- * optional values
- *
- * to add:
- * external template instantiations
-*/
-
 class DocumentationTest : public testing::Test {};
 
 TEST_F(DocumentationTest, Constructor) {
@@ -504,6 +496,54 @@ TEST_F(DocumentationTest, NestedTables) {
     EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0]);
     EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenders[1]);
     EXPECT_EQ("Outer_Table2.Inner_Table.Inner_Inner_Int", negativeRes.offenders[2]);
+}
+
+TEST_F(DocumentationTest, Optional) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "Bool_Force", new BoolVerifier, Optional::No },
+        { "Bool_Optional", new BoolVerifier, Optional::Yes }
+    };
+
+    ghoul::Dictionary positive {
+        { "Bool_Force", true },
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "Bool_Force", true },
+        { "Bool_Optional", true }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+    
+    ghoul::Dictionary negative {
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool_Force", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "Bool_Optional", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool_Force", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative3 {
+        { "Bool_Force", true },
+        { "Bool_Optional", 1 }
+    };
+    negativeRes = testSpecification(doc, negative3);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("Bool_Optional", negativeRes.offenders[0]);
 }
 
 TEST_F(DocumentationTest, LessInt) {
@@ -1421,24 +1461,3 @@ TEST_F(DocumentationTest, NotInRangeDouble) {
     ASSERT_EQ(1, negativeRes.offenders.size());
     EXPECT_EQ("Double", negativeRes.offenders[0]);
 }
-
-
-//TEST_F(DocumentationTest, LessBool) {
-//    using namespace openspace::documentation;
-//
-//    Documentation doc {
-//    };
-//
-//    ghoul::Dictionary positive {
-//    };
-//    TestResult positiveRes = testSpecification(doc, positive);
-//    EXPECT_TRUE(positiveRes.success);
-//    EXPECT_EQ(0, positiveRes.offenders.size());
-//
-//    ghoul::Dictionary negative {
-//    };
-//    TestResult negativeRes = testSpecification(doc, negative);
-//    EXPECT_FALSE(negativeRes.success);
-//    ASSERT_EQ(1, negativeRes.offenders.size());
-//    EXPECT_EQ("", negativeRes.offenders[0]);
-//}

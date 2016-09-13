@@ -58,6 +58,8 @@
 //#include <test_iswamanager.inl>
 #endif
 
+#include <test_documentation.inl>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/configurationmanager.h>

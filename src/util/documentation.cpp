@@ -72,7 +72,8 @@ template struct AnnotationVerifier<TableVerifier>;
 
 
 TestResult Verifier::operator()(const ghoul::Dictionary& dict,
-                                        const std::string& key) const {
+                                        const std::string& key) const
+{
     bool testSuccess = test(dict, key);
     if (testSuccess) {
         return{ testSuccess, {} };
@@ -87,17 +88,22 @@ bool Verifier::test(const ghoul::Dictionary& dict, const std::string& key) const
 };
 
 DocumentationEntry::DocumentationEntry(std::string key, Verifier* t,
-                                       bool optional, std::string doc)
+                                       Optional optional, std::string doc)
     : key(std::move(key))
     , tester(std::move(t))
     , optional(optional)
     , documentation(std::move(doc)) {}
 
-TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary) {
+TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary){
     TestResult result;
     result.success = true;
 
     for (const auto& p : d) {
+        if (p.optional && !dictionary.hasKey(p.key)) {
+            // If the key is optional and it doesn't exist, we don't need to check it
+            // if the key exists, it has to be correct, however
+            continue;
+        }
         Verifier& verifier = *(p.tester);
         TestResult res = verifier(dictionary, p.key);
         if (!res.success) {
@@ -177,7 +183,9 @@ TableVerifier::TableVerifier(Documentation d)
     : doc(std::move(d))
 {}
 
-TestResult TableVerifier::operator()(const ghoul::Dictionary& dict, const std::string& key) const {
+TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
+                                     const std::string& key) const
+{
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<Type>(key);
         TestResult res = testSpecification(doc, d);
