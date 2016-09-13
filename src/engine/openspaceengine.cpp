@@ -959,9 +959,9 @@ void OpenSpaceEngine::decode() {
     if (_syncBuffer) {
         _syncBuffer->read();
 
-        Time::ref().deserialize(_syncBuffer.get());
+        Time::ref().deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
         _scriptEngine->deserialize(_syncBuffer.get());
-        _renderEngine->deserialize(_syncBuffer.get());
+        _renderEngine->deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
 
     }
 }

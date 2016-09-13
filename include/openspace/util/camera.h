@@ -121,7 +121,23 @@ namespace openspace {
 
         // Synchronization
         void serialize(SyncBuffer* syncBuffer);
-        void deserialize(SyncBuffer* syncBuffer);
+
+        /**
+        * Updates camera variables from data in syncbuffer. If \param useDoubleBuffering is 
+        * false, values will be written directly into the camera state, overwriting any
+        * previous values.
+        * If \param useDoubleBuffering is true, values will be written and stored in local
+        * copies, keeping the state unchanged until <code>updateDoubleBuffer</code> has
+        * been called.
+        */
+        void deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering);
+
+        /**
+        * This method should be called from the SGCT postSynchronization stage if and only
+        * if method <code>deserialize</code> has previously been called with the argument
+        * useDoubleBuffering set to true.
+        */
+        void updateDoubleBuffer();
         
         void serialize(std::ostream& os) const;
         void deserialize(std::istream& is);
@@ -176,7 +192,6 @@ namespace openspace {
         [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
         const glm::mat4& viewProjectionMatrix() const;
 
-        void updateDoubleBuffer();
 
     private:
         struct SyncData {

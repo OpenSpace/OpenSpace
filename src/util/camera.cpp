@@ -195,9 +195,14 @@ namespace openspace {
         local.serialize(syncBuffer);
     }
 
-    void Camera::deserialize(SyncBuffer* syncBuffer) {
+    void Camera::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        synced.deserialize(syncBuffer);
+        if (useDoubleBuffering) {
+            synced.deserialize(syncBuffer);
+        }
+        else {
+            local.deserialize(syncBuffer);
+        }
     }
 
     void Camera::invalidateCache() {

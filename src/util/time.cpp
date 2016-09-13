@@ -156,9 +156,14 @@ void Time::serialize(SyncBuffer* syncBuffer) {
     _syncMutex.unlock();
 }
 
-void Time::deserialize(SyncBuffer* syncBuffer) {
+void Time::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
     _syncMutex.lock();
-    synced.deserialize(syncBuffer);
+    if (useDoubleBuffering) {
+        synced.deserialize(syncBuffer);
+    }
+    else {
+        local.deserialize(syncBuffer);
+    }
     _syncMutex.unlock();
 }
 

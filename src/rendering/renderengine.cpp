@@ -529,23 +529,20 @@ void RenderEngine::serialize(SyncBuffer* syncBuffer) {
     if (_mainCamera){
         _mainCamera->serialize(syncBuffer);
     }
-
-
     syncBuffer->encode(_onScreenInformation._node);
     syncBuffer->encode(_onScreenInformation._position.x);
     syncBuffer->encode(_onScreenInformation._position.y);
     syncBuffer->encode(_onScreenInformation._size);
 }
 
-void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
+void RenderEngine::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
     if (_mainCamera){
-        _mainCamera->deserialize(syncBuffer);
+        _mainCamera->deserialize(syncBuffer, useDoubleBuffering);
     }
     syncBuffer->decode(_onScreenInformation._node);
     syncBuffer->decode(_onScreenInformation._position.x);
     syncBuffer->decode(_onScreenInformation._position.y);
     syncBuffer->decode(_onScreenInformation._size);
-
 }
 
 Camera* RenderEngine::camera() const {

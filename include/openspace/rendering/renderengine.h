@@ -116,7 +116,7 @@ public:
     performance::PerformanceManager* performanceManager();
 
     void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer);
+    void deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering);
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
