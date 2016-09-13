@@ -37,325 +37,185 @@
 namespace openspace {
 namespace documentation {
 
-struct AbstractVerifier {
-    using Success = bool;
-    using Offender = std::vector<std::string>;
-    using TestResult = std::tuple<Success, Offender>;
+struct TestResult {
+    bool success;
+    std::vector<std::string> offenders;
+};
 
-    virtual TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const {
-        bool testSuccess = test(dict, key);
-        if (testSuccess) {
-            return { testSuccess, {} };
-        }
-        else {
-            return { testSuccess, {key} };
-        }
-    }
+struct Verifier {
+    virtual TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const;
 
-    virtual bool test(const ghoul::Dictionary& dict, const std::string& key) const {
-        return false;
-    };
+    virtual bool test(const ghoul::Dictionary& dict, const std::string& key) const;
 
     virtual std::string documentation() const = 0;
 };
 
 
 struct DocumentationEntry {
-    DocumentationEntry(std::string key, AbstractVerifier* t, bool optional = false, std::string doc = "")
-        : key(std::move(key))
-        , tester(std::move(t))
-        , optional(optional)
-        , documentation(std::move(doc)) {}
+    DocumentationEntry(std::string key, Verifier* t, bool optional = false,
+                       std::string doc = "");
 
     std::string key;
-    std::unique_ptr<AbstractVerifier> tester;
+    std::shared_ptr<Verifier> tester;
     bool optional;
     std::string documentation;
 };
 
 using Documentation = std::vector<DocumentationEntry>;
 
+TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary);
 
-std::tuple<bool, std::vector<std::string>> testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary) {
-    bool success = true;
-    std::vector<std::string> offenders;
+std::string generateDocumentation(const Documentation& d);
 
-    for (const auto& p : d) {
-        AbstractVerifier& verifier = *(p.tester);
-        AbstractVerifier::TestResult res = verifier(dictionary, p.key);
-        if (!std::get<0>(res)) {
-            success = false;
-            offenders.insert(
-                offenders.end(),
-                std::get<1>(res).begin(),
-                std::get<1>(res).end()
-            );
-        }
-    }
-    return { success, offenders };
-}
-
-std::string generateDocumentation(const Documentation& d) {
-    using namespace std::string_literals;
-    std::string result;
-
-    for (const auto& p : d) {
-        result += p.key + '\n';
-        result += "Optional: "s + (p.optional ? "true" : "false") + '\n';
-        result += p.tester->documentation() + '\n';
-        result += '\n';
-        result += p.documentation + '\n';
-    }
-
-    return result;
-}
-
+// General verifiers
 template <typename T>
-struct TemplateVerifier : public AbstractVerifier {
+struct TemplateVerifier : public Verifier {
     using Type = T;
 };
 
 struct BoolVerifier : public TemplateVerifier<bool> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return dict.hasKeyAndValue<Type>(key);
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return "Type: Boolean";
-    }
+    std::string documentation() const override;
 };
 
 struct DoubleVerifier : public TemplateVerifier<double> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return dict.hasKeyAndValue<Type>(key);
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return "Type: Double";
-    }
+    std::string documentation() const override;
 };
 
 struct IntVerifier : public TemplateVerifier<int> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        if (dict.hasKeyAndValue<int>(key)) {
-            return true;
-        }
-        else {
-            if (dict.hasKeyAndValue<double>(key)) {
-                // If we have a double value, we need to check if it is integer
-                double value = dict.value<double>(key);
-                double intPart;
-                return modf(value, &intPart) == 0.0;
-            }
-            else {
-                // If we don't have a double value, we cannot have an int value
-                return false;
-            }
-        }
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return "Type: Integer";
-    }
+    std::string documentation() const override;
 };
 
 struct StringVerifier : public TemplateVerifier<std::string> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return dict.hasKeyAndValue<Type>(key);
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return "Type: String";
-    }
+    std::string documentation() const override;
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
-    TableVerifier(Documentation d) : doc(std::move(d)) {}
+    TableVerifier(Documentation d);
 
-    TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override {
-        if (dict.hasKeyAndValue<Type>(key)) {
-            ghoul::Dictionary d = dict.value<Type>(key);
-            AbstractVerifier::TestResult res = testSpecification(doc, d);
-            
-            for (std::string& s : std::get<1>(res)) {
-                s = key + "." + s;
-            }
+    TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-            return res;
-        }
-        return{ dict.hasKeyAndValue<Type>(key), {} };
-    }
-
-    std::string documentation() const override {
-        return "Type: Table" + '\n' + generateDocumentation(doc);
-    }
+    std::string documentation() const override;
 
     Documentation doc;
 };
 
+// Operator Verifiers
+
 template <typename T>
 struct LessVerifier : public T {
-    LessVerifier(typename T::Type value) : value(std::move(value)) {}
+    LessVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) < value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Less than: " + std::to_string(value);
-    }
+    std::string documentation() const;
 
     typename T::Type value;
 };
 
 template <typename T>
 struct LessEqualVerifier : public T {
-    LessEqualVerifier(typename T::Type value) : value(std::move(value)) {}
+    LessEqualVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) <= value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Less or equal to: " + std::to_string(value);
-    }
+    std::string documentation() const override;
 
     typename T::Type value;
 };
 
 template <typename T>
 struct GreaterVerifier : public T {
-    GreaterVerifier(typename T::Type value) : value(std::move(value)) {}
+    GreaterVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) > value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Greater than: " + std::to_string(value);
-    }
+    std::string documentation() const override;
 
     typename T::Type value;
 };
 
 template <typename T>
 struct GreaterEqualVerifier : public T {
-    GreaterEqualVerifier(typename T::Type value) : value(std::move(value)) {}
+    GreaterEqualVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) >= value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Greater or equal to: " + std::to_string(value);
-    }
+    std::string documentation() const override;
 
     typename T::Type value;
 };
 
 template <typename T>
 struct EqualVerifier : public T {
-    EqualVerifier(typename T::Type value) : value(std::move(value)) {}
+    EqualVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) == value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Equal to: " + std::to_string(value);
-    }
+    std::string documentation() const override;
 
     typename T::Type value;
 };
 
 template <typename T>
 struct UnequalVerifier : public T {
-    UnequalVerifier(typename T::Type value) : value(std::move(value)) {}
+    UnequalVerifier(typename T::Type value);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        return T::test(dict, key) && dict.value<Type>(key) != value;
-    }
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override {
-        return T::documentation() + '\n' + "Unequal to: " + std::to_string(value);
-    }
+    std::string documentation() const override;
 
     typename T::Type value;
 };
 
+// List Verifiers
+
 template <typename T>
 struct InListVerifier : public T {
-    InListVerifier(std::vector<typename T::Type> values) : values(std::move(values)) {}
+    InListVerifier(std::vector<typename T::Type> values);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        if (T::test(dict, key)) {
-            typename T::Type value = dict.value<typename T::Type>(key);
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-            auto it = std::find(values.begin(), values.end(), value);
-            return it != values.end();
-        }
-        else {
-            return false;
-        }
-    }
-
-    std::string documentation() const override {
-        std::string result = T::documentation() + '\n' + "In list {";
-
-        std::stringstream s;
-        std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
-
-        std::string joined = s.str();
-        // We need to remove a trailing ',' at the end of the string
-        result += joined.substr(0, joined.size() - 1);
-
-        result += "}";
-        return result;
-    }
+    std::string documentation() const override;
 
     std::vector<typename T::Type> values;
 };
 
 template <typename T>
 struct NotInListVerifier : public T {
-    NotInListVerifier(std::vector<typename T::Type> values) : values(std::move(values)) {}
+    NotInListVerifier(std::vector<typename T::Type> values);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override {
-        if (T::test(dict, key)) {
-            typename T::Type value = dict.value<typename T::Type>(key);
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-            auto it = std::find(values.begin(), values.end(), value);
-            return it == values.end();
-        }
-        else {
-            return false;
-        }
-    }
-
-    std::string documentation() const override {
-        std::string result = T::documentation() + '\n' + "Not in list {";
-
-        std::stringstream s;
-        std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
-
-        std::string joined = s.str();
-        // We need to remove a trailing ',' at the end of the string
-        result += joined.substr(0, joined.size() - 1);
-
-
-        result += "}";
-        return result;
-    }
+    std::string documentation() const override;
 
     std::vector<typename T::Type> values;
 };
 
+// Misc Verifiers
 
+template <typename T>
+struct AnnotationVerifier : public T {
+    AnnotationVerifier(std::string annotation);
 
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
+    std::string documentation() const override;
 
+    std::string annotation;
+};
 
 } // namespace documentation
 } // namespace openspace
+
+#include "documentation.inl"
 
 #endif // __DOCUMENTATION_H__
