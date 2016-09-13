@@ -33,6 +33,37 @@ std::string to_string(std::string value) {
 namespace openspace {
 namespace documentation {
 
+template struct LessVerifier<IntVerifier>;
+template struct LessVerifier<DoubleVerifier>;
+template struct LessEqualVerifier<IntVerifier>;
+template struct LessEqualVerifier<DoubleVerifier>;
+template struct GreaterVerifier<IntVerifier>;
+template struct GreaterVerifier<DoubleVerifier>;
+template struct GreaterEqualVerifier<IntVerifier>;
+template struct GreaterEqualVerifier<DoubleVerifier>;
+template struct EqualVerifier<BoolVerifier>;
+template struct EqualVerifier<IntVerifier>;
+template struct EqualVerifier<DoubleVerifier>;
+template struct EqualVerifier<StringVerifier>;
+template struct UnequalVerifier<BoolVerifier>;
+template struct UnequalVerifier<IntVerifier>;
+template struct UnequalVerifier<DoubleVerifier>;
+template struct UnequalVerifier<StringVerifier>;
+
+template struct InListVerifier<BoolVerifier>;
+template struct InListVerifier<IntVerifier>;
+template struct InListVerifier<DoubleVerifier>;
+template struct InListVerifier<StringVerifier>;
+template struct NotInListVerifier<BoolVerifier>;
+template struct NotInListVerifier<IntVerifier>;
+template struct NotInListVerifier<DoubleVerifier>;
+template struct NotInListVerifier<StringVerifier>;
+
+template struct InRangeVerifier<IntVerifier>;
+template struct InRangeVerifier<DoubleVerifier>;
+template struct NotInRangeVerifier<IntVerifier>;
+template struct NotInRangeVerifier<DoubleVerifier>;
+
 TestResult Verifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const {
     bool testSuccess = test(dict, key);

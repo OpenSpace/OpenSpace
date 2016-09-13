@@ -271,6 +271,37 @@ struct AnnotationVerifier : public T {
     std::string annotation;
 };
 
+extern template struct LessVerifier<IntVerifier>;
+extern template struct LessVerifier<DoubleVerifier>;
+extern template struct LessEqualVerifier<IntVerifier>;
+extern template struct LessEqualVerifier<DoubleVerifier>;
+extern template struct GreaterVerifier<IntVerifier>;
+extern template struct GreaterVerifier<DoubleVerifier>;
+extern template struct GreaterEqualVerifier<IntVerifier>;
+extern template struct GreaterEqualVerifier<DoubleVerifier>;
+extern template struct EqualVerifier<BoolVerifier>;
+extern template struct EqualVerifier<IntVerifier>;
+extern template struct EqualVerifier<DoubleVerifier>;
+extern template struct EqualVerifier<StringVerifier>;
+extern template struct UnequalVerifier<BoolVerifier>;
+extern template struct UnequalVerifier<IntVerifier>;
+extern template struct UnequalVerifier<DoubleVerifier>;
+extern template struct UnequalVerifier<StringVerifier>;
+
+extern template struct InListVerifier<BoolVerifier>;
+extern template struct InListVerifier<IntVerifier>;
+extern template struct InListVerifier<DoubleVerifier>;
+extern template struct InListVerifier<StringVerifier>;
+extern template struct NotInListVerifier<BoolVerifier>;
+extern template struct NotInListVerifier<IntVerifier>;
+extern template struct NotInListVerifier<DoubleVerifier>;
+extern template struct NotInListVerifier<StringVerifier>;
+
+extern template struct InRangeVerifier<IntVerifier>;
+extern template struct InRangeVerifier<DoubleVerifier>;
+extern template struct NotInRangeVerifier<IntVerifier>;
+extern template struct NotInRangeVerifier<DoubleVerifier>;
+
 } // namespace documentation
 } // namespace openspace
 
