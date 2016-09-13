@@ -59,7 +59,7 @@ return {
                         Spice = {"ORX_OCAMS_POLYCAM"},
                         Files = {
                             "BaseballDiamond_PolyCam.txt", 
-                            "OrbitalB_Site08_PolyCamImages.txt",
+                            --"OrbitalB_Site08_PolyCamImages.txt",
                             "Recon_225m_Equatorial_PolyCam.txt",
                         },
                     },

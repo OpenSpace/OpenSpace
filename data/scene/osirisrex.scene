@@ -2,6 +2,8 @@
 TextureResolution = "med"
 -- TextureResolution = "high"
 
+local startTime = "2016 SEP 8 23:05:00.50"
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -159,10 +161,6 @@ function preInitialization()
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
 
     --local startTime = "2019 APR 16 12:03:00.00"
-    local startTime = "2016 SEP 8 23:05:00.50"
-    
-    openspace.time.setTime(startTime)
-    openspace.time.setDeltaTime(0)
 
     openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
 
@@ -196,7 +194,8 @@ function postInitialization()
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
 
-    
+    openspace.time.setTime(startTime)
+    openspace.time.setDeltaTime(0)
 
     openspace.resetCameraDirection()
 end
