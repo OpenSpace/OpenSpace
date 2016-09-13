@@ -63,6 +63,12 @@ ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict)
     }
 }
 
+bool ScheduledScript::CompareByTime(const ScheduledScript& s1, const ScheduledScript& s2){
+    return s1.time < s2.time;
+}
+
+
+
 void ScriptScheduler::loadScripts(const std::string& filepath, lua_State* L) {
     ghoul::Dictionary timedScriptsDict;
     try {
@@ -81,33 +87,30 @@ void ScriptScheduler::loadScripts(const ghoul::Dictionary& dict) {
         const ghoul::Dictionary& timedScriptDict = dict.value<ghoul::Dictionary>(id);
         _scheduledScripts.push_back(ScheduledScript(timedScriptDict));
     }
+
+    // Sort scripts by time
+    std::stable_sort(_scheduledScripts.begin(), _scheduledScripts.end(), &ScheduledScript::CompareByTime);
+
+    // Ensure _currentIndex and _currentTime is accurate after new scripts was added
+    double lastTime = _currentTime;
+    rewind();
+    progressTo(lastTime);
 }
 
-void ScriptScheduler::skipTo(double newTime) {
-    if (newTime > _lastTime) {
-        while (_currentIndex < _scheduledScripts.size() && _scheduledScripts[_currentIndex].time <= newTime) {
-            _currentIndex++;
-        }
-    }
-    else {
-        while (0 < _currentIndex && _scheduledScripts[_currentIndex - 1].time > newTime) {
-            _currentIndex--;
-        }
-    }
+void ScriptScheduler::rewind() {
+    _currentIndex = 0;
+    _currentTime = -DBL_MAX;
 }
 
-void ScriptScheduler::skipTo(const std::string& timeStr) {
-    skipTo(SpiceManager::ref().ephemerisTimeFromDate(timeStr));
-}
 
 void ScriptScheduler::clearSchedule() {
+    rewind();
     _scheduledScripts.clear();
-    _currentIndex = 0;
 }
 
-std::queue<std::string> ScriptScheduler::scheduledScripts(double newTime) {
+std::queue<std::string> ScriptScheduler::progressTo(double newTime) {
     std::queue<std::string> triggeredScripts;
-    if (newTime > _lastTime) {
+    if (newTime > _currentTime) {
         while(_currentIndex < _scheduledScripts.size() && _scheduledScripts[_currentIndex].time <= newTime){
             triggeredScripts.push(_scheduledScripts[_currentIndex].script.forwardScript);
             _currentIndex++;
@@ -120,13 +123,22 @@ std::queue<std::string> ScriptScheduler::scheduledScripts(double newTime) {
         }
     }
 
-    _lastTime = newTime;
+    _currentTime = newTime;
     return triggeredScripts;
 }
 
-std::queue<std::string> ScriptScheduler::scheduledScripts(const std::string& timeStr) {
-    return std::move(scheduledScripts(SpiceManager::ref().ephemerisTimeFromDate(timeStr)));
+std::queue<std::string> ScriptScheduler::progressTo(const std::string& timeStr) {
+    return std::move(progressTo(SpiceManager::ref().ephemerisTimeFromDate(timeStr)));
 }
+
+double ScriptScheduler::currentTime() const { 
+    return _currentTime; 
+};
+
+const std::vector<ScheduledScript>& ScriptScheduler::allScripts() const { 
+    return _scheduledScripts; 
+};
+
 
 
 /////////////////////////////////////////////////////////////////////
@@ -146,20 +158,6 @@ namespace luascriptfunctions {
         }
         
         OsEng.scriptScheduler().loadScripts(missionFileName, L);
-    }
-
-    int skipTo(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string dateStr = luaL_checkstring(L, -1);
-        if (dateStr.empty()) {
-            return luaL_error(L, "date string is empty");
-        }
-
-        OsEng.scriptScheduler().skipTo(dateStr);
     }
 
     int clear(lua_State* L) {
@@ -183,12 +181,6 @@ LuaLibrary ScriptScheduler::luaLibrary() {
                 &luascriptfunctions::loadTimedScripts,
                 "string",
                 "Load timed scripts from file"
-            },
-            {
-                "skipTo",
-                &luascriptfunctions::skipTo,
-                "string",
-                "skip to a time without executing scripts"
             },
             {
                 "clear",
