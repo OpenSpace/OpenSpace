@@ -116,11 +116,6 @@ return {
             Body  = "OSIRIS-REX",
             Frame = "ORX_OCAMS_POLYCAM",
             RGB   = { 0.8, 0.7, 0.7 },
-            Textures = {
-                Type  = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },
             Instrument = {
                 Name       = "ORX_OCAMS_POLYCAM",
                 Method     = "ELLIPSOID",
@@ -140,11 +135,6 @@ return {
             Body  = "OSIRIS-REX",
             Frame = "ORX_REXIS",
             RGB   = { 0.8, 0.7, 0.7 },
-            Textures = {
-                Type  = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },
             Instrument = {
                 Name       = "ORX_REXIS",
                 Method     = "ELLIPSOID",
