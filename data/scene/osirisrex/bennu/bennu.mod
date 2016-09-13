@@ -27,7 +27,7 @@ return {
             Body = BENNU_BODY,
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/BennuResizedTextured.obj",
+                GeometryFile = "models/BennuTextured.obj",
                 Magnification = 0,
             }, 
             Shading = {
@@ -59,7 +59,7 @@ return {
                         Spice = {"ORX_OCAMS_POLYCAM"},
                         Files = {
                             "BaseballDiamond_PolyCam.txt", 
-                            "OrbitalB_Site08_PolyCamImages.txt",
+                            --"OrbitalB_Site08_PolyCamImages.txt",
                             "Recon_225m_Equatorial_PolyCam.txt",
                         },
                     },

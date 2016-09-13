@@ -12,7 +12,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/osiris_BASE.obj",
+                GeometryFile = "models/orx_base_resized_12_sep_2016.obj",
                 Magnification = 0,
             },
             Textures = {
@@ -48,7 +48,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/osiris_POLYCAM.obj",
+                GeometryFile = "models/orx_polycam_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -64,7 +64,7 @@ return {
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
-                Position = {-2.476, 2.710, 3.364},
+                Position = {-0.2476, 0.2710, 0.3364},
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -82,7 +82,7 @@ return {
             Body = "OSIRIS-REX",
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/osiris_REXIS.obj",
+                GeometryFile = "models/orx_rexis_resized_12_sep_2016.obj",
                 Magnification = 0,
             }, 
             Textures = {
@@ -98,7 +98,7 @@ return {
         Transform = {
             Translation = {
                 Type = "StaticEphemeris",
-                Position = {0, 3.371, 2.712},
+                Position = {0, 0.3371, 0.2712},
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -116,11 +116,6 @@ return {
             Body  = "OSIRIS-REX",
             Frame = "ORX_OCAMS_POLYCAM",
             RGB   = { 0.8, 0.7, 0.7 },
-            Textures = {
-                Type  = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },
             Instrument = {
                 Name       = "ORX_OCAMS_POLYCAM",
                 Method     = "ELLIPSOID",
@@ -140,11 +135,6 @@ return {
             Body  = "OSIRIS-REX",
             Frame = "ORX_REXIS",
             RGB   = { 0.8, 0.7, 0.7 },
-            Textures = {
-                Type  = "simple",
-                Color = "textures/glare_blue.png",
-                -- need to add different texture
-            },
             Instrument = {
                 Name       = "ORX_REXIS",
                 Method     = "ELLIPSOID",
