@@ -172,6 +172,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h
