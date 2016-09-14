@@ -24,6 +24,8 @@
 
 set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/openspace.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
@@ -86,7 +88,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/documentation.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
@@ -106,6 +107,9 @@ set(OPENSPACE_SOURCE
 
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.inl
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
@@ -173,8 +177,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/documentation.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/documentation.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h

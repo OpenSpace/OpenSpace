@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/documentation.h>
+#include <openspace/documentation/documentation.h>
 
 namespace std {
 std::string to_string(std::string value) {
