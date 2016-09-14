@@ -58,7 +58,12 @@ namespace {
 
 namespace openspace {
 
-    const std::string TemporalTileProvider::TIME_PLACEHOLDER("${OpenSpaceTimeId}");
+    const std::string TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
+
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_END = "OpenSpaceTimeEnd";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION = "OpenSpaceTimeResolution";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
 
 
     TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
@@ -79,13 +84,16 @@ namespace openspace {
         _defaultTile = getTileProvider()->getDefaultTile();
     }
 
+
+
+
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
         CPLXMLNode* node = CPLParseXMLString(xml.c_str());
 
-        std::string timeStart = getXMLValue(node, "OpenSpaceTimeStart", "2000 Jan 1");
-        std::string timeResolution = getXMLValue(node, "OpenSpaceTimeResolution", "2d");
-        std::string timeEnd = getXMLValue(node, "OpenSpaceTimeEnd", "Now");
-        std::string timeIdFormat = getXMLValue(node, "OpenSpaceTimeIdFormat", "YYYY-MM-DDThh:mm:ssZ");
+        std::string timeStart = getXMLValue(node, TemporalXMLTags::TIME_START, "2000 Jan 1");
+        std::string timeResolution = getXMLValue(node, TemporalXMLTags::TIME_RESOLUTION, "2d");
+        std::string timeEnd = getXMLValue(node, TemporalXMLTags::TIME_END, "Now");
+        std::string timeIdFormat = getXMLValue(node, TemporalXMLTags::TIME_FORMAT, "YYYY-MM-DDThh:mm:ssZ");
 
         Time start; start.setTime(timeStart);
         Time end(Time::now());
@@ -167,7 +175,7 @@ namespace openspace {
 
     std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
         Time tCopy(t);
-        if (_timeQuantizer.quantize(tCopy)) {
+        if (_timeQuantizer.quantize(tCopy, true)) {
             TimeKey timekey = _timeFormat->stringify(tCopy);
             try {
                 return getTileProvider(timekey);
@@ -208,8 +216,8 @@ namespace openspace {
 
     std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
         std::string xmlTemplate(_gdalXmlTemplate);
-        size_t pos = xmlTemplate.find(TIME_PLACEHOLDER);
-        size_t numChars = TIME_PLACEHOLDER.length();
+        size_t pos = xmlTemplate.find(URL_TIME_PLACEHOLDER);
+        size_t numChars = URL_TIME_PLACEHOLDER.length();
         ghoul_assert(pos != std::string::npos, "Invalid dataset file");
         std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
         return timeSpecifiedXml;
@@ -303,14 +311,14 @@ namespace openspace {
         }
     }
 
-    bool TimeQuantizer::quantize(Time& t) const {
+    bool TimeQuantizer::quantize(Time& t, bool clamp) const {
         double unquantized = t.unsyncedJ2000Seconds();
         if (_start <= unquantized && unquantized <= _end) {
             double quantized = std::floor((unquantized - _start) / _resolution) * _resolution + _start;
             t.setTime(quantized);
             return true;
         }
-        else if (_clampTime) {
+        else if (clamp) {
             double clampedTime = unquantized;
             clampedTime = std::max(clampedTime, _start);
             clampedTime = std::min(clampedTime, _end);
@@ -321,4 +329,5 @@ namespace openspace {
             return false;
         }
     }
+
 }  // namespace openspace
