@@ -139,11 +139,11 @@ TEST_F(DocumentationTest, InitializerConstructor) {
         {"NotInListString", new StringNotInListVerifier({ "", "a" })},
 
         // Range Verifiers
-        {"InRangeDouble", new DoubleInRangeVerifier{{0.0, 1.0}},
-        {"InRangeInt", new IntInRangeVerifier{{0, 1}},
+        {"InRangeDouble", new DoubleInRangeVerifier(0.0, 1.0)},
+        {"InRangeInt", new IntInRangeVerifier(0, 1)},
 
-        {"InRangeDouble", new DoubleNotInRangeVerifier{{ 0.0, 1.0 }},
-        {"InRangeInt", new IntNotInRangeVerifier{{ 0, 1 }},
+        {"InRangeDouble", new DoubleNotInRangeVerifier(0.0, 1.0)},
+        {"InRangeInt", new IntNotInRangeVerifier(0, 1)},
 
         // Misc Verifiers
         {"AnnotationBool", new BoolAnnotationVerifier("Bool")},
