@@ -587,7 +587,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 
 void SceneGraphNode::updateCamera(Camera* camera) const{
 
-    psc origin = worldPosition();
+    psc origin = psc(worldPosition());
     //int i = 0;
     // the camera position
     
