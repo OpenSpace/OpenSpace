@@ -141,9 +141,9 @@ struct Documented<ConfigurationManager> {
                     }
                 }),
                 "Configurations for the logging of messages that are generated "
-                            "throughout the code and are useful for debugging potential errors or "
-                            "other information.",
-                            Optional::Yes
+                "throughout the code and are useful for debugging potential errors or "
+                "other information.",
+                Optional::Yes
             },
             {
                 "LuaDocumentationFile",
