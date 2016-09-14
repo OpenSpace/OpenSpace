@@ -951,12 +951,32 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
 void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
 {
     if (type == "text") {
-        std::ofstream f(absPath(file));
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(file);
         
         for (const auto& p : _keyLua) {
             f << std::to_string(p.first) << ": " <<
                 p.second << std::endl;
         }
+    }
+    else if (type == "html") {
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(absPath(file));
+
+        std::stringstream json;
+        json << "[";
+        for (const auto& p : _keyLua) {
+            json << "{";
+            json << "\"key\": \"" << std::to_string(p.first) << "\",";
+            json << "\"script\": \"" << p.second << "\",";
+            json << "},";
+        }
+        json << "]";
+
+        std::string jsonText = json.str();
+
     }
     else {
         throw ghoul::RuntimeError(

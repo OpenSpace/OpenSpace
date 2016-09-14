@@ -414,13 +414,11 @@ SceneGraph& Scene::sceneGraph() {
 }
 
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+    LDEBUG("Writing documentation for properties");
     if (type == "text") {
-        LDEBUG("Writing documentation for properties");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing property documentation");
-            return;
-        }
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         using properties::Property;
         for (SceneGraphNode* node : _graph.nodes()) {
@@ -429,12 +427,58 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
                 file << node->name() << std::endl;
 
                 for (Property* p : properties) {
-                    file << p->fullyQualifiedIdentifier() << ":   " << p->guiName() << std::endl;
+                    file << p->fullyQualifiedIdentifier() << ":   " <<
+                        p->guiName() << std::endl;
                 }
 
                 file << std::endl;
             }
         }
+    }
+    else if (type == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+        // Create JSON
+        std::function<std::string(properties::PropertyOwner*)> createJson =
+            [&createJson](properties::PropertyOwner* owner) -> std::string 
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"name\": \"" << owner->name() << "\",";
+
+            json << "\"properties\": [";
+            for (properties::Property* p : owner->properties()) {
+                json << "{";
+                json << "\"id\": \"" << p->identifier() << "\",";
+                json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+                json << "\"guiName\": \"" << p->guiName() << "\",";
+                json << "},";
+            }
+            json << "],";
+
+            json << "\"propertyOwner\": [";
+            for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+                json << createJson(o);
+            }
+            json << "],";
+            json << "},";
+
+            return json.str();
+        };
+
+
+        std::stringstream json;
+        json << "[";
+        for (SceneGraphNode* node : _graph.nodes()) {
+            json << createJson(node);
+        }
+
+        json << "]";
+
+        std::string jsonText = json.str();
+
     }
     else
         LERROR("Undefined type '" << type << "' for Property documentation");
