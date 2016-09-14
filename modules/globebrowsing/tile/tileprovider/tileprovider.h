@@ -44,26 +44,108 @@ namespace openspace {
     
     using namespace ghoul::opengl;
     
+    /**
+    * Interface for providing <code>Tile</code>s given a 
+    * <code>ChunkIndex</code>. 
+    */
     class TileProvider {
     public:
+
+        /**
+        * Factory method for instantiating different implementations of 
+        * <code>TileProviders</code>. The provided dictionary must 
+        * define a key specifying what implementation of TileProvider
+        * to be instantiated.
+        */
         static TileProvider* createFromDictionary(const ghoul::Dictionary& dictionary);
 
+        /** 
+        * Empty default constructor 
+        */
         TileProvider() {};
+
+        /**
+        * Implementations of the TileProvider interface must implement 
+        * a constructor taking a dictionary as input. The provided 
+        * dictionary must define a key specifying what implementation 
+        * of TileProvider to be instantiated.
+        */
         TileProvider(const ghoul::Dictionary& dictionary);
 
+        /**
+        * Virtual constructor that subclasses should override to do
+        * clean up.
+        */
         virtual ~TileProvider() { }
 
+
+
+        /**
+        * Method for querying tiles, given a specified <code>ChunkIndex</code>.
+        *
+        * This method is expected to be invoked multiple times per frame,
+        * and should therefore return quickly, e.g. not perform heavy I/O 
+        * operations. However, invoking this method may spawn separate threads
+        * to perform such operations. Therefore, programmers shoud 
+        * note that there is no guarantee that the <code>Tile</code> 
+        * status and texture will be consistent over different invocations
+        * of this method.
+        *
+        * \param chunkIndex specifying a region of a map for which 
+        * we want tile data.
+        *
+        * \returns The tile corresponding to the ChunkIndex by the time
+        * the method was invoked.
+        */
         virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
+
+        /**
+        * TileProviders must be able to provide a defualt
+        * <code>Tile</code> which may be used by clients in cases when
+        * requested tiles were unavailable.
+        *
+        * \returns A default tile
+        */
         virtual Tile getDefaultTile() = 0;
+
+
+        /**
+        * Returns the status of the <code>Tile</code> to be returned
+        * if the <code>getTile</code> were to be invoked by this point
+        * in time.
+        */
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
+
+        /**
+        * Get the associated depth transform for this TileProviders
+        * This is necessary for TileProviders serving height map 
+        * data, in order to correcly map pixel values to meters.
+        */
         virtual TileDepthTransform depthTransform() = 0;
+
+        /**
+        * This method should be called once per frame. Here, TileProviders
+        * are given the opportunity to update internal state.
+        */
         virtual void update() = 0;
+
+        /**
+        * Provides a uniform way of all TileProviders to reload or 
+        * restore all of its internal state. This is mainly useful 
+        * for debugging purposes.
+        */
         virtual void reset() = 0;
+
+        /**
+        * \returns The maximum level as defined by <code>ChunkIndex</code>
+        * that this TileProvider is able provide.
+        */
         virtual int maxLevel() = 0;
     };
 
 
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
+
 
     struct TileProviderInitData {
         int minimumPixelSize;
