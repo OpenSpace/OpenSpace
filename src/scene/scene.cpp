@@ -455,6 +455,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
+                "string, *",
                 "Sets all properties that pass the regular expression in the first "
                 "argument. The second argument can be any type, but it has to match the "
                 "type of the properties that matched the regular expression. The regular "
