@@ -69,7 +69,7 @@ public:
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
 
-    bool writeDocumentation(const std::string& filename, const std::string& type) const;
+    void writeDocumentation(const std::string& filename, const std::string& type) const;
 
     bool writeLog(const std::string& script);
 

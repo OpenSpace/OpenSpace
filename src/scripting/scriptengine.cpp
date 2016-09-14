@@ -27,6 +27,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/exception.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
@@ -51,7 +52,6 @@ namespace {
     //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
     
     const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
-
 }
 
 void ScriptEngine::initialize() {
@@ -487,41 +487,36 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
-    if (type == "text") {
-        // The additional space between the longest function name and the descriptions
-        LDEBUG("Writing Lua documentation of type '" << type <<
-            "' to file '" << filename << "'");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing documentation");
-            return false;
+void ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
+    auto concatenate = [](std::string library, std::string function) {
+        std::string total = "openspace.";
+        if (!library.empty()) {
+            total += std::move(library) + ".";
         }
+        total += std::move(function);
+        return total;
+    };
 
-        auto concatenate = [](std::string library, std::string function) {
-            std::string total = "openspace.";
-            if (!library.empty())
-                total += std::move(library) + ".";
-            total += std::move(function);
-            return total;
-        };
-
+    LDEBUG("Writing Lua documentation of type '" << type <<
+           "' to file '" << filename << "'");
+    if (type == "text") {
         // Settings
         const unsigned int lineWidth = 80;
         static const std::string whitespace = " \t";
         static const std::string padding = "    ";
-        const bool commandListArguments = true;
+
+        // The additional space between the longest function name and the descriptions
+
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         file << "Available commands:\n";
         // Now write out the functions
-        for (const LuaLibrary& library : _registeredLibraries) {
-            for (const LuaLibrary::Function& function : library.functions) {
-
-                std::string functionName = concatenate(library.name, function.name);
-                file << padding << functionName;
-                if (commandListArguments)
-                    file << "(" << function.argumentText << ")";
-                file << std::endl;
+        for (const LuaLibrary& l : _registeredLibraries) {
+            for (const LuaLibrary::Function& f : l.functions) {
+                std::string name = concatenate(l.name, f.name);
+                file << padding << name << "(" << f.argumentText << ")" << std::endl;
             }
         }
         file << std::endl;
@@ -529,24 +524,32 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         // Now write out the functions definitions
         for (const LuaLibrary& library : _registeredLibraries) {
             for (const LuaLibrary::Function& function : library.functions) {
-
-                std::string functionName = concatenate(library.name, function.name);
-                file << functionName << "(" << function.argumentText << "):" << std::endl;
+                std::string name = concatenate(library.name, function.name);
+                file << name << "(" << function.argumentText << "):" << std::endl;
 
                 std::string remainingHelptext = function.helpText;
-
-                // @CLEANUP This needs to become a bit prettier ---abock
                 while (!remainingHelptext.empty()) {
-                    const auto length = remainingHelptext.length();
-                    const auto paddingLength = padding.length();
+                    const size_t length = remainingHelptext.length();
+                    const size_t paddingLength = padding.length();
+
                     if ((length + paddingLength) > lineWidth) {
-                        auto lastSpace = remainingHelptext.find_last_of(whitespace, lineWidth - 1 - paddingLength);
-                        if (lastSpace == remainingHelptext.npos)
+                        size_t lastSpace = remainingHelptext.find_last_of(
+                            whitespace,
+                            lineWidth - 1 - paddingLength
+                        );
+                        if (lastSpace == remainingHelptext.npos) {
                             lastSpace = lineWidth;
-                        file << padding << remainingHelptext.substr(0, lastSpace) << std::endl;
-                        auto firstNotSpace = remainingHelptext.find_first_not_of(whitespace, lastSpace);
-                        if (firstNotSpace == remainingHelptext.npos)
+                        }
+                        
+                        file << padding << remainingHelptext.substr(0, lastSpace) << '\n';
+                        
+                        size_t firstNotSpace = remainingHelptext.find_first_not_of(
+                            whitespace,
+                            lastSpace
+                        );
+                        if (firstNotSpace == remainingHelptext.npos) {
                             firstNotSpace = lastSpace;
+                        }
                         remainingHelptext = remainingHelptext.substr(firstNotSpace);
                     }
                     else {
@@ -557,11 +560,39 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
                 file << std::endl;
             }
         }
-        return true;
+    }
+    else if (type == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+        // Create JSON
+        std::stringstream json;
+        json << "[";
+
+        for (const LuaLibrary& l : _registeredLibraries) {
+            json << "{";
+
+            json << "\"library\": \"" << l.name << "\",";
+            json << "\"functions\": [";
+
+            for (const LuaLibrary::Function& f : l.functions) {
+                json << "{";
+                json << "\"name\": \"" << f.name << "\", ";
+                json << "\"arguments\": \"" << f.argumentText << "\", ";
+                json << "\"help\": \"" << f.helpText << "\"";
+                json << "},";
+            }
+            json << "]},";
+        }
+        json << "]";
+
+
+        std::string jsonText = json.str();
+
     }
     else {
-        LERROR("Undefined type '" << type << "' for Lua documentation");
-        return false;
+        throw ghoul::RuntimeError("Undefined type '" + type + "' for Lua documentation");
     }
 }
 
