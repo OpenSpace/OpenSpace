@@ -25,10 +25,13 @@
 #ifndef __SINGLE_IMAGE_PROVIDER_H__
 #define __SINGLE_IMAGE_PROVIDER_H__
 
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/asynctilereader.h>
+
 #include <gdal_priv.h>
 
 #include <openspace/engine/downloadmanager.h>
-#include <set>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
@@ -36,18 +39,11 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/font/fontrenderer.h>
 
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/asynctilereader.h>
-
-
-
+#include <set>
 
 namespace openspace {
     
-    using namespace ghoul::opengl;
-    
+    using namespace ghoul::opengl;    
 
     class SingleImageProvider : public TileProvider {
     public:
@@ -68,10 +64,6 @@ namespace openspace {
         std::string _imagePath;
     };
 
-
 }  // namespace openspace
-
-
-
 
 #endif  // __SINGLE_IMAGE_PROVIDER_H__
