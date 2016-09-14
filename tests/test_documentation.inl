@@ -250,7 +250,7 @@ TEST_F(DocumentationTest, IntVerifier) {
     ASSERT_EQ(1, negativeRes.offenders.size());
     EXPECT_EQ("Int", negativeRes.offenders[0]);
 
-    ghoul::Dictionary negativeExist{
+    ghoul::Dictionary negativeExist {
         { "Int2", 0 }
     };
     negativeRes = testSpecification(doc, negative);
@@ -282,7 +282,7 @@ TEST_F(DocumentationTest, StringVerifier) {
     ASSERT_EQ(1, negativeRes.offenders.size());
     EXPECT_EQ("String", negativeRes.offenders[0]);
 
-    ghoul::Dictionary negativeExist{
+    ghoul::Dictionary negativeExist {
         { "String2", ""s }
     };
     negativeRes = testSpecification(doc, negative);
@@ -1474,4 +1474,117 @@ TEST_F(DocumentationTest, NotInRangeDouble) {
     EXPECT_FALSE(negativeRes.success);
     ASSERT_EQ(1, negativeRes.offenders.size());
     EXPECT_EQ("Double", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, Wildcard) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "*", new IntVerifier }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", 1 },
+        { "b", 2 },
+        { "c", 3 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "a", false },
+        { "b", 2 },
+        { "c", 3 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "a", false },
+        { "b", false },
+        { "c", 3 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("b", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negative3 {
+        { "a", false },
+        { "b", false },
+        { "c", false }
+    };
+    negativeRes = testSpecification(doc, negative3);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(3, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("b", negativeRes.offenders[1]);
+    EXPECT_EQ("c", negativeRes.offenders[2]);
+}
+
+TEST_F(DocumentationTest, WildcardMixed) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "*", new IntVerifier },
+        { "b", new IntGreaterVerifier(5) }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", 1 },
+        { "b", 8 },
+        { "c", 3 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "a", false },
+        { "b", 2 },
+        { "c", 3 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("b", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negative2 {
+        { "a", false },
+        { "b", false },
+        { "c", 3 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("b", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negative3 {
+        { "a", false },
+        { "b", 1 },
+        { "c", false }
+    };
+    negativeRes = testSpecification(doc, negative3);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(3, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("b", negativeRes.offenders[1]);
+    EXPECT_EQ("c", negativeRes.offenders[2]);
+
+    ghoul::Dictionary negative4 {
+        { "a", false },
+        { "b", 10 },
+        { "c", false }
+    };
+    negativeRes = testSpecification(doc, negative4);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+    EXPECT_EQ("c", negativeRes.offenders[1]);
 }

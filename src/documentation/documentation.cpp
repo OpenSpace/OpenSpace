@@ -24,6 +24,12 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <set>
+
+namespace {
+    const std::string Wildcard = "*";
+} // namespace
+
 namespace std {
 std::string to_string(std::string value) {
     return value; 
@@ -99,22 +105,47 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     result.success = true;
 
     for (const auto& p : d) {
-        if (p.optional && !dictionary.hasKey(p.key)) {
-            // If the key is optional and it doesn't exist, we don't need to check it
-            // if the key exists, it has to be correct, however
-            continue;
+        if (p.key == Wildcard) {
+            for (const std::string& key : dictionary.keys()) {
+                Verifier& verifier = *(p.tester);
+                TestResult res = verifier(dictionary, key);
+                if (!res.success) {
+                    result.success = false;
+                    result.offenders.insert(
+                        result.offenders.end(),
+                        res.offenders.begin(),
+                        res.offenders.end()
+                    );
+                }
+            }
         }
-        Verifier& verifier = *(p.tester);
-        TestResult res = verifier(dictionary, p.key);
-        if (!res.success) {
-            result.success = false;
-            result.offenders.insert(
-                result.offenders.end(),
-                res.offenders.begin(),
-                res.offenders.end()
-            );
+        else {
+            if (p.optional && !dictionary.hasKey(p.key)) {
+                // If the key is optional and it doesn't exist, we don't need to check it
+                // if the key exists, it has to be correct, however
+                continue;
+            }
+            Verifier& verifier = *(p.tester);
+            TestResult res = verifier(dictionary, p.key);
+            if (!res.success) {
+                result.success = false;
+                result.offenders.insert(
+                    result.offenders.end(),
+                    res.offenders.begin(),
+                    res.offenders.end()
+                );
+            }
         }
     }
+
+    // Make the offenders unique so that they only appear once in the list
+    std::set<std::string> uniqueOffenders(
+        result.offenders.begin(), result.offenders.end()
+    );
+    result.offenders = std::vector<std::string>(
+        uniqueOffenders.begin(), uniqueOffenders.end()
+    );
+
     return result;
 }
 
