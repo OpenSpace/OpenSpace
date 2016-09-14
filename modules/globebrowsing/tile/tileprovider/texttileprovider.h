@@ -51,15 +51,17 @@ namespace openspace {
     using namespace ghoul::fontrendering;
 
     /**
-     * This abstract class implements the TilProvider interface and enables a simple way 
-     * of providing tiles with any type of rendered text. 
+     * Enables a simple way of providing tiles with any type of rendered text. 
      * Internally it handles setting up a FBO for rendering the text, and defines a new 
      * interface, consisting of only a single method for subclasses to implement: 
-     * \code  renderText(const FontRenderer&, const ChunkIndex&) const \endcode 
+     * renderText(const FontRenderer&, const ChunkIndex&) const;
      */
     class TextTileProvider : public TileProvider {
     public:
 
+        /**
+        * Default constructor with default values for texture and font size
+        */
         TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
         virtual ~TextTileProvider();
 
@@ -73,14 +75,29 @@ namespace openspace {
         virtual void reset();
         virtual int maxLevel();
 
-        // Returns the tile which will be used to draw text onto.
-        // Default implementation returns a tile with a plain transparent texture.
+        /**
+        * Returns the tile which will be used to draw text onto. 
+        * Default implementation returns a tile with a plain transparent texture.
+        */
         virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
 
-        // Default implementation uses ChunkIndex::hashKey()
+
+        /**
+        * Allow overriding of hash function. 
+        * Default is <code>ChunkIndex::hashKey()</code>
+        *
+        * \param chunkIndex chunkIndex to hash
+        * \returns hashkey used for in LRU cache for this tile
+        */
         virtual ChunkHashKey toHash(const ChunkIndex& chunkIndex) const;
         
-        // This method is pure and should be implemented by subclasses
+        /**
+        * Uses the fontRenderer to render some text onto the tile texture provided in 
+        * backgroundTile(const ChunkIndex& chunkIndex). 
+        * 
+        * \param fontRenderer used for rendering text onto texture
+        * \param chunkIndex associated with the tile to be rendered onto
+        */
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
 
     protected:
@@ -96,15 +113,19 @@ namespace openspace {
         GLuint _fbo;
     };
 
+
     /**
-     * Provides \class Tiles with the chunk index rendered as text onto its tiles.
+     * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
      */
     class ChunkIndexTileProvider : public TextTileProvider {
     public:
         virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
     };
 
-
+    /**
+    * Constructed with an ellipsoid and uses that to render the longitudal length of each
+    * of each tile.
+    */
     class SizeReferenceTileProvider : public TextTileProvider {
     public:
         SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
