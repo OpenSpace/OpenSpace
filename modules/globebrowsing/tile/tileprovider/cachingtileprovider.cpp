@@ -193,24 +193,16 @@ namespace openspace {
         return Tile::Status::Unavailable;
     }
 
-
-    Tile CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
-        ChunkHashKey hashkey = chunkIndex.hashKey();
-        if (_tileCache->exist(hashkey)) {
-            return _tileCache->get(hashkey);
-        }
-        else {
-            _asyncTextureDataProvider->enqueueTileIO(chunkIndex);
-            return Tile::TileUnavailable;
-        }
-    }
-
     TileDepthTransform CachingTileProvider::depthTransform() {
         return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
 
     Tile CachingTileProvider::createTile(std::shared_ptr<TileIOResult> tileIOResult) {
+        if (tileIOResult->error != CE_None) {
+            return{ nullptr, nullptr, Tile::Status::IOError };
+        }
+
         ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
         TileDataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         Texture* texturePtr = new Texture(
@@ -232,7 +224,7 @@ namespace openspace {
         Tile tile = {
             texture,
             tileIOResult->preprocessData,
-            tileIOResult->error == CE_None ? Tile::Status::OK : Tile::Status::IOError
+            Tile::Status::OK
         };
 
         return tile;

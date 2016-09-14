@@ -37,15 +37,15 @@
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
+//                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 
 namespace openspace {
 
     /**
-        Provides tiles through GDAL datasets which can be defined with xml files
-        for example for wms.
+    * Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
+    * caches them in memory using LRU caching
     */
     class CachingTileProvider : public TileProvider {
     public:
@@ -59,9 +59,15 @@ namespace openspace {
 
         virtual ~CachingTileProvider();
         
+        /**
+        * \returns a Tile with status OK iff it exists in in-memory 
+        * cache. If not, it may enqueue some IO operations on a 
+        * separate thread.
+        */
         virtual Tile getTile(const ChunkIndex& chunkIndex);
+
         virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual void reset();
@@ -74,34 +80,39 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                                Helper functions                              //
         //////////////////////////////////////////////////////////////////////////////////
-        
-        Tile getOrStartFetchingTile(ChunkIndex chunkIndex);
 
-
-        
         /**
-            Creates an OpenGL texture and pushes the data to the GPU.
+        * Collects all asynchronously downloaded <code>TileIOResult</code>
+        * and uses <code>createTile</code> to create <code>Tile</code>s, 
+        * which are put in the LRU cache - potentially pushing out outdated
+        * Tiles.
         */
-
-        Tile createTile(std::shared_ptr<TileIOResult> res);
-
-        void clearRequestQueue();
-
         void initTexturesFromLoadedData();
 
+        /**
+        * \returns A tile with <code>Tile::Status::OK</code> if no errors
+        * occured, a tile with <code>Tile::Status::IOError</code> otherwise
+        */
+        Tile createTile(std::shared_ptr<TileIOResult> res);
+
+        /**
+        * Deletes all enqueued, but not yet started async downloads of textures.
+        * Note that this does not cancel any currently ongoing async downloads.
+        */
+        void clearRequestQueue();
 
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Member variables                              //
         //////////////////////////////////////////////////////////////////////////////////
 
+        std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
         std::shared_ptr<TileCache> _tileCache;
-        Tile _defaultTile;
 
         int _framesSinceLastRequestFlush;
         int _framesUntilRequestFlush;
 
-        std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+        Tile _defaultTile;
     };
 
 }  // namespace openspace
