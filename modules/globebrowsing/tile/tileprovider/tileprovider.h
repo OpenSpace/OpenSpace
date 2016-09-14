@@ -25,7 +25,6 @@
 #ifndef __TILE_PROVIDER_H__
 #define __TILE_PROVIDER_H__
 
-
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
@@ -34,11 +33,9 @@
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/other/lrucache.h>
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 namespace openspace {
     
@@ -73,12 +70,10 @@ namespace openspace {
         TileProvider(const ghoul::Dictionary& dictionary);
 
         /**
-        * Virtual constructor that subclasses should override to do
+        * Virtual destructor that subclasses should override to do
         * clean up.
         */
         virtual ~TileProvider() { }
-
-
 
         /**
         * Method for querying tiles, given a specified <code>ChunkIndex</code>.
@@ -108,16 +103,16 @@ namespace openspace {
         */
         virtual Tile getDefaultTile() = 0;
 
-
         /**
-        * Returns the status of the <code>Tile</code> to be returned
-        * if the <code>getTile</code> were to be invoked by this point
-        * in time.
+        * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
+        * corresponds the <code>Tile</code> that would be returned
+        * if the function <code>getTile</code> would be invoked with the same
+        * <code>ChunkIndex</code> argument at this point in time.
         */
         virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
 
         /**
-        * Get the associated depth transform for this TileProviders
+        * Get the associated depth transform for this TileProvider.
         * This is necessary for TileProviders serving height map 
         * data, in order to correcly map pixel values to meters.
         */
@@ -125,7 +120,7 @@ namespace openspace {
 
         /**
         * This method should be called once per frame. Here, TileProviders
-        * are given the opportunity to update internal state.
+        * are given the opportunity to update their internal state.
         */
         virtual void update() = 0;
 
@@ -143,9 +138,7 @@ namespace openspace {
         virtual int maxLevel() = 0;
     };
 
-
     typedef LRUCache<ChunkHashKey, Tile> TileCache;
-
 
     struct TileProviderInitData {
         int minimumPixelSize;
@@ -156,8 +149,5 @@ namespace openspace {
     };
 
 }  // namespace openspace
-
-
-
 
 #endif  // __TILE_PROVIDER_H__
