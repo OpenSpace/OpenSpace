@@ -235,5 +235,30 @@ std::string TableVerifier::documentation() const {
     return "Type: Table" + '\n' + generateDocumentation(doc);
 }
 
+AndVerifier::AndVerifier(Verifier* a, Verifier* b)
+    : a(a)
+    , b(b) {}
+
+bool AndVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
+    return a->test(dict, key) && b->test(dict, key);
+}
+
+std::string AndVerifier::documentation() const {
+    return a->documentation() + " and " + b->documentation();
+}
+
+OrVerifier::OrVerifier(Verifier* a, Verifier* b)
+    : a(a)
+    , b(b)
+{}
+
+bool OrVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
+    return a->test(dict, key) || b->test(dict, key);
+}
+
+std::string OrVerifier::documentation() const {
+    return a->documentation() + " or " + b->documentation();
+}
+
 } // namespace documentation
 } // namespace openspace

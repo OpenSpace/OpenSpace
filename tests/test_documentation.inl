@@ -1648,3 +1648,68 @@ TEST_F(DocumentationTest, WildcardMixed) {
     EXPECT_EQ("a", negativeRes.offenders[0]);
     EXPECT_EQ("c", negativeRes.offenders[1]);
 }
+
+TEST_F(DocumentationTest, AndOperator) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { "a", new AndVerifier(
+            new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
+        )
+        }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", 4 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "a", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+
+    ghoul::Dictionary negative2 {
+        { "a", 8 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, OrOperator) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { "a", new OrVerifier(new StringVerifier, new IntVerifier)}
+    };
+
+    ghoul::Dictionary positive {
+        { "a", ""s}
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        { "a", 1 }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "a", false }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("a", negativeRes.offenders[0]);
+}

@@ -273,6 +273,30 @@ struct AnnotationVerifier : public T {
     std::string annotation;
 };
 
+// Boolean Verifiers
+
+struct AndVerifier : public Verifier {
+    AndVerifier(Verifier* a, Verifier* b);
+
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    std::shared_ptr<Verifier> a;
+    std::shared_ptr<Verifier> b;
+};
+
+struct OrVerifier : public Verifier {
+    OrVerifier(Verifier* a, Verifier* b);
+
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    std::shared_ptr<Verifier> a;
+    std::shared_ptr<Verifier> b;
+};
+
 using IntLessVerifier = LessVerifier<IntVerifier>;
 using DoubleLessVerifier = LessVerifier<DoubleVerifier>;
 using IntLessEqualVerifier = LessEqualVerifier<IntVerifier>;
