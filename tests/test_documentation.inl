@@ -516,8 +516,8 @@ TEST_F(DocumentationTest, Optional) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        { "Bool_Force", new BoolVerifier, Optional::No },
-        { "Bool_Optional", new BoolVerifier, Optional::Yes }
+        { "Bool_Force", new BoolVerifier, "", Optional::No },
+        { "Bool_Optional", new BoolVerifier, "", Optional::Yes }
     };
 
     ghoul::Dictionary positive {
@@ -558,6 +558,66 @@ TEST_F(DocumentationTest, Optional) {
     EXPECT_FALSE(negativeRes.success);
     ASSERT_EQ(1, negativeRes.offenders.size());
     EXPECT_EQ("Bool_Optional", negativeRes.offenders[0]);
+}
+
+TEST_F(DocumentationTest, RequiredInOptional) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        {
+            "a",
+            new TableVerifier({
+                {
+                    "b",
+                    new IntVerifier
+                },
+                {
+                    "c",
+                    new IntVerifier,
+                    "",
+                    Optional::Yes
+                }
+            }),
+            "",
+            Optional::Yes
+        }
+    };
+
+    ghoul::Dictionary positive {
+        {
+            "a", ghoul::Dictionary{
+                { "b", 1 }
+            }
+        }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive2 {
+        {
+            "a", ghoul::Dictionary{
+                { "b", 1 },
+                { "c", 2 }
+        }
+        }
+    };
+    positiveRes = testSpecification(doc, positive2);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary positive3 {};
+    positiveRes = testSpecification(doc, positive3);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "c", 2 }}}
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenders.size());
+    EXPECT_EQ("a.b", negativeRes.offenders[0]);
 }
 
 TEST_F(DocumentationTest, LessInt) {
