@@ -25,7 +25,6 @@
 #ifndef __CACHING_TILE_PROVIDER_H__
 #define __CACHING_TILE_PROVIDER_H__
 
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // absPath
 #include <ghoul/opengl/texture.h>
@@ -35,11 +34,9 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/other/lrucache.h>
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 namespace openspace {
 
@@ -73,9 +70,7 @@ namespace openspace {
         virtual void reset();
         virtual int maxLevel();
 
-
     private:
-
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                Helper functions                              //
@@ -101,7 +96,6 @@ namespace openspace {
         */
         void clearRequestQueue();
 
-
         //////////////////////////////////////////////////////////////////////////////////
         //                                Member variables                              //
         //////////////////////////////////////////////////////////////////////////////////
@@ -116,8 +110,5 @@ namespace openspace {
     };
 
 }  // namespace openspace
-
-
-
 
 #endif  // __CACHING_TILE_PROVIDER_H__

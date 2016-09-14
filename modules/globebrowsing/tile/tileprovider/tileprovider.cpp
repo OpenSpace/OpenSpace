@@ -51,7 +51,7 @@ TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictio
     TileProvider* result = factory->create(type, dictionary);
 
     if (result == nullptr) {
-        LERROR("Failed creating Ephemeris object of type '" << type << "'");
+        LERROR("Failed creating TileProvider of type '" << type << "'");
         return nullptr;
     }
 

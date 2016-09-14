@@ -23,7 +23,6 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -31,17 +30,13 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
-
 #include <openspace/engine/openspaceengine.h>
-
-
 
 namespace {
     const std::string _loggerCat = "SingleImageProvider";
 
     const std::string KeyFilePath = "FilePath";
 }
-
 
 namespace openspace {
 
@@ -53,7 +48,6 @@ namespace openspace {
 
         reset();
     }
-
 
     SingleImageProvider::SingleImageProvider(const std::string& imagePath)
         : _imagePath(imagePath)
@@ -68,7 +62,6 @@ namespace openspace {
     Tile SingleImageProvider::getDefaultTile() {
         return _tile;
     }
-
 
     Tile::Status SingleImageProvider::getTileStatus(const ChunkIndex& index) {
         return _tile.status;
