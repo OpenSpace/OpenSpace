@@ -76,6 +76,10 @@ template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
 
+SpecificationError::SpecificationError(TestResult result, std::string component)
+    : ghoul::RuntimeError("Error in specification", std::move(component))
+    , result(std::move(result))
+{}
 
 TestResult Verifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const

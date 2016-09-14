@@ -28,6 +28,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 
 #include <iterator>
 #include <map>
@@ -39,12 +40,18 @@
 namespace openspace {
 namespace documentation {
 
+using Optional = ghoul::Boolean;
+
 struct TestResult {
     bool success;
     std::vector<std::string> offenders;
 };
 
-using Optional = ghoul::Boolean;
+struct SpecificationError : public ghoul::RuntimeError {
+    SpecificationError(TestResult result, std::string component);
+
+    TestResult result;
+};
 
 struct Verifier {
     virtual TestResult operator()(const ghoul::Dictionary& dict,

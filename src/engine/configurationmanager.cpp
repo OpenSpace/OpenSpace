@@ -32,6 +32,8 @@
 
 using std::string;
 
+#include "configurationmanager_doc.inl"
+
 namespace {
     const string _configurationFile = "openspace.cfg";
     const string _keyBasePath = "BASE_PATH";
@@ -94,8 +96,9 @@ string ConfigurationManager::findConfiguration(const string& filename) {
 void ConfigurationManager::loadFromFile(const string& filename) {
     using ghoul::filesystem::FileSystem;
     
-    if (!FileSys.fileExists(filename))
+    if (!FileSys.fileExists(filename)) {
         throw ghoul::FileNotFoundError(filename, "ConfigurationManager");
+    }
 
     // ${BASE_PATH}
     string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
@@ -108,6 +111,16 @@ void ConfigurationManager::loadFromFile(const string& filename) {
 
     // Loading the configuration file into ourselves
     ghoul::lua::loadDictionaryFromFile(filename, *this);
+
+    // Perform testing against the documentation/specification
+    using namespace openspace::documentation;
+    TestResult result = testSpecification(
+        Documented<ConfigurationManager>::Documentation(),
+        *this
+    );
+    if (!result.success) {
+        throw SpecificationError(result, "ConfigurationManager");
+    }
 
     // Register all the paths
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);
