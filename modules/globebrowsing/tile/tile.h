@@ -32,21 +32,64 @@
 
 namespace openspace {
     
-    using namespace ghoul::opengl;    
+    using namespace ghoul::opengl;
 
+    /**
+    * Defines a status and may have a Texture and PreprocessData
+    */
     struct Tile {
         std::shared_ptr<Texture> texture;
         std::shared_ptr<TilePreprocessData> preprocessData;
 
-        enum class Status { Unavailable, OutOfRange, IOError, OK } status;
+
+        /**
+        * Describe if this Tile is good for usage (OK) or otherwise
+        * the reason why it is not.
+        */
+        enum class Status { 
+            /** 
+            * E.g when texture data is not currently in memory. 
+            * texture and preprocessData are both null
+            */
+            Unavailable, 
+
+            /**
+            * Can be set by <code>TileProvider</code>s if the requested 
+            * <code>ChunkIndex</code> is undefined for that particular 
+            * provider. 
+            * texture and preprocessData are both null
+            */
+            OutOfRange, 
+
+            /**
+            * An IO Error happend
+            * texture and preprocessData are both null
+            */
+            IOError, 
+
+            /**
+            * The Texture is uploaded to the GPU and good for usage.
+            * texture is defined. preprocessData may be defined.
+            */
+            OK 
+        } status;
     
         
         /**
-         * Instantiaes a new tile unicolored tile. The texture gets the provided size and
-         * color in rgba. Color values ranges between 0-255.
+         * Instantiates a new tile with a single color. 
+         * 
+         * \param size The size of texture to be created
+         * \param color defined RGBA values in range 0-255.
+         *
+         * \returns a Tile with status OK and the a texture 
+         * with the requested size and color
          */
         static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
 
+        /**
+        * A tile with status unavailable that any user can return to 
+        * indicate that a tile was unavailable.
+        */
         static const Tile TileUnavailable;
 
     };
