@@ -25,4 +25,21 @@
 #ifndef __DOCUMENTATIONENGINE_H__
 #define __DOCUMENTATIONENGINE_H__
 
+#include <openspace/documentation/documentation.h>
+
+namespace openspace {
+namespace documentation {
+
+class DocumentationEngine {
+public:
+
+
+private:
+};
+
+} // namespace documentation
+} // namespace openspace
+
+
+
 #endif // __DOCUMENTATIONENGINE_H__
