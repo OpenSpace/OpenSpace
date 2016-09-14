@@ -56,8 +56,8 @@ struct Verifier {
 };
 
 struct DocumentationEntry {
-    DocumentationEntry(std::string key, Verifier* t, Optional optional = Optional::No,
-                       std::string doc = "");
+    DocumentationEntry(std::string key, Verifier* t, std::string doc = "",
+        Optional optional = Optional::No);
 
     std::string key;
     std::shared_ptr<Verifier> tester;

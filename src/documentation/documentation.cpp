@@ -93,12 +93,13 @@ bool Verifier::test(const ghoul::Dictionary& dict, const std::string& key) const
     return false;
 };
 
-DocumentationEntry::DocumentationEntry(std::string key, Verifier* t,
-                                       Optional optional, std::string doc)
+DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string doc,
+                                       Optional optional)
     : key(std::move(key))
     , tester(std::move(t))
+    , documentation(std::move(doc))
     , optional(optional)
-    , documentation(std::move(doc)) {}
+{}
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary){
     TestResult result;
