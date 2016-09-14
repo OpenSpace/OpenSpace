@@ -39,7 +39,7 @@ namespace {
     const std::string keyCategoryStamping = "CategoryStamping";
     const std::string keyLogLevelStamping = "LogLevelStamping";
 
-    const std::string valueHtmlLog = "HTML";
+    const std::string valueHtmlLog = "html";
     const std::string valueTextLog = "Text";
 }
 

@@ -561,7 +561,7 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
             }
         }
     }
-    else if (type == "HTML") {
+    else if (type == "html") {
         std::ofstream file;
         file.exceptions(~std::ofstream::goodbit);
         file.open(filename);
