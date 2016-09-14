@@ -55,7 +55,6 @@ struct Verifier {
     virtual std::string documentation() const = 0;
 };
 
-
 struct DocumentationEntry {
     DocumentationEntry(std::string key, Verifier* t, Optional optional = Optional::No,
                        std::string doc = "");

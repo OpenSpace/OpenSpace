@@ -78,6 +78,13 @@ TEST_F(DocumentationTest, Constructor) {
     doc.emplace_back("NotInListInt", new IntNotInListVerifier({ 0, 1 }));
     doc.emplace_back("NotInListString", new StringNotInListVerifier({ "", "a" }));
 
+    // Range Verifiers
+    doc.emplace_back("InListDouble", new DoubleInRangeVerifier({ 0.0, 1.0 }));
+    doc.emplace_back("InListInt", new IntInRangeVerifier({ 0, 1 }));
+
+    doc.emplace_back("NotInListDouble", new DoubleNotInRangeVerifier({ 0.0, 1.0 }));
+    doc.emplace_back("NotInListInt", new IntNotInRangeVerifier({ 0, 1 }));
+
     // Misc Verifiers
     doc.emplace_back("AnnotationBool", new BoolAnnotationVerifier("Bool"));
     doc.emplace_back("AnnotationDouble", new DoubleAnnotationVerifier("Double"));
@@ -130,6 +137,13 @@ TEST_F(DocumentationTest, InitializerConstructor) {
         {"NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 })},
         {"NotInListInt", new IntNotInListVerifier({ 0, 1 })},
         {"NotInListString", new StringNotInListVerifier({ "", "a" })},
+
+        // Range Verifiers
+        {"InRangeDouble", new DoubleInRangeVerifier{{0.0, 1.0}},
+        {"InRangeInt", new IntInRangeVerifier{{0, 1}},
+
+        {"InRangeDouble", new DoubleNotInRangeVerifier{{ 0.0, 1.0 }},
+        {"InRangeInt", new IntNotInRangeVerifier{{ 0, 1 }},
 
         // Misc Verifiers
         {"AnnotationBool", new BoolAnnotationVerifier("Bool")},
