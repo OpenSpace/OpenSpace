@@ -510,7 +510,7 @@ bool OpenSpaceEngine::initialize() {
 #endif
 
     _syncEngine->addSyncables(Time::ref().getSyncables());
-    _syncEngine->addSyncables(_renderEngine->camera()->getSyncables());
+    _syncEngine->addSyncables(_renderEngine->getSyncables());
 
     LINFO("Finished initializing");
     return true;
@@ -958,7 +958,7 @@ void OpenSpaceEngine::encode() {
         _syncEngine->encode(_syncBuffer.get());
 
         _scriptEngine->serialize(_syncBuffer.get());
-        _renderEngine->serialize(_syncBuffer.get());
+        //_renderEngine->serialize(_syncBuffer.get());
         
         _syncBuffer->write();
     }
@@ -972,7 +972,7 @@ void OpenSpaceEngine::decode() {
         _syncEngine->decode(_syncBuffer.get());
 
         _scriptEngine->deserialize(_syncBuffer.get());
-        _renderEngine->deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
+        //_renderEngine->deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
     }
 }
 

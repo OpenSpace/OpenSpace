@@ -34,6 +34,10 @@ namespace openspace {
 class Syncable;
 class SyncBuffer;
 
+/**
+* Manages a collection of <code>Syncable</code>s and ensures they are synchronized
+* over SGCT nodes.
+*/
 class SyncEngine {
 public:
 

@@ -526,20 +526,6 @@ void RenderEngine::setSceneGraph(Scene* sceneGraph) {
     _sceneGraph = sceneGraph;
 }
 
-void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-    syncBuffer->encode(_onScreenInformation._node);
-    syncBuffer->encode(_onScreenInformation._position.x);
-    syncBuffer->encode(_onScreenInformation._position.y);
-    syncBuffer->encode(_onScreenInformation._size);
-}
-
-void RenderEngine::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
-    syncBuffer->decode(_onScreenInformation._node);
-    syncBuffer->decode(_onScreenInformation._position.x);
-    syncBuffer->decode(_onScreenInformation._position.y);
-    syncBuffer->decode(_onScreenInformation._size);
-}
-
 Camera* RenderEngine::camera() const {
     return _mainCamera;
 }
@@ -1698,6 +1684,12 @@ void RenderEngine::renderScreenLog() {
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
+}
+
+std::vector<Syncable*> RenderEngine::getSyncables(){
+    std::vector<Syncable*> syncables = _mainCamera->getSyncables();
+    syncables.push_back(&_onScreenInformation);
+    return syncables;
 }
 
 void RenderEngine::sortScreenspaceRenderables() {

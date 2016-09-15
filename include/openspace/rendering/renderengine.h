@@ -31,6 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/util/syncdata.h>
+
+
 #include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
@@ -49,6 +52,7 @@ namespace openspace {
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
+
 class Scene;
 class Renderer;
 class RaycasterManager;
@@ -114,9 +118,6 @@ public:
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
-
-    void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering);
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
@@ -188,12 +189,17 @@ public:
     void startFading(int direction, float fadeDuration);
 
     void sortScreenspaceRenderables();
+
     // This is temporary until a proper screenspace solution is found ---abock
-    struct {
+    struct OnScreenInformation{
         glm::vec2 _position;
         unsigned int _size;
         int _node;
-    } _onScreenInformation;
+    };
+
+    SyncData<OnScreenInformation> _onScreenInformation;
+
+    std::vector<Syncable*> getSyncables();
     
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
