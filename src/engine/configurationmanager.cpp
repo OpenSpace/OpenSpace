@@ -113,14 +113,11 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     ghoul::lua::loadDictionaryFromFile(filename, *this);
 
     // Perform testing against the documentation/specification
-    using namespace openspace::documentation;
-    TestResult result = testSpecification(
+    openspace::documentation::testSpecificationAndThrow(
         ConfigurationManager::Documentation(),
-        *this
+        *this,
+        "ConfigurationManager"
     );
-    if (!result.success) {
-        throw SpecificationError(result, "ConfigurationManager");
-    }
 
     // Register all the paths
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);

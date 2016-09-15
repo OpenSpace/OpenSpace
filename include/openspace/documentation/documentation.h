@@ -73,6 +73,8 @@ struct Documentation {
 
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary);
+void testSpecificationAndThrow(const Documentation& doc,
+    const ghoul::Dictionary& dictionary, std::string component);
 
 std::string generateDocumentation(const Documentation& d);
 

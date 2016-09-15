@@ -69,16 +69,11 @@ const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
-    // Perform testing against the documentation/specification
-    using namespace openspace::documentation;
-    TestResult testResult = testSpecification(
+    openspace::documentation::testSpecificationAndThrow(
         SceneGraphNode::Documentation(),
-        dictionary
+        dictionary,
+        "SceneGraphNode"
     );
-    if (!testResult.success) {
-        throw SpecificationError(testResult, "SceneGraphNode");
-    }
-
 
     SceneGraphNode* result = new SceneGraphNode;
 

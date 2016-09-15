@@ -190,14 +190,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     );
 
     // Perform testing against the documentation/specification
-    using namespace openspace::documentation;
-    TestResult result = testSpecification(
+    openspace::documentation::testSpecificationAndThrow(
         Scene::Documentation(),
-        dictionary
+        dictionary,
+        "Scene"
     );
-    if (!result.success) {
-        throw SpecificationError(result, "Scene");
-    }
 
 
     _graph.loadFromFile(sceneDescriptionFilePath);

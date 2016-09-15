@@ -42,8 +42,7 @@ namespace documentation {
 
 SpecificationError::SpecificationError(TestResult result, std::string component)
     : ghoul::RuntimeError("Error in specification", std::move(component))
-    , result(std::move(result))
-{}
+    , result(std::move(result)) {}
 
 
 DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string doc,
@@ -51,19 +50,16 @@ DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string
     : key(std::move(key))
     , tester(std::move(t))
     , documentation(std::move(doc))
-    , optional(optional)
-{}
+    , optional(optional) {}
 
 Documentation::Documentation(std::string name, DocumentationEntries entries)
     : name(std::move(name))
-    , entries(std::move(entries))
-{}
+    , entries(std::move(entries)) {}
 
 Documentation::Documentation(DocumentationEntries entries)
-    : Documentation("", std::move(entries))
-{}
+    : Documentation("", std::move(entries)) {}
 
-TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary){
+TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary) {
     TestResult result;
     result.success = true;
 
@@ -108,10 +104,26 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     );
     result.offenders = std::vector<std::string>(
         uniqueOffenders.begin(), uniqueOffenders.end()
-    );
+        );
 
     return result;
 }
+
+void testSpecificationAndThrow(const Documentation& doc,
+    const ghoul::Dictionary& dictionary, std::string component)
+
+{
+    // Perform testing against the documentation/specification
+    using namespace openspace::documentation;
+    TestResult testResult = testSpecification(
+        doc,
+        dictionary
+    );
+    if (!testResult.success) {
+        throw SpecificationError(std::move(testResult), std::move(component));
+    }
+}
+
 
 std::string generateDocumentation(const Documentation& d) {
     using namespace std::string_literals;
