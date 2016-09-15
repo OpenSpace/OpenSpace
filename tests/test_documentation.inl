@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/dictionary.h>
 

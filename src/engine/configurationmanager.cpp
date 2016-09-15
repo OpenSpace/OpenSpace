@@ -115,7 +115,7 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     // Perform testing against the documentation/specification
     using namespace openspace::documentation;
     TestResult result = testSpecification(
-        Documented<ConfigurationManager>::Documentation(),
+        ConfigurationManager::Documentation(),
         *this
     );
     if (!result.success) {

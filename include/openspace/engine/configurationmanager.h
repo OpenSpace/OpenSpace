@@ -25,6 +25,8 @@
 #ifndef __CONFIGURATIONMANAGER_H__
 #define __CONFIGURATIONMANAGER_H__
 
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
@@ -122,6 +124,8 @@ public:
      * \pre \p filename must not be empty
      */
     void loadFromFile(const std::string& filename);
+
+    static Documentation Documentation();
 
 private:
     /**
