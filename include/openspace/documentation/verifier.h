@@ -70,13 +70,13 @@ struct StringVerifier : public TemplateVerifier<std::string> {
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
-    TableVerifier(Documentation d = {});
+    TableVerifier(std::vector<DocumentationEntry> d = {});
 
     TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
 
     std::string documentation() const override;
 
-    Documentation doc;
+    std::vector<DocumentationEntry> doc;
 };
 
 // Operator Verifiers

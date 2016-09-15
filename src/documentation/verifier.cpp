@@ -126,7 +126,7 @@ std::string StringVerifier::documentation() const {
     return "Type: String";
 }
 
-TableVerifier::TableVerifier(Documentation d)
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
     : doc(std::move(d))
 {}
 

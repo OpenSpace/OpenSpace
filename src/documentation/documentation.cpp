@@ -54,11 +54,20 @@ DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string
     , optional(optional)
 {}
 
+Documentation::Documentation(std::string name, DocumentationEntries entries)
+    : name(std::move(name))
+    , entries(std::move(entries))
+{}
+
+Documentation::Documentation(DocumentationEntries entries)
+    : Documentation("", std::move(entries))
+{}
+
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary){
     TestResult result;
     result.success = true;
 
-    for (const auto& p : d) {
+    for (const auto& p : d.entries) {
         if (p.key == Wildcard) {
             for (const std::string& key : dictionary.keys()) {
                 Verifier& verifier = *(p.tester);
@@ -92,7 +101,8 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         }
     }
 
-    // Make the offenders unique so that they only appear once in the list
+    // Remove duplicate offenders that might occur if multiple rules apply to a single
+    // key and more than one of these rules are broken
     std::set<std::string> uniqueOffenders(
         result.offenders.begin(), result.offenders.end()
     );
@@ -107,7 +117,8 @@ std::string generateDocumentation(const Documentation& d) {
     using namespace std::string_literals;
     std::string result;
 
-    for (const auto& p : d) {
+    result += "Name: "s + d.name + '\n';
+    for (const auto& p : d.entries) {
         result += p.key + '\n';
         result += "Optional: "s + (p.optional ? "true" : "false") + '\n';
         result += p.tester->documentation() + '\n';

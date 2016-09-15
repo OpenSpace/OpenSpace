@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <iterator>
+
 namespace std {
 std::string to_string(std::string value);
 }

@@ -25,16 +25,12 @@
 #ifndef __DOCUMENTATION_H__
 #define __DOCUMENTATION_H__
 
-#include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
-#include <iterator>
-#include <map>
 #include <memory>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 namespace openspace {
@@ -65,7 +61,16 @@ struct DocumentationEntry {
     std::string documentation;
 };
 
-using Documentation = std::vector<documentation::DocumentationEntry>;
+using DocumentationEntries = std::vector<documentation::DocumentationEntry>;
+
+struct Documentation {
+    Documentation(std::string name = "", DocumentationEntries entries = {});
+    Documentation(DocumentationEntries entries);
+
+    std::string name;
+    DocumentationEntries entries;
+};
+
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary);
 
