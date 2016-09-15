@@ -44,6 +44,11 @@ Documentation StaticScale::Documentation() {
     };
 }
 
+StaticScale::StaticScale()
+    : _scaleValue(1.0) 
+{}
+
+
 StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
     : _scaleValue(1.0)
 {

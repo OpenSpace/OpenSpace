@@ -33,7 +33,8 @@ namespace openspace {
     
 class StaticScale : public Scale {
 public:
-    StaticScale(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    StaticScale();
+    StaticScale(const ghoul::Dictionary& dictionary);
     double scaleValue() const;
 
     static Documentation Documentation();
