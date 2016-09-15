@@ -56,7 +56,7 @@ struct DocumentationEntry {
         Optional optional = Optional::No);
 
     std::string key;
-    std::shared_ptr<Verifier> tester;
+    std::shared_ptr<Verifier> verifier;
     bool optional;
     std::string documentation;
 };
@@ -75,8 +75,6 @@ struct Documentation {
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary);
 void testSpecificationAndThrow(const Documentation& doc,
     const ghoul::Dictionary& dictionary, std::string component);
-
-std::string generateDocumentation(const Documentation& d);
 
 } // namespace documentation
 

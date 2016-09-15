@@ -36,7 +36,8 @@ struct Verifier {
 
     virtual bool test(const ghoul::Dictionary& dict, const std::string& key) const;
 
-    virtual std::string documentation() const = 0;
+    virtual std::string type() const = 0;
+    virtual std::string documentation() const;
 };
 
 // General verifiers
@@ -48,25 +49,25 @@ struct TemplateVerifier : public Verifier {
 struct BoolVerifier : public TemplateVerifier<bool> {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 struct DoubleVerifier : public TemplateVerifier<double> {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 struct IntVerifier : public TemplateVerifier<int> {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 struct StringVerifier : public TemplateVerifier<std::string> {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
@@ -74,7 +75,7 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
 
     TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 
     std::vector<DocumentationEntry> doc;
 };
@@ -85,21 +86,21 @@ template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 template <typename T>
 struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 template <typename T>
 struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
-    std::string documentation() const override;
+    std::string type() const override;
 };
 
 // Operator Verifiers
@@ -277,6 +278,7 @@ struct AndVerifier : public Verifier {
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
+    std::string type() const override;
     std::string documentation() const override;
 
     std::shared_ptr<Verifier> a;
@@ -288,6 +290,7 @@ struct OrVerifier : public Verifier {
 
     bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
 
+    std::string type() const override;
     std::string documentation() const override;
 
     std::shared_ptr<Verifier> a;

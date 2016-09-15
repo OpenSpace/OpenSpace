@@ -37,10 +37,10 @@ bool Vector2Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) 
 }
 
 template <typename T>
-std::string Vector2Verifier<T>::documentation() const {
+std::string Vector2Verifier<T>::type() const {
     using namespace std::string_literals;
 
-    return "Type: Vector2<"s + typeid(T).name() + ">";
+    return "Vector2<"s + typeid(T).name() + ">";
 }
 
 template <typename T>
@@ -49,10 +49,10 @@ bool Vector3Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) 
 }
 
 template <typename T>
-std::string Vector3Verifier<T>::documentation() const {
+std::string Vector3Verifier<T>::type() const {
     using namespace std::string_literals;
 
-    return "Type: Vector3<"s + typeid(T).name() + ">";
+    return "Vector3<"s + typeid(T).name() + ">";
 }
 
 template <typename T>
@@ -61,10 +61,10 @@ bool Vector4Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) 
 }
 
 template <typename T>
-std::string Vector4Verifier<T>::documentation() const {
+std::string Vector4Verifier<T>::type() const {
     using namespace std::string_literals;
 
-    return "Type: Vector4<"s + typeid(T).name() + ">";
+    return "Vector4<"s + typeid(T).name() + ">";
 }
 
 template <typename T>
@@ -80,7 +80,7 @@ bool LessVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key
 
 template <typename T>
 std::string LessVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Less than: " + std::to_string(value);
+    return "Less than: " + std::to_string(value);
 }
 
 
@@ -96,7 +96,7 @@ bool LessEqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::string
 
 template <typename T>
 std::string LessEqualVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Less or equal to: " + std::to_string(value);
+    return "Less or equal to: " + std::to_string(value);
 }
 
 template <typename T>
@@ -111,7 +111,7 @@ bool GreaterVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& 
 
 template <typename T>
 std::string GreaterVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Greater than: " + std::to_string(value);
+    return "Greater than: " + std::to_string(value);
 }
 
 template <typename T>
@@ -126,7 +126,7 @@ bool GreaterEqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::str
 
 template <typename T>
 std::string GreaterEqualVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Greater or equal to: " + std::to_string(value);
+    return "Greater or equal to: " + std::to_string(value);
 }
 
 template <typename T>
@@ -141,7 +141,7 @@ bool EqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& ke
 
 template <typename T>
 std::string EqualVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Equal to: " + std::to_string(value);
+    return "Equal to: " + std::to_string(value);
 }
 
 template <typename T>
@@ -156,7 +156,7 @@ bool UnequalVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& 
 
 template <typename T>
 std::string UnequalVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Unequal to: " + std::to_string(value);
+    return "Unequal to: " + std::to_string(value);
 }
 
 template <typename T>
@@ -179,7 +179,7 @@ bool InListVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& k
 
 template <typename T>
 std::string InListVerifier<T>::documentation() const {
-    std::string result = T::documentation() + '\n' + "In list {";
+    std::string result = "In list { ";
 
     std::stringstream s;
     std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
@@ -188,7 +188,7 @@ std::string InListVerifier<T>::documentation() const {
     // We need to remove a trailing ',' at the end of the string
     result += joined.substr(0, joined.size() - 1);
 
-    result += "}";
+    result += " }";
     return result;
 }
 
@@ -212,7 +212,7 @@ bool NotInListVerifier<T>::test(const ghoul::Dictionary& dict, const std::string
 
 template <typename T>
 std::string NotInListVerifier<T>::documentation() const {
-    std::string result = T::documentation() + '\n' + "Not in list {";
+    std::string result = "Not in list { ";
 
     std::stringstream s;
     std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
@@ -222,7 +222,7 @@ std::string NotInListVerifier<T>::documentation() const {
     result += joined.substr(0, joined.size() - 1);
 
 
-    result += "}";
+    result += " }";
     return result;
 }
 
@@ -247,8 +247,8 @@ bool InRangeVerifier<T>::test(const ghoul::Dictionary& d, const std::string& key
 
 template <typename T>
 std::string InRangeVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "In range: (" + std::to_string(lower) + "," +
-        std::to_string(upper) + ")";
+    return "In range: ( " + std::to_string(lower) + "," +
+        std::to_string(upper) + " )";
 }
 
 template <typename T>
@@ -272,8 +272,8 @@ bool NotInRangeVerifier<T>::test(const ghoul::Dictionary& d, const std::string& 
 
 template <typename T>
 std::string NotInRangeVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + "Not in range: (" + std::to_string(lower) + "," +
-        std::to_string(upper) + ")";
+    return "Not in range: ( " + std::to_string(lower) + "," +
+        std::to_string(upper) + " )";
 }
 
 
@@ -291,7 +291,7 @@ bool AnnotationVerifier<T>::test(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {
-    return T::documentation() + '\n' + annotation;
+    return annotation;
 }
 
 } // namespace documentation

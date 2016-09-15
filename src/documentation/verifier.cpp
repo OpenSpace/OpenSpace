@@ -90,20 +90,24 @@ bool Verifier::test(const ghoul::Dictionary& dict, const std::string& key) const
     return false;
 };
 
+std::string Verifier::documentation() const {
+    return "";
+}
+
 bool BoolVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
     return dict.hasKeyAndValue<Type>(key);
 }
 
-std::string BoolVerifier::documentation() const {
-    return "Type: Boolean";
+std::string BoolVerifier::type() const {
+    return "Boolean";
 }
 
 bool DoubleVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
     return dict.hasKeyAndValue<Type>(key);
 }
 
-std::string DoubleVerifier::documentation() const {
-    return "Type: Double";
+std::string DoubleVerifier::type() const {
+    return "Double";
 }
 
 bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
@@ -124,16 +128,16 @@ bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string & key) 
     }
 }
 
-std::string IntVerifier::documentation() const {
-    return "Type: Integer";
+std::string IntVerifier::type() const {
+    return "Integer";
 }
 
 bool StringVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
     return dict.hasKeyAndValue<Type>(key);
 }
 
-std::string StringVerifier::documentation() const {
-    return "Type: String";
+std::string StringVerifier::type() const {
+    return "String";
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
@@ -156,17 +160,24 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
     return { dict.hasKeyAndValue<Type>(key), { key } };
 }
 
-std::string TableVerifier::documentation() const {
-    return "Type: Table" + '\n' + generateDocumentation(doc);
+std::string TableVerifier::type() const {
+    return "Table";
 }
 
 AndVerifier::AndVerifier(Verifier* a, Verifier* b)
     : a(a)
     , b(b) 
-{}
+{
+    ghoul_assert(a->type() == b->type(), "Cannot use AndVerifier with different types");
+}
 
 bool AndVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
     return a->test(dict, key) && b->test(dict, key);
+}
+
+std::string AndVerifier::type() const {
+    // It does not matter which type we choose as they both have to be the same
+    return a->type();
 }
 
 std::string AndVerifier::documentation() const {
@@ -180,6 +191,15 @@ OrVerifier::OrVerifier(Verifier* a, Verifier* b)
 
 bool OrVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
     return a->test(dict, key) || b->test(dict, key);
+}
+
+std::string OrVerifier::type() const {
+    if (a->type() != b->type()) {
+        return a->type() + " or " + b->type();
+    }
+    else {
+        return a->type();
+    }
 }
 
 std::string OrVerifier::documentation() const {

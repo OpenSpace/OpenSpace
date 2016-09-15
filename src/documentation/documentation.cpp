@@ -48,7 +48,7 @@ SpecificationError::SpecificationError(TestResult result, std::string component)
 DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string doc,
                                        Optional optional)
     : key(std::move(key))
-    , tester(std::move(t))
+    , verifier(std::move(t))
     , documentation(std::move(doc))
     , optional(optional) {}
 
@@ -66,7 +66,7 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     for (const auto& p : d.entries) {
         if (p.key == Wildcard) {
             for (const std::string& key : dictionary.keys()) {
-                Verifier& verifier = *(p.tester);
+                Verifier& verifier = *(p.verifier);
                 TestResult res = verifier(dictionary, key);
                 if (!res.success) {
                     result.success = false;
@@ -84,7 +84,7 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
                 // if the key exists, it has to be correct, however
                 continue;
             }
-            Verifier& verifier = *(p.tester);
+            Verifier& verifier = *(p.verifier);
             TestResult res = verifier(dictionary, p.key);
             if (!res.success) {
                 result.success = false;
@@ -122,23 +122,6 @@ void testSpecificationAndThrow(const Documentation& doc,
     if (!testResult.success) {
         throw SpecificationError(std::move(testResult), std::move(component));
     }
-}
-
-
-std::string generateDocumentation(const Documentation& d) {
-    using namespace std::string_literals;
-    std::string result;
-
-    result += "Name: "s + d.name + '\n';
-    for (const auto& p : d.entries) {
-        result += p.key + '\n';
-        result += "Optional: "s + (p.optional ? "true" : "false") + '\n';
-        result += p.tester->documentation() + '\n';
-        result += '\n';
-        result += p.documentation + '\n';
-    }
-
-    return result;
 }
 
 } // namespace documentation

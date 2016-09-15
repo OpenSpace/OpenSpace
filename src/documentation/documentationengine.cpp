@@ -24,12 +24,55 @@
 
 #include <openspace/documentation/documentationengine.h>
 
+#include <openspace/documentation/verifier.h>
+
 #include <ghoul/misc/assert.h>
 
 #include <fstream>
 
 namespace openspace {
 namespace documentation {
+
+
+std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {
+    using namespace std::string_literals;
+
+    auto indentMessage = [&indentLevel](std::string prefix, std::string msg) {
+        if (msg.empty()) {
+            return ""s;
+        }
+        else {
+            return std::string(indentLevel, '\t') + prefix + ": " + msg + '\n';
+        }
+    };
+    std::string result;
+
+    result += indentMessage("Name", d.name);
+    if (!d.name.empty()) {
+        ++indentLevel;
+    }
+    for (const auto& p : d.entries) {
+        result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
+        result += indentMessage("Optional", (p.optional ? "true" : "false"));
+        result += indentMessage("Type", p.verifier->type());
+        result += indentMessage("Restrictions", p.verifier->documentation());
+        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
+        if (tv) {
+            // We have a TableVerifier, so we need to recurse
+            ++indentLevel;
+            result += generateTextDocumentation(tv->doc, indentLevel);
+            result = result.substr(0, result.size() - 2);
+            --indentLevel;
+        }
+        result += indentMessage("Documentation", p.documentation);
+        result += "\n\n";
+    }
+    if (!d.name.empty()) {
+        --indentLevel;
+    }
+
+    return result;
+}
 
 void DocumentationEngine::writeDocumentation(const std::string& f, const std::string& t) {
     if (t == "text") {
@@ -38,7 +81,8 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
         file.open(f);
 
         for (const Documentation& d : _documentations) {
-            file << documentation::generateDocumentation(d) << std::endl << std::endl;
+            int indent = 0;
+            file << documentation::generateTextDocumentation(d, indent) << std::endl << std::endl;
         }
     }
 }
