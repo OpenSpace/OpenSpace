@@ -55,12 +55,12 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {
     const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
-    const std::string _defaultCommonDirectory = "common";
     const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyCamera = "Camera";
@@ -188,6 +188,17 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         dictionary,
         state
     );
+
+    // Perform testing against the documentation/specification
+    using namespace openspace::documentation;
+    TestResult result = testSpecification(
+        Scene::Documentation(),
+        dictionary
+    );
+    if (!result.success) {
+        throw SpecificationError(result, "Scene");
+    }
+
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
