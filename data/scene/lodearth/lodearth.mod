@@ -63,25 +63,25 @@ return {
                     {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
-                        FilePath = "map_service_configs/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Type = "SingleImage",
                         Name = "Debug Tiles",
-                        FilePath = "../debugglobe/textures/test_tile.png",
+                        FilePath = "textures/test_tile.png",
                     },
                     {
                         Type = "Temporal",
                         Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
-                        FilePath = "map_service_configs/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/GIBS/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
+                        FilePath = "map_service_configs/GIBS/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI_Imagery_World_2D.wms",
+                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
                         Enabled = true,
                     }
                 },
@@ -91,27 +91,27 @@ return {
                 NightTextures = {
                     {
                         Name = "Earth at Night 2012",
-                        FilePath = "map_service_configs/VIIRS_CityLights_2012.xml",
+                        FilePath = "map_service_configs/GIBS/VIIRS_CityLights_2012.xml",
                     },
                 },
                 WaterMasks = {
                     {
                         Name = "MODIS_Water_Mask",
-                        FilePath = "map_service_configs/MODIS_Water_Mask.xml",
+                        FilePath = "map_service_configs/GIBS/MODIS_Water_Mask.xml",
                     },
                 },
                 Overlays = {
                     {
                         Name = "Coastlines",
-                        FilePath = "map_service_configs/Coastlines.xml",
+                        FilePath = "map_service_configs/GIBS/Coastlines.xml",
                     },
                     {
                         Name = "Reference_Features",
-                        FilePath = "map_service_configs/Reference_Features.xml",
+                        FilePath = "map_service_configs/GIBS/Reference_Features.xml",
                     },
                     {
                         Name = "Reference_Labels",
-                        FilePath = "map_service_configs/Reference_Labels.xml",
+                        FilePath = "map_service_configs/GIBS/Reference_Labels.xml",
                     },
                     {
                         Type = "SizeReference",
@@ -123,7 +123,7 @@ return {
                 HeightMaps = {
                     {
                         Name = "Terrain tileset",
-                        FilePath = "map_service_configs/TERRAIN.wms",
+                        FilePath = "map_service_configs/ESRI/TERRAIN.wms",
                         Enabled = true,
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
@@ -131,6 +131,6 @@ return {
                 },
             },
         },
-        GuiName = "/Solar/Planets/LodEarth"
+        GuiName = "/Solar/Planets/Earth"
     },
 }

@@ -75,11 +75,6 @@ return {
             TropicalOrbitPeriod =  60,
             EarthOrbitRatio = 0.01,
             DayLength = 1.0,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
         },
         GuiName = "/Solar/MoonTrail"
     }

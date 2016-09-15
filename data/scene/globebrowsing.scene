@@ -48,7 +48,9 @@ return {
 
     Modules = {
         "lodearth",
+        "lodmoon",
         "lodmars",
+        "lodmercury",
         "sun",
         "stars",
         "milkyway",    

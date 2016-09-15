@@ -12,9 +12,4 @@
     <BlockSizeX>256</BlockSizeX>
     <BlockSizeY>256</BlockSizeY>
   </DataWindow>
-   <Cache>
-        <Path>./ctx_wms_cache</Path>
-        <Depth>2</Depth>
-        <Extension>.jpg</Extension>
-    </Cache>
 </GDAL_WMS>

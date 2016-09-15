@@ -55,7 +55,7 @@ return {
                     },
                     {
                         Name = "Mars Viking Clr",
-                        FilePath = "map_datasets/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
+                        FilePath = "map_datasets/Viking/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
                         Enabled = true,
                     },
                 },
@@ -66,13 +66,13 @@ return {
                         Enabled = true,
                     },
                     {
-                        Name = "West_Candor_Chasma_longlat_global",
-                        FilePath = "map_datasets/West_Candor_Chasma_longlat_global.vrt",
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
                         --Enabled = true,
                     },
                     {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_A.vrt",
+                        Name = "Layered Rock Outcrops in Southwest Candor Chasma Texture",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
                     --[[
                     {
@@ -109,15 +109,15 @@ return {
                         DoPreProcessing = true,
                     },
                     {
-                        Name = "West_Candor_Chasma_DEM_longlat_global",
-                        FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_DEM.vrt",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
@@ -140,11 +140,6 @@ return {
             TropicalOrbitPeriod = 686.973,
             EarthOrbitRatio = 1.881,
             DayLength = 24.6597,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
         },
         GuiName = "/Solar/MarsTrail"
     }

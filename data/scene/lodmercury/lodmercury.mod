@@ -86,11 +86,6 @@ return {
             TropicalOrbitPeriod = 87.968 ,
             EarthOrbitRatio = 0.241,
             DayLength = 4222.6,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
         },
         GuiName = "/Solar/MercuryTrail"
     }
