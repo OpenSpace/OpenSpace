@@ -40,6 +40,7 @@
 
 #include <openspace/performance/performancemanager.h>
 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -136,6 +137,8 @@ RenderEngine::RenderEngine()
         12,
         -1
     };
+
+    OsEng.documentationEngine().addDocumentation(Scene::Documentation());
 }
 
 RenderEngine::~RenderEngine() {
@@ -493,8 +496,7 @@ void RenderEngine::toggleFrametimeType(int t) {
 }
 
 Scene* RenderEngine::scene() {
-    // TODO custom assert (ticket #5)
-    assert(_sceneGraph);
+    ghoul_assert(_sceneGraph, "Scenegraph not initialized");
     return _sceneGraph;
 }
 

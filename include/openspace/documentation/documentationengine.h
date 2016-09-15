@@ -33,8 +33,11 @@ namespace documentation {
 class DocumentationEngine {
 public:
 
+    void addDocumentation(Documentation doc);
 
 private:
+    std::vector<Documentation> _documentations;
+
 };
 
 } // namespace documentation

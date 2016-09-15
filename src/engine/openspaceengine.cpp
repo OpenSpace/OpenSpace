@@ -26,6 +26,7 @@
 
 #include <openspace/openspace.h>
 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/logfactory.h>
@@ -120,6 +121,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
+    , _documentationEngine(new documentation::DocumentationEngine)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new scripting::ScriptEngine)
@@ -147,6 +149,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
+
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>()
@@ -158,6 +161,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
+
+    _documentationEngine->addDocumentation(ConfigurationManager::Documentation());
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -291,6 +296,14 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
     // Register modules
     _engine->_moduleEngine->initialize();
+
+    // After registering the modules, the documentations for the available classes
+    // can be added as well
+    for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
+        for (auto&& doc : m->documentations()) {
+            _engine->_documentationEngine->addDocumentation(doc);
+        }
+    }
 
     // Create the cachemanager
     FileSys.createCacheManager(

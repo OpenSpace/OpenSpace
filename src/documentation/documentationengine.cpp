@@ -24,10 +24,16 @@
 
 #include <openspace/documentation/documentationengine.h>
 
+#include <ghoul/misc/assert.h>
+
 namespace openspace {
 namespace documentation {
 
 
+
+void DocumentationEngine::addDocumentation(Documentation doc) {
+    _documentations.push_back(std::move(doc));
+}
 
 } // namespace documentation
 } // namespace openspace

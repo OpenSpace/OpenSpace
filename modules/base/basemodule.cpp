@@ -119,4 +119,10 @@ void BaseModule::internalInitialize() {
     fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
+std::vector<Documentation> BaseModule::documentations() const {
+    return {
+        StaticScale::Documentation()
+    };
+}
+
 } // namespace openspace
