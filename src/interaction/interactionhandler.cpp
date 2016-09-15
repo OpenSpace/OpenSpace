@@ -953,7 +953,7 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
     if (type == "text") {
         std::ofstream f;
         f.exceptions(~std::ofstream::goodbit);
-        f.open(file);
+        f.open(absPath(file));
         
         for (const auto& p : _keyLua) {
             f << std::to_string(p.first) << ": " <<
