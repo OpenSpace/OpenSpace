@@ -163,6 +163,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     TransformationManager::initialize();
 
     _documentationEngine->addDocumentation(ConfigurationManager::Documentation());
+    _documentationEngine->addDocumentation(Scene::Documentation());
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -415,9 +416,9 @@ bool OpenSpaceEngine::initialize() {
     const std::string LuaDocumentationFile =
         ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
 
-    const bool hasType = configurationManager().hasKey(LuaDocumentationType);
-    const bool hasFile = configurationManager().hasKey(LuaDocumentationFile);
-    if (hasType && hasFile) {
+    const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
+    const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
+    if (hasLuaDocType && hasLuaDocFile) {
         std::string luaDocumentationType;
         configurationManager().getValue(LuaDocumentationType, luaDocumentationType);
         std::string luaDocumentationFile;
@@ -425,6 +426,23 @@ bool OpenSpaceEngine::initialize() {
 
         luaDocumentationFile = absPath(luaDocumentationFile);
         _scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
+    }
+
+    // If a general documentation was specified, generate it now
+    const std::string DocumentationType =
+        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartType;
+    const std::string DocumentationFile =
+        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartFile;
+
+    const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
+    const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
+    if (hasDocumentationType && hasDocumentationFile) {
+        std::string documentationType;
+        configurationManager().getValue(DocumentationType, documentationType);
+        std::string documentationFile;
+        configurationManager().getValue(DocumentationFile, documentationFile);
+        documentationFile = absPath(documentationFile);
+        _documentationEngine->writeDocumentation(documentationFile, documentationType);
     }
 
     bool disableMasterRendering = false;

@@ -137,8 +137,6 @@ RenderEngine::RenderEngine()
         12,
         -1
     };
-
-    OsEng.documentationEngine().addDocumentation(Scene::Documentation());
 }
 
 RenderEngine::~RenderEngine() {

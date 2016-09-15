@@ -33,6 +33,8 @@ namespace documentation {
 class DocumentationEngine {
 public:
 
+    void writeDocumentation(const std::string& filename, const std::string& type);
+
     void addDocumentation(Documentation doc);
 
 private:

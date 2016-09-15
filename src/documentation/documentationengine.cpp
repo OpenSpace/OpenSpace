@@ -26,10 +26,22 @@
 
 #include <ghoul/misc/assert.h>
 
+#include <fstream>
+
 namespace openspace {
 namespace documentation {
 
+void DocumentationEngine::writeDocumentation(const std::string& f, const std::string& t) {
+    if (t == "text") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(f);
 
+        for (const Documentation& d : _documentations) {
+            file << documentation::generateDocumentation(d) << std::endl << std::endl;
+        }
+    }
+}
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
     _documentations.push_back(std::move(doc));
