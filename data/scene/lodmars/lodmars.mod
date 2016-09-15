@@ -71,16 +71,17 @@ return {
                         --Enabled = true,
                     },
                     {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma Texture",
+                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
-                    --[[
                     {
                         Name = "MER_Meridianni_Endeavor_Basemap_25cm",
-                        FilePath = "map_datasets/MER_Meridianni_Endeavor_Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
-                        Enabled = false,
+                        FilePath = "map_datasets/Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
                     },
-                    ]]
+                    {
+                        Name = "Part of Area Traversed by the Mars Exploration Rover",
+                        FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
+                    },
                 },
                 NightTextures = {
 
@@ -120,6 +121,10 @@ return {
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
+                    },
+                    {
+                        Name = "Part of Area Traversed by the Mars Exploration Rover",
+                        FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
                     },
                 },
             },
