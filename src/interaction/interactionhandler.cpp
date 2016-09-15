@@ -794,8 +794,10 @@ void InteractionHandler::postSynchronizationPreDraw() {
         _cameraUpdatedFromScript = false;
     }
     else {
-        _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
-        _camera->setFocusPositionVec3(focusNode()->worldPosition());
+        if (_camera && focusNode()) {
+            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+            _camera->setFocusPositionVec3(focusNode()->worldPosition());
+        }
     }
 }
 
