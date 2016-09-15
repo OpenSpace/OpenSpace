@@ -597,18 +597,23 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
+    const std::string KeyScriptLogType =
+        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartType;
+    const std::string KeyScriptLogFile =
+        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartFile;
+
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
         const bool hasType = OsEng.configurationManager()
-            .hasKey(ConfigurationManager::KeyScriptLogType);
+            .hasKey(KeyScriptLogType);
         const bool hasFile = OsEng.configurationManager()
-            .hasKey(ConfigurationManager::KeyScriptLogFile);
+            .hasKey(KeyScriptLogFile);
         if (hasType && hasFile) {
             OsEng.configurationManager()
-                .getValue(ConfigurationManager::KeyScriptLogType, _logType);
+                .getValue(KeyScriptLogType, _logType);
             OsEng.configurationManager()
-                .getValue(ConfigurationManager::KeyScriptLogFile, _logFilename);
+                .getValue(KeyScriptLogFile, _logFilename);
 
             _logFilename = absPath(_logFilename);
             _logFileExists = true;
@@ -627,8 +632,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
             }
         } else {
             LDEBUG("No script log specified in 'openspace.cfg.' To log, set '"
-                   << ConfigurationManager::KeyScriptLogType << " and "
-                   << ConfigurationManager::KeyScriptLogFile
+                   << KeyScriptLogType << " and "
+                   << KeyScriptLogFile
                    << " in configuration table.");
             _logScripts = false;
             return false;

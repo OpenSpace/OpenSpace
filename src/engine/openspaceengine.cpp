@@ -367,7 +367,9 @@ bool OpenSpaceEngine::initialize() {
 
     using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
     Verbosity verbosity = Verbosity::Default;
-    if (configurationManager().hasKeyAndValue<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity)) {
+    if (configurationManager().hasKeyAndValue<std::string>(
+
+        ConfigurationManager::KeyCapabilitiesVerbosity)) {
         std::map<std::string, Verbosity> verbosityMap = {
             { "None", Verbosity::None },
             { "Minimal", Verbosity::Minimal },
@@ -408,13 +410,18 @@ bool OpenSpaceEngine::initialize() {
     scriptEngine().initialize();
 
     // If a LuaDocumentationFile was specified, generate it now
-    const bool hasType = configurationManager().hasKey(ConfigurationManager::KeyLuaDocumentationType);
-    const bool hasFile = configurationManager().hasKey(ConfigurationManager::KeyLuaDocumentationFile);
+    const std::string LuaDocumentationType =
+        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartType;
+    const std::string LuaDocumentationFile =
+        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
+
+    const bool hasType = configurationManager().hasKey(LuaDocumentationType);
+    const bool hasFile = configurationManager().hasKey(LuaDocumentationFile);
     if (hasType && hasFile) {
         std::string luaDocumentationType;
-        configurationManager().getValue(ConfigurationManager::KeyLuaDocumentationType, luaDocumentationType);
+        configurationManager().getValue(LuaDocumentationType, luaDocumentationType);
         std::string luaDocumentationFile;
-        configurationManager().getValue(ConfigurationManager::KeyLuaDocumentationFile, luaDocumentationFile);
+        configurationManager().getValue(LuaDocumentationFile, luaDocumentationFile);
 
         luaDocumentationFile = absPath(luaDocumentationFile);
         _scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
@@ -680,12 +687,21 @@ void OpenSpaceEngine::loadFonts() {
 }
     
 void OpenSpaceEngine::configureLogging() {
-    if (configurationManager().hasKeyAndValue<std::string>(ConfigurationManager::KeyLogLevel)) {
+    const std::string KeyLogLevel =
+        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogLevel;
+    const std::string KeyLogImmediateFlush =
+        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
+    const std::string KeyLogs = 
+        ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
+
+
+
+    if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
         std::string logLevel;
-        configurationManager().getValue(ConfigurationManager::KeyLogLevel, logLevel);
+        configurationManager().getValue(KeyLogLevel, logLevel);
 
         bool immediateFlush = false;
-        configurationManager().getValue(ConfigurationManager::KeyLogImmediateFlush, immediateFlush);
+        configurationManager().getValue(KeyLogImmediateFlush, immediateFlush);
 
         LogManager::LogLevel level = LogManager::levelFromString(logLevel);
         LogManager::deinitialize();
@@ -697,9 +713,9 @@ void OpenSpaceEngine::configureLogging() {
         LogMgr.addLog(std::make_unique<ConsoleLog>());
     }
 
-    if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(ConfigurationManager::KeyLogs)) {
+    if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
         ghoul::Dictionary logs;
-        configurationManager().getValue(ConfigurationManager::KeyLogs, logs);
+        configurationManager().getValue(KeyLogs, logs);
 
         for (size_t i = 1; i <= logs.size(); ++i) {
             ghoul::Dictionary logInfo;
@@ -1000,6 +1016,11 @@ void OpenSpaceEngine::enableBarrier() {
 
 void OpenSpaceEngine::disableBarrier() {
     _windowWrapper->setBarrier(false);
+}
+
+documentation::DocumentationEngine& OpenSpaceEngine::documentationEngine() {
+    ghoul_assert(_documentationEngine, "DocumentationEngine must not be nullptr");
+    return *_documentationEngine;
 }
 
 NetworkEngine& OpenSpaceEngine::networkEngine() {

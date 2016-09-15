@@ -32,7 +32,7 @@
 
 namespace {
     const std::string keyType = "Type";
-    const std::string keyFilename = "FileName";
+    const std::string keyFilename = "File";
     const std::string keyAppend = "Append";
     const std::string keyTimeStamping = "TimeStamping";
     const std::string keyDateStamping = "DateStamping";

@@ -98,15 +98,23 @@ void Scene::update(const UpdateData& data) {
             OsEng.interactionHandler().setInteractionMode("Orbital");
 
             // After loading the scene, the keyboard bindings have been set
-            
+            const std::string KeyboardShortcutsType =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartType;
+
+            const std::string KeyboardShortcutsFile =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartFile;
+
+
             std::string type;
             std::string file;
             bool hasType = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsType, type
+                KeyboardShortcutsType, type
             );
             
             bool hasFile = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsFile, file
+                KeyboardShortcutsFile, file
             );
             
             if (hasType && hasFile) {
@@ -238,13 +246,21 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const std::string KeyPropertyDocumentationType =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartType;
+
+    const std::string KeyPropertyDocumentationFile =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartFile;
+
+    const bool hasType = OsEng.configurationManager().hasKey(KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);

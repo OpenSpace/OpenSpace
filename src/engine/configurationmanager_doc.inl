@@ -33,13 +33,13 @@ Documentation ConfigurationManager::Documentation() {
         "OpenSpace Configuration",
         {
         {
-            "SGCTConfig",
+            ConfigurationManager::KeyConfigSgct,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
             "The SGCT configuration file that determines the window and view frustum "
             "settings that are being used when OpenSpace is started."
         },
         {
-            "Scene",
+            ConfigurationManager::KeyConfigScene,
             new StringAnnotationVerifier(
                 "A valid scene file as described in the Scene documentation"),
             "The scene description that is used to populate the application after "
@@ -48,7 +48,7 @@ Documentation ConfigurationManager::Documentation() {
             "the Scene documentation."
         },
         {
-            "Paths",
+            ConfigurationManager::KeyPaths,
             new TableVerifier({
                 { "*", new StringVerifier }
             }),
@@ -58,7 +58,7 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "Fonts",
+            ConfigurationManager::KeyFonts,
             new TableVerifier({
                 { "*", new StringVerifier, "Font paths loadable by FreeType" }
             }),
@@ -68,10 +68,10 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "Logging",
+            ConfigurationManager::KeyLogging,
             new TableVerifier({
                 {
-                    "LogLevel",
+                    ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
                         {"Debug", "Info", "Warning", "Error", "Fatal", "None" }
@@ -83,7 +83,7 @@ Documentation ConfigurationManager::Documentation() {
                     Optional::Yes
                 },
                 {
-                    "ImmediateFlush",
+                    ConfigurationManager::PartImmediateFlush,
                     new BoolVerifier,
                     "Determines whether error messages will be displayed immediately "
                     "or if it is acceptable to have a short delay, but being more "
@@ -93,13 +93,13 @@ Documentation ConfigurationManager::Documentation() {
                     Optional::Yes
                 },
                 {
-                    "Logs",
+                    ConfigurationManager::PartLogs,
                     new TableVerifier({
                         {
                             "*",
                             new TableVerifier({
                                 {
-                                    "Type",
+                                    ConfigurationManager::PartType,
                                     new StringInListVerifier({
                                     // List from logfactory.cpp::createLog
                                         "text", "html"
@@ -107,12 +107,12 @@ Documentation ConfigurationManager::Documentation() {
                                     "The type of the new log to be generated."
                                 },
                                 {
-                                    "FileName",
+                                    ConfigurationManager::PartFile,
                                     new StringVerifier,
                                     "The filename to which the log will be written."
                                 },
                                 {
-                                    "Append",
+                                    ConfigurationManager::PartAppend,
                                     new BoolVerifier,
                                     "Determines whether the file will be cleared at "
                                     "startup or if the contents will be appended to "
@@ -131,7 +131,7 @@ Documentation ConfigurationManager::Documentation() {
                     Optional::Yes
                 },
                 {
-                    "CapabilitiesVerbosity",
+                    ConfigurationManager::PartCapabilitiesVerbosity,
                     new StringInListVerifier(
                         // List from OpenspaceEngine::initialize
                         { "None", "Minimal", "Default", "Full" }
@@ -147,10 +147,10 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "LuaDocumentationFile",
+            ConfigurationManager::KeyLuaDocumentation,
             new TableVerifier({
                 {
-                    "Type",
+                    ConfigurationManager::PartType,
                     new StringInListVerifier(
                         // List from ScriptEngine::writeDocumentation
                         { "text", "html" }
@@ -158,7 +158,7 @@ Documentation ConfigurationManager::Documentation() {
                     "The type of documentation that will be written."
                 },
                 {
-                    "File",
+                    ConfigurationManager::PartFile,
                     new StringVerifier,
                     "The filename that will be created on startup containing the "
                     "documentation of available Lua functions. Any existing file "
@@ -171,10 +171,10 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "PropertyDocumentationFile",
+            ConfigurationManager::KeyPropertyDocumentation,
             new TableVerifier({
                 {
-                    "Type",
+                    ConfigurationManager::PartType,
                     new StringInListVerifier(
                         // List taken from Scene::writePropertyDocumentation
                         { "text", "html" }
@@ -182,7 +182,7 @@ Documentation ConfigurationManager::Documentation() {
                     "The type of property documentation file that is created."
                 },
                 {
-                    "File",
+                    ConfigurationManager::PartFile,
                     new StringVerifier,
                     "The file that will be created on startup containing a list of "
                     "all properties in the scene. Any existing file will be silently "
@@ -194,10 +194,10 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "ScriptLogFile",
+            ConfigurationManager::KeyScriptLog,
             new TableVerifier({
                 {
-                    "Type",
+                    ConfigurationManager::PartType,
                     new StringInListVerifier(
                         // List taken from ScriptEngine::writeLog
                         { "text" }
@@ -205,7 +205,7 @@ Documentation ConfigurationManager::Documentation() {
                     "The type of logfile that will be created."
                 },
                 {
-                    "File",
+                    ConfigurationManager::PartFile,
                     new StringVerifier,
                     "The file that will be created on startup containing the log of "
                     "all Lua scripts that are executed. Any existing file (including "
@@ -217,10 +217,10 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "KeyboardShortcuts",
+            ConfigurationManager::KeyKeyboardShortcuts,
             new TableVerifier({
                 {
-                    "Type",
+                    ConfigurationManager::PartType,
                     new StringInListVerifier(
                         // List from InteractionHandler::writeKeyboardDocumentation
                         { "text", "html" }
@@ -229,10 +229,11 @@ Documentation ConfigurationManager::Documentation() {
                     "written."
                 },
                 {
-                    "File",
+                    ConfigurationManager::PartFile,
                     new StringVerifier,
                     "The file that will be created on startup containing the list of "
-                    "all keyboard bindings with their respective Lua scripts."
+                    "all keyboard bindings with their respective Lua scripts. Any "
+                    "previous file in this location will be silently overritten."
                 }
             }),
             "Contains the collection of all keyboard shortcuts that were collected "
@@ -241,7 +242,29 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "ShutdownCountdown",
+            ConfigurationManager::KeyDocumentation,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartType,
+                    new StringInListVerifier(
+                        // List from DocumentationEngine::writeDocumentation
+                        { "text", "html" }
+                    ),
+                    "The type of documentation that should be written."
+                },
+                {
+                    ConfigurationManager::PartFile,
+                    new StringVerifier,
+                    "The file that will be created on startup containing this "
+                    "documentation. Any previous file in this location will be silently "
+                    "overritten."
+                }
+            }),
+            "This defines the location and type of this documentation file.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             "The countdown that the application will wait between pressing ESC and "
             "actually shutting down. If ESC is pressed again in this time, the "
@@ -249,7 +272,7 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "DownloadRequestURL",
+            ConfigurationManager::KeyDownloadRequestURL,
             new OrVerifier(
                 new StringVerifier,
                 new TableVerifier({
@@ -262,13 +285,21 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
-            "RenderingMethod",
+            ConfigurationManager::KeyRenderingMethod,
             new StringInListVerifier(
                 // List from RenderEngine::setRendererFromString
                 { "Framebuffer", "ABuffer" }
             ),
             "The renderer that is use after startup. The renderer 'ABuffer' requires "
             "support for at least OpenGL 4.3",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyDisableMasterRendering,
+            new BoolVerifier,
+            "Toggles whether the master in a multi-application setup should be rendering "
+            "or just managing the state of the network. This is desired in cases where "
+            "the master computer does not have the resources to render a scene.",
             Optional::Yes
         }
         }
