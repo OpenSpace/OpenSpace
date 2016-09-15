@@ -44,7 +44,6 @@ namespace openspace {
         "WaterMasks",
         "Overlays",
         "HeightMaps",
-        "HeightMapOverlays",
     };
 
 }  // namespace openspace

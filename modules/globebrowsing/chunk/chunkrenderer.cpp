@@ -306,23 +306,6 @@ namespace openspace {
             i++;
         }
 
-        // Go through all the height map overlays and set depth tranforms
-        i = 0;
-        it = tileProviders[LayeredTextures::HeightMapOverlays].begin();
-        end = tileProviders[LayeredTextures::HeightMapOverlays].end();
-        for (; it != end; it++) {
-            auto tileProvider = *it;
-
-            TileDepthTransform depthTransform = tileProvider->depthTransform();
-            setDepthTransformUniforms(
-                programUniformHandler,
-                LayeredTextures::TextureCategory::HeightMapOverlays,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
-                i,
-                depthTransform);
-            i++;
-        }
-
         // The length of the skirts is proportional to its size
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());

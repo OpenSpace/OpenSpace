@@ -98,12 +98,6 @@ uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
 uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
-#if USE_HEIGHTMAP_OVERLAY
-uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
-#endif // USE_HEIGHTMAP_OVERLAY
-
 float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	float height = CHUNK_DEFAULT_HEIGHT;
 
@@ -116,15 +110,6 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
-
-#if USE_HEIGHTMAP_OVERLAY
-	height = calculateUntransformedHeightOverlay(
-		height,
-		uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP_OVERLAY
 
 	return height;
 }
@@ -237,16 +222,11 @@ vec4 getTileFragColor(){
 
 
 #if SHOW_HEIGHT_RESOLUTION
-
 	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
 	#if USE_HEIGHTMAP
 		color.r = min(color.r, 0.8);
 		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
 	#endif
-	#if USE_HEIGHTMAP_OVERLAY
-		color.g = min(color.g, 0.8);
-		color.g += tileResolution(fs_uv, HeightMapOverlays[0]) > 0.9 ? 1 : 0;
-	#endif // USE_HEIGHTMAP_OVERLAY
 #endif
 
 	return color;

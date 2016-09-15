@@ -36,12 +36,6 @@ uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
 uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
-#if USE_HEIGHTMAP_OVERLAY
-uniform Tile HeightMapOverlays[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent1[NUMLAYERS_HEIGHTMAP_OVERLAY];
-uniform Tile HeightMapOverlaysParent2[NUMLAYERS_HEIGHTMAP_OVERLAY];
-#endif // USE_HEIGHTMAP_OVERLAY
-
 uniform int xSegments;
 uniform float skirtLength;
 
@@ -62,15 +56,6 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 
 #endif // USE_HEIGHTMAP
 
-#if USE_HEIGHTMAP_OVERLAY
-	height = calculateUntransformedHeightOverlay(
-		height,
-		uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP_OVERLAY
-
 	return height;
 }
 
@@ -87,15 +72,6 @@ float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 		HeightMaps, HeightMapsParent1, HeightMapsParent2);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
-
-#if USE_HEIGHTMAP_OVERLAY
-	height = calculateHeightOverlay(
-		height,
-		uv,
-		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMapOverlays, HeightMapOverlaysParent1, HeightMapOverlaysParent2);	// Three textures to sample from
-
-#endif // USE_HEIGHTMAP_OVERLAY
 
 	return height;
 }

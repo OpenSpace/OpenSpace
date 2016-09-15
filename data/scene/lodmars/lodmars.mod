@@ -83,11 +83,7 @@ return {
                     ]]
                 },
                 NightTextures = {
-                    --[[{
-                        Name = "Mars Night Texture",
-                        FilePath = "map_datasets/MarsNight.vrt",
-                        Enabled = true,
-                    },]]
+
                 },
                 WaterMasks = {
 
@@ -125,8 +121,6 @@ return {
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
-                },
-                HeightMapOverlays = {
                 },
             },
         },

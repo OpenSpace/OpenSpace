@@ -35,7 +35,7 @@ namespace openspace {
 
     public:
 
-        static const size_t NUM_TEXTURE_CATEGORIES = 7;
+        static const size_t NUM_TEXTURE_CATEGORIES = 6;
         static const size_t MAX_NUM_TEXTURES_PER_CATEGORY = 5;
 
         enum TextureCategory {
@@ -45,7 +45,6 @@ namespace openspace {
             WaterMasks,
             Overlays,
             HeightMaps,
-            HeightMapOverlays,
         };
 
         static const std::string TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES];

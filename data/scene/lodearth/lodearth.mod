@@ -129,9 +129,6 @@ return {
                         DoPreProcessing = true,
                     },
                 },
-                HeightMapOverlays = {
-
-                },
             },
         },
         GuiName = "/Solar/Planets/LodEarth"
