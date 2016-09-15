@@ -133,11 +133,20 @@ namespace openspace {
             std::string type = "LRUCaching"; // if type is unspecified
             texDict.getValue("Type", type);
 
-
+            TileProvider* tileProvider;
             auto tileProviderFactory = FactoryManager::ref().factory<TileProvider>();
-            TileProvider* tileProvider = tileProviderFactory->create(type, texDict);
+            try {
+                tileProvider = tileProviderFactory->create(type, texDict);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.what());
+                continue;
+            }
+
+            // Something else went wrong and no exception was thrown
             if (tileProvider == nullptr) {
-                LERROR("Unable to create TileProvider '" << name << "' of type '" << type << "'");
+                LERROR("Unable to create TileProvider '" << name << "' of type '"
+                    << type << "'");
                 continue;
             }
 
