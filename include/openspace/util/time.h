@@ -26,6 +26,8 @@
 #define __TIME_H__
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/syncdata.h>
+
 #include <mutex>
 #include <string>
 
@@ -179,31 +181,11 @@ public:
      */
     double advanceTime(double tickTime);
 
-    void serialize(SyncBuffer* syncBuffer);
-
-
-    /**
-    * Updates time variables from data in syncbuffer. If \param useDoubleBuffering is
-    * false, values will be written directly into the time state, overwriting any
-    * previous values.
-    * If \param useDoubleBuffering is true, values will be written and stored in local
-    * copies, keeping the time state unchanged until <code>updateDoubleBuffer</code> has
-    * been called.
-    */
-    void deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering);
-
     bool timeJumped() const;
 
     void setTimeJumped(bool jumped);
     
     bool paused() const;
-
-    /**
-    * This method should be called from the SGCT postSynchronization stage if and only 
-    * if method <code>deserialize</code> has previously been called with the argument 
-    * useDoubleBuffering set to true.
-    */
-    void updateDoubleBuffer();
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
@@ -218,26 +200,16 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
+    std::vector<Syncable*> getSyncables();
+
 private:
     static Time* _instance; ///< The singleton instance
 
-    struct SyncData {
-        void serialize(SyncBuffer* syncBuffer);
+    SyncData<double> _time;
+    SyncData<double> _dt;
+    SyncData<bool> _timeJumped;
 
-        void deserialize(SyncBuffer* syncBuffer);
-        
-        double time = -1.0;
-        double dt = 1.0;
-        bool timeJumped = false;
-        
-    };
-
-    SyncData local;
-    SyncData synced;
-
-    bool _timePaused = false;
-    
-    std::mutex _syncMutex;
+    bool _timePaused = false;    
 };
 
 } // namespace openspace

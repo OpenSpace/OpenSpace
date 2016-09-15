@@ -43,13 +43,14 @@ Time* Time::_instance = nullptr;
 
 Time::Time(double secondsJ2000)
 {
-    local.time = secondsJ2000;
+    _time = secondsJ2000;
 }
 
 
 Time::Time(const Time& other)
-    : local(other.local)
-    , synced(other.synced)
+    : _time(other._time)
+    , _dt(other._dt)
+    , _timeJumped(other._timeJumped)
 {
 
 }
@@ -86,27 +87,30 @@ bool Time::isInitialized() {
 }
 
 void Time::setTime(double value, bool requireJump) {
-    local.time = value;
-    local.timeJumped = requireJump;
+    _time = value;
+    _timeJumped = requireJump;
 }
 
 double Time::j2000Seconds() const {
-    return local.time;
+    return _time;
 }
 
 double Time::advanceTime(double tickTime) {
-    if (_timePaused)
-        return local.time;
-    else
-        return local.time += local.dt * tickTime;
+    if (_timePaused) {
+        return _time;
+    }
+    else {
+        _time += _dt * tickTime;
+    }
+    return _time;
 }
 
 void Time::setDeltaTime(double deltaT) {
-    local.dt = deltaT;
+    _dt = deltaT;
 }
 
 double Time::deltaTime() const {
-    return local.dt;
+    return _dt;
 }
 
 void Time::setPause(bool pause) {
@@ -119,16 +123,16 @@ bool Time::togglePause() {
 }
 
 void Time::setTime(std::string time, bool requireJump) {
-    local.time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
-    local.timeJumped = requireJump;
+    _time = SpiceManager::ref().ephemerisTimeFromDate(std::move(time));
+    _timeJumped = requireJump;
 }
 
 std::string Time::UTC() const {
-    return SpiceManager::ref().dateFromEphemerisTime(local.time);
+    return SpiceManager::ref().dateFromEphemerisTime(_time);
 }
 
 std::string Time::ISO8601() const {
-    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(local.time);
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(_time);
     std::string month = datetime.substr(5, 3);
 
     std::string MM = "";
@@ -150,52 +154,21 @@ std::string Time::ISO8601() const {
     return datetime;
 }
 
-void Time::serialize(SyncBuffer* syncBuffer) {
-    _syncMutex.lock();
-    local.serialize(syncBuffer);
-    _syncMutex.unlock();
-}
-
-void Time::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
-    _syncMutex.lock();
-    if (useDoubleBuffering) {
-        synced.deserialize(syncBuffer);
-    }
-    else {
-        local.deserialize(syncBuffer);
-    }
-    _syncMutex.unlock();
-}
-
 bool Time::timeJumped() const {
-    return local.timeJumped;
+    return _timeJumped;
 }
 
 void Time::setTimeJumped(bool jumped) {
-    local.timeJumped = jumped;
+    _timeJumped = jumped;
 }
     
 bool Time::paused() const {
     return _timePaused;
 }
-void Time::updateDoubleBuffer() {
-    _syncMutex.lock();
-    local = synced;
-    _syncMutex.unlock();
+
+std::vector<Syncable*> Time::getSyncables() {
+    return{ &_time, &_dt, &_timeJumped};
 }
-
-void Time::SyncData::serialize(SyncBuffer* syncBuffer) {
-    syncBuffer->encode(time);
-    syncBuffer->encode(dt);
-    syncBuffer->encode(timeJumped);
-};
-
-void Time::SyncData::deserialize(SyncBuffer* syncBuffer) {
-    syncBuffer->decode(time);
-    syncBuffer->decode(dt);
-    syncBuffer->decode(timeJumped);
-}
-
 
 scripting::LuaLibrary Time::luaLibrary() {
     return {

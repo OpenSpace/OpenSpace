@@ -31,6 +31,7 @@
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/settingsengine.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
@@ -128,6 +129,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
+    , _syncEngine(new SyncEngine)
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
       ))
@@ -507,6 +509,9 @@ bool OpenSpaceEngine::initialize() {
     IswaManager::initialize();
 #endif
 
+    _syncEngine->addSyncables(Time::ref().getSyncables());
+    _syncEngine->addSyncables(_renderEngine->camera()->getSyncables());
+
     LINFO("Finished initializing");
     return true;
 }
@@ -753,6 +758,7 @@ void OpenSpaceEngine::setRunTime(double d){
     
 void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
+    
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
 
@@ -774,13 +780,17 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
+
     }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    if (_settingsEngine->useDoubleBuffering() && !_isMaster) {
-        Time::ref().updateDoubleBuffer();
-        _renderEngine->camera()->updateDoubleBuffer();
+    double t1 = Time::ref().j2000Seconds();
+
+    if (!_isMaster) {
+        if (_settingsEngine->useDoubleBuffering()) {
+            _syncEngine->applySyncedUpdates();
+        }
     }
 
     if (_isInShutdownMode) {
@@ -945,7 +955,8 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 
 void OpenSpaceEngine::encode() {
     if (_syncBuffer) {
-        Time::ref().serialize(_syncBuffer.get());
+        _syncEngine->encode(_syncBuffer.get());
+
         _scriptEngine->serialize(_syncBuffer.get());
         _renderEngine->serialize(_syncBuffer.get());
         
@@ -958,11 +969,10 @@ void OpenSpaceEngine::encode() {
 void OpenSpaceEngine::decode() {
     if (_syncBuffer) {
         _syncBuffer->read();
+        _syncEngine->decode(_syncBuffer.get());
 
-        Time::ref().deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
         _scriptEngine->deserialize(_syncBuffer.get());
         _renderEngine->deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
-
     }
 }
 

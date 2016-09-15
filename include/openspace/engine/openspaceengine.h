@@ -55,6 +55,7 @@ class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
+class SyncEngine;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
@@ -145,6 +146,7 @@ private:
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<NetworkEngine> _networkEngine;
+    std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;

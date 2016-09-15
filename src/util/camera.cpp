@@ -51,10 +51,10 @@ namespace openspace {
         , _focusPosition()
     {
 
-        local.scaling= glm::vec2(1.f, 0.f);
-        local.position = Vec3(1.0, 1.0, 1.0);
+        _scaling = glm::vec2(1.f, 0.f);
+        _position = Vec3(1.0, 1.0, 1.0);
         Vec3 eulerAngles(1.0, 1.0, 1.0);
-        local.rotation = Quat(eulerAngles);
+        _rotation = Quat(eulerAngles);
     }
 
     Camera::Camera(const Camera& o)
@@ -62,7 +62,9 @@ namespace openspace {
         , _focusPosition(o._focusPosition)
         , _cachedViewDirection(o._cachedViewDirection)
         , _cachedLookupVector(o._cachedLookupVector)
-        , local(o.local)
+        , _position(o._position)
+        , _rotation(o._rotation)
+        , _scaling(o._scaling)
         , _maxFov(o._maxFov)
     { }
 
@@ -71,7 +73,7 @@ namespace openspace {
     // Mutators
     void Camera::setPositionVec3(Vec3 pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        local.position = pos;
+        _position = pos;
       
         _cachedCombinedViewMatrix.isDirty = true;
     }
@@ -83,7 +85,7 @@ namespace openspace {
 
     void Camera::setRotation(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        local.rotation = rotation;
+        _rotation = rotation;
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
         _cachedViewRotationMatrix.isDirty = true;
@@ -92,7 +94,7 @@ namespace openspace {
 
     void Camera::setScaling(glm::vec2 scaling) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        local.scaling = std::move(scaling);
+        _scaling = std::move(scaling);
     }
 
     void Camera::setMaxFov(float fov) {
@@ -104,7 +106,7 @@ namespace openspace {
     // Relative mutators
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        local.rotation = rotation * local.rotation;
+        _rotation = rotation * (glm::dquat)_rotation;
       
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
@@ -114,11 +116,11 @@ namespace openspace {
 
     // Accessors
     const Camera::Vec3& Camera::positionVec3() const {
-        return local.position;
+        return _position;
     }
 
     const Camera::Vec3& Camera::unsynchedPositionVec3() const {
-        return local.position;
+        return _position;
     }
 
     const Camera::Vec3& Camera::focusPositionVec3() const {
@@ -128,7 +130,7 @@ namespace openspace {
     const Camera::Vec3& Camera::viewDirectionWorldSpace() const {
         if (_cachedViewDirection.isDirty) {
             _cachedViewDirection.datum =
-                local.rotation * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
+                (glm::dquat)_rotation * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
             _cachedViewDirection.datum = glm::normalize(_cachedViewDirection.datum);
             _cachedViewDirection.isDirty = true;
         }
@@ -142,7 +144,7 @@ namespace openspace {
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
         if (_cachedLookupVector.isDirty) {
             _cachedLookupVector.datum =
-                local.rotation * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
+               (glm::dquat)_rotation * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
             _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
             _cachedLookupVector.isDirty = true;
         }
@@ -150,7 +152,7 @@ namespace openspace {
     }
 
     const glm::vec2& Camera::scaling() const {
-        return local.scaling;
+        return _scaling;
     }
 
     float Camera::maxFov() const {
@@ -167,19 +169,19 @@ namespace openspace {
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
-            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse(local.rotation));
+            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse((glm::dquat)_rotation));
         }
         return _cachedViewRotationMatrix.datum;
     }
 
     const Camera::Quat& Camera::rotationQuaternion() const {
-        return local.rotation;
+        return _rotation;
     }
 
     const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
             Mat4 cameraTranslation =
-                glm::inverse(glm::translate(Mat4(1.0), local.position));
+                glm::inverse(glm::translate(Mat4(1.0), (Vec3)_position));
             _cachedCombinedViewMatrix.datum =
                 Mat4(sgctInternal.viewMatrix()) *
                 Mat4(viewRotationMatrix()) *
@@ -187,22 +189,6 @@ namespace openspace {
             _cachedCombinedViewMatrix.isDirty = true;
         }
         return _cachedCombinedViewMatrix.datum;
-    }
-
-    // Synchronization
-    void Camera::serialize(SyncBuffer* syncBuffer) {
-        std::lock_guard<std::mutex> _lock(_mutex);
-        local.serialize(syncBuffer);
-    }
-
-    void Camera::deserialize(SyncBuffer* syncBuffer, bool useDoubleBuffering) {
-        std::lock_guard<std::mutex> _lock(_mutex);
-        if (useDoubleBuffering) {
-            synced.deserialize(syncBuffer);
-        }
-        else {
-            local.deserialize(syncBuffer);
-        }
     }
 
     void Camera::invalidateCache() {
@@ -271,7 +257,7 @@ namespace openspace {
     // Deprecated
     void Camera::setPosition(psc pos) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        local.position = pos.dvec3();
+        _position = pos.dvec3();
     }
 
     void Camera::setFocusPosition(psc pos) {
@@ -280,11 +266,11 @@ namespace openspace {
     }
 
     psc Camera::position() const {
-        return psc(local.position);
+        return psc((Vec3)_position);
     }
 
     psc Camera::unsynchedPosition() const {
-        return psc(local.position);
+        return psc((Vec3)_position);
     }
 
     psc Camera::focusPosition() const {
@@ -303,19 +289,8 @@ namespace openspace {
         return sgctInternal.viewProjectionMatrix();
     }
 
-    void Camera::updateDoubleBuffer(){
-        std::lock_guard<std::mutex> _lock(_mutex);
-        local = synced;
+    std::vector<Syncable*> Camera::getSyncables() {
+        return{ &_position, &_rotation, &_scaling };
     }
 
-    void Camera::SyncData::serialize(SyncBuffer* syncBuffer) {
-        syncBuffer->encode(position);
-        syncBuffer->encode(rotation);
-        syncBuffer->encode(scaling);
-    }
-    void Camera::SyncData::deserialize(SyncBuffer* syncBuffer) {
-        syncBuffer->decode(position);
-        syncBuffer->decode(rotation);
-        syncBuffer->decode(scaling);
-    }
 } // namespace openspace
