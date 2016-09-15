@@ -29,7 +29,7 @@ namespace openspace {
 Documentation Scene::Documentation() {
     using namespace documentation;
 
-    return{
+    return {
         "Scene Description",
         {
         {
@@ -85,7 +85,8 @@ Documentation Scene::Documentation() {
             }),
             "This is the list of modules that will be loaded into the initial scene. The "
             "values in this table have to correspond to folders relative to the "
-            "ScenePath key."
+            "ScenePath key. The order in which the modules are loaded is the same as the "
+            "order in which they are specified in this table."
         }
         }
     };

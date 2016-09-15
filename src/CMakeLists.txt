@@ -85,6 +85,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraph.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl

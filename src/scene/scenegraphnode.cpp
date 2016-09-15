@@ -24,6 +24,9 @@
 
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
+
+#include <openspace/documentation/documentation.h>
+
 #include <openspace/query/query.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -46,6 +49,8 @@
 #include <cctype>
 #include <chrono>
 
+#include "scenegraphnode_doc.inl"
+
 namespace {
     const std::string _loggerCat = "SceneGraphNode";
     const std::string KeyRenderable = "Renderable";
@@ -63,8 +68,18 @@ const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 
-SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
+SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+    // Perform testing against the documentation/specification
+    using namespace openspace::documentation;
+    TestResult testResult = testSpecification(
+        SceneGraphNode::Documentation(),
+        dictionary
+    );
+    if (!testResult.success) {
+        throw SpecificationError(testResult, "SceneGraphNode");
+    }
+
+
     SceneGraphNode* result = new SceneGraphNode;
 
     if (!dictionary.hasValue<std::string>(KeyName)) {
