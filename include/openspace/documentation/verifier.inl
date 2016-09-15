@@ -32,6 +32,42 @@ namespace openspace {
 namespace documentation {
 
 template <typename T>
+bool Vector2Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
+    return d.hasKeyAndValue<glm::tvec2<T>>(k);
+}
+
+template <typename T>
+std::string Vector2Verifier<T>::documentation() const {
+    using namespace std::string_literals;
+
+    return "Type: Vector2<"s + typeid(T).name() + ">";
+}
+
+template <typename T>
+bool Vector3Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
+    return d.hasKeyAndValue<glm::tvec3<T>>(k);
+}
+
+template <typename T>
+std::string Vector3Verifier<T>::documentation() const {
+    using namespace std::string_literals;
+
+    return "Type: Vector3<"s + typeid(T).name() + ">";
+}
+
+template <typename T>
+bool Vector4Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
+    return d.hasKeyAndValue<glm::tvec4<T>>(k);
+}
+
+template <typename T>
+std::string Vector4Verifier<T>::documentation() const {
+    using namespace std::string_literals;
+
+    return "Type: Vector4<"s + typeid(T).name() + ">";
+}
+
+template <typename T>
 LessVerifier<T>::LessVerifier(typename T::Type value) 
     : value(std::move(value))
 {

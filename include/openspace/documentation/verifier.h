@@ -79,6 +79,29 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
     std::vector<DocumentationEntry> doc;
 };
 
+struct VectorVerifier {};
+
+template <typename T>
+struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+};
+
+template <typename T>
+struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+};
+
+template <typename T>
+struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
+    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+
+    std::string documentation() const override;
+};
+
 // Operator Verifiers
 
 template <typename T>
@@ -86,6 +109,7 @@ struct LessVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     LessVerifier(typename T::Type value);
 
@@ -101,6 +125,7 @@ struct LessEqualVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     LessEqualVerifier(typename T::Type value);
 
@@ -116,6 +141,7 @@ struct GreaterVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     GreaterVerifier(typename T::Type value);
 
@@ -131,6 +157,7 @@ struct GreaterEqualVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     GreaterEqualVerifier(typename T::Type value);
 
@@ -201,6 +228,7 @@ struct InRangeVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     InRangeVerifier(typename T::Type lower, typename T::Type upper);
 
@@ -217,6 +245,7 @@ struct NotInRangeVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
 
     NotInRangeVerifier(typename T::Type lower, typename T::Type upper);
 
@@ -265,6 +294,16 @@ struct OrVerifier : public Verifier {
     std::shared_ptr<Verifier> b;
 };
 
+using BoolVector2Verifier = Vector2Verifier<bool>;
+using IntVector2Verifier = Vector2Verifier<int>;
+using DoubleVector2Verifier = Vector2Verifier<double>;
+using BoolVector3Verifier = Vector3Verifier<bool>;
+using IntVector3Verifier = Vector3Verifier<int>;
+using DoubleVector3Verifier = Vector3Verifier<double>;
+using BoolVector4Verifier = Vector4Verifier<bool>;
+using IntVector4Verifier = Vector4Verifier<int>;
+using DoubleVector4Verifier = Vector4Verifier<double>;
+
 using IntLessVerifier = LessVerifier<IntVerifier>;
 using DoubleLessVerifier = LessVerifier<DoubleVerifier>;
 using IntLessEqualVerifier = LessEqualVerifier<IntVerifier>;
@@ -302,6 +341,15 @@ using DoubleAnnotationVerifier = AnnotationVerifier<DoubleVerifier>;
 using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 
+extern template struct Vector2Verifier<bool>;
+extern template struct Vector2Verifier<int>;
+extern template struct Vector2Verifier<double>;
+extern template struct Vector3Verifier<bool>;
+extern template struct Vector3Verifier<int>;
+extern template struct Vector3Verifier<double>;
+extern template struct Vector4Verifier<bool>;
+extern template struct Vector4Verifier<int>;
+extern template struct Vector4Verifier<double>;
 
 extern template struct LessVerifier<IntVerifier>;
 extern template struct LessVerifier<DoubleVerifier>;

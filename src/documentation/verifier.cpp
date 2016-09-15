@@ -27,6 +27,16 @@
 namespace openspace {
 namespace documentation {
 
+template struct Vector2Verifier<bool>;
+template struct Vector2Verifier<int>;
+template struct Vector2Verifier<double>;
+template struct Vector3Verifier<bool>;
+template struct Vector3Verifier<int>;
+template struct Vector3Verifier<double>;
+template struct Vector4Verifier<bool>;
+template struct Vector4Verifier<int>;
+template struct Vector4Verifier<double>;
+
 template struct LessVerifier<IntVerifier>;
 template struct LessVerifier<DoubleVerifier>;
 template struct LessEqualVerifier<IntVerifier>;
