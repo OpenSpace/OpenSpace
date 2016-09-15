@@ -144,31 +144,6 @@ namespace openspace {
             }
         }
         
-        const TileProviderGroup& heightmapOverlays = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMapOverlays);
-        TileAndTransform mostHighResHeightmapOverlay = TileSelector::getHighestResolutionTile(heightmapOverlays, _index);
-        if (mostHighResHeightmapOverlay.tile.status == Tile::Status::OK) {
-            auto preprocessData = mostHighResHeightmapOverlay.tile.preprocessData;
-            if (preprocessData != nullptr && preprocessData->minValues[0] < preprocessData->maxValues[0]) {
-                if (boundingHeights.available) {
-                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[0]);
-                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[0]);
-                }
-                else {
-                    boundingHeights.min = preprocessData->minValues[0];
-                    boundingHeights.max = preprocessData->maxValues[0];
-                    boundingHeights.available = true;
-
-                    if (preprocessData->hasMissingData[0]) {
-                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[0]);
-                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[0]);
-                    }
-                }
-            }
-        }
-        
-                
-        
-
         return boundingHeights;
     }
 

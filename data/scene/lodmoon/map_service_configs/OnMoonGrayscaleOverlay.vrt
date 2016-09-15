@@ -17,13 +17,12 @@
   <VRTRasterBand dataType="Byte" band="2">
     <ColorInterp>Alpha</ColorInterp>
     <ComplexSource>
-      <SourceFilename relativeToVRT="1">OnMoonColor.xml</SourceFilename>
+      <SourceFilename relativeToVRT="1">white_geo.tif</SourceFilename>
       <SourceBand>1</SourceBand>
-      <SourceProperties RasterXSize="163840" RasterYSize="81920" DataType="Byte" BlockXSize="512" BlockYSize="512" />
-      <SrcRect xOff="0" yOff="0" xSize="163840" ySize="81920" />
+      <SourceProperties RasterXSize="163840" RasterYSize="81920" DataType="Byte" BlockXSize="512" BlockYSize="512"/>
+      <SrcRect xOff="0" yOff="0" xSize="32" ySize="32" />
       <DstRect xOff="0" yOff="0" xSize="163840" ySize="81920" />
-      <ScaleOffset>255</ScaleOffset>
-      <ScaleRatio>1</ScaleRatio>
+
     </ComplexSource>
   </VRTRasterBand>
 </VRTDataset>

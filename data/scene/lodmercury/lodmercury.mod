@@ -68,7 +68,6 @@ return {
                         Enabled = true,
                     },
                 },
-                HeightMapOverlays = { },
             },
         },
         GuiName = "/Solar/Planets/LodMercury"
