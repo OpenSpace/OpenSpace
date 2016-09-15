@@ -33,6 +33,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <openspace/util/time.h>
+#include <openspace/util/timerange.h>
 
 #include <unordered_map>
 
@@ -152,8 +153,7 @@ namespace openspace {
         bool quantize(Time& t, bool clamp) const;
 
     private:
-        double _start;
-        double _end;
+        TimeRange _timerange;
         double _resolution;
     };
 
