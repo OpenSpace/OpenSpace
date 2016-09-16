@@ -464,6 +464,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         file.exceptions(~std::ofstream::goodbit);
         file.open(filename);
 
+#ifdef JSON
         // Create JSON
         std::function<std::string(properties::PropertyOwner*)> createJson =
             [&createJson](properties::PropertyOwner* owner) -> std::string 
@@ -476,6 +477,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             for (properties::Property* p : owner->properties()) {
                 json << "{";
                 json << "\"id\": \"" << p->identifier() << "\",";
+                json << "\"type\": \"" << p->className() << "\",";
                 json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
                 json << "\"guiName\": \"" << p->guiName() << "\",";
                 json << "},";
@@ -502,6 +504,45 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         json << "]";
 
         std::string jsonText = json.str();
+#else
+        std::stringstream html;
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Properties</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Properties</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>ID</th>\n"
+             << "\t\t\t<th>Type</th>\n"
+             << "\t\t\t<th>Description</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (SceneGraphNode* node : _graph.nodes()) {
+            for (properties::Property* p : node->propertiesRecursive()) {
+                html << "\t\t<tr>\n"
+                     << "\t\t\t<td>" << p->fullyQualifiedIdentifier() << "</td>\n"
+                     << "\t\t\t<td>" << p->className() << "</td>\n"
+                     << "\t\t\t<td>" << p->guiName() << "</td>\n"
+                     << "\t\t</tr>\n";
+            }
+
+            if (!node->propertiesRecursive().empty()) {
+                html << "\t<tr><td style=\"line-height: 10px;\" colspan=3></td></tr>\n";
+            }
+
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>;";
+
+        file << html.str();
+#endif
 
     }
     else
