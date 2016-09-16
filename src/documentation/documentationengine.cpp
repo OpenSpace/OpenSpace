@@ -106,37 +106,44 @@ std::string generateJsonDocumentation(const Documentation& d) {
 
 std::string generateHtmlDocumentation(const Documentation& d) {
     std::stringstream html;
-    html << "<table cellpadding=3 cellspacing=0 border=1>\n"
-         << "\t<caption>" << d.name << "</caption>\n\n"
-         << "\t<thead>\n"
-         << "\t\t<tr>\n"
-         << "\t\t\t<th>Key</th>\n"
-         << "\t\t\t<th>Optional</th>\n"
-         << "\t\t\t<th>Type</th>\n"
-         << "\t\t\t<th>Restrictions</th>\n"
-         << "\t\t\t<th>Documentation</th>\n"
-         << "\t\t</tr>\n"
-         << "\t</thead>\n"
-         << "\t<tbody>\n";
-    
+
+    html << "\t<tr>\n"
+         << "\t\t<td colspan=6>" << d.name << "</td>\n";
+
     for (const auto& p : d.entries) {
         html << "\t<tr>\n"
+             << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
              << "\t\t<td>" << (p.optional ? "true" : "false") << "</td>\n"
              << "\t\t<td>" << p.verifier->type() << "</td>\n";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         if (tv) {
             // We have a TableVerifier, so we need to recurse
-            html << "\t\t<td>" << generateHtmlDocumentation(tv->doc) << "</td>\n";
+            html << "<td><table cellpadding=3 cellspacing=0 border=1>\n"
+                 << "\t<thead>\n"
+                 << "\t\t<tr>\n"
+                 << "\t\t\t<th></th>\n"
+                 << "\t\t\t<th>Key</th>\n"
+                 << "\t\t\t<th>Optional</th>\n"
+                 << "\t\t\t<th>Type</th>\n"
+                 << "\t\t\t<th>Restrictions</th>\n"
+                 << "\t\t\t<th>Documentation</th>\n"
+                 << "\t\t</tr>\n"
+                 << "\t</thead>\n"
+                 << "\t<tbody>\n"
+                 << generateHtmlDocumentation(tv->doc) 
+                 << "\t</tbody>\n"
+                 << "</table>\n"
+                 << "</td>\n";
         }
         else {
             html << "\t\t<td>" << p.verifier->documentation() << "</td>\n";
         }
+        html << "\t\t<td>" << p.documentation << "</td>\n"
+             << "\t</tr>\n";
 
     }
 
-    html << "\t</tbody>\n"
-         << "</table>\n";
     return html.str();
 }
 
@@ -177,9 +184,31 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
             << "\t</head>\n"
             << "<body>\n";
 
+
+        html << "<table cellpadding=3 cellspacing=0 border=1>\n"
+            << "\t<caption>Documentation</caption>\n\n"
+            << "\t<thead>\n"
+            << "\t\t<tr>\n"
+            << "\t\t\t<th rowspan=2>Name</th>\n"
+            << "\t\t</tr>\n"
+            << "\t\t<tr>\n"
+            << "\t\t\t<th>Key</th>\n"
+            << "\t\t\t<th>Optional</th>\n"
+            << "\t\t\t<th>Type</th>\n"
+            << "\t\t\t<th>Restrictions</th>\n"
+            << "\t\t\t<th>Documentation</th>\n"
+            << "\t\t</tr>\n"
+            << "\t</thead>\n"
+            << "\t<tbody>\n";
+
         for (const Documentation& d : _documentations) {
             html << generateHtmlDocumentation(d);
+
+            html << "\t<tr><td style=\"line-height: 50px;\" colspan=6></br></td></tr>\n";
         }
+
+        html << "\t</tbody>\n"
+            << "</table>\n";
 
         html << "</body>\n";
         html << "</html>\n";
