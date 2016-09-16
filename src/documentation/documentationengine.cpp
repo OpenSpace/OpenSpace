@@ -55,7 +55,6 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
         result += indentMessage("Optional", (p.optional ? "true" : "false"));
         result += indentMessage("Type", p.verifier->type());
-        result += indentMessage("Restrictions", p.verifier->documentation());
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         if (tv) {
             // We have a TableVerifier, so we need to recurse
@@ -63,6 +62,9 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
             result += generateTextDocumentation(tv->doc, indentLevel);
             result = result.substr(0, result.size() - 2);
             --indentLevel;
+        }
+        else {
+            result += indentMessage("Restrictions", p.verifier->documentation());
         }
         result += indentMessage("Documentation", p.documentation);
         result += "\n\n";
@@ -74,6 +76,34 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
     return result;
 }
 
+std::string generateJsonDocumentation(const Documentation& d) {
+    std::stringstream result;
+    result << "{";
+
+    result << "\"name\": \"" << d.name << "\",";
+    result << "\"entries\": [";
+    for (const auto& p : d.entries) {
+        result << "{";
+        result << "\"key\": \"" << p.key << "\",";
+        result << "\"optional\": \"" << (p.optional ? "true" : "false") << "\",";
+        result << "\"type\": \"" << p.verifier->type() << "\",";
+        TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
+        if (tv) {
+            // We have a TableVerifier, so we need to recurse
+            result << "\"restrictions\": " << generateJsonDocumentation(tv->doc) << ",";
+        }
+        else {
+            result << "\"restrictions\": \"" << p.verifier->documentation() << "\",";
+        }
+        result << "},";
+    }
+
+    result << ']';
+    result << "}";
+
+    return result.str();
+}
+
 void DocumentationEngine::writeDocumentation(const std::string& f, const std::string& t) {
     if (t == "text") {
         std::ofstream file;
@@ -82,8 +112,27 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
 
         for (const Documentation& d : _documentations) {
             int indent = 0;
-            file << documentation::generateTextDocumentation(d, indent) << std::endl << std::endl;
+            file << documentation::generateTextDocumentation(d, indent) << "\n\n";
         }
+    }
+    else if (t == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(f);
+
+        std::stringstream json;
+        json << "[";
+
+        for (const Documentation& d : _documentations) {
+            json << generateJsonDocumentation(d);
+            json << ",";
+        }
+
+        json << "]";
+
+        std::string jsonText = json.str();
+
+        file << jsonText;
     }
 }
 
