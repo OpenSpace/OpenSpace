@@ -1,0 +1,447 @@
+<html>
+	<head>
+		<title>Documentation</title>
+	</head>
+<body>
+<table cellpadding=3 cellspacing=0 border=1>
+	<caption>OpenSpace Configuration</caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>SGCTConfig</td>
+		<td>false</td>
+		<td>String</td>
+		<td>A valid SGCT configuration file</td>
+	<tr>
+		<td>Scene</td>
+		<td>false</td>
+		<td>String</td>
+		<td>A valid scene file as described in the Scene documentation</td>
+	<tr>
+		<td>Paths</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>*</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>Fonts</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>*</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>Logging</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>LogLevel</td>
+		<td>true</td>
+		<td>String</td>
+		<td>In list { Debug,Info,Warning,Error,Fatal,None }</td>
+	<tr>
+		<td>ImmediateFlush</td>
+		<td>true</td>
+		<td>Boolean</td>
+		<td></td>
+	<tr>
+		<td>Logs</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>*</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text,html }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	<tr>
+		<td>Append</td>
+		<td>true</td>
+		<td>Boolean</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>CapabilitiesVerbosity</td>
+		<td>true</td>
+		<td>String</td>
+		<td>In list { None,Minimal,Default,Full }</td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>LuaDocumentation</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text,html }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>PropertyDocumentation</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text,html }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>ScriptLog</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>KeyboardShortcuts</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text,html }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>Documentation</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Type</td>
+		<td>false</td>
+		<td>String</td>
+		<td>In list { text,html }</td>
+	<tr>
+		<td>File</td>
+		<td>false</td>
+		<td>String</td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>ShutdownCountdown</td>
+		<td>true</td>
+		<td>Double</td>
+		<td>Greater or equal to: 0.000000</td>
+	<tr>
+		<td>DownloadRequestURL</td>
+		<td>true</td>
+		<td>String or Table</td>
+		<td> or </td>
+	<tr>
+		<td>RenderingMethod</td>
+		<td>true</td>
+		<td>String</td>
+		<td>In list { Framebuffer,ABuffer }</td>
+	<tr>
+		<td>DisableRenderingOnMaster</td>
+		<td>true</td>
+		<td>Boolean</td>
+		<td></td>
+	</tbody>
+</table>
+<table cellpadding=3 cellspacing=0 border=1>
+	<caption>Scene Description</caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>ScenePath</td>
+		<td>true</td>
+		<td>String</td>
+		<td></td>
+	<tr>
+		<td>CommonFolder</td>
+		<td>true</td>
+		<td>String</td>
+		<td>A valid scene module folder</td>
+	<tr>
+		<td>Camera</td>
+		<td>true</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Focus</td>
+		<td>false</td>
+		<td>String</td>
+		<td>A valid object in the scene</td>
+	<tr>
+		<td>Position</td>
+		<td>true</td>
+		<td>Vector3<double></td>
+		<td></td>
+	<tr>
+		<td>Rotation</td>
+		<td>true</td>
+		<td>Vector4<double></td>
+		<td></td>
+	</tbody>
+</table>
+</td>
+	<tr>
+		<td>Modules</td>
+		<td>false</td>
+		<td>Table</td>
+		<td><table cellpadding=3 cellspacing=0 border=1>
+	<caption></caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>*</td>
+		<td>false</td>
+		<td>String</td>
+		<td>Loadable module folders. This means that they either have to point to a folder that contains a ModuleFile or a folder which contains other folders that eventually contain ModuleFile. This second recursive approach is useful for grouping modules into logical units.</td>
+	</tbody>
+</table>
+</td>
+	</tbody>
+</table>
+<table cellpadding=3 cellspacing=0 border=1>
+	<caption>Static Scaling</caption>
+
+	<thead>
+		<tr>
+			<th>Key</th>
+			<th>Optional</th>
+			<th>Type</th>
+			<th>Restrictions</th>
+			<th>Documentation</th>
+		</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Scale</td>
+		<td>false</td>
+		<td>Double</td>
+		<td></td>
+	</tbody>
+</table>
+</body>
+</html>
