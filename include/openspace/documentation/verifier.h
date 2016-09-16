@@ -110,7 +110,7 @@ struct LessVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     LessVerifier(typename T::Type value);
 
@@ -126,7 +126,7 @@ struct LessEqualVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     LessEqualVerifier(typename T::Type value);
 
@@ -142,7 +142,7 @@ struct GreaterVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     GreaterVerifier(typename T::Type value);
 
@@ -158,7 +158,7 @@ struct GreaterEqualVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     GreaterEqualVerifier(typename T::Type value);
 
@@ -229,7 +229,7 @@ struct InRangeVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     InRangeVerifier(typename T::Type lower, typename T::Type upper);
 
@@ -246,7 +246,7 @@ struct NotInRangeVerifier : public T {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
-    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be TableVerifier");
+    static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
     NotInRangeVerifier(typename T::Type lower, typename T::Type upper);
 
