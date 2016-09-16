@@ -41,9 +41,11 @@ class SyncBuffer;
 class SyncEngine {
 public:
 
+    void presync(bool isMaster);
     void encode(SyncBuffer* syncBuffer);
     void decode(SyncBuffer* syncBuffer);
-    void applySyncedUpdates();
+    void postsync(bool isMaster);
+    
 
     void addSyncable(Syncable* syncable);
     void addSyncables(const std::vector<Syncable*>& syncables);

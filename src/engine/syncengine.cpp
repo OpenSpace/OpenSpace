@@ -37,6 +37,11 @@ namespace {
 
 namespace openspace {
 
+    void SyncEngine::presync(bool isMaster) {
+        for (const auto& syncable : _syncables) {
+            syncable->presync(isMaster);
+        }
+    }
 
     // should be called on sgct master
     void SyncEngine::encode(SyncBuffer* syncBuffer) {
@@ -52,11 +57,13 @@ namespace openspace {
         }
     }
 
-    void SyncEngine::applySyncedUpdates() {
+    void SyncEngine::postsync(bool isMaster) {
         for (const auto& syncable : _syncables) {
-            syncable->applySyncedUpdate();
+            syncable->postsync(isMaster);
         }
     }
+
+
 
     void SyncEngine::addSyncable(Syncable*  syncable) {
         _syncables.push_back(syncable);

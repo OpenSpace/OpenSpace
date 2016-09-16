@@ -26,6 +26,7 @@
 #define __SYNC_DATA_H__
 
 #include <memory>
+#include <mutex>
 
 #include <ghoul/misc/assert.h>
 #include <openspace/util/syncbuffer.h>
@@ -41,9 +42,10 @@ public:
 
 protected:
     friend class SyncEngine;
+    virtual void presync(bool isMaster) {};
     virtual void encode(SyncBuffer* syncBuffer) = 0;
-    virtual void decode(SyncBuffer* syncBuffer, bool directDecode = false) = 0;
-    virtual void applySyncedUpdate() = 0;
+    virtual void decode(SyncBuffer* syncBuffer) = 0;
+    virtual void postsync(bool isMaster) {};
 };
 
 
@@ -53,6 +55,9 @@ public:
 
     SyncData() {};
     SyncData(const T& val) : data(val) {};
+    SyncData(const SyncData<T>& o) : data(o.data) {
+        // should not be copied!
+    };
 
     SyncData& operator=(const T& rhs) {
         data = rhs;
@@ -69,24 +74,30 @@ public:
 
 protected:
     virtual void encode(SyncBuffer* syncBuffer) {
+        _mutex.lock();
         syncBuffer->encode(data);
+        _mutex.unlock();
     }
 
-    virtual void decode(SyncBuffer* syncBuffer, bool directDecode = false) {
-        if (directDecode) {
-            syncBuffer->decode(data);
-        }
-        else {
-            syncBuffer->decode(doubleBufferedData);
-        }
+    virtual void decode(SyncBuffer* syncBuffer) {
+        _mutex.lock();
+        syncBuffer->decode(doubleBufferedData);
+        _mutex.unlock();
     }
 
-    virtual void applySyncedUpdate() {
-        data = doubleBufferedData;
+    virtual void postsync(bool isMaster) {
+        // apply synced update
+        if (!isMaster) {
+            _mutex.lock();
+            data = doubleBufferedData;
+            _mutex.unlock();
+        }
     };
 
     T data;
     T doubleBufferedData;
+    std::mutex _mutex;
+
 };
 
 

@@ -787,11 +787,7 @@ void OpenSpaceEngine::preSynchronization() {
 void OpenSpaceEngine::postSynchronizationPreDraw() {
     double t1 = Time::ref().j2000Seconds();
 
-    if (!_isMaster) {
-        if (_settingsEngine->useDoubleBuffering()) {
-            _syncEngine->applySyncedUpdates();
-        }
-    }
+    _syncEngine->postsync(_isMaster);
 
     if (_isInShutdownMode) {
         if (_shutdownCountdown <= 0.f) {
@@ -972,7 +968,7 @@ void OpenSpaceEngine::decode() {
         _syncEngine->decode(_syncBuffer.get());
 
         _scriptEngine->deserialize(_syncBuffer.get());
-        //_renderEngine->deserialize(_syncBuffer.get(), _settingsEngine->useDoubleBuffering());
+
     }
 }
 
