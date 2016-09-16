@@ -556,6 +556,7 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         
         //@JK
         //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
+        /*
         std::ifstream scriptFile;
         scriptFile.open(absoluteScriptPath.c_str());
         std::string line;
@@ -569,7 +570,7 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
                     _engine->scriptEngine().cacheScript(lib, func, line);
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -858,14 +859,13 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
                 return;
         }
 #endif
-
-        if (key == _console->commandInputButton() && (action == KeyAction::Press || action == KeyAction::Repeat))
-            _console->toggleVisibility();
-
-        if (!_console->isVisible()) {
+        if (key == _console->commandInputButton()) {
+            if (action == KeyAction::Press) {
+                _console->toggleMode();
+            }
+        } else if (!_console->isVisible()) {
             _interactionHandler->keyboardCallback(key, mod, action);
-        }
-        else {
+        } else {
             _console->keyboardCallback(key, mod, action);
         }
     }

@@ -269,8 +269,10 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
         // iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
-            //OsEng.scriptEngine()->runScript(it->second);
-            OsEng.scriptEngine().queueScript(it->second);
+            OsEng.scriptEngine().queueScript(it->second.first,
+                it->second.second ?
+                scripting::ScriptEngine::RemoteScripting::Yes :
+                scripting::ScriptEngine::RemoteScripting::No);
         }
     }
 }
@@ -378,12 +380,20 @@ void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
 }
 
+void InteractionHandler::bindKeyLocal(Key key, KeyModifier modifier, std::string lua) {
+    _keyLua.insert({
+        { key, modifier },
+        std::make_pair(lua, false)
+    });
+}
+
 void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua) {
     _keyLua.insert({
         { key, modifier },
-        lua
+        std::make_pair(lua, true)
     });
 }
+
     
 void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
 {
@@ -391,8 +401,14 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
         std::ofstream f(absPath(file));
         
         for (const auto& p : _keyLua) {
+            std::string remoteScriptingInfo;
+            bool remoteScripting = p.second.second;
+
+            if (!remoteScripting) {
+                remoteScriptingInfo = " (LOCAL)";
+            }
             f << std::to_string(p.first) << ": " <<
-                p.second << std::endl;
+                p.second.first << remoteScriptingInfo << std::endl;
         }
     }
     else {
@@ -417,7 +433,14 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 "bindKey",
                 &luascriptfunctions::bindKey,
                 "string, string",
-                "Binds a key by name to a lua string command"
+                "Binds a key by name to a lua string command to execute both locally "
+                "and to broadcast to clients if this is the host of a parallel session"
+            },
+            {
+                "bindKeyLocal",
+                &luascriptfunctions::bindKeyLocal,
+                "string, string",
+                "Binds a key by name to a lua string command to execute only locally"
             },
             {
                 "setInteractionMode",

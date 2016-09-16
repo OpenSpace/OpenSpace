@@ -67,6 +67,7 @@ public:
     void addKeyframe(const network::datamessagestructures::CameraKeyframe &kf);
     void clearKeyframes();
 
+    void bindKeyLocal(Key key, KeyModifier modifier, std::string lua);
     void bindKey(Key key, KeyModifier modifier, std::string lua);
     void lockControls();
     void unlockControls();
@@ -109,7 +110,7 @@ private:
 
     bool _cameraUpdatedFromScript = false;
 
-    std::multimap<KeyWithModifier, std::string > _keyLua;
+    std::multimap<KeyWithModifier, std::pair<std::string, bool>> _keyLua;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;

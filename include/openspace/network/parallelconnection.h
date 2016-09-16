@@ -33,6 +33,9 @@
 //glm includes
 #include <glm/gtx/quaternion.hpp>
 
+//ghoul includes
+#include <ghoul/designpattern/event.h>
+
 //std includes
 #include <string>
 #include <vector>
@@ -59,16 +62,24 @@ typedef int _SOCKET;
 #include <netdb.h>
 #endif
 
-namespace openspace{
+namespace openspace {
     
-    namespace network{
+    namespace network {
         
+        enum class Status : uint32_t {
+            Disconnected = 0,
+            ClientWithoutHost,
+            ClientWithHost,
+            Host
+        };
+
         enum class MessageType : uint32_t {
             Authentication = 0,
             Data,
-            HostInformation,
+            ConnectionStatus,
             HostshipRequest,
-            HostshipResignation
+            HostshipResignation,
+            NConnections
         };
 
         struct Message {
@@ -106,9 +117,13 @@ namespace openspace{
             void setAddress(const std::string &address);
             
             void setName(const std::string& name);
-            
+
+            bool isAuthenticated();
+
             bool isHost();
-            
+
+            const std::string& hostName();
+
             void requestHostship(const std::string &password);
 
             void resignHostship();
@@ -133,7 +148,15 @@ namespace openspace{
              * interaction
              */
             static scripting::LuaLibrary luaLibrary();
+
+            Status status();
+
+            size_t nConnections();
+
+            std::shared_ptr<ghoul::Event<>> connectionEvent();
             
+
+
         protected:
             
         private:
@@ -162,7 +185,10 @@ namespace openspace{
 
             void dataMessageReceived(const std::vector<char>& messageContent);
 
-            void hostInfoMessageReceived(const std::vector<char>& messageContent);
+            void connectionStatusMessageReceived(const std::vector<char>& messageContent);
+
+            void nConnectionsMessageReceived(const std::vector<char>& messageContent);
+
             
             void broadcast();
             
@@ -171,25 +197,36 @@ namespace openspace{
             void sendFunc();
             
             void threadManagement();
+
+            void setStatus(Status status);
+
+            void setHostName(const std::string& hostName);
+
+            void setNConnections(size_t nConnections);
             
-            std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
+            //std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
             
             uint32_t _passCode;
             std::string _port;
             std::string _address;
             std::string _name;
+            
             _SOCKET _clientSocket;
             std::unique_ptr<std::thread> _connectionThread;
             std::unique_ptr<std::thread> _broadcastThread;
             std::unique_ptr<std::thread> _sendThread;
             std::unique_ptr<std::thread> _listenThread;
             std::unique_ptr<std::thread> _handlerThread;
-            std::atomic<bool> _isHost;
+            
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isRunning;
             std::atomic<bool> _tryConnect;
             std::atomic<bool> _disconnect;
             std::atomic<bool> _initializationTimejumpRequired;
+
+            std::atomic<size_t> _nConnections;
+            std::atomic<Status> _status;
+            std::string _hostName;
 
             std::condition_variable _disconnectCondition;
             std::mutex _disconnectMutex;
@@ -206,6 +243,8 @@ namespace openspace{
             std::atomic<bool> _latestTimeKeyframeValid;
             std::map<std::string, std::string> _currentState;
             std::mutex _currentStateMutex;
+
+            std::shared_ptr<ghoul::Event<>> _connectionEvent;
         };
     } // namespace network
     
