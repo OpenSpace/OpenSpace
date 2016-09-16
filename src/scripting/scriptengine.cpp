@@ -566,6 +566,7 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         file.exceptions(~std::ofstream::goodbit);
         file.open(filename);
 
+#ifdef JSON
         // Create JSON
         std::stringstream json;
         json << "[";
@@ -589,7 +590,61 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
 
 
         std::string jsonText = json.str();
+#else
+        std::stringstream html;
 
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Script Log</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Script Log</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th rowspan=2>Library</th>\n"
+             << "\t\t\t<th colspan=3>Functions</th>\n"
+             << "\t\t</tr>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>Name</th>\n"
+             << "\t\t\t<th>Arguments</th>\n"
+             << "\t\t\t<th>Help</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+
+
+        for (const LuaLibrary& l : _registeredLibraries) {
+            html << "\t<tr>\n";
+
+            if (l.name.empty()) {
+                html << "\t\t<td>openspace</td>\n";
+            }
+            else {
+                html << "\t\t<td>openspace." << l.name << "</td>\n";
+            }
+            html << "\t\t<td></td><td></td><td></td>\n"
+                 << "\t\</tr>";
+
+            for (const LuaLibrary::Function& f : l.functions) {
+                html << "\t<tr>\n"
+                     << "\t\t<td></td>\n"
+                     << "\t\t<td>" << f.name << "</td>\n"
+                     << "\t\t<td>" << f.argumentText << "</td>\n"
+                     << "\t\t<td>" << f.helpText << "</td>\n"
+                     << "\t</tr>\n";
+            }
+
+            html << "\t<tr><td style=\"line-height: 10px;\" colspan=4></td></tr>\n";
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>";
+
+        file << html.str();
+#endif
     }
     else {
         throw ghoul::RuntimeError("Undefined type '" + type + "' for Lua documentation");
