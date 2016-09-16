@@ -39,6 +39,7 @@ namespace documentation {
 struct Verifier;
 
 using Optional = ghoul::Boolean;
+using Exhaustive = ghoul::Boolean;
 
 struct TestResult {
     bool success;
@@ -64,11 +65,13 @@ struct DocumentationEntry {
 using DocumentationEntries = std::vector<documentation::DocumentationEntry>;
 
 struct Documentation {
-    Documentation(std::string name = "", DocumentationEntries entries = {});
+    Documentation(std::string name = "", DocumentationEntries entries = {},
+        Exhaustive exhaustive = Exhaustive::No);
     Documentation(DocumentationEntries entries);
 
     std::string name;
     DocumentationEntries entries;
+    Exhaustive exhaustive;
 };
 
 

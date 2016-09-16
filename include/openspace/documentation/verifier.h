@@ -71,13 +71,14 @@ struct StringVerifier : public TemplateVerifier<std::string> {
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
-    TableVerifier(std::vector<DocumentationEntry> d = {});
+    TableVerifier(std::vector<DocumentationEntry> d = {}, Exhaustive exhaustive = Exhaustive::No);
 
     TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
 
     std::string type() const override;
 
     std::vector<DocumentationEntry> doc;
+    Exhaustive exhaustive;
 };
 
 struct VectorVerifier {};

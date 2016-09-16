@@ -52,9 +52,11 @@ DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string
     , documentation(std::move(doc))
     , optional(optional) {}
 
-Documentation::Documentation(std::string name, DocumentationEntries entries)
+Documentation::Documentation(std::string name, DocumentationEntries entries, Exhaustive exhaustive)
     : name(std::move(name))
-    , entries(std::move(entries)) {}
+    , entries(std::move(entries))
+    , exhaustive(std::move(exhaustive))
+{}
 
 Documentation::Documentation(DocumentationEntries entries)
     : Documentation("", std::move(entries)) {}
@@ -97,6 +99,31 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         }
     }
 
+    if (d.exhaustive) {
+        // If the documentation is exhaustive, we have to check if there are extra values
+        // in the table that are not covered by the Documentation
+
+        for (const std::string& key : dictionary.keys()) {
+            auto it = std::find_if(
+                d.entries.begin(),
+                d.entries.end(),
+                [&key](const DocumentationEntry& entry) {
+                    if (entry.key == Wildcard) {
+                        return true;
+                    }
+                    else {
+                        return entry.key == key;
+                    }
+                }
+            );
+
+            if (it == d.entries.end()) {
+                result.success = false;
+                result.offenders.push_back(key);
+            }
+        }
+    }
+
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
     std::set<std::string> uniqueOffenders(
@@ -104,7 +131,7 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     );
     result.offenders = std::vector<std::string>(
         uniqueOffenders.begin(), uniqueOffenders.end()
-        );
+    );
 
     return result;
 }

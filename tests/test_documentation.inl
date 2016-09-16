@@ -639,6 +639,70 @@ TEST_F(DocumentationTest, RequiredInOptional) {
     EXPECT_EQ("a.b", negativeRes.offenders[0]);
 }
 
+TEST_F(DocumentationTest, Exhaustive) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        "Test",
+        {{ "Int", new IntVerifier }},
+        Exhaustive::Yes
+    };
+
+    ghoul::Dictionary positive {
+        { "Int" , 1 }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "False_Int", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("False_Int", negativeRes.offenders[0]);
+    EXPECT_EQ("Int", negativeRes.offenders[1]);
+
+    ghoul::Dictionary negative2 {
+        { "Double", 2.0 }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("Double", negativeRes.offenders[0]);
+    EXPECT_EQ("Int", negativeRes.offenders[1]);
+}
+
+TEST_F(DocumentationTest, NestedExhaustive) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        "Test",
+        {{ "Table", new TableVerifier(
+            { { "a", new IntVerifier } },
+            Exhaustive::Yes
+        )
+        }}
+    };
+
+    ghoul::Dictionary positive {
+        { "Table", ghoul::Dictionary{{ "a", 1 }}}
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenders.size());
+
+    ghoul::Dictionary negative {
+        { "Table", ghoul::Dictionary{{ "b", 2.0 }}}
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(2, negativeRes.offenders.size());
+    EXPECT_EQ("Table.a", negativeRes.offenders[0]);
+    EXPECT_EQ("Table.b", negativeRes.offenders[1]);
+}
+
 TEST_F(DocumentationTest, LessInt) {
     using namespace openspace::documentation;
 

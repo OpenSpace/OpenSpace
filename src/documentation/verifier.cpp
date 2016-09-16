@@ -140,8 +140,9 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
-TableVerifier::TableVerifier(std::vector<DocumentationEntry> d)
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
     : doc(std::move(d))
+    , exhaustive(std::move(exhaustive))
 {}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
@@ -149,7 +150,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
 {
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<Type>(key);
-        TestResult res = testSpecification(doc, d);
+        TestResult res = testSpecification({ "", doc, exhaustive }, d);
 
         for (std::string& s : res.offenders) {
             s = key + "." + s;
