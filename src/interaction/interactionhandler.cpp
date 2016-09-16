@@ -967,6 +967,7 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
         f.exceptions(~std::ofstream::goodbit);
         f.open(absPath(file));
 
+#ifdef JSON
         std::stringstream json;
         json << "[";
         for (const auto& p : _keyLua) {
@@ -978,6 +979,38 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
         json << "]";
 
         std::string jsonText = json.str();
+
+#else
+        std::stringstream html;
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Key Bindings</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Key Bindings</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<td>Key</td>\n"
+             << "\t\t\t<td>Binding</td>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (const auto& p : _keyLua) {
+            html << "\t\t<tr>\n"
+                 << "\t\t\t<td>" << std::to_string(p.first) << "</td>\n"
+                 << "\t\t\t<td>" << p.second << "</td>\n"
+                 << "\t\t</tr>\n";
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>";
+
+        f << html.str();
+#endif
 
     }
     else {
