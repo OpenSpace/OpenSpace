@@ -26,6 +26,7 @@
 #define __SCRIPTENGINE_H__
 
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/syncdata.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 
@@ -47,7 +48,7 @@ namespace scripting {
  * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine {
+class ScriptEngine : public Syncable {
 public:
     /**
      * Initializes the internal Lua state and registers a common set of library functions
@@ -73,13 +74,10 @@ public:
 
     bool writeLog(const std::string& script);
 
-    void serialize(SyncBuffer* syncBuffer);
-
-    void deserialize(SyncBuffer* syncBuffer);
-
-    void postSynchronizationPreDraw();
-
-    void preSynchronization();
+    virtual void presync(bool isMaster);
+    virtual void encode(SyncBuffer* syncBuffer);
+    virtual void decode(SyncBuffer* syncBuffer);
+    virtual void postsync(bool isMaster);
 
     void queueScript(const std::string &script);
 

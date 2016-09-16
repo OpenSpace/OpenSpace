@@ -511,6 +511,7 @@ bool OpenSpaceEngine::initialize() {
 
     _syncEngine->addSyncables(Time::ref().getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
+    _syncEngine->addSyncable(_scriptEngine.get());
 
     LINFO("Finished initializing");
     return true;
@@ -759,6 +760,7 @@ void OpenSpaceEngine::setRunTime(double d){
 void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     
+    _syncEngine->presync(_isMaster);
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
 
@@ -772,7 +774,6 @@ void OpenSpaceEngine::preSynchronization() {
             scheduledScripts.pop();
         }
 
-        _scriptEngine->preSynchronization();
         _interactionHandler->updateInputStates(dt);
         
         _renderEngine->updateSceneGraph();
@@ -785,8 +786,6 @@ void OpenSpaceEngine::preSynchronization() {
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    double t1 = Time::ref().j2000Seconds();
-
     _syncEngine->postsync(_isMaster);
 
     if (_isInShutdownMode) {
@@ -796,19 +795,15 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
 
-    _scriptEngine->postSynchronizationPreDraw();
-
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();
-    
     _renderEngine->updateShaderPrograms();
     
     if (!_isMaster) {
         _renderEngine->updateSceneGraph();
         _renderEngine->camera()->invalidateCache();
-    }
-    
+    }   
 
     // Step the camera using the current mouse velocities which are synced
     //_interactionHandler->updateCamera();
@@ -952,10 +947,6 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 void OpenSpaceEngine::encode() {
     if (_syncBuffer) {
         _syncEngine->encode(_syncBuffer.get());
-
-        _scriptEngine->serialize(_syncBuffer.get());
-        //_renderEngine->serialize(_syncBuffer.get());
-        
         _syncBuffer->write();
     }
     _networkEngine->publishStatusMessage();
@@ -966,9 +957,6 @@ void OpenSpaceEngine::decode() {
     if (_syncBuffer) {
         _syncBuffer->read();
         _syncEngine->decode(_syncBuffer.get());
-
-        _scriptEngine->deserialize(_syncBuffer.get());
-
     }
 }
 

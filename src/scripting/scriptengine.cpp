@@ -624,30 +624,46 @@ bool ScriptEngine::writeLog(const std::string& script) {
     return true;
 }
 
+void ScriptEngine::presync(bool isMaster) {
+    if (isMaster) {
+        _mutex.lock();
 
-void ScriptEngine::serialize(SyncBuffer* syncBuffer){
+        if (!_queuedScripts.empty()) {
+            _currentSyncedScript = _queuedScripts.back();
+            _queuedScripts.pop_back();
+
+            //Not really a received script but the master also needs to run the script...
+            _receivedScripts.push_back(_currentSyncedScript);
+        }
+
+        _mutex.unlock();
+    }
+
+}
+
+void ScriptEngine::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_currentSyncedScript);
     _currentSyncedScript.clear();
 }
 
-void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
+void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_currentSyncedScript);
 
-    if (!_currentSyncedScript.empty()){
+    if (!_currentSyncedScript.empty()) {
         _mutex.lock();
         _receivedScripts.push_back(_currentSyncedScript);
         _mutex.unlock();
     }
 }
 
-void ScriptEngine::postSynchronizationPreDraw() {
+void ScriptEngine::postsync(bool isMaster) {
     std::vector<std::string> scripts;
 
     _mutex.lock();
     scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
     _receivedScripts.clear();
     _mutex.unlock();
-    
+
     while (!scripts.empty()) {
         try {
             runScript(scripts.back());
@@ -657,22 +673,6 @@ void ScriptEngine::postSynchronizationPreDraw() {
         }
         scripts.pop_back();
     }
-    
-}
-
-void ScriptEngine::preSynchronization() {
-    
-    _mutex.lock();
-    
-    if (!_queuedScripts.empty()){
-        _currentSyncedScript = _queuedScripts.back();
-        _queuedScripts.pop_back();
-        
-        //Not really a received script but the master also needs to run the script...
-        _receivedScripts.push_back(_currentSyncedScript);
-    }
-    
-    _mutex.unlock();
 }
 
 void ScriptEngine::queueScript(const std::string &script){

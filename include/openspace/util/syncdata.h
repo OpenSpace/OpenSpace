@@ -35,7 +35,11 @@
 namespace openspace {
 
 
-
+/**
+* Interace for synchronizable data
+*
+* Used by <code>SyncEngine</code> for synchronization
+*/
 class Syncable {
 public:
     virtual ~Syncable() {};
