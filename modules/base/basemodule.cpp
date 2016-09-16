@@ -65,12 +65,27 @@ BaseModule::BaseModule()
 {}
 
 void BaseModule::internalInitialize() {
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>());
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>());
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>());
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<planetgeometry::PlanetGeometry>>(),
+        "PlanetGeometry"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<modelgeometry::ModelGeometry>>(),
+        "ModelGeometry"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<ScreenSpaceRenderable>>(),
+        "ScreenSpaceRenderable"
+    );
 
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Rotation>>());
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Scale>>());
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
+        "Rotation"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Scale>>(),
+        "Scale"
+    );
 
     auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");

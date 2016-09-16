@@ -264,6 +264,29 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyFactoryDocumentation,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartType,
+                    new StringInListVerifier(
+                        // List from FactoryManager::writeDocumentation
+                        { "text", "html" }
+                    ),
+                    "The type of documentation that should be written."
+                },
+                {
+                    ConfigurationManager::PartFile,
+                    new StringVerifier,
+                    "The file that will be created on startup containing the factory "
+                    "documentation. Any previous file in this location will be silently "
+                    "overritten."
+                }
+            }),
+            "This defines the location and type of the factory documentation file, which "
+            "shows the different types of objects that can be created in the current "
+            "application configuration."
+        },
+        {
             ConfigurationManager::KeyShutdownCountdown,
             new DoubleGreaterEqualVerifier(0.0),
             "The countdown that the application will wait between pressing ESC and "

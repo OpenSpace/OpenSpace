@@ -152,10 +152,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Renderable>>()
+        std::make_unique<ghoul::TemplateFactory<Renderable>>(),
+        "Renderable"
     );
     FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Ephemeris>>()
+        std::make_unique<ghoul::TemplateFactory<Ephemeris>>(),
+        "Ephemeris"
     );
     SpiceManager::initialize();
     Time::initialize();
@@ -443,6 +445,20 @@ bool OpenSpaceEngine::initialize() {
         configurationManager().getValue(DocumentationFile, documentationFile);
         documentationFile = absPath(documentationFile);
         _documentationEngine->writeDocumentation(documentationFile, documentationType);
+    }
+
+    const std::string FactoryDocumentationType =
+        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartType;
+
+    const std::string FactoryDocumentationFile =
+        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartFile;
+    bool hasFactoryDocumentationType = configurationManager().hasKey(FactoryDocumentationType);
+    bool hasFactoryDocumentationFile = configurationManager().hasKey(FactoryDocumentationFile);
+    if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
+        std::string type = configurationManager().value<std::string>(FactoryDocumentationType);
+        std::string file = configurationManager().value<std::string>(FactoryDocumentationFile);
+
+        FactoryManager::ref().writeDocumentation(absPath(file), type);
     }
 
     bool disableMasterRendering = false;

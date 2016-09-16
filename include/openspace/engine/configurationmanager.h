@@ -65,6 +65,8 @@ public:
     static const std::string KeyKeyboardShortcuts;
     /// The key that stores the main documentation
     static const std::string KeyDocumentation;
+    /// The key that stores the factory documentation values
+    static const std::string KeyFactoryDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
     /// The key that stores the subdirectory containing a list of all startup scripts to

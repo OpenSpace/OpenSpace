@@ -30,14 +30,9 @@ install_manifest.txt
 .project
 
 # Doxygen stuff
-html/
-latex/
 shaders/ABuffer/constants.hglsl
 *.OpenSpaceGenerated.glsl
-LuaScripting.txt
-Properties.txt
 log.html
-Documentation.html
 data/scene/rosetta/67P/obj/67P_rotated_5_130.obj
 data/spice/NewHorizonsKernels/
 data/scene/newhorizons/pluto/pluto/textures/
@@ -111,14 +106,11 @@ data/scene/juno/juno/textures
 data/scene/juno/juno/spice
 data/scene/juno/juno/Juno.mtl
 data/scene/juno/juno/Juno.obj
-KeyboardMapping.txt
 saturn_rings.png
 data/scene/debugglobe/textures/
 data/scene/rosetta/rosetta/obj/Rosetta.obj
 data/scene/rosetta/rosetta/rosetta/
 data/scene/rosetta/rosetta/textures/
 data/spice/Rosetta/
-KeyboardMapping.html
-LuaScripting.html
-Properties.html
-Documentation.txt
+documentation/
+doc/

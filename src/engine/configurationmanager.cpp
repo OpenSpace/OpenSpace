@@ -54,6 +54,7 @@ const string ConfigurationManager::KeyScriptLog = "ScriptLog";
 const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
 const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
+const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 const string ConfigurationManager::KeyConfigScene = "Scene";
 
 const string ConfigurationManager::KeyLogging = "Logging";
