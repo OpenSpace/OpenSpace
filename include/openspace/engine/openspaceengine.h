@@ -51,7 +51,6 @@ class LuaConsole;
 class NetworkEngine;
 class GUI;
 class RenderEngine;
-class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
@@ -161,7 +160,6 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
-    std::unique_ptr<SyncBuffer> _syncBuffer;
     
     bool _isMaster;
     double _runTime;

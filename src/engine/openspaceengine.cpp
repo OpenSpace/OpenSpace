@@ -129,7 +129,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
-    , _syncEngine(new SyncEngine)
+    , _syncEngine(std::make_unique<SyncEngine>(new SyncBuffer(4096)))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
       ))
@@ -145,7 +145,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _globalPropertyNamespace(new properties::PropertyOwner)
     , _isMaster(false)
     , _runTime(0.0)
-    , _syncBuffer(new SyncBuffer(4096))
     , _isInShutdownMode(false)
     , _shutdownCountdown(0.f)
     , _shutdownWait(0.f)
@@ -182,6 +181,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     _renderEngine = nullptr;
     _scriptEngine = nullptr;
     _networkEngine = nullptr;
+    _syncEngine = nullptr;
     _commandlineParser = nullptr;
     _console = nullptr;
     _moduleEngine = nullptr;
@@ -189,7 +189,6 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui = nullptr;
 #endif
-    _syncBuffer = nullptr;
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -945,19 +944,14 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
 }
 
 void OpenSpaceEngine::encode() {
-    if (_syncBuffer) {
-        _syncEngine->encode(_syncBuffer.get());
-        _syncBuffer->write();
-    }
+    _syncEngine->encodeSyncables();
+
     _networkEngine->publishStatusMessage();
     _networkEngine->sendMessages();
 }
 
 void OpenSpaceEngine::decode() {
-    if (_syncBuffer) {
-        _syncBuffer->read();
-        _syncEngine->decode(_syncBuffer.get());
-    }
+    _syncEngine->decodeSyncables();
 }
 
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,

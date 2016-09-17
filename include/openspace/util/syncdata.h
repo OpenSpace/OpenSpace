@@ -36,15 +36,17 @@ namespace openspace {
 
 
 /**
-* Interace for synchronizable data
+* Interface for synchronizable data
 *
-* Used by <code>SyncEngine</code> for synchronization
+* Used by <code>SyncEngine</code>
 */
 class Syncable {
 public:
     virtual ~Syncable() {};
 
 protected:
+    // Allowing SyncEngine synchronization methods and at the same time hiding them
+    // from the used of implementations of the interface
     friend class SyncEngine;
     virtual void presync(bool isMaster) {};
     virtual void encode(SyncBuffer* syncBuffer) = 0;
@@ -52,7 +54,18 @@ protected:
     virtual void postsync(bool isMaster) {};
 };
 
-
+/**
+* A double buffered implementation of the Syncable interface. 
+* Users are encouraged to used this class as a default way to synchronize different 
+* C++ data types using the <code>SyncEngine</code>
+*
+* This class aims to handle the synchronization parts and yet act like a regular  
+* instance of T. Implicit casts are supported, however, when accessing member functions or
+* or variables, user may have to do explicit casts. 
+*
+* ((T&) t).method();
+*
+*/
 template<class T>
 class SyncData : public Syncable {
 public:
@@ -60,23 +73,33 @@ public:
     SyncData() {};
     SyncData(const T& val) : data(val) {};
     SyncData(const SyncData<T>& o) : data(o.data) {
-        // should not be copied!
+        // Should not have to be copied! 
     };
 
+    /**
+    * Allowing assignment of data as if
+    */
     SyncData& operator=(const T& rhs) {
         data = rhs;
         return *this;
     }
 
+    /**
+    * Allow implicit cast to referenced T
+    */
     operator T&() {
         return data;
     }
 
+    /**
+    * Allow implicit cast to const referenced T
+    */
     operator const T&() const {
         return data;
     }
 
 protected:
+
     virtual void encode(SyncBuffer* syncBuffer) {
         _mutex.lock();
         syncBuffer->encode(data);
@@ -97,6 +120,7 @@ protected:
             _mutex.unlock();
         }
     };
+
 
     T data;
     T doubleBufferedData;

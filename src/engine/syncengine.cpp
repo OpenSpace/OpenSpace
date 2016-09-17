@@ -37,6 +37,13 @@ namespace {
 
 namespace openspace {
 
+    SyncEngine::SyncEngine(SyncBuffer* syncBuffer) 
+        : _syncBuffer(syncBuffer)
+    {
+
+    }
+
+
     void SyncEngine::presync(bool isMaster) {
         for (const auto& syncable : _syncables) {
             syncable->presync(isMaster);
@@ -44,16 +51,18 @@ namespace openspace {
     }
 
     // should be called on sgct master
-    void SyncEngine::encode(SyncBuffer* syncBuffer) {
+    void SyncEngine::encodeSyncables() {
         for (const auto& syncable : _syncables) {
-            syncable->encode(syncBuffer);
+            syncable->encode(_syncBuffer.get());
         }
+        _syncBuffer->write();
     }
 
     //should be called on sgct slaves
-    void SyncEngine::decode(SyncBuffer* syncBuffer) {
+    void SyncEngine::decodeSyncables() {
+        _syncBuffer->read();
         for (const auto& syncable : _syncables) {
-            syncable->decode(syncBuffer);
+            syncable->decode(_syncBuffer.get());
         }
     }
 

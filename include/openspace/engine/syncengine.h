@@ -27,6 +27,7 @@
 
 
 #include <vector>
+#include <memory>
 
 
 namespace openspace {
@@ -36,25 +37,67 @@ class SyncBuffer;
 
 /**
 * Manages a collection of <code>Syncable</code>s and ensures they are synchronized
-* over SGCT nodes.
+* over SGCT nodes. Encoding/Decoding order is handles internally.
 */
 class SyncEngine {
 public:
 
+    /**
+    * Dependency injection: a SyncEngine relies on a SyncBuffer to encode the sync data.
+    */
+    SyncEngine(SyncBuffer* syncBuffer);
+
+
+    /**
+    * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
+    * This method is only called on the SGCT master node
+    */
+    void encodeSyncables();
+
+    /**
+    * Decodes the <code>SyncBuffer</code> into the added Syncables.
+    * This method is only called on the SGCT slave nodes
+    */
+    void decodeSyncables();
+
+    /**
+    * Invokes the presync method of all added Syncables
+    */
     void presync(bool isMaster);
-    void encode(SyncBuffer* syncBuffer);
-    void decode(SyncBuffer* syncBuffer);
+
+    /**
+    * Invokes the postsync method of all added Syncables
+    */
     void postsync(bool isMaster);
     
 
+
+    /**
+    * Add a Syncable to be synchronized over the SGCT cluster
+    */
     void addSyncable(Syncable* syncable);
+
+    /**
+    * Add multiple Syncables to be synchronized over the SGCT cluster
+    */
     void addSyncables(const std::vector<Syncable*>& syncables);
+
+    /**
+    * Remove a Syncable from being synchronized over the SGCT cluster
+    */
     void removeSyncable(Syncable* syncable);
 
 private:
+    
+    /** 
+    * Vector of Syncables. The vectors ensures consistent encode/decode order
+    */
+    std::vector<Syncable*> _syncables;
 
-    ::std::vector<Syncable*> _syncables;
-
+    /**
+    * Databuffer used in encoding/decoding
+    */
+    std::unique_ptr<SyncBuffer> _syncBuffer;
 };
 
 
