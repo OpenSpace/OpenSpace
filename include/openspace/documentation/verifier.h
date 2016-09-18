@@ -27,14 +27,14 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <functional>
+
 namespace openspace {
 namespace documentation {
 
 struct Verifier {
-    virtual TestResult operator()(const ghoul::Dictionary& dict,
-                                  const std::string& key) const;
-
-    virtual bool test(const ghoul::Dictionary& dict, const std::string& key) const;
+    virtual TestResult operator()(const ghoul::Dictionary& dict, 
+        const std::string& key) const = 0;
 
     virtual std::string type() const = 0;
     virtual std::string documentation() const;
@@ -44,36 +44,36 @@ struct Verifier {
 template <typename T>
 struct TemplateVerifier : public Verifier {
     using Type = T;
+
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 };
 
 struct BoolVerifier : public TemplateVerifier<bool> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 struct DoubleVerifier : public TemplateVerifier<double> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 struct IntVerifier : public TemplateVerifier<int> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string type() const override;
 };
 
 struct StringVerifier : public TemplateVerifier<std::string> {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
-    TableVerifier(std::vector<DocumentationEntry> d = {}, Exhaustive exhaustive = Exhaustive::No);
+    TableVerifier(std::vector<DocumentationEntry> d = {},
+        Exhaustive exhaustive = Exhaustive::No);
 
-    TestResult operator()(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string type() const override;
 
@@ -85,115 +85,94 @@ struct VectorVerifier {};
 
 template <typename T>
 struct Vector2Verifier : public TemplateVerifier<glm::tvec2<T>>, public VectorVerifier {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 template <typename T>
 struct Vector3Verifier : public TemplateVerifier<glm::tvec3<T>>, public VectorVerifier {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 template <typename T>
 struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVerifier {
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string type() const override;
 };
 
 // Operator Verifiers
+template <typename T, typename Op>
+struct OperatorVerifier : public T {
+    OperatorVerifier(typename T::Type value);
+
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
+
+    typename T::Type value;
+};
 
 template <typename T>
-struct LessVerifier : public T {
+struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
     static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
-    LessVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const;
-
-    typename T::Type value;
 };
 
 template <typename T>
-struct LessEqualVerifier : public T {
+struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T::Type>> {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
     static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
-    LessEqualVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const override;
-
-    typename T::Type value;
 };
 
 template <typename T>
-struct GreaterVerifier : public T {
+struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Type>> {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
     static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
-    GreaterVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const override;
-
-    typename T::Type value;
 };
 
 template <typename T>
-struct GreaterEqualVerifier : public T {
+struct GreaterEqualVerifier : public OperatorVerifier<T, std::greater_equal<typename T::Type>> {
     static_assert(!std::is_base_of_v<BoolVerifier, T>, "T cannot be BoolVerifier");
     static_assert(!std::is_base_of_v<StringVerifier, T>, "T cannot be StringVerifier");
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
     static_assert(!std::is_base_of_v<VectorVerifier, T>, "T cannot be VectorVerifier");
 
-    GreaterEqualVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const override;
-
-    typename T::Type value;
 };
 
 template <typename T>
-struct EqualVerifier : public T {
+struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type>> {
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
 
-    EqualVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const override;
-
-    typename T::Type value;
 };
 
 template <typename T>
-struct UnequalVerifier : public T {
+struct UnequalVerifier : public OperatorVerifier<T, std::not_equal_to<typename T::Type>> {
     static_assert(!std::is_base_of_v<TableVerifier, T>, "T cannot be TableVerifier");
 
-    UnequalVerifier(typename T::Type value);
-
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    using OperatorVerifier::OperatorVerifier;
 
     std::string documentation() const override;
-
-    typename T::Type value;
 };
 
 // List Verifiers
@@ -204,7 +183,8 @@ struct InListVerifier : public T {
 
     InListVerifier(std::vector<typename T::Type> values);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string documentation() const override;
 
@@ -217,7 +197,8 @@ struct NotInListVerifier : public T {
 
     NotInListVerifier(std::vector<typename T::Type> values);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string documentation() const override;
 
@@ -234,7 +215,8 @@ struct InRangeVerifier : public T {
 
     InRangeVerifier(typename T::Type lower, typename T::Type upper);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string documentation() const override;
 
@@ -251,7 +233,8 @@ struct NotInRangeVerifier : public T {
 
     NotInRangeVerifier(typename T::Type lower, typename T::Type upper);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string documentation() const override;
 
@@ -265,8 +248,6 @@ template <typename T>
 struct AnnotationVerifier : public T {
     AnnotationVerifier(std::string annotation);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
-
     std::string documentation() const override;
 
     std::string annotation;
@@ -277,7 +258,8 @@ struct AnnotationVerifier : public T {
 struct AndVerifier : public Verifier {
     AndVerifier(Verifier* a, Verifier* b);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string type() const override;
     std::string documentation() const override;
@@ -289,7 +271,8 @@ struct AndVerifier : public Verifier {
 struct OrVerifier : public Verifier {
     OrVerifier(Verifier* a, Verifier* b);
 
-    bool test(const ghoul::Dictionary& dict, const std::string& key) const override;
+    TestResult operator()(const ghoul::Dictionary& dict,
+        const std::string& key) const override;
 
     std::string type() const override;
     std::string documentation() const override;

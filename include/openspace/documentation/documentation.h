@@ -36,14 +36,22 @@
 namespace openspace {
 namespace documentation {
 
-struct Verifier;
-
 using Optional = ghoul::Boolean;
 using Exhaustive = ghoul::Boolean;
 
 struct TestResult {
+    struct Offence {
+        enum class Reason {
+            MissingKey,
+            ExtraKey,
+            WrongType,
+            Verification
+        };
+        std::string offender;
+        Reason reason;
+    };
     bool success;
-    std::vector<std::string> offenders;
+    std::vector<Offence> offenders;
 };
 
 struct SpecificationError : public ghoul::RuntimeError {
@@ -51,6 +59,8 @@ struct SpecificationError : public ghoul::RuntimeError {
 
     TestResult result;
 };
+
+struct Verifier;
 
 struct DocumentationEntry {
     DocumentationEntry(std::string key, Verifier* t, std::string doc = "",

@@ -74,66 +74,51 @@ template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
 
-TestResult Verifier::operator()(const ghoul::Dictionary& dict,
-                                const std::string& key) const
-{
-    bool testSuccess = test(dict, key);
-    if (testSuccess) {
-        return { testSuccess,{} };
-    }
-    else {
-        return { testSuccess,{ key } };
-    }
-}
-
-bool Verifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return false;
-};
-
 std::string Verifier::documentation() const {
     return "";
-}
-
-bool BoolVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return dict.hasKeyAndValue<Type>(key);
 }
 
 std::string BoolVerifier::type() const {
     return "Boolean";
 }
 
-bool DoubleVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
-    return dict.hasKeyAndValue<Type>(key);
-}
-
 std::string DoubleVerifier::type() const {
     return "Double";
 }
 
-bool IntVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
+TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
+                             const std::string & key) const
+{
     if (dict.hasKeyAndValue<int>(key)) {
-        return true;
+        return { true, {} };
     }
     else {
-        if (dict.hasKeyAndValue<double>(key)) {
-            // If we have a double value, we need to check if it is integer
-            double value = dict.value<double>(key);
-            double intPart;
-            return modf(value, &intPart) == 0.0;
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<double>(key)) {
+                // If we have a double value, we need to check if it is integer
+                double value = dict.value<double>(key);
+                double intPart;
+                bool isInt = modf(value, &intPart) == 0.0;
+                if (isInt) {
+                    return { true,{} };
+                }
+                else {
+                    return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+                }
+            }
+            else {
+                // If we don't have a double value, we cannot have an int value
+                return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+            }
         }
         else {
-            // If we don't have a double value, we cannot have an int value
-            return false;
+            return { false, { {key, TestResult::Offence::Reason::MissingKey }}};
         }
     }
 }
 
 std::string IntVerifier::type() const {
     return "Integer";
-}
-
-bool StringVerifier::test(const ghoul::Dictionary & dict, const std::string & key) const {
-    return dict.hasKeyAndValue<Type>(key);
 }
 
 std::string StringVerifier::type() const {
@@ -149,16 +134,24 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
                                      const std::string& key) const
 {
     if (dict.hasKeyAndValue<Type>(key)) {
-        ghoul::Dictionary d = dict.value<Type>(key);
+        ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({ "", doc, exhaustive }, d);
 
-        for (std::string& s : res.offenders) {
-            s = key + "." + s;
+        for (TestResult::Offence& s : res.offenders) {
+            s.offender = key + "." + s.offender;
         }
 
         return res;
     }
-    return { dict.hasKeyAndValue<Type>(key), { key } };
+    else {
+        if (dict.hasKey(key)) {
+            return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::MissingKey } } };
+        }
+    }
 }
 
 std::string TableVerifier::type() const {
@@ -172,8 +165,18 @@ AndVerifier::AndVerifier(Verifier* a, Verifier* b)
     ghoul_assert(a->type() == b->type(), "Cannot use AndVerifier with different types");
 }
 
-bool AndVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return a->test(dict, key) && b->test(dict, key);
+TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
+                                   const std::string& key) const 
+{
+    TestResult resA = a->operator()(dict, key);
+    TestResult resB = b->operator()(dict, key);
+
+    if (resA.success && resB.success) {
+        return { true, {} };
+    }
+    else {
+        return { false, { { key, TestResult::Offence::Reason::Verification } } };
+    }
 }
 
 std::string AndVerifier::type() const {
@@ -190,8 +193,17 @@ OrVerifier::OrVerifier(Verifier* a, Verifier* b)
     , b(b) 
 {}
 
-bool OrVerifier::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return a->test(dict, key) || b->test(dict, key);
+TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
+                                   const std::string& key) const {
+    TestResult resA = a->operator()(dict, key);
+    TestResult resB = b->operator()(dict, key);
+
+    if (resA.success || resB.success) {
+        return { true, {} };
+    }
+    else {
+        return { false, { { key, TestResult::Offence::Reason::Verification } } };
+    }
 }
 
 std::string OrVerifier::type() const {

@@ -32,8 +32,20 @@ namespace openspace {
 namespace documentation {
 
 template <typename T>
-bool Vector2Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
-    return d.hasKeyAndValue<glm::tvec2<T>>(k);
+TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                           const std::string& key) const
+{
+    if (dict.hasKey(key)) {
+        if (dict.hasValue<Type>(key)) {
+            return{ true, {} };
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+        }
+    }
+    else {
+        return { false, { { key, TestResult::Offence::Reason::MissingKey } } };
+    }
 }
 
 template <typename T>
@@ -44,20 +56,10 @@ std::string Vector2Verifier<T>::type() const {
 }
 
 template <typename T>
-bool Vector3Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
-    return d.hasKeyAndValue<glm::tvec3<T>>(k);
-}
-
-template <typename T>
 std::string Vector3Verifier<T>::type() const {
     using namespace std::string_literals;
 
     return "Vector3<"s + typeid(T).name() + ">";
-}
-
-template <typename T>
-bool Vector4Verifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
-    return d.hasKeyAndValue<glm::tvec4<T>>(k);
 }
 
 template <typename T>
@@ -67,31 +69,32 @@ std::string Vector4Verifier<T>::type() const {
     return "Vector4<"s + typeid(T).name() + ">";
 }
 
-template <typename T>
-LessVerifier<T>::LessVerifier(typename T::Type value) 
+template <typename T, typename Op>
+OperatorVerifier<T, Op>::OperatorVerifier(typename T::Type value)
     : value(std::move(value))
-{
-}
+{}
 
-template <typename T>
-bool LessVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) < value;
+template <typename T, typename Op>
+TestResult OperatorVerifier<T, Op>::operator()(const ghoul::Dictionary& dict,
+                                               const std::string& key) const 
+{
+    TestResult res = T::operator()(dict, key);
+    if (res.success) {
+        if (Op()(dict.value<Type>(key), value)) {
+            return { true, {} };
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::Verification }}};
+        }
+    }
+    else {
+        return res;
+    }
 }
 
 template <typename T>
 std::string LessVerifier<T>::documentation() const {
     return "Less than: " + std::to_string(value);
-}
-
-
-template <typename T>
-LessEqualVerifier<T>::LessEqualVerifier(typename T::Type value)
-    : value(std::move(value))
-{}
-
-template <typename T>
-bool LessEqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) <= value;
 }
 
 template <typename T>
@@ -100,28 +103,8 @@ std::string LessEqualVerifier<T>::documentation() const {
 }
 
 template <typename T>
-GreaterVerifier<T>::GreaterVerifier(typename T::Type value)
-    : value(std::move(value))
-{}
-
-template <typename T>
-bool GreaterVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) > value;
-}
-
-template <typename T>
 std::string GreaterVerifier<T>::documentation() const {
     return "Greater than: " + std::to_string(value);
-}
-
-template <typename T>
-GreaterEqualVerifier<T>::GreaterEqualVerifier(typename T::Type value)
-    : value(std::move(value)) 
-{}
-
-template <typename T>
-bool GreaterEqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) >= value;
 }
 
 template <typename T>
@@ -130,28 +113,8 @@ std::string GreaterEqualVerifier<T>::documentation() const {
 }
 
 template <typename T>
-EqualVerifier<T>::EqualVerifier(typename T::Type value) 
-    : value(std::move(value)) 
-{}
-
-template <typename T>
-bool EqualVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) == value;
-}
-
-template <typename T>
 std::string EqualVerifier<T>::documentation() const {
     return "Equal to: " + std::to_string(value);
-}
-
-template <typename T>
-UnequalVerifier<T>::UnequalVerifier(typename T::Type value)
-    : value(std::move(value))
-{}
-
-template <typename T>
-bool UnequalVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    return T::test(dict, key) && dict.value<Type>(key) != value;
 }
 
 template <typename T>
@@ -165,15 +128,24 @@ InListVerifier<T>::InListVerifier(std::vector<typename T::Type> values)
 {}
 
 template <typename T>
-bool InListVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    if (T::test(dict, key)) {
+TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                         const std::string& key) const
+{
+    TestResult res = T::operator()(dict, key);
+    if (res.success) {
         typename T::Type value = dict.value<typename T::Type>(key);
 
         auto it = std::find(values.begin(), values.end(), value);
-        return it != values.end();
+
+        if (it != values.end()) {
+            return { true, {} };
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        }
     }
     else {
-        return false;
+        return res;
     }
 }
 
@@ -198,15 +170,24 @@ NotInListVerifier<T>::NotInListVerifier(std::vector<typename T::Type> values)
 {}
 
 template <typename T>
-bool NotInListVerifier<T>::test(const ghoul::Dictionary& dict, const std::string& key) const {
-    if (T::test(dict, key)) {
+TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                         const std::string& key) const
+{
+    TestResult res = T::operator()(dict, key);
+    if (res.success) {
         typename T::Type value = dict.value<typename T::Type>(key);
 
         auto it = std::find(values.begin(), values.end(), value);
-        return it == values.end();
+
+        if (it == values.end()) {
+            return { true, {} };
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        }
     }
     else {
-        return false;
+        return res;
     }
 }
 
@@ -234,14 +215,24 @@ InRangeVerifier<T>::InRangeVerifier(typename T::Type lower, typename T::Type upp
     ghoul_assert(lower <= upper, "Lower value must be smaller or equal to upper value");
 }
 
+
 template <typename T>
-bool InRangeVerifier<T>::test(const ghoul::Dictionary& d, const std::string& key) const {
-    if (T::test(d, key)) {
-        typename T::Type val = d.value<typename T::Type>(key);
-        return val >= lower && val <= upper;
+TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                          const std::string& key) const
+{
+    TestResult res = T::operator()(dict, key);
+    if (res.success) {
+        typename T::Type val = dict.value<typename T::Type>(key);
+
+        if (val >= lower && val <= upper) {
+            return { true, {} };
+        }
+        else {
+            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        }
     }
     else {
-        return false;
+        return res;
     }
 }
 
@@ -260,13 +251,21 @@ NotInRangeVerifier<T>::NotInRangeVerifier(typename T::Type lower, typename T::Ty
 }
 
 template <typename T>
-bool NotInRangeVerifier<T>::test(const ghoul::Dictionary& d, const std::string& k) const {
-    if (T::test(d, k)) {
-        typename T::Type val = d.value<typename T::Type>(k);
-        return !(val >= lower && val <= upper);
+TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                          const std::string& key) const {
+    TestResult res = T::operator()(dict, key);
+    if (res.success) {
+        typename T::Type val = dict.value<typename T::Type>(key);
+
+        if (val >= lower && val <= upper) {
+            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        }
+        else {
+            return { true, {} };
+        }
     }
     else {
-        return false;
+        return res;
     }
 }
 
@@ -282,12 +281,6 @@ AnnotationVerifier<T>::AnnotationVerifier(std::string annotation)
     : annotation(std::move(annotation))
 {}
 
-template <typename T>
-bool AnnotationVerifier<T>::test(const ghoul::Dictionary& dict,
-                                 const std::string& key) const
-{
-    return T::test(dict, key);
-}
 
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {

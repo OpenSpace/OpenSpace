@@ -29,6 +29,22 @@
 
 namespace {
     const std::string Wildcard = "*";
+
+    // Structure used to make offences unique
+    struct OffenceCompare {
+        using Offence = openspace::documentation::TestResult::Offence;
+        bool operator()(const Offence& lhs, const Offence& rhs) const
+        {
+            if (lhs.offender != rhs.offender) {
+                return lhs.offender < rhs.offender;
+            }
+            else {
+                return std::underlying_type_t<Offence::Reason>(lhs.reason) <
+                    std::underlying_type_t<Offence::Reason>(rhs.reason);
+            }
+        }
+
+    };
 } // namespace
 
 namespace std {
@@ -119,17 +135,19 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
 
             if (it == d.entries.end()) {
                 result.success = false;
-                result.offenders.push_back(key);
+                result.offenders.push_back(
+                    { key, TestResult::Offence::Reason::ExtraKey }
+                );
             }
         }
     }
 
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
-    std::set<std::string> uniqueOffenders(
+    std::set<TestResult::Offence, OffenceCompare> uniqueOffenders(
         result.offenders.begin(), result.offenders.end()
     );
-    result.offenders = std::vector<std::string>(
+    result.offenders = std::vector<TestResult::Offence>(
         uniqueOffenders.begin(), uniqueOffenders.end()
     );
 
