@@ -39,8 +39,13 @@ namespace documentation {
 using Optional = ghoul::Boolean;
 using Exhaustive = ghoul::Boolean;
 
+/**
+ * The TestResult structure returns the information from the #testSpecification method. It
+ * contains the information whether test specification test was successful
+ * (TestResult::success) and a list of Offence%s 
+ */
 struct TestResult {
-    struct Offence {
+    struct Offense {
         enum class Reason {
             MissingKey,
             ExtraKey,
@@ -51,7 +56,7 @@ struct TestResult {
         Reason reason;
     };
     bool success;
-    std::vector<Offence> offenders;
+    std::vector<Offense> offenses;
 };
 
 struct SpecificationError : public ghoul::RuntimeError {

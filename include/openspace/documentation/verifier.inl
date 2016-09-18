@@ -40,11 +40,11 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return{ true, {} };
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
         }
     }
     else {
-        return { false, { { key, TestResult::Offence::Reason::MissingKey } } };
+        return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
     }
 }
 
@@ -84,7 +84,7 @@ TestResult OperatorVerifier<T, Op>::operator()(const ghoul::Dictionary& dict,
             return { true, {} };
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::Verification }}};
+            return { false, { { key, TestResult::Offense::Reason::Verification }}};
         }
     }
     else {
@@ -141,7 +141,7 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return { true, {} };
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+            return { false, { { key, TestResult::Offense::Reason::Verification } } };
         }
     }
     else {
@@ -183,7 +183,7 @@ TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return { true, {} };
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+            return { false, { { key, TestResult::Offense::Reason::Verification } } };
         }
     }
     else {
@@ -228,7 +228,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
             return { true, {} };
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+            return { false, { { key, TestResult::Offense::Reason::Verification } } };
         }
     }
     else {
@@ -258,7 +258,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
         typename T::Type val = dict.value<typename T::Type>(key);
 
         if (val >= lower && val <= upper) {
-            return { false, { { key, TestResult::Offence::Reason::Verification } } };
+            return { false, { { key, TestResult::Offense::Reason::Verification } } };
         }
         else {
             return { true, {} };

@@ -103,16 +103,16 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                     return { true,{} };
                 }
                 else {
-                    return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+                    return { false, { { key, TestResult::Offense::Reason::WrongType } } };
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+                return { false, { { key, TestResult::Offense::Reason::WrongType } } };
             }
         }
         else {
-            return { false, { {key, TestResult::Offence::Reason::MissingKey }}};
+            return { false, { {key, TestResult::Offense::Reason::MissingKey }}};
         }
     }
 }
@@ -137,7 +137,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({ "", doc, exhaustive }, d);
 
-        for (TestResult::Offence& s : res.offenders) {
+        for (TestResult::Offense& s : res.offenses) {
             s.offender = key + "." + s.offender;
         }
 
@@ -145,11 +145,11 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
     }
     else {
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offence::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
 
         }
         else {
-            return { false, { { key, TestResult::Offence::Reason::MissingKey } } };
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
         }
     }
 }
@@ -175,7 +175,7 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
         return { true, {} };
     }
     else {
-        return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } } };
     }
 }
 
@@ -202,7 +202,7 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
         return { true, {} };
     }
     else {
-        return { false, { { key, TestResult::Offence::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } } };
     }
 }
 

@@ -31,16 +31,16 @@ namespace {
     const std::string Wildcard = "*";
 
     // Structure used to make offences unique
-    struct OffenceCompare {
-        using Offence = openspace::documentation::TestResult::Offence;
-        bool operator()(const Offence& lhs, const Offence& rhs) const
+    struct OffenseCompare {
+        using Offense = openspace::documentation::TestResult::Offense;
+        bool operator()(const Offense& lhs, const Offense& rhs) const
         {
             if (lhs.offender != rhs.offender) {
                 return lhs.offender < rhs.offender;
             }
             else {
-                return std::underlying_type_t<Offence::Reason>(lhs.reason) <
-                    std::underlying_type_t<Offence::Reason>(rhs.reason);
+                return std::underlying_type_t<Offense::Reason>(lhs.reason) <
+                    std::underlying_type_t<Offense::Reason>(rhs.reason);
             }
         }
 
@@ -88,10 +88,10 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
                 TestResult res = verifier(dictionary, key);
                 if (!res.success) {
                     result.success = false;
-                    result.offenders.insert(
-                        result.offenders.end(),
-                        res.offenders.begin(),
-                        res.offenders.end()
+                    result.offenses.insert(
+                        result.offenses.end(),
+                        res.offenses.begin(),
+                        res.offenses.end()
                     );
                 }
             }
@@ -106,10 +106,10 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
             TestResult res = verifier(dictionary, p.key);
             if (!res.success) {
                 result.success = false;
-                result.offenders.insert(
-                    result.offenders.end(),
-                    res.offenders.begin(),
-                    res.offenders.end()
+                result.offenses.insert(
+                    result.offenses.end(),
+                    res.offenses.begin(),
+                    res.offenses.end()
                 );
             }
         }
@@ -135,8 +135,8 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
 
             if (it == d.entries.end()) {
                 result.success = false;
-                result.offenders.push_back(
-                    { key, TestResult::Offence::Reason::ExtraKey }
+                result.offenses.push_back(
+                    { key, TestResult::Offense::Reason::ExtraKey }
                 );
             }
         }
@@ -144,10 +144,10 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
 
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
-    std::set<TestResult::Offence, OffenceCompare> uniqueOffenders(
-        result.offenders.begin(), result.offenders.end()
+    std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
+        result.offenses.begin(), result.offenses.end()
     );
-    result.offenders = std::vector<TestResult::Offence>(
+    result.offenses = std::vector<TestResult::Offense>(
         uniqueOffenders.begin(), uniqueOffenders.end()
     );
 

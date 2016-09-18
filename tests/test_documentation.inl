@@ -172,16 +172,16 @@ TEST_F(DocumentationTest, BoolVerifier) {
 
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", 0}
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
     
     ghoul::Dictionary negativeExist {
         { "Bool2", 0}
@@ -189,9 +189,9 @@ TEST_F(DocumentationTest, BoolVerifier) {
     negativeRes = testSpecification(doc, negativeExist);
 
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, DoubleVerifier) {
@@ -208,7 +208,7 @@ TEST_F(DocumentationTest, DoubleVerifier) {
 
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 0 }
@@ -216,18 +216,18 @@ TEST_F(DocumentationTest, DoubleVerifier) {
 
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeExist{
         { "Double2" , 0.0 }
     };
     negativeRes = testSpecification(doc, negativeExist);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, IntVerifier) {
@@ -243,14 +243,14 @@ TEST_F(DocumentationTest, IntVerifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Int", 0.0 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 0.1 }
@@ -258,18 +258,18 @@ TEST_F(DocumentationTest, IntVerifier) {
 
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeExist {
         { "Int2", 0 }
     };
     negativeRes = testSpecification(doc, negativeExist);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, StringVerifier) {
@@ -286,25 +286,25 @@ TEST_F(DocumentationTest, StringVerifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeExist {
         { "String2", ""s }
     };
     negativeRes = testSpecification(doc, negativeExist);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, TableVerifierType) {
@@ -320,25 +320,25 @@ TEST_F(DocumentationTest, TableVerifierType) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Table", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Table", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeExist {
         { "Table2", ghoul::Dictionary{} }
     };
     negativeRes = testSpecification(doc, negativeExist);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Table", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, MixedVerifiers) {
@@ -365,7 +365,7 @@ TEST_F(DocumentationTest, MixedVerifiers) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative1 {
         { "Bool", true },
@@ -376,9 +376,9 @@ TEST_F(DocumentationTest, MixedVerifiers) {
     };
     TestResult negativeRes = testSpecification(doc, negative1);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "Bool", true },
@@ -389,11 +389,11 @@ TEST_F(DocumentationTest, MixedVerifiers) {
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("String", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("String", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 }
 
 TEST_F(DocumentationTest, NestedTables) {
@@ -436,7 +436,7 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negativeSimple {
         { "Outer_Int", 1 },
@@ -452,9 +452,9 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     TestResult negativeRes = testSpecification(doc, negativeSimple);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Outer_Table", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Outer_Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeInner {
         { "Outer_Int", 1 },
@@ -473,9 +473,9 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     negativeRes = testSpecification(doc, negativeInner);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negativeInner2 {
         { "Outer_Int", 1 },
@@ -494,11 +494,11 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     negativeRes = testSpecification(doc, negativeInner2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Outer_Table.Inner_String", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Outer_Table.Inner_String", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negativeInnerSeparate {
         { "Outer_Int", 1 },
@@ -517,11 +517,11 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     negativeRes = testSpecification(doc, negativeInnerSeparate);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negativeInnerFull {
         { "Outer_Int", 1 },
@@ -540,13 +540,13 @@ TEST_F(DocumentationTest, NestedTables) {
     };
     negativeRes = testSpecification(doc, negativeInnerFull);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(3, negativeRes.offenders.size());
-    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
-    EXPECT_EQ("Outer_Table2.Inner_Table.Inner_Inner_Int", negativeRes.offenders[2].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[2].reason);
+    ASSERT_EQ(3, negativeRes.offenses.size());
+    EXPECT_EQ("Outer_Table.Inner_Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Outer_Table2.Inner_Double2", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
+    EXPECT_EQ("Outer_Table2.Inner_Table.Inner_Inner_Int", negativeRes.offenses[2].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[2].reason);
 }
 
 TEST_F(DocumentationTest, Optional) {
@@ -565,7 +565,7 @@ TEST_F(DocumentationTest, Optional) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Bool_Force", true },
@@ -573,24 +573,24 @@ TEST_F(DocumentationTest, Optional) {
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
     
     ghoul::Dictionary negative {
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool_Force", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool_Force", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "Bool_Optional", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool_Force", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool_Force", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative3 {
         { "Bool_Force", true },
@@ -598,9 +598,9 @@ TEST_F(DocumentationTest, Optional) {
     };
     negativeRes = testSpecification(doc, negative3);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool_Optional", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool_Optional", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, RequiredInOptional) {
@@ -636,7 +636,7 @@ TEST_F(DocumentationTest, RequiredInOptional) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         {
@@ -648,21 +648,21 @@ TEST_F(DocumentationTest, RequiredInOptional) {
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive3 {};
     positiveRes = testSpecification(doc, positive3);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "c", 2 }}}
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a.b", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a.b", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, Exhaustive) {
@@ -679,29 +679,29 @@ TEST_F(DocumentationTest, Exhaustive) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "False_Int", 1 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("False_Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::ExtraKey, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Int", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("False_Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Int", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negative2 {
         { "Double", 2.0 }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::ExtraKey, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Int", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Int", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[1].reason);
 }
 
 TEST_F(DocumentationTest, NestedExhaustive) {
@@ -721,18 +721,18 @@ TEST_F(DocumentationTest, NestedExhaustive) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Table", ghoul::Dictionary{{ "b", 2.0 }}}
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("Table.a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::MissingKey, negativeRes.offenders[0].reason);
-    EXPECT_EQ("Table.b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::ExtraKey, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("Table.a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
+    EXPECT_EQ("Table.b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[1].reason);
 }
 
 TEST_F(DocumentationTest, LessInt) {
@@ -748,16 +748,16 @@ TEST_F(DocumentationTest, LessInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 10 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, LessDouble) {
@@ -773,16 +773,16 @@ TEST_F(DocumentationTest, LessDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 10.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, LessEqualInt) {
@@ -798,23 +798,23 @@ TEST_F(DocumentationTest, LessEqualInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positiveEqual {
         { "Int", 5 }
     };
     positiveRes = testSpecification(doc, positiveEqual);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 10 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, LessEqualDouble) {
@@ -830,23 +830,23 @@ TEST_F(DocumentationTest, LessEqualDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positiveEqual {
         { "Double", 5.0 }
     };
     positiveRes = testSpecification(doc, positiveEqual);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 10.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, GreaterInt) {
@@ -862,16 +862,16 @@ TEST_F(DocumentationTest, GreaterInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, GreaterDouble) {
@@ -887,16 +887,16 @@ TEST_F(DocumentationTest, GreaterDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 0.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, GreaterEqualInt) {
@@ -912,23 +912,23 @@ TEST_F(DocumentationTest, GreaterEqualInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positiveEqual {
         { "Int", 5 }
     };
     positiveRes = testSpecification(doc, positiveEqual);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, GreaterEqualDouble) {
@@ -944,23 +944,23 @@ TEST_F(DocumentationTest, GreaterEqualDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positiveEqual {
         { "Double", 5.0 }
     };
     positiveRes = testSpecification(doc, positiveEqual);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 0.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, EqualBool) {
@@ -976,16 +976,16 @@ TEST_F(DocumentationTest, EqualBool) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", false }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, EqualInt) {
@@ -1001,16 +1001,16 @@ TEST_F(DocumentationTest, EqualInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, EqualDouble) {
@@ -1026,16 +1026,16 @@ TEST_F(DocumentationTest, EqualDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 0.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, EqualString) {
@@ -1052,16 +1052,16 @@ TEST_F(DocumentationTest, EqualString) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", "no_string"s }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, UnequalBool) {
@@ -1077,16 +1077,16 @@ TEST_F(DocumentationTest, UnequalBool) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", true }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, UnequalInt) {
@@ -1102,16 +1102,16 @@ TEST_F(DocumentationTest, UnequalInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 1 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, UnequalDouble) {
@@ -1127,16 +1127,16 @@ TEST_F(DocumentationTest, UnequalDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 1.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, UnequalString) {
@@ -1153,16 +1153,16 @@ TEST_F(DocumentationTest, UnequalString) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", "string"s }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, ListBool) {
@@ -1178,16 +1178,16 @@ TEST_F(DocumentationTest, ListBool) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", false }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, ListInt) {
@@ -1203,23 +1203,23 @@ TEST_F(DocumentationTest, ListInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Int", 2 }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 5 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, ListDouble) {
@@ -1235,23 +1235,23 @@ TEST_F(DocumentationTest, ListDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Double", 2.0 }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 5.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, ListString) {
@@ -1268,23 +1268,23 @@ TEST_F(DocumentationTest, ListString) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "String", "2"s }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", "5"s }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotListBool) {
@@ -1300,16 +1300,16 @@ TEST_F(DocumentationTest, NotListBool) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", true }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotListInt) {
@@ -1325,23 +1325,23 @@ TEST_F(DocumentationTest, NotListInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Int", 3 }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 2 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotListDouble) {
@@ -1357,23 +1357,23 @@ TEST_F(DocumentationTest, NotListDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Double", 3.0 }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 1.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotListString) {
@@ -1390,23 +1390,23 @@ TEST_F(DocumentationTest, NotListString) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "String", "foo_string"s }
     };
     positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", "1"s }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, AnnotationBool) {
@@ -1422,16 +1422,16 @@ TEST_F(DocumentationTest, AnnotationBool) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Bool", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Bool", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Bool", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, AnnotationInt) {
@@ -1447,16 +1447,16 @@ TEST_F(DocumentationTest, AnnotationInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 1.1 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, AnnotationDouble) {
@@ -1472,16 +1472,16 @@ TEST_F(DocumentationTest, AnnotationDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", true }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, AnnotationString) {
@@ -1498,16 +1498,16 @@ TEST_F(DocumentationTest, AnnotationString) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "String", 1 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("String", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("String", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, AnnotationTable) {
@@ -1523,16 +1523,16 @@ TEST_F(DocumentationTest, AnnotationTable) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Table", 1 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Table", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, InRangeInt) {
@@ -1548,30 +1548,30 @@ TEST_F(DocumentationTest, InRangeInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Int", 0 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive3 {
         { "Int", 5 }
     };
     positiveRes = testSpecification(doc, positive3);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 10 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, InRangeDouble) {
@@ -1587,37 +1587,37 @@ TEST_F(DocumentationTest, InRangeDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Double", 0.0 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive3 {
         { "Double", 5.0 }
     };
     positiveRes = testSpecification(doc, positive3);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive4 {
         { "Double", 1.5 }
     };
     positiveRes = testSpecification(doc, positive4);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 10.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotInRangeInt) {
@@ -1633,41 +1633,41 @@ TEST_F(DocumentationTest, NotInRangeInt) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Int", 6 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Int", 2 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "Int", 0 }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative3 {
         { "Int", 5 }
     };
     negativeRes = testSpecification(doc, negative3);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Int", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Int", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, NotInRangeDouble) {
@@ -1683,41 +1683,41 @@ TEST_F(DocumentationTest, NotInRangeDouble) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "Double", 6.0 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "Double", 0.0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "Double", 5.0 }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative3 {
         { "Double", 2.5 }
     };
     negativeRes = testSpecification(doc, negative3);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("Double", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Double", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, Wildcard) {
@@ -1735,7 +1735,7 @@ TEST_F(DocumentationTest, Wildcard) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", false },
@@ -1744,9 +1744,9 @@ TEST_F(DocumentationTest, Wildcard) {
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", false },
@@ -1755,11 +1755,11 @@ TEST_F(DocumentationTest, Wildcard) {
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negative3 {
         { "a", false },
@@ -1768,13 +1768,13 @@ TEST_F(DocumentationTest, Wildcard) {
     };
     negativeRes = testSpecification(doc, negative3);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(3, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
-    EXPECT_EQ("c", negativeRes.offenders[2].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[2].reason);
+    ASSERT_EQ(3, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
+    EXPECT_EQ("c", negativeRes.offenses[2].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[2].reason);
 }
 
 TEST_F(DocumentationTest, WildcardMixed) {
@@ -1795,7 +1795,7 @@ TEST_F(DocumentationTest, WildcardMixed) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", false },
@@ -1804,11 +1804,11 @@ TEST_F(DocumentationTest, WildcardMixed) {
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negative2 {
         { "a", false },
@@ -1817,11 +1817,11 @@ TEST_F(DocumentationTest, WildcardMixed) {
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 
     ghoul::Dictionary negative3 {
         { "a", false },
@@ -1830,13 +1830,13 @@ TEST_F(DocumentationTest, WildcardMixed) {
     };
     negativeRes = testSpecification(doc, negative3);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(3, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("b", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[1].reason);
-    EXPECT_EQ("c", negativeRes.offenders[2].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[2].reason);
+    ASSERT_EQ(3, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("b", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[1].reason);
+    EXPECT_EQ("c", negativeRes.offenses[2].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[2].reason);
 
     ghoul::Dictionary negative4 {
         { "a", false },
@@ -1845,11 +1845,11 @@ TEST_F(DocumentationTest, WildcardMixed) {
     };
     negativeRes = testSpecification(doc, negative4);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(2, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
-    EXPECT_EQ("c", negativeRes.offenders[1].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[1].reason);
+    ASSERT_EQ(2, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+    EXPECT_EQ("c", negativeRes.offenses[1].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 }
 
 TEST_F(DocumentationTest, AndOperator) {
@@ -1870,25 +1870,25 @@ TEST_F(DocumentationTest, AndOperator) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", 8 }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, OrOperator) {
@@ -1905,23 +1905,23 @@ TEST_F(DocumentationTest, OrOperator) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary positive2 {
         { "a", 1 }
     };
     positiveRes = testSpecification(doc, positive2);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", false }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::Verification, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::Verification, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, BoolVector2Verifier) {
@@ -1937,25 +1937,25 @@ TEST_F(DocumentationTest, BoolVector2Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true }, { "2", 1.0 } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, IntVector2Verifier) {
@@ -1971,25 +1971,25 @@ TEST_F(DocumentationTest, IntVector2Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1 } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, DoubleVector2Verifier) {
@@ -2005,25 +2005,25 @@ TEST_F(DocumentationTest, DoubleVector2Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true }, { "2", 1.0 } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, BoolVector3Verifier) {
@@ -2039,25 +2039,25 @@ TEST_F(DocumentationTest, BoolVector3Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 }, { "3", "s" } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, IntVector3Verifier) {
@@ -2073,25 +2073,25 @@ TEST_F(DocumentationTest, IntVector3Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1 }, { "3", "s" } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, DoubleVector3Verifier) {
@@ -2107,25 +2107,25 @@ TEST_F(DocumentationTest, DoubleVector3Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 }, { "3", "s"} } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, BoolVector4Verifier) {
@@ -2141,25 +2141,25 @@ TEST_F(DocumentationTest, BoolVector4Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 }, { "3", "s" }, { "4", 1 }}}
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, IntVector4Verifier) {
@@ -2175,25 +2175,25 @@ TEST_F(DocumentationTest, IntVector4Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1 },{ "3", "s" }, { "4", 1 } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2{
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
 TEST_F(DocumentationTest, DoubleVector4Verifier) {
@@ -2209,23 +2209,23 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
     };
     TestResult positiveRes = testSpecification(doc, positive);
     EXPECT_TRUE(positiveRes.success);
-    EXPECT_EQ(0, positiveRes.offenders.size());
+    EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" }, { "4", 1 } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 
     ghoul::Dictionary negative2 {
         { "a", true }
     };
     negativeRes = testSpecification(doc, negative2);
     EXPECT_FALSE(negativeRes.success);
-    ASSERT_EQ(1, negativeRes.offenders.size());
-    EXPECT_EQ("a", negativeRes.offenders[0].offender);
-    EXPECT_EQ(TestResult::Offence::Reason::WrongType, negativeRes.offenders[0].reason);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
