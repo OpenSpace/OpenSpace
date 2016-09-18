@@ -27,6 +27,8 @@
 namespace openspace {
 namespace documentation {
 
+// The explicit template instantiations for many of the commonly used template values
+// This cuts down on the compilation time by only compiling these once
 template struct Vector2Verifier<bool>;
 template struct Vector2Verifier<int>;
 template struct Vector2Verifier<double>;
@@ -74,10 +76,6 @@ template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
 
-std::string Verifier::documentation() const {
-    return "";
-}
-
 std::string BoolVerifier::type() const {
     return "Boolean";
 }
@@ -87,9 +85,10 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
-                             const std::string & key) const
+                                   const std::string & key) const
 {
     if (dict.hasKeyAndValue<int>(key)) {
+        // We we have a key and the value is int, we are done
         return { true, {} };
     }
     else {
@@ -126,7 +125,7 @@ std::string StringVerifier::type() const {
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
-    : doc(std::move(d))
+    : documentations(std::move(d))
     , exhaustive(std::move(exhaustive))
 {}
 
@@ -135,7 +134,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
 {
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({ "", doc, exhaustive }, d);
+        TestResult res = testSpecification({ "", documentations, exhaustive }, d);
 
         for (TestResult::Offense& s : res.offenses) {
             s.offender = key + "." + s.offender;
@@ -158,20 +157,21 @@ std::string TableVerifier::type() const {
     return "Table";
 }
 
-AndVerifier::AndVerifier(Verifier* a, Verifier* b)
-    : a(a)
-    , b(b) 
+AndVerifier::AndVerifier(Verifier* lhs, Verifier* rhs)
+    : lhs(lhs)
+    , rhs(rhs)
 {
-    ghoul_assert(a->type() == b->type(), "Cannot use AndVerifier with different types");
+    ghoul_assert(lhs, "lhs must not be nullptr");
+    ghoul_assert(rhs, "rhs must not be nullptr");
 }
 
 TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string& key) const 
 {
-    TestResult resA = a->operator()(dict, key);
-    TestResult resB = b->operator()(dict, key);
+    TestResult resLhs = lhs->operator()(dict, key);
+    TestResult resRhs = rhs->operator()(dict, key);
 
-    if (resA.success && resB.success) {
+    if (resLhs.success && resRhs.success) {
         return { true, {} };
     }
     else {
@@ -180,23 +180,30 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
 }
 
 std::string AndVerifier::type() const {
-    // It does not matter which type we choose as they both have to be the same
-    return a->type();
+    if (lhs->type() != rhs->type()) {
+        return lhs->type() + " and " + rhs->type();
+    }
+    else {
+        return lhs->type();
+    }
 }
 
 std::string AndVerifier::documentation() const {
-    return a->documentation() + " and " + b->documentation();
+    return lhs->documentation() + " and " + rhs->documentation();
 }
 
-OrVerifier::OrVerifier(Verifier* a, Verifier* b)
-    : a(a)
-    , b(b) 
-{}
+OrVerifier::OrVerifier(Verifier* lhs, Verifier* rhs)
+    : lhs(lhs)
+    , rhs(rhs)
+{
+    ghoul_assert(lhs, "lhs must not be nullptr");
+    ghoul_assert(rhs, "rhs must not be nullptr");
+}
 
 TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
                                    const std::string& key) const {
-    TestResult resA = a->operator()(dict, key);
-    TestResult resB = b->operator()(dict, key);
+    TestResult resA = lhs->operator()(dict, key);
+    TestResult resB = rhs->operator()(dict, key);
 
     if (resA.success || resB.success) {
         return { true, {} };
@@ -207,16 +214,16 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
 }
 
 std::string OrVerifier::type() const {
-    if (a->type() != b->type()) {
-        return a->type() + " or " + b->type();
+    if (lhs->type() != rhs->type()) {
+        return lhs->type() + " or " + rhs->type();
     }
     else {
-        return a->type();
+        return lhs->type();
     }
 }
 
 std::string OrVerifier::documentation() const {
-    return a->documentation() + " or " + b->documentation();
+    return lhs->documentation() + " or " + rhs->documentation();
 }
 
 

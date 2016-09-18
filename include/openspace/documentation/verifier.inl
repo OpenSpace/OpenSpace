@@ -25,7 +25,7 @@
 #include <iterator>
 
 namespace std {
-std::string to_string(std::string value);
+    std::string to_string(std::string value);
 }
 
 namespace openspace {
@@ -35,17 +35,22 @@ template <typename T>
 TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
                                            const std::string& key) const
 {
-    if (dict.hasKey(key)) {
-        if (dict.hasValue<Type>(key)) {
-            return{ true, {} };
+    if (dict.hasKeyAndValue<Type>(key)) {
+        return { true, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
         }
         else {
             return { false, { { key, TestResult::Offense::Reason::WrongType } } };
         }
     }
-    else {
-        return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
-    }
+}
+
+template <typename T>
+std::string TemplateVerifier<T>::documentation() const {
+    return "Type testing of '" + type() + "'";
 }
 
 template <typename T>
@@ -69,18 +74,18 @@ std::string Vector4Verifier<T>::type() const {
     return "Vector4<"s + typeid(T).name() + ">";
 }
 
-template <typename T, typename Op>
-OperatorVerifier<T, Op>::OperatorVerifier(typename T::Type value)
+template <typename T, typename Operator>
+OperatorVerifier<T, Operator>::OperatorVerifier(typename T::Type value)
     : value(std::move(value))
 {}
 
-template <typename T, typename Op>
-TestResult OperatorVerifier<T, Op>::operator()(const ghoul::Dictionary& dict,
-                                               const std::string& key) const 
+template <typename T, typename Operator>
+TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& dict,
+                                                     const std::string& key) const 
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        if (Op()(dict.value<Type>(key), value)) {
+        if (Operator()(dict.value<Type>(key), value)) {
             return { true, {} };
         }
         else {
@@ -154,7 +159,11 @@ std::string InListVerifier<T>::documentation() const {
     std::string result = "In list { ";
 
     std::stringstream s;
-    std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
+    std::copy(
+        values.begin(),
+        values.end(),
+        std::ostream_iterator<typename T::Type>(s, ",")
+    );
 
     std::string joined = s.str();
     // We need to remove a trailing ',' at the end of the string
@@ -196,12 +205,15 @@ std::string NotInListVerifier<T>::documentation() const {
     std::string result = "Not in list { ";
 
     std::stringstream s;
-    std::copy(values.begin(), values.end(), std::ostream_iterator<typename T::Type>(s, ","));
+    std::copy(
+        values.begin(),
+        values.end(),
+        std::ostream_iterator<typename T::Type>(s, ",")
+    );
 
     std::string joined = s.str();
     // We need to remove a trailing ',' at the end of the string
     result += joined.substr(0, joined.size() - 1);
-
 
     result += " }";
     return result;
@@ -212,9 +224,8 @@ InRangeVerifier<T>::InRangeVerifier(typename T::Type lower, typename T::Type upp
     : lower(std::move(lower))
     , upper(std::move(upper))
 {
-    ghoul_assert(lower <= upper, "Lower value must be smaller or equal to upper value");
+    ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
 }
-
 
 template <typename T>
 TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
@@ -247,7 +258,7 @@ NotInRangeVerifier<T>::NotInRangeVerifier(typename T::Type lower, typename T::Ty
     : lower(std::move(lower))
     , upper(std::move(upper))
 {
-    ghoul_assert(lower <= upper, "Lower value must be smaller or equal to upper value");
+    ghoul_assert(lower <= upper, "lower must be smaller or equal to upper");
 }
 
 template <typename T>
@@ -279,8 +290,9 @@ std::string NotInRangeVerifier<T>::documentation() const {
 template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string annotation)
     : annotation(std::move(annotation))
-{}
-
+{
+    ghoul_assert(!this->annotation.empty(), "Annotation must not be empty");
+}
 
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {

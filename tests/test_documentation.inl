@@ -735,6 +735,85 @@ TEST_F(DocumentationTest, NestedExhaustive) {
     EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[1].reason);
 }
 
+TEST_F(DocumentationTest, EmptyEntriesNonExhaustive) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        "Test",
+        {}
+    };
+
+    ghoul::Dictionary positive {};
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary positive2 {
+        { "a", 1 }
+    };
+    positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+}
+
+TEST_F(DocumentationTest, EmptyEntriesExhaustive) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        "Test",
+        {},
+        Exhaustive::Yes
+    };
+
+    ghoul::Dictionary positive {};
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, EmptyNestedExhaustive) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        "Test",
+        {{
+            "Table",
+            new TableVerifier(
+            {
+            },
+            Exhaustive::Yes
+            )
+        }}
+    };
+
+    ghoul::Dictionary positive {
+        { "Table", ghoul::Dictionary() }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "Table", ghoul::Dictionary{ { "a", 1 }}}
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table.a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::ExtraKey, negativeRes.offenses[0].reason);
+}
+
+
+
 TEST_F(DocumentationTest, LessInt) {
     using namespace openspace::documentation;
 
@@ -1725,7 +1804,7 @@ TEST_F(DocumentationTest, Wildcard) {
 
     Documentation doc {
         "Test",
-        {{ "*", new IntVerifier }}
+        {{ DocumentationEntry::Wildcard, new IntVerifier }}
     };
 
     ghoul::Dictionary positive {
@@ -1783,7 +1862,7 @@ TEST_F(DocumentationTest, WildcardMixed) {
     Documentation doc {
         "Test",
         {
-            { "*", new IntVerifier },
+            { DocumentationEntry::Wildcard, new IntVerifier },
             { "b", new IntGreaterVerifier(5) }
         }
     };
@@ -2228,4 +2307,122 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
     ASSERT_EQ(1, negativeRes.offenses.size());
     EXPECT_EQ("a", negativeRes.offenses[0].offender);
     EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, VerifierTypePostConditions) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    EXPECT_NE("", BoolVerifier().type());
+    EXPECT_NE("", DoubleVerifier().type());
+    EXPECT_NE("", IntVerifier().type());
+    EXPECT_NE("", StringVerifier().type());
+    EXPECT_NE("", TableVerifier().type());
+
+    EXPECT_NE("", BoolVector2Verifier().type());
+    EXPECT_NE("", IntVector2Verifier().type());
+    EXPECT_NE("", DoubleVector2Verifier().type());
+    EXPECT_NE("", BoolVector3Verifier().type());
+    EXPECT_NE("", IntVector3Verifier().type());
+    EXPECT_NE("", DoubleVector3Verifier().type());
+    EXPECT_NE("", BoolVector4Verifier().type());
+    EXPECT_NE("", IntVector4Verifier().type());
+    EXPECT_NE("", DoubleVector4Verifier().type());
+
+    EXPECT_NE("", IntLessVerifier(0).type());
+    EXPECT_NE("", DoubleLessVerifier(0.0).type());
+    EXPECT_NE("", IntLessEqualVerifier(0).type());
+    EXPECT_NE("", DoubleLessEqualVerifier(0.0).type());
+    EXPECT_NE("", IntGreaterVerifier(0).type());
+    EXPECT_NE("", DoubleGreaterVerifier(0.0).type());
+    EXPECT_NE("", IntGreaterEqualVerifier(0).type());
+    EXPECT_NE("", DoubleGreaterEqualVerifier(0.0).type());
+
+    EXPECT_NE("", BoolEqualVerifier(true).type());
+    EXPECT_NE("", IntEqualVerifier(0).type());
+    EXPECT_NE("", DoubleEqualVerifier(0.0).type());
+    EXPECT_NE("", StringEqualVerifier(""s).type());
+    EXPECT_NE("", BoolUnequalVerifier(true).type());
+    EXPECT_NE("", IntUnequalVerifier(0).type());
+    EXPECT_NE("", DoubleUnequalVerifier(0.0).type());
+    EXPECT_NE("", StringUnequalVerifier(""s).type());
+
+    EXPECT_NE("", BoolInListVerifier({ true }).type());
+    EXPECT_NE("", IntInListVerifier({ 0 }).type());
+    EXPECT_NE("", DoubleInListVerifier({ 0.0 }).type());
+    EXPECT_NE("", StringInListVerifier({ ""s }).type());
+    EXPECT_NE("", BoolNotInListVerifier({ true }).type());
+    EXPECT_NE("", IntNotInListVerifier({ 0 }).type());
+    EXPECT_NE("", DoubleNotInListVerifier({ 0.0 }).type());
+    EXPECT_NE("", StringNotInListVerifier({ ""s }).type());
+
+    EXPECT_NE("", IntInRangeVerifier({ 0, 1 }).type());
+    EXPECT_NE("", DoubleInRangeVerifier({ 0.0, 1.0 }).type());
+    EXPECT_NE("", IntNotInRangeVerifier({ 0, 1 }).type());
+    EXPECT_NE("", DoubleNotInRangeVerifier({ 0.0, 1.0 }).type());
+
+    EXPECT_NE("", BoolAnnotationVerifier("Annotation"s).type());
+    EXPECT_NE("", IntAnnotationVerifier("Annotation"s).type());
+    EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).type());
+    EXPECT_NE("", StringAnnotationVerifier("Annotation"s).type());
+    EXPECT_NE("", TableAnnotationVerifier("Annotation"s).type());
+}
+
+TEST_F(DocumentationTest, VerifierDocumentationPostConditions) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    EXPECT_NE("", BoolVerifier().documentation());
+    EXPECT_NE("", DoubleVerifier().documentation());
+    EXPECT_NE("", IntVerifier().documentation());
+    EXPECT_NE("", StringVerifier().documentation());
+    EXPECT_NE("", TableVerifier().documentation());
+
+    EXPECT_NE("", BoolVector2Verifier().documentation());
+    EXPECT_NE("", IntVector2Verifier().documentation());
+    EXPECT_NE("", DoubleVector2Verifier().documentation());
+    EXPECT_NE("", BoolVector3Verifier().documentation());
+    EXPECT_NE("", IntVector3Verifier().documentation());
+    EXPECT_NE("", DoubleVector3Verifier().documentation());
+    EXPECT_NE("", BoolVector4Verifier().documentation());
+    EXPECT_NE("", IntVector4Verifier().documentation());
+    EXPECT_NE("", DoubleVector4Verifier().documentation());
+
+    EXPECT_NE("", IntLessVerifier(0).documentation());
+    EXPECT_NE("", DoubleLessVerifier(0.0).documentation());
+    EXPECT_NE("", IntLessEqualVerifier(0).documentation());
+    EXPECT_NE("", DoubleLessEqualVerifier(0.0).documentation());
+    EXPECT_NE("", IntGreaterVerifier(0).documentation());
+    EXPECT_NE("", DoubleGreaterVerifier(0.0).documentation());
+    EXPECT_NE("", IntGreaterEqualVerifier(0).documentation());
+    EXPECT_NE("", DoubleGreaterEqualVerifier(0.0).documentation());
+
+    EXPECT_NE("", BoolEqualVerifier(true).documentation());
+    EXPECT_NE("", IntEqualVerifier(0).documentation());
+    EXPECT_NE("", DoubleEqualVerifier(0.0).documentation());
+    EXPECT_NE("", StringEqualVerifier(""s).documentation());
+    EXPECT_NE("", BoolUnequalVerifier(true).documentation());
+    EXPECT_NE("", IntUnequalVerifier(0).documentation());
+    EXPECT_NE("", DoubleUnequalVerifier(0.0).documentation());
+    EXPECT_NE("", StringUnequalVerifier(""s).documentation());
+
+    EXPECT_NE("", BoolInListVerifier({ true }).documentation());
+    EXPECT_NE("", IntInListVerifier({ 0 }).documentation());
+    EXPECT_NE("", DoubleInListVerifier({ 0.0 }).documentation());
+    EXPECT_NE("", StringInListVerifier({ ""s }).documentation());
+    EXPECT_NE("", BoolNotInListVerifier({ true }).documentation());
+    EXPECT_NE("", IntNotInListVerifier({ 0 }).documentation());
+    EXPECT_NE("", DoubleNotInListVerifier({ 0.0 }).documentation());
+    EXPECT_NE("", StringNotInListVerifier({ ""s }).documentation());
+
+    EXPECT_NE("", IntInRangeVerifier({ 0, 1 }).documentation());
+    EXPECT_NE("", DoubleInRangeVerifier({ 0.0, 1.0 }).documentation());
+    EXPECT_NE("", IntNotInRangeVerifier({ 0, 1 }).documentation());
+    EXPECT_NE("", DoubleNotInRangeVerifier({ 0.0, 1.0 }).documentation());
+
+    EXPECT_NE("", BoolAnnotationVerifier("Annotation"s).documentation());
+    EXPECT_NE("", IntAnnotationVerifier("Annotation"s).documentation());
+    EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).documentation());
+    EXPECT_NE("", StringAnnotationVerifier("Annotation"s).documentation());
+    EXPECT_NE("", TableAnnotationVerifier("Annotation"s).documentation());
 }

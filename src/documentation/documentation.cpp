@@ -28,9 +28,7 @@
 #include <set>
 
 namespace {
-    const std::string Wildcard = "*";
-
-    // Structure used to make offences unique
+    // Structure used to make offenses unique
     struct OffenseCompare {
         using Offense = openspace::documentation::TestResult::Offense;
         bool operator()(const Offense& lhs, const Offense& rhs) const
@@ -47,6 +45,8 @@ namespace {
     };
 } // namespace
 
+// Unfortunately, the standard library does not contain a no-op for the to_string method
+// so we have to include one ourselves
 namespace std {
 std::string to_string(std::string value) {
     return value; 
@@ -56,62 +56,67 @@ std::string to_string(std::string value) {
 namespace openspace {
 namespace documentation {
 
-SpecificationError::SpecificationError(TestResult result, std::string component)
+const std::string DocumentationEntry::Wildcard = "*";
+
+SpecificationError::SpecificationError(TestResult res, std::string component)
     : ghoul::RuntimeError("Error in specification", std::move(component))
-    , result(std::move(result)) {}
+    , result(std::move(res))
+{
+    ghoul_assert(!result.success, "Result's success must be false");
+}
 
-
-DocumentationEntry::DocumentationEntry(std::string key, Verifier* t, std::string doc,
-                                       Optional optional)
-    : key(std::move(key))
-    , verifier(std::move(t))
+DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
+                                       std::string doc, Optional opt)
+    : key(std::move(k))
+    , verifier(std::move(v))
     , documentation(std::move(doc))
-    , optional(optional) {}
+    , optional(opt)
+{
+    ghoul_assert(!key.empty(), "Key must not be empty");
+    ghoul_assert(verifier, "Verifier must not be nullptr");
+}
 
-Documentation::Documentation(std::string name, DocumentationEntries entries, Exhaustive exhaustive)
-    : name(std::move(name))
-    , entries(std::move(entries))
-    , exhaustive(std::move(exhaustive))
+DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, std::string doc,
+                                       Optional optional)
+    : DocumentationEntry(std::move(key), std::shared_ptr<Verifier>(v), std::move(doc),
+                         optional)
 {}
 
-Documentation::Documentation(DocumentationEntries entries)
-    : Documentation("", std::move(entries)) {}
+Documentation::Documentation(std::string n, DocumentationEntries entries, Exhaustive exh)
+    : name(std::move(n))
+    , entries(std::move(entries))
+    , exhaustive(std::move(exh))
+{}
 
-TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dictionary) {
+TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {
     TestResult result;
     result.success = true;
 
+    auto applyVerifier = [dict, &result](Verifier& verifier, const std::string& key) {
+        TestResult res = verifier(dict, key);
+        if (!res.success) {
+            result.success = false;
+            result.offenses.insert(
+                result.offenses.end(),
+                res.offenses.begin(),
+                res.offenses.end()
+            );
+        }
+    };
+
     for (const auto& p : d.entries) {
-        if (p.key == Wildcard) {
-            for (const std::string& key : dictionary.keys()) {
-                Verifier& verifier = *(p.verifier);
-                TestResult res = verifier(dictionary, key);
-                if (!res.success) {
-                    result.success = false;
-                    result.offenses.insert(
-                        result.offenses.end(),
-                        res.offenses.begin(),
-                        res.offenses.end()
-                    );
-                }
+        if (p.key == DocumentationEntry::Wildcard) {
+            for (const std::string& key : dict.keys()) {
+                applyVerifier(*(p.verifier), key);
             }
         }
         else {
-            if (p.optional && !dictionary.hasKey(p.key)) {
+            if (p.optional && !dict.hasKey(p.key)) {
                 // If the key is optional and it doesn't exist, we don't need to check it
                 // if the key exists, it has to be correct, however
                 continue;
             }
-            Verifier& verifier = *(p.verifier);
-            TestResult res = verifier(dictionary, p.key);
-            if (!res.success) {
-                result.success = false;
-                result.offenses.insert(
-                    result.offenses.end(),
-                    res.offenses.begin(),
-                    res.offenses.end()
-                );
-            }
+            applyVerifier(*(p.verifier), p.key);
         }
     }
 
@@ -119,12 +124,12 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         // If the documentation is exhaustive, we have to check if there are extra values
         // in the table that are not covered by the Documentation
 
-        for (const std::string& key : dictionary.keys()) {
+        for (const std::string& key : dict.keys()) {
             auto it = std::find_if(
                 d.entries.begin(),
                 d.entries.end(),
                 [&key](const DocumentationEntry& entry) {
-                    if (entry.key == Wildcard) {
+                    if (entry.key == DocumentationEntry::Wildcard) {
                         return true;
                     }
                     else {
@@ -154,16 +159,11 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
     return result;
 }
 
-void testSpecificationAndThrow(const Documentation& doc,
-    const ghoul::Dictionary& dictionary, std::string component)
-
+void testSpecificationAndThrow(const Documentation& doc, const ghoul::Dictionary& dict,
+                               std::string component)
 {
     // Perform testing against the documentation/specification
-    using namespace openspace::documentation;
-    TestResult testResult = testSpecification(
-        doc,
-        dictionary
-    );
+    TestResult testResult = testSpecification(doc, dict);
     if (!testResult.success) {
         throw SpecificationError(std::move(testResult), std::move(component));
     }

@@ -59,7 +59,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         if (tv) {
             // We have a TableVerifier, so we need to recurse
             ++indentLevel;
-            result += generateTextDocumentation(tv->doc, indentLevel);
+            result += generateTextDocumentation({ "", tv->documentations }, indentLevel);
             result = result.substr(0, result.size() - 2);
             --indentLevel;
         }
@@ -89,8 +89,9 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"type\": \"" << p.verifier->type() << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         if (tv) {
+            std::string json = generateJsonDocumentation({ "", tv->documentations });
             // We have a TableVerifier, so we need to recurse
-            result << "\"restrictions\": " << generateJsonDocumentation(tv->doc) << ",";
+            result << "\"restrictions\": " << json << ",";
         }
         else {
             result << "\"restrictions\": \"" << p.verifier->documentation() << "\",";
@@ -131,7 +132,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
                  << "\t\t</tr>\n"
                  << "\t</thead>\n"
                  << "\t<tbody>\n"
-                 << generateHtmlDocumentation(tv->doc) 
+                 << generateHtmlDocumentation({ "", tv->documentations })
                  << "\t</tbody>\n"
                  << "</table>\n"
                  << "</td>\n";

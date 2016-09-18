@@ -119,7 +119,7 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    static Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
