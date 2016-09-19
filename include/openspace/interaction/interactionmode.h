@@ -58,13 +58,14 @@ namespace interaction {
         // Mutators
         void addKeyframe(const network::datamessagestructures::CameraKeyframe &kf);
         void clearKeyframes();
+        void clearOldKeyframes();
 
         // Accessors
         const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
         const std::list<MouseButton>& getPressedMouseButtons() const;
         glm::dvec2 getMousePosition() const;
         double getMouseScrollDelta() const;
-        std::vector<network::datamessagestructures::CameraKeyframe>& getKeyFrames() const;
+        const std::vector<network::datamessagestructures::CameraKeyframe>& keyframes() const;
 
         bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
         bool isMouseButtonPressed(MouseButton mouseButton) const;
@@ -174,6 +175,7 @@ public:
     virtual void serialize(SyncBuffer* syncBuffer) {};
     virtual void deserialize(SyncBuffer* syncBuffer) {};
 private:
+    std::vector<network::datamessagestructures::CameraKeyframe> _keyframes;
     double _currentKeyframeTime;
 };
 

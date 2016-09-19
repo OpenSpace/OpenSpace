@@ -137,6 +137,25 @@ InteractionHandler::~InteractionHandler() {
 
 }
 
+void InteractionHandler::initialize() {
+    OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
+        if (OsEng.parallelConnection().status() == network::Status::ClientWithHost) {
+            setInteractionMode("Keyframe");
+        } else {
+            auto keyframeModeIter = _interactionModes.find("Keyframe");
+            if (keyframeModeIter != _interactionModes.end()) {
+                if (_currentInteractionMode == keyframeModeIter->second) {
+                    setInteractionMode("Orbital");
+                }
+            }
+        }
+    });
+}
+
+void InteractionHandler::deinitialize() {
+    OsEng.parallelConnection().connectionEvent()->unsubscribe("interactionHandler");
+}
+
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
     _currentInteractionMode->setFocusNode(node);
 }

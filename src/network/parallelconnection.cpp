@@ -55,6 +55,7 @@
 //openspace includes
 #include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/util/time.h>
 #include <openspace/openspace.h>
@@ -65,6 +66,8 @@
 
 namespace {
     const uint32_t ProtocolVersion = 2;
+    const size_t MaxLatencyDiffs = 64;
+    const double BroadcastIntervalMilliseconds = 100;
     const std::string _loggerCat = "ParallelConnection";
 }
 
@@ -488,7 +491,40 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
  
     switch(static_cast<network::datamessagestructures::Type>(type)) {
         case network::datamessagestructures::Type::CameraData: {
+
+            std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+
             network::datamessagestructures::CameraKeyframe kf(buffer);
+
+            double timeDiff = OsEng.runTime() - kf._timestamp;
+            if (_latencyDiffs.size() == 0) {
+                _initialTimeDiff = timeDiff;
+            }
+            double latencyDiff = timeDiff - _initialTimeDiff;
+            if (_latencyDiffs.size() >= MaxLatencyDiffs) {
+                _latencyDiffs.pop_front();
+            }
+            _latencyDiffs.push_back(latencyDiff);
+
+            double accumulatedLatencyDiffSquared = 0;
+            double accumulatedLatencyDiff = 0;
+            for (double diff : _latencyDiffs) {
+                accumulatedLatencyDiff += diff;
+                accumulatedLatencyDiffSquared += diff*diff;
+            }
+            double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
+            double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
+
+            // V(X) = E(x^2) - E(x)^2
+            double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
+            double latencyStandardDeviation = std::sqrt(latencyVariance);
+
+            double frametime = OsEng.windowWrapper().averageDeltaTime();
+
+            double latencyCompensation = std::max(expectedLatencyDiff + 2*latencyStandardDeviation, latencyDiff);
+
+            kf._timestamp += _initialTimeDiff + BroadcastIntervalMilliseconds / 1000 + latencyCompensation + 2*frametime;
+
             OsEng.interactionHandler().addKeyframe(kf);
             break;
         }
@@ -1102,7 +1138,7 @@ void ParallelConnection::broadcast(){
         queueOutDataMessage(DataMessage(network::datamessagestructures::Type::CameraData, buffer));
 
         //100 ms sleep - send keyframes 10 times per second
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(BroadcastIntervalMilliseconds)));
     }
 }
 

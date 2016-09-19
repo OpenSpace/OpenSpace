@@ -53,6 +53,9 @@ public:
     InteractionHandler();
     ~InteractionHandler();
 
+    void initialize();
+    void deinitialize();
+
     // Mutators
     void setFocusNode(SceneGraphNode* node);
     void setCamera(Camera* camera);

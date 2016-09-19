@@ -164,6 +164,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui->deinitializeGL();
 #endif
+    _interactionHandler->deinitialize();
     _renderEngine->deinitialize();
 
     _globalPropertyNamespace = nullptr;
@@ -424,6 +425,9 @@ bool OpenSpaceEngine::initialize() {
     // Initialize the SettingsEngine
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
+
+    // Initialize the InteractionHandler
+    _interactionHandler->initialize();
 
     // Initialize the Scene
     Scene* sceneGraph = new Scene;

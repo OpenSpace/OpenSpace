@@ -244,6 +244,10 @@ namespace openspace {
             std::map<std::string, std::string> _currentState;
             std::mutex _currentStateMutex;
 
+            std::mutex _latencyMutex;
+            std::deque<double> _latencyDiffs;
+            double _initialTimeDiff;
+
             std::shared_ptr<ghoul::Event<>> _connectionEvent;
         };
     } // namespace network
