@@ -52,17 +52,7 @@ Documentation SceneGraphNode::Documentation() {
         },
         {
             "Renderable",
-            new TableVerifier({
-                {
-                    "Type",
-                    new StringAnnotationVerifier(
-                        "Must name a valid Renderable type."
-                    ),
-                    "The type of the specific renderable. The list of available "
-                    "renderables depends on the configuration of the application and can "
-                    "be written to disk at startup."
-                }
-            }),
+            new ReferencingVerifier("renderable"),
             "The renderable that is to be created for this scenegraph node. A renderable "
             "is a component of a scenegraph node that will lead to some visual result on "
             "the screen. The specifics heavily depend on the 'Type' of the renderable. "

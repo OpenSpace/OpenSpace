@@ -32,6 +32,8 @@
 
 #include <ghoul/opengl/programobject.h>
 
+#include <openspace/documentation/documentation.h>
+
 
 // Forward declare to minimize dependencies
 namespace ghoul {
@@ -90,6 +92,8 @@ public:
     void onEnabledChange(std::function<void(bool)> callback);
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
+
+    static Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;

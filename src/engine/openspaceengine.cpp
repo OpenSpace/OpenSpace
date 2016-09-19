@@ -165,6 +165,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 
     DocEng.addDocumentation(ConfigurationManager::Documentation());
     DocEng.addDocumentation(Scene::Documentation());
+    DocEng.addDocumentation(SceneGraphNode::Documentation());
+    DocEng.addDocumentation(Renderable::Documentation());
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {

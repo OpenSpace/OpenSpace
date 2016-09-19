@@ -125,16 +125,34 @@ std::string generateHtmlDocumentation(const Documentation& d) {
     std::stringstream html;
 
     html << "\t<tr>\n"
-         << "\t\t<td colspan=6>" << d.name << "</td>\n";
+         << "\t\t<td colspan=6>" << d.name << "<a name=\"" << d.id << "\"></a></td>\n";
 
     for (const auto& p : d.entries) {
         html << "\t<tr>\n"
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
-             << "\t\t<td>" << (p.optional ? "true" : "false") << "</td>\n"
+             << "\t\t<td>" << (p.optional ? "Optional" : "Required") << "</td>\n"
              << "\t\t<td>" << p.verifier->type() << "</td>\n";
+
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        if (tv) {
+        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
+
+        // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
+        // TableVerifier
+        if (rv) {
+            std::vector<Documentation> documentations = DocEng.documentations();
+            auto it = std::find_if(
+                documentations.begin(),
+                documentations.end(),
+                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+            );
+
+            html << "\t\t<td>"
+                 << "\t\t\tReferencing: "
+                 << "<a href=\"#" << rv->identifier << "\">" << it->name << "</a>"
+                 << "\t\t</td>";
+        }
+        else if (tv) {
             // We have a TableVerifier, so we need to recurse
             html << "<td><table cellpadding=3 cellspacing=0 border=1>\n"
                  << "\t<thead>\n"
