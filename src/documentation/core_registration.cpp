@@ -22,32 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCALE_H__
-#define __SCALE_H__
+#include <openspace/documentation/core_registration.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/documentation/documentationengine.h>
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 
-#include <openspace/documentation/documentation.h>
 
 namespace openspace {
+namespace documentation {
 
-class Scale {
-public:
-    static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
+void registerCoreClasses(documentation::DocumentationEngine& engine) {
+    engine.addDocumentation(ConfigurationManager::Documentation());
+    engine.addDocumentation(Ephemeris::Documentation());
+    engine.addDocumentation(Renderable::Documentation());
+    engine.addDocumentation(Rotation::Documentation());
+    engine.addDocumentation(Scale::Documentation());
+    engine.addDocumentation(Scene::Documentation());
+    engine.addDocumentation(SceneGraphNode::Documentation());
+    engine.addDocumentation(ScreenSpaceRenderable::Documentation());
+}
 
-    Scale(const ghoul::Dictionary& dictionary);
-    virtual ~Scale();
-    virtual bool initialize();
-    virtual double scaleValue() const = 0;
-    virtual void update(const UpdateData& data);
-
-    static openspace::Documentation Documentation();
-
-protected:
-    Scale();
-};
-
-}  // namespace openspace
-
-#endif // __SCALE_H__
+} // namespace documentation
+} // namespace openspace

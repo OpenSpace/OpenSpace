@@ -66,18 +66,7 @@ Documentation SceneGraphNode::Documentation() {
             new TableVerifier({
                 {
                     "Translation",
-                    new TableVerifier({
-                        {
-                            "Type",
-                            new StringAnnotationVerifier(
-                                "Must name a valid Translation type."
-                            ),
-                            "The type of translation that is described in this element. "
-                            "The available types of translations depend on the "
-                            "configuration of the application and can be written to disk "
-                            "on application startup."
-                        }
-                    }),
+                    new ReferencingVerifier("core_transform_translation"),
                     "This node describes a translation that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the "
                     "translation, this can either be a static translation or a "
@@ -86,18 +75,7 @@ Documentation SceneGraphNode::Documentation() {
                 },
                 {
                     "Rotation",
-                    new TableVerifier({
-                        {
-                            "Type",
-                            new StringAnnotationVerifier(
-                                "Must name a valid Rotation type."
-                            ),
-                            "The type of the rotation that is described in this element. "
-                            "The available types of rotations depend on the "
-                            "configuration of the application and can be written to disk "
-                            "on application startup."
-                        }
-                    }),
+                    new ReferencingVerifier("core_transform_rotation"),
                     "This nodes describes a rotation that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the rotation, "
                     "this can either be a static rotation or a time-varying one.",
@@ -105,18 +83,7 @@ Documentation SceneGraphNode::Documentation() {
                 },
                 {
                     "Scale",
-                    new TableVerifier({
-                        {
-                            "Type",
-                            new StringAnnotationVerifier(
-                                "Must name a valid Scale type."
-                            ),
-                            "The type of the scaling that is described in this element. "
-                            "The available types of scaling depend on the configuration "
-                            "of the application and can be written to disk on "
-                            "application startup."
-                        }
-                    }),
+                    new ReferencingVerifier("core_transform_scaling"),
                     "This node describes a scaling that is applied to the scenegraph "
                     "node and all its children. Depending on the 'Type' of the scaling, "
                     "this can either be a static scaling or a time-varying one.",

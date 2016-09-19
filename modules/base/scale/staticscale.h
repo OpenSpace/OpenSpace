@@ -37,7 +37,7 @@ public:
     StaticScale(const ghoul::Dictionary& dictionary);
     double scaleValue() const;
 
-    static Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     double _scaleValue;

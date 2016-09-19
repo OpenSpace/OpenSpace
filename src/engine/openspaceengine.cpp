@@ -26,6 +26,7 @@
 
 #include <openspace/openspace.h>
 
+#include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
@@ -162,11 +163,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     Time::initialize();
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
-
-    DocEng.addDocumentation(ConfigurationManager::Documentation());
-    DocEng.addDocumentation(Scene::Documentation());
-    DocEng.addDocumentation(SceneGraphNode::Documentation());
-    DocEng.addDocumentation(Renderable::Documentation());
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -301,6 +297,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // Register modules
     _engine->_moduleEngine->initialize();
 
+    documentation::registerCoreClasses(DocEng);
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
