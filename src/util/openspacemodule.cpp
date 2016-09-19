@@ -63,6 +63,10 @@ void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
 }
 
+std::vector<Documentation> OpenSpaceModule::documentations() const {
+    return {};
+}
+
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);

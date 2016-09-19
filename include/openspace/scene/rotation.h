@@ -28,6 +28,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
 class Rotation {
@@ -39,6 +41,8 @@ public:
     virtual bool initialize();
     virtual const glm::dmat3& matrix() const = 0;
     virtual void update(const UpdateData& data);
+
+    static openspace::Documentation Documentation();
 
 protected:
     Rotation();

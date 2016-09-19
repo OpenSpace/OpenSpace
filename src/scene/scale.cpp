@@ -26,6 +26,8 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string _loggerCat = "Scale";
     const std::string KeyType = "Type";
@@ -33,16 +35,33 @@ namespace {
 
 namespace openspace {
 
-Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Ephemeris did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+Documentation Scale::Documentation() {
+    using namespace openspace::documentation;
 
-    std::string scaleType;
-    dictionary.getValue(KeyType, scaleType);
-    ghoul::TemplateFactory<Scale>* factory
-          = FactoryManager::ref().factory<Scale>();
+    return {
+        "Transformation Scaling",
+        "core_transform_scaling",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier("Must name a valid Scale type"),
+                "The type of the scaling that is described in this element. "
+                "The available types of scaling depend on the configuration "
+                "of the application and can be written to disk on "
+                "application startup into the FactoryDocumentation.",
+                Optional::No
+            }
+        }
+    };
+}
+
+
+Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
+
+    std::string scaleType = dictionary.value<std::string>(KeyType);
+
+    auto factory = FactoryManager::ref().factory<Scale>();
     Scale* result = factory->create(scaleType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Scale object of type '" << scaleType << "'");

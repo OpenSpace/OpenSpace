@@ -1,0 +1,273 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <openspace/documentation/verifier.h>
+
+#include <openspace/documentation/documentationengine.h>
+
+namespace openspace {
+namespace documentation {
+
+// The explicit template instantiations for many of the commonly used template values
+// This cuts down on the compilation time by only compiling these once
+template struct Vector2Verifier<bool>;
+template struct Vector2Verifier<int>;
+template struct Vector2Verifier<double>;
+template struct Vector3Verifier<bool>;
+template struct Vector3Verifier<int>;
+template struct Vector3Verifier<double>;
+template struct Vector4Verifier<bool>;
+template struct Vector4Verifier<int>;
+template struct Vector4Verifier<double>;
+
+template struct LessVerifier<IntVerifier>;
+template struct LessVerifier<DoubleVerifier>;
+template struct LessEqualVerifier<IntVerifier>;
+template struct LessEqualVerifier<DoubleVerifier>;
+template struct GreaterVerifier<IntVerifier>;
+template struct GreaterVerifier<DoubleVerifier>;
+template struct GreaterEqualVerifier<IntVerifier>;
+template struct GreaterEqualVerifier<DoubleVerifier>;
+template struct EqualVerifier<BoolVerifier>;
+template struct EqualVerifier<IntVerifier>;
+template struct EqualVerifier<DoubleVerifier>;
+template struct EqualVerifier<StringVerifier>;
+template struct UnequalVerifier<BoolVerifier>;
+template struct UnequalVerifier<IntVerifier>;
+template struct UnequalVerifier<DoubleVerifier>;
+template struct UnequalVerifier<StringVerifier>;
+
+template struct InListVerifier<BoolVerifier>;
+template struct InListVerifier<IntVerifier>;
+template struct InListVerifier<DoubleVerifier>;
+template struct InListVerifier<StringVerifier>;
+template struct NotInListVerifier<BoolVerifier>;
+template struct NotInListVerifier<IntVerifier>;
+template struct NotInListVerifier<DoubleVerifier>;
+template struct NotInListVerifier<StringVerifier>;
+
+template struct InRangeVerifier<IntVerifier>;
+template struct InRangeVerifier<DoubleVerifier>;
+template struct NotInRangeVerifier<IntVerifier>;
+template struct NotInRangeVerifier<DoubleVerifier>;
+
+template struct AnnotationVerifier<BoolVerifier>;
+template struct AnnotationVerifier<IntVerifier>;
+template struct AnnotationVerifier<DoubleVerifier>;
+template struct AnnotationVerifier<StringVerifier>;
+template struct AnnotationVerifier<TableVerifier>;
+
+std::string BoolVerifier::type() const {
+    return "Boolean";
+}
+
+std::string DoubleVerifier::type() const {
+    return "Double";
+}
+
+TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
+                                   const std::string & key) const {
+    if (dict.hasKeyAndValue<int>(key)) {
+        // We we have a key and the value is int, we are done
+        return{ true, {} };
+    }
+    else {
+        if (dict.hasKey(key)) {
+            if (dict.hasValue<double>(key)) {
+                // If we have a double value, we need to check if it is integer
+                double value = dict.value<double>(key);
+                double intPart;
+                bool isInt = modf(value, &intPart) == 0.0;
+                if (isInt) {
+                    return{ true,{} };
+                }
+                else {
+                    return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+                }
+            }
+            else {
+                // If we don't have a double value, we cannot have an int value
+                return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+            }
+        }
+        else {
+            return{ false, { {key, TestResult::Offense::Reason::MissingKey }} };
+        }
+    }
+}
+
+std::string IntVerifier::type() const {
+    return "Integer";
+}
+
+std::string StringVerifier::type() const {
+    return "String";
+}
+
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
+    : documentations(std::move(d))
+    , exhaustive(std::move(exhaustive)) {}
+
+TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
+                                     const std::string& key) const {
+    if (dict.hasKeyAndValue<Type>(key)) {
+        ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
+        TestResult res = testSpecification({ "", documentations, exhaustive }, d);
+
+        for (TestResult::Offense& s : res.offenses) {
+            s.offender = key + "." + s.offender;
+        }
+
+        return res;
+    }
+    else {
+        if (dict.hasKey(key)) {
+            return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+
+        }
+        else {
+            return{ false, { { key, TestResult::Offense::Reason::MissingKey } } };
+        }
+    }
+}
+
+std::string TableVerifier::type() const {
+    return "Table";
+}
+
+ReferencingVerifier::ReferencingVerifier(std::string id)
+    : identifier(std::move(id))
+{
+    ghoul_assert(!identifier.empty(), "identifier must not be empty");
+}
+
+TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                           const std::string& key) const
+{
+    TestResult res = TableVerifier::operator()(dictionary, key);
+    if (res.success) {
+        std::vector<Documentation> documentations = DocEng.documentations();
+
+        auto it = std::find_if(
+            documentations.begin(),
+            documentations.end(),
+            [this](const Documentation& doc) { return doc.id == identifier; }
+        );
+
+        if (it == documentations.end()) {
+            return { false, { { key, TestResult::Offense::Reason::UnknownIdentifier } } };
+        }
+        else {
+            ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+            TestResult res = testSpecification(*it, d);
+
+            for (TestResult::Offense& s : res.offenses) {
+                s.offender = key + "." + s.offender;
+            }
+
+            return res;
+        }
+    }
+    else {
+        return res;
+    }
+}
+
+std::string ReferencingVerifier::documentation() const {
+    using namespace std::string_literals;
+    return "Referencing Documentation: '"s + identifier + "'";
+}
+
+AndVerifier::AndVerifier(Verifier* lhs, Verifier* rhs)
+    : lhs(lhs)
+    , rhs(rhs)
+{
+    ghoul_assert(lhs, "lhs must not be nullptr");
+    ghoul_assert(rhs, "rhs must not be nullptr");
+}
+
+TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
+                                   const std::string& key) const 
+{
+    TestResult resLhs = lhs->operator()(dict, key);
+    TestResult resRhs = rhs->operator()(dict, key);
+
+    if (resLhs.success && resRhs.success) {
+        return { true, {} };
+    }
+    else {
+        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+    }
+}
+
+std::string AndVerifier::type() const {
+    if (lhs->type() != rhs->type()) {
+        return lhs->type() + " and " + rhs->type();
+    }
+    else {
+        return lhs->type();
+    }
+}
+
+std::string AndVerifier::documentation() const {
+    return lhs->documentation() + " and " + rhs->documentation();
+}
+
+OrVerifier::OrVerifier(Verifier* lhs, Verifier* rhs)
+    : lhs(lhs)
+    , rhs(rhs)
+{
+    ghoul_assert(lhs, "lhs must not be nullptr");
+    ghoul_assert(rhs, "rhs must not be nullptr");
+}
+
+TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
+                                   const std::string& key) const {
+    TestResult resA = lhs->operator()(dict, key);
+    TestResult resB = rhs->operator()(dict, key);
+
+    if (resA.success || resB.success) {
+        return { true, {} };
+    }
+    else {
+        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+    }
+}
+
+std::string OrVerifier::type() const {
+    if (lhs->type() != rhs->type()) {
+        return lhs->type() + " or " + rhs->type();
+    }
+    else {
+        return lhs->type();
+    }
+}
+
+std::string OrVerifier::documentation() const {
+    return lhs->documentation() + " or " + rhs->documentation();
+}
+
+
+} // namespace documentation
+} // namespace openspace

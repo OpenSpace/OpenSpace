@@ -27,8 +27,8 @@ namespace openspace {
 template <class T>
 ghoul::TemplateFactory<T>* FactoryManager::factory() const {
     for (auto& factory : _factories) {
-        if (factory->baseClassType() == typeid(T))
-            return dynamic_cast<ghoul::TemplateFactory<T>*>(factory.get());
+        if (factory.factory->baseClassType() == typeid(T))
+            return dynamic_cast<ghoul::TemplateFactory<T>*>(factory.factory.get());
     }
     
     throw FactoryNotFoundError(typeid(T).name());

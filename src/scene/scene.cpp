@@ -55,12 +55,12 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {
     const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
-    const std::string _defaultCommonDirectory = "common";
     const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyCamera = "Camera";
@@ -98,15 +98,23 @@ void Scene::update(const UpdateData& data) {
             OsEng.interactionHandler().setInteractionMode("Orbital");
 
             // After loading the scene, the keyboard bindings have been set
-            
+            const std::string KeyboardShortcutsType =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartType;
+
+            const std::string KeyboardShortcutsFile =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartFile;
+
+
             std::string type;
             std::string file;
             bool hasType = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsType, type
+                KeyboardShortcutsType, type
             );
             
             bool hasFile = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsFile, file
+                KeyboardShortcutsFile, file
             );
             
             if (hasType && hasFile) {
@@ -189,6 +197,14 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         state
     );
 
+    // Perform testing against the documentation/specification
+    openspace::documentation::testSpecificationAndThrow(
+        Scene::Documentation(),
+        dictionary,
+        "Scene"
+    );
+
+
     _graph.loadFromFile(sceneDescriptionFilePath);
 
     // Initialize all nodes
@@ -230,13 +246,21 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const std::string KeyPropertyDocumentationType =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartType;
+
+    const std::string KeyPropertyDocumentationFile =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartFile;
+
+    const bool hasType = OsEng.configurationManager().hasKey(KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
         writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
@@ -414,13 +438,11 @@ SceneGraph& Scene::sceneGraph() {
 }
 
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+    LDEBUG("Writing documentation for properties");
     if (type == "text") {
-        LDEBUG("Writing documentation for properties");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing property documentation");
-            return;
-        }
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         using properties::Property;
         for (SceneGraphNode* node : _graph.nodes()) {
@@ -429,12 +451,99 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
                 file << node->name() << std::endl;
 
                 for (Property* p : properties) {
-                    file << p->fullyQualifiedIdentifier() << ":   " << p->guiName() << std::endl;
+                    file << p->fullyQualifiedIdentifier() << ":   " <<
+                        p->guiName() << std::endl;
                 }
 
                 file << std::endl;
             }
         }
+    }
+    else if (type == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+#ifdef JSON
+        // Create JSON
+        std::function<std::string(properties::PropertyOwner*)> createJson =
+            [&createJson](properties::PropertyOwner* owner) -> std::string 
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"name\": \"" << owner->name() << "\",";
+
+            json << "\"properties\": [";
+            for (properties::Property* p : owner->properties()) {
+                json << "{";
+                json << "\"id\": \"" << p->identifier() << "\",";
+                json << "\"type\": \"" << p->className() << "\",";
+                json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+                json << "\"guiName\": \"" << p->guiName() << "\",";
+                json << "},";
+            }
+            json << "],";
+
+            json << "\"propertyOwner\": [";
+            for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+                json << createJson(o);
+            }
+            json << "],";
+            json << "},";
+
+            return json.str();
+        };
+
+
+        std::stringstream json;
+        json << "[";
+        for (SceneGraphNode* node : _graph.nodes()) {
+            json << createJson(node);
+        }
+
+        json << "]";
+
+        std::string jsonText = json.str();
+#else
+        std::stringstream html;
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Properties</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Properties</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>ID</th>\n"
+             << "\t\t\t<th>Type</th>\n"
+             << "\t\t\t<th>Description</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (SceneGraphNode* node : _graph.nodes()) {
+            for (properties::Property* p : node->propertiesRecursive()) {
+                html << "\t\t<tr>\n"
+                     << "\t\t\t<td>" << p->fullyQualifiedIdentifier() << "</td>\n"
+                     << "\t\t\t<td>" << p->className() << "</td>\n"
+                     << "\t\t\t<td>" << p->guiName() << "</td>\n"
+                     << "\t\t</tr>\n";
+            }
+
+            if (!node->propertiesRecursive().empty()) {
+                html << "\t<tr><td style=\"line-height: 10px;\" colspan=3></td></tr>\n";
+            }
+
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>;";
+
+        file << html.str();
+#endif
+
     }
     else
         LERROR("Undefined type '" << type << "' for Property documentation");
@@ -455,6 +564,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
+                "string, *",
                 "Sets all properties that pass the regular expression in the first "
                 "argument. The second argument can be any type, but it has to match the "
                 "type of the properties that matched the regular expression. The regular "

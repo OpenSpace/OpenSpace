@@ -22,32 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCALE_H__
-#define __SCALE_H__
-
-#include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
-
-#include <openspace/documentation/documentation.h>
+#ifndef __CORE_REGISTRATION_H__
+#define __CORE_REGISTRATION_H__
 
 namespace openspace {
+namespace documentation {
 
-class Scale {
-public:
-    static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
+class DocumentationEngine;
 
-    Scale(const ghoul::Dictionary& dictionary);
-    virtual ~Scale();
-    virtual bool initialize();
-    virtual double scaleValue() const = 0;
-    virtual void update(const UpdateData& data);
+void registerCoreClasses(documentation::DocumentationEngine& engine);
 
-    static openspace::Documentation Documentation();
+} // namespace documentation
+} // namespace openspace
 
-protected:
-    Scale();
-};
-
-}  // namespace openspace
-
-#endif // __SCALE_H__
+#endif // __CORE_REGISTRATION_H__

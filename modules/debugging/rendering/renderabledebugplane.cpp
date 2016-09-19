@@ -26,8 +26,6 @@
 
 #include <modules/debugging/rendering/renderabledebugplane.h>
 
-
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
