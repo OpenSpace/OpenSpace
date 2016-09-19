@@ -40,10 +40,10 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
     }
     else {
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
         }
     }
 }

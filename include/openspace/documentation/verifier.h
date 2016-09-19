@@ -580,6 +580,46 @@ struct AnnotationVerifier : public T {
     std::string annotation;
 };
 
+/**
+ * This Verifier can reference and apply other Documentation%s that have been registered
+ * with a DocumentationEngine. The dependency is only resolved when the operator() is
+ * called, at which the referencing Documentation must have been registered, or the
+ * TestResult will contain an offense of TestResult::Offense::Reason::UnknownIdentifier.
+ * If the referenced Documentation exists, the stored Table will be checked against that
+ * Documentation.
+ */
+struct ReferencingVerifier : public TableVerifier {
+    /**
+     * Creates a ReferencingVerifier that references a documentation with the provided
+     * \p identifier. The ReferencingVerifier will use the static DocumentationEngine to
+     * retrieve Documentation%s and find the \p identifier among them.
+     * \param identifier The identifier of the Documentation that this Verifier references
+     */
+    ReferencingVerifier(std::string identifier);
+
+    /**
+     * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
+     * to the TableVerifier). If it exists and is a Table, the Documentation referenced by
+     * the identifier provided in the constructor is used to validate the Table. If the
+     * identifier does not name a registered Documentation, the TestResult::offenses
+     * will contain the \p key and TestResult::Offense::Reason::UnknownIdentifier will be
+     * signaled. If the identifier exists and the \p key%'s value does not comply with the
+     * Documentation, the offending keys will be returned in the TestResult with their
+     * fully qualified names.
+     * \param dictionary The ghoul::Dictionary whose \p key should be tested
+     * \param key The key contained in the \p dictionary that should be tested
+     * \return A TestResult struct that contains the results of the testing
+     */
+    TestResult operator()(const ghoul::Dictionary& dictionary,
+                          const std::string& key) const override;
+
+    std::string documentation() const override;
+
+    /// The identifier that references another Documentation registered with the 
+    /// DocumentationEngine
+    std::string identifier;
+};
+
 //----------------------------------------------------------------------------------------
 // Misc verifiers
 //----------------------------------------------------------------------------------------

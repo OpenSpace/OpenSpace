@@ -24,6 +24,8 @@
 
 #include <openspace/documentation/verifier.h>
 
+#include <openspace/documentation/documentationengine.h>
+
 namespace openspace {
 namespace documentation {
 
@@ -85,11 +87,10 @@ std::string DoubleVerifier::type() const {
 }
 
 TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
-                                   const std::string & key) const
-{
+                                   const std::string & key) const {
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
-        return { true, {} };
+        return{ true, {} };
     }
     else {
         if (dict.hasKey(key)) {
@@ -99,19 +100,19 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                 double intPart;
                 bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
-                    return { true,{} };
+                    return{ true,{} };
                 }
                 else {
-                    return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+                    return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
             }
         }
         else {
-            return { false, { {key, TestResult::Offense::Reason::MissingKey }}};
+            return{ false, { {key, TestResult::Offense::Reason::MissingKey }} };
         }
     }
 }
@@ -126,12 +127,10 @@ std::string StringVerifier::type() const {
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
     : documentations(std::move(d))
-    , exhaustive(std::move(exhaustive))
-{}
+    , exhaustive(std::move(exhaustive)) {}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
-                                     const std::string& key) const
-{
+                                     const std::string& key) const {
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({ "", documentations, exhaustive }, d);
@@ -144,17 +143,60 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
     }
     else {
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+            return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
 
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
+            return{ false, { { key, TestResult::Offense::Reason::MissingKey } } };
         }
     }
 }
 
 std::string TableVerifier::type() const {
     return "Table";
+}
+
+ReferencingVerifier::ReferencingVerifier(std::string id)
+    : identifier(std::move(id))
+{
+    ghoul_assert(!identifier.empty(), "identifier must not be empty");
+}
+
+TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
+                                           const std::string& key) const
+{
+    TestResult res = TableVerifier::operator()(dictionary, key);
+    if (res.success) {
+        std::vector<Documentation> documentations = DocEng.documentations();
+
+        auto it = std::find_if(
+            documentations.begin(),
+            documentations.end(),
+            [this](const Documentation& doc) { return doc.id == identifier; }
+        );
+
+        if (it == documentations.end()) {
+            return { false, { { key, TestResult::Offense::Reason::UnknownIdentifier } } };
+        }
+        else {
+            ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+            TestResult res = testSpecification(*it, d);
+
+            for (TestResult::Offense& s : res.offenses) {
+                s.offender = key + "." + s.offender;
+            }
+
+            return res;
+        }
+    }
+    else {
+        return res;
+    }
+}
+
+std::string ReferencingVerifier::documentation() const {
+    using namespace std::string_literals;
+    return "Referencing Documentation: '"s + identifier + "'";
 }
 
 AndVerifier::AndVerifier(Verifier* lhs, Verifier* rhs)

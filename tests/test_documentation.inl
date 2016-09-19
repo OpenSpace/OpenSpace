@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -173,7 +174,7 @@ TEST_F(DocumentationTest, BoolVerifier) {
     EXPECT_EQ(0, positiveRes.offenses.size());
 
     ghoul::Dictionary negative {
-        { "Bool", 0}
+        { "Bool", 0 }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);
@@ -1879,6 +1880,67 @@ TEST_F(DocumentationTest, WildcardMixed) {
     EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[1].reason);
 }
 
+TEST_F(DocumentationTest, Referencing) {
+    using namespace openspace::documentation;
+
+    Documentation referenced {
+        "Referenced Name",
+        "referenced_id",
+        {
+            { "a", new IntVerifier },
+            { "b", new DoubleVerifier }
+        },
+    };
+    DocEng.addDocumentation(referenced);
+
+    Documentation doc {{
+        { "Table", new ReferencingVerifier("referenced_id") }
+    }};
+
+    ghoul::Dictionary positive {
+        { "Table", ghoul::Dictionary{ { "a", 1 }, { "b", 2.0 } }}
+    };
+
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "Table", 1 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "Table", ghoul::Dictionary{ { "a", 1 }, { "b", true }}}
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table.b", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+
+    Documentation wrongDoc {{
+        { "Table", new ReferencingVerifier("WRONG") }
+    } };
+    ghoul::Dictionary wrongNegative {
+        { "Table", ghoul::Dictionary{ { "a", 1 },{ "b", 2.0 } } }
+    };
+    negativeRes = testSpecification(wrongDoc, wrongNegative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("Table", negativeRes.offenses[0].offender);
+    EXPECT_EQ(
+        TestResult::Offense::Reason::UnknownIdentifier,
+        negativeRes.offenses[0].reason
+    );
+}
+
+
 TEST_F(DocumentationTest, AndOperator) {
     using namespace openspace::documentation;
 
@@ -2303,6 +2365,8 @@ TEST_F(DocumentationTest, VerifierTypePostConditions) {
     EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).type());
     EXPECT_NE("", StringAnnotationVerifier("Annotation"s).type());
     EXPECT_NE("", TableAnnotationVerifier("Annotation"s).type());
+
+    EXPECT_NE("", ReferencingVerifier("identifier"s).type());
 }
 
 TEST_F(DocumentationTest, VerifierDocumentationPostConditions) {
@@ -2362,4 +2426,7 @@ TEST_F(DocumentationTest, VerifierDocumentationPostConditions) {
     EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).documentation());
     EXPECT_NE("", StringAnnotationVerifier("Annotation"s).documentation());
     EXPECT_NE("", TableAnnotationVerifier("Annotation"s).documentation());
+
+    EXPECT_NE("", ReferencingVerifier("identifier"s).documentation());
+
 }

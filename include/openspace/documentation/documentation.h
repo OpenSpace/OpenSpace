@@ -57,10 +57,11 @@ struct TestResult {
          * The Reason for the offense
          */
         enum class Reason {
-            MissingKey,     ///< The offending key that was requested was not found
-            ExtraKey,       ///< The exhaustive documentation contained an extra key
-            WrongType,      ///< The key's value was not of the expected type
-            Verification    ///< The value did not pass a necessary non-type verifier
+            MissingKey,       ///< The offending key that was requested was not found
+            ExtraKey,         ///< The exhaustive documentation contained an extra key
+            WrongType,        ///< The key's value was not of the expected type
+            Verification,     ///< The value did not pass a necessary non-type verifier
+            UnknownIdentifier ///< If the identifier for a ReferencingVerifier did not exist
         };
         /// The offending key that caused the Offense. In the case of a nested table,
         /// this value will be the fully qualified name of the key
@@ -216,9 +217,24 @@ struct Documentation {
     Documentation(std::string name, std::string id, DocumentationEntries entries = {},
         Exhaustive exhaustive = Exhaustive::No);
 
+    /**
+    * Creates a Documentation with a human-readable \p name.
+    * \param name The human-readable name of this Documentation
+    * \param entries A list of DocumentationEntry%s that describe the individual keys for
+    * this entrie Documentation
+    * \param exhaustive Determines whether the \p entries are an exhaustive specification
+    * of the object or whether additional, potentially unused, keys are allowed
+    */
     Documentation(std::string name, DocumentationEntries entries = {},
         Exhaustive exhaustive = Exhaustive::No);
 
+    /**
+    * Creates a Documentation.
+    * \param entries A list of DocumentationEntry%s that describe the individual keys for
+    * this entrie Documentation
+    * \param exhaustive Determines whether the \p entries are an exhaustive specification
+    * of the object or whether additional, potentially unused, keys are allowed
+    */
     Documentation(DocumentationEntries entries = {}, Exhaustive exhaustive = Exhaustive::No);
 
     /// The human-readable name of the Documentation

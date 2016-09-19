@@ -236,18 +236,27 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
-    auto it = std::find_if(
-        _documentations.begin(),
-        _documentations.end(),
-        [doc](const Documentation& d) { return doc.id == d.id; }
-    );
-
-    if (it != _documentations.end()) {
-        throw DuplicateDocumentationException(std::move(doc));
-    }
-    else {
+    if (doc.id.empty()) {
         _documentations.push_back(std::move(doc));
     }
+    else {
+        auto it = std::find_if(
+            _documentations.begin(),
+            _documentations.end(),
+            [doc](const Documentation& d) { return doc.id == d.id; }
+        );
+
+        if (it != _documentations.end()) {
+            throw DuplicateDocumentationException(std::move(doc));
+        }
+        else {
+            _documentations.push_back(std::move(doc));
+        }
+    }
+}
+
+std::vector<Documentation> DocumentationEngine::documentations() const {
+    return _documentations;
 }
 
 } // namespace documentation
