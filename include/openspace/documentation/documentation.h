@@ -206,16 +206,25 @@ struct Documentation {
     /**
      * Creates a Documentation with a human-readable \p name and a list of \p entries.
      * \param name The human-readable name of this Documentation
+     * \param id A unique identifier which can be used by applications (or other
+     * Documentation%s to reference this entry
      * \param entries A list of DocumentationEntry%s that describe the individual keys for
      * this entrie Documentation
      * \param exhaustive Determines whether the \p entries are an exhaustive specification
      * of the object or whether additional, potentially unused, keys are allowed
      */
-    Documentation(std::string name = "", DocumentationEntries entries = {},
+    Documentation(std::string name, std::string id, DocumentationEntries entries = {},
         Exhaustive exhaustive = Exhaustive::No);
+
+    Documentation(std::string name, DocumentationEntries entries = {},
+        Exhaustive exhaustive = Exhaustive::No);
+
+    Documentation(DocumentationEntries entries = {}, Exhaustive exhaustive = Exhaustive::No);
 
     /// The human-readable name of the Documentation
     std::string name;
+    /// A unique identifier which can be used to reference this Documentation
+    std::string id;
     /// A list of specifications that are describing this Documentation
     DocumentationEntries entries;
     /// A flag to say wheter the DocumentationEntries are an exhaustive description

@@ -55,7 +55,6 @@ class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
 
-namespace documentation { class DocumentationEngine; }
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
 //namespace scripting { class ScriptEngine; }
@@ -78,7 +77,6 @@ public:
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
-    documentation::DocumentationEngine& documentationEngine();
     interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
     scripting::ScriptEngine& scriptEngine();
@@ -137,7 +135,6 @@ private:
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
-    std::unique_ptr<documentation::DocumentationEngine> _documentationEngine;
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;

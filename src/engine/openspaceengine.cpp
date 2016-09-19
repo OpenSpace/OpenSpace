@@ -121,7 +121,6 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
-    , _documentationEngine(new documentation::DocumentationEngine)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
     , _scriptEngine(new scripting::ScriptEngine)
@@ -164,8 +163,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
 
-    _documentationEngine->addDocumentation(ConfigurationManager::Documentation());
-    _documentationEngine->addDocumentation(Scene::Documentation());
+    DocEng.addDocumentation(ConfigurationManager::Documentation());
+    DocEng.addDocumentation(Scene::Documentation());
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
@@ -304,7 +303,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
         for (auto&& doc : m->documentations()) {
-            _engine->_documentationEngine->addDocumentation(doc);
+            DocEng.addDocumentation(doc);
         }
     }
 
@@ -444,7 +443,7 @@ bool OpenSpaceEngine::initialize() {
         std::string documentationFile;
         configurationManager().getValue(DocumentationFile, documentationFile);
         documentationFile = absPath(documentationFile);
-        _documentationEngine->writeDocumentation(documentationFile, documentationType);
+        DocEng.writeDocumentation(documentationFile, documentationType);
     }
 
     const std::string FactoryDocumentationType =
@@ -1050,11 +1049,6 @@ void OpenSpaceEngine::enableBarrier() {
 
 void OpenSpaceEngine::disableBarrier() {
     _windowWrapper->setBarrier(false);
-}
-
-documentation::DocumentationEngine& OpenSpaceEngine::documentationEngine() {
-    ghoul_assert(_documentationEngine, "DocumentationEngine must not be nullptr");
-    return *_documentationEngine;
 }
 
 NetworkEngine& OpenSpaceEngine::networkEngine() {

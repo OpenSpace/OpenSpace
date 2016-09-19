@@ -82,10 +82,20 @@ DocumentationEntry::DocumentationEntry(std::string key, Verifier* v, std::string
                          optional)
 {}
 
-Documentation::Documentation(std::string n, DocumentationEntries entries, Exhaustive exh)
+Documentation::Documentation(std::string n, std::string id, DocumentationEntries entries,
+                             Exhaustive exh)
     : name(std::move(n))
+    , id(std::move(id))
     , entries(std::move(entries))
     , exhaustive(std::move(exh))
+{}
+
+Documentation::Documentation(std::string n, DocumentationEntries entries, Exhaustive exh)
+    : Documentation(n, "", entries, exh)
+{}
+
+Documentation::Documentation(DocumentationEntries entries, Exhaustive exh)
+    : Documentation("", "", entries, exh)
 {}
 
 TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& dict) {

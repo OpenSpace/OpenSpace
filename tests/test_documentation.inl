@@ -98,7 +98,6 @@ TEST_F(DocumentationTest, InitializerConstructor) {
     using namespace openspace::documentation;
     
     Documentation doc {
-        "Test",
         {
             // Basic Verifiers
             {"BoolVerifier", new BoolVerifier },
@@ -162,7 +161,6 @@ TEST_F(DocumentationTest, BoolVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "",
         {{ "Bool", new BoolVerifier }}
     };
 
@@ -198,7 +196,6 @@ TEST_F(DocumentationTest, DoubleVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "",
         {{ "Double", new DoubleVerifier }}
     };
 
@@ -234,7 +231,6 @@ TEST_F(DocumentationTest, IntVerifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "",
         {{ "Int", new IntVerifier }}
     };
 
@@ -277,7 +273,6 @@ TEST_F(DocumentationTest, StringVerifier) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String", new StringVerifier }}
     };
 
@@ -311,7 +306,6 @@ TEST_F(DocumentationTest, TableVerifierType) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Table", new TableVerifier }}
     };
 
@@ -346,7 +340,6 @@ TEST_F(DocumentationTest, MixedVerifiers) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {
             { "Bool", new BoolVerifier },
             { "Double", new DoubleVerifier },
@@ -401,7 +394,6 @@ TEST_F(DocumentationTest, NestedTables) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {
             { "Outer_Int", new IntVerifier },
             { "Outer_Table", new TableVerifier({
@@ -553,7 +545,6 @@ TEST_F(DocumentationTest, Optional) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {
             { "Bool_Force", new BoolVerifier, "", Optional::No },
             { "Bool_Optional", new BoolVerifier, "", Optional::Yes }
@@ -607,7 +598,6 @@ TEST_F(DocumentationTest, RequiredInOptional) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{
             "a",
             new TableVerifier({
@@ -669,7 +659,6 @@ TEST_F(DocumentationTest, Exhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntVerifier }},
         Exhaustive::Yes
     };
@@ -708,7 +697,6 @@ TEST_F(DocumentationTest, NestedExhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Table", new TableVerifier(
             { { "a", new IntVerifier } },
             Exhaustive::Yes
@@ -738,10 +726,7 @@ TEST_F(DocumentationTest, NestedExhaustive) {
 TEST_F(DocumentationTest, EmptyEntriesNonExhaustive) {
     using namespace openspace::documentation;
 
-    Documentation doc {
-        "Test",
-        {}
-    };
+    Documentation doc;
 
     ghoul::Dictionary positive {};
     TestResult positiveRes = testSpecification(doc, positive);
@@ -760,7 +745,6 @@ TEST_F(DocumentationTest, EmptyEntriesExhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {},
         Exhaustive::Yes
     };
@@ -784,7 +768,6 @@ TEST_F(DocumentationTest, EmptyNestedExhaustive) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{
             "Table",
             new TableVerifier(
@@ -818,7 +801,6 @@ TEST_F(DocumentationTest, LessInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntLessVerifier(5) }}
     };
 
@@ -843,7 +825,6 @@ TEST_F(DocumentationTest, LessDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleLessVerifier(5.0) }}
     };
 
@@ -868,7 +849,6 @@ TEST_F(DocumentationTest, LessEqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntLessEqualVerifier(5) }}
     };
 
@@ -900,7 +880,6 @@ TEST_F(DocumentationTest, LessEqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleLessEqualVerifier(5.0) }}
     };
 
@@ -932,7 +911,6 @@ TEST_F(DocumentationTest, GreaterInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntGreaterVerifier(5) }}
     };
 
@@ -957,7 +935,6 @@ TEST_F(DocumentationTest, GreaterDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleGreaterVerifier(5.0) }}
     };
 
@@ -982,7 +959,6 @@ TEST_F(DocumentationTest, GreaterEqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntGreaterEqualVerifier(5) }}
     };
 
@@ -1014,7 +990,6 @@ TEST_F(DocumentationTest, GreaterEqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleGreaterEqualVerifier(5.0) }}
     };
 
@@ -1046,7 +1021,6 @@ TEST_F(DocumentationTest, EqualBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Bool", new BoolEqualVerifier(true) }}
     };
 
@@ -1071,7 +1045,6 @@ TEST_F(DocumentationTest, EqualInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntEqualVerifier(1) }}
     };
 
@@ -1096,7 +1069,6 @@ TEST_F(DocumentationTest, EqualDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleEqualVerifier(1.0) }}
     };
 
@@ -1122,7 +1094,6 @@ TEST_F(DocumentationTest, EqualString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String", new StringEqualVerifier("string"s) }}
     };
 
@@ -1147,7 +1118,6 @@ TEST_F(DocumentationTest, UnequalBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Bool", new BoolUnequalVerifier(true) }}
     };
 
@@ -1172,7 +1142,6 @@ TEST_F(DocumentationTest, UnequalInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntUnequalVerifier(1) }}
     };
 
@@ -1197,7 +1166,6 @@ TEST_F(DocumentationTest, UnequalDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleUnequalVerifier(1.0) }}
     };
 
@@ -1223,7 +1191,6 @@ TEST_F(DocumentationTest, UnequalString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String", new StringUnequalVerifier("string"s) }}
     };
 
@@ -1248,7 +1215,6 @@ TEST_F(DocumentationTest, ListBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Bool" , new BoolInListVerifier({ true }) }}
     };
 
@@ -1273,7 +1239,6 @@ TEST_F(DocumentationTest, ListInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int" , new IntInListVerifier({ 0, 1, 2 }) }}
     };
 
@@ -1305,7 +1270,6 @@ TEST_F(DocumentationTest, ListDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double" , new DoubleInListVerifier({ 0.0, 1.0, 2.0 }) }}
     };
 
@@ -1338,7 +1302,6 @@ TEST_F(DocumentationTest, ListString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String" , new StringInListVerifier({ "0"s, "1"s, "2"s }) }}
     };
 
@@ -1370,7 +1333,6 @@ TEST_F(DocumentationTest, NotListBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Bool" , new BoolNotInListVerifier({ true }) }}
     };
 
@@ -1395,7 +1357,6 @@ TEST_F(DocumentationTest, NotListInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int" , new IntNotInListVerifier({ 0, 1, 2 }) }}
     };
 
@@ -1427,7 +1388,6 @@ TEST_F(DocumentationTest, NotListDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double" , new DoubleNotInListVerifier({ 0.0, 1.0, 2.0 }) }}
     };
 
@@ -1460,7 +1420,6 @@ TEST_F(DocumentationTest, NotListString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String" , new StringNotInListVerifier({ "0"s, "1"s, "2"s }) }}
     };
 
@@ -1492,7 +1451,6 @@ TEST_F(DocumentationTest, AnnotationBool) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Bool", new BoolAnnotationVerifier("Bool") }}
     };
 
@@ -1517,7 +1475,6 @@ TEST_F(DocumentationTest, AnnotationInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new IntAnnotationVerifier("Int") }}
     };
 
@@ -1542,7 +1499,6 @@ TEST_F(DocumentationTest, AnnotationDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new DoubleAnnotationVerifier("Double") }}
     };
 
@@ -1568,7 +1524,6 @@ TEST_F(DocumentationTest, AnnotationString) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "String", new StringAnnotationVerifier("String") }}
     };
 
@@ -1593,7 +1548,6 @@ TEST_F(DocumentationTest, AnnotationTable) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Table", new TableAnnotationVerifier("Table") }}
     };
 
@@ -1618,7 +1572,6 @@ TEST_F(DocumentationTest, InRangeInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new InRangeVerifier<IntVerifier>(0, 5) }}
     };
 
@@ -1657,7 +1610,6 @@ TEST_F(DocumentationTest, InRangeDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new InRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
     };
 
@@ -1703,7 +1655,6 @@ TEST_F(DocumentationTest, NotInRangeInt) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Int", new NotInRangeVerifier<IntVerifier>(0, 5) }}
     };
 
@@ -1753,7 +1704,6 @@ TEST_F(DocumentationTest, NotInRangeDouble) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "Double", new NotInRangeVerifier<DoubleVerifier>(0.0, 5.0) }}
     };
 
@@ -1803,7 +1753,6 @@ TEST_F(DocumentationTest, Wildcard) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ DocumentationEntry::Wildcard, new IntVerifier }}
     };
 
@@ -1860,7 +1809,6 @@ TEST_F(DocumentationTest, WildcardMixed) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {
             { DocumentationEntry::Wildcard, new IntVerifier },
             { "b", new IntGreaterVerifier(5) }
@@ -1935,7 +1883,6 @@ TEST_F(DocumentationTest, AndOperator) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {
             { "a", new AndVerifier(
                 new IntGreaterEqualVerifier(2), new IntLessEqualVerifier(5)
@@ -1975,7 +1922,6 @@ TEST_F(DocumentationTest, OrOperator) {
     using namespace std::string_literals;
 
     Documentation doc {
-        "Test",
         {{ "a", new OrVerifier(new StringVerifier, new IntVerifier)}}
     };
 
@@ -2007,7 +1953,6 @@ TEST_F(DocumentationTest, BoolVector2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         {{ "a", new BoolVector2Verifier }}
     };
 
@@ -2041,7 +1986,6 @@ TEST_F(DocumentationTest, IntVector2Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new IntVector2Verifier } }
     };
 
@@ -2074,8 +2018,7 @@ TEST_F(DocumentationTest, IntVector2Verifier) {
 TEST_F(DocumentationTest, DoubleVector2Verifier) {
     using namespace openspace::documentation;
 
-    Documentation doc{
-        "Test",
+    Documentation doc {
         { { "a", new DoubleVector2Verifier } }
     };
 
@@ -2109,7 +2052,6 @@ TEST_F(DocumentationTest, BoolVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new BoolVector3Verifier } }
     };
 
@@ -2143,7 +2085,6 @@ TEST_F(DocumentationTest, IntVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new IntVector3Verifier } }
     };
 
@@ -2177,7 +2118,6 @@ TEST_F(DocumentationTest, DoubleVector3Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new DoubleVector3Verifier } }
     };
 
@@ -2211,7 +2151,6 @@ TEST_F(DocumentationTest, BoolVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new BoolVector4Verifier } }
     };
 
@@ -2245,7 +2184,6 @@ TEST_F(DocumentationTest, IntVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new IntVector4Verifier } }
     };
 
@@ -2279,7 +2217,6 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
     using namespace openspace::documentation;
 
     Documentation doc {
-        "Test",
         { { "a", new DoubleVector4Verifier } }
     };
 

@@ -30,9 +30,25 @@
 
 #include <fstream>
 
+#include <fmt/format.h>
+
 namespace openspace {
 namespace documentation {
 
+DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
+                    Documentation documentation)
+    : ghoul::RuntimeError(fmt::format(
+        "Duplicate Documentation with name '{}' and id '{}'",
+        documentation.name,
+        documentation.id
+    ))
+    , documentation(std::move(documentation))
+{}
+
+DocumentationEngine& DocumentationEngine::ref() {
+    static DocumentationEngine engine;
+    return engine;
+}
 
 std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {
     using namespace std::string_literals;
@@ -59,7 +75,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         if (tv) {
             // We have a TableVerifier, so we need to recurse
             ++indentLevel;
-            result += generateTextDocumentation({ "", tv->documentations }, indentLevel);
+            result += generateTextDocumentation({ "", "", tv->documentations }, indentLevel);
             result = result.substr(0, result.size() - 2);
             --indentLevel;
         }
@@ -89,7 +105,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"type\": \"" << p.verifier->type() << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         if (tv) {
-            std::string json = generateJsonDocumentation({ "", tv->documentations });
+            std::string json = generateJsonDocumentation({ "", "", tv->documentations });
             // We have a TableVerifier, so we need to recurse
             result << "\"restrictions\": " << json << ",";
         }
@@ -132,7 +148,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
                  << "\t\t</tr>\n"
                  << "\t</thead>\n"
                  << "\t<tbody>\n"
-                 << generateHtmlDocumentation({ "", tv->documentations })
+                 << generateHtmlDocumentation({ "", "", tv->documentations })
                  << "\t</tbody>\n"
                  << "</table>\n"
                  << "</td>\n";
@@ -220,7 +236,18 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
-    _documentations.push_back(std::move(doc));
+    auto it = std::find_if(
+        _documentations.begin(),
+        _documentations.end(),
+        [doc](const Documentation& d) { return doc.id == d.id; }
+    );
+
+    if (it != _documentations.end()) {
+        throw DuplicateDocumentationException(std::move(doc));
+    }
+    else {
+        _documentations.push_back(std::move(doc));
+    }
 }
 
 } // namespace documentation
