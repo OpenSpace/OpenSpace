@@ -234,14 +234,14 @@ namespace openspace {
         // Sample and do linear interpolation (could possibly be moved as a function in ghoul texture)
         glm::uvec3 dimensions = tile.texture->dimensions();
         
-        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions.xy());
+        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy() - glm::uvec2(1));
+        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
         glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
 
         float sample00 = tile.texture->texelAsFloat(samplePos00).x;
         float sample10 = tile.texture->texelAsFloat(samplePos10).x;

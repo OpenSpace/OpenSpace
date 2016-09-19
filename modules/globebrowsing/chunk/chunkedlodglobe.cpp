@@ -214,7 +214,7 @@ namespace openspace {
                 const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
                 clippingSpaceCorners[i] = clippingSpaceCorner;
 
-                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
+                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
                 screenSpaceBounds.expand(screenSpaceCorner);
             }
 
