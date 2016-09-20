@@ -7,11 +7,9 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "CHURYUMOV-GERASIMENKO",
-                Reference = "GALACTIC",
                 Observer = "SUN",
             },
         },
-        GuiName = "/Solar/67PBarycenter",
     },
     {   
         Name = "67P",
@@ -89,7 +87,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-        GuiName = "/Solar/67P",
     },
     -- 67P Trail Module
     {   
@@ -117,7 +114,6 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 0,
         },
-        GuiName = "/Solar/67PTrail"
     },
     --[[
     {   

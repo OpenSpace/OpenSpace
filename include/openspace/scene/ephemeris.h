@@ -25,28 +25,25 @@
 #ifndef __EPHEMERIS_H__
 #define __EPHEMERIS_H__
 
-#include <openspace/util/powerscaledcoordinate.h>
-#include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class Ephemeris {
+class Ephemeris : public properties::PropertyOwner {
 public:
     static Ephemeris* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    Ephemeris(const ghoul::Dictionary& dictionary);
     virtual ~Ephemeris();
     virtual bool initialize();
-    virtual const glm::dvec3& position() const = 0;
+    virtual glm::dvec3 position() const = 0;
     virtual void update(const UpdateData& data);
 
     static openspace::Documentation Documentation();
-
-protected:
-    Ephemeris();
 };
 
 }  // namespace openspace

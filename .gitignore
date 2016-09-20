@@ -68,6 +68,10 @@ data/scene/newhorizons/pluto/pluto/assets
 data/scene/newhorizons/pluto/pluto/full_images
 data/scene/newhorizons/pluto/pluto/images
 data/scene/newhorizons/pluto/pluto/textures
+data/scene/osirisrex/bennu/models
+data/scene/osirisrex/bennu/textures
+data/scene/osirisrex/osirisrex/models
+data/scene/osirisrex/osirisrex/textures
 data/scene/pluto/textures
 data/scene/saturn/textures
 data/scene/rosetta/67P/obj
@@ -91,5 +95,6 @@ data/spice/de430_1850-2150.bsp
 data/spice/MAR063.BSP
 data/spice/NewHorizonsKernels
 data/spice/nh_kernels
+data/spice/OsirisRexKernels
 data/spice/Rosetta
 

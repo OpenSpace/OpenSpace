@@ -11,12 +11,9 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = BENNU_BODY,
-                Reference = "GALACTIC",
                 Observer = "SUN",
             },
         },
-
-        GuiName = "/Solar/Bennu"
     },
     {   
         Name = "Bennu2",
@@ -97,8 +94,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-
-        GuiName = "/Solar/Bennu"
     },
     {   
         Name = "BennuTrail",
@@ -124,6 +119,5 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 0, 
         },
-        GuiName = "OsirisRexTrailLocal"
     },
 }

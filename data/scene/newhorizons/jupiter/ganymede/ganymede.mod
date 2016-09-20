@@ -41,11 +41,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "GANYMEDE",
-                Reference = "ECLIPJ2000",
                 Observer = "JUPITER BARYCENTER",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -53,23 +50,6 @@ return {
                 DestinationFrame = "ECLIPJ2000",
             },
         },
-        --[[
-        Ephemeris = {
-            Type = "Spice",
-            Body = "GANYMEDE",
-            Reference = "ECLIPJ2000",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_GANYMEDE",
-            Reference = "ECLIPJ2000"
-        },
-        ]]
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "GanymedeText",
@@ -109,6 +89,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/GanymedeTrail"
     }
 }

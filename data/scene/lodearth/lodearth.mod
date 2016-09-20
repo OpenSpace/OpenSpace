@@ -8,11 +8,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "EARTH",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
@@ -29,8 +26,7 @@ return {
             TropicalOrbitPeriod = 365.242,
             EarthOrbitRatio = 1,
             DayLength = 24
-        },
-        GuiName = "/Solar/EarthTrail"
+        }
     },
     -- RenderableGlobe module
     {
@@ -130,7 +126,6 @@ return {
                     },
                 },
             },
-        },
-        GuiName = "/Solar/Planets/Earth"
+        }
     },
 }

@@ -29,7 +29,6 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "OSIRIS-REX",
-                Reference = "GALACTIC",
                 Observer = "SUN",
             },
             Rotation = {
@@ -38,7 +37,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-        GuiName = "/Solar/OsirisRex"
     },
     {
         Name = "ORX_OCAMS_POLYCAM",
@@ -72,7 +70,6 @@ return {
                 DestinationFrame = "ORX_SPACECRAFT",
             },
         },
-        GuiName = "/Solar/ORX_OCAMS_POLYCAM"
     },
     {
         Name = "ORX_REXIS",
@@ -104,11 +101,10 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "ORX_REXIS",
                 DestinationFrame = "ORX_SPACECRAFT",
-            },        },
-        
-        GuiName = "/Solar/ORX_REXIS"
+            },
+        },
     },
-    {   
+    {
         Name = "POLYCAM FOV",
         Parent = "ORX_OCAMS_POLYCAM",
         Renderable = {
@@ -125,9 +121,8 @@ return {
                 BENNU_BODY -- Bennu
             }
         },
-        GuiName = "/Solar/POLYCAM FOV"
     },
-    {   
+    { 
         Name = "REXIS FOV",
         Parent = "ORX_REXIS",
         Renderable = {
@@ -144,7 +139,6 @@ return {
                 BENNU_BODY -- Bennu
             }
         },
-        GuiName = "/Solar/REXIS FOV"
     },
     --[[
     -- Latest image taken by POLYCAM
@@ -211,7 +205,6 @@ return {
             SampleDeltaTime = 60, -- Seconds between each point
             SubSamples = 59, 
         },
-        GuiName = "OsirisRexTrailEarth"
     },
 
     -- Trail relative to solar system barycenter
@@ -240,7 +233,6 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 0, 
         },
-        GuiName = "OsirisRexTrailSolarSystem"
     },
 
     -- Trail relative to Bennu
@@ -269,7 +261,6 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 3, 
         },
-        GuiName = "OsirisRexTrailBennu"
     },
 
 

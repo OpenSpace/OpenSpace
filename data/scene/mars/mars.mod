@@ -31,11 +31,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MARS BARYCENTER",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -46,8 +43,7 @@ return {
                 Type = "StaticScale",
                 Scale = 1,
             },
-        },
-        GuiName = "/Solar/Planets/Mars"
+        }
     },
     -- MarsTrail module
     {   
@@ -67,7 +63,6 @@ return {
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
-        },
-        GuiName = "/Solar/MarsTrail"
+        }
     }
 }

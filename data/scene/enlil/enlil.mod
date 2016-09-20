@@ -4,14 +4,9 @@ return {
     {   
         Name = "Enlil",
         Parent = "Root",
-        Ephemeris = {
-            Type = "Static",
-            Position = { 0.0, 0.0, 0.0, 0}
-        },
         RenderableToggle = "e",
         Renderable = {
             Type = "RenderableVolumeGL",
-            ---[[
             BoxScaling = { f, f, f},
             VolumeName = "EnlilVolume",
             Volume = "${OPENSPACE_DATA}/enlil/Hong_Xie_120312_SH_1.enlil.0016.cdf",
@@ -26,8 +21,6 @@ return {
             TransferFunction = "transferfunctions/t2.txt",
             -- TransferFunction = "transferfunctions/t1.txt",
             Sampler = "sampler.glsl",
-            --]]
-        },
-        GuiName = "/Volumes/Volume"
+        }
     }
 }

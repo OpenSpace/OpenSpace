@@ -24,24 +24,66 @@
 
 #include <modules/base/ephemeris/staticephemeris.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string KeyPosition = "Position";
 }
 
 namespace openspace {
 
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : _position(0.0, 0.0, 0.0)
+Documentation StaticEphemeris::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Translation",
+        "base_transform_translation_static",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("StaticEphemeris"),
+                "",
+                Optional::No
+            },
+            {
+                KeyPosition,
+                new DoubleVector3Verifier,
+                "Specifies the position (in meters) that this scenegraph node is located "
+                "at relative to its parent",
+                Optional::No
+            }
+        },
+        Exhaustive::Yes
+    };
+}
+
+
+StaticEphemeris::StaticEphemeris()
+    : _position(
+        "position",
+        "Position",
+        glm::dvec3(0.0),
+        glm::dvec3(-std::numeric_limits<double>::max()),
+        glm::dvec3(std::numeric_limits<double>::max())
+    )
 {
-    const bool hasPosition = dictionary.hasKeyAndValue<glm::vec3>(KeyPosition);
-    if (hasPosition) {
-        dictionary.getValue(KeyPosition, _position);
-    }
+    addProperty(_position);
+}
+
+StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
+    : StaticEphemeris()
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "StaticEphemeris"
+    );
+
+    _position = dictionary.value<glm::dvec3>(KeyPosition);
 }
 
 StaticEphemeris::~StaticEphemeris() {}
 
-const glm::dvec3& StaticEphemeris::position() const {
+glm::dvec3 StaticEphemeris::position() const {
     return _position;
 }
 

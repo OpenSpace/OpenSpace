@@ -7,11 +7,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MOON",
-                Reference = "ECLIPJ2000",
                 Observer = "EARTH BARYCENTER",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -59,8 +56,7 @@ return {
                     },
                 },
             },
-        },
-        GuiName = "/Solar/Planets/Moon"
+        }
     },
     -- MoonTrail module
     {   
@@ -75,7 +71,6 @@ return {
             TropicalOrbitPeriod =  60,
             EarthOrbitRatio = 0.01,
             DayLength = 1.0,
-        },
-        GuiName = "/Solar/MoonTrail"
+        }
     }
 }

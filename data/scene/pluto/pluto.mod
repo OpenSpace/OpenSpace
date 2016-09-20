@@ -6,12 +6,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "PLUTO BARYCENTER",
-            Reference = "GALACTIC",
             Observer = "SUN",
-            Kernels = {
-               "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-                  -- "${OPENSPACE_DATA}/spice/Pluto/EPHEMERIDES/nh_plu017.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
         },
     },
 
@@ -41,20 +37,14 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "PLUTO",
-            Reference = "GALACTIC",
             Observer = "PLUTO BARYCENTER",
-            Kernels = {
-               "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-                  -- "${OPENSPACE_DATA}/spice/Pluto/EPHEMERIDES/nh_plu017.bsp"
-               -- "C:/Users/michal/NewHorizons/SPICE/nh_plu017.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
         },
         Rotation = {
             Type = "Spice",
             Frame = "IAU_PLUTO",
             Reference = "GALACTIC"
         },
-        GuiName = "/Solar/Planets/Pluto"
     },
 {   
         Name = "Charon",
@@ -81,20 +71,15 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "CHARON",
-            Reference = "ECLIPJ2000",
             Observer = "PLUTO BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
         },
         Rotation = {
             Type = "Spice",
             Frame = "IAU_CHARON",
             Reference = "ECLIPJ2000"
         },
-        GuiName = "/Solar/Planets/Charon"
     },
-
     -- CharonTrail module
     {   
         Name = "CharonTrail",
@@ -114,7 +99,6 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/CharonTrail"
     }    
     --[[
     -- PlutoTrail module

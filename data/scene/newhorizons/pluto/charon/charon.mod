@@ -56,25 +56,10 @@ return {
                 "CHARON"
             }
         },
-        --[[
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CHARON",
-            Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_CHARON",
-            Reference = "ECLIPJ2000"
-        },
-        ]]
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "CHARON",
-                Reference = "GALACTIC",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -84,7 +69,6 @@ return {
                 DestinationFrame = "GALACTIC"
             },
         },
-        GuiName = "/Solar/Planets/Charon"
     },
     {
         Name = "CharonText",
@@ -103,12 +87,6 @@ return {
                 Position = {0, -1000000, 0}
             },
         },
-        --[[
-        Ephemeris = {
-            Type = "Static",
-             Position = {0, -10, 0, 5}
-        }
-        ]]
     },
     {
         Name = "CharonShadow",
@@ -143,6 +121,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/CharonTrail"
     }
 }

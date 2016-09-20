@@ -8,11 +8,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MARS BARYCENTER",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
@@ -128,9 +125,7 @@ return {
                     },
                 },
             },
-        },
-
-        GuiName = "/Solar/Planets/LodMars"
+        }
     },
     -- MarsTrail module
     {   
@@ -145,7 +140,6 @@ return {
             TropicalOrbitPeriod = 686.973,
             EarthOrbitRatio = 1.881,
             DayLength = 24.6597,
-        },
-        GuiName = "/Solar/MarsTrail"
+        }
     }
 }

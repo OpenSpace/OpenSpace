@@ -51,6 +51,22 @@ namespace std {
 std::string to_string(std::string value) {
     return value; 
 }
+
+std::string to_string(openspace::documentation::TestResult::Offense::Reason reason) {
+    switch (reason) {
+        case openspace::documentation::TestResult::Offense::Reason::ExtraKey:
+            return "Extra key";
+        case openspace::documentation::TestResult::Offense::Reason::MissingKey:
+            return "Missing key";
+        case openspace::documentation::TestResult::Offense::Reason::UnknownIdentifier:
+            return "Unknown identifier";
+        case openspace::documentation::TestResult::Offense::Reason::Verification:
+            return "Verification failed";
+        case openspace::documentation::TestResult::Offense::Reason::WrongType:
+            return "Wrong type";
+    }
+}
+
 } // namespace std
 
 namespace openspace {

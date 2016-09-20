@@ -51,7 +51,8 @@ Documentation Ephemeris::Documentation() {
                 "on application startup into the FactoryDocumentation.",
                 Optional::No
             }
-        }
+        },
+        Exhaustive::No
     };
 }
 
@@ -74,10 +75,6 @@ Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) 
     return result;
 }
 
-Ephemeris::Ephemeris() {}
-    
-Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary) {}
-    
 Ephemeris::~Ephemeris() {}
     
 bool Ephemeris::initialize() {

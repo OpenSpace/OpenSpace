@@ -136,7 +136,9 @@ void BaseModule::internalInitialize() {
 
 std::vector<Documentation> BaseModule::documentations() const {
     return {
-        StaticScale::Documentation()
+        StaticScale::Documentation(),
+        StaticEphemeris::Documentation(),
+        SpiceEphemeris::Documentation()
     };
 }
 

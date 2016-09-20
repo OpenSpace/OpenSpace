@@ -345,8 +345,17 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         };
 
         for (const ModuleInformation& i : moduleDictionaries) {
-            LINFO("Adding module: " << i.moduleName);
-            addModule(i);
+            try {
+                LINFO("Adding module: " << i.moduleName);
+                addModule(i);
+            }
+            catch (const documentation::SpecificationError& specError) {
+                LERROR("Error loading module: " << i.moduleName);
+                LERRORC(specError.component, specError.message);
+                for (const auto& offense : specError.result.offenses) {
+                    LERRORC(offense.offender, std::to_string(offense.reason));
+                }
+            }
         }
     }
 //    ghoul::lua::destroyLuaState(state);

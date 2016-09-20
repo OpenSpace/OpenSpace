@@ -5,8 +5,8 @@ return {
         Parent = "EarthBarycenter",
         Renderable = {
             Type = "RenderablePlanet",
-			Frame = "IAU_MOON",
-			Body = "MOON",
+            Frame = "IAU_MOON",
+            Body = "MOON",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.737, 6},
@@ -32,11 +32,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MOON",
-                Reference = "ECLIPJ2000",
                 Observer = "EARTH BARYCENTER",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -44,7 +41,6 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
-        GuiName = "/Solar/Planets/MOON"
     },
     -- MoonTrail module
     {   
@@ -65,6 +61,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/MoonTrail"
     }
 }

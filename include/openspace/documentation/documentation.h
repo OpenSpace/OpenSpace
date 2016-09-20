@@ -285,4 +285,13 @@ using documentation::Documentation;
 
 } // namespace openspace
 
+// Make the overload for std::to_string available for the Offense::Reason for easier
+// error logging
+
+namespace std {
+
+std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+
+} // namespace
+
 #endif // __DOCUMENTATION_H__

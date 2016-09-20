@@ -7,11 +7,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MERCURY",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
@@ -70,7 +67,6 @@ return {
                 },
             },
         },
-        GuiName = "/Solar/Planets/LodMercury"
     },
 
     -- MercuryTrail module
@@ -87,6 +83,5 @@ return {
             EarthOrbitRatio = 0.241,
             DayLength = 4222.6,
         },
-        GuiName = "/Solar/MercuryTrail"
     }
 }

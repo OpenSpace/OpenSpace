@@ -70,7 +70,6 @@ return {
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        "imageplane",
         "newhorizons/newhorizons",
         "newhorizons/newhorizonsfov",
     }

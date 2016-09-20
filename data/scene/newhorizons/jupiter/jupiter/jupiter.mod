@@ -7,11 +7,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "JUPITER BARYCENTER",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
@@ -97,7 +94,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "JupiterText",
@@ -136,7 +132,6 @@ return {
                  -- need to add different texture
              },  
          },
-         GuiName = "/Solar/JupiterTrail"
      }
     
 }

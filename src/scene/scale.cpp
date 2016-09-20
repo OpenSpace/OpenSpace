@@ -51,7 +51,8 @@ Documentation Scale::Documentation() {
                 "application startup into the FactoryDocumentation.",
                 Optional::No
             }
-        }
+        },
+        Exhaustive::No
     };
 }
 
@@ -71,10 +72,6 @@ Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     return result;
 }
 
-Scale::Scale() {}
-    
-Scale::Scale(const ghoul::Dictionary& dictionary) {}
-    
 Scale::~Scale() {}
     
 bool Scale::initialize() {

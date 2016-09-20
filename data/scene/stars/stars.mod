@@ -9,8 +9,5 @@ return {
             Texture = "${OPENSPACE_DATA}/scene/stars/textures/halo.png",
             ColorMap = "${OPENSPACE_DATA}/scene/stars/colorbv.cmap"
         },
-        Ephemeris = {
-            Type = "Static"
-        }
     }
 }

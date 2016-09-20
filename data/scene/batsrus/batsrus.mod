@@ -57,8 +57,6 @@ return {
             TransferFunctionName = "BatsrusPTF",
             TransferFunction = "transferfunctions/p.txt",
             Sampler = "psampler.glsl",
-        },
-        GuiName = "/Volumes/Volume"
+        }
     }
-    --]]
 }

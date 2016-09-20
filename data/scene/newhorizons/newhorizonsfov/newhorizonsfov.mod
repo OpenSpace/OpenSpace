@@ -24,7 +24,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_LORRI"
     },
     -- NewHorizonsFov module NH_RALPH_LEISA
     {   
@@ -51,7 +50,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_LEISA"
     },
 
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN1
@@ -79,7 +77,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_PAN1"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN2
     {   
@@ -107,7 +104,6 @@ return {
             }
 
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_PAN2"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_RED
     {   
@@ -135,7 +131,6 @@ return {
             }
 
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_RED"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_BLUE
     {   
@@ -162,7 +157,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_BLUE"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_FT
     {   
@@ -189,7 +183,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_FT"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_METHANE
     {   
@@ -216,7 +209,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_NIR
     {   
@@ -243,7 +235,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
     -- NewHorizonsFov module NH_ALICE_AIRGLOW
     {   
@@ -270,7 +261,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_ALICE_AIRGLOW"
     },
     -- NewHorizonsFov module NH_ALICE_SOC
     {   
@@ -297,7 +287,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_ALICE_SOC"
     },
     {
         Name = "NH_REX",

@@ -102,23 +102,10 @@ return {
                 Ghosting = false,
             },
         },
-        --[[
-        Ephemeris = {
-                Type = "Spice",
-                Body = "NEW HORIZONS",
-                -- Reference = "ECLIPJ2000",
-                Reference = "GALACTIC",
-                -- Observer = "PLUTO BARYCENTER",
-                Observer = "SUN",
-                -- Observer = "JUPITER BARYCENTER",
-                Kernels = NewHorizonsKernels
-            },
-            ]]
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "NEW HORIZONS",
-                Reference = "GALACTIC",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
             },
@@ -128,7 +115,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-        GuiName = "/Solar/NewHorizons"
     },
     --NewHorizonsTrail module
     --[[{   
@@ -181,7 +167,6 @@ return {
                 Ghosting = false,
             },
         },
-        GuiName = "/Solar/NewHorizons"
     },
 
     {   
@@ -209,7 +194,6 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 3, 
         },
-        GuiName = "/Solar/NewHorizonsTrailPluto"
     },
     --[[
     -- NewHorizonsPath module
