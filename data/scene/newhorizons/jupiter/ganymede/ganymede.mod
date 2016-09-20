@@ -22,6 +22,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "GANYMEDE",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             Instrument = {                
                 Name       = "NH_LORRI",
@@ -78,7 +79,8 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Ganymede-Text.png"
+            Texture = "textures/Ganymede-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {

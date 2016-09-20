@@ -27,17 +27,20 @@
 
 #include <openspace/scene/scale.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
     
-class StaticScale: public Scale {
+class StaticScale : public Scale {
 public:
-    StaticScale(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
-    virtual ~StaticScale();
-    virtual double scaleValue() const;
-    virtual void update(const UpdateData& data) override;
+    StaticScale();
+    StaticScale(const ghoul::Dictionary& dictionary);
+    double scaleValue() const;
+
+    static openspace::Documentation Documentation();
+
 private:
     properties::FloatProperty _scaleValue;
-    //double _scaleValue;
 };
     
 } // namespace openspace

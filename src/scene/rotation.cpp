@@ -26,6 +26,8 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string _loggerCat = "Rotation";
     const std::string KeyType = "Type";
@@ -33,16 +35,31 @@ namespace {
 
 namespace openspace {
 
-Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Ephemeris did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+Documentation Rotation::Documentation() {
+    using namespace openspace::documentation;
 
-    std::string rotationType;
-    dictionary.getValue(KeyType, rotationType);
-    ghoul::TemplateFactory<Rotation>* factory
-          = FactoryManager::ref().factory<Rotation>();
+    return {
+        "Transformation Rotation",
+        "core_transform_rotation",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier("Must name a valid Rotation type."),
+                "The type of the rotation that is described in this element. The "
+                "available types of rotations depend on the configuration of the "
+                "application and can be written to disk on application startup into the "
+                "FactoryDocumentation.",
+                Optional::No
+            }
+        }
+    };
+}
+
+Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
+
+    std::string rotationType = dictionary.value<std::string>(KeyType);
+    auto factory = FactoryManager::ref().factory<Rotation>();
     Rotation* result = factory->create(rotationType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Rotation object of type '" << rotationType << "'");

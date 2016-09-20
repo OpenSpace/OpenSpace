@@ -27,6 +27,8 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
 namespace {
     const std::string _loggerCat = "SpiceEphemeris";
     //const std::string keyGhosting = "EphmerisGhosting";
@@ -59,8 +61,15 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     for (size_t i = 1; i <= kernels.size(); ++i) {
         std::string kernel;
         bool success = kernels.getValue(std::to_string(i), kernel);
-        if (!success)
+        if (!success) {
             LERROR("'" << KeyKernels << "' has to be an array-style table");
+            break;
+        }
+
+        if (!FileSys.fileExists(kernel)) {
+            LERROR("Kernel '" << kernel << "' does not exist");
+            continue;
+        }
 
         try {
             SpiceManager::ref().loadKernel(kernel);

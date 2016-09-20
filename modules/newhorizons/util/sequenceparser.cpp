@@ -42,7 +42,7 @@ namespace openspace {
 std::map<std::string, ImageSubset> SequenceParser::getSubsetMap(){
     return _subsetMap;
 }
-std::vector<std::pair<std::string, TimeRange>> SequenceParser::getIstrumentTimes(){
+std::vector<std::pair<std::string, TimeRange>> SequenceParser::getInstrumentTimes(){
     return _instrumentTimes;
 }
 std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
@@ -52,6 +52,9 @@ std::vector<double> SequenceParser::getCaptureProgression(){
     return _captureProgression;
 };
 
+std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
+    return _fileTranslation;
+}
 
 template <typename T>
 void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T value) {

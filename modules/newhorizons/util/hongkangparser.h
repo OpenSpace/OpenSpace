@@ -46,7 +46,6 @@ public:
 
     bool create() override;
     void findPlaybookSpecifiedTarget(std::string line, std::string& target);
-    virtual std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
 
 private:
     double getMetFromET(double et);
@@ -70,7 +69,7 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    std::map<std::string, Decoder*> _fileTranslation;
+    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _potentialTargets;
 };
 

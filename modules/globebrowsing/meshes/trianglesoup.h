@@ -25,6 +25,7 @@
 #ifndef __TRIANGLESOUP_H__
 #define __TRIANGLESOUP_H__
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -46,9 +47,9 @@ namespace openspace {
 class TriangleSoup
 {
 public:
-    enum class Positions { Yes, No };
-    enum class TextureCoordinates { Yes, No };
-    enum class Normals { Yes, No };
+    using Positions = ghoul::Boolean;
+    using TextureCoordinates = ghoul::Boolean;
+    using Normals = ghoul::Boolean;
 
     TriangleSoup(
         std::vector<unsigned int> elements, // At least elements are required

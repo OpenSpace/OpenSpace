@@ -24,6 +24,8 @@
 
 #include <modules/base/scale/staticscale.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string _loggerCat = "StaticScale";
     const std::string KeyValue = "Scale";
@@ -31,24 +33,35 @@ namespace {
 
 namespace openspace {
 
-StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
+Documentation StaticScale::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Scaling",
+        {{
+            KeyValue,
+            new DoubleVerifier,
+            "The scaling factor by which the scenegraph node is scaled."
+        }}
+    };
+}
+
+StaticScale::StaticScale()
     : _scaleValue("scale", "Scale", 1.0, 1.0, 1000.0)
 {
-    const bool hasValue = dictionary.hasKeyAndValue<glm::vec3>(KeyValue);
-    if (hasValue) {
-        float value;
-        dictionary.getValue(KeyValue, value);
-        _scaleValue.setValue(value);
-    }
-    Scale::addProperty(_scaleValue);
+    addProperty(_scaleValue);
 }
 
-StaticScale::~StaticScale() {}
+
+StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
+    : StaticScale()
+{
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
+    
+    _scaleValue = dictionary.value<double>(KeyValue);
+}
 
 double StaticScale::scaleValue() const {
-    return _scaleValue.value();
+    return _scaleValue;
 }
-
-void StaticScale::update(const UpdateData&) {}
 
 } // namespace openspace

@@ -473,7 +473,7 @@ namespace openspace {
         io.write.region.roundDownToQuadratic();
         io.write.region.roundUpNumPixelToNearestMultipleOf(2);
         if (preRound != io.write.region.numPixels) {
-            //LDEBUG(chunkIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
+            LDEBUG(chunkIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
         }
 
 
@@ -611,10 +611,10 @@ namespace openspace {
             }
         }
 
-        if (depth == 0) {
+        //if (depth == 0) {
             //LDEBUG(indentation << "main rasterIO read: " << io.read.region);
             //LDEBUG(indentation << "main rasterIO write: " << io.write.region);
-        }
+        //}
 
         else if (worstError > CPLErr::CE_None) {
             LDEBUG(indentation << "Error reading padding: " << worstError);

@@ -24,6 +24,9 @@
 
 // open space includes
 #include <openspace/scene/scenegraphnode.h>
+
+#include <openspace/documentation/documentation.h>
+
 #include <openspace/query/query.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -46,6 +49,8 @@
 #include <cctype>
 #include <chrono>
 
+#include "scenegraphnode_doc.inl"
+
 namespace {
     const std::string _loggerCat = "SceneGraphNode";
     const std::string KeyRenderable = "Renderable";
@@ -63,8 +68,13 @@ const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 
-SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
+SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+    openspace::documentation::testSpecificationAndThrow(
+        SceneGraphNode::Documentation(),
+        dictionary,
+        "SceneGraphNode"
+    );
+
     SceneGraphNode* result = new SceneGraphNode;
 
     if (!dictionary.hasValue<std::string>(KeyName)) {
@@ -149,9 +159,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     //}
 
     //parentNode->addNode(result);
-
-    result->_scale->setName("Transform");
-    result->addPropertySubOwner(result->_scale);
 
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
@@ -346,12 +353,20 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         data.camera,
         thisPositionPSC,
         data.doPerformanceMeasurement,
+        data.renderBinMask,
         _worldPositionCached,
         _worldRotationCached,
         _worldScaleCached};
 
     _performanceRecord.renderTime = 0;
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
+
+    bool visible = _renderableVisible &&
+        _renderable->isVisible() &&
+        _renderable->isReady() &&
+        _renderable->isEnabled() &&
+        _renderable->matchesRenderBinMask(data.renderBinMask);
+
+    if (visible) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
@@ -374,7 +389,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
 void SceneGraphNode::postRender(const RenderData& data) {
     const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, _worldPositionCached};
+    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, data.renderBinMask, _worldPositionCached};
 
     _performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
@@ -587,7 +602,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 
 void SceneGraphNode::updateCamera(Camera* camera) const{
 
-    psc origin = psc(worldPosition());
+    psc origin(worldPosition());
     //int i = 0;
     // the camera position
     

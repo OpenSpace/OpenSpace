@@ -31,6 +31,8 @@
 #include <set>
 #include <mutex>
 
+#include <openspace/documentation/documentation.h>
+
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
@@ -116,6 +118,8 @@ public:
      * scene graph
      */
     static scripting::LuaLibrary luaLibrary();
+
+    static documentation::Documentation Documentation();
 
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);

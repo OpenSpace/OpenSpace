@@ -4,7 +4,6 @@ return {
         { Identifier = "rosetta_textures", Destination = "textures", Version = 2 }
     },
     TorrentFiles = {
-        { File = "RosettaKernels.torrent", Destination = "${SPICE}" },
-        { File = "RosettaKernels_New.torrent", Destination = "${SPICE}" }
+        { File = "Rosetta.torrent", Destination = "${SPICE}" },
     }
 }

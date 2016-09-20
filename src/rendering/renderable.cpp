@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
-// ghoul
+#include <openspace/documentation/verifier.h>
+
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
@@ -44,22 +44,37 @@ namespace {
 
 namespace openspace {
 
+Documentation Renderable::Documentation() {
+    using namespace openspace::documentation;
+
+    return {
+        "Renderable",
+        "renderable",
+        {
+        {
+            KeyType,
+            new StringAnnotationVerifier("A valid Renderable created by a factory"),
+            "This key specifies the type of Renderable that gets created. It has to be one"
+            "of the valid Renderables that are available for creation (see the "
+            "FactoryDocumentation for a list of possible Renderables), which depends on "
+            "the configration of the application",
+            Optional::No
+        }
+        }
+    };
+}
+
 Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
     // The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    assert(success);
+    ghoul_assert(success, "The SceneGraphNode did not set the 'name' key");
 
-    std::string renderableType;
-    success = dictionary.getValue(KeyType, renderableType);
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
-    if (!success) {
-        LERROR("Renderable '" << name << "' did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+    std::string renderableType = dictionary.value<std::string>(KeyType);
 
-    ghoul::TemplateFactory<Renderable>* factory
-          = FactoryManager::ref().factory<Renderable>();
+    auto factory = FactoryManager::ref().factory<Renderable>();
     Renderable* result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
@@ -71,66 +86,55 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 
 Renderable::Renderable()
     : _enabled("enabled", "Is Enabled", true)
+    , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
-{
-
-}
+{}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)
+    , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
 {
     setName("renderable");
-#ifndef NDEBUG
-    std::string name;
-    ghoul_assert(dictionary.getValue(SceneGraphNode::KeyName, name),
-                 "Scenegraphnode need to specify '" << SceneGraphNode::KeyName
-        << "' because renderables is going to use this for debugging!");
-#endif
+
+    ghoul_assert(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "SceneGraphNode must specify '" << SceneGraphNode::KeyName << "'"
+    );
 
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
-    if (_startTime != "" && _endTime != "")
+    if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
+    }
 
     addProperty(_enabled);
 }
 
-Renderable::~Renderable() {
+Renderable::~Renderable() {}
+
+void Renderable::setBoundingSphere(PowerScaledScalar boundingSphere) {
+    boundingSphere_ = std::move(boundingSphere);
 }
 
-void Renderable::setBoundingSphere(const PowerScaledScalar& boundingSphere)
-{
-    boundingSphere_ = boundingSphere;
-}
-
-const PowerScaledScalar& Renderable::getBoundingSphere()
-{
+PowerScaledScalar Renderable::getBoundingSphere() {
     return boundingSphere_;
 }
 
-void Renderable::update(const UpdateData&)
-{
-}
+void Renderable::update(const UpdateData&) {}
 
-void Renderable::render(const RenderData& data, RendererTasks& tasks)
-{
-    (void) tasks;
+void Renderable::render(const RenderData& data, RendererTasks&) {
     render(data);
 }
 
-void Renderable::render(const RenderData& data)
-{
-}
+void Renderable::render(const RenderData& data) {}
 
-void Renderable::postRender(const RenderData& data)
-{
-}
+void Renderable::postRender(const RenderData& data) {}
 
 void Renderable::setPscUniforms(
     ghoul::opengl::ProgramObject& program, 
@@ -141,6 +145,18 @@ void Renderable::setPscUniforms(
     program.setUniform("objpos", position.vec4());
     program.setUniform("camrot", glm::mat4(camera.viewRotationMatrix()));
     program.setUniform("scaling", camera.scaling());
+}
+
+Renderable::RenderBin Renderable::renderBin() const {
+    return _renderBin;
+}
+
+void Renderable::setRenderBin(RenderBin bin) {
+    _renderBin = bin;
+}
+
+bool Renderable::matchesRenderBinMask(int binMask) {
+    return binMask & static_cast<int>(renderBin());
 }
 
 bool Renderable::isVisible() const {

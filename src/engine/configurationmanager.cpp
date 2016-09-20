@@ -32,6 +32,8 @@
 
 using std::string;
 
+#include "configurationmanager_doc.inl"
+
 namespace {
     const string _configurationFile = "openspace.cfg";
     const string _keyBasePath = "BASE_PATH";
@@ -43,25 +45,32 @@ const string ConfigurationManager::KeyPaths = "Paths";
 const string ConfigurationManager::KeyCache = "CACHE";
 const string ConfigurationManager::KeyFonts = "Fonts";
 const string ConfigurationManager::KeyConfigSgct = "SGCTConfig";
-const string ConfigurationManager::KeyLuaDocumentationType = "LuaDocumentationFile.Type";
-const string ConfigurationManager::KeyLuaDocumentationFile = "LuaDocumentationFile.File";
-const string ConfigurationManager::KeyScriptLogType = "ScriptLogFile.Type";
-const string ConfigurationManager::KeyScriptLogFile = "ScriptLogFile.File";
-const string ConfigurationManager::KeyPropertyDocumentationType =
-    "PropertyDocumentationFile.Type";
-const string ConfigurationManager::KeyPropertyDocumentationFile =
-    "PropertyDocumentationFile.File";
-const string ConfigurationManager::KeyKeyboardShortcutsType = "KeyboardShortcuts.Type";
-const string ConfigurationManager::KeyKeyboardShortcutsFile = "KeyboardShortcuts.File";
+
+const string ConfigurationManager::PartType = "Type";
+const string ConfigurationManager::PartFile = "File";
+
+const string ConfigurationManager::KeyLuaDocumentation = "LuaDocumentation";
+const string ConfigurationManager::KeyScriptLog = "ScriptLog";
+const string ConfigurationManager::KeyPropertyDocumentation = "PropertyDocumentation";
+const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
+const string ConfigurationManager::KeyDocumentation = "Documentation";
+const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 const string ConfigurationManager::KeyConfigScene = "Scene";
-const string ConfigurationManager::KeyLogLevel = "Logging.LogLevel";
-const string ConfigurationManager::KeyLogImmediateFlush = "Logging.ImmediateFlush";
-const string ConfigurationManager::KeyLogs = "Logging.Logs";
+
+const string ConfigurationManager::KeyLogging = "Logging";
+const string ConfigurationManager::PartLogLevel = "LogLevel";
+const string ConfigurationManager::PartImmediateFlush = "ImmediateFlush";
+const string ConfigurationManager::PartLogs = "Logs";
+const string ConfigurationManager::PartAppend = "Append";
+const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
+
 const string ConfigurationManager::KeyCapabilitiesVerbosity =
-    "Logging.CapabilitiesVerbosity";
+    KeyLogging + "." + PartCapabilitiesVerbosity;
+
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
+const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
@@ -94,8 +103,9 @@ string ConfigurationManager::findConfiguration(const string& filename) {
 void ConfigurationManager::loadFromFile(const string& filename) {
     using ghoul::filesystem::FileSystem;
     
-    if (!FileSys.fileExists(filename))
+    if (!FileSys.fileExists(filename)) {
         throw ghoul::FileNotFoundError(filename, "ConfigurationManager");
+    }
 
     // ${BASE_PATH}
     string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
@@ -108,6 +118,13 @@ void ConfigurationManager::loadFromFile(const string& filename) {
 
     // Loading the configuration file into ourselves
     ghoul::lua::loadDictionaryFromFile(filename, *this);
+
+    // Perform testing against the documentation/specification
+    openspace::documentation::testSpecificationAndThrow(
+        ConfigurationManager::Documentation(),
+        *this,
+        "ConfigurationManager"
+    );
 
     // Register all the paths
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);

@@ -29,6 +29,8 @@
 #include <openspace/util/updatestructures.h>
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
 class Scale : public properties::PropertyOwner {
@@ -40,6 +42,8 @@ public:
     virtual bool initialize();
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);
+
+    static openspace::Documentation Documentation();
 
 protected:
     Scale();

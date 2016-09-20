@@ -84,12 +84,12 @@ Fragment getFragment() {
         color = diffuseAlbedo;
     }
 
-    float transparency = 1.0;
-    float alpha = _projectionFading * transparency;
+    // float transparency = 1.0;
+    // float alpha = _projectionFading * transparency;
 
 
     Fragment frag;
-    frag.color = vec4(color, alpha);
+    frag.color = vec4(color, 1.0);
     frag.depth = vs_positionScreenSpace.w;
     return frag;
 }

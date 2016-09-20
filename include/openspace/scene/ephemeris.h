@@ -29,6 +29,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
 class Ephemeris {
@@ -40,6 +42,8 @@ public:
     virtual bool initialize();
     virtual const glm::dvec3& position() const = 0;
     virtual void update(const UpdateData& data);
+
+    static openspace::Documentation Documentation();
 
 protected:
     Ephemeris();

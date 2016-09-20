@@ -66,7 +66,8 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Styx-Text.png"
+            Texture = "textures/Styx-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {

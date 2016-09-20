@@ -65,7 +65,7 @@ InstrumentTimesParser::InstrumentTimesParser(
     for (const auto& instrumentKey : instruments.keys()) {
         ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(instrumentKey);
         ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(instrument, KeyInstrument);
+        _fileTranslation[instrumentKey] = std::move(Decoder::createFromDictionary(instrument, KeyInstrument));
         for (int i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
             _instrumentFiles[instrumentKey].push_back(filename);

@@ -145,7 +145,7 @@ namespace openspace {
     }
 
     Scalar Ellipsoid::longitudalDistance(Scalar lat, Scalar lon1, Scalar lon2) const {
-        Vec2 ellipseRadii = glm::cos(lat) * _radii.xy();
+        Vec2 ellipseRadii = glm::cos(lat) * Vec2(_radii);
         // Approximating with the ellipse mean radius
         Scalar meanRadius = 0.5 * (ellipseRadii.x + ellipseRadii.y);
         return meanRadius * std::abs(lon2 - lon1);

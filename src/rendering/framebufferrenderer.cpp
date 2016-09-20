@@ -30,6 +30,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/rendering/raycastermanager.h>
 
@@ -329,7 +330,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    RenderData data = { *_camera, psc(), doPerformanceMeasurements };
+    RenderData data = { *_camera, psc(), doPerformanceMeasurements, 0 };
     RendererTasks tasks;
 
     // Capture standard fbo
@@ -339,7 +340,13 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // bind new fbo A with color and depth buffer.
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     _scene->render(data, tasks);
 
     for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {

@@ -784,8 +784,8 @@ void InteractionHandler::updateCamera() {
         _cameraUpdatedFromScript = false;
     }
     else {
-        _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
-        if (focusNode() != nullptr) {
+        if (_camera && focusNode()) {
+            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
@@ -938,12 +938,65 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
 void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
 {
     if (type == "text") {
-        std::ofstream f(absPath(file));
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(absPath(file));
         
         for (const auto& p : _keyLua) {
             f << std::to_string(p.first) << ": " <<
                 p.second << std::endl;
         }
+    }
+    else if (type == "html") {
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(absPath(file));
+
+#ifdef JSON
+        std::stringstream json;
+        json << "[";
+        for (const auto& p : _keyLua) {
+            json << "{";
+            json << "\"key\": \"" << std::to_string(p.first) << "\",";
+            json << "\"script\": \"" << p.second << "\",";
+            json << "},";
+        }
+        json << "]";
+
+        std::string jsonText = json.str();
+
+#else
+        std::stringstream html;
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Key Bindings</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Key Bindings</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<td>Key</td>\n"
+             << "\t\t\t<td>Binding</td>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (const auto& p : _keyLua) {
+            html << "\t\t<tr>\n"
+                 << "\t\t\t<td>" << std::to_string(p.first) << "</td>\n"
+                 << "\t\t\t<td>" << p.second << "</td>\n"
+                 << "\t\t</tr>\n";
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>";
+
+        f << html.str();
+#endif
+
     }
     else {
         throw ghoul::RuntimeError(

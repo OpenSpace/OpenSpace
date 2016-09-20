@@ -125,9 +125,9 @@ bool ModelGeometry::initialize(Renderable* parent) {
     for (auto v: _vertices)
     {
         maximumDistanceSquared = glm::max(
-            glm::pow(v.location[0], 2) +
-            glm::pow(v.location[1], 2) +
-            glm::pow(v.location[2], 2), maximumDistanceSquared);
+            glm::pow(v.location[0], 2.f) +
+            glm::pow(v.location[1], 2.f) +
+            glm::pow(v.location[2], 2.f), maximumDistanceSquared);
     }
     _parent->setBoundingSphere(PowerScaledScalar(glm::sqrt(maximumDistanceSquared), 0.0));
 

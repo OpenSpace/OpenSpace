@@ -25,6 +25,8 @@
 #ifndef __CONFIGURATIONMANAGER_H__
 #define __CONFIGURATIONMANAGER_H__
 
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
@@ -49,22 +51,22 @@ public:
     /// The key that stores the location of the SGCT configuration file that is used on
     /// application launch
     static const std::string KeyConfigSgct;
-    /// The key that stores the type of Lua documentation that should be stored
-    static const std::string KeyLuaDocumentationType;
-    /// The key that stores the save location of the Lua documentation
-    static const std::string KeyLuaDocumentationFile;
-    /// The key that stores the type of scripting log that should be stored
-    static const std::string KeyScriptLogType;
-    /// The key that stores the save location of the scripting log
-    static const std::string KeyScriptLogFile;
-    /// The key that stores the type of Property documentation that should be stored
-    static const std::string KeyPropertyDocumentationType;
-    /// The key that stores the save location of the Property documentation
-    static const std::string KeyPropertyDocumentationFile;
-    /// The key that stores the type of keyboard bindings that should be stored
-    static const std::string KeyKeyboardShortcutsType;
-    /// The key that stores the save location of the keyboard bindings file
-    static const std::string KeyKeyboardShortcutsFile;
+    /// The part of the key that defines the type
+    static const std::string PartType;
+    /// The part of the key that defines the file
+    static const std::string PartFile;
+    /// The key that stores the Lua documentation
+    static const std::string KeyLuaDocumentation;
+    /// The key that stores the scripting log
+    static const std::string KeyScriptLog;
+    /// The key that stores the Property documentation
+    static const std::string KeyPropertyDocumentation;
+    /// The key that stores the keyboard bindings that should be stored
+    static const std::string KeyKeyboardShortcuts;
+    /// The key that stores the main documentation
+    static const std::string KeyDocumentation;
+    /// The key that stores the factory documentation values
+    static const std::string KeyFactoryDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
     /// The key that stores the subdirectory containing a list of all startup scripts to
@@ -73,18 +75,24 @@ public:
     /// The key that stores the subdirectory containing a list of all settings scripts to
     /// be executed on application start and after the scene file is loaded
     static const std::string KeySettingsScript;
+    /// The key that stores the settings for determining log-related settings
+    static const std::string KeyLogging;
     /// The key that stores the desired LogLevel for the whole application
     /// \sa ghoul::logging::LogManager
-    static const std::string KeyLogLevel;
+    static const std::string PartLogLevel;
     /// The key that stores whether the log should be immediately flushed after a n
     /// \sa ghoul::logging::LogManager
-    static const std::string KeyLogImmediateFlush;
+    static const std::string PartImmediateFlush;
     /// The key that stores a subdirectory with a description for additional
     /// ghoul::logging::Log%s to be created
     /// \sa LogFactory
-    static const std::string KeyLogs;
+    static const std::string PartLogs;
+    /// The key that stores whether a log should be appended to or should be overwritten
+    static const std::string PartAppend;
     /// The key that stores the verbosity (None, Minimal, Default, Full) of the system
     /// capabilities components
+    static const std::string PartCapabilitiesVerbosity;
+    /// The full key that stores the verbosity of the system capabilities component
     static const std::string KeyCapabilitiesVerbosity;
     /// The key that stores the time (in seconds) that the application will wait before
     /// shutting down after the shutdown call is made
@@ -95,6 +103,9 @@ public:
     /// The key that sets the request URL that is used to request additional data to be
     /// downloaded
     static const std::string KeyDownloadRequestURL;
+    /// The key that stores the switch for enabling/disabling the rendering on a master
+    /// computer
+    static const std::string KeyRenderingMethod;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
@@ -122,6 +133,8 @@ public:
      * \pre \p filename must not be empty
      */
     void loadFromFile(const std::string& filename);
+
+    static Documentation Documentation();
 
 private:
     /**

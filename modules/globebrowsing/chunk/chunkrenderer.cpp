@@ -372,7 +372,7 @@ namespace openspace {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
-                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
             programObject->setUniform("modelViewTransform", modelViewTransform);
             programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
@@ -451,7 +451,7 @@ namespace openspace {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
-                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
             programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
         }
