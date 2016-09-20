@@ -53,7 +53,7 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
+    //std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;
