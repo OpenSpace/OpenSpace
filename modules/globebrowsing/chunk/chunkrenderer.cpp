@@ -95,7 +95,7 @@ namespace openspace {
     void ChunkRenderer::setDepthTransformUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
@@ -120,7 +120,7 @@ namespace openspace {
     void ChunkRenderer::activateTileAndSetTileUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
         const TileAndTransform& tileAndTransform)
@@ -244,7 +244,7 @@ namespace openspace {
                 activateTileAndSetTileUniforms(
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
-                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                     i,
                     texUnits[category][i].blendTexture0,
                     tileAndTransform);
@@ -258,7 +258,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent1,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent1,
                         i,
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
@@ -270,7 +270,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent2,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent2,
                         i,
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
@@ -300,7 +300,7 @@ namespace openspace {
             setDepthTransformUniforms(
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                 i,
                 depthTransform);
             i++;
