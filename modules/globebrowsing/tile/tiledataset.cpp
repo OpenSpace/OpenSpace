@@ -611,10 +611,10 @@ namespace openspace {
             }
         }
 
-        if (depth == 0) {
-            LDEBUG(indentation << "main rasterIO read: " << io.read.region);
-            LDEBUG(indentation << "main rasterIO write: " << io.write.region);
-        }
+        //if (depth == 0) {
+            //LDEBUG(indentation << "main rasterIO read: " << io.read.region);
+            //LDEBUG(indentation << "main rasterIO write: " << io.write.region);
+        //}
 
         else if (worstError > CPLErr::CE_None) {
             LDEBUG(indentation << "Error reading padding: " << worstError);
