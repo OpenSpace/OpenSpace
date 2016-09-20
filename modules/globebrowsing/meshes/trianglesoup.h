@@ -35,15 +35,14 @@
 namespace openspace {
 
 /**
-    Class to hold vertex data and handling OpenGL interfacing and rendering. A Geometry
-    has all data needed such as position buffer and normal buffer but all data is not
-    necessarily needed for all purpouses so the Geometry can disable use of normals for
-    example.
+* Class to hold vertex data and handling OpenGL interfacing and rendering.
+* A <code>TriangleSoup</code> has all data needed such as position buffer and normal
+* buffer but all data is not necessarily needed for all purpouses so some vertex buffers
+* such as normals can be disabled if not needed.
 */
 
-    // TODO : Possibly render triangle strips in this class instead of triangles since
-    // that is faster
-
+// TODO : Possibly render triangle strips in this class instead of triangles since
+// that is faster
 class TriangleSoup
 {
 public:
@@ -64,8 +63,14 @@ public:
     void setVertexNormals(std::vector<glm::vec3> normals);
     void setElements(std::vector<unsigned int> elements);
 
-
-    
+    /**
+    * Calls OpenGL's draw function to draw the triangles defined in the vertex buffers
+    * using the current bound program object.
+    * The vertex buffer attribute input locations to the shader program comes in the
+    * order of positions (0), texture coordinates (1) and normals (2).
+    * The input locations in the shader program should be specified to match these
+    * locations.
+    */
     void drawUsingActiveProgram();
 
 protected:
@@ -88,7 +93,7 @@ protected:
     std::vector<GLuint> _elementData;
 private:
 
-    bool updateDataInGPU();
+    bool updateDataOnGPU();
 
     // GL handles
     GLuint _vaoID;

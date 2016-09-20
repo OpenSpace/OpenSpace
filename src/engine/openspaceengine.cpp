@@ -433,6 +433,9 @@ bool OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
+    // Load a light and a monospaced font
+    loadFonts();
+
     // Initialize the Scene
     Scene* sceneGraph = new Scene;
     sceneGraph->initialize();
@@ -454,8 +457,6 @@ bool OpenSpaceEngine::initialize() {
     // Run start up scripts
     runPreInitializationScripts(scenePath);
 
-    // Load a light and a monospaced font
-    loadFonts();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
@@ -765,7 +766,7 @@ void OpenSpaceEngine::preSynchronization() {
 
         Time::ref().advanceTime(dt);
 
-        auto scheduledScripts = _scriptScheduler->scheduledScripts(Time::ref().j2000Seconds());
+        auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
         while(scheduledScripts.size()){
             auto scheduledScript = scheduledScripts.front();
             LINFO(scheduledScript);

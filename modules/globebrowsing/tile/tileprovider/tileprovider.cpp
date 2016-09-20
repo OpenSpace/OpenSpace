@@ -22,72 +22,42 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <openspace/util/factorymanager.h>
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
-
-#include <openspace/engine/downloadmanager.h>
-
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/font/fontmanager.h>
-
-#include <openspace/engine/openspaceengine.h>
-
-#include <sstream>
-
-#include <gdal_priv.h>
-
 
 
 namespace {
     const std::string _loggerCat = "TileProvider";
+
+    const std::string KeyType = "Type";
 }
 
 
 namespace openspace {
 
-    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
-    
-
-    Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
-        using namespace ghoul::opengl;
-        
-        // Create pixel data
-        int numBytes = size.x * size.y * 4 * 1;
-        char* pixels = new char[numBytes];
-        size_t numPixels = size.x * size.y;
-        size_t i = 0;
-        for (size_t p = 0; p < numPixels; p++){
-            pixels[i++] = color.r;
-            pixels[i++] = color.g;
-            pixels[i++] = color.b;
-            pixels[i++] = color.a;
-        }
-
-        // Create ghoul texture
-        auto texture = std::make_shared<Texture>(glm::uvec3(size, 1));
-        texture->setDataOwnership(Texture::TakeOwnership::Yes);
-        texture->setPixelData(pixels);
-        texture->uploadTexture();
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-        // Create tile
-        Tile tile;
-        tile.status = Tile::Status::OK;
-        tile.preprocessData = nullptr;
-        tile.texture = texture;
-
-        return tile;
+TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    if (!dictionary.hasValue<std::string>(KeyType)) {
+        LERROR("TileProvider did not have key '" << KeyType << "'");
+        return nullptr;
     }
 
+    std::string type;
+    dictionary.getValue(KeyType, type);
+    ghoul::TemplateFactory<TileProvider>* factory
+        = FactoryManager::ref().factory<TileProvider>();
+    TileProvider* result = factory->create(type, dictionary);
 
+    if (result == nullptr) {
+        LERROR("Failed creating TileProvider of type '" << type << "'");
+        return nullptr;
+    }
+
+    return result;
+}
+
+TileProvider::TileProvider(const ghoul::Dictionary& dictionary) { };
 
 }  // namespace openspace

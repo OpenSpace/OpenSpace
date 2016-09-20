@@ -2,6 +2,8 @@
 TextureResolution = "med"
 -- TextureResolution = "high"
 
+local startTime = "2016 SEP 8 23:05:00.50"
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -159,10 +161,6 @@ function preInitialization()
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
 
     --local startTime = "2019 APR 16 12:03:00.00"
-    local startTime = "2016 SEP 8 23:05:00.50"
-    
-    openspace.time.setTime(startTime)
-    openspace.time.setDeltaTime(0)
 
     openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
 
@@ -189,13 +187,15 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     -- Activate night textures and water masks
-    openspace.setPropertyValue("LodEarth.RenderableGlobe.WaterMasks", {0, 1});
-    openspace.setPropertyValue("LodEarth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.WaterMasks", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true);
 
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
 
-    
+    openspace.time.setTime(startTime)
+    openspace.time.setDeltaTime(0)
 
     openspace.resetCameraDirection()
 end
@@ -205,15 +205,17 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "OsirisRex",
-        Position = {100, 0, 0},
-        Rotation = {0.668258, -0.089482, 0.589040, 0.445484},
+        Position = {26974590199.661884, 76314608558.908020, -127086452897.101791},
+        Rotation = {0.729548, -0.126024, 0.416827, 0.527382},
     },
     Modules = {
         "sun",
-        "mercury",
+        "lodmercury",
         "venus",
         "lodearth",
-        "mars",
+        "lodmoon",
+        "lodmars",
+        "jupiter",
         "saturn",
         "uranus",
         "neptune",

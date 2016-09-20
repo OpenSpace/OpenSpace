@@ -22,61 +22,81 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CHUNK_INDEX_TILE_PROVIDER_H__
-#define __CHUNK_INDEX_TILE_PROVIDER_H__
+#ifndef __TILE_H__
+#define __TILE_H__
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // absPath
-#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/texture.h> // Texture
 
-#include <ghoul/io/texture/texturereader.h>
-
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/font/fontmanager.h>
-
-#include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/other/lrucache.h>
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
-//////////////////////////////////////////////////////////////////////////////////////////
+#include <modules/globebrowsing/tile/asynctilereader.h> // TilePreprocessData
 
 
 namespace openspace {
     
+    using namespace ghoul::opengl;
+
+    /**
+    * Defines a status and may have a Texture and PreprocessData
+    */
+    struct Tile {
+        std::shared_ptr<Texture> texture;
+        std::shared_ptr<TilePreprocessData> preprocessData;
+
+
+        /**
+        * Describe if this Tile is good for usage (OK) or otherwise
+        * the reason why it is not.
+        */
+        enum class Status { 
+            /** 
+            * E.g when texture data is not currently in memory. 
+            * texture and preprocessData are both null
+            */
+            Unavailable, 
+
+            /**
+            * Can be set by <code>TileProvider</code>s if the requested 
+            * <code>ChunkIndex</code> is undefined for that particular 
+            * provider. 
+            * texture and preprocessData are both null
+            */
+            OutOfRange, 
+
+            /**
+            * An IO Error happend
+            * texture and preprocessData are both null
+            */
+            IOError, 
+
+            /**
+            * The Texture is uploaded to the GPU and good for usage.
+            * texture is defined. preprocessData may be defined.
+            */
+            OK 
+        } status;
     
-    class ChunkIndexTileProvider : public TileProvider {
-    public:
-        ChunkIndexTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-        virtual ~ChunkIndexTileProvider();
-
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-    private:
-        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
-
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
         
-        TileCache _tileCache;
-        glm::uvec2 _textureSize;
-        size_t _fontSize;
-        
-        GLuint _fbo;
+        /**
+         * Instantiates a new tile with a single color. 
+         * 
+         * \param size The size of texture to be created
+         * \param color defined RGBA values in range 0-255.
+         *
+         * \returns a Tile with status OK and the a texture 
+         * with the requested size and color
+         */
+        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
+
+        /**
+        * A tile with status unavailable that any user can return to 
+        * indicate that a tile was unavailable.
+        */
+        static const Tile TileUnavailable;
 
     };
-
 
 }  // namespace openspace
 
 
 
 
-#endif  // __CHUNK_INDEX_TILE_PROVIDER_H__
+#endif  // __TILE_H__

@@ -22,40 +22,51 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_FACTORY_H__
-#define __TILE_PROVIDER_FACTORY_H__
+#include <modules/globebrowsing/tile/tile.h>
 
+#include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-#include <ghoul/misc/dictionary.h>
-
-#include <memory>
-#include <string>
-#include <functional>
+namespace {
+    const std::string _loggerCat = "Tile";
+}
 
 
 namespace openspace {
 
-    class TileProviderFactory {
-    public:
+    const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
+    
 
-        static std::shared_ptr<TileProviderFactory> ref();
+    Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
+        using namespace ghoul::opengl;
+        
+        // Create pixel data
+        int numBytes = size.x * size.y * 4 * 1;
+        char* pixels = new char[numBytes];
+        size_t numPixels = size.x * size.y;
+        size_t i = 0;
+        for (size_t p = 0; p < numPixels; p++){
+            pixels[i++] = color.r;
+            pixels[i++] = color.g;
+            pixels[i++] = color.b;
+            pixels[i++] = color.a;
+        }
 
-        std::shared_ptr<TileProvider> create(const std::string& type, const std::string& desc, const TileProviderInitData& initData);
+        // Create ghoul texture
+        auto texture = std::make_shared<Texture>(glm::uvec3(size, 1));
+        texture->setDataOwnership(Texture::TakeOwnership::Yes);
+        texture->setPixelData(pixels);
+        texture->uploadTexture();
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-    private:
+        // Create tile
+        Tile tile;
+        tile.status = Tile::Status::OK;
+        tile.preprocessData = nullptr;
+        tile.texture = texture;
 
-        TileProviderFactory();
-        void initialize();
+        return tile;
+    }
 
-        typedef std::function<std::shared_ptr<TileProvider>(const std::string&, const TileProviderInitData&)> ConcreteFactory;
 
-        std::unordered_map<std::string, ConcreteFactory> _factoryMap;
 
-        static std::shared_ptr<TileProviderFactory> _ref;
-    };
-
-  
-} // namespace openspace
-#endif  // __TILE_PROVIDER_FACTORY_H__
+}  // namespace openspace

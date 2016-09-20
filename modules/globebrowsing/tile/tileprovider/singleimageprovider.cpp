@@ -23,7 +23,6 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -31,51 +30,55 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
-
 #include <openspace/engine/openspaceengine.h>
-
-
 
 namespace {
     const std::string _loggerCat = "SingleImageProvider";
-}
 
+    const std::string KeyFilePath = "FilePath";
+}
 
 namespace openspace {
 
+    SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
+        // Required input
+        if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
 
+        reset();
+    }
 
-    SingleImagePrivoder::SingleImagePrivoder(const std::string& imagePath)
+    SingleImageProvider::SingleImageProvider(const std::string& imagePath)
         : _imagePath(imagePath)
     {
         reset();
     }
 
-    Tile SingleImagePrivoder::getTile(const ChunkIndex& chunkIndex) {
+    Tile SingleImageProvider::getTile(const ChunkIndex& chunkIndex) {
         return _tile;
     }
 
-    Tile SingleImagePrivoder::getDefaultTile() {
+    Tile SingleImageProvider::getDefaultTile() {
         return _tile;
     }
 
-
-    Tile::Status SingleImagePrivoder::getTileStatus(const ChunkIndex& index) {
+    Tile::Status SingleImageProvider::getTileStatus(const ChunkIndex& index) {
         return _tile.status;
     }
 
-    TileDepthTransform SingleImagePrivoder::depthTransform() {
+    TileDepthTransform SingleImageProvider::depthTransform() {
         TileDepthTransform transform;
         transform.depthOffset = 0.0f;
         transform.depthScale = 1.0f;
         return transform;
     }
 
-    void SingleImagePrivoder::update() {
+    void SingleImageProvider::update() {
         // nothing to be done
     }
 
-    void SingleImagePrivoder::reset() {
+    void SingleImageProvider::reset() {
         _tile = Tile();
         _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(_imagePath).release());
         _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
@@ -85,7 +88,7 @@ namespace openspace {
         _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     }
 
-    int SingleImagePrivoder::maxLevel() {
+    int SingleImageProvider::maxLevel() {
         return 1337; // unlimited
     }
 

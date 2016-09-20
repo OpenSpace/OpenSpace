@@ -42,9 +42,9 @@ namespace openspace {
 Time* Time::_instance = nullptr;
 
 Time::Time(double secondsJ2000)
-{
-    _time = secondsJ2000;
-}
+    : _time(secondsJ2000)
+    , _dt(1.0)
+{}
 
 
 Time::Time(const Time& other)

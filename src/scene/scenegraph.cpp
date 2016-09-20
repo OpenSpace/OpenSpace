@@ -310,6 +310,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 element.getValue(SceneGraphNode::KeyParentName, parentName);
                 
                 FileSys.setCurrentDirectory(modulePath);
+                LDEBUGC("Create from dictionary", "Node name: " << nodeName << "  Parent name:" << parentName << "  Path: " << modulePath);
                 SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
                 if (node == nullptr) {
                     LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
@@ -344,6 +345,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         };
 
         for (const ModuleInformation& i : moduleDictionaries) {
+            LINFO("Adding module: " << i.moduleName);
             addModule(i);
         }
     }

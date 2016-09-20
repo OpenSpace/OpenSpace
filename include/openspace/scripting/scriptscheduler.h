@@ -49,36 +49,84 @@ struct ScheduledScript {
 
     double time;
     ReversibleLuaScript script;
+
+    static bool CompareByTime(const ScheduledScript& s1, const ScheduledScript& s2);
 };
 
 
 /**
- * Maintains an ordered list of \code ScheduledScripts.
+ * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple 
+ * interface for retrieveing scheduled scripts
  */
 class ScriptScheduler {
 public:
 
+    /**
+    * Load a schedule from a Lua-file
+    * \param filename Lua file to load
+    * \param L an optional lua_State defining variables that may be used
+    * in the Lua-file.
+    */
     void loadScripts(const std::string& filename, lua_State* L = nullptr);
+
+    /**
+    * Load a schedule from a <code>ghoul::Dictionary</code>
+    * \param dict Dictionary to read
+    */
     void loadScripts(const ghoul::Dictionary& dict);
 
-    void skipTo(double time);
-    void skipTo(const std::string& timeStr);
 
+    /**
+    * Rewinds the script scheduler to the first scheduled script.
+    */
+    void rewind();
+
+    /**
+    * Removes all scripts for the schedule.
+    */
     void clearSchedule();
 
-    std::queue<std::string> scheduledScripts(double newTime);
-    std::queue<std::string> scheduledScripts(const std::string& timeStr);
+    /**
+    * Progresses the script schedulers time and returns all scripts that has been 
+    * scheduled to run between \param newTime and the time provided in the last invocation 
+    * of this method.
+    *
+    * \param newTime A j2000 time value specifying the new time stamp that
+    * the script scheduler should progress to.
+    *
+    * \returns the ordered queue of scripts .
+    */
+    std::queue<std::string> progressTo(double newTime);
 
-    const std::vector<ScheduledScript>& allScripts() const { return _scheduledScripts; };
+    /**
+    * See <code>progressTo(double newTime)</code>.
+    *
+    * \param timeStr A string specifying the a new time stamp that the
+    * scripts scheduler should progress to.
+    */
+    std::queue<std::string> progressTo(const std::string& timeStr);
+
+
+
+    /**
+    * Returns the the j2000 time value that the script scheduler is currently at 
+    */
+    double currentTime() const;
+
+    /**
+    * \returns a vector of all scripts that has been loaded
+    */
+    const std::vector<ScheduledScript>& allScripts() const;
+
 
     static LuaLibrary luaLibrary();
 
 private:
 
     std::vector<ScheduledScript> _scheduledScripts;
-    
+
     size_t _currentIndex = 0;
-    double _lastTime;
+    double _currentTime;
 
 };
 

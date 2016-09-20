@@ -28,19 +28,21 @@ return {
                 --Color = "textures/moonmap4k.jpg",
             },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "MOON",
-            Reference = "ECLIPJ2000",
-            Observer = "EARTH BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_MOON",
-            Reference = "ECLIPJ2000"
+        Transform = {
+            Translation = {
+                Type = "SpiceEphemeris",
+                Body = "MOON",
+                Reference = "ECLIPJ2000",
+                Observer = "EARTH BARYCENTER",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+                }
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_MOON",
+                DestinationFrame = "ECLIPJ2000"
+            },
         },
         GuiName = "/Solar/Planets/MOON"
     },

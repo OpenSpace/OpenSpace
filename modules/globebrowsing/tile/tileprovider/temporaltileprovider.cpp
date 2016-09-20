@@ -25,7 +25,8 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileproviderfactory.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
@@ -46,34 +47,53 @@
 
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
+
+    const std::string KeyDoPreProcessing = "DoPreProcessing";
+    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
+    const std::string KeyFilePath = "FilePath";
+    const std::string KeyCacheSize = "CacheSize";
+    const std::string KeyFlushInterval = "FlushInterval";
 }
 
 
 namespace openspace {
 
-    const std::string TemporalTileProvider::TIME_PLACEHOLDER("${OpenSpaceTimeId}");
+    const std::string TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
-    TemporalTileProvider::TemporalTileProvider(const std::string& datasetFile, 
-        const TileProviderInitData& tileProviderInitData)
-        : _datasetFile(datasetFile)
-        , _tileProviderInitData(tileProviderInitData)
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_END = "OpenSpaceTimeEnd";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION = "OpenSpaceTimeResolution";
+    const std::string TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
+
+
+    TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
+        : _initDict(dictionary) 
     {
-        std::ifstream in(datasetFile.c_str());
-        ghoul_assert(errno == 0, strerror(errno) << std::endl << datasetFile);
+
+        if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
+
+
+        std::ifstream in(_datasetFile.c_str());
+        ghoul_assert(errno == 0, strerror(errno) << std::endl << _datasetFile);
 
         // read file
-        std::string xml( (std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
+        std::string xml((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
         _defaultTile = getTileProvider()->getDefaultTile();
     }
 
+
+
+
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
         CPLXMLNode* node = CPLParseXMLString(xml.c_str());
 
-        std::string timeStart = getXMLValue(node, "OpenSpaceTimeStart", "2000 Jan 1");
-        std::string timeResolution = getXMLValue(node, "OpenSpaceTimeResolution", "2d");
-        std::string timeEnd = getXMLValue(node, "OpenSpaceTimeEnd", "Now");
-        std::string timeIdFormat = getXMLValue(node, "OpenSpaceTimeIdFormat", "YYYY-MM-DDThh:mm:ssZ");
+        std::string timeStart = getXMLValue(node, TemporalXMLTags::TIME_START, "2000 Jan 1");
+        std::string timeResolution = getXMLValue(node, TemporalXMLTags::TIME_RESOLUTION, "2d");
+        std::string timeEnd = getXMLValue(node, TemporalXMLTags::TIME_END, "Now");
+        std::string timeIdFormat = getXMLValue(node, TemporalXMLTags::TIME_FORMAT, "YYYY-MM-DDThh:mm:ssZ");
 
         Time start; start.setTime(timeStart);
         Time end(Time::now());
@@ -155,7 +175,7 @@ namespace openspace {
 
     std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
         Time tCopy(t);
-        if (_timeQuantizer.quantize(tCopy)) {
+        if (_timeQuantizer.quantize(tCopy, true)) {
             TimeKey timekey = _timeFormat->stringify(tCopy);
             try {
                 return getTileProvider(timekey);
@@ -185,7 +205,8 @@ namespace openspace {
 
     std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
-        return TileProviderFactory::ref()->create("LRUCaching", gdalDatasetXml, _tileProviderInitData);
+        _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
+        return std::make_shared<CachingTileProvider>(_initDict);
     }
     
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
@@ -195,8 +216,8 @@ namespace openspace {
 
     std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
         std::string xmlTemplate(_gdalXmlTemplate);
-        size_t pos = xmlTemplate.find(TIME_PLACEHOLDER);
-        size_t numChars = TIME_PLACEHOLDER.length();
+        size_t pos = xmlTemplate.find(URL_TIME_PLACEHOLDER);
+        size_t numChars = URL_TIME_PLACEHOLDER.length();
         ghoul_assert(pos != std::string::npos, "Invalid dataset file");
         std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
         return timeSpecifiedXml;
@@ -250,8 +271,7 @@ namespace openspace {
     //                                  Time Quantizer                                  //
     //////////////////////////////////////////////////////////////////////////////////////
     TimeQuantizer::TimeQuantizer(const Time& start, const Time& end, double resolution)
-        : _start(start.j2000Seconds())
-        , _end(end.j2000Seconds())
+        : _timerange(start.j2000Seconds(), end.j2000Seconds())
         , _resolution(resolution)
     {
 
@@ -290,17 +310,17 @@ namespace openspace {
         }
     }
 
-    bool TimeQuantizer::quantize(Time& t) const {
+    bool TimeQuantizer::quantize(Time& t, bool clamp) const {
         double unquantized = t.j2000Seconds();
-        if (_start <= unquantized && unquantized <= _end) {
-            double quantized = std::floor((unquantized - _start) / _resolution) * _resolution + _start;
+        if (_timerange.includes(unquantized)) {
+            double quantized = std::floor((unquantized - _timerange.start) / _resolution) * _resolution + _timerange.start;
             t.setTime(quantized);
             return true;
         }
-        else if (_clampTime) {
+        else if (clamp) {
             double clampedTime = unquantized;
-            clampedTime = std::max(clampedTime, _start);
-            clampedTime = std::min(clampedTime, _end);
+            clampedTime = std::max(clampedTime, _timerange.start);
+            clampedTime = std::min(clampedTime, _timerange.end);
             t.setTime(clampedTime);
             return true;
         }
@@ -308,4 +328,5 @@ namespace openspace {
             return false;
         }
     }
+
 }  // namespace openspace

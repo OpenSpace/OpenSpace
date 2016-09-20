@@ -68,14 +68,14 @@ namespace openspace {
         void setDepthTransformUniforms(
             std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
             LayeredTextures::TextureCategory textureCategory,
-            LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+            LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
             size_t layerIndex,
             const TileDepthTransform& tileDepthTransform);
 
         void activateTileAndSetTileUniforms(
             std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
             LayeredTextures::TextureCategory textureCategory,
-            LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+            LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
             size_t layerIndex,
             ghoul::opengl::TextureUnit& texUnit,
             const TileAndTransform& tileAndTransform);
