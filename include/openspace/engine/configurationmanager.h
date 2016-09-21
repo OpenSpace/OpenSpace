@@ -134,7 +134,7 @@ public:
      */
     void loadFromFile(const std::string& filename);
 
-    static Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
