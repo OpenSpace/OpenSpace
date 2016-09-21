@@ -112,6 +112,7 @@ namespace {
         std::string configurationName;
         std::string sgctConfigurationName;
         std::string sceneName;
+        std::string cacheFolder;
     } commandlineArgumentPlaceholders;
 }
 
@@ -281,6 +282,14 @@ bool OpenSpaceEngine::create(int argc, char** argv,
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
         LFATALC(e.component, e.message);
         return false;
+    }
+
+    if (!commandlineArgumentPlaceholders.cacheFolder.empty()) {
+        FileSys.registerPathToken(
+            "${CACHE}",
+            commandlineArgumentPlaceholders.cacheFolder,
+            ghoul::filesystem::FileSystem::Override::Yes
+        );
     }
 
     // Initialize the requested logs from the configuration file
@@ -598,6 +607,14 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
         &commandlineArgumentPlaceholders.sceneName, "-scene", "", "Provides the path to "
         "the scene file, overriding the value set in the OpenSpace configuration file"
     ));
+
+    commandlineArgumentPlaceholders.cacheFolder = "";
+    _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
+        &commandlineArgumentPlaceholders.cacheFolder, "-cacheDir", "", "Provides the "
+        "path to a cache file, overriding the value set in the OpenSpace configuration "
+        "file"
+    ));
+    
 
     return true;
 }
