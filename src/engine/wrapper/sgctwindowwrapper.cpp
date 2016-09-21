@@ -44,6 +44,10 @@ void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
     
+void SGCTWindowWrapper::setSynchronization(bool enabled) {
+    sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
+}
+
 void SGCTWindowWrapper::clearAllWindows(const glm::vec4& clearColor) {
     size_t n = sgct::Engine::instance()->getNumberOfWindows();
     for (size_t i = 0; i < n; ++i) {

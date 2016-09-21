@@ -55,6 +55,14 @@ public:
      * disables it
      */
     virtual void setBarrier(bool enabled);
+
+    /**
+    * This method enables or disables a framelock barrier. If the specific windowing
+    * framework does not provide a framelock, this method defaults to a no-op.
+    * \param enabled If <code>true</code> the framelock is enabled, <code>false</code>
+    * disables it
+    */
+    virtual void setSynchronization(bool enabled);
     
     /**
      * This method clears all the rendering windows with the specified \p clearColor. In

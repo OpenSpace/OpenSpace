@@ -35,6 +35,8 @@ WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string&
 void WindowWrapper::terminate() {}
     
 void WindowWrapper::setBarrier(bool) {}
+
+void WindowWrapper::setSynchronization(bool) {}
     
 void WindowWrapper::clearAllWindows(const glm::vec4& clearColor) {}
 
