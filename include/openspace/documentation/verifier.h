@@ -308,7 +308,7 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
         "T cannot be VectorVerifier"
     );
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::less<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const;
 };
@@ -337,7 +337,7 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
         "T cannot be VectorVerifier"
     );
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::less_equal<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
 };
@@ -366,7 +366,7 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
         "T cannot be VectorVerifier"
         );
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::greater<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
 };
@@ -395,7 +395,7 @@ struct GreaterEqualVerifier : public OperatorVerifier<T, std::greater_equal<type
         "T cannot be VectorVerifier"
     );
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::greater_equal<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
 };
@@ -408,7 +408,7 @@ template <typename T>
 struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type>> {
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::equal_to<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
 };
@@ -422,7 +422,7 @@ template <typename T>
 struct UnequalVerifier : public OperatorVerifier<T, std::not_equal_to<typename T::Type>> {
     static_assert(!std::is_base_of<TableVerifier, T>::value, "T cannot be TableVerifier");
 
-    using OperatorVerifier::OperatorVerifier;
+    using OperatorVerifier<T, std::not_equal_to<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
 };

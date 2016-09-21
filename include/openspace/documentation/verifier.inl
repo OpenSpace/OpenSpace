@@ -85,7 +85,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
-        if (Operator()(dict.value<Type>(key), value)) {
+        if (Operator()(dict.value<typename T::Type>(key), value)) {
             return { true, {} };
         }
         else {
