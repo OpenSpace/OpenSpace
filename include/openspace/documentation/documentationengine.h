@@ -87,7 +87,7 @@ public:
      * Returns a static reference to the main singleton DocumentationEngine
      * \return A static reference to the main singleton DocumentationEngine
      */
-    static openspace::DocumentationEngine& ref();
+    static DocumentationEngine& ref();
 
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
