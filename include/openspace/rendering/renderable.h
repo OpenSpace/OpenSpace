@@ -93,7 +93,7 @@ public:
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
-    static Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;
