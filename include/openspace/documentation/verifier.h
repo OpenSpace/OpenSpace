@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <functional>
+#include <type_traits>
 
 namespace openspace {
 namespace documentation {
