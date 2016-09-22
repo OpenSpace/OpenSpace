@@ -311,6 +311,8 @@ struct LessVerifier : public OperatorVerifier<T, std::less<typename T::Type>> {
     using OperatorVerifier<T, std::less<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const;
+
+    using OperatorVerifier<T, std::less<typename T::Type>>::value;
 };
 
 /**
@@ -340,6 +342,8 @@ struct LessEqualVerifier : public OperatorVerifier<T, std::less_equal<typename T
     using OperatorVerifier<T, std::less_equal<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
+
+    using OperatorVerifier<T, std::less_equal<typename T::Type>>::value;
 };
 
 /**
@@ -369,6 +373,8 @@ struct GreaterVerifier : public OperatorVerifier<T, std::greater<typename T::Typ
     using OperatorVerifier<T, std::greater<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
+
+    using OperatorVerifier<T, std::greater<typename T::Type>>::value;
 };
 
 /**
@@ -398,6 +404,8 @@ struct GreaterEqualVerifier : public OperatorVerifier<T, std::greater_equal<type
     using OperatorVerifier<T, std::greater_equal<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
+
+    using OperatorVerifier<T, std::greater_equal<typename T::Type>>::value;
 };
 
 /**
@@ -411,6 +419,8 @@ struct EqualVerifier : public OperatorVerifier<T, std::equal_to<typename T::Type
     using OperatorVerifier<T, std::equal_to<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
+
+    using OperatorVerifier<T, std::equal_to<typename T::Type>>::value;
 };
 
 /**
@@ -425,6 +435,8 @@ struct UnequalVerifier : public OperatorVerifier<T, std::not_equal_to<typename T
     using OperatorVerifier<T, std::not_equal_to<typename T::Type>>::OperatorVerifier;
 
     std::string documentation() const override;
+
+    using OperatorVerifier<T, std::not_equal_to<typename T::Type>>::value;
 };
 
 //----------------------------------------------------------------------------------------
