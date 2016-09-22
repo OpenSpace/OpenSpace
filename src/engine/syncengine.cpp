@@ -27,6 +27,7 @@
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <algorithm>
 #include <string>
 
 
