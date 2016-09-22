@@ -88,7 +88,7 @@ void TimeManager::consumeKeyframes(double dt) {
         // Do not interpolate with time jumping keyframes.
         // Instead, wait until their timestamp and apply them directly.
         if (next._requiresTimeJump) {
-            time.setTime(time.j2000Seconds() + dt * time.deltaTime(), false);
+            Time::ref().advanceTime(dt);
             return;
         }
 

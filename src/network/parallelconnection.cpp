@@ -676,8 +676,9 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
             _broadcastThread->join();
             _broadcastThread = nullptr;
         }
-        OsEng.interactionHandler().clearKeyframes();
     }
+    OsEng.interactionHandler().clearKeyframes();
+    OsEng.timeManager().clearKeyframes();
 
 }
 
@@ -1012,7 +1013,7 @@ void ParallelConnection::sendTimeKeyframe() {
 
 
 void ParallelConnection::broadcast(){
-            
+    _timeJumped = true;
     //while we're still connected and we're the host
     while (_isConnected && isHost()) {
         sendCameraKeyframe();
