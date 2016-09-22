@@ -32,6 +32,9 @@
 
 #include <sgct.h>
 
+#include <chrono>
+#include <thread>
+
 sgct::Engine* _sgctEngine;
 
 void mainInitFunc();

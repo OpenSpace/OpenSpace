@@ -184,6 +184,9 @@ namespace openspace {
             }
         }
 
+        // Commenting away the following for now since it is not supported for older
+        // versions of GDAL. Only used for debug info.
+        /*
         const std::string originalDriverName = dataset->GetDriverName();
         
         if (originalDriverName != "WMS") {
@@ -200,7 +203,7 @@ namespace openspace {
             const char* in_memory = "";
             //GDALDataset* vrtDataset = driver->CreateCopy(in_memory, dataset, false, nullptr, nullptr, nullptr);
         }
-        
+        */
 
         return dataset;
     }
@@ -308,8 +311,7 @@ namespace openspace {
 
     TileDepthTransform TileDataset::calculateTileDepthTransform() {
         GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
-        // Floating point types does not have a fix maximum or minimum value and
-        // can not be normalized when sampling a texture. Hence no rescaling is needed.
+        
         bool isFloat = (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64);
         double maximumValue = isFloat ? 1.0 : TileDataType::getMaximumValue(_dataLayout.gdalType);
 

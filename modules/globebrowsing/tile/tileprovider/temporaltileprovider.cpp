@@ -74,10 +74,11 @@ namespace openspace {
             throw std::runtime_error("Must define key '" + KeyFilePath + "'");
         }
 
-
         std::ifstream in(_datasetFile.c_str());
-        ghoul_assert(errno == 0, strerror(errno) << std::endl << _datasetFile);
-
+        if (!in.is_open()) {
+            throw ghoul::FileNotFoundError(_datasetFile);
+        }
+        
         // read file
         std::string xml((std::istreambuf_iterator<char>(in)), (std::istreambuf_iterator<char>()));
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
