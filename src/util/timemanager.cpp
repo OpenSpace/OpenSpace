@@ -26,6 +26,10 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
 
+namespace {
+    double SecondsOffTolerance = 0.1;
+}
+
 namespace openspace {
 
 using network::datamessagestructures::TimeKeyframe;
@@ -73,10 +77,10 @@ void TimeManager::consumeKeyframes(double dt) {
 
             time.setPause(latest._paused);
             time.setTimeJumped(consumingTimeJump);
+            time.setDeltaTime(latest._dt);
 
             if (consumingTimeJump || latest._paused) {
                 time.setTime(latest._time, consumingTimeJump);
-                time.setDeltaTime(latest._dt);
             }
             _latestConsumedTimestamp = latest._timestamp;
         }
@@ -89,6 +93,14 @@ void TimeManager::consumeKeyframes(double dt) {
         }
 
         if (time.paused()) {
+            return;
+        }
+
+        double predictedTime = time.j2000Seconds() + time.deltaTime() * (next._timestamp - now);
+        bool withinTolerance = std::abs(predictedTime - next._time) < std::abs(next._dt * SecondsOffTolerance);
+        
+        if (next._dt == time.deltaTime() && withinTolerance) {
+            Time::ref().advanceTime(dt);
             return;
         }
 
@@ -123,17 +135,11 @@ void TimeManager::addKeyframe(const TimeKeyframe& kf) {
     _keyframes.insert(iter, kf);
 }
 
-void TimeManager::removeKeyframesAfter(double timestamp) {
-    network::datamessagestructures::TimeKeyframe kf;
-    kf._timestamp = timestamp;
-    auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
-    _keyframes.erase(iter, _keyframes.end());
-}
 
 void TimeManager::removeKeyframesBefore(double timestamp) {
     network::datamessagestructures::TimeKeyframe kf;
     kf._timestamp = timestamp;
-    auto iter = std::lower_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
+    auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
     _keyframes.erase(_keyframes.begin(), iter);
 }
 

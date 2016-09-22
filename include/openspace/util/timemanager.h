@@ -35,7 +35,6 @@ public:
     void preSynchronization(double dt);
     void addKeyframe(const network::datamessagestructures::TimeKeyframe& kf);
     void removeKeyframesBefore(double timestamp);
-    void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
 private:
     void consumeKeyframes(double dt);
