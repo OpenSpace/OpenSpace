@@ -84,8 +84,11 @@ namespace openspace {
         }
     }
 
-    void SyncEngine::removeSyncable(Syncable*  syncable) {
-        _syncables.erase(std::remove(_syncables.begin(), _syncables.end(), syncable));
+    void SyncEngine::removeSyncable(Syncable* syncable) {
+        _syncables.erase(
+            std::remove(_syncables.begin(), _syncables.end(), syncable),
+            _syncables.end()
+        );
     }
 
 }
