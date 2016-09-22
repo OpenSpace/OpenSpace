@@ -40,6 +40,7 @@
 
 #include <openspace/performance/performancemanager.h>
 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/scene/scene.h>
@@ -124,10 +125,12 @@ RenderEngine::RenderEngine()
     , _showInfo(true)
     , _showLog(true)
     , _takeScreenshot(false)
+    , _showFrameNumber(false)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+    , _frameNumber(0)
     , _frametimeType(FrametimeType::DtTimeAvg)
     //    , _sgctRenderStatisticsVisible(false)
 {
@@ -180,6 +183,7 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 }
 
 bool RenderEngine::initialize() {
+    _frameNumber = 0;
     std::string renderingMethod = DefaultRenderingMethod;
     
     // If the user specified a rendering method that he would like to use, use that
@@ -228,6 +232,7 @@ bool RenderEngine::initialize() {
     MissionManager::initialize();
 #endif
 
+
     return true;
 }
 
@@ -240,6 +245,8 @@ bool RenderEngine::initializeGL() {
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
     
     try {
+        const float fontSizeBig = 50.f;
+        _fontBig = OsEng.fontManager().font(KeyFontMono, fontSizeBig);
         const float fontSizeTime = 15.f;
         _fontDate = OsEng.fontManager().font(KeyFontMono, fontSizeTime);
         const float fontSizeMono = 10.f;
@@ -334,23 +341,69 @@ bool RenderEngine::initializeGL() {
     return true;
 }
 
-void RenderEngine::preSynchronization() {
-    //if (_mainCamera)
-    //    _mainCamera->preSynchronization();
+void RenderEngine::updateSceneGraph() {
+    _sceneGraph->update({
+        glm::dvec3(0),
+        glm::dmat3(1),
+        1,
+        Time::ref().j2000Seconds(),
+        Time::ref().timeJumped(),
+        Time::ref().deltaTime(),
+        _performanceManager != nullptr
+    });
+
+    _sceneGraph->evaluate(_mainCamera);
+    
+    //Allow focus node to update camera (enables camera-following)
+    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
+    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
+    //node->updateCamera(_mainCamera);
+    //}
 }
 
-void RenderEngine::postSynchronizationPreDraw() {
+void RenderEngine::updateShaderPrograms() {
+    for (auto program : _programs) {
+        try {
+            if (program->isDirty()) {
+                program->rebuildFromFile();
+            }
+        }
+        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
+}
+
+void RenderEngine::updateRenderer() {
+    bool windowResized = OsEng.windowWrapper().windowHasResized();
+
+    if (windowResized) {
+        glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
+        _renderer->setResolution(res);
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
+    }
+
+    _renderer->update();
+}
+
+void RenderEngine::updateScreenSpaceRenderables() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->update();
+    }
+}
+
+void RenderEngine::updateFade() {
     //temporary fade funtionality
     float fadedIn = 1.0;
     float fadedOut = 0.0;
     // Don't restart the fade if you've already done it in that direction
-    if (  (_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
-       || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
+    if ((_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
+        || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
         _fadeDirection = 0;
     }
 
     if (_fadeDirection != 0) {
-        if (_currentFadeTime > _fadeDuration){
+        if (_currentFadeTime > _fadeDuration) {
             _globalBlackOutFactor = _fadeDirection > 0 ? fadedIn : fadedOut;
             _fadeDirection = 0;
         }
@@ -362,52 +415,6 @@ void RenderEngine::postSynchronizationPreDraw() {
             _currentFadeTime += static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
         }
     }
-
-    //if (_mainCamera)
-    //    _mainCamera->postSynchronizationPreDraw();
-
-    bool windowResized = OsEng.windowWrapper().windowHasResized();
-
-    if (windowResized) {
-        glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
-        _renderer->setResolution(res);
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
-    }
-
-    // update and evaluate the scene starting from the root node
-    _sceneGraph->update({
-        glm::dvec3(0),
-        glm::dmat3(1),
-        1,
-        Time::ref().currentTime(),
-        Time::ref().timeJumped(),
-        Time::ref().deltaTime(),
-        _performanceManager != nullptr
-    });
-    _sceneGraph->evaluate(_mainCamera);
-
-    _renderer->update();
-
-    for (auto program : _programs) {
-        try {
-            if (program->isDirty()) {
-                program->rebuildFromFile();
-            }
-        }
-        catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
-            LERRORC(e.component, e.what());
-        }
-    }
-    
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
-    }
-    //Allow focus node to update camera (enables camera-following)
-    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
-    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
-        //node->updateCamera(_mainCamera);
-    //}
-
 }
 
 void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
@@ -420,10 +427,20 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
 
     // Print some useful information on the master viewport
     if (OsEng.isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
-        if (_showInfo) {
-            renderInformation();
-        }
+        renderInformation();
     }
+
+    glm::vec2 penPosition = glm::vec2(
+        OsEng.windowWrapper().viewportPixelCoordinates().y / 2 - 50,
+        OsEng.windowWrapper().viewportPixelCoordinates().w / 3
+        );
+
+    if(_showFrameNumber) {
+        RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
+    }
+    
+    _frameNumber++;
+
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
         if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
@@ -462,7 +479,7 @@ void RenderEngine::postDraw() {
     }
 
     if (_takeScreenshot) {
-        OsEng.windowWrapper().takeScreenshot();
+        OsEng.windowWrapper().takeScreenshot(_applyWarping);
         _takeScreenshot = false;
     }
 
@@ -471,8 +488,9 @@ void RenderEngine::postDraw() {
     }
 }
 
-void RenderEngine::takeScreenshot() {
+void RenderEngine::takeScreenshot(bool applyWarping) {
     _takeScreenshot = true;
+    _applyWarping = applyWarping;
 }
 
 void RenderEngine::toggleInfoText(bool b) {
@@ -495,8 +513,7 @@ void RenderEngine::toggleFrametimeType(int t) {
 }
 
 Scene* RenderEngine::scene() {
-    // TODO custom assert (ticket #5)
-    assert(_sceneGraph);
+    ghoul_assert(_sceneGraph, "Scenegraph not initialized");
     return _sceneGraph;
 }
 
@@ -506,29 +523,6 @@ RaycasterManager& RenderEngine::raycasterManager() {
 
 void RenderEngine::setSceneGraph(Scene* sceneGraph) {
     _sceneGraph = sceneGraph;
-}
-
-void RenderEngine::serialize(SyncBuffer* syncBuffer) {
-    if (_mainCamera){
-        _mainCamera->serialize(syncBuffer);
-    }
-
-
-    syncBuffer->encode(_onScreenInformation._node);
-    syncBuffer->encode(_onScreenInformation._position.x);
-    syncBuffer->encode(_onScreenInformation._position.y);
-    syncBuffer->encode(_onScreenInformation._size);
-}
-
-void RenderEngine::deserialize(SyncBuffer* syncBuffer) {
-    if (_mainCamera){
-        _mainCamera->deserialize(syncBuffer);
-    }
-    syncBuffer->decode(_onScreenInformation._node);
-    syncBuffer->decode(_onScreenInformation._position.x);
-    syncBuffer->decode(_onScreenInformation._position.y);
-    syncBuffer->decode(_onScreenInformation._size);
-
 }
 
 Camera* RenderEngine::camera() const {
@@ -720,14 +714,16 @@ void RenderEngine::setNAaSamples(int nAaSamples) {
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return {
+    return{
         "",
         {
             {
                 "takeScreenshot",
                 &luascriptfunctions::takeScreenshot,
-                "",
-                "Renders the current image to a file on disk"
+                "(optional bool)",
+                "Renders the current image to a file on disk. If the boolean parameter "
+                "is set to 'true', the screenshot will include the blending and the "
+                "meshes. If it is 'false', the straight FBO will be recorded."
             },
             {
                 "setRenderer",
@@ -739,7 +735,7 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "setNAaSamples",
                 &luascriptfunctions::setNAaSamples,
                 "int",
-                "Sets the number of anti-aliasing (msaa) samples"
+                "Sets the number of anti-aliasing (MSAA) samples"
             },
             {
                 "showRenderInformation",
@@ -1202,6 +1198,10 @@ void RenderEngine::changeViewPoint(std::string origin) {
     LFATAL("This function is being misused with an argument of '" << origin << "'");
 }
 
+void RenderEngine::setShowFrameNumber(bool enabled){
+    _showFrameNumber = enabled;
+}
+
 void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
     _disableMasterRendering = enabled;
 }
@@ -1281,7 +1281,7 @@ void RenderEngine::renderInformation() {
     using Font = ghoul::fontrendering::Font;
     using ghoul::fontrendering::RenderFont;
 
-    if (_showInfo && _fontDate && _fontInfo) {
+    if (_fontDate) {
         glm::vec2 penPosition = glm::vec2(
             10.f,
             OsEng.windowWrapper().viewportPixelCoordinates().w
@@ -1291,45 +1291,46 @@ void RenderEngine::renderInformation() {
         RenderFontCr(*_fontDate,
             penPosition,
             "Date: %s",
-            Time::ref().currentTimeUTC().c_str()
+            Time::ref().UTC().c_str()
             );
 
-        RenderFontCr(*_fontInfo,
-            penPosition,
-            "Simulation increment (s): %.0f",
-            Time::ref().deltaTime()
+        if (_showInfo && _fontInfo) {
+            RenderFontCr(*_fontInfo,
+                         penPosition,
+                         "Simulation increment (s): %.0f",
+                         Time::ref().deltaTime()
             );
 
-        switch (_frametimeType) {
-            case FrametimeType::DtTimeAvg:
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    "Avg. Frametime: %.5f",
-                    OsEng.windowWrapper().averageDeltaTime()
-                );
-                break;
-            case FrametimeType::FPS:
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    "FPS: %3.2f",
-                    1.0 / OsEng.windowWrapper().deltaTime()
-                );
-                break;
-            case FrametimeType::FPSAvg:
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    "Avg. FPS: %3.2f",
-                    1.0 / OsEng.windowWrapper().averageDeltaTime()
-                );
-                break;
-            default:
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    "Avg. Frametime: %.5f",
-                    OsEng.windowWrapper().averageDeltaTime()
-                );
-                break;
-        }
+            switch (_frametimeType) {
+                case FrametimeType::DtTimeAvg:
+                    RenderFontCr(*_fontInfo,
+                                 penPosition,
+                                 "Avg. Frametime: %.5f",
+                                 OsEng.windowWrapper().averageDeltaTime()
+                    );
+                    break;
+                case FrametimeType::FPS:
+                    RenderFontCr(*_fontInfo,
+                                 penPosition,
+                                 "FPS: %3.2f",
+                                 1.0 / OsEng.windowWrapper().deltaTime()
+                    );
+                    break;
+                case FrametimeType::FPSAvg:
+                    RenderFontCr(*_fontInfo,
+                                 penPosition,
+                                 "Avg. FPS: %3.2f",
+                                 1.0 / OsEng.windowWrapper().averageDeltaTime()
+                    );
+                    break;
+                default:
+                    RenderFontCr(*_fontInfo,
+                                 penPosition,
+                                 "Avg. Frametime: %.5f",
+                                 OsEng.windowWrapper().averageDeltaTime()
+                    );
+                    break;
+            }
 
         network::Status status = OsEng.parallelConnection().status();
         size_t nConnections = OsEng.parallelConnection().nConnections();
@@ -1371,260 +1372,270 @@ void RenderEngine::renderInformation() {
 
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
+//<<<<<<< HEAD
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-        double currentTime = Time::ref().currentTime();
+        double currentTime = Time::ref().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
 
             const Mission& mission = MissionManager::ref().currentMission();
+//=======
+//            bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+//            double currentTime = Time::ref().currentTime();
+//>>>>>>> develop
+//
+//            if (MissionManager::ref().hasCurrentMission()) {
+//
+//                const Mission& mission = MissionManager::ref().currentMission();
 
-            if (mission.phases().size() > 0) {
+                if (mission.phases().size() > 0) {
 
-                static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
-                //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
-                static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
-                static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
-                static const glm::vec4 currentLeafMissionColor = missionProgressColor;
-                static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
+                    static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
+                    //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
+                    static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
+                    static const glm::vec4 missionProgressColor = currentMissionColor;// (0.4, 1.0, 1.0, 1);
+                    static const glm::vec4 currentLeafMissionColor = missionProgressColor;
+                    static const glm::vec4 nonCurrentMissionColor(0.3, 0.3, 0.3, 1);
 
-                // Add spacing
-                RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
+                    // Add spacing
+                    RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
-                std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+                    std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
 
-                if (phaseTrace.size()) {
-                    std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
-                    RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
-                    double remaining = phaseTrace.back()->timeRange().end - currentTime;
-                    float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
-                    std::string progress = progressToStr(25, t);
-                    //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
-                    //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
-                }
-                else {
-                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
-                    double remaining = mission.timeRange().start - currentTime;
-                    RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
-                        "%.0f s", remaining);
-                }
-
-                bool showAllPhases = false;
-
-                typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
-                std::stack<PhaseWithDepth> S;
-                int pixelIndentation = 20;
-                S.push({ &mission, 0 });
-                while (!S.empty()) {
-                    const MissionPhase* phase = S.top().first;
-                    int depth = S.top().second;
-                    S.pop();
-
-                    bool isCurrentPhase = phase->timeRange().includes(currentTime);
-
-                    penPosition.x += depth * pixelIndentation;
-                    if (isCurrentPhase) {
-                        double remaining = phase->timeRange().end - currentTime;
-                        float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+                    if (phaseTrace.size()) {
+                        std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
+                        RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
+                        double remaining = phaseTrace.back()->timeRange().end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
                         std::string progress = progressToStr(25, t);
-                        RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
-                            "%s  %s %.1f %%",
-                            phase->name().c_str(),
-                            progress.c_str(),
-                            t * 100
-                            );
+                        //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
+                        //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
                     }
                     else {
-                        RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
+                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor, "Next Mission:");
+                        double remaining = mission.timeRange().start - currentTime;
+                        RenderFontCr(*_fontInfo, penPosition, nextMissionColor,
+                            "%.0f s", remaining);
                     }
-                    penPosition.x -= depth * pixelIndentation;
 
-                    if (isCurrentPhase || showAllPhases) {
-                        // phases are sorted increasingly by start time, and will be popped
-                        // last-in-first-out from the stack, so add them in reversed order.
-                        int indexLastPhase = phase->phases().size() - 1;
-                        for (int i = indexLastPhase; 0 <= i; --i) {
-                            S.push({ &phase->phase(i), depth + 1 });
-                        }
-                    }
-                }
-            }
-        }
+                    bool showAllPhases = false;
 
+                    typedef std::pair<const MissionPhase*, int> PhaseWithDepth;
+                    std::stack<PhaseWithDepth> S;
+                    int pixelIndentation = 20;
+                    S.push({ &mission, 0 });
+                    while (!S.empty()) {
+                        const MissionPhase* phase = S.top().first;
+                        int depth = S.top().second;
+                        S.pop();
 
+                        bool isCurrentPhase = phase->timeRange().includes(currentTime);
 
-        if (openspace::ImageSequencer::ref().isReady()) {
-            penPosition.y -= 25.f;
-
-            glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
-
-            if (hasNewHorizons) {
-                try {
-                    double lt;
-                    glm::dvec3 p =
-                        SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
-                    psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-                    float a, b, c;
-                    glm::dvec3 radii;
-                    SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-                    a = radii.x;
-                    b = radii.y;
-                    float radius = (a + b) / 2.f;
-                    float distToSurf = glm::length(nhPos.vec3()) - radius;
-
-                    RenderFont(*_fontInfo,
-                               penPosition,
-                               "Distance to Pluto: % .1f (KM)",
-                               distToSurf
-                    );
-                    penPosition.y -= _fontInfo->height();
-                }
-                catch (...) {
-                }
-            }
-
-            double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
-            float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
-
-            std::string str = SpiceManager::ref().dateFromEphemerisTime(
-                ImageSequencer::ref().getNextCaptureTime(),
-                "YYYY MON DD HR:MN:SC"
-                );
-
-            glm::vec4 active(0.6, 1, 0.00, 1);
-            glm::vec4 brigther_active(0.9, 1, 0.75, 1);
-
-            if (remaining > 0) {
-                
-                std::string progress = progressToStr(25, t);
-                brigther_active *= (1 - t);
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active * t + brigther_active,
-                    "Next instrument activity:"
-                    );
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active * t + brigther_active,
-                    "%.0f s %s %.1f %%",
-                    remaining, progress.c_str(), t * 100
-                    );
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active,
-                    "Data acquisition time: %s",
-                    str.c_str()
-                    );
-            }
-            std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
-            std::pair<double, std::string> currentTarget = ImageSequencer::ref().getCurrentTarget();
-
-            if (currentTarget.first > 0.0) {
-                int timeleft = static_cast<int>(nextTarget.first - currentTime);
-
-                int hour = timeleft / 3600;
-                int second = timeleft % 3600;
-                int minute = second / 60;
-                second = second % 60;
-
-                std::string hh, mm, ss;
-
-                if (hour   < 10)
-                    hh.append("0");
-                if (minute < 10)
-                    mm.append("0");
-                if (second < 10)
-                    ss.append("0");
-
-                hh.append(std::to_string(hour));
-                mm.append(std::to_string(minute));
-                ss.append(std::to_string(second));
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    targetColor,
-                    "Data acquisition adjacency: [%s:%s:%s]",
-                    hh.c_str(), mm.c_str(), ss.c_str()
-                    );
-
-#if 0
-// Why is it (2) in the original? ---abock
-                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
-                //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
-                std::string space;
-                glm::vec4 color;
-                size_t isize = incidentTargets.second.size();
-                for (size_t p = 0; p < isize; p++) {
-                    double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
-                    t = (p > isize / 2) ? 1 - t : t;
-                    t += 0.3;
-                    color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
-
-                    RenderFont(*_fontInfo,
-                        penPosition,
-                        color,
-                        "%s%s",
-                        space.c_str(), incidentTargets.second[p].c_str()
-                        );
-
-
-                    for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
-                        space += " ";
-                }
-#endif
-                penPosition.y -= _fontInfo->height();
-
-                std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
-                glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
-                glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
-
-                RenderFontCr(*_fontInfo,
-                    penPosition,
-                    active,
-                    "Active Instruments:"
-                    );
-
-                for (auto t : activeMap) {
-                    if (t.second == false) {
-                        RenderFont(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "| |"
-                            );
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "    %5s",
-                            t.first.c_str()
-                            );
-
-                    }
-                    else {
-                        RenderFont(*_fontInfo,
-                            penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "|"
-                            );
-                        if (t.first == "NH_LORRI") {
-                            RenderFont(*_fontInfo,
-                                penPosition,
-                                firing,
-                                " + "
+                        penPosition.x += depth * pixelIndentation;
+                        if (isCurrentPhase) {
+                            double remaining = phase->timeRange().end - currentTime;
+                            float t = static_cast<float>(1.0 - remaining / phase->timeRange().duration());
+                            std::string progress = progressToStr(25, t);
+                            RenderFontCr(*_fontInfo, penPosition, currentMissionColor,
+                                "%s  %s %.1f %%",
+                                phase->name().c_str(),
+                                progress.c_str(),
+                                t * 100
                                 );
                         }
+                        else {
+                            RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, phase->name().c_str());
+                        }
+                        penPosition.x -= depth * pixelIndentation;
+
+                        if (isCurrentPhase || showAllPhases) {
+                            // phases are sorted increasingly by start time, and will be popped
+                            // last-in-first-out from the stack, so add them in reversed order.
+                            int indexLastPhase = phase->phases().size() - 1;
+                            for (int i = indexLastPhase; 0 <= i; --i) {
+                                S.push({ &phase->phase(i), depth + 1 });
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            if (openspace::ImageSequencer::ref().isReady()) {
+                penPosition.y -= 25.f;
+
+                glm::vec4 targetColor(0.00, 0.75, 1.00, 1);
+
+                if (hasNewHorizons) {
+                    try {
+                        double lt;
+                        glm::dvec3 p =
+                            SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
+                        psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+                        float a, b, c;
+                        glm::dvec3 radii;
+                        SpiceManager::ref().getValue("PLUTO", "RADII", radii);
+                        a = radii.x;
+                        b = radii.y;
+                        float radius = (a + b) / 2.f;
+                        float distToSurf = glm::length(nhPos.vec3()) - radius;
+
+                        RenderFont(*_fontInfo,
+                                   penPosition,
+                                   "Distance to Pluto: % .1f (KM)",
+                                   distToSurf
+                        );
+                        penPosition.y -= _fontInfo->height();
+                    }
+                    catch (...) {
+                    }
+                }
+
+                double remaining = openspace::ImageSequencer::ref().getNextCaptureTime() - currentTime;
+                float t = static_cast<float>(1.0 - remaining / openspace::ImageSequencer::ref().getIntervalLength());
+
+                std::string str = SpiceManager::ref().dateFromEphemerisTime(
+                    ImageSequencer::ref().getNextCaptureTime(),
+                    "YYYY MON DD HR:MN:SC"
+                    );
+
+                glm::vec4 active(0.6, 1, 0.00, 1);
+                glm::vec4 brigther_active(0.9, 1, 0.75, 1);
+
+                if (remaining > 0) {
+                
+                    std::string progress = progressToStr(25, t);
+                    brigther_active *= (1 - t);
+
+                    RenderFontCr(*_fontInfo,
+                        penPosition,
+                        active * t + brigther_active,
+                        "Next instrument activity:"
+                        );
+
+                    RenderFontCr(*_fontInfo,
+                        penPosition,
+                        active * t + brigther_active,
+                        "%.0f s %s %.1f %%",
+                        remaining, progress.c_str(), t * 100
+                        );
+
+                    RenderFontCr(*_fontInfo,
+                        penPosition,
+                        active,
+                        "Data acquisition time: %s",
+                        str.c_str()
+                        );
+                }
+                std::pair<double, std::string> nextTarget = ImageSequencer::ref().getNextTarget();
+                std::pair<double, std::string> currentTarget = ImageSequencer::ref().getCurrentTarget();
+
+                if (currentTarget.first > 0.0) {
+                    int timeleft = static_cast<int>(nextTarget.first - currentTime);
+
+                    int hour = timeleft / 3600;
+                    int second = timeleft % 3600;
+                    int minute = second / 60;
+                    second = second % 60;
+
+                    std::string hh, mm, ss;
+
+                    if (hour   < 10)
+                        hh.append("0");
+                    if (minute < 10)
+                        mm.append("0");
+                    if (second < 10)
+                        ss.append("0");
+
+                    hh.append(std::to_string(hour));
+                    mm.append(std::to_string(minute));
+                    ss.append(std::to_string(second));
+
+                    RenderFontCr(*_fontInfo,
+                        penPosition,
+                        targetColor,
+                        "Data acquisition adjacency: [%s:%s:%s]",
+                        hh.c_str(), mm.c_str(), ss.c_str()
+                        );
+
+    #if 0
+    // Why is it (2) in the original? ---abock
+                    //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(0);
+                    //std::pair<double, std::vector<std::string>> incidentTargets = ImageSequencer::ref().getIncidentTargetList(2);
+                    std::string space;
+                    glm::vec4 color;
+                    size_t isize = incidentTargets.second.size();
+                    for (size_t p = 0; p < isize; p++) {
+                        double t = static_cast<double>(p + 1) / static_cast<double>(isize + 1);
+                        t = (p > isize / 2) ? 1 - t : t;
+                        t += 0.3;
+                        color = (p == isize / 2) ? targetColor : glm::vec4(t, t, t, 1);
+
                         RenderFont(*_fontInfo,
                             penPosition,
-                            glm::vec4(0.3, 0.3, 0.3, 1),
-                            "  |"
+                            color,
+                            "%s%s",
+                            space.c_str(), incidentTargets.second[p].c_str()
                             );
-                        RenderFontCr(*_fontInfo,
-                            penPosition,
-                            active,
-                            "    %5s",
-                            t.first.c_str()
-                            );
+
+
+                        for (int k = 0; k < incidentTargets.second[p].size() + 2; k++)
+                            space += " ";
+                    }
+    #endif
+                    penPosition.y -= _fontInfo->height();
+
+                    std::map<std::string, bool> activeMap = ImageSequencer::ref().getActiveInstruments();
+                    glm::vec4 firing(0.58 - t, 1 - t, 1 - t, 1);
+                    glm::vec4 notFiring(0.5, 0.5, 0.5, 1);
+
+                    RenderFontCr(*_fontInfo,
+                        penPosition,
+                        active,
+                        "Active Instruments:"
+                        );
+
+                    for (auto t : activeMap) {
+                        if (t.second == false) {
+                            RenderFont(*_fontInfo,
+                                penPosition,
+                                glm::vec4(0.3, 0.3, 0.3, 1),
+                                "| |"
+                                );
+                            RenderFontCr(*_fontInfo,
+                                penPosition,
+                                glm::vec4(0.3, 0.3, 0.3, 1),
+                                "    %5s",
+                                t.first.c_str()
+                                );
+
+                        }
+                        else {
+                            RenderFont(*_fontInfo,
+                                penPosition,
+                                glm::vec4(0.3, 0.3, 0.3, 1),
+                                "|"
+                                );
+                            if (t.first == "NH_LORRI") {
+                                RenderFont(*_fontInfo,
+                                    penPosition,
+                                    firing,
+                                    " + "
+                                    );
+                            }
+                            RenderFont(*_fontInfo,
+                                penPosition,
+                                glm::vec4(0.3, 0.3, 0.3, 1),
+                                "  |"
+                                );
+                            RenderFontCr(*_fontInfo,
+                                penPosition,
+                                active,
+                                "    %5s",
+                                t.first.c_str()
+                                );
+                        }
                     }
                 }
             }
@@ -1721,6 +1732,12 @@ void RenderEngine::renderScreenLog() {
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;
     }
+}
+
+std::vector<Syncable*> RenderEngine::getSyncables(){
+    std::vector<Syncable*> syncables = _mainCamera->getSyncables();
+    syncables.push_back(&_onScreenInformation);
+    return syncables;
 }
 
 void RenderEngine::sortScreenspaceRenderables() {

@@ -121,6 +121,7 @@ public:
 
     // Properties 
     properties::BoolProperty _isEnabled;
+    properties::BoolProperty _toggleEnabledEveryFrame;
     properties::FloatProperty lodScaleFactor;
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
     properties::BoolProperty atmosphereEnabled;

@@ -27,76 +27,120 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
-namespace {
-    const std::string _loggerCat = "SpiceEphemeris";
-    //const std::string keyGhosting = "EphmerisGhosting";
+#include <ghoul/filesystem/filesystem.h>
 
+#include <openspace/documentation/verifier.h>
+
+namespace {
     const std::string KeyBody = "Body";
-    const std::string KeyOrigin = "Observer";
+    const std::string KeyObserver = "Observer";
     const std::string KeyKernels = "Kernels";
+
+    const std::string ReferenceFrame = "GALACTIC";
 }
 
 namespace openspace {
     
+Documentation SpiceEphemeris::Documentation() {
+    using namespace openspace::documentation;
+
+    return {
+        "Spice Translation",
+        "base_translation_spicetranslation",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("SpiceEphemeris"),
+                "",
+                Optional::No
+            },
+            {
+                KeyBody,
+                new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
+                "This is the SPICE NAIF name for the body whose translation is to be "
+                "computed by the SpiceTranslation. It can either be a fully qualified "
+                "name (such as 'EARTH') or a NAIF integer id code (such as '399').",
+                Optional::No
+            },
+            {
+                KeyObserver,
+                new StringAnnotationVerifier("A valid SPICE NAIF name or identifier"),
+                "This is the SPICE NAIF name for the parent of the body whose "
+                "translation is to be computed by the SpiceTranslation. It can either be "
+                "a fully qualified name (such as 'SOLAR SYSTEM BARYCENTER') or a NAIF "
+                "integer id code (such as '0').",
+                Optional::No
+            },
+            {
+                KeyKernels,
+                new OrVerifier(
+                    new TableVerifier({
+                        { "*", new StringVerifier }
+                    }),
+                    new StringVerifier
+                ),
+                "A single kernel or list of kernels that this SpiceTranslation depends "
+                "on. All provided kernels will be loaded before any other operation is "
+                "performed.",
+                Optional::Yes
+            }
+        },
+        Exhaustive::Yes
+    };
+}
+
 SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
-    : _targetName("")
-    , _originName("")
-    , _position()
+    : _target("target", "Target", "")
+    , _origin("origin", "Origin", "")
     , _kernelsLoadedSuccessfully(true)
 {
-    const bool hasBody = dictionary.getValue(KeyBody, _targetName);
-    if (!hasBody)
-        LERROR("SpiceEphemeris does not contain the key '" << KeyBody << "'");
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "SpiceEphemeris"
+    );
 
-    const bool hasObserver = dictionary.getValue(KeyOrigin, _originName);
-    if (!hasObserver)
-        LERROR("SpiceEphemeris does not contain the key '" << KeyOrigin << "'");
+    _target = dictionary.value<std::string>(KeyBody);
+    _origin = dictionary.value<std::string>(KeyObserver);
 
-    //dictionary.getValue(keyGhosting, _ghosting);
-
-    ghoul::Dictionary kernels;
-    dictionary.getValue(KeyKernels, kernels);
-    for (size_t i = 1; i <= kernels.size(); ++i) {
-        std::string kernel;
-        bool success = kernels.getValue(std::to_string(i), kernel);
-        if (!success)
-            LERROR("'" << KeyKernels << "' has to be an array-style table");
+    auto loadKernel = [](const std::string& kernel) {
+        if (!FileSys.fileExists(kernel)) {
+            throw SpiceManager::SpiceException("Kernel '" + kernel + "' does not exist");
+        }
 
         try {
             SpiceManager::ref().loadKernel(kernel);
-            _kernelsLoadedSuccessfully = true;
         }
-        catch (const SpiceManager::SpiceException& e) {
-            LERROR("Could not load SPICE kernel: " << e.what());
-            _kernelsLoadedSuccessfully = false;
+        catch (const SpiceManager::SpiceException& exception) {
+            LERRORC("SpiceEphemeris", exception.message);
+        }
+    };
+
+    if (dictionary.hasKey(KeyKernels)) {
+        // Due to the specification, we can be sure it is either a Dictionary or a string
+        if (dictionary.hasValue<std::string>(KeyKernels)) {
+            std::string kernel = dictionary.value<std::string>(KeyKernels);
+            loadKernel(kernel);
+        }
+        else {
+            ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
+            for (size_t i = 1; i <= kernels.size(); ++i) {
+                std::string kernel = kernels.value<std::string>(std::to_string(i));
+                loadKernel(kernel);
+            }
         }
     }
 }
     
-const glm::dvec3& SpiceEphemeris::position() const {
+glm::dvec3 SpiceEphemeris::position() const {
     return _position;
 }
 
 void SpiceEphemeris::update(const UpdateData& data) {
-    if (!_kernelsLoadedSuccessfully)
-        return;
-
     double lightTime = 0.0;
-    glm::dvec3 position = SpiceManager::ref().targetPosition(
-        _targetName, _originName, "GALACTIC", {}, data.time, lightTime);
-    
-    //double interval = openspace::ImageSequencer::ref().getIntervalLength();
-    //if (_ghosting == "TRUE" && interval > 60){
-    //    double _time = openspace::ImageSequencer::ref().getNextCaptureTime();
-    //    SpiceManager::ref().getTargetPosition(_targetName, _originName,
-    //        "GALACTIC", "NONE", _time, position, lightTime);
-    //}
-    //
-    
-    
-    //_position = psc::CreatePowerScaledCoordinate(position.x, position.y, position.z);
-    //_position[3] += 3;
-    _position = position * glm::pow(10.0, 3.0);
+    _position = SpiceManager::ref().targetPosition(
+        _target, _origin, ReferenceFrame, {}, data.time, lightTime
+    ) * glm::pow(10.0, 3.0);
 }
 
 } // namespace openspace

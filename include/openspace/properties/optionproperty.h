@@ -60,9 +60,16 @@ public:
      * to its super class.
      * \param identifier A unique identifier for this property
      * \param guiName The GUI name that should be used to represent this property
-     * \param displayType Optional DisplayType for GUI (default RADIO)
      */
     OptionProperty(std::string identifier, std::string guiName);
+
+    /**
+    * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
+    * to its super class.
+    * \param identifier A unique identifier for this property
+    * \param guiName The GUI name that should be used to represent this property
+    * \param displayType Optional DisplayType for GUI (default RADIO)
+    */
     OptionProperty(std::string identifier, std::string guiName, DisplayType displayType);
 
     /**

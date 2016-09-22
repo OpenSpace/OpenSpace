@@ -30,6 +30,8 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/documentation/verifier.h>
+
  #ifdef WIN32
  #define _USE_MATH_DEFINES
  #include <math.h>
@@ -50,16 +52,36 @@ namespace {
 
 namespace openspace {
 
+Documentation ScreenSpaceRenderable::Documentation() {
+    using namespace openspace::documentation;
+
+    return {
+        "Screenspace Renderable",
+        "core_screenspacerenderable",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier("Must name a valid Screenspace renderable"),
+                "The type of the Screenspace renderable that is to be created. The "
+                "available types of Screenspace renderable depend on the configuration of"
+                "the application and can be written to disk on application startup into "
+                "the FactoryDocumentation.",
+                Optional::No
+            }
+        }
+    };
+}
+
 ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
     const ghoul::Dictionary& dictionary)
 {
-    std::string renderableType;
-    bool success = dictionary.getValue(KeyType, renderableType);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ScreenSpaceRenderable"
+    );
 
-    if (!success) {
-        LERROR("ScreenSpaceRenderable did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+    std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ScreenSpaceRenderable* result = factory->create(renderableType, dictionary);

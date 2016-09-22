@@ -2,6 +2,8 @@
 TextureResolution = "med"
 -- TextureResolution = "high"
 
+local startTime = "2016 SEP 8 23:05:00.50"
+
 function preInitialization()
     --[[
     The scripts in this function are executed after the scene is loaded but before the
@@ -9,8 +11,6 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
-
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
 
     -- Load Spice Kernels
     openspace.spice.loadKernel("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp")
@@ -39,6 +39,7 @@ function preInitialization()
     -- Low res SPK
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/orx_160917_231024_pgaa3_day15m60_v1.bsp")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/orx_160914_231024_pgaa3_day12m60_v1.bsp")
+    
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/orx_160908_231024_pgaa3_day06m60_v1.bsp")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/spk_orx_160908_231024_pgaa2_day06m60_v3.bsp")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/orx_160908_231024_pgaa2_day06m60.bsp")
@@ -50,6 +51,19 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/de421.bsp")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/background/spk/sb-101955-76.bsp")
 
+    -- Nominal_Profile_LowRes
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Approach_600s_20180816T230000_20181119T010000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Approach_NominalProfile_600s_20180816T230000_20181119T010000.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_600s_20190108T000000_20190317T000000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_NominalProfile_600s_20190108T000000_20190317T000000.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_600s_20181203T230000_20190109T000000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_NominalProfile_600s_20181203T230000_20190109T000000.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_600s_20190316T000000_20190521T000000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_NominalProfile600s_20190316T000000_20190521T000000.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_600s_20181119T230000_20181204T010000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_NominalProfile_600s_20181119T230000_20181204T010000.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Recon_600s_20190519T000000_20190830T000000.bsp")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Recon_NominalProfile_600s_20190519T000000_20190830T000000.bc")
     
     -- Nominal_Observations_Science
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/03_Approach/DustSearch_v1/Phase03_AP_DustSearch_1.bc")
@@ -80,15 +94,19 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_4.bc")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_5.bc")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/04_PrelimSurvey/PolyCam_v1/Phase04_PS_PolyCam_6.bc")
+
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19013_18_BBD1_info.TXT")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19013_18_BBD1_v2.bc")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19014_16_BBD2_info.TXT")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19014_16_BBD2_v2.bc")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19020_18_BBD3_info.TXT")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19020_18_BBD3_v2.bc")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19021_19_BBD4_info.TXT")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19021_19_BBD4_v2.bc")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/README.txt")
+    
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19013_18_BBD1_v2.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19014_16_BBD2_v2.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19020_18_BBD3_v2.bc")
+    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/BaseballDiamond_v2/atl_19021_19_BBD4_v2.bc")
+    
+
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_1.bc")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_2.bc")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/06_DetailedSurvey/EquatorialStations_v1/Phase06_DS_Equatorial_Stations_3.bc")
@@ -104,48 +122,51 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_1.a")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_2.a")
     openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/07_OrbitalB/CandidateSampleSite_v2/CSS_Mapping_3.a")
+
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case02_0Latitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case05_20negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case08_40negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case11_60negLatitude.wmv")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case02.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case05.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case08.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case11.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case02_0Latitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case05_20negLatitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case08_40negLatitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case11_60negLatitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case02.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case05.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_0Latitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_atl_19145_04.atf")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_20negLatitude.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_atl_19145_04.atf")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_NominalProfile.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case08_NominalProfile.bc")
 
-    -- Nominal_Profile_LowRes
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Approach_600s_20180816T230000_20181119T010000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Approach_NominalProfile_600s_20180816T230000_20181119T010000.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_600s_20190108T000000_20190317T000000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/DetailedSurvey_NominalProfile_600s_20190108T000000_20190317T000000.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_600s_20181203T230000_20190109T000000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalA_NominalProfile_600s_20181203T230000_20190109T000000.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_600s_20190316T000000_20190521T000000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/OrbitalB_NominalProfile600s_20190316T000000_20190521T000000.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_600s_20181119T230000_20181204T010000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/PrelimSurvey_NominalProfile_600s_20181119T230000_20181204T010000.bc")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Recon_600s_20190519T000000_20190830T000000.bsp")
-    openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Profile_LowRes/Recon_NominalProfile_600s_20190519T000000_20190830T000000.bc")
-    
+    local case = 2 -- Right now we only have the image times for case 2
+
+    if case == 2 then
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case02.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_0Latitude.bc")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case02_atl_19145_04.atf")
+
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case02.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case02_0Latitude.bc")
+    elseif case == 5 then
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/ORX_Recon_525mSortie_Case05.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_20negLatitude.bc")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_atl_19145_04.atf")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case05_NominalProfile.bc")
+       
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case05.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case05_20negLatitude.bc")
+    elseif case == 8 then
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/525m_Sortie_v2/Recon_525mSortie_Case08_NominalProfile.bc")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case08.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case08_40negLatitude.bc")
+    elseif case == 11 then
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/ORX_Recon_225mSortie_Case11.bsp")
+        openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Recon_225mSortie_Case11_60negLatitude.bc")
+    end
+
     -- Load planetary constants
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    -- openspace.time.setTime("2018-12-20T22:47:00.00")
-    --openspace.time.setTime("2019-05-25T03:57:55.00")
-    openspace.time.setTime("2016 SEP 8 23:05:00.50")
-    openspace.time.setDeltaTime(0)
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
+
+    --local startTime = "2019 APR 16 12:03:00.00"
+
+    openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
+
+    -- Removing the line below will cause all scripts prior to <startTime> to be executed during initialization
+    -- openspace.scriptScheduler.skipTo(startTime);
+
 end
 
 function postInitialization()
@@ -165,11 +186,16 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
-    -- Rotate Osiris Rex model to match the specification in the spice data
-    openspace.setPropertyValue("OsirisRex.renderable.modelrotation", {90.0, 0.0, 0.0})
+    -- Activate night textures and water masks
+    openspace.setPropertyValue("Earth.RenderableGlobe.WaterMasks", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true);
 
     openspace.printInfo("Done setting default values")
     openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
+
+    openspace.time.setTime(startTime)
+    openspace.time.setDeltaTime(0)
 
     openspace.resetCameraDirection()
 end
@@ -179,21 +205,23 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "OsirisRex",
-        Position = {100, 0, 0},
-        Rotation = {0.668258, -0.089482, 0.589040, 0.445484},
+        Position = {26974590199.661884, 76314608558.908020, -127086452897.101791},
+        Rotation = {0.729548, -0.126024, 0.416827, 0.527382},
     },
     Modules = {
         "sun",
-        --"mercury",
-        --"venus",
+        "lodmercury",
+        "venus",
         "lodearth",
-        --"mars",
-        --"saturn",
-        --"uranus",
-        --"neptune",
-        --"stars",
+        "lodmoon",
+        "lodmars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
+        "stars",
         -- "stars-denver",
-        --"milkyway",
+        "milkyway",
         -- "milkyway-eso",
         --"imageplane",
         "osirisrex",

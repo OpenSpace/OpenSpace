@@ -22,9 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <openspace/util/factorymanager.h>
+
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
-#include <modules/globebrowsing/tile/tileproviderfactory.h>
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -91,7 +91,7 @@ namespace openspace {
             else if (i == LayeredTextures::Overlays) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
             }
-            else if (i == LayeredTextures::HeightMaps || i == LayeredTextures::HeightMapOverlays) {
+            else if (i == LayeredTextures::HeightMaps) {
                 initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
             }
             else {
@@ -101,9 +101,8 @@ namespace openspace {
             initData.threads = 1;
             initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles =
-                i == LayeredTextures::HeightMaps ||
-                i == LayeredTextures::HeightMapOverlays; // Only preprocess height maps.
+            // Only preprocess height maps.
+            initData.preprocessTiles = i == LayeredTextures::HeightMaps;
 
             initTexures(
                 _layerCategories[i].tileProviders,
@@ -134,16 +133,27 @@ namespace openspace {
             std::string type = "LRUCaching"; // if type is unspecified
             texDict.getValue("Type", type);
 
-            
-            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+            TileProvider* tileProvider;
+            auto tileProviderFactory = FactoryManager::ref().factory<TileProvider>();
+            try {
+                tileProvider = tileProviderFactory->create(type, texDict);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.what());
+                continue;
+            }
+
+            // Something else went wrong and no exception was thrown
             if (tileProvider == nullptr) {
+                LERROR("Unable to create TileProvider '" << name << "' of type '"
+                    << type << "'");
                 continue;
             }
 
             bool enabled = false; // defaults to false if unspecified
             texDict.getValue("Enabled", enabled);
 
-            dest.push_back({ name, tileProvider, enabled });
+            dest.push_back({ name, std::shared_ptr<TileProvider>(tileProvider), enabled });
         }
     }
 

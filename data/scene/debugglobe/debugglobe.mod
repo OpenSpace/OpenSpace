@@ -7,11 +7,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "EARTH BARYCENTER",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
         },
     },
     -- RenderableGlobe module
@@ -170,8 +167,7 @@ return {
             Kernels = {
                 "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             }
-        },
-        GuiName = "/Solar/Planets/DebugGlobe"
+        }
     },
     -- EarthTrail module
     {   
@@ -186,8 +182,7 @@ return {
             TropicalOrbitPeriod = 365.242,
             EarthOrbitRatio = 1,
             DayLength = 24
-        },
-        GuiName = "/Solar/EarthTrail"
+        }
     }
     --[[,
     {

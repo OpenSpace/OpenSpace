@@ -22,6 +22,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "IO",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             Instrument = {                
                 Name       = "NH_LORRI",
@@ -40,11 +41,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "IO",
-                Reference = "ECLIPJ2000",
                 Observer = "JUPITER BARYCENTER",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -68,7 +66,6 @@ return {
             Reference = "ECLIPJ2000"
         },
         ]]
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "IoText",
@@ -78,7 +75,8 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Io-Text.png"
+            Texture = "textures/Io-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {
@@ -107,6 +105,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/IoTrail"
     }
 }

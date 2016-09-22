@@ -18,6 +18,5 @@ return {
                 -- need to add different texture
             },    
         },
-        GuiName = "/Solar/NewHorizonsTrail"
     }
 }

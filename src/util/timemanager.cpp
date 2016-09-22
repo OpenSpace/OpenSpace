@@ -38,7 +38,6 @@ void TimeManager::preSynchronization(double dt) {
     } else {
         consumeKeyframes(dt);
     }
-    Time::ref().preSynchronization();
 }
 
 void TimeManager::consumeKeyframes(double dt) {
@@ -85,7 +84,7 @@ void TimeManager::consumeKeyframes(double dt) {
         // Do not interpolate with time jumping keyframes.
         // Instead, wait until their timestamp and apply them directly.
         if (next._requiresTimeJump) {
-            time.setTime(time.currentTime() + dt * time.deltaTime(), false);
+            time.setTime(time.j2000Seconds() + dt * time.deltaTime(), false);
             return;
         }
 
@@ -99,7 +98,7 @@ void TimeManager::consumeKeyframes(double dt) {
 
         double parameter = (t1 - t0) / (t2 - t0);
         
-        double y0 = time.currentTime();
+        double y0 = time.j2000Seconds();
         double yPrime0 = time.deltaTime();
 
         double y2 = next._time;

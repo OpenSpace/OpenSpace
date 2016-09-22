@@ -34,6 +34,12 @@
 
 namespace openspace {
 
+/**
+* Abstract class defining an interface used for geometries with grid structures.
+* The class <code>Grid</code> should be extended for use of geometries with a 2D
+* structure where the number of segments in x and y direction represents the number
+* of vertices + 1 in each direction.
+*/
 class Grid
 {
 public:
@@ -48,22 +54,45 @@ public:
     TriangleSoup& geometry();
 
     /**
-    Returns the number of grid cells in the x direction. Hence the number of vertices
-    in the x direction is xResolution + 1.
+    * Returns the number of grid cells in the x direction. Hence the number of vertices
+    * in the x direction is xResolution + 1.
     */
     virtual int xSegments() const = 0;
     
     /**
-    Returns the number of grid cells in the y direction. Hence the number of vertices
-    in the y direction is xResolution + 1.
+    * Returns the number of grid cells in the y direction. Hence the number of vertices
+    * in the y direction is xResolution + 1.
     */
     virtual int ySegments() const = 0;
 
 protected:
-    virtual std::vector<GLuint>        CreateElements(                int xSegments, int ySegments) = 0;
-    virtual std::vector<glm::vec4>    CreatePositions(            int xSegments, int ySegments) = 0;
-    virtual std::vector<glm::vec2>    CreateTextureCoordinates(    int xSegments, int ySegments) = 0;
-    virtual std::vector<glm::vec3>    CreateNormals(                int xSegments, int ySegments) = 0;
+    /**
+    * Should return the indices of vertices for a grid with size <code>xSegments</code> * 
+    * <code>ySegments</code>. Where the number of vertices in each direction is the number
+    * of segments + 1.
+    */
+    virtual std::vector<GLuint> CreateElements(int xSegments, int ySegments) = 0;
+    
+    /**
+    * Should return the positions of vertices for a grid with size <code>xSegments</code> *
+    * <code>ySegments</code>. Where the number of vertices in each direction is the number
+    * of segments + 1.
+    */
+    virtual std::vector<glm::vec4> CreatePositions(int xSegments, int ySegments) = 0;
+    
+    /**
+    * Should return the texture coordinates of vertices for a grid with size
+    * <code>xSegments</code> * <code>ySegments</code>. Where the number of vertices in
+    * each direction is the number of segments + 1.
+    */
+    virtual std::vector<glm::vec2> CreateTextureCoordinates(int xSegments, int ySegments) = 0;
+    
+    /**
+    * Should return the normals of vertices for a grid with size <code>xSegments</code> *
+    * <code>ySegments</code>. Where the number of vertices in each direction is the number
+    * of segments + 1.
+    */
+    virtual std::vector<glm::vec3> CreateNormals(int xSegments, int ySegments) = 0;
 
     std::unique_ptr<TriangleSoup> _geometry;
 

@@ -3,9 +3,6 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Static"
-        }
     },
     -- EarthTrail module
     {   
@@ -30,11 +27,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "EARTH",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430.bsp"
         },
         Rotation = {
             Type = "Spice",
@@ -86,8 +80,7 @@ return {
                 HeightMapOverlays = {
                 },
             },
-        },
-        GuiName = "/Solar/Planets/LodEarth"
+        }
     },
     {
         Name = "LodMoon",
@@ -95,11 +88,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "MOON",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430.bsp"
         },
         Rotation = {
             Type = "Spice",
@@ -180,11 +170,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "MARS",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/MAR063.BSP"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/MAR063.BSP"
         },
         Rotation = {
             Type = "Spice",
@@ -243,8 +230,7 @@ return {
                 HeightMapOverlays = {
                 },
             },
-        },
-        GuiName = "/Solar/Planets/LodEarth"
+        }
     },
     {
         Name = "LodMercury",
@@ -252,11 +238,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "MERCURY",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430.bsp"
         },
         Rotation = {
             Type = "Spice",
@@ -303,7 +286,6 @@ return {
 
                 },
             },
-        },
-        GuiName = "/Solar/Planets/LodEarth"
+        }
     },
 }

@@ -173,6 +173,9 @@ PerformanceManager::~PerformanceManager() {
         
         LINFO("Remove shared memory '" << _performanceMemory->name() << "'");
         ghoul::SharedMemory::remove(_performanceMemory->name());
+
+        _performanceMemory = nullptr;
+
     }
     
     PerformanceManager::destroyGlobalSharedMemory();

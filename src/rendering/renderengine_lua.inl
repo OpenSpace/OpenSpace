@@ -33,11 +33,18 @@ namespace luascriptfunctions {
     */
 int takeScreenshot(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0) {
+    if (nArguments == 0) {
+        OsEng.renderEngine().takeScreenshot();
+        return 0;
+    }
+    else if (nArguments == 1) {
+        bool b = lua_toboolean(L, -1) != 0;
+        OsEng.renderEngine().takeScreenshot(b);
+        return 0;
+    }
+    else {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
-    OsEng.renderEngine().takeScreenshot();
-    return 0;
 }
 
 /**

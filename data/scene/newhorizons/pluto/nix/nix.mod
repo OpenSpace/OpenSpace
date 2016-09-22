@@ -31,7 +31,6 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "NIX",
-                Reference = "ECLIPJ2000",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -41,21 +40,6 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
-        --[[
-        Ephemeris = {
-            Type = "Spice",
-            Body = "NIX",
-            Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_PLUTO",
-            Reference = "ECLIPJ2000"
-        },
-        ]]
-        GuiName = "/Solar/Planets/Nix"
     },
     {
         Name = "NixText",
@@ -67,12 +51,6 @@ return {
             Billboard = true,
             Texture = "textures/Nix-Text.png"
         },
-        --[[
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 0}
-        }
-        ]]
     },
     -- StyxTrail module
     {   
@@ -94,7 +72,6 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/NixTrail"
     }
     
 }

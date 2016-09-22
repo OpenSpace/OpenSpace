@@ -75,10 +75,10 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                 ghoul::Dictionary decoderDictionary;
                 translationDictionary.getValue(currentKey, decoderDictionary);
 
-                Decoder* decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
+                auto decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = decoder;
+                _fileTranslation[keys[j]] = std::move(decoder);
             }
         }
         //Hong's playbook needs _only_ instrument translation though.
@@ -201,7 +201,7 @@ bool HongKangParser::create() {
                         if (it->second->getDecoderType() == "SCANNER"){ // SCANNER START 
                             scan_start = time;
 
-                            InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(it->second);
+                            InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(it->second.get());
                             std::string endNominal = scanner->getStopCommand();
 
                             // store current position in file

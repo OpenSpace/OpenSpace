@@ -24,13 +24,19 @@
 
 set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/openspace.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
     ${OPENSPACE_BASE_DIR}/src/engine/downloadmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/settingsengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
@@ -77,11 +83,14 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraph.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
@@ -97,6 +106,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/spicemanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/syncdata.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
@@ -106,12 +116,18 @@ set(OPENSPACE_SOURCE
 
 set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/downloadmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/settingsengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
@@ -170,6 +186,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
@@ -185,6 +202,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/screenlog.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h

@@ -1,4 +1,3 @@
-
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -33,6 +32,8 @@
 
 #include <ghoul/opengl/programobject.h>
 
+#include <openspace/documentation/documentation.h>
+
 
 // Forward declare to minimize dependencies
 namespace ghoul {
@@ -51,6 +52,13 @@ class PowerScaledCoordinate;
 
 class Renderable : public properties::PropertyOwner {
 public:
+    enum class RenderBin : int {
+        Background = 1,
+        Opaque = 2,
+        Transparent = 4,
+        Overlay = 8
+    };
+
     static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
@@ -64,13 +72,17 @@ public:
     virtual bool isReady() const = 0;
     bool isEnabled() const;
 
-    void setBoundingSphere(const PowerScaledScalar& boundingSphere);
-    const PowerScaledScalar& getBoundingSphere();
+    void setBoundingSphere(PowerScaledScalar boundingSphere);
+    PowerScaledScalar getBoundingSphere();
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void postRender(const RenderData& data);
     virtual void update(const UpdateData& data);
+
+    RenderBin renderBin() const;
+    void setRenderBin(RenderBin bin);
+    bool matchesRenderBinMask(int binMask);
 
     bool isVisible() const;
     
@@ -81,10 +93,13 @@ public:
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
+    static openspace::Documentation Documentation();
+
 protected:
     properties::BoolProperty _enabled;
     
 private:
+    RenderBin _renderBin;
     PowerScaledScalar boundingSphere_;
     std::string _startTime;
     std::string _endTime;

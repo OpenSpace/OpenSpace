@@ -27,17 +27,23 @@
 
 #include <openspace/scene/ephemeris.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/vectorproperty.h>
+
 namespace openspace {
     
-class StaticEphemeris: public Ephemeris {
+class StaticEphemeris : public Ephemeris {
 public:
-    StaticEphemeris(const ghoul::Dictionary& dictionary
-                                = ghoul::Dictionary());
+    StaticEphemeris();
+    StaticEphemeris(const ghoul::Dictionary& dictionary);
     virtual ~StaticEphemeris();
-    virtual const glm::dvec3& position() const;
+    virtual glm::dvec3 position() const;
     virtual void update(const UpdateData& data) override;
+
+    static openspace::Documentation Documentation();
+
 private:
-    glm::dvec3 _position;
+    properties::DVec3Property _position;
 };
     
 } // namespace openspace

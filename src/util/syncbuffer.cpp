@@ -44,8 +44,10 @@ SyncBuffer::~SyncBuffer() {
 }
 
 void SyncBuffer::write() {
+    _dataStream.resize(_encodeOffset);
     _synchronizationBuffer->setVal(_dataStream);
     sgct::SharedData::instance()->writeVector(_synchronizationBuffer.get());
+    _dataStream.resize(_n);
     _encodeOffset = 0;
     _decodeOffset = 0;
 }

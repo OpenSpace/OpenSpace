@@ -45,13 +45,7 @@ public:
 
     bool create() override;
 
-    //virtual std::map<std::string, Decoder*> getTranslation() override;
-
-    // temporary need to figure this out
-   std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
-
 private:
-    
     std::regex _pattern;
 
     std::map<std::string, std::vector<std::string>> _instrumentFiles;
@@ -59,7 +53,7 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    std::map<std::string, Decoder*> _fileTranslation;
+    //std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;

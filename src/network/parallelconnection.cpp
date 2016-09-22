@@ -994,7 +994,7 @@ void ParallelConnection::sendTimeKeyframe() {
     kf._dt = Time::ref().deltaTime();
     kf._paused = Time::ref().paused();
     kf._requiresTimeJump = _timeJumped;
-    kf._time = Time::ref().currentTime();
+    kf._time = Time::ref().j2000Seconds();
 
     //timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.runTime();

@@ -27,26 +27,10 @@ return {
                 Color = "textures/gray.jpg",
             }
         },
-        --[[
-        Ephemeris = {
-            Type = "Spice",
-            Body = "STYX",
-            Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_PLUTO",
-            Reference = "ECLIPJ2000"
-        },
-        ]]
-
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "STYX",
-                Reference = "ECLIPJ2000",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
@@ -56,7 +40,6 @@ return {
                 DestinationFrame = "ECLIPJ2000"
             },
         },
-        GuiName = "/Solar/Planets/Styx"
     },
     {
         Name = "StyxText",
@@ -66,7 +49,8 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Styx-Text.png"
+            Texture = "textures/Styx-Text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {
@@ -74,12 +58,6 @@ return {
                 Position = {1000000, 0, 1000000}
             },
         },
-        --[[
-        Ephemeris = {
-            Type = "Static",
-            Position = {1, 0, 1, 6}
-        }
-        ]]
     },
     -- StyxTrail module
     {   
@@ -101,7 +79,6 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/CharonTrail"
     }
     
 }

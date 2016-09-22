@@ -22,18 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
-#include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
+#include <modules/newhorizons/util/labelparser.h>
+
 #include <modules/newhorizons/util/decoder.h>
+
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+
+#include <ghoul/filesystem/directory.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+
 #include <fstream>
 #include <iterator>
 #include <iomanip>
 #include <limits>
 
-#include <modules/newhorizons/util/labelparser.h>
 
 namespace {
     const std::string _loggerCat = "LabelParser";
@@ -54,24 +59,24 @@ LabelParser::LabelParser(std::string name, std::string fileName,
     //get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
-    for (int i = 0; i < decoders.size(); i++){
+    for (int i = 0; i < decoders.size(); ++i) {
         ghoul::Dictionary typeDictionary;
         translationDictionary.getValue(decoders[i], typeDictionary);
 
         //create dictionary containing all {playbookKeys , spice IDs}
-        if (decoders[i] == "Instrument"){
+        if (decoders[i] == "Instrument") {
             //for each playbook call -> create a Decoder object
-            const std::vector<std::string>& keys = typeDictionary.keys();
-            for (int j = 0; j < keys.size(); j++){
+            std::vector<std::string> keys = typeDictionary.keys();
+            for (int j = 0; j < keys.size(); ++j){
                 std::string currentKey = decoders[i] + "." + keys[j];
 
-                ghoul::Dictionary decoderDictionary;
-                translationDictionary.getValue(currentKey, decoderDictionary);
+                ghoul::Dictionary decoderDictionary =
+                    translationDictionary.value<ghoul::Dictionary>(currentKey);
 
-                Decoder *decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
+                auto decoder = Decoder::createFromDictionary(decoderDictionary, decoders[i]);
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = decoder;
+                _fileTranslation[keys[j]] = std::move(decoder);
             }
         }
         if (decoders[i] == "Target"){
@@ -91,17 +96,17 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             for (int j = 0; j < keys.size(); j++){
                 ghoul::Dictionary itemDictionary;
                 convertDictionary.getValue(keys[j], itemDictionary);
-                Decoder *decoder = Decoder::createFromDictionary(itemDictionary, decoders[i]);
+                auto decoder = Decoder::createFromDictionary(itemDictionary, decoders[i]);
                 //insert decoder to map - this will be used in the parser to determine
                 //behavioral characteristics of each instrument
-                _fileTranslation[keys[j]] = decoder;
+                _fileTranslation[keys[j]] = std::move(decoder);
             };
         }
     }
 }
 
 std::string LabelParser::decode(std::string line){
-    for (auto key : _fileTranslation){
+    for (auto& key : _fileTranslation){
         std::size_t value = line.find(key.first);
         if (value != std::string::npos){
             std::string toTranslate = line.substr(value);
@@ -121,7 +126,7 @@ std::string LabelParser::decode(std::string line){
 }
 
 std::string LabelParser::encode(std::string line) {
-    for (auto key : _fileTranslation) {
+    for (auto& key : _fileTranslation) {
         std::size_t value = line.find(key.first);
         if (value != std::string::npos) {
             return line.substr(value);
@@ -232,29 +237,31 @@ bool LabelParser::create() {
                                 LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
                             }
                         }
-                        if (count == _specsOfInterest.size()){
-                            count = 0;
-                            std::string ext = "jpg";
-                            path.replace(path.begin() + position, path.end(), ext);
-                            bool fileExists = FileSys.fileExists(path);
-                            if (!fileExists) {
-                                ext = "JPG";
-                                path.replace(path.begin() + position, path.end(), ext);
-                                fileExists = FileSys.fileExists(path);
-                            }
-                            if (fileExists) {
-                                Image image;
-                                std::vector<std::string> spiceInstrument;
-                                spiceInstrument.push_back(_instrumentID);
-                                createImage(image, startTime, stopTime, spiceInstrument, _target, path);
-                                
-                                _subsetMap[image.target]._subset.push_back(image);
-                                _subsetMap[image.target]._range.include(startTime);
+                        if (count == _specsOfInterest.size()) {
+                            using ghoul::io::TextureReader;
+                            auto extensions = TextureReader::ref().supportedExtensions();
 
-                                _captureProgression.push_back(startTime);
-                                std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+                            count = 0;
+
+                            using namespace std::literals;
+                            std::string p = path.substr(0, path.size() - ("lbl"s).size());
+                            for (const std::string& ext : extensions) {
+                                path = p + ext;
+                                if (FileSys.fileExists(path)) {
+                                    Image image;
+                                    std::vector<std::string> spiceInstrument;
+                                    spiceInstrument.push_back(_instrumentID);
+                                    createImage(image, startTime, stopTime, spiceInstrument, _target, path);
+
+                                    _subsetMap[image.target]._subset.push_back(image);
+                                    _subsetMap[image.target]._range.include(startTime);
+
+                                    _captureProgression.push_back(startTime);
+                                    std::stable_sort(_captureProgression.begin(), _captureProgression.end());
+
+                                    break;
+                                }
                             }
-    
                         }
                     } while (!file.eof());
                 }

@@ -7,11 +7,8 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "EARTH BARYCENTER",
-            Reference = "ECLIPJ2000",
             Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
         },
     },
     -- Earth module
@@ -101,9 +98,7 @@ return {
                 --     G = 0.65,
                 -- },                
             }
-        },
-        
-        GuiName = "/Solar/Planets/Earth"
+        }
     },
     -- EarthTrail module
     {   
@@ -118,8 +113,7 @@ return {
             TropicalOrbitPeriod = 365.242,
             EarthOrbitRatio = 1,
             DayLength = 24
-        },
-        GuiName = "/Solar/EarthTrail"
+        }
     },
     {
         Name = "EarthMarker",
@@ -129,7 +123,8 @@ return {
             Size = {3.0, 11.0},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/marker.png"
+            Texture = "textures/marker.png",
+            BlendMode = "Additive"
         },
 		Ephemeris = {
             Type = "Static",

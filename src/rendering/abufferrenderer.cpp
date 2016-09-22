@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
@@ -260,7 +261,12 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     glBindImageTexture(1, _fragmentTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32UI);
 
     // Render the scene to the fragment buffer. Collect renderer tasks (active raycasters)
-    RenderData data{ *_camera, psc(), doPerformanceMeasurements };
+    int renderBinMask = static_cast<int>(Renderable::RenderBin::Background) |
+        static_cast<int>(Renderable::RenderBin::Opaque) |
+        static_cast<int>(Renderable::RenderBin::Transparent) |
+        static_cast<int>(Renderable::RenderBin::Overlay);
+
+    RenderData data{ *_camera, psc(), doPerformanceMeasurements, renderBinMask };
     RendererTasks tasks;
     _scene->render(data, tasks);
 

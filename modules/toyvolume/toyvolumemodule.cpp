@@ -24,7 +24,6 @@
 
 #include <modules/toyvolume/toyvolumemodule.h>
 
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>

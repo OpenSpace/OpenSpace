@@ -88,16 +88,12 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "VESTA",
-            Reference = "GALACTIC",
             Observer = "SUN",
             Kernels = {
                 --"${OPENSPACE_DATA}/spice/DAWN_KERNELS/pck/dawn_vesta_v06.tpc",
                 "${OPENSPACE_DATA}/spice/DawnKernels/spk/sb_vesta_071107.bsp",
             }
-        },
-       
-        
-        GuiName = "/Solar/Vesta"
+        }
     },
     -- Vesta Trail Module
     {   
@@ -122,7 +118,6 @@ return {
             },  
             StartTime = "2007 JUL 20 12:00:00",
             EndTime = "2018 JAN 22 12:00:00"
-        },
-        GuiName = "/Solar/VestaTrail"
+        }
     }
 }

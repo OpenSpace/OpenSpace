@@ -36,9 +36,9 @@ TriangleSoup::TriangleSoup(std::vector<unsigned int> elements,
     : _vaoID(0)
     ,_vertexBufferID(0)
     ,_elementBufferID(0)
-    ,_useVertexPositions(usePositions == Positions::Yes)
-    ,_useTextureCoordinates(useTextures == TextureCoordinates::Yes)
-    ,_useVertexNormals(useNormals == Normals::Yes)
+    ,_useVertexPositions(usePositions)
+    ,_useTextureCoordinates(useTextures)
+    ,_useVertexNormals(useNormals)
 {
     setElements(elements);
 }
@@ -48,7 +48,6 @@ TriangleSoup::~TriangleSoup() {
     glDeleteBuffers(1, &_elementBufferID);
     glDeleteVertexArrays(1, &_vaoID);
 }
-
 
 void TriangleSoup::setVertexPositions(std::vector<glm::vec4> positions) {
     _useVertexPositions = true;
@@ -63,7 +62,6 @@ void TriangleSoup::setVertexPositions(std::vector<glm::vec4> positions) {
     }
 }
 
-
 void TriangleSoup::setVertexTextureCoordinates(std::vector<glm::vec2> textures) {
     _useTextureCoordinates = true;
     _gpuDataNeedUpdate = true;
@@ -74,7 +72,6 @@ void TriangleSoup::setVertexTextureCoordinates(std::vector<glm::vec2> textures) 
         _vertexData[i].texture[1] = static_cast<GLfloat>(textures[i].t);
     }
 }
-
 
 void TriangleSoup::setVertexNormals(std::vector<glm::vec3> normals) {
     _useVertexNormals = true;
@@ -88,7 +85,6 @@ void TriangleSoup::setVertexNormals(std::vector<glm::vec3> normals) {
     }
 }
 
-
 void TriangleSoup::setElements(std::vector<unsigned int> elements) {
     _elementData.resize(elements.size());
     _gpuDataNeedUpdate = true;
@@ -98,7 +94,7 @@ void TriangleSoup::setElements(std::vector<unsigned int> elements) {
     }
 }
 
-bool TriangleSoup::updateDataInGPU() {
+bool TriangleSoup::updateDataOnGPU() {
     // Create VAO
     if (_vaoID == 0)
         glGenVertexArrays(1, &_vaoID);
@@ -118,7 +114,6 @@ bool TriangleSoup::updateDataInGPU() {
             return false;
         }
     }
-
 
     // First VAO setup
     glBindVertexArray(_vaoID);
@@ -167,7 +162,7 @@ bool TriangleSoup::updateDataInGPU() {
 
 void TriangleSoup::drawUsingActiveProgram() {
     if (_gpuDataNeedUpdate) {
-        updateDataInGPU();
+        updateDataOnGPU();
     }
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);

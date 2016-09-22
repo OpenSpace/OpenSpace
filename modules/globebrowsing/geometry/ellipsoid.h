@@ -76,13 +76,18 @@ public:
     Vec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const;
     Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
     
-    Vec3 radiiSquared() const;
-    Vec3 oneOverRadiiSquared() const;
-    Vec3 radiiToTheFourth() const;
+    const Vec3& radii() const;
+    const Vec3& radiiSquared() const;
+    const Vec3& oneOverRadiiSquared() const;
+    const Vec3& radiiToTheFourth() const;
+    
 
     Scalar minimumRadius() const;
     Scalar maximumRadius() const;
     Scalar averageRadius() const;
+
+    Scalar longitudalDistance(Scalar lat, Scalar lon1, Scalar lon2) const;
+    Scalar greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const;
 
     Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
     Vec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;

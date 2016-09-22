@@ -22,7 +22,8 @@ openspace.bindKey("F8", "openspace.setPropertyValue('67P.renderable.ProjectionCo
 
 openspace.bindKey("i", helper.renderable.toggle('ImagePlaneRosetta'))
 openspace.bindKey("q", helper.renderable.toggle('SunMarker'))
-openspace.bindKey("e", helper.renderable.toggle('EarthMarker'))
+openspace.bindKey("e", helper.renderable.toggle('JupiterTrail') .. helper.renderable.toggle('SaturnTrail') .. helper.renderable.toggle('UranusTrail') .. helper.renderable.toggle('NeptuneTrail'))
+openspace.bindKey("f", helper.renderable.toggle('PhilaeTrail'))
 
 openspace.bindKeyLocal("h", "openspace.parallel.setAddress('127.0.0.1');openspace.parallel.setPort('25001');openspace.parallel.setPassword('test');openspace.parallel.connect();openspace.parallel.requestHostship('test');")
 openspace.bindKeyLocal("c", "openspace.parallel.setAddress('127.0.0.1');openspace.parallel.setPort('25001');openspace.parallel.setPassword('test');openspace.parallel.connect();")

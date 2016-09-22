@@ -26,12 +26,35 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string _loggerCat = "Ephemeris";
     const std::string KeyType = "Type";
 }
 
 namespace openspace {
+
+Documentation Ephemeris::Documentation() {
+    using namespace openspace::documentation;
+
+    return{
+        "Transformation Translation",
+        "core_transform_translation",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier("Must name a valid Translation type"),
+                "The type of translation that is described in this element. "
+                "The available types of translations depend on the "
+                "configuration of the application and can be written to disk "
+                "on application startup into the FactoryDocumentation.",
+                Optional::No
+            }
+        },
+        Exhaustive::No
+    };
+}
 
 Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) {
     if (!dictionary.hasValue<std::string>(KeyType)) {
@@ -52,10 +75,6 @@ Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) 
     return result;
 }
 
-Ephemeris::Ephemeris() {}
-    
-Ephemeris::Ephemeris(const ghoul::Dictionary& dictionary) {}
-    
 Ephemeris::~Ephemeris() {}
     
 bool Ephemeris::initialize() {

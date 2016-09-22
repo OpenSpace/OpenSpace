@@ -27,23 +27,25 @@
 
 #include <openspace/scene/ephemeris.h>
 
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
     
 class SpiceEphemeris : public Ephemeris {
 public:
     SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    virtual const glm::dvec3& position() const;
+    glm::dvec3 position() const;
     void update(const UpdateData& data) override;
 
+    static openspace::Documentation Documentation();
+
 private:
-    std::string _targetName;
-    std::string _originName;
+    properties::StringProperty _target;
+    properties::StringProperty _origin;
+
     glm::dvec3 _position;
     bool _kernelsLoadedSuccessfully;
-    //std::string _ghosting;
-    std::string _name;
 };
     
 } // namespace openspace

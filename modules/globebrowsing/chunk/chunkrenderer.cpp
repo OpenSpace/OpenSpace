@@ -95,7 +95,7 @@ namespace openspace {
     void ChunkRenderer::setDepthTransformUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
@@ -120,7 +120,7 @@ namespace openspace {
     void ChunkRenderer::activateTileAndSetTileUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
         const TileAndTransform& tileAndTransform)
@@ -244,7 +244,7 @@ namespace openspace {
                 activateTileAndSetTileUniforms(
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
-                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                     i,
                     texUnits[category][i].blendTexture0,
                     tileAndTransform);
@@ -258,7 +258,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent1,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent1,
                         i,
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
@@ -270,7 +270,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent2,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent2,
                         i,
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
@@ -300,24 +300,7 @@ namespace openspace {
             setDepthTransformUniforms(
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
-                i,
-                depthTransform);
-            i++;
-        }
-
-        // Go through all the height map overlays and set depth tranforms
-        i = 0;
-        it = tileProviders[LayeredTextures::HeightMapOverlays].begin();
-        end = tileProviders[LayeredTextures::HeightMapOverlays].end();
-        for (; it != end; it++) {
-            auto tileProvider = *it;
-
-            TileDepthTransform depthTransform = tileProvider->depthTransform();
-            setDepthTransformUniforms(
-                programUniformHandler,
-                LayeredTextures::TextureCategory::HeightMapOverlays,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                 i,
                 depthTransform);
             i++;
@@ -383,11 +366,13 @@ namespace openspace {
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
         if (_tileProviderManager->getTileProviderGroup(
-            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
-                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
             programObject->setUniform("modelViewTransform", modelViewTransform);
             programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
@@ -460,11 +445,13 @@ namespace openspace {
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
         if (_tileProviderManager->getTileProviderGroup(
-            LayeredTextures::NightTextures).getActiveTileProviders().size() > 0) {
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
-                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0)).xyz();
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
             programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
         }

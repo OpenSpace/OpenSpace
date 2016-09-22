@@ -7,11 +7,8 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "JUPITER BARYCENTER",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
@@ -41,6 +38,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "JUPITER",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instrument = {
@@ -96,7 +94,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "JupiterText",
@@ -106,7 +103,8 @@ return {
             Size = {1.0, 7.5},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Jupiter-text.png"
+            Texture = "textures/Jupiter-text.png",
+            BlendMode = "Additive"
         },
         Transform = {
             Translation = {
@@ -134,7 +132,6 @@ return {
                  -- need to add different texture
              },  
          },
-         GuiName = "/Solar/JupiterTrail"
      }
     
 }

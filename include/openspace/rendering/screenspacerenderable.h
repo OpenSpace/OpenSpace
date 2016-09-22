@@ -35,6 +35,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <openspace/documentation/documentation.h>
+
 namespace openspace {
 
 /**
@@ -63,6 +65,8 @@ public:
     glm::vec3 sphericalPosition() const;
     float depth() const;
     
+    static openspace::Documentation Documentation();
+
 protected:
     void createPlane();
     void useEuclideanCoordinates(bool b);

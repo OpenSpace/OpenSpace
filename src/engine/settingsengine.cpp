@@ -32,12 +32,27 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+
+#include <string>
+
+
+namespace {
+    const std::string _loggerCat = "SettingsEngine";
+}
+
 
 namespace openspace {
+
+
 
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::DROPDOWN)
+    , _showFrameNumber("showFrameNumber", "Show frame number", false)
+    , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
+    , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
+    , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
 {
     setName("Global Properties");
 }
@@ -45,6 +60,10 @@ SettingsEngine::SettingsEngine()
 void SettingsEngine::initialize() {
     initEyeSeparation();
     initSceneFiles();
+    initShowFrameNumber();
+    initBusyWaitForDecode();
+    initLogSGCTOutOfOrderErrors();
+    initUseDoubleBuffering();
 }
     
 void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
@@ -59,6 +78,51 @@ void SettingsEngine::initEyeSeparation() {
     // Set interaction to change the window's (SGCT's) eye separation
     _eyeSeparation.onChange(
         [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
+}
+
+void SettingsEngine::initShowFrameNumber() {
+    addProperty(_showFrameNumber);
+
+    _showFrameNumber.onChange(
+        [this]() { OsEng.renderEngine().setShowFrameNumber(_showFrameNumber.value()); } );
+}
+
+void SettingsEngine::initBusyWaitForDecode() {
+    addProperty(_busyWaitForDecode);
+    _busyWaitForDecode.onChange(
+        [this]() { 
+        LINFO((_busyWaitForDecode.value() ? "Busy wait for decode" : "Async decode"));
+    });
+}
+
+bool SettingsEngine::busyWaitForDecode() {
+    return _busyWaitForDecode.value();
+}
+
+void SettingsEngine::initLogSGCTOutOfOrderErrors() {
+    addProperty(_logSGCTOutOfOrderErrors);
+    _logSGCTOutOfOrderErrors.onChange(
+        [this]() {
+        LINFO("Turn " << (_logSGCTOutOfOrderErrors.value() ? "on" : "off") << " SGCT out of order logging");
+    });
+}
+
+bool SettingsEngine::logSGCTOutOfOrderErrors() {
+    return _logSGCTOutOfOrderErrors.value();
+}
+
+
+void SettingsEngine::initUseDoubleBuffering() {
+    addProperty(_useDoubleBuffering);
+    _useDoubleBuffering.onChange(
+        [this]() {
+        LINFO("Turn " << (_useDoubleBuffering.value() ? "on" : "off") << " double buffering");
+    });
+}
+
+
+bool SettingsEngine::useDoubleBuffering() {
+    return _useDoubleBuffering.value();
 }
 
 void SettingsEngine::initSceneFiles() {

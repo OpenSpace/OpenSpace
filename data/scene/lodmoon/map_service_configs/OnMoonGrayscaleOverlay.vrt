@@ -1,0 +1,28 @@
+<VRTDataset rasterXSize="163840" rasterYSize="81920">
+  <SRS>GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400.0,0.0]],PRIMEM["Reference_Meridian",0.0],UNIT["Degree",0.0174532925199433]]</SRS>
+  <GeoTransform> -1.8000000000000000e+02,  2.1972656250000000e-03,  0.0000000000000000e+00,  9.0000000000000000e+01,  0.0000000000000000e+00, -2.1972656250000000e-03</GeoTransform>
+  <VRTRasterBand dataType="Byte" band="1">
+    <NoDataValue>0</NoDataValue>
+    <HideNoDataValue>1</HideNoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">OnMoonColor.xml</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="163840" RasterYSize="81920" DataType="Byte" BlockXSize="512" BlockYSize="512" />
+      <SrcRect xOff="0" yOff="0" xSize="163840" ySize="81920" />
+      <DstRect xOff="0" yOff="0" xSize="163840" ySize="81920" />
+      <NODATA>0</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+  <VRTRasterBand dataType="Byte" band="2">
+    <ColorInterp>Alpha</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">white_geo.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="163840" RasterYSize="81920" DataType="Byte" BlockXSize="512" BlockYSize="512"/>
+      <SrcRect xOff="0" yOff="0" xSize="32" ySize="32" />
+      <DstRect xOff="0" yOff="0" xSize="163840" ySize="81920" />
+
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

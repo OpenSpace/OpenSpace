@@ -61,13 +61,14 @@ namespace openspace {
 
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : _isEnabled(properties::BoolProperty(" Enabled", " Enabled", true))
+        : _isEnabled(properties::BoolProperty("Enabled", "Enabled", true))
+        , _toggleEnabledEveryFrame(properties::BoolProperty("Toggle enabled every frame", "Toggle enabled every frame", false))
         , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
         , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
         , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 10.0f, 1.0f, 50.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
-        , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
+        , atmosphereEnabled(properties::BoolProperty("Atmosphere", "Atmosphere", false))
     {
         setName("RenderableGlobe");
         
@@ -103,6 +104,7 @@ namespace openspace {
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
 
         addProperty(_isEnabled);
+        addProperty(_toggleEnabledEveryFrame);
 
 
         // Add debug options - must be after chunkedLodGlobe has been created as it 
@@ -122,7 +124,7 @@ namespace openspace {
         // Add all tile layers as being toggleable for each category
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
-            std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            std::string categoryName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
             
             auto& categoryProviders = _tileProviderManager->getTileProviderGroup(category);
@@ -164,6 +166,9 @@ namespace openspace {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
+        if (_toggleEnabledEveryFrame.value()) {
+            _isEnabled.setValue(!_isEnabled.value());
+        }
         if (_isEnabled.value()) {
             if (_saveOrThrowCamera.value()) {
                 _saveOrThrowCamera.setValue(false);
@@ -234,14 +239,14 @@ namespace openspace {
         // Sample and do linear interpolation (could possibly be moved as a function in ghoul texture)
         glm::uvec3 dimensions = tile.texture->dimensions();
         
-        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions.xy());
+        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy() - glm::uvec2(1));
+        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
         glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
 
         float sample00 = tile.texture->texelAsFloat(samplePos00).x;
         float sample10 = tile.texture->texelAsFloat(samplePos10).x;

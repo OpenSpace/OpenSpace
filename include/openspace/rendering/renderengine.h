@@ -31,6 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/util/syncdata.h>
+
+
 #include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
@@ -49,6 +52,7 @@ namespace openspace {
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
+
 class Scene;
 class Renderer;
 class RaycasterManager;
@@ -94,15 +98,19 @@ public:
 
     // sgct wrapped functions
     bool initializeGL();
-    void postSynchronizationPreDraw();
-    void preSynchronization();
+    
+    void updateSceneGraph();
+    void updateShaderPrograms();
+    void updateFade();
+    void updateRenderer();
+    void updateScreenSpaceRenderables();
     void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
-    void takeScreenshot();
+    void takeScreenshot(bool applyWarping = false);
     void toggleInfoText(bool b);
     void toggleFrametimeType(int t);
 
@@ -111,13 +119,10 @@ public:
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
 
-    void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer);
-
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
     void setNAaSamples(int nAaSamples);
-
+    void setShowFrameNumber(bool enabled);
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -184,12 +189,17 @@ public:
     void startFading(int direction, float fadeDuration);
 
     void sortScreenspaceRenderables();
+
     // This is temporary until a proper screenspace solution is found ---abock
-    struct {
+    struct OnScreenInformation{
         glm::vec2 _position;
         unsigned int _size;
         int _node;
-    } _onScreenInformation;
+    };
+
+    SyncData<OnScreenInformation> _onScreenInformation;
+
+    std::vector<Syncable*> getSyncables();
     
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
@@ -214,16 +224,20 @@ private:
     bool _showInfo;
     bool _showLog;
     bool _takeScreenshot;
+    bool _applyWarping;
+    bool _showFrameNumber;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
     int _nAaSamples;
+    unsigned int _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;

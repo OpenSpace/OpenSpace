@@ -11,12 +11,9 @@ return {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = BENNU_BODY,
-                Reference = "GALACTIC",
                 Observer = "SUN",
             },
         },
-
-        GuiName = "/Solar/Bennu"
     },
     {   
         Name = "Bennu2",
@@ -27,7 +24,7 @@ return {
             Body = BENNU_BODY,
             Geometry = {
                 Type = "MultiModelGeometry",
-                GeometryFile = "models/BennuResized.obj",
+                GeometryFile = "models/BennuTextured.obj",
                 Magnification = 0,
             }, 
             Shading = {
@@ -37,7 +34,7 @@ return {
             },
             Textures = {
                 Type = "simple",
-                Color =  "textures/osirisTex.png",
+                Color =  "textures/gray.png",
                 Project = "textures/defaultProj.png",
                 Default = "textures/defaultProj.png"
             },
@@ -48,9 +45,10 @@ return {
             Projection = {
                 Sequence   = "InstrumentTimes",
                 SequenceType = "instrument-times",
-                Observer   = "SUN",
+                Observer   = "OSIRIS-REX",
                 Target     = BENNU_BODY,
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             DataInputTranslation = {
                 Instruments = {
@@ -59,8 +57,8 @@ return {
                         Spice = {"ORX_OCAMS_POLYCAM"},
                         Files = {
                             "BaseballDiamond_PolyCam.txt", 
-                            "OrbitalB_Site08_PolyCamImages.txt",
-                            "Recon_225m_Equatorial_PolyCam",
+                            --"OrbitalB_Site08_PolyCamImages.txt",
+                            "Recon_225m_Equatorial_PolyCam.txt",
                         },
                     },
                     ORX_REXIS = {
@@ -82,7 +80,7 @@ return {
                 Name       = "ORX_OCAMS_POLYCAM",
                 Method     = "ELLIPSOID",
                 Aberration = "NONE",
-                Fovy       = 5.00,
+                Fovy       = 0.792,
                 Aspect     = 1,
                 Near       = 0.01,
                 Far        = 1000000,
@@ -96,8 +94,6 @@ return {
                 DestinationFrame = "GALACTIC",
             },
         },
-
-        GuiName = "/Solar/Bennu"
     },
     {   
         Name = "BennuTrail",
@@ -123,6 +119,5 @@ return {
             SampleDeltaTime = 3600, -- Seconds between each point
             SubSamples = 0, 
         },
-        GuiName = "OsirisRexTrailLocal"
     },
 }

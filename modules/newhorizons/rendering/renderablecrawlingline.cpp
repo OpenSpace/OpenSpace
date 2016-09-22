@@ -24,12 +24,10 @@
 
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
 
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/imagesequencer.h>
-//#include <imgui.h>
 
 namespace {
     const std::string _loggerCat = "RenderableCrawlingLine";

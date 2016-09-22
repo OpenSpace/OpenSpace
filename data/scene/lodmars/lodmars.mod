@@ -1,27 +1,27 @@
+local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
 return {
     -- Mars barycenter module
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
-    },
-    -- RenderableGlobe module
-    {   
-        Name = "LodMars",
-        Parent = "MarsBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceEphemeris",
                 Body = "MARS BARYCENTER",
-                Reference = "ECLIPJ2000",
                 Observer = "SUN",
-                Kernels = {
-                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                }
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
+        },
+    },
+    -- RenderableGlobe module
+    {   
+        Name = "Mars",
+        Parent = "MarsBarycenter",
+        Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC",
             },
             Scale = {
                 Type = "StaticScale",
@@ -30,9 +30,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Frame = "IAU_MARS",
-            Body = "MARS BARYCENTER",
-            Radii = {3396190.0, 3396190.0, 3376200.0}, -- Mars' radii
+            Radii = marsEllipsoid,
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 90,
@@ -51,11 +49,10 @@ return {
                     {
                         Name = "MARS_Viking_MDIM21",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                        Enabled = true,
                     },
                     {
                         Name = "Mars Viking Clr",
-                        FilePath = "map_datasets/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
+                        FilePath = "map_datasets/Viking/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
                         Enabled = true,
                     },
                 },
@@ -66,13 +63,21 @@ return {
                         Enabled = true,
                     },
                     {
-                        Name = "West_Candor_Chasma_longlat_global",
-                        FilePath = "map_datasets/West_Candor_Chasma_longlat_global.vrt",
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
                         --Enabled = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_A.vrt",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
+                    },
+                    {
+                        Name = "MER_Meridianni_Endeavor_Basemap_25cm",
+                        FilePath = "map_datasets/Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
+                    },
+                    {
+                        Name = "Part of Area Traversed by the Mars Exploration Rover",
+                        FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
                     },
                 },
                 NightTextures = {
@@ -86,34 +91,46 @@ return {
                         Type = "ChunkIndex",
                         Name = "Indices",
                     },
+                    {
+                        Type = "SizeReference",
+                        Name = "Size Reference",
+                        Radii = marsEllipsoid,
+                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
+                    },
                 },
                 HeightMaps = {
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                     {
-                        Name = "West_Candor_Chasma_DEM_longlat_global",
-                        FilePath = "map_datasets/West_Candor_Chasma_DEM_longlat_global.vrt",
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_DEM.vrt",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
+                    },
+                    {
+                        Name = "Part of Area Traversed by the Mars Exploration Rover",
+                        FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
                     },
                 },
-                HeightMapOverlays = {
-                },
             },
-        },
-
-        GuiName = "/Solar/Planets/LodMars"
+        }
     },
     -- MarsTrail module
     {   
         Name = "MarsTrail",
-        Parent = "MarsBarycenter",
+        Parent = "Sun",
         Renderable = {
             Type = "RenderableTrail",
             Body = "MARS BARYCENTER",
@@ -123,12 +140,6 @@ return {
             TropicalOrbitPeriod = 686.973,
             EarthOrbitRatio = 1.881,
             DayLength = 24.6597,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
-        },
-        GuiName = "/Solar/MarsTrail"
+        }
     }
 }

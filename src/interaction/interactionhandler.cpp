@@ -190,10 +190,6 @@ void InteractionHandler::resetCameraDirection() {
 
     // Update camera Rotation
     _camera->setRotation(rotationLookAtFocusNode);
-
-    // Explicitly synch
-    _camera->preSynchronization();
-    _camera->postSynchronizationPreDraw();
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
@@ -230,7 +226,13 @@ void InteractionHandler::unlockControls() {
 
 }
 
-void InteractionHandler::preSynchronization(double deltaTime) {
+void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
+    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
+    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
+    _currentInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
+}
+
+void InteractionHandler::updateCamera() {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -238,23 +240,12 @@ void InteractionHandler::preSynchronization(double deltaTime) {
         _cameraUpdatedFromScript = false;
     }
     else {
-        _currentInteractionMode->updateMouseStatesFromInput(*_inputState, deltaTime);
+        if (_camera && focusNode()) {
+            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+            _camera->setFocusPositionVec3(focusNode()->worldPosition());
+        }
     }
 }
-
-void InteractionHandler::postSynchronizationPreDraw() {
-    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
-    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-
-    if (_cameraUpdatedFromScript) {
-        _cameraUpdatedFromScript = false;
-    }
-    else {
-        _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
-        _camera->setFocusPositionVec3(focusNode()->worldPosition());
-    }
-}
-
 
 SceneGraphNode* const InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();
@@ -323,10 +314,6 @@ void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& c
     _camera->setPositionVec3(cameraPosition);
     _camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
-
-    // Explicitly synch
-    _camera->preSynchronization();
-    _camera->postSynchronizationPreDraw();
 }
 
 ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
@@ -417,7 +404,9 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua)
 void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
 {
     if (type == "text") {
-        std::ofstream f(absPath(file));
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(absPath(file));
         
         for (const auto& p : _keyLua) {
             std::string remoteScriptingInfo;
@@ -429,6 +418,59 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
             f << std::to_string(p.first) << ": " <<
                 p.second.first << remoteScriptingInfo << std::endl;
         }
+    }
+    else if (type == "html") {
+        std::ofstream f;
+        f.exceptions(~std::ofstream::goodbit);
+        f.open(absPath(file));
+
+#ifdef JSON
+        std::stringstream json;
+        json << "[";
+        for (const auto& p : _keyLua) {
+            json << "{";
+            json << "\"key\": \"" << std::to_string(p.first) << "\",";
+            json << "\"script\": \"" << p.second << "\",";
+            json << "},";
+        }
+        json << "]";
+
+        std::string jsonText = json.str();
+
+#else
+        std::stringstream html;
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Key Bindings</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Key Bindings</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<td>Key</td>\n"
+             << "\t\t\t<td>Binding</td>\n"
+             << "\t\t\t<td>Remote scripting</td>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (const auto& p : _keyLua) {
+            html << "\t\t<tr>\n"
+                 << "\t\t\t<td>" << std::to_string(p.first) << "</td>\n"
+                 << "\t\t\t<td>" << p.second.first << "</td>\n"
+                 << "\t\t\t<td>" << (p.second.second ? "Yes" : "No") << "</td>\n"
+                 << "\t\t</tr>\n";
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>";
+
+        f << html.str();
+#endif
+
     }
     else {
         throw ghoul::RuntimeError(
@@ -495,18 +537,6 @@ void InteractionHandler::addKeyframe(const network::datamessagestructures::Camer
 
 void InteractionHandler::clearKeyframes() {
     _inputState->clearKeyframes();
-}
-
-void InteractionHandler::serialize(SyncBuffer* syncBuffer) {
-    for (auto var : _interactionModes) {
-        var.second->serialize(syncBuffer);
-    }
-}
-
-void InteractionHandler::deserialize(SyncBuffer* syncBuffer) {
-    for (auto var : _interactionModes) {
-        var.second->deserialize(syncBuffer);
-    }
 }
 
 } // namespace interaction

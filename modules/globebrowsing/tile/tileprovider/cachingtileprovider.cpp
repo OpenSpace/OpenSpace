@@ -23,9 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
-
 #include <modules/globebrowsing/chunk/chunkindex.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -34,18 +32,73 @@
 
 #include <openspace/engine/openspaceengine.h>
 
-
-
-
 namespace {
-    const std::string _loggerCat = "TileProvider";
-}
+    const std::string _loggerCat = "CachingTileProvider";
 
+    const std::string KeyDoPreProcessing = "DoPreProcessing";
+    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
+    const std::string KeyFilePath = "FilePath";
+    const std::string KeyCacheSize = "CacheSize";
+    const std::string KeyFlushInterval = "FlushInterval";
+}
 
 namespace openspace {
 
+    CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
+    : _framesSinceLastRequestFlush(0)
+    {
+        std::string name = "Name unspecified";
+        dictionary.getValue("Name", name);
+        std::string _loggerCat = "CachingTileProvider : " + name;
 
-    CachingTileProvider::CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader, 
+        // 1. Get required Keys
+        std::string filePath;
+        if (!dictionary.getValue<std::string>(KeyFilePath, filePath)) {
+            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+        }
+
+        // 2. Initialize default values for any optional Keys
+        TileDataset::Configuration config;
+        config.doPreProcessing = false;
+        config.minimumTilePixelSize = 512;
+        
+        // getValue does not work for integers
+        double minimumPixelSize; 
+        double cacheSize = 512;
+        double framesUntilRequestFlush = 60;
+
+        // 3. Check for used spcified optional keys
+        if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
+            LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
+        }
+        if (dictionary.getValue<double>(KeyMinimumPixelSize, minimumPixelSize)) {
+            LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
+            config.minimumTilePixelSize = static_cast<int>(minimumPixelSize); 
+        }
+        if (dictionary.getValue<double>(KeyCacheSize, cacheSize)) {
+            LDEBUG("Default cacheSize overridden: " << cacheSize);
+        }
+        if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
+            LDEBUG("Default framesUntilRequestFlush overridden: " <<
+                framesUntilRequestFlush);
+        }
+
+        // Initialize instance variables
+        auto tileDataset = std::make_shared<TileDataset>(filePath, config);
+
+        // only one thread per provider supported atm
+        // (GDAL does not handle multiple threads for a single dataset very well
+        // currently)
+        auto threadPool = std::make_shared<ThreadPool>(1);
+
+        _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
+            tileDataset, threadPool);
+        _tileCache = std::make_shared<TileCache>(cacheSize);
+        _framesUntilRequestFlush = framesUntilRequestFlush;
+    }
+
+    CachingTileProvider::CachingTileProvider(
+        std::shared_ptr<AsyncTileDataProvider> tileReader, 
         std::shared_ptr<TileCache> tileCache,
         int framesUntilFlushRequestQueue)
         : _asyncTextureDataProvider(tileReader)
@@ -56,11 +109,9 @@ namespace openspace {
         
     }
 
-
     CachingTileProvider::~CachingTileProvider(){
         clearRequestQueue();
     }
-
 
     void CachingTileProvider::update() {
         initTexturesFromLoadedData();
@@ -81,7 +132,6 @@ namespace openspace {
     Tile CachingTileProvider::getTile(const ChunkIndex& chunkIndex) {
         Tile tile = Tile::TileUnavailable;
 
-        
         if (chunkIndex.level > maxLevel()) {
             tile.status = Tile::Status::OutOfRange;
             return tile;
@@ -105,7 +155,6 @@ namespace openspace {
         }
         return _defaultTile;
     }
-
 
     void CachingTileProvider::initTexturesFromLoadedData() {
         auto readyTileIOResults = _asyncTextureDataProvider->getTileIOResults();
@@ -136,27 +185,21 @@ namespace openspace {
         return Tile::Status::Unavailable;
     }
 
-
-    Tile CachingTileProvider::getOrStartFetchingTile(ChunkIndex chunkIndex) {
-        ChunkHashKey hashkey = chunkIndex.hashKey();
-        if (_tileCache->exist(hashkey)) {
-            return _tileCache->get(hashkey);
-        }
-        else {
-            _asyncTextureDataProvider->enqueueTileIO(chunkIndex);
-            return Tile::TileUnavailable;
-        }
-    }
-
     TileDepthTransform CachingTileProvider::depthTransform() {
         return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
-
     Tile CachingTileProvider::createTile(std::shared_ptr<TileIOResult> tileIOResult) {
+        if (tileIOResult->error != CE_None) {
+            return{ nullptr, nullptr, Tile::Status::IOError };
+        }
+
         ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
-        TileDataLayout dataLayout = _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
-        Texture* texturePtr = new Texture(
+        TileDataLayout dataLayout =
+            _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
+        
+        // The texture should take ownership of the data
+        std::shared_ptr<Texture> texture = std::make_shared<Texture>(
             tileIOResult->imageData,
             tileIOResult->dimensions,
             dataLayout.textureFormat.ghoulFormat,
@@ -164,23 +207,19 @@ namespace openspace {
             dataLayout.glType,
             Texture::FilterMode::Linear,
             Texture::WrappingMode::ClampToEdge);
-
-        // The texture should take ownership of the data
-        std::shared_ptr<Texture> texture = std::shared_ptr<Texture>(texturePtr);
         
         texture->uploadTexture();
+
         // AnisotropicMipMap must be set after texture is uploaded. Why?!
         texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
         Tile tile = {
             texture,
             tileIOResult->preprocessData,
-            tileIOResult->error == CE_None ? Tile::Status::OK : Tile::Status::IOError
+            Tile::Status::OK
         };
 
         return tile;
     }
-
-
 
 }  // namespace openspace

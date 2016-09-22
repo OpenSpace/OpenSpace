@@ -25,23 +25,25 @@
 #ifndef __SCALE_H__
 #define __SCALE_H__
 
-#include <ghoul/misc/dictionary.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class Scale {
+class Scale : public properties::PropertyOwner {
 public:
     static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    Scale(const ghoul::Dictionary& dictionary);
     virtual ~Scale();
     virtual bool initialize();
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);
 
-protected:
-    Scale();
+    static openspace::Documentation Documentation();
 };
 
 }  // namespace openspace

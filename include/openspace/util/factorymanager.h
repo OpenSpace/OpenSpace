@@ -86,9 +86,11 @@ public:
     /**
      * Adds the passed \p factory to the FactoryManager. Factories may only be added once.
      * \param factory The ghoul::TemplateFactory to add to this FactoryManager
+     * \param name A user-readable name for the registered factory.
      * \pre \p factory must not be nullptr
      */
-    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory);
+    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory,
+        std::string name = "");
 
     /**
      * This method provides access to all registered ghoul::TemplateFactory%s through
@@ -102,11 +104,25 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
+    /**
+     * Writes a documentation for the FactoryMananger that contains all of the registered
+     * factories and for each factory all registered class names.
+     * \param file The file to which the documentation will be written
+     * \param type The type of documentation that will be written
+     * \pre \p file must not be empty
+     * \pre \p type must not be empty
+     */
+    void writeDocumentation(const std::string& file, const std::string& type);
+
 private:
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 
-    std::vector<std::unique_ptr<ghoul::TemplateFactoryBase>> _factories;
+    struct FactoryInfo {
+        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
+        std::string name;
+    };
+    std::vector<FactoryInfo> _factories;
 };
 
 } // namespace openspace

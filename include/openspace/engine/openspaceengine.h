@@ -29,6 +29,7 @@
 #include <openspace/util/mouse.h>
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/scriptscheduler.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
@@ -50,11 +51,11 @@ class LuaConsole;
 class NetworkEngine;
 class GUI;
 class RenderEngine;
-class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
 class TimeManager;
+class SyncEngine;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
@@ -81,6 +82,7 @@ public:
     interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
     scripting::ScriptEngine& scriptEngine();
+    scripting::ScriptScheduler& scriptScheduler();
     NetworkEngine& networkEngine();
     LuaConsole& console();
     ModuleEngine& moduleEngine();
@@ -115,6 +117,9 @@ public:
     void disableBarrier();
 
     void toggleShutdownMode();
+    
+    bool useBusyWaitForDecode();
+    bool logSGCTOutOfOrderErrors();
 
     void runPostInitializationScripts(const std::string& sceneDescription);
 
@@ -140,7 +145,9 @@ private:
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<NetworkEngine> _networkEngine;
+    std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
@@ -156,7 +163,6 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
-    std::unique_ptr<SyncBuffer> _syncBuffer;
     
     bool _isMaster;
     double _runTime;

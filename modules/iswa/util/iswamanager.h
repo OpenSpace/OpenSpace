@@ -91,7 +91,7 @@ public:
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
-    std::string iswaUrl(int id, double timestamp = Time::ref().currentTime(), std::string type = "image");
+    std::string iswaUrl(int id, double timestamp = Time::ref().j2000Seconds(), std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     

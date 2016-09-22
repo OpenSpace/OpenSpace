@@ -115,15 +115,20 @@ namespace openspace {
             sin(geodetic2.lat));
     }
 
-    Vec3 Ellipsoid::radiiSquared() const {
+    const Vec3& Ellipsoid::radii() const {
+        return _radii;
+    }
+
+
+    const Vec3& Ellipsoid::radiiSquared() const {
         return _cached._radiiSquared;
     }
 
-    Vec3 Ellipsoid::oneOverRadiiSquared() const {
+    const Vec3& Ellipsoid::oneOverRadiiSquared() const {
         return _cached._oneOverRadiiSquared;
     }
 
-    Vec3 Ellipsoid::radiiToTheFourth() const {
+    const Vec3& Ellipsoid::radiiToTheFourth() const {
         return _cached._radiiToTheFourth;
     }
 
@@ -137,6 +142,27 @@ namespace openspace {
 
     Scalar Ellipsoid::averageRadius() const {
         return (_radii.x + _radii.y + _radii.z) / 3.0;
+    }
+
+    Scalar Ellipsoid::longitudalDistance(Scalar lat, Scalar lon1, Scalar lon2) const {
+        Vec2 ellipseRadii = glm::cos(lat) * Vec2(_radii);
+        // Approximating with the ellipse mean radius
+        Scalar meanRadius = 0.5 * (ellipseRadii.x + ellipseRadii.y);
+        return meanRadius * std::abs(lon2 - lon1);
+    }
+
+    Scalar Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const{
+        // https://en.wikipedia.org/wiki/Meridian_arc
+        // https://en.wikipedia.org/wiki/Great-circle_distance#Vector_version
+
+        Vec3 n1 = geodeticSurfaceNormal(p1);
+        Vec3 n2 = geodeticSurfaceNormal(p2);
+        Scalar centralAngle = glm::atan(glm::length(glm::cross(n1, n2)) / glm::dot(n1, n2));
+
+        Geodetic2 pMid = (p1 + p2) / 2;
+        Vec3 centralNormal = cartesianSurfacePosition(pMid);
+
+        return centralAngle * glm::length(centralNormal);
     }
 
     Geodetic2 Ellipsoid::cartesianToGeodetic2(const Vec3& p) const

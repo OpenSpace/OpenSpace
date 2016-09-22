@@ -51,6 +51,11 @@ class RenderablePlane : public Renderable {
     };
 
 public:
+    enum class BlendMode : int {
+        Normal = 0,
+        Additive
+    };
+
     RenderablePlane(const ghoul::Dictionary& dictionary);
     ~RenderablePlane();
 
@@ -79,6 +84,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     bool _textureIsDirty;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    BlendMode _blendMode;
     ghoul::filesystem::File* _textureFile;
     GLuint _quad;
     GLuint _vertexPositionBuffer;

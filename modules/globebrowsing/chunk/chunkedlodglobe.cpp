@@ -156,7 +156,7 @@ namespace openspace {
 
         stats.startNewRecord();
         
-        int j2000s = Time::now().unsyncedJ2000Seconds();
+        int j2000s = Time::now().j2000Seconds();
 
         auto duration = std::chrono::system_clock::now().time_since_epoch();
         auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -180,7 +180,7 @@ namespace openspace {
                 stats.i["chunks leafs"]++;
                 if (chunk.isVisible()) {
                     stats.i["rendered chunks"]++;
-                    double t0 = Time::now().unsyncedJ2000Seconds();
+                    double t0 = Time::now().j2000Seconds();
                     _renderer->renderChunk(chunkNode.getChunk(), data);
                     debugRenderChunk(chunk, mvp);
                 }
@@ -214,7 +214,7 @@ namespace openspace {
                 const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
                 clippingSpaceCorners[i] = clippingSpaceCorner;
 
-                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
+                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
                 screenSpaceBounds.expand(screenSpaceCorner);
             }
 

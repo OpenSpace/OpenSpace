@@ -72,7 +72,7 @@ namespace openspace {
             dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
             clippingSpaceCorners[i] = cornerClippingSpace;
 
-            dvec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace.xyz();
+            dvec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
             bounds.expand(cornerScreenSpace);
         }
         

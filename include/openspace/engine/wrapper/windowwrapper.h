@@ -154,6 +154,16 @@ public:
     virtual bool isGuiWindow() const;
 
     /**
+    * Returns <code>true</code> if the current rendering window is using swap groups.
+    */
+    virtual bool isUsingSwapGroups() const;
+
+    /**
+    * Returns <code>true</code> if the current rendering window is master of the swap its group. 
+    */
+    virtual bool isSwapGroupMaster() const;
+
+    /**
      * Returns the currently employed view-projection matrix. On default, this method will
      * return the identity matrix.
      * \return The currently employed view-projection matrix
@@ -216,7 +226,7 @@ public:
     /**
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
-    virtual void takeScreenshot() const;
+    virtual void takeScreenshot(bool applyWarping = false) const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);
