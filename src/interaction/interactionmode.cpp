@@ -528,14 +528,17 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                  * rotationDiffWorldSpace
                 - (distFromCenterToCamera * directionFromSurfaceToCamera);
 
-            glm::dvec3 rotationDiffVec3AroundCenter = 
+            camPos += rotationDiffVec3;
+
+            posDiff = camPos - centerPos;
+            glm::dvec3 rotationDiffVec3AroundCenter =
                 posDiff
-                 * focusNodeRotationDiff
+                * focusNodeRotationDiff
                 - (posDiff);
-
-            camPos += rotationDiffVec3 + rotationDiffVec3AroundCenter;
-            dvec3 posDiff = camPos - centerPos;
-
+            camPos += rotationDiffVec3AroundCenter;
+            
+            
+            
 
 
             cameraPositionModelSpace =
