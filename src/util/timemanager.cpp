@@ -117,8 +117,6 @@ void TimeManager::consumeKeyframes(double dt) {
         double yPrime2 = next._dt;
 
         double y1 = (1 - parameter) * y0 + parameter * y2;
-        // For continuous derivative, use this instead:
-        // double y1 = (1 - parameter) * (y0 + (t1 - t0) * yPrime0) + parameter * (y2 + (t1 - t2) * yPrime2);
         double y1Prime = (y1 - y0) / dt;
 
         time.setDeltaTime(y1Prime);
