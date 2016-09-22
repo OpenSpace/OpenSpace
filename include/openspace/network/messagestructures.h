@@ -97,6 +97,7 @@ namespace openspace{
                 double _dt;
                 bool _paused;
                 bool _requiresTimeJump;
+                double _timestamp;
                 
                 void serialize(std::vector<char> &buffer){
                     //add current time
@@ -110,6 +111,9 @@ namespace openspace{
                     
                     //add wether a time jump is necessary (recompute paths etc)
                     buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
+
+                    //add timestamp
+                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
                 };
                 
                 void deserialize(const std::vector<char> &buffer){
@@ -134,6 +138,12 @@ namespace openspace{
                     //is a time jump required?
                     size = sizeof(_requiresTimeJump);
                     memcpy(&_requiresTimeJump, buffer.data() + offset, size);
+                    offset += size;
+
+                    // timestamp
+                    size = sizeof(_timestamp);
+                    memcpy(&_timestamp, buffer.data() + offset, size);
+                    offset += size;
                 };
             };
             

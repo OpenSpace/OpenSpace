@@ -105,41 +105,21 @@ namespace openspace {
 
         class ParallelConnection{
         public:
-            
             ParallelConnection();
-            
             ~ParallelConnection();
-            
             void clientConnect();
-            
             void setPort(const std::string &port);
-            
             void setAddress(const std::string &address);
-            
             void setName(const std::string& name);
-
-            bool isAuthenticated();
-
             bool isHost();
-
             const std::string& hostName();
-
             void requestHostship(const std::string &password);
-
             void resignHostship();
-
             void setPassword(const std::string &password);
-            
             void signalDisconnect();
-            
             void preSynchronization();
-
             void sendScript(const std::string& script);
-            
-            //void scriptMessage(const std::string propIdentifier, const std::string propValue);
-            
 
-            
             /**
              * Returns the Lua library that contains all Lua functions available to affect the
              * remote OS parallel connection. The functions contained are
@@ -148,76 +128,50 @@ namespace openspace {
              * interaction
              */
             static scripting::LuaLibrary luaLibrary();
-
             Status status();
-
             size_t nConnections();
-
             std::shared_ptr<ghoul::Event<>> connectionEvent();
-            
-
-
-        protected:
             
         private:
             //@TODO change this into the ghoul hasher for client AND server
             uint32_t hash(const std::string &val);
-            
             void queueOutMessage(const Message& message);
-
             void queueOutDataMessage(const DataMessage& dataMessage);
-
             void queueInMessage(const Message& message);
 
             void disconnect();
-
             void closeSocket();
-
             bool initNetworkAPI();
-
             void establishConnection(addrinfo *info);
-
             void sendAuthentication();
-
             void listenCommunication();
+            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
 
             void handleMessage(const Message&);
-
             void dataMessageReceived(const std::vector<char>& messageContent);
-
             void connectionStatusMessageReceived(const std::vector<char>& messageContent);
-
             void nConnectionsMessageReceived(const std::vector<char>& messageContent);
 
-            
             void broadcast();
-            
-            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
-            
+            void sendCameraKeyframe();
+            void sendTimeKeyframe();
+
             void sendFunc();
-            
             void threadManagement();
 
             void setStatus(Status status);
-
             void setHostName(const std::string& hostName);
-
             void setNConnections(size_t nConnections);
-            
-            //std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
-            
+
+            double calculateBufferedKeyframeTime(double originalTime);
+
             uint32_t _passCode;
             std::string _port;
             std::string _address;
             std::string _name;
             
             _SOCKET _clientSocket;
-            std::unique_ptr<std::thread> _connectionThread;
-            std::unique_ptr<std::thread> _broadcastThread;
-            std::unique_ptr<std::thread> _sendThread;
-            std::unique_ptr<std::thread> _listenThread;
-            std::unique_ptr<std::thread> _handlerThread;
-            
+
             std::atomic<bool> _isConnected;
             std::atomic<bool> _isRunning;
             std::atomic<bool> _tryConnect;
@@ -238,16 +192,16 @@ namespace openspace {
             std::deque<Message> _receiveBuffer;
             std::mutex _receiveBufferMutex;
             
-            network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
-            std::mutex _timeKeyframeMutex;
-            std::atomic<bool> _latestTimeKeyframeValid;
-            std::map<std::string, std::string> _currentState;
-            std::mutex _currentStateMutex;
-
+            std::atomic<bool> _timeJumped;
             std::mutex _latencyMutex;
             std::deque<double> _latencyDiffs;
             double _initialTimeDiff;
 
+            std::unique_ptr<std::thread> _connectionThread;
+            std::unique_ptr<std::thread> _broadcastThread;
+            std::unique_ptr<std::thread> _sendThread;
+            std::unique_ptr<std::thread> _listenThread;
+            std::unique_ptr<std::thread> _handlerThread;
             std::shared_ptr<ghoul::Event<>> _connectionEvent;
         };
     } // namespace network

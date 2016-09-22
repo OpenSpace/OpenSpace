@@ -99,6 +99,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
 )
@@ -185,6 +186,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h

@@ -57,6 +57,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/openspace.h>
 #include <ghoul/logging/logmanager.h>
@@ -93,7 +94,6 @@ ParallelConnection::ParallelConnection()
     , _isConnected(false)
     , _tryConnect(false)
     , _disconnect(false)
-    , _latestTimeKeyframeValid(false)
     , _initializationTimejumpRequired(false)
 {
     _connectionEvent = std::make_shared<ghoul::Event<>>();
@@ -483,6 +483,40 @@ void ParallelConnection::initializationMessageReceived(){
 }
 */
 
+double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
+    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
+
+    double timeDiff = OsEng.runTime() - originalTime;
+    if (_latencyDiffs.size() == 0) {
+        _initialTimeDiff = timeDiff;
+    }
+    double latencyDiff = timeDiff - _initialTimeDiff;
+    if (_latencyDiffs.size() >= MaxLatencyDiffs) {
+        _latencyDiffs.pop_front();
+    }
+    _latencyDiffs.push_back(latencyDiff);
+
+    double accumulatedLatencyDiffSquared = 0;
+    double accumulatedLatencyDiff = 0;
+    for (double diff : _latencyDiffs) {
+        accumulatedLatencyDiff += diff;
+        accumulatedLatencyDiffSquared += diff*diff;
+    }
+    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
+    double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
+
+    // V(X) = E(x^2) - E(x)^2
+    double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
+    double latencyStandardDeviation = std::sqrt(latencyVariance);
+
+    double frametime = OsEng.windowWrapper().averageDeltaTime();
+
+    double latencyCompensation = std::max(expectedLatencyDiff + 2 * latencyStandardDeviation, latencyDiff);
+
+    return originalTime + _initialTimeDiff + BroadcastIntervalMilliseconds / 1000 + latencyCompensation + 2 * frametime;
+
+}
+
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     
     //the type of data message received
@@ -492,78 +526,18 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
     switch(static_cast<network::datamessagestructures::Type>(type)) {
         case network::datamessagestructures::Type::CameraData: {
 
-            std::lock_guard<std::mutex> latencyLock(_latencyMutex);
-
             network::datamessagestructures::CameraKeyframe kf(buffer);
-
-            double timeDiff = OsEng.runTime() - kf._timestamp;
-            if (_latencyDiffs.size() == 0) {
-                _initialTimeDiff = timeDiff;
-            }
-            double latencyDiff = timeDiff - _initialTimeDiff;
-            if (_latencyDiffs.size() >= MaxLatencyDiffs) {
-                _latencyDiffs.pop_front();
-            }
-            _latencyDiffs.push_back(latencyDiff);
-
-            double accumulatedLatencyDiffSquared = 0;
-            double accumulatedLatencyDiff = 0;
-            for (double diff : _latencyDiffs) {
-                accumulatedLatencyDiff += diff;
-                accumulatedLatencyDiffSquared += diff*diff;
-            }
-            double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
-            double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
-
-            // V(X) = E(x^2) - E(x)^2
-            double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
-            double latencyStandardDeviation = std::sqrt(latencyVariance);
-
-            double frametime = OsEng.windowWrapper().averageDeltaTime();
-
-            double latencyCompensation = std::max(expectedLatencyDiff + 2*latencyStandardDeviation, latencyDiff);
-
-            kf._timestamp += _initialTimeDiff + BroadcastIntervalMilliseconds / 1000 + latencyCompensation + 2*frametime;
+            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
             OsEng.interactionHandler().addKeyframe(kf);
             break;
         }
         case network::datamessagestructures::Type::TimeData: {
-            /*
-            //time data message
-            //create and read a time keyframe from the data buffer
-            network::datamessagestructures::TimeKeyframe tf;
-            tf.deserialize(buffer);
-                    
-            //lock mutex and assign latest time keyframe parameters
-            _timeKeyframeMutex.lock();
-                    
-            _latestTimeKeyframe._dt = tf._dt;
-            _latestTimeKeyframe._time = tf._time;
-            _latestTimeKeyframe._paused = tf._paused;
-                    
-            //ensure that we never miss a timejump
-            //if last keyframe required a jump and that keyframe has not been used yet
-            if(_latestTimeKeyframe._requiresTimeJump && _latestTimeKeyframeValid){
-                //do nothing to the boolean. Old value must be executed
-            }else{
-                //either the latest keyframe didnt require a jump, or we have already spent that keyframe.
-                //in either case we can go ahead and write the bool value of newest frame
-                _latestTimeKeyframe._requiresTimeJump = tf._requiresTimeJump;
-            }
-                    
-            //if we're just initialized we need to perform a time jump as soon as a valid keyframe has been received
-            if(_initializationTimejumpRequired.load() && _latestTimeKeyframeValid){
-                _latestTimeKeyframe._requiresTimeJump = true;
-                _initializationTimejumpRequired.store(false);
-            }
-                    
-            //unlock mutex
-            _timeKeyframeMutex.unlock();
-                    
-            //the keyframe is now valid for use
-            _latestTimeKeyframeValid.store(true);
-                  */  
+
+            network::datamessagestructures::TimeKeyframe kf(buffer);
+            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
+
+            OsEng.timeManager().addKeyframe(kf);
             break;
         }
         case network::datamessagestructures::Type::ScriptData: {
@@ -949,136 +923,14 @@ void ParallelConnection::preSynchronization(){
         handleMessage(message);
         _receiveBuffer.pop_front();
     }
-
-    //std::cout << "start." << std::endl;
-            
-    //if we're the host
-    //if(_isHost){
-        /*
-        //get current time parameters and create a keyframe
-        network::datamessagestructures::TimeKeyframe tf;
-        tf._dt = Time::ref().deltaTime();
-        tf._paused = Time::ref().paused();
-        tf._requiresTimeJump = Time::ref().timeJumped();
-        tf._time = Time::ref().currentTime();
-                
-        //create a buffer and serialize message
-        std::vector<char> tbuffer;
-        tf.serialize(tbuffer);
-
-        //the type of data message
-        uint16_t type = static_cast<uint16_t>(network::datamessagestructures::TimeData);
-                
-        //create the full buffer
-        std::vector<char> buffer;
-
-            
-        std::cout << "host 5." << std::endl;
-
-        //type of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-                
-        //size of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-                
-        //actual message
-        buffer.insert(buffer.end(), tbuffer.begin(), tbuffer.end());
-                
-        std::cout << "host 6." << std::endl;
-
-        //send message
-        std::cout << "pre sync queue" << std::endl;
-        queueMessage(MessageType::Data, buffer);
-
-        std::cout << "host 7." << std::endl;
-        */
-    //}
-    //else{
-        /*
-        //if we're not the host and we have a valid keyframe (one that hasnt been used before)
-        if(_latestTimeKeyframeValid.load()){
-                    
-            //lock mutex and retrieve parameters from latest keyframe
-            _timeKeyframeMutex.lock();
-                    
-            double dt = _latestTimeKeyframe._dt;
-            double time = _latestTimeKeyframe._time;
-            bool jump = _latestTimeKeyframe._requiresTimeJump;
-            bool paused = _latestTimeKeyframe._paused;
-                    
-            _timeKeyframeMutex.unlock();
-                    
-            //this keyframe is now spent
-            _latestTimeKeyframeValid.store(false);
-                    
-            //assign latest params
-            Time::ref().setDeltaTime(dt);
-            Time::ref().setTime(time, jump);
-            Time::ref().setPause(paused);
-                    
+    
+    if (status() == network::Status::Host) {
+        if (Time::ref().timeJumped()) {
+            _timeJumped = true;
         }
-        */
-    //}
-
-    //std::cout << "stop." << std::endl;
-}
-        
-
-
-//void ParallelConnection::scriptMessage(const std::string propIdentifier, const std::string propValue){
-            /*
-    //save script as current state
-    {
-        //mutex protect
-        std::lock_guard<std::mutex> lock(_currentStateMutex);
-        _currentState[propIdentifier] = propValue;
     }
-            
-    //if we're connected and we're the host, also send the script
-    if(_isConnected.load() && _isHost.load()){
-        //construct script
-        std::string script = scriptFromPropertyAndValue(propIdentifier, propValue);
-                
-        //create a script message
-        network::datamessagestructures::ScriptMessage sm;
-        sm._script = script;
-        sm._scriptlen = static_cast<uint16_t>(script.length());
-                
-        //create a buffer for the script
-        std::vector<char> sbuffer;
-                
-        //fill the script buffer
-        sm.serialize(sbuffer);
-                
-        //get the size of the keyframebuffer
-        uint16_t msglen = static_cast<uint16_t>(sbuffer.size());
-                
-        //the type of message
-        uint16_t type = static_cast<uint16_t>(network::datamessagestructures::ScriptData);
-                
-        //create the full buffer
-        std::vector<char> buffer;
-        buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-                
-        //write header
-        writeHeader(buffer, MessageTypes::Data);
-                
-        //type of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-                
-        //size of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-                
-        //actual message
-        buffer.insert(buffer.end(), sbuffer.begin(), sbuffer.end());
-                
-        std::cout << "script message queue" << std::endl;
-        //send message
-        queueMessage(buffer);
-    }*/
-
-//}
-     
+}
+         
 void ParallelConnection::setStatus(Status status) {
     if (_status != status) {
         _status = status;
@@ -1116,26 +968,55 @@ const std::string& ParallelConnection::hostName() {
     return _hostName;
 }
 
+void ParallelConnection::sendCameraKeyframe() {
+    //create a keyframe with current position and orientation of camera
+    network::datamessagestructures::CameraKeyframe kf;
+    kf._position = OsEng.interactionHandler().camera()->positionVec3();
+    kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
+
+    //timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.runTime();
+
+    //create a buffer for the keyframe
+    std::vector<char> buffer;
+
+    //fill the keyframe buffer
+    kf.serialize(buffer);
+
+    //send message
+    queueOutDataMessage(DataMessage(network::datamessagestructures::Type::CameraData, buffer));
+}
+
+void ParallelConnection::sendTimeKeyframe() {
+    //create a keyframe with current position and orientation of camera
+    network::datamessagestructures::TimeKeyframe kf;
+    
+    kf._dt = Time::ref().deltaTime();
+    kf._paused = Time::ref().paused();
+    kf._requiresTimeJump = _timeJumped;
+    kf._time = Time::ref().currentTime();
+
+    //timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.runTime();
+
+    //create a buffer for the keyframe
+    std::vector<char> buffer;
+
+    //fill the keyframe buffer
+    kf.serialize(buffer);
+
+    //send message
+    queueOutDataMessage(DataMessage(network::datamessagestructures::Type::TimeData, buffer));
+    _timeJumped = false;
+}
+
+
 void ParallelConnection::broadcast(){
             
     //while we're still connected and we're the host
     while (_isConnected && isHost()) {
-        //create a keyframe with current position and orientation of camera
-        network::datamessagestructures::CameraKeyframe kf;
-        kf._position = OsEng.interactionHandler().camera()->positionVec3();
-        kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
-
-        //timestamp as current runtime of OpenSpace instance
-        kf._timestamp = OsEng.runTime();
-                
-        //create a buffer for the keyframe
-        std::vector<char> buffer;
-                
-        //fill the keyframe buffer
-        kf.serialize(buffer);
-                
-        //send message
-        queueOutDataMessage(DataMessage(network::datamessagestructures::Type::CameraData, buffer));
+        sendCameraKeyframe();
+        sendTimeKeyframe();
 
         //100 ms sleep - send keyframes 10 times per second
         std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(BroadcastIntervalMilliseconds)));

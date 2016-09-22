@@ -45,6 +45,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
@@ -130,6 +131,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _settingsEngine(new SettingsEngine)
+    , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     , _gui(new gui::GUI)
@@ -144,6 +146,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdownCountdown(0.f)
     , _shutdownWait(0.f)
 {
+
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
@@ -749,9 +752,7 @@ void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
-
-        Time::ref().advanceTime(dt);
-        Time::ref().preSynchronization();
+        _timeManager->preSynchronization(dt);
 
         _scriptEngine->preSynchronization();
         
@@ -1061,6 +1062,11 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
 DownloadManager& OpenSpaceEngine::downloadManager() {
     ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
     return *_downloadManager;
+}
+
+TimeManager& OpenSpaceEngine::timeManager() {
+    ghoul_assert(_timeManager, "Download Manager must not be nullptr");
+    return *_timeManager;
 }
 
 
