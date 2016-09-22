@@ -226,7 +226,7 @@ public:
     /**
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
-    virtual void takeScreenshot() const;
+    virtual void takeScreenshot(bool applyWarping = false) const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);

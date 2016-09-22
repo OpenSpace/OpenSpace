@@ -128,6 +128,6 @@ bool WindowWrapper::isSimpleRendering() const {
     return true;
 }
     
-void WindowWrapper::takeScreenshot() const {}
+void WindowWrapper::takeScreenshot(bool) const {}
     
 } // namespace openspace

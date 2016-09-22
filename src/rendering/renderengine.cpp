@@ -479,7 +479,7 @@ void RenderEngine::postDraw() {
     }
 
     if (_takeScreenshot) {
-        OsEng.windowWrapper().takeScreenshot();
+        OsEng.windowWrapper().takeScreenshot(_applyWarping);
         _takeScreenshot = false;
     }
 
@@ -488,8 +488,9 @@ void RenderEngine::postDraw() {
     }
 }
 
-void RenderEngine::takeScreenshot() {
+void RenderEngine::takeScreenshot(bool applyWarping) {
     _takeScreenshot = true;
+    _applyWarping = applyWarping;
 }
 
 void RenderEngine::toggleInfoText(bool b) {
@@ -713,14 +714,16 @@ void RenderEngine::setNAaSamples(int nAaSamples) {
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return {
+    return{
         "",
         {
             {
                 "takeScreenshot",
                 &luascriptfunctions::takeScreenshot,
-                "",
-                "Renders the current image to a file on disk"
+                "(optional bool)",
+                "Renders the current image to a file on disk. If the boolean parameter "
+                "is set to 'true', the screenshot will include the blending and the "
+                "meshes. If it is 'false', the straight FBO will be recorded."
             },
             {
                 "setRenderer",
@@ -732,7 +735,7 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "setNAaSamples",
                 &luascriptfunctions::setNAaSamples,
                 "int",
-                "Sets the number of anti-aliasing (msaa) samples"
+                "Sets the number of anti-aliasing (MSAA) samples"
             },
             {
                 "showRenderInformation",

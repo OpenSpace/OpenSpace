@@ -110,7 +110,7 @@ public:
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
-    void takeScreenshot();
+    void takeScreenshot(bool applyWarping = false);
     void toggleInfoText(bool b);
     void toggleFrametimeType(int t);
 
@@ -224,6 +224,7 @@ private:
     bool _showInfo;
     bool _showLog;
     bool _takeScreenshot;
+    bool _applyWarping;
     bool _showFrameNumber;
 
     float _globalBlackOutFactor;

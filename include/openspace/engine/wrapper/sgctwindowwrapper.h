@@ -68,7 +68,7 @@ public:
 
     bool isSimpleRendering() const override;
 
-    void takeScreenshot() const override;
+    void takeScreenshot(bool applyWarping = false) const override;
 };
 
 } // namespace openspace

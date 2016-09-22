@@ -185,10 +185,10 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
 
 }
     
-void SGCTWindowWrapper::takeScreenshot() const {
+void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
+    sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();
 }
-    
     
 //void forEachWindow(std::function<void (void)> function) {
 //    size_t n = sgct::Engine::instance()->getNumberOfWindows();
