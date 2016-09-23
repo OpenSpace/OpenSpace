@@ -666,6 +666,33 @@ struct AnnotationVerifier : public T {
 };
 
 /**
+ * This Verifier is a marker that performs the same testing as the \c T parameter, but
+ * also adds a warning to the test result informing the user of the deprecation.
+ * Furthermore, the documentation will contain the word <code>(deprecated)</code> in
+ * addition to the documentation returned by \c
+ * \tparam T The Verifier that is to be marked deprecated
+ */
+template <typename T>
+struct DeprecatedVerifier : public T {
+    /**
+     * Tests the \p dictionary%s \p key using the Verifier \c T and adds a warning to the
+     * TestResult informing the caller of the deprecation.
+     * \param dictionary The ghoul::Dictionary whose \p key should be tested
+     * \param key The key inside the \p dictionary that is to be tested
+     * \return A TestResult that contains the results of the testing
+     */
+    TestResult operator()(const ghoul::Dictionary& dictionary,
+                          const std::string& key) const override;
+
+    /**
+     * Returns the documentation as reported by \c T and adds the word
+     * <code>(deprecated)</code> to it.
+     * \return The deprecated version of \c T%'s documentation
+     */
+    std::string documentation() const override;
+};
+
+/**
  * This Verifier can reference and apply other Documentation%s that have been registered
  * with a DocumentationEngine. The dependency is only resolved when the operator() is
  * called, at which the referencing Documentation must have been registered, or the
@@ -884,6 +911,18 @@ using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
 /// <code>ghoul::Dictionary</code>
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 
+/// A short-hand definition for a DeprecatedVerifier with a type check for \c bool
+using BoolDeprecatedVerifier = DeprecatedVerifier<BoolVerifier>;
+/// A short-hand definition for a DeprecatedVerifier with a type check for \c int
+using IntDeprecatedVerifier = DeprecatedVerifier<IntVerifier>;
+/// A short-hand definition for a DeprecatedVerifier with a type check for \c double
+using DoubleDeprecatedVerifier = DeprecatedVerifier<DoubleVerifier>;
+/// A short-hand definition for a DeprecatedVerifier with a type check for \c string
+using StringDeprecatedVerifier = DeprecatedVerifier<StringVerifier>;
+/// A short-hand definition for a DeprecatedVerifier with a type check for
+/// <code>ghoul::Dictionary</code>
+using TableDeprecatedVerifier = DeprecatedVerifier<TableVerifier>;
+
 // Definitions of external templates that are instantiated in the cpp file
 // This cuts down the compilation times as almost all of the possible template types do
 // not need to be instantiated multiple times
@@ -933,7 +972,30 @@ extern template struct AnnotationVerifier<IntVerifier>;
 extern template struct AnnotationVerifier<DoubleVerifier>;
 extern template struct AnnotationVerifier<StringVerifier>;
 extern template struct AnnotationVerifier<TableVerifier>;
+extern template struct AnnotationVerifier<BoolVector2Verifier>;
+extern template struct AnnotationVerifier<IntVector2Verifier>;
+extern template struct AnnotationVerifier<DoubleVector2Verifier>;
+extern template struct AnnotationVerifier<BoolVector3Verifier>;
+extern template struct AnnotationVerifier<IntVector3Verifier>;
+extern template struct AnnotationVerifier<DoubleVector3Verifier>;
+extern template struct AnnotationVerifier<BoolVector4Verifier>;
+extern template struct AnnotationVerifier<IntVector4Verifier>;
+extern template struct AnnotationVerifier<DoubleVector4Verifier>;
 
+extern template struct DeprecatedVerifier<BoolVerifier>;
+extern template struct DeprecatedVerifier<IntVerifier>;
+extern template struct DeprecatedVerifier<DoubleVerifier>;
+extern template struct DeprecatedVerifier<StringVerifier>;
+extern template struct DeprecatedVerifier<TableVerifier>;
+extern template struct DeprecatedVerifier<BoolVector2Verifier>;
+extern template struct DeprecatedVerifier<IntVector2Verifier>;
+extern template struct DeprecatedVerifier<DoubleVector2Verifier>;
+extern template struct DeprecatedVerifier<BoolVector3Verifier>;
+extern template struct DeprecatedVerifier<IntVector3Verifier>;
+extern template struct DeprecatedVerifier<DoubleVector3Verifier>;
+extern template struct DeprecatedVerifier<BoolVector4Verifier>;
+extern template struct DeprecatedVerifier<IntVector4Verifier>;
+extern template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
 } // namespace documentation
 } // namespace openspace

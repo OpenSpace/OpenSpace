@@ -2308,6 +2308,73 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
     EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
 }
 
+TEST_F(DocumentationTest, DeprecatedVerifier) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc{ {
+        { "bool", new BoolDeprecatedVerifier },
+        { "int" , new IntDeprecatedVerifier },
+        { "double", new DoubleDeprecatedVerifier },
+        { "string" , new StringDeprecatedVerifier },
+        { "boolvec2", new DeprecatedVerifier<BoolVector2Verifier> },
+        { "intvec2", new DeprecatedVerifier<IntVector2Verifier> },
+        { "doublevec2", new DeprecatedVerifier<DoubleVector2Verifier> },
+        { "boolvec3", new DeprecatedVerifier<BoolVector3Verifier> },
+        { "intvec3", new DeprecatedVerifier<IntVector3Verifier> },
+        { "doublevec3", new DeprecatedVerifier<DoubleVector3Verifier> },
+        { "boolvec4", new DeprecatedVerifier<BoolVector4Verifier> },
+        { "intvec4", new DeprecatedVerifier<IntVector4Verifier> },
+        { "doublevec4", new DeprecatedVerifier<DoubleVector4Verifier> }
+    }};
+
+    ghoul::Dictionary positive {
+        { "bool", true },
+        { "int", 1 },
+        { "double", 2.0 },
+        { "string" , ""s },
+        { "boolvec2", glm::bvec2() },
+        { "intvec2", glm::ivec2() },
+        { "doublevec2", glm::dvec2() },
+        { "boolvec3", glm::bvec3() },
+        { "intvec3", glm::ivec3() },
+        { "doublevec3", glm::dvec3() },
+        { "boolvec4", glm::bvec4() },
+        { "intvec4", glm::ivec4() },
+        { "doublevec4", glm::dvec4() }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+    ASSERT_EQ(13, positiveRes.warnings.size());
+    EXPECT_EQ("bool", positiveRes.warnings[0].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[0].reason);
+    EXPECT_EQ("int", positiveRes.warnings[1].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[1].reason);
+    EXPECT_EQ("double", positiveRes.warnings[2].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[2].reason);
+    EXPECT_EQ("string", positiveRes.warnings[3].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[3].reason);
+    EXPECT_EQ("boolvec2", positiveRes.warnings[4].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[4].reason);
+    EXPECT_EQ("intvec2", positiveRes.warnings[5].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[5].reason);
+    EXPECT_EQ("doublevec2", positiveRes.warnings[6].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[6].reason);
+    EXPECT_EQ("boolvec3", positiveRes.warnings[7].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[7].reason);
+    EXPECT_EQ("intvec3", positiveRes.warnings[8].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[8].reason);
+    EXPECT_EQ("doublevec3", positiveRes.warnings[9].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[9].reason);
+    EXPECT_EQ("boolvec4", positiveRes.warnings[10].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[10].reason);
+    EXPECT_EQ("intvec4", positiveRes.warnings[11].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[11].reason);
+    EXPECT_EQ("doublevec4", positiveRes.warnings[12].offender);
+    EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[12].reason);
+}
+
 TEST_F(DocumentationTest, VerifierTypePostConditions) {
     using namespace openspace::documentation;
     using namespace std::string_literals;
@@ -2360,11 +2427,35 @@ TEST_F(DocumentationTest, VerifierTypePostConditions) {
     EXPECT_NE("", IntNotInRangeVerifier({ 0, 1 }).type());
     EXPECT_NE("", DoubleNotInRangeVerifier({ 0.0, 1.0 }).type());
 
-    EXPECT_NE("", BoolAnnotationVerifier("Annotation"s).type());
-    EXPECT_NE("", IntAnnotationVerifier("Annotation"s).type());
-    EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).type());
-    EXPECT_NE("", StringAnnotationVerifier("Annotation"s).type());
-    EXPECT_NE("", TableAnnotationVerifier("Annotation"s).type());
+    EXPECT_NE("", BoolAnnotationVerifier("A"s).type());
+    EXPECT_NE("", IntAnnotationVerifier("A"s).type());
+    EXPECT_NE("", DoubleAnnotationVerifier("A"s).type());
+    EXPECT_NE("", StringAnnotationVerifier("A"s).type());
+    EXPECT_NE("", TableAnnotationVerifier("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<BoolVector2Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<IntVector2Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector2Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<BoolVector3Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<IntVector3Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector3Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<BoolVector4Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<IntVector4Verifier>("A"s).type());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector4Verifier>("A"s).type());
+
+    EXPECT_NE("", BoolDeprecatedVerifier().type());
+    EXPECT_NE("", IntDeprecatedVerifier().type());
+    EXPECT_NE("", DoubleDeprecatedVerifier().type());
+    EXPECT_NE("", StringDeprecatedVerifier().type());
+    EXPECT_NE("", TableDeprecatedVerifier().type());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector2Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<IntVector2Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector2Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector3Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<IntVector3Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector3Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector4Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<IntVector4Verifier>().type());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector4Verifier>().type());
 
     EXPECT_NE("", ReferencingVerifier("identifier"s).type());
 }
@@ -2421,11 +2512,35 @@ TEST_F(DocumentationTest, VerifierDocumentationPostConditions) {
     EXPECT_NE("", IntNotInRangeVerifier({ 0, 1 }).documentation());
     EXPECT_NE("", DoubleNotInRangeVerifier({ 0.0, 1.0 }).documentation());
 
-    EXPECT_NE("", BoolAnnotationVerifier("Annotation"s).documentation());
-    EXPECT_NE("", IntAnnotationVerifier("Annotation"s).documentation());
-    EXPECT_NE("", DoubleAnnotationVerifier("Annotation"s).documentation());
-    EXPECT_NE("", StringAnnotationVerifier("Annotation"s).documentation());
-    EXPECT_NE("", TableAnnotationVerifier("Annotation"s).documentation());
+    EXPECT_NE("", BoolAnnotationVerifier("A"s).documentation());
+    EXPECT_NE("", IntAnnotationVerifier("A"s).documentation());
+    EXPECT_NE("", DoubleAnnotationVerifier("A"s).documentation());
+    EXPECT_NE("", StringAnnotationVerifier("A"s).documentation());
+    EXPECT_NE("", TableAnnotationVerifier("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<BoolVector2Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<IntVector2Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector2Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<BoolVector3Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<IntVector3Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector3Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<BoolVector4Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<IntVector4Verifier>("A"s).documentation());
+    EXPECT_NE("", AnnotationVerifier<DoubleVector4Verifier>("A"s).documentation());
+
+    EXPECT_NE("", BoolDeprecatedVerifier().documentation());
+    EXPECT_NE("", IntDeprecatedVerifier().documentation());
+    EXPECT_NE("", DoubleDeprecatedVerifier().documentation());
+    EXPECT_NE("", StringDeprecatedVerifier().documentation());
+    EXPECT_NE("", TableDeprecatedVerifier().documentation());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector2Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<IntVector2Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector2Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector3Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<IntVector3Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector3Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<BoolVector4Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<IntVector4Verifier>().documentation());
+    EXPECT_NE("", DeprecatedVerifier<DoubleVector4Verifier>().documentation());
 
     EXPECT_NE("", ReferencingVerifier("identifier"s).documentation());
 

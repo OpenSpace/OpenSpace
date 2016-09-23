@@ -72,11 +72,36 @@ template struct InRangeVerifier<DoubleVerifier>;
 template struct NotInRangeVerifier<IntVerifier>;
 template struct NotInRangeVerifier<DoubleVerifier>;
 
+
 template struct AnnotationVerifier<BoolVerifier>;
 template struct AnnotationVerifier<IntVerifier>;
 template struct AnnotationVerifier<DoubleVerifier>;
 template struct AnnotationVerifier<StringVerifier>;
 template struct AnnotationVerifier<TableVerifier>;
+template struct AnnotationVerifier<BoolVector2Verifier>;
+template struct AnnotationVerifier<IntVector2Verifier>;
+template struct AnnotationVerifier<DoubleVector2Verifier>;
+template struct AnnotationVerifier<BoolVector3Verifier>;
+template struct AnnotationVerifier<IntVector3Verifier>;
+template struct AnnotationVerifier<DoubleVector3Verifier>;
+template struct AnnotationVerifier<BoolVector4Verifier>;
+template struct AnnotationVerifier<IntVector4Verifier>;
+template struct AnnotationVerifier<DoubleVector4Verifier>;
+
+template struct DeprecatedVerifier<BoolVerifier>;
+template struct DeprecatedVerifier<IntVerifier>;
+template struct DeprecatedVerifier<DoubleVerifier>;
+template struct DeprecatedVerifier<StringVerifier>;
+template struct DeprecatedVerifier<TableVerifier>;
+template struct DeprecatedVerifier<BoolVector2Verifier>;
+template struct DeprecatedVerifier<IntVector2Verifier>;
+template struct DeprecatedVerifier<DoubleVector2Verifier>;
+template struct DeprecatedVerifier<BoolVector3Verifier>;
+template struct DeprecatedVerifier<IntVector3Verifier>;
+template struct DeprecatedVerifier<DoubleVector3Verifier>;
+template struct DeprecatedVerifier<BoolVector4Verifier>;
+template struct DeprecatedVerifier<IntVector4Verifier>;
+template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
 std::string BoolVerifier::type() const {
     return "Boolean";
@@ -127,7 +152,8 @@ std::string StringVerifier::type() const {
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> d, Exhaustive exhaustive)
     : documentations(std::move(d))
-    , exhaustive(std::move(exhaustive)) {}
+    , exhaustive(std::move(exhaustive))
+{}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
                                      const std::string& key) const {
@@ -135,19 +161,25 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
         TestResult res = testSpecification({ "", documentations, exhaustive }, d);
 
+        // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
             s.offender = key + "." + s.offender;
+        }
+
+        // Add the 'key' as a prefix to make the new warning a fully qualified identifer
+        for (TestResult::Warning& w : res.warnings) {
+            w.offender = key + "." + w.offender;
         }
 
         return res;
     }
     else {
         if (dict.hasKey(key)) {
-            return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
 
         }
         else {
-            return{ false, { { key, TestResult::Offense::Reason::MissingKey } } };
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
         }
     }
 }
@@ -182,8 +214,14 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
             ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
             TestResult res = testSpecification(*it, d);
 
+            // Add the 'key' as a prefix to make the offender a fully qualified identifer
             for (TestResult::Offense& s : res.offenses) {
                 s.offender = key + "." + s.offender;
+            }
+
+            // Add the 'key' as a prefix to make the warning a fully qualified identifer
+            for (TestResult::Warning& w : res.warnings) {
+                w.offender = key + "." + w.offender;
             }
 
             return res;
