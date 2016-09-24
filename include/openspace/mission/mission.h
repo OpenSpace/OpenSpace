@@ -61,12 +61,10 @@ public:
     */
     const MissionPhase& phase(size_t i) const;
 
-    std::list<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
-
-    //TimeRange parseTimeRange(const ghoul::Dictionary& dict);
+    std::vector<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
 
 protected:
-    bool phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const;
+    bool phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const;
     
     std::string _name;
     std::string _description;

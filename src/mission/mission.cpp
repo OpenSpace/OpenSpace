@@ -124,8 +124,8 @@ const MissionPhase& MissionPhase::phase(size_t i) const {
     return _subphases[i];
 }
 
-std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
-    std::list<const MissionPhase*> trace;
+std::vector<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
+    std::vector<const MissionPhase*> trace;
     if (_timeRange.includes(time)) {
         trace.push_back(this);
         phaseTrace(time, trace, maxDepth);
@@ -133,7 +133,7 @@ std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDept
     return std::move(trace);
 }
 
-bool MissionPhase::phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const {
+bool MissionPhase::phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const {
     if (maxDepth == 0) {
         return false;
     }

@@ -22,10 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/mission/missionmanager.h>
+
+#include <ghoul/misc/assert.h>
+
 #include <assert.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -44,12 +47,12 @@ namespace openspace {
 MissionManager* MissionManager::_instance = nullptr;
 
 MissionManager& MissionManager::ref() {
-    assert(_instance != nullptr);
+    ghoul_assert(_instance, "Instance has not been initiated");
     return *_instance;
 }
 
 void MissionManager::initialize() {
-    assert(_instance == nullptr);
+    ghoul_assert(!_instance, "Instance has been initialized before");
     _instance = new MissionManager;
     OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
 }
@@ -59,13 +62,13 @@ void MissionManager::deinitialize() {
     _instance = nullptr;
 }
 
-void MissionManager::setCurrentMission(const std::string missionName) {
+void MissionManager::setCurrentMission(const std::string& missionName) {
     auto it = _missionMap.find(missionName);
     if (it == _missionMap.end()) {
         LWARNING("Mission with name \"" << missionName << "\" has not been loaded!");
     }
     else {
-        _currentMissionIter = it;
+        _currentMission = it;
     }
 }
 
@@ -74,23 +77,28 @@ void MissionManager::setCurrentMission(const std::string missionName) {
 */
 
 bool MissionManager::hasCurrentMission() const {
-    return _currentMissionIter != _missionMap.end();
+    return _currentMission != _missionMap.end();
 }
 
 void MissionManager::loadMission(const std::string& filepath) {
+    // Changing the values might invalidate the _currentMission iterator
+    const std::string& currentMission = _currentMission->first;
+
     Mission mission(filepath);
-    _missionMap[mission.name()] = mission;
+    _missionMap[mission.name()] = std::move(mission);
     if (_missionMap.size() == 1) {
         setCurrentMission(mission.name());
     }
+
+    setCurrentMission(currentMission);
 }
 
 const Mission& MissionManager::currentMission() {
-    if (_currentMissionIter == _missionMap.end()) {
+    if (_currentMission == _missionMap.end()) {
         LWARNING("No current mission has been specified. returning dummy mission");
         return Mission();
     }
-    return _currentMissionIter->second;
+    return _currentMission->second;
 }
 
 namespace luascriptfunctions { 
@@ -122,7 +130,7 @@ namespace luascriptfunctions {
 } // namespace luascriptfunction
 
 scripting::LuaLibrary MissionManager::luaLibrary() {
-    return{
+    return {
         "",
         {
             {
@@ -143,6 +151,8 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 
 // Singleton
 
-inline MissionManager::MissionManager() : _currentMissionIter(_missionMap.end()) {}
+MissionManager::MissionManager()
+     : _currentMission(_missionMap.end())
+{}
 
 }  // namespace openspace

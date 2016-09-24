@@ -25,17 +25,14 @@
 #ifndef __MISSIONPHASEEQUENCER_H__
 #define __MISSIONPHASEEQUENCER_H__
 
-#include <vector>
-#include <list>
-#include <string>
-#include <unordered_map>
-#include <openspace/util/timerange.h>
 #include <openspace/mission/mission.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <map>
+#include <string>
 
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 /**
 * Singleton class keeping track of space missions. 
@@ -58,7 +55,7 @@ public:
     * Sets the mission with the name <missionName> as the current mission. The current
     * mission is what is return by `currentMission()`.
     */
-    void setCurrentMission(const std::string missionName);
+    void setCurrentMission(const std::string& missionName);
 
     /**
     * Returns true if a current mission exists
@@ -76,9 +73,11 @@ private:
     static scripting::LuaLibrary luaLibrary();
     static MissionManager* _instance;
 
-    typedef std::unordered_map<std::string, Mission> MissionMap;
+    //typedef std::map<std::string, Mission> MissionMap;
+    using MissionMap = std::map<std::string, Mission>;
     MissionMap _missionMap;
-    MissionMap::iterator _currentMissionIter;
+
+    MissionMap::iterator _currentMission;
 
     // Singleton
     MissionManager();

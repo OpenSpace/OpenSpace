@@ -1364,7 +1364,7 @@ void RenderEngine::renderInformation() {
                     // Add spacing
                     RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
-                    std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+                    std::vector<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
 
                     if (phaseTrace.size()) {
                         std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
