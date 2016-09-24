@@ -26,6 +26,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -182,11 +183,15 @@ void Scene::clearSceneGraph() {
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     ghoul::Dictionary dictionary;
     
+    OsEng.windowWrapper().setSynchronization(false);
+    OnExit(
+        [](){ OsEng.windowWrapper().setSynchronization(true); }
+    );
     
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
            // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
+           [state](){ ghoul::lua::destroyLuaState(state); }
            );
     
     OsEng.scriptEngine().initializeLuaState(state);
