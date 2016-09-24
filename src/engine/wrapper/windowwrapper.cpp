@@ -23,14 +23,51 @@
  ****************************************************************************************/
 
 #include <openspace/engine/wrapper/windowwrapper.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/misc/exception.h>
 #include <string>
+
+namespace luascriptfunctions {
+
+int setSynchronization(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    bool b = lua_toboolean(L, -1) != 0;
+    OsEng.windowWrapper().setSynchronization(b);
+    return 0;
+}
+
+} // namespace luascriptfunctions
 
 namespace openspace {
 
 WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string& msg)
     : ghoul::RuntimeError(msg, "WindowWrapper")
 {}
+
+scripting::LuaLibrary WindowWrapper::luaLibrary() {
+    return {
+        "cluster",
+        {
+            {
+                "setSynchronization",
+                &luascriptfunctions::setSynchronization,
+                "bool",
+                "Enables or disables the frame synchronization of the cluster. If the "
+                "synchronization is enabled, the computers in the cluster will swap "
+                "their backbuffers at the same time, either supported by hardware or by "
+                "network signals."
+            }
+        }
+    };
+}
 
 void WindowWrapper::terminate() {}
     

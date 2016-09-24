@@ -27,7 +27,7 @@
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/missionmanager.h>
 #include <openspace/engine/openspaceengine.h>
-
+#include <openspace/scripting/scriptengine.h>
 
 
 namespace {

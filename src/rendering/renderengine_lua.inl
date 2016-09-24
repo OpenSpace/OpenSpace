@@ -43,7 +43,7 @@ int takeScreenshot(lua_State* L) {
         return 0;
     }
     else {
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 0, 1, nArguments);
     }
 }
 

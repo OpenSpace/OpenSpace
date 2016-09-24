@@ -714,7 +714,7 @@ void RenderEngine::setNAaSamples(int nAaSamples) {
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return{
+    return {
         "",
         {
             {

@@ -34,6 +34,8 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 /**
  * A WindowWrapper is a class that handles the abstraction between OpenSpace and a
  * specific window creation framework.<br>
@@ -42,6 +44,12 @@ namespace openspace {
  */
 class WindowWrapper {
 public:
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * windowing system.
+    */
+    static scripting::LuaLibrary luaLibrary();
+
     /**
      * This method closes the application by calling the necessary terminate function of
      * the window management system
