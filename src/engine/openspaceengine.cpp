@@ -151,6 +151,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _isInShutdownMode(false)
     , _shutdownCountdown(0.f)
     , _shutdownWait(0.f)
+    , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
@@ -837,6 +838,10 @@ void OpenSpaceEngine::setRunTime(double d){
     
 void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
+
+    if (_isFirstRenderingFirstFrame) {
+        _windowWrapper->setSynchronization(false);
+    }
     
     _syncEngine->presync(_isMaster);
     if (_isMaster) {
@@ -949,8 +954,15 @@ void OpenSpaceEngine::postDraw() {
 #endif
     }
 
-    if (_isInShutdownMode)
+    if (_isInShutdownMode) {
         _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);
+    }
+
+    if (_isFirstRenderingFirstFrame) {
+        _windowWrapper->setSynchronization(true);
+        _isFirstRenderingFirstFrame = false;
+    }
+
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {

@@ -172,6 +172,10 @@ private:
     // The current state of the countdown; if it reaches '0', the application will close
     float _shutdownCountdown;
 
+    // The first frame might take some more time in the update loop, so we need to know to
+    // disable the synchronization; otherwise a hardware sync will kill us after 1 sec
+    bool _isFirstRenderingFirstFrame;
+
     static OpenSpaceEngine* _engine;
 };
 
