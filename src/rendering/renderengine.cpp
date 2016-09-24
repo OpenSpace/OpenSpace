@@ -26,8 +26,8 @@
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
-#include <modules/newhorizons/util/missionmanager.h>
 #endif
+#include <openspace/mission/missionmanager.h>
 
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/abufferrenderer.h>

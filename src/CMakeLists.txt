@@ -55,6 +55,9 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/mouseexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/pythonexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/randomexternalcontrol.cpp
+    ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
+    ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
+    # ${OPENSPACE_BASE_DIR}/src/mission/missionphasesequencer.cpp
     ${OPENSPACE_BASE_DIR}/src/network/networkengine.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection.cpp
     ${OPENSPACE_BASE_DIR}/src/network/parallelconnection_lua.inl
@@ -143,6 +146,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/mouseexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/pythonexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/randomexternalcontrol.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/parallelconnection.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/messagestructures.h

@@ -25,113 +25,21 @@
 #include <assert.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/missionmanager.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/engine/openspaceengine.h>
-
+#include <openspace/scripting/scriptengine.h>
 
 
 namespace {
     const std::string _loggerCat = "MissionPhaseSequencer";
+
+    const std::string KEY_PHASE_NAME = "Name";
+    const std::string KEY_PHASE_DESCRIPTION = "Description";
+    const std::string KEY_PHASE_SUBPHASES = "Phases";
+    const std::string KEY_TIME_RANGE = "TimeRange";
 }
-
-
-
-
 
 namespace openspace {
-
-MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
-    const auto byPhaseStartTime = [](const MissionPhase& a, const MissionPhase& b)->bool{
-        return a.timeRange().start < b.timeRange().start;
-    };
-
-    _name = dict.value<std::string>("Name");
-    ghoul::Dictionary childDicts;
-    if (dict.getValue("Phases", childDicts)) {
-        // This is a nested mission phase
-        size_t numSubPhases = childDicts.size();
-        _subphases.resize(numSubPhases);
-        for (size_t i = 0; i < numSubPhases; ++i) {
-            std::string key = std::to_string(i + 1);
-            _subphases[i] = MissionPhase(childDicts.value<ghoul::Dictionary>(key));
-        }
-            
-        std::stable_sort(_subphases.begin(), _subphases.end(), byPhaseStartTime);
-
-        // The subphases will have a total time phases
-        TimeRange timeRangeSubPhases;
-        timeRangeSubPhases.start = _subphases[0].timeRange().start;
-        timeRangeSubPhases.end = _subphases.back().timeRange().end;
-
-        // user may specify an overall time range. In that case expand this timerange.
-        TimeRange overallTimeRange;
-        try {
-            overallTimeRange = parseTimeRange(dict);
-            ghoul_assert(overallTimeRange.includes(timeRangeSubPhases),
-                "User specified time range must at least include its subphases'");
-            _timeRange.include(overallTimeRange);
-        }
-        catch (...) {
-            // Its OK to not specify an overall time range, the time range for the 
-            // subphases will simply be used. 
-            _timeRange.include(timeRangeSubPhases);
-        }
-    }
-    else {
-        _timeRange = parseTimeRange(dict);
-    }
-};
-
-TimeRange MissionPhase::parseTimeRange(const ghoul::Dictionary& dict) {
-    std::string startTimeStr;
-    std::string endTimeStr;
-    bool success = true;
-    success &= dict.getValue("StartTime", startTimeStr);
-    success &= dict.getValue("EndTime", endTimeStr);
-    
-    if (!success) {
-        // Had to do this because ghoul::Dictionary::value<>(std::string key) throws 
-        // uncatchable xtree error on my AMNH windwos machine/ eb)
-        throw "meh";
-    }
-    // Parse to date
-    TimeRange timeRange;
-    timeRange.start = SpiceManager::ref().ephemerisTimeFromDate(startTimeStr);
-    timeRange.end = SpiceManager::ref().ephemerisTimeFromDate(endTimeStr);
-    return timeRange;
-}
-
-
-
-
-
-Mission::Mission(std::string filepath) 
-    : MissionPhase(readDictFromFile(filepath))
-    , _filepath(filepath) 
-{
-    
-}
-
-ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
-    filepath = absPath(filepath);
-    LINFO("Reading mission phases fomr file: " << filepath);
-    if (!FileSys.fileExists(filepath))
-        throw ghoul::FileNotFoundError(filepath, "Mission file path");
-
-    ghoul::Dictionary missionDict;
-    try {
-        ghoul::lua::loadDictionaryFromFile(filepath, missionDict);
-        return missionDict;
-    }
-    catch (ghoul::RuntimeError& e) {
-        LWARNING("Unable to load mission phases");
-        LWARNING(e.message);
-    }
-    return {};
-}
-
-
-
 
 MissionManager* MissionManager::_instance = nullptr;
 
@@ -161,6 +69,14 @@ void MissionManager::setCurrentMission(const std::string missionName) {
     }
 }
 
+/**
+* Returns true if a current mission exists
+*/
+
+bool MissionManager::hasCurrentMission() const {
+    return _currentMissionIter != _missionMap.end();
+}
+
 void MissionManager::loadMission(const std::string& filepath) {
     Mission mission(filepath);
     _missionMap[mission.name()] = mission;
@@ -172,6 +88,7 @@ void MissionManager::loadMission(const std::string& filepath) {
 const Mission& MissionManager::currentMission() {
     if (_currentMissionIter == _missionMap.end()) {
         LWARNING("No current mission has been specified. returning dummy mission");
+        return Mission();
     }
     return _currentMissionIter->second;
 }
@@ -223,5 +140,9 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
         }
     };
 }
+
+// Singleton
+
+inline MissionManager::MissionManager() : _currentMissionIter(_missionMap.end()) {}
 
 }  // namespace openspace

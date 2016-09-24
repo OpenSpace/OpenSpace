@@ -22,10 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/mission/mission.h>
+
 #include <assert.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/missionmanager.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -38,10 +40,6 @@ namespace {
     const std::string KEY_PHASE_SUBPHASES = "Phases";
     const std::string KEY_TIME_RANGE = "TimeRange";
 }
-
-
-
-
 
 namespace openspace {
 
@@ -96,7 +94,35 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
             throw std::runtime_error("Must specify key: " + KEY_TIME_RANGE);
         }
     }
-};
+}
+
+const std::string & MissionPhase::name() const {
+    return _name;
+}
+
+const TimeRange & MissionPhase::timeRange() const {
+    return _timeRange;
+}
+
+const std::string & MissionPhase::description() const {
+    return _description;
+}
+
+/**
+* Returns all subphases sorted by start time
+*/
+
+const std::vector<MissionPhase>& MissionPhase::phases() const {
+    return _subphases;
+}
+
+/**
+* Returns the i:th subphase, sorted by start time
+*/
+
+const MissionPhase& MissionPhase::phase(size_t i) const {
+    return _subphases[i];
+}
 
 std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
     std::list<const MissionPhase*> trace;
@@ -130,7 +156,9 @@ bool MissionPhase::phaseTrace(double time, std::list<const MissionPhase*>& trace
 
 
 
-Mission::Mission(std::string filepath) 
+//inline Mission::Mission() {}
+
+Mission::Mission(std::string filepath)
     : MissionPhase(readDictFromFile(filepath))
     , _filepath(filepath) 
 {
@@ -153,101 +181,6 @@ ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
         LERROR(e.message);
     }
     return {};
-}
-
-
-
-
-MissionManager* MissionManager::_instance = nullptr;
-
-MissionManager& MissionManager::ref() {
-    assert(_instance != nullptr);
-    return *_instance;
-}
-
-void MissionManager::initialize() {
-    assert(_instance == nullptr);
-    _instance = new MissionManager;
-    OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
-}
-
-void MissionManager::deinitialize() {
-    delete _instance;
-    _instance = nullptr;
-}
-
-void MissionManager::setCurrentMission(const std::string missionName) {
-    auto it = _missionMap.find(missionName);
-    if (it == _missionMap.end()) {
-        LWARNING("Mission with name \"" << missionName << "\" has not been loaded!");
-    }
-    else {
-        _currentMissionIter = it;
-    }
-}
-
-void MissionManager::loadMission(const std::string& filepath) {
-    Mission mission(filepath);
-    _missionMap[mission.name()] = mission;
-    if (_missionMap.size() == 1) {
-        setCurrentMission(mission.name());
-    }
-}
-
-const Mission& MissionManager::currentMission() {
-    if (_currentMissionIter == _missionMap.end()) {
-        LWARNING("No current mission has been specified. returning dummy mission");
-        return Mission();
-    }
-    return _currentMissionIter->second;
-}
-
-namespace luascriptfunctions { 
-    int loadMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionFileName = luaL_checkstring(L, -1);
-        if (missionFileName.empty()) {
-            return luaL_error(L, "filepath string is empty");
-        }
-        MissionManager::ref().loadMission(missionFileName);
-    }
-
-    int setCurrentMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionName = luaL_checkstring(L, -1);
-        if (missionName.empty()) {
-            return luaL_error(L, "mission name string is empty");
-        }
-        MissionManager::ref().setCurrentMission(missionName);
-    }
-} // namespace luascriptfunction
-
-scripting::LuaLibrary MissionManager::luaLibrary() {
-    return{
-        "",
-        {
-            {
-                "loadMission",
-                &luascriptfunctions::loadMission,
-                "string",
-                "Load mission phases from file"
-            },
-            {
-                "setCurrentMission",
-                &luascriptfunctions::setCurrentMission,
-                "string",
-                "Set the currnet mission"
-            },
-        }
-    };
 }
 
 }  // namespace openspace

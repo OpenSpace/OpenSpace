@@ -25,77 +25,23 @@
 #ifndef __MISSIONPHASEEQUENCER_H__
 #define __MISSIONPHASEEQUENCER_H__
 
-
 #include <vector>
 #include <list>
 #include <string>
 #include <unordered_map>
 #include <openspace/util/timerange.h>
+#include <openspace/mission/mission.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 
-
 namespace openspace {
-
-
-/**
-* Used to represent a named period of time within a mission. Allows nested phases, i.e.
-* phases within phases. Designed for WORM usage (Write Once, Read Multiple), and therefor
-* has only accessors.
-*/
-class MissionPhase {
-public:
-    MissionPhase() : _name(""), _description("") {};
-    MissionPhase(const ghoul::Dictionary& dict);
-
-    const std::string& name() const { return _name; }
-
-    const TimeRange& timeRange() const { return _timeRange; };
-
-    const std::string& description() const { return _description; };
-
-    /**
-    * Returns all subphases sorted by start time
-    */
-    const std::vector<MissionPhase>& phases() const { return _subphases; }
-
-    /**
-    * Returns the i:th subphase, sorted by start time
-    */
-    const MissionPhase& phase(size_t i) const { return _subphases[i]; }
-
-    std::list<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
-
-protected:
-
-    bool phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const;
-
-
-    std::string _name;
-    std::string _description;
-    TimeRange _timeRange;
-    std::vector<MissionPhase> _subphases;
-};
-
-
-
-class Mission : public MissionPhase {
-public:
-    Mission() {};
-    Mission(std::string filename);
-
-private:
-    static ghoul::Dictionary readDictFromFile(std::string filepath);
-    std::string _filepath;
-};
 
 /**
 * Singleton class keeping track of space missions. 
 */
 class MissionManager {
 public:
-
     static MissionManager& ref();
     
     static void initialize();
@@ -117,7 +63,7 @@ public:
     /**
     * Returns true if a current mission exists
     */
-    bool hasCurrentMission() const { return _currentMissionIter != _missionMap.end(); }
+    bool hasCurrentMission() const;
 
     /**
     * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
@@ -125,10 +71,8 @@ public:
     * loaded, a warning will be printed and a dummy mission will be returned.
     */
     const Mission& currentMission();
-
     
 private:
-
     static scripting::LuaLibrary luaLibrary();
     static MissionManager* _instance;
 
@@ -137,7 +81,7 @@ private:
     MissionMap::iterator _currentMissionIter;
 
     // Singleton
-    MissionManager() : _currentMissionIter(_missionMap.end()) { };
+    MissionManager();
 };
 
 } // namespace openspace
