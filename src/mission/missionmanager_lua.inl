@@ -22,60 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMERANGE_H__
-#define __TIMERANGE_H__
-
-#include <openspace/documentation/documentation.h>
-
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
-struct TimeRange {
+namespace luascriptfunctions { 
+    int loadMission(lua_State* L) {
+        using ghoul::lua::luaTypeToString;
+        int nArguments = lua_gettop(L);
+        if (nArguments != 1)
+            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    /**
-    * Default constructor initializes an empty time range.
-    */
-    TimeRange();
+        std::string missionFileName = luaL_checkstring(L, -1);
+        if (missionFileName.empty()) {
+            return luaL_error(L, "filepath string is empty");
+        }
+        MissionManager::ref().loadMission(missionFileName);
+    }
 
-    /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
-    * is OK.
-    */
-    TimeRange(double startTime, double endTime);
-    
-    /**
-    * Throws exception if unable to parse the provided \class ghoul::Dictionary
-    */
-    TimeRange(const ghoul::Dictionary& dict);
+    int setCurrentMission(lua_State* L) {
+        using ghoul::lua::luaTypeToString;
+        int nArguments = lua_gettop(L);
+        if (nArguments != 1)
+            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    /**
-    * \returns true if timeRange could be initialized from the dictionary, false otherwise.
-    */
-    static bool initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange);
+        std::string missionName = luaL_checkstring(L, -1);
+        if (missionName.empty()) {
+            return luaL_error(L, "mission name string is empty");
+        }
+        MissionManager::ref().setCurrentMission(missionName);
+    }
 
-    void include(double val);
-
-    void include(const TimeRange& other);
-    
-    double duration() const;
-
-    bool isDefined() const;
-
-    bool isEmpty() const;
-
-    bool inRange(double min, double max);
-
-    bool includes(double val) const;
-
-    bool includes(const TimeRange& o) const;
-
-    static openspace::Documentation Documentation();
-
-    double start;
-    double end;
-};
-
+} // namespace luascriptfunction
 } // namespace openspace
-
-#endif //__TIMERANGE_H__

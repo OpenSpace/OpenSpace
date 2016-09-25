@@ -26,13 +26,15 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/mission/mission.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/ephemeris.h>
 #include <openspace/scene/rotation.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scale.h>
+#include <openspace/util/timerange.h>
 
 
 namespace openspace {
@@ -41,12 +43,14 @@ namespace documentation {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(Ephemeris::Documentation());
+    engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
     engine.addDocumentation(Scale::Documentation());
     engine.addDocumentation(Scene::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
+    engine.addDocumentation(TimeRange::Documentation());
 }
 
 } // namespace documentation

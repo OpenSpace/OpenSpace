@@ -24,68 +24,56 @@
 
 #include <openspace/mission/missionmanager.h>
 
-#include <ghoul/misc/assert.h>
-
-#include <assert.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <ghoul/misc/assert.h>
 
-namespace {
-    const std::string _loggerCat = "MissionPhaseSequencer";
-
-    const std::string KEY_PHASE_NAME = "Name";
-    const std::string KEY_PHASE_DESCRIPTION = "Description";
-    const std::string KEY_PHASE_SUBPHASES = "Phases";
-    const std::string KEY_TIME_RANGE = "TimeRange";
-}
+#include "missionmanager_lua.inl"
 
 namespace openspace {
 
-MissionManager* MissionManager::_instance = nullptr;
+MissionManager::MissionManagerException::MissionManagerException(std::string error)
+    : ghoul::RuntimeError(std::move(error), "MissionManager")
+{}
+
+MissionManager MissionManager::_instance;
 
 MissionManager& MissionManager::ref() {
-    ghoul_assert(_instance, "Instance has not been initiated");
-    return *_instance;
+    return _instance;
 }
 
 void MissionManager::initialize() {
-    ghoul_assert(!_instance, "Instance has been initialized before");
-    _instance = new MissionManager;
     OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
 }
 
-void MissionManager::deinitialize() {
-    delete _instance;
-    _instance = nullptr;
-}
+void MissionManager::deinitialize() {}
 
 void MissionManager::setCurrentMission(const std::string& missionName) {
     auto it = _missionMap.find(missionName);
     if (it == _missionMap.end()) {
-        LWARNING("Mission with name \"" << missionName << "\" has not been loaded!");
+        throw MissionManagerException("Mission has not been loaded");
     }
     else {
         _currentMission = it;
     }
 }
 
-/**
-* Returns true if a current mission exists
-*/
-
 bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
 
-void MissionManager::loadMission(const std::string& filepath) {
+void MissionManager::loadMission(const std::string& filename) {
+    ghoul_assert(!filename.empty(), "filename must not be empty");
+    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
+    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
+
     // Changing the values might invalidate the _currentMission iterator
     const std::string& currentMission = _currentMission->first;
 
-    Mission mission(filepath);
-    _missionMap[mission.name()] = std::move(mission);
+    Mission mission = missionFromFile(filename);
+    _missionMap.insert({ mission.name(), std::move(mission) });
     if (_missionMap.size() == 1) {
         setCurrentMission(mission.name());
     }
@@ -93,41 +81,16 @@ void MissionManager::loadMission(const std::string& filepath) {
     setCurrentMission(currentMission);
 }
 
+bool MissionManager::hasMission(const std::string& missionName) {
+    return _missionMap.find(missionName) != _missionMap.end();
+}
+
 const Mission& MissionManager::currentMission() {
     if (_currentMission == _missionMap.end()) {
-        LWARNING("No current mission has been specified. returning dummy mission");
-        return Mission();
+        throw MissionManagerException("No current mission has been specified");
     }
     return _currentMission->second;
 }
-
-namespace luascriptfunctions { 
-    int loadMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionFileName = luaL_checkstring(L, -1);
-        if (missionFileName.empty()) {
-            return luaL_error(L, "filepath string is empty");
-        }
-        MissionManager::ref().loadMission(missionFileName);
-    }
-
-    int setCurrentMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionName = luaL_checkstring(L, -1);
-        if (missionName.empty()) {
-            return luaL_error(L, "mission name string is empty");
-        }
-        MissionManager::ref().setCurrentMission(missionName);
-    }
-} // namespace luascriptfunction
 
 scripting::LuaLibrary MissionManager::luaLibrary() {
     return {

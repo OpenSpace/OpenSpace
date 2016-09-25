@@ -31,33 +31,74 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/documentation/verifier.h>
 
 namespace {
     const std::string _loggerCat = "MissionPhaseSequencer";
 
-    const std::string KEY_PHASE_NAME = "Name";
-    const std::string KEY_PHASE_DESCRIPTION = "Description";
-    const std::string KEY_PHASE_SUBPHASES = "Phases";
-    const std::string KEY_TIME_RANGE = "TimeRange";
+    const std::string KeyName = "Name";
+    const std::string KeyDescription = "Description";
+    const std::string KeyPhases = "Phases";
+    const std::string KeyTimeRange = "TimeRange";
 }
 
 namespace openspace {
+
+
+Documentation MissionPhase::Documentation() {
+    using namespace documentation;
+
+    return {
+        "Missions and Mission Phases",
+        "core_mission_mission",
+        {
+            {
+                KeyName,
+                new StringVerifier,
+                "The human readable name of this mission or mission phase that is "
+                "displayed to the user.",
+                Optional::No
+            },
+            {
+                KeyDescription,
+                new StringVerifier,
+                "A description of this mission or mission phase.",
+                Optional::Yes
+            },
+            {
+                KeyTimeRange,
+                new ReferencingVerifier("core_util_timerange"),
+                "The time range for which this mission or mission phase is valid. If no "
+                "time range is specified, the ranges of sub mission phases are used "
+                "instead.",
+                Optional::Yes
+            },
+            {
+                KeyPhases,
+                new ReferencingVerifier("core_mission_mission"),
+                "The phases into which this mission or mission phase is separated.",
+                Optional::Yes
+            }
+        },
+        Exhaustive::Yes
+    };
+}
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     const auto byPhaseStartTime = [](const MissionPhase& a, const MissionPhase& b)->bool{
         return a.timeRange().start < b.timeRange().start;
     };
 
-    _name = dict.value<std::string>(KEY_PHASE_NAME);
-    if (!dict.getValue(KEY_PHASE_DESCRIPTION, _description)) {
+    _name = dict.value<std::string>(KeyName);
+    if (!dict.getValue(KeyDescription, _description)) {
         // If no description specified, just init to empty string
         _description = "";
     }
     
     ghoul::Dictionary childDicts;
-    if (dict.getValue(KEY_PHASE_SUBPHASES, childDicts)) {
+    if (dict.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
-        _subphases.resize(childDicts.size());
+        _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
             std::string key = std::to_string(i + 1);
             _subphases[i] = MissionPhase(childDicts.value<ghoul::Dictionary>(key));
@@ -73,7 +114,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
 
         // user may specify an overall time range. In that case expand this timerange.
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
             TimeRange overallTimeRange(timeRangeDict);
             ghoul_assert(overallTimeRange.includes(timeRangeSubPhases),
                 "User specified time range must at least include its subphases'");
@@ -87,11 +128,11 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
     else {
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {
-            throw std::runtime_error("Must specify key: " + KEY_TIME_RANGE);
+            throw std::runtime_error("Must specify key: " + KeyTimeRange);
         }
     }
 }
@@ -152,35 +193,17 @@ bool MissionPhase::phaseTrace(double time, std::vector<const MissionPhase*>& tra
     return true;
 }
 
-
-
-
-
-//inline Mission::Mission() {}
-
-Mission::Mission(std::string filepath)
-    : MissionPhase(readDictFromFile(filepath))
-    , _filepath(filepath) 
-{
-    
-}
-
-ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
-    filepath = absPath(filepath);
-    LINFO("Reading mission phases fomr file: " << filepath);
-    if (!FileSys.fileExists(filepath))
-        throw ghoul::FileNotFoundError(filepath, "Mission file path");
+Mission missionFromFile(std::string filename) {
+    ghoul_assert(!filename.empty(), "filename must not be empty");
+    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
+    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
 
     ghoul::Dictionary missionDict;
-    try {
-        ghoul::lua::loadDictionaryFromFile(filepath, missionDict);
-        return missionDict;
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR("Unable to load mission phases");
-        LERROR(e.message);
-    }
-    return {};
+    ghoul::lua::loadDictionaryFromFile(filename, missionDict);
+
+    documentation::testSpecificationAndThrow(Documentation(), missionDict, "Mission");
+
+    return MissionPhase(missionDict);
 }
 
 }  // namespace openspace

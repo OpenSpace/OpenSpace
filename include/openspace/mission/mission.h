@@ -25,9 +25,9 @@
 #ifndef __MISSION_H__
 #define __MISSION_H__
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/timerange.h>
 
-#include <list>
 #include <string>
 #include <vector>
 
@@ -42,7 +42,6 @@ namespace openspace {
 */
 class MissionPhase {
 public:
-    MissionPhase() = default;
     MissionPhase(const ghoul::Dictionary& dict);
 
     const std::string& name() const;
@@ -63,6 +62,8 @@ public:
 
     std::vector<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
 
+    static openspace::Documentation Documentation();
+
 protected:
     bool phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const;
     
@@ -72,16 +73,14 @@ protected:
     std::vector<MissionPhase> _subphases;
 };
 
+using Mission = MissionPhase;
 
-class Mission : public MissionPhase {
-public:
-    Mission() = default;
-    Mission(std::string filename);
-
-private:
-    static ghoul::Dictionary readDictFromFile(std::string filepath);
-    std::string _filepath;
-};
+/**
+* \pre \p filename must not be empty
+* \pre \p filename must not contain tokens
+* \pre \p filename must exist
+*/
+Mission missionFromFile(std::string filename);
 
 } // namespace openspace
 

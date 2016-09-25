@@ -27,6 +27,8 @@
 
 #include <openspace/mission/mission.h>
 
+#include <ghoul/misc/exception.h>
+
 #include <map>
 #include <string>
 
@@ -39,6 +41,10 @@ namespace scripting { struct LuaLibrary; }
 */
 class MissionManager {
 public:
+    struct MissionManagerException : public ghoul::RuntimeError {
+        explicit MissionManagerException(std::string error);
+    };
+
     static MissionManager& ref();
     
     static void initialize();
@@ -48,8 +54,19 @@ public:
     * Reads a mission from file and maps the mission name to the Mission object. If
     * this is the first mission to be loaded, the mission will also be set as the 
     * current active mission.
+    * \pre \p filename must not be empty
+    * \pre \p filename must not contain tokens
+    * \pre \p filename must exist
     */
-    void loadMission(const std::string& fileName);
+    void loadMission(const std::string& filename);
+
+    /**
+     * Returns whether the provided \p missionName has previously been added to the
+     * MissionManager.
+     * \param missionName The name of the mission that is to be tested
+     * \return \c true if the \p missionName has been added before
+     */
+    bool hasMission(const std::string& missionName);
 
     /**
     * Sets the mission with the name <missionName> as the current mission. The current
@@ -71,9 +88,8 @@ public:
     
 private:
     static scripting::LuaLibrary luaLibrary();
-    static MissionManager* _instance;
+    static MissionManager _instance;
 
-    //typedef std::map<std::string, Mission> MissionMap;
     using MissionMap = std::map<std::string, Mission>;
     MissionMap _missionMap;
 
@@ -85,6 +101,4 @@ private:
 
 } // namespace openspace
 
-
 #endif // __MISSIONPHASEEQUENCER_H__
-
