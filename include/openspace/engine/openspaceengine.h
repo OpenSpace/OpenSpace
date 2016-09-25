@@ -28,17 +28,14 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/scriptscheduler.h>
-
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace ghoul {
+class Dictionary;
 namespace cmdparser { class CommandlineParser; }
 namespace fontrendering { class FontManager; }
 }
@@ -61,6 +58,9 @@ namespace gui { class GUI; }
 //namespace scripting { class ScriptEngine; }
 namespace network { class ParallelConnection; }
 namespace properties { class PropertyOwner; }
+namespace scripting { struct LuaLibrary; }
+namespace scripting { class ScriptScheduler; }
+namespace scripting { class ScriptEngine; }
  
 class OpenSpaceEngine {
 public:
@@ -132,7 +132,7 @@ private:
     ~OpenSpaceEngine();
 
     void clearAllWindows();
-    bool gatherCommandlineArguments();
+    void gatherCommandlineArguments();
     void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
     void runPreInitializationScripts(const std::string& sceneDescription);
@@ -171,6 +171,10 @@ private:
     float _shutdownWait;
     // The current state of the countdown; if it reaches '0', the application will close
     float _shutdownCountdown;
+
+    // The first frame might take some more time in the update loop, so we need to know to
+    // disable the synchronization; otherwise a hardware sync will kill us after 1 sec
+    bool _isFirstRenderingFirstFrame;
 
     static OpenSpaceEngine* _engine;
 };

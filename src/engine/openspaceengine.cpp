@@ -53,7 +53,6 @@
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
 
-
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
@@ -65,8 +64,9 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/systemcapabilities/systemcapabilities>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/systemcapabilities/systemcapabilities>
 
 #include <fstream>
 #include <queue>
@@ -151,6 +151,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _isInShutdownMode(false)
     , _shutdownCountdown(0.f)
     , _shutdownWait(0.f)
+    , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
@@ -242,9 +243,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
 
     // Query modules for commandline arguments
-    bool gatherSuccess = _engine->gatherCommandlineArguments();
-    if (!gatherSuccess)
-        return false;
+    _engine->gatherCommandlineArguments();
 
     // Parse commandline arguments
     std::vector<std::string> args(argv, argv + argc);
@@ -419,6 +418,7 @@ bool OpenSpaceEngine::initialize() {
     _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
     _scriptEngine->addLibrary(ModuleEngine::luaLibrary());
     _scriptEngine->addLibrary(ScriptScheduler::luaLibrary());
+    _scriptEngine->addLibrary(WindowWrapper::luaLibrary());
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _scriptEngine->addLibrary(IswaManager::luaLibrary());
@@ -586,9 +586,7 @@ void OpenSpaceEngine::clearAllWindows() {
     _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 }
 
-bool OpenSpaceEngine::gatherCommandlineArguments() {
-    // TODO: Get commandline arguments from all modules
-    
+void OpenSpaceEngine::gatherCommandlineArguments() {
     commandlineArgumentPlaceholders.configurationName = "";
     _commandlineParser->addCommand(std::make_unique<SingleCommand<std::string>>(
         &commandlineArgumentPlaceholders.configurationName, "-config", "-c",
@@ -614,9 +612,6 @@ bool OpenSpaceEngine::gatherCommandlineArguments() {
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
-    
-
-    return true;
 }
 
 void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
@@ -690,9 +685,9 @@ void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescr
     LINFO("Running Setup scripts");
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
-           // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
-           );
+        // Delete the Lua state at the end of the scope, no matter what
+        [state](){ghoul::lua::destroyLuaState(state);}
+    );
     OsEng.scriptEngine().initializeLuaState(state);
     
     // First execute the script to get all global variables
@@ -712,7 +707,8 @@ void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescr
     int success = lua_pcall(state, 0, 0, 0);
     if (success != 0) {
         LERROR("Error executing '" << PostInitializationFunction << "': " <<
-               lua_tostring(state, -1));
+               lua_tostring(state, -1)
+        );
     }
 }
 
@@ -837,6 +833,10 @@ void OpenSpaceEngine::setRunTime(double d){
     
 void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
+
+    if (_isFirstRenderingFirstFrame) {
+        _windowWrapper->setSynchronization(false);
+    }
     
     _syncEngine->presync(_isMaster);
     if (_isMaster) {
@@ -949,8 +949,15 @@ void OpenSpaceEngine::postDraw() {
 #endif
     }
 
-    if (_isInShutdownMode)
+    if (_isInShutdownMode) {
         _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);
+    }
+
+    if (_isFirstRenderingFirstFrame) {
+        _windowWrapper->setSynchronization(true);
+        _isFirstRenderingFirstFrame = false;
+    }
+
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {

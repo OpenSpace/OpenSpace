@@ -26,8 +26,8 @@
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
-#include <modules/newhorizons/util/missionmanager.h>
 #endif
+#include <openspace/mission/missionmanager.h>
 
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/abufferrenderer.h>
@@ -714,7 +714,7 @@ void RenderEngine::setNAaSamples(int nAaSamples) {
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
-    return{
+    return {
         "",
         {
             {
@@ -1364,7 +1364,7 @@ void RenderEngine::renderInformation() {
                     // Add spacing
                     RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
-                    std::list<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+                    std::vector<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
 
                     if (phaseTrace.size()) {
                         std::string title = "Current Mission Phase: " + phaseTrace.back()->name();

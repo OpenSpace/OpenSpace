@@ -147,10 +147,19 @@ std::string generateHtmlDocumentation(const Documentation& d) {
                 [rv](const Documentation& doc) { return doc.id == rv->identifier; }
             );
 
-            html << "\t\t<td>"
-                 << "\t\t\tReferencing: "
-                 << "<a href=\"#" << rv->identifier << "\">" << it->name << "</a>"
-                 << "\t\t</td>";
+            if (it == documentations.end()) {
+                html << "\t\t<td>"
+                     << "<font color=\"red\">"
+                     << "Could not find identifier: " << rv->identifier
+                     << "</font>"
+                     << "</td>";
+            }
+            else {
+                html << "\t\t<td>"
+                     << "\t\t\tReferencing: "
+                     << "<a href=\"#" << rv->identifier << "\">" << it->name << "</a>"
+                     << "\t\t</td>";
+            }
         }
         else if (tv) {
             // We have a TableVerifier, so we need to recurse

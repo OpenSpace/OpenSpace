@@ -22,44 +22,83 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/mission/mission.h>
+
 #include <assert.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/missionmanager.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/scriptengine.h>
 
-
+#include <openspace/documentation/verifier.h>
 
 namespace {
     const std::string _loggerCat = "MissionPhaseSequencer";
 
-    const std::string KEY_PHASE_NAME = "Name";
-    const std::string KEY_PHASE_DESCRIPTION = "Description";
-    const std::string KEY_PHASE_SUBPHASES = "Phases";
-    const std::string KEY_TIME_RANGE = "TimeRange";
+    const std::string KeyName = "Name";
+    const std::string KeyDescription = "Description";
+    const std::string KeyPhases = "Phases";
+    const std::string KeyTimeRange = "TimeRange";
 }
 
-
-
-
-
 namespace openspace {
+
+
+Documentation MissionPhase::Documentation() {
+    using namespace documentation;
+
+    return {
+        "Missions and Mission Phases",
+        "core_mission_mission",
+        {
+            {
+                KeyName,
+                new StringVerifier,
+                "The human readable name of this mission or mission phase that is "
+                "displayed to the user.",
+                Optional::No
+            },
+            {
+                KeyDescription,
+                new StringVerifier,
+                "A description of this mission or mission phase.",
+                Optional::Yes
+            },
+            {
+                KeyTimeRange,
+                new ReferencingVerifier("core_util_timerange"),
+                "The time range for which this mission or mission phase is valid. If no "
+                "time range is specified, the ranges of sub mission phases are used "
+                "instead.",
+                Optional::Yes
+            },
+            {
+                KeyPhases,
+                new ReferencingVerifier("core_mission_mission"),
+                "The phases into which this mission or mission phase is separated.",
+                Optional::Yes
+            }
+        },
+        Exhaustive::Yes
+    };
+}
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     const auto byPhaseStartTime = [](const MissionPhase& a, const MissionPhase& b)->bool{
         return a.timeRange().start < b.timeRange().start;
     };
 
-    _name = dict.value<std::string>(KEY_PHASE_NAME);
-    if (!dict.getValue(KEY_PHASE_DESCRIPTION, _description)) {
+    _name = dict.value<std::string>(KeyName);
+    if (!dict.getValue(KeyDescription, _description)) {
         // If no description specified, just init to empty string
         _description = "";
     }
     
     ghoul::Dictionary childDicts;
-    if (dict.getValue(KEY_PHASE_SUBPHASES, childDicts)) {
+    if (dict.getValue(KeyPhases, childDicts)) {
         // This is a nested mission phase
-        _subphases.resize(childDicts.size());
+        _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
             std::string key = std::to_string(i + 1);
             _subphases[i] = MissionPhase(childDicts.value<ghoul::Dictionary>(key));
@@ -75,7 +114,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
 
         // user may specify an overall time range. In that case expand this timerange.
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
             TimeRange overallTimeRange(timeRangeDict);
             ghoul_assert(overallTimeRange.includes(timeRangeSubPhases),
                 "User specified time range must at least include its subphases'");
@@ -89,17 +128,45 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
     else {
         ghoul::Dictionary timeRangeDict;
-        if (dict.getValue(KEY_TIME_RANGE, timeRangeDict)) {
+        if (dict.getValue(KeyTimeRange, timeRangeDict)) {
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {
-            throw std::runtime_error("Must specify key: " + KEY_TIME_RANGE);
+            throw std::runtime_error("Must specify key: " + KeyTimeRange);
         }
     }
-};
+}
 
-std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
-    std::list<const MissionPhase*> trace;
+const std::string & MissionPhase::name() const {
+    return _name;
+}
+
+const TimeRange & MissionPhase::timeRange() const {
+    return _timeRange;
+}
+
+const std::string & MissionPhase::description() const {
+    return _description;
+}
+
+/**
+* Returns all subphases sorted by start time
+*/
+
+const std::vector<MissionPhase>& MissionPhase::phases() const {
+    return _subphases;
+}
+
+/**
+* Returns the i:th subphase, sorted by start time
+*/
+
+const MissionPhase& MissionPhase::phase(size_t i) const {
+    return _subphases[i];
+}
+
+std::vector<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
+    std::vector<const MissionPhase*> trace;
     if (_timeRange.includes(time)) {
         trace.push_back(this);
         phaseTrace(time, trace, maxDepth);
@@ -107,7 +174,7 @@ std::list<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDept
     return std::move(trace);
 }
 
-bool MissionPhase::phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const {
+bool MissionPhase::phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const {
     if (maxDepth == 0) {
         return false;
     }
@@ -126,128 +193,17 @@ bool MissionPhase::phaseTrace(double time, std::list<const MissionPhase*>& trace
     return true;
 }
 
-
-
-
-
-Mission::Mission(std::string filepath) 
-    : MissionPhase(readDictFromFile(filepath))
-    , _filepath(filepath) 
-{
-    
-}
-
-ghoul::Dictionary Mission::readDictFromFile(std::string filepath) {
-    filepath = absPath(filepath);
-    LINFO("Reading mission phases fomr file: " << filepath);
-    if (!FileSys.fileExists(filepath))
-        throw ghoul::FileNotFoundError(filepath, "Mission file path");
+Mission missionFromFile(std::string filename) {
+    ghoul_assert(!filename.empty(), "filename must not be empty");
+    ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
+    ghoul_assert(FileSys.fileExists(filename), "filename must exist");
 
     ghoul::Dictionary missionDict;
-    try {
-        ghoul::lua::loadDictionaryFromFile(filepath, missionDict);
-        return missionDict;
-    }
-    catch (ghoul::RuntimeError& e) {
-        LERROR("Unable to load mission phases");
-        LERROR(e.message);
-    }
-    return {};
-}
+    ghoul::lua::loadDictionaryFromFile(filename, missionDict);
 
+    documentation::testSpecificationAndThrow(Documentation(), missionDict, "Mission");
 
-
-
-MissionManager* MissionManager::_instance = nullptr;
-
-MissionManager& MissionManager::ref() {
-    assert(_instance != nullptr);
-    return *_instance;
-}
-
-void MissionManager::initialize() {
-    assert(_instance == nullptr);
-    _instance = new MissionManager;
-    OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
-}
-
-void MissionManager::deinitialize() {
-    delete _instance;
-    _instance = nullptr;
-}
-
-void MissionManager::setCurrentMission(const std::string missionName) {
-    auto it = _missionMap.find(missionName);
-    if (it == _missionMap.end()) {
-        LWARNING("Mission with name \"" << missionName << "\" has not been loaded!");
-    }
-    else {
-        _currentMissionIter = it;
-    }
-}
-
-void MissionManager::loadMission(const std::string& filepath) {
-    Mission mission(filepath);
-    _missionMap[mission.name()] = mission;
-    if (_missionMap.size() == 1) {
-        setCurrentMission(mission.name());
-    }
-}
-
-const Mission& MissionManager::currentMission() {
-    if (_currentMissionIter == _missionMap.end()) {
-        LWARNING("No current mission has been specified. returning dummy mission");
-        return Mission();
-    }
-    return _currentMissionIter->second;
-}
-
-namespace luascriptfunctions { 
-    int loadMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionFileName = luaL_checkstring(L, -1);
-        if (missionFileName.empty()) {
-            return luaL_error(L, "filepath string is empty");
-        }
-        MissionManager::ref().loadMission(missionFileName);
-    }
-
-    int setCurrentMission(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionName = luaL_checkstring(L, -1);
-        if (missionName.empty()) {
-            return luaL_error(L, "mission name string is empty");
-        }
-        MissionManager::ref().setCurrentMission(missionName);
-    }
-} // namespace luascriptfunction
-
-scripting::LuaLibrary MissionManager::luaLibrary() {
-    return{
-        "",
-        {
-            {
-                "loadMission",
-                &luascriptfunctions::loadMission,
-                "string",
-                "Load mission phases from file"
-            },
-            {
-                "setCurrentMission",
-                &luascriptfunctions::setCurrentMission,
-                "string",
-                "Set the currnet mission"
-            },
-        }
-    };
+    return MissionPhase(missionDict);
 }
 
 }  // namespace openspace

@@ -22,22 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MISSIONPHASEEQUENCER_H__
-#define __MISSIONPHASEEQUENCER_H__
+#ifndef __MISSION_H__
+#define __MISSION_H__
 
-
-#include <vector>
-#include <list>
-#include <string>
-#include <unordered_map>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/timerange.h>
 
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <string>
+#include <vector>
 
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
-
 
 /**
 * Used to represent a named period of time within a mission. Allows nested phases, i.e.
@@ -46,102 +42,47 @@ namespace openspace {
 */
 class MissionPhase {
 public:
-    MissionPhase() : _name(""), _description("") {};
     MissionPhase(const ghoul::Dictionary& dict);
 
-    const std::string& name() const { return _name; }
+    const std::string& name() const;
 
-    const TimeRange& timeRange() const { return _timeRange; };
+    const TimeRange& timeRange() const;
 
-    const std::string& description() const { return _description; };
+    const std::string& description() const;
 
     /**
     * Returns all subphases sorted by start time
     */
-    const std::vector<MissionPhase>& phases() const { return _subphases; }
+    const std::vector<MissionPhase>& phases() const;
 
     /**
     * Returns the i:th subphase, sorted by start time
     */
-    const MissionPhase& phase(size_t i) const { return _subphases[i]; }
+    const MissionPhase& phase(size_t i) const;
 
-    std::list<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
+    std::vector<const MissionPhase*> phaseTrace(double time, int maxDepth = -1) const;
+
+    static openspace::Documentation Documentation();
 
 protected:
-
-    bool phaseTrace(double time, std::list<const MissionPhase*>& trace, int maxDepth) const;
-
-
+    bool phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const;
+    
     std::string _name;
     std::string _description;
     TimeRange _timeRange;
     std::vector<MissionPhase> _subphases;
 };
 
-
-
-class Mission : public MissionPhase {
-public:
-    Mission() {};
-    Mission(std::string filename);
-
-private:
-    static ghoul::Dictionary readDictFromFile(std::string filepath);
-    std::string _filepath;
-};
+using Mission = MissionPhase;
 
 /**
-* Singleton class keeping track of space missions. 
+* \pre \p filename must not be empty
+* \pre \p filename must not contain tokens
+* \pre \p filename must exist
 */
-class MissionManager {
-public:
-
-    static MissionManager& ref();
-    
-    static void initialize();
-    static void deinitialize();
-
-    /**
-    * Reads a mission from file and maps the mission name to the Mission object. If
-    * this is the first mission to be loaded, the mission will also be set as the 
-    * current active mission.
-    */
-    void loadMission(const std::string& fileName);
-
-    /**
-    * Sets the mission with the name <missionName> as the current mission. The current
-    * mission is what is return by `currentMission()`.
-    */
-    void setCurrentMission(const std::string missionName);
-
-    /**
-    * Returns true if a current mission exists
-    */
-    bool hasCurrentMission() const { return _currentMissionIter != _missionMap.end(); }
-
-    /**
-    * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
-    * been specified, the first mission loaded will be returned. If no mission has been 
-    * loaded, a warning will be printed and a dummy mission will be returned.
-    */
-    const Mission& currentMission();
-
-    
-private:
-
-    static scripting::LuaLibrary luaLibrary();
-    static MissionManager* _instance;
-
-    typedef std::unordered_map<std::string, Mission> MissionMap;
-    MissionMap _missionMap;
-    MissionMap::iterator _currentMissionIter;
-
-    // Singleton
-    MissionManager() : _currentMissionIter(_missionMap.end()) { };
-};
+Mission missionFromFile(std::string filename);
 
 } // namespace openspace
 
 
-#endif // __MISSIONPHASEEQUENCER_H__
-
+#endif // __MISSION_H__

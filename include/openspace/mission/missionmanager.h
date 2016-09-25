@@ -22,60 +22,83 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMERANGE_H__
-#define __TIMERANGE_H__
+#ifndef __MISSIONPHASEEQUENCER_H__
+#define __MISSIONPHASEEQUENCER_H__
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/mission/mission.h>
 
-namespace ghoul { class Dictionary; }
+#include <ghoul/misc/exception.h>
+
+#include <map>
+#include <string>
 
 namespace openspace {
 
-struct TimeRange {
+namespace scripting { struct LuaLibrary; }
 
-    /**
-    * Default constructor initializes an empty time range.
-    */
-    TimeRange();
+/**
+* Singleton class keeping track of space missions. 
+*/
+class MissionManager {
+public:
+    struct MissionManagerException : public ghoul::RuntimeError {
+        explicit MissionManagerException(std::string error);
+    };
 
-    /**
-    * Initializes a TimeRange with both start and end time. Initializing empty timeranges 
-    * is OK.
-    */
-    TimeRange(double startTime, double endTime);
+    static MissionManager& ref();
     
-    /**
-    * Throws exception if unable to parse the provided \class ghoul::Dictionary
-    */
-    TimeRange(const ghoul::Dictionary& dict);
+    static void initialize();
+    static void deinitialize();
 
     /**
-    * \returns true if timeRange could be initialized from the dictionary, false otherwise.
+    * Reads a mission from file and maps the mission name to the Mission object. If
+    * this is the first mission to be loaded, the mission will also be set as the 
+    * current active mission.
+    * \pre \p filename must not be empty
+    * \pre \p filename must not contain tokens
+    * \pre \p filename must exist
     */
-    static bool initializeFromDictionary(const ghoul::Dictionary& dict, TimeRange& timeRange);
+    void loadMission(const std::string& filename);
 
-    void include(double val);
+    /**
+     * Returns whether the provided \p missionName has previously been added to the
+     * MissionManager.
+     * \param missionName The name of the mission that is to be tested
+     * \return \c true if the \p missionName has been added before
+     */
+    bool hasMission(const std::string& missionName);
 
-    void include(const TimeRange& other);
+    /**
+    * Sets the mission with the name <missionName> as the current mission. The current
+    * mission is what is return by `currentMission()`.
+    */
+    void setCurrentMission(const std::string& missionName);
+
+    /**
+    * Returns true if a current mission exists
+    */
+    bool hasCurrentMission() const;
+
+    /**
+    * Returns the latest mission specified to `setCurrentMission()`. If no mission has 
+    * been specified, the first mission loaded will be returned. If no mission has been 
+    * loaded, a warning will be printed and a dummy mission will be returned.
+    */
+    const Mission& currentMission();
     
-    double duration() const;
+private:
+    static scripting::LuaLibrary luaLibrary();
+    static MissionManager _instance;
 
-    bool isDefined() const;
+    using MissionMap = std::map<std::string, Mission>;
+    MissionMap _missionMap;
 
-    bool isEmpty() const;
+    MissionMap::iterator _currentMission;
 
-    bool inRange(double min, double max);
-
-    bool includes(double val) const;
-
-    bool includes(const TimeRange& o) const;
-
-    static openspace::Documentation Documentation();
-
-    double start;
-    double end;
+    // Singleton
+    MissionManager();
 };
 
 } // namespace openspace
 
-#endif //__TIMERANGE_H__
+#endif // __MISSIONPHASEEQUENCER_H__
