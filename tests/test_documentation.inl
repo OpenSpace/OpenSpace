@@ -2312,7 +2312,7 @@ TEST_F(DocumentationTest, DeprecatedVerifier) {
     using namespace openspace::documentation;
     using namespace std::string_literals;
 
-    Documentation doc{ {
+    Documentation doc { {
         { "bool", new BoolDeprecatedVerifier },
         { "int" , new IntDeprecatedVerifier },
         { "double", new DoubleDeprecatedVerifier },
@@ -2349,29 +2349,29 @@ TEST_F(DocumentationTest, DeprecatedVerifier) {
     ASSERT_EQ(13, positiveRes.warnings.size());
     EXPECT_EQ("bool", positiveRes.warnings[0].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[0].reason);
-    EXPECT_EQ("int", positiveRes.warnings[1].offender);
+    EXPECT_EQ("boolvec2", positiveRes.warnings[1].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[1].reason);
-    EXPECT_EQ("double", positiveRes.warnings[2].offender);
+    EXPECT_EQ("boolvec3", positiveRes.warnings[2].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[2].reason);
-    EXPECT_EQ("string", positiveRes.warnings[3].offender);
+    EXPECT_EQ("boolvec4", positiveRes.warnings[3].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[3].reason);
-    EXPECT_EQ("boolvec2", positiveRes.warnings[4].offender);
+    EXPECT_EQ("double", positiveRes.warnings[4].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[4].reason);
-    EXPECT_EQ("intvec2", positiveRes.warnings[5].offender);
+    EXPECT_EQ("doublevec2", positiveRes.warnings[5].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[5].reason);
-    EXPECT_EQ("doublevec2", positiveRes.warnings[6].offender);
+    EXPECT_EQ("doublevec3", positiveRes.warnings[6].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[6].reason);
-    EXPECT_EQ("boolvec3", positiveRes.warnings[7].offender);
+    EXPECT_EQ("doublevec4", positiveRes.warnings[7].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[7].reason);
-    EXPECT_EQ("intvec3", positiveRes.warnings[8].offender);
+    EXPECT_EQ("int", positiveRes.warnings[8].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[8].reason);
-    EXPECT_EQ("doublevec3", positiveRes.warnings[9].offender);
+    EXPECT_EQ("intvec2", positiveRes.warnings[9].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[9].reason);
-    EXPECT_EQ("boolvec4", positiveRes.warnings[10].offender);
+    EXPECT_EQ("intvec3", positiveRes.warnings[10].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[10].reason);
     EXPECT_EQ("intvec4", positiveRes.warnings[11].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[11].reason);
-    EXPECT_EQ("doublevec4", positiveRes.warnings[12].offender);
+    EXPECT_EQ("string", positiveRes.warnings[12].offender);
     EXPECT_EQ(TestResult::Warning::Reason::Deprecated, positiveRes.warnings[12].reason);
 }
 

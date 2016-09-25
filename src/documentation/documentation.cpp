@@ -206,6 +206,21 @@ TestResult testSpecification(const Documentation& d, const ghoul::Dictionary& di
         uniqueWarnings.begin(), uniqueWarnings.end()
     );
 
+    std::sort(
+        result.offenses.begin(),
+        result.offenses.end(),
+        [](const TestResult::Offense& lhs, const TestResult::Offense& rhs) {
+            return OffenseCompare()(lhs, rhs);
+        }
+    );
+    std::sort(
+        result.warnings.begin(),
+        result.warnings.end(),
+        [](const TestResult::Warning& lhs, const TestResult::Warning& rhs) {
+            return WarningCompare()(lhs, rhs);
+        }
+    );
+
     return result;
 }
 
