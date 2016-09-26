@@ -26,13 +26,13 @@
 #define __CORE_REGISTRATION_H__
 
 namespace openspace {
-namespace documentation {
 
-class DocumentationEngine;
+namespace documentation { class DocumentationEngine; }
+namespace scripting { class ScriptEngine; }
 
 void registerCoreClasses(documentation::DocumentationEngine& engine);
+void registerCoreClasses(scripting::ScriptEngine& engine);
 
-} // namespace documentation
 } // namespace openspace
 
 #endif // __CORE_REGISTRATION_H__

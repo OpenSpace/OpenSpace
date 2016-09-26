@@ -38,17 +38,10 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
     : ghoul::RuntimeError(std::move(error), "MissionManager")
 {}
 
-MissionManager MissionManager::_instance;
 
-MissionManager& MissionManager::ref() {
-    return _instance;
-}
-
-void MissionManager::initialize() {
-    OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
-}
-
-void MissionManager::deinitialize() {}
+MissionManager::MissionManager()
+    : _currentMission(_missionMap.end())
+{}
 
 void MissionManager::setCurrentMission(const std::string& missionName) {
     ghoul_assert(!missionName.empty(), "missionName must not be empty");
@@ -118,8 +111,5 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 
 // Singleton
 
-MissionManager::MissionManager()
-     : _currentMission(_missionMap.end())
-{}
 
 }  // namespace openspace

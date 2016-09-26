@@ -151,9 +151,7 @@ bool RenderEngine::deinitialize() {
         screenspacerenderable->deinitialize();
     }
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
     MissionManager::deinitialize();
-#endif
 
     _sceneGraph->clearSceneGraph();
     return true;
@@ -224,10 +222,7 @@ bool RenderEngine::initialize() {
   
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
-#ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
     MissionManager::initialize();
-#endif
-
 
     return true;
 }

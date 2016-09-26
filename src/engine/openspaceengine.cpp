@@ -39,6 +39,7 @@
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/interaction/mousecontroller.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
@@ -312,7 +313,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // Register modules
     _engine->_moduleEngine->initialize();
 
-    documentation::registerCoreClasses(DocEng);
+    registerCoreClasses(DocEng);
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
@@ -407,18 +408,7 @@ bool OpenSpaceEngine::initialize() {
 
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
-    _scriptEngine->addLibrary(OpenSpaceEngine::luaLibrary());
-    _scriptEngine->addLibrary(SpiceManager::luaLibrary());
-    _scriptEngine->addLibrary(RenderEngine::luaLibrary());
-    _scriptEngine->addLibrary(Scene::luaLibrary());
-    _scriptEngine->addLibrary(Time::luaLibrary());
-    _scriptEngine->addLibrary(interaction::InteractionHandler::luaLibrary());
-    _scriptEngine->addLibrary(LuaConsole::luaLibrary());
-    _scriptEngine->addLibrary(gui::GUI::luaLibrary());
-    _scriptEngine->addLibrary(network::ParallelConnection::luaLibrary());
-    _scriptEngine->addLibrary(ModuleEngine::luaLibrary());
-    _scriptEngine->addLibrary(ScriptScheduler::luaLibrary());
-    _scriptEngine->addLibrary(WindowWrapper::luaLibrary());
+    registerCoreClasses(*_scriptEngine);
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     _scriptEngine->addLibrary(IswaManager::luaLibrary());
