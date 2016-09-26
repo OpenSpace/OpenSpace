@@ -301,6 +301,7 @@ function (handle_option_tests)
             add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
             # add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
             set_property(TARGET gtest PROPERTY FOLDER "External")
+            set_property(TARGET gtest_main PROPERTY FOLDER "External")
         endif ()
 
         file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
