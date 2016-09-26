@@ -4,12 +4,14 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH BARYCENTER",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
+        Transform = {
+            Translation = {
+                Type = "Spice",
+                Body = "EARTH BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
     -- Earth module
     {   

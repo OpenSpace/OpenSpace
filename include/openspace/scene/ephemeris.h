@@ -34,11 +34,11 @@
 
 namespace openspace {
 
-class Ephemeris : public properties::PropertyOwner {
+class Translation : public properties::PropertyOwner {
 public:
-    static Ephemeris* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static Translation* createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    virtual ~Ephemeris();
+    virtual ~Translation();
     virtual bool initialize();
     virtual glm::dvec3 position() const = 0;
     virtual void update(const UpdateData& data);

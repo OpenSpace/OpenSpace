@@ -24,7 +24,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"

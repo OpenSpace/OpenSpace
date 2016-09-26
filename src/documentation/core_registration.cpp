@@ -42,7 +42,7 @@ namespace documentation {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ConfigurationManager::Documentation());
-    engine.addDocumentation(Ephemeris::Documentation());
+    engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());

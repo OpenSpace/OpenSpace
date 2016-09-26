@@ -32,9 +32,9 @@
 
 namespace openspace {
     
-class SpiceEphemeris : public Ephemeris {
+class SpiceTranslation : public Translation {
 public:
-    SpiceEphemeris(const ghoul::Dictionary& dictionary);
+    SpiceTranslation(const ghoul::Dictionary& dictionary);
     glm::dvec3 position() const;
     void update(const UpdateData& data) override;
 

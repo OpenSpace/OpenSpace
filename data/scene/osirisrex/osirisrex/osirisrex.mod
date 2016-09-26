@@ -27,7 +27,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "OSIRIS-REX",
                 Observer = "SUN",
             },
@@ -61,7 +61,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {-0.2476, 0.2710, 0.3364},
             },
             Rotation = {
@@ -94,7 +94,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {0, 0.3371, 0.2712},
             },
             Rotation = {

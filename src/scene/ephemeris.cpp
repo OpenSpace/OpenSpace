@@ -29,13 +29,13 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "Ephemeris";
+    const std::string _loggerCat = "Translation";
     const std::string KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Ephemeris::Documentation() {
+Documentation Translation::Documentation() {
     using namespace openspace::documentation;
 
     return{
@@ -56,31 +56,31 @@ Documentation Ephemeris::Documentation() {
     };
 }
 
-Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) {
+Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Ephemeris did not have key '" << KeyType << "'");
+        LERROR("Translation did not have key '" << KeyType << "'");
         return nullptr;
     }
 
-    std::string ephemerisType;
-    dictionary.getValue(KeyType, ephemerisType);
-    ghoul::TemplateFactory<Ephemeris>* factory
-          = FactoryManager::ref().factory<Ephemeris>();
-    Ephemeris* result = factory->create(ephemerisType, dictionary);
+    std::string translationType;
+    dictionary.getValue(KeyType, translationType);
+    ghoul::TemplateFactory<Translation>* factory
+          = FactoryManager::ref().factory<Translation>();
+    Translation* result = factory->create(translationType, dictionary);
     if (result == nullptr) {
-        LERROR("Failed creating Ephemeris object of type '" << ephemerisType << "'");
+        LERROR("Failed creating Translation object of type '" << translationType << "'");
         return nullptr;
     }
 
     return result;
 }
 
-Ephemeris::~Ephemeris() {}
+Translation::~Translation() {}
     
-bool Ephemeris::initialize() {
+bool Translation::initialize() {
     return true;
 }
     
-void Ephemeris::update(const UpdateData& data) {}
+void Translation::update(const UpdateData& data) {}
 
 } // namespace openspace

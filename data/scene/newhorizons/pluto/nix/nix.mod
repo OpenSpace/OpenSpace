@@ -29,7 +29,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "NIX",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels

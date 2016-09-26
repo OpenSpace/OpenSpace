@@ -108,11 +108,11 @@ void BaseModule::internalInitialize() {
     fRenderable->registerClass<RenderableTrail>("RenderableTrail");
     fRenderable->registerClass<RenderableTrailNew>("RenderableTrailNew");
 
-    auto fEphemeris = FactoryManager::ref().factory<Ephemeris>();
-    ghoul_assert(fEphemeris, "Ephemeris factory was not created");
+    auto fTranslation = FactoryManager::ref().factory<Translation>();
+    ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
-    fEphemeris->registerClass<StaticEphemeris>("StaticEphemeris");
-    fEphemeris->registerClass<SpiceEphemeris>("SpiceEphemeris");
+    fTranslation->registerClass<StaticTranslation>("StaticTranslation");
+    fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
@@ -137,8 +137,8 @@ void BaseModule::internalInitialize() {
 std::vector<Documentation> BaseModule::documentations() const {
     return {
         StaticScale::Documentation(),
-        StaticEphemeris::Documentation(),
-        SpiceEphemeris::Documentation()
+        StaticTranslation::Documentation(),
+        SpiceTranslation::Documentation()
     };
 }
 

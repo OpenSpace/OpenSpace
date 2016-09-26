@@ -163,8 +163,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         "Renderable"
     );
     FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<Ephemeris>>(),
-        "Ephemeris"
+        std::make_unique<ghoul::TemplateFactory<Translation>>(),
+        "Translation"
     );
     SpiceManager::initialize();
     Time::initialize();

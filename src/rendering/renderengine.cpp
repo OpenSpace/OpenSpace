@@ -814,391 +814,391 @@ performance::PerformanceManager* RenderEngine::performanceManager() {
 
 // This method is temporary and will be removed once the scalegraph is in effect ---abock
 void RenderEngine::changeViewPoint(std::string origin) {
-    SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");
-    SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
-    SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
-    SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
-    SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
-//    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
-//    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-
-    RenderablePath* nhPath;
-
-    SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
-
-    //SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
-    //SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
-    //SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
-
-  //  if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
-        //jupiterBarycenterNode == nullptr) {
-     //   LERROR("Necessary nodes does not exist");
-        //return;
-  //  }
-
-    if (origin == "Pluto") {
-        if (newHorizonsPathNodeP) {
-            Renderable* R = newHorizonsPathNodeP->renderable();
-            newHorizonsPathNodeP->setParent(plutoBarycenterNode);
-            nhPath = static_cast<RenderablePath*>(R);
-            nhPath->calculatePath("PLUTO BARYCENTER");
-        }
-
-        plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
-        
-        solarSystemBarycenterNode->setParent(plutoBarycenterNode);
-        newHorizonsNode->setParent(plutoBarycenterNode);
-        //newHorizonsGhostNode->setParent(plutoBarycenterNode);
-
-        //dawnNode->setParent(plutoBarycenterNode);
-        //vestaNode->setParent(plutoBarycenterNode);
-
-        //newHorizonsTrailNode->setParent(plutoBarycenterNode);
-        ghoul::Dictionary solarDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("SUN") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        
-        ghoul::Dictionary jupiterDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("JUPITER BARYCENTER") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-
-        ghoul::Dictionary newHorizonsDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("NEW HORIZONS") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-
-        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
-
-        //ghoul::Dictionary dawnDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("DAWN") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-        //
-        //ghoul::Dictionary vestaDictionary =
-        //{
-        //      { std::string("Type"), std::string("Spice") },
-        //      { std::string("Body"), std::string("VESTA") },
-        //      { std::string("Reference"), std::string("GALACTIC") },
-        //      { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-        //      { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-
-        
-        //ghoul::Dictionary newHorizonsGhostDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("NEW HORIZONS") },
-        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-        
-        return;
-    }
-    if (origin == "Sun") {
-        solarSystemBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-
-        if (plutoBarycenterNode)
-            plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-        jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-        if (newHorizonsNode)
-            newHorizonsNode->setParent(solarSystemBarycenterNode);
-        //newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
-
-        //newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
-        //dawnNode->setParent(solarSystemBarycenterNode);
-        //vestaNode->setParent(solarSystemBarycenterNode);
-
-        ghoul::Dictionary plutoDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("PLUTO BARYCENTER") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("SUN") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        ghoul::Dictionary jupiterDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("JUPITER BARYCENTER") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("SUN") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        
-        solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
-        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-        if (plutoBarycenterNode)
-            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-
-        ghoul::Dictionary newHorizonsDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("NEW HORIZONS") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("SUN") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        if (newHorizonsNode)
-            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
-        
-        //ghoul::Dictionary dawnDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("DAWN") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("SUN") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-        //
-        //ghoul::Dictionary vestaDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("VESTA") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("SUN") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-        
-        
-        //ghoul::Dictionary newHorizonsGhostDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("NEW HORIZONS") },
-        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-        
-        return;
-    }
-    if (origin == "Jupiter") {
-        if (newHorizonsPathNodeJ) {
-            Renderable* R = newHorizonsPathNodeJ->renderable();
-            newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
-            nhPath = static_cast<RenderablePath*>(R);
-            nhPath->calculatePath("JUPITER BARYCENTER");
-        }
-
-        jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-        jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
-
-        solarSystemBarycenterNode->setParent(jupiterBarycenterNode);
-        if (newHorizonsNode)
-            newHorizonsNode->setParent(jupiterBarycenterNode);
-        //newHorizonsTrailNode->setParent(jupiterBarycenterNode);
-
-        //dawnNode->setParent(jupiterBarycenterNode);
-        //vestaNode->setParent(jupiterBarycenterNode);
-
-
-        ghoul::Dictionary solarDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("SUN") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-
-        ghoul::Dictionary plutoDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("PlUTO BARYCENTER") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-
-        ghoul::Dictionary newHorizonsDictionary =
-        {
-            { std::string("Type"), std::string("Spice") },
-            { std::string("Body"), std::string("NEW HORIZONS") },
-            { std::string("Reference"), std::string("GALACTIC") },
-            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-            { std::string("Kernels"), ghoul::Dictionary() }
-        };
-        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        if (plutoBarycenterNode)
-            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-        if (newHorizonsNode)
-            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
-        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-
-
-        //ghoul::Dictionary dawnDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("DAWN") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-        //
-        //ghoul::Dictionary vestaDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("VESTA") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-
-
-        
-        //ghoul::Dictionary newHorizonsGhostDictionary =
-        //{
-        //    { std::string("Type"), std::string("Spice") },
-        //    { std::string("Body"), std::string("NEW HORIZONS") },
-        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-        //    { std::string("Reference"), std::string("GALACTIC") },
-        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-        //    { std::string("Kernels"), ghoul::Dictionary() }
-        //};
-        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
-
-    
-        return;
-    }
-    //if (origin == "Vesta") {
-    //    
-    //    vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-    //    vestaNode->setEphemeris(new StaticEphemeris);
-    //
-    //    solarSystemBarycenterNode->setParent(vestaNode);
-    //    newHorizonsNode->setParent(vestaNode);
-    //
-    //    dawnNode->setParent(vestaNode);
-    //    plutoBarycenterNode->setParent(vestaNode);
-    //
-    //
-    //    ghoul::Dictionary plutoDictionary =
-    //    {
-    //        { std::string("Type"), std::string("Spice") },
-    //        { std::string("Body"), std::string("PLUTO BARYCENTER") },
-    //        { std::string("Reference"), std::string("GALACTIC") },
-    //        { std::string("Observer"), std::string("VESTA") },
-    //        { std::string("Kernels"), ghoul::Dictionary() }
-    //    };
-    //    ghoul::Dictionary solarDictionary =
-    //    {
-    //        { std::string("Type"), std::string("Spice") },
-    //        { std::string("Body"), std::string("SUN") },
-    //        { std::string("Reference"), std::string("GALACTIC") },
-    //        { std::string("Observer"), std::string("VESTA") },
-    //        { std::string("Kernels"), ghoul::Dictionary() }
-    //    };
-    //
-    //    ghoul::Dictionary jupiterDictionary =
-    //    {
-    //        { std::string("Type"), std::string("Spice") },
-    //        { std::string("Body"), std::string("JUPITER BARYCENTER") },
-    //        { std::string("Reference"), std::string("GALACTIC") },
-    //        { std::string("Observer"), std::string("VESTA") },
-    //        { std::string("Kernels"), ghoul::Dictionary() }
-    //    };
-    //
-    //    solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-    //    plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-    //    jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-    //
-    //    ghoul::Dictionary newHorizonsDictionary =
-    //    {
-    //        { std::string("Type"), std::string("Spice") },
-    //        { std::string("Body"), std::string("NEW HORIZONS") },
-    //        { std::string("Reference"), std::string("GALACTIC") },
-    //        { std::string("Observer"), std::string("VESTA") },
-    //        { std::string("Kernels"), ghoul::Dictionary() }
-    //    };
-    //    newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-    //
-    //    ghoul::Dictionary dawnDictionary =
-    //    {
-    //        { std::string("Type"), std::string("Spice") },
-    //        { std::string("Body"), std::string("DAWN") },
-    //        { std::string("Reference"), std::string("GALACTIC") },
-    //        { std::string("Observer"), std::string("VESTA") },
-    //        { std::string("Kernels"), ghoul::Dictionary() }
-    //    };
-    //    dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-    //    vestaNode->setEphemeris(new StaticEphemeris);
-    //
-    //    return;
-    //}
-
-    if (origin == "67P") {
-        SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-        SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
-        //jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-        //plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-        solarSystemBarycenterNode->setParent(cgNode);
-        rosettaNode->setParent(cgNode);
-        
-        ghoul::Dictionary solarDictionary =
-            {
-            { std::string("Type"), std::string("Spice") },
-                { std::string("Body"), std::string("SUN") },
-                { std::string("Reference"), std::string("GALACTIC") },
-                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-                { std::string("Kernels"), ghoul::Dictionary() }
-            };
-        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-        
-        ghoul::Dictionary rosettaDictionary =
-            {
-            { std::string("Type"), std::string("Spice") },
-                { std::string("Body"), std::string("ROSETTA") },
-                { std::string("Reference"), std::string("GALACTIC") },
-                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-                { std::string("Kernels"), ghoul::Dictionary() }
-            };
-        
-        cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-        rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
-        cgNode->setEphemeris(new StaticEphemeris);
-        
-        return;
-        
-    }
-
-    LFATAL("This function is being misused with an argument of '" << origin << "'");
+//    SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");
+//    SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
+//    SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
+//    SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
+//    SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
+////    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
+////    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+//
+//    RenderablePath* nhPath;
+//
+//    SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
+//
+//    //SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
+//    //SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
+//    //SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
+//
+//  //  if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
+//        //jupiterBarycenterNode == nullptr) {
+//     //   LERROR("Necessary nodes does not exist");
+//        //return;
+//  //  }
+//
+//    if (origin == "Pluto") {
+//        if (newHorizonsPathNodeP) {
+//            Renderable* R = newHorizonsPathNodeP->renderable();
+//            newHorizonsPathNodeP->setParent(plutoBarycenterNode);
+//            nhPath = static_cast<RenderablePath*>(R);
+//            nhPath->calculatePath("PLUTO BARYCENTER");
+//        }
+//
+//        plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+//        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
+//        
+//        solarSystemBarycenterNode->setParent(plutoBarycenterNode);
+//        newHorizonsNode->setParent(plutoBarycenterNode);
+//        //newHorizonsGhostNode->setParent(plutoBarycenterNode);
+//
+//        //dawnNode->setParent(plutoBarycenterNode);
+//        //vestaNode->setParent(plutoBarycenterNode);
+//
+//        //newHorizonsTrailNode->setParent(plutoBarycenterNode);
+//        ghoul::Dictionary solarDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("SUN") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//        
+//        ghoul::Dictionary jupiterDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("JUPITER BARYCENTER") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//
+//        ghoul::Dictionary newHorizonsDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("NEW HORIZONS") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//
+//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+//        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
+//        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//
+//
+//        //ghoul::Dictionary dawnDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("DAWN") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+//        //
+//        //ghoul::Dictionary vestaDictionary =
+//        //{
+//        //      { std::string("Type"), std::string("Spice") },
+//        //      { std::string("Body"), std::string("VESTA") },
+//        //      { std::string("Reference"), std::string("GALACTIC") },
+//        //      { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//        //      { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+//
+//        
+//        //ghoul::Dictionary newHorizonsGhostDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("NEW HORIZONS") },
+//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+//        
+//        return;
+//    }
+//    if (origin == "Sun") {
+//        solarSystemBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+//
+//        if (plutoBarycenterNode)
+//            plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+//        jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+//        if (newHorizonsNode)
+//            newHorizonsNode->setParent(solarSystemBarycenterNode);
+//        //newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
+//
+//        //newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
+//        //dawnNode->setParent(solarSystemBarycenterNode);
+//        //vestaNode->setParent(solarSystemBarycenterNode);
+//
+//        ghoul::Dictionary plutoDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("PLUTO BARYCENTER") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("SUN") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//        ghoul::Dictionary jupiterDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("JUPITER BARYCENTER") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("SUN") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//        
+//        solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
+//        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
+//        if (plutoBarycenterNode)
+//            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+//
+//        ghoul::Dictionary newHorizonsDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("NEW HORIZONS") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("SUN") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//        if (newHorizonsNode)
+//            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//
+//        
+//        //ghoul::Dictionary dawnDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("DAWN") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("SUN") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+//        //
+//        //ghoul::Dictionary vestaDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("VESTA") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("SUN") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+//        
+//        
+//        //ghoul::Dictionary newHorizonsGhostDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("NEW HORIZONS") },
+//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+//        
+//        return;
+//    }
+//    if (origin == "Jupiter") {
+//        if (newHorizonsPathNodeJ) {
+//            Renderable* R = newHorizonsPathNodeJ->renderable();
+//            newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
+//            nhPath = static_cast<RenderablePath*>(R);
+//            nhPath->calculatePath("JUPITER BARYCENTER");
+//        }
+//
+//        jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+//        jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
+//
+//        solarSystemBarycenterNode->setParent(jupiterBarycenterNode);
+//        if (newHorizonsNode)
+//            newHorizonsNode->setParent(jupiterBarycenterNode);
+//        //newHorizonsTrailNode->setParent(jupiterBarycenterNode);
+//
+//        //dawnNode->setParent(jupiterBarycenterNode);
+//        //vestaNode->setParent(jupiterBarycenterNode);
+//
+//
+//        ghoul::Dictionary solarDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("SUN") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//
+//        ghoul::Dictionary plutoDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("PlUTO BARYCENTER") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//
+//        ghoul::Dictionary newHorizonsDictionary =
+//        {
+//            { std::string("Type"), std::string("Spice") },
+//            { std::string("Body"), std::string("NEW HORIZONS") },
+//            { std::string("Reference"), std::string("GALACTIC") },
+//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//            { std::string("Kernels"), ghoul::Dictionary() }
+//        };
+//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+//        if (plutoBarycenterNode)
+//            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+//        if (newHorizonsNode)
+//            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
+//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//
+//
+//        //ghoul::Dictionary dawnDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("DAWN") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+//        //
+//        //ghoul::Dictionary vestaDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("VESTA") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
+//
+//
+//        
+//        //ghoul::Dictionary newHorizonsGhostDictionary =
+//        //{
+//        //    { std::string("Type"), std::string("Spice") },
+//        //    { std::string("Body"), std::string("NEW HORIZONS") },
+//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
+//        //    { std::string("Reference"), std::string("GALACTIC") },
+//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
+//        //    { std::string("Kernels"), ghoul::Dictionary() }
+//        //};
+//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
+//        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
+//
+//    
+//        return;
+//    }
+//    //if (origin == "Vesta") {
+//    //    
+//    //    vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+//    //    vestaNode->setEphemeris(new StaticEphemeris);
+//    //
+//    //    solarSystemBarycenterNode->setParent(vestaNode);
+//    //    newHorizonsNode->setParent(vestaNode);
+//    //
+//    //    dawnNode->setParent(vestaNode);
+//    //    plutoBarycenterNode->setParent(vestaNode);
+//    //
+//    //
+//    //    ghoul::Dictionary plutoDictionary =
+//    //    {
+//    //        { std::string("Type"), std::string("Spice") },
+//    //        { std::string("Body"), std::string("PLUTO BARYCENTER") },
+//    //        { std::string("Reference"), std::string("GALACTIC") },
+//    //        { std::string("Observer"), std::string("VESTA") },
+//    //        { std::string("Kernels"), ghoul::Dictionary() }
+//    //    };
+//    //    ghoul::Dictionary solarDictionary =
+//    //    {
+//    //        { std::string("Type"), std::string("Spice") },
+//    //        { std::string("Body"), std::string("SUN") },
+//    //        { std::string("Reference"), std::string("GALACTIC") },
+//    //        { std::string("Observer"), std::string("VESTA") },
+//    //        { std::string("Kernels"), ghoul::Dictionary() }
+//    //    };
+//    //
+//    //    ghoul::Dictionary jupiterDictionary =
+//    //    {
+//    //        { std::string("Type"), std::string("Spice") },
+//    //        { std::string("Body"), std::string("JUPITER BARYCENTER") },
+//    //        { std::string("Reference"), std::string("GALACTIC") },
+//    //        { std::string("Observer"), std::string("VESTA") },
+//    //        { std::string("Kernels"), ghoul::Dictionary() }
+//    //    };
+//    //
+//    //    solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+//    //    plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
+//    //    jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
+//    //
+//    //    ghoul::Dictionary newHorizonsDictionary =
+//    //    {
+//    //        { std::string("Type"), std::string("Spice") },
+//    //        { std::string("Body"), std::string("NEW HORIZONS") },
+//    //        { std::string("Reference"), std::string("GALACTIC") },
+//    //        { std::string("Observer"), std::string("VESTA") },
+//    //        { std::string("Kernels"), ghoul::Dictionary() }
+//    //    };
+//    //    newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
+//    //
+//    //    ghoul::Dictionary dawnDictionary =
+//    //    {
+//    //        { std::string("Type"), std::string("Spice") },
+//    //        { std::string("Body"), std::string("DAWN") },
+//    //        { std::string("Reference"), std::string("GALACTIC") },
+//    //        { std::string("Observer"), std::string("VESTA") },
+//    //        { std::string("Kernels"), ghoul::Dictionary() }
+//    //    };
+//    //    dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
+//    //    vestaNode->setEphemeris(new StaticEphemeris);
+//    //
+//    //    return;
+//    //}
+//
+//    if (origin == "67P") {
+//        SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
+//        SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
+//        //jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
+//        //plutoBarycenterNode->setParent(solarSystemBarycenterNode);
+//        solarSystemBarycenterNode->setParent(cgNode);
+//        rosettaNode->setParent(cgNode);
+//        
+//        ghoul::Dictionary solarDictionary =
+//            {
+//            { std::string("Type"), std::string("Spice") },
+//                { std::string("Body"), std::string("SUN") },
+//                { std::string("Reference"), std::string("GALACTIC") },
+//                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+//                { std::string("Kernels"), ghoul::Dictionary() }
+//            };
+//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
+//        
+//        ghoul::Dictionary rosettaDictionary =
+//            {
+//            { std::string("Type"), std::string("Spice") },
+//                { std::string("Body"), std::string("ROSETTA") },
+//                { std::string("Reference"), std::string("GALACTIC") },
+//                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
+//                { std::string("Kernels"), ghoul::Dictionary() }
+//            };
+//        
+//        cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
+//        rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
+//        cgNode->setEphemeris(new StaticEphemeris);
+//        
+//        return;
+//        
+//    }
+//
+//    LFATAL("This function is being misused with an argument of '" << origin << "'");
 }
 
 void RenderEngine::setShowFrameNumber(bool enabled){

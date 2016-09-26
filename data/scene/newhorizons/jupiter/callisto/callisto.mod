@@ -39,7 +39,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "CALLISTO",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
@@ -70,7 +70,7 @@ return {
         ]]
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {0, -10000000, 0}
             },
         },

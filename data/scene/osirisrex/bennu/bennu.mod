@@ -9,7 +9,7 @@ return {
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = BENNU_BODY,
                 Observer = "SUN",
             },

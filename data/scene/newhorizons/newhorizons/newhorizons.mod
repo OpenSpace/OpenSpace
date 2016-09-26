@@ -104,7 +104,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "NEW HORIZONS",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
