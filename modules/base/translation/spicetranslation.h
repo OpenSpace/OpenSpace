@@ -22,30 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __EPHEMERIS_H__
-#define __EPHEMERIS_H__
+#ifndef __SPICETRANSLATION_H__
+#define __SPICETRANSLATION_H__
 
-#include <openspace/properties/propertyowner.h>
+#include <openspace/scene/translation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/misc/dictionary.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-
-class Translation : public properties::PropertyOwner {
+    
+class SpiceTranslation : public Translation {
 public:
-    static Translation* createFromDictionary(const ghoul::Dictionary& dictionary);
-
-    virtual ~Translation();
-    virtual bool initialize();
-    virtual glm::dvec3 position() const = 0;
-    virtual void update(const UpdateData& data);
+    SpiceTranslation(const ghoul::Dictionary& dictionary);
+    glm::dvec3 position() const;
+    void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
+
+private:
+    properties::StringProperty _target;
+    properties::StringProperty _origin;
+
+    glm::dvec3 _position;
+    bool _kernelsLoadedSuccessfully;
 };
+    
+} // namespace openspace
 
-}  // namespace openspace
-
-#endif // __EPHEMERIS_H__
+#endif // __SPICETRANSLATION_H__

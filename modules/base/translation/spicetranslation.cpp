@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/ephemeris/spiceephemeris.h>
+#include <modules/base/translation/spicetranslation.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>

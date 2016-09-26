@@ -22,7 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
+
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
 

@@ -84,10 +84,6 @@
 #include <sgct.h>
 #include <stack>
 
-// These are temporary ---abock
-#include <modules/base/ephemeris/spiceephemeris.h>
-#include <modules/base/ephemeris/staticephemeris.h>
-
 // ABuffer defines
 #define RENDERER_FRAMEBUFFER 0
 #define RENDERER_ABUFFER 1

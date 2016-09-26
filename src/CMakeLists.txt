@@ -83,7 +83,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
-    ${OPENSPACE_BASE_DIR}/src/scene/ephemeris.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scale.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
@@ -183,7 +183,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/ephemeris.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h

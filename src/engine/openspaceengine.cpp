@@ -45,7 +45,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>

@@ -22,32 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SPICEEPHEMERIS_H__
-#define __SPICEEPHEMERIS_H__
+#include <modules/base/translation/statictranslation.h>
 
-#include <openspace/scene/ephemeris.h>
+#include <openspace/documentation/verifier.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
+namespace {
+    const std::string KeyPosition = "Position";
+}
 
 namespace openspace {
-    
-class SpiceTranslation : public Translation {
-public:
-    SpiceTranslation(const ghoul::Dictionary& dictionary);
-    glm::dvec3 position() const;
-    void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+Documentation StaticTranslation::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Translation",
+        "base_transform_translation_static",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("StaticTranslation"),
+                "",
+                Optional::No
+            },
+            {
+                KeyPosition,
+                new DoubleVector3Verifier,
+                "Specifies the position (in meters) that this scenegraph node is located "
+                "at relative to its parent",
+                Optional::No
+            }
+        },
+        Exhaustive::Yes
+    };
+}
 
-private:
-    properties::StringProperty _target;
-    properties::StringProperty _origin;
 
-    glm::dvec3 _position;
-    bool _kernelsLoadedSuccessfully;
-};
-    
+StaticTranslation::StaticTranslation()
+    : _position(
+        "position",
+        "Position",
+        glm::dvec3(0.0),
+        glm::dvec3(-std::numeric_limits<double>::max()),
+        glm::dvec3(std::numeric_limits<double>::max())
+    )
+{
+    addProperty(_position);
+}
+
+StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
+    : StaticTranslation()
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "StaticEphemeris"
+    );
+
+    _position = dictionary.value<glm::dvec3>(KeyPosition);
+}
+
+StaticTranslation::~StaticTranslation() {}
+
+glm::dvec3 StaticTranslation::position() const {
+    return _position;
+}
+
+void StaticTranslation::update(const UpdateData&) {}
+
 } // namespace openspace
-
-#endif // __SPICEEPHEMERIS_H__

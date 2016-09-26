@@ -29,7 +29,7 @@
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/properties/propertyowner.h>

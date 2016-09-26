@@ -42,8 +42,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.h
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.h
@@ -68,8 +68,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/spiceephemeris.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ephemeris/staticephemeris.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/spicetranslation.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/spicerotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rotation/staticrotation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/scale/staticscale.cpp

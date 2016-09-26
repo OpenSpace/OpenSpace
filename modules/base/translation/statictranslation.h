@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICEPHEMERIS_H__
-#define __STATICEPHEMERIS_H__
+#ifndef __STATICTRANSLATION_H__
+#define __STATICTRANSLATION_H__
 
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/vectorproperty.h>
@@ -48,4 +48,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICEPHEMERIS_H__
+#endif // __STATICTRANSLATION_H__

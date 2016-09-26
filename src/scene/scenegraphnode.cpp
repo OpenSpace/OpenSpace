@@ -39,7 +39,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/translation/statictranslation.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/staticscale.h>
 

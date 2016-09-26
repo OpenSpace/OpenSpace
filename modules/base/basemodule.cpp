@@ -48,8 +48,8 @@
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
-#include <modules/base/ephemeris/staticephemeris.h>
-#include <modules/base/ephemeris/spiceephemeris.h>
+#include <modules/base/translation/statictranslation.h>
+#include <modules/base/translation/spicetranslation.h>
 
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/spicerotation.h>
