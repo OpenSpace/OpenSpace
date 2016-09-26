@@ -730,7 +730,9 @@ void OpenSpaceEngine::loadFonts() {
     if (!initSuccess)
         LERROR("Error initializing default font renderer");
     
-    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(_windowWrapper->currentDrawBufferResolution()));
+    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
+        glm::vec2(_windowWrapper->currentWindowSize())
+    );
     
 }
     
@@ -741,8 +743,6 @@ void OpenSpaceEngine::configureLogging() {
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartImmediateFlush;
     const std::string KeyLogs = 
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
-
-
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
         std::string logLevel;
@@ -882,21 +882,24 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
-        glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
+        //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
         glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
         uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
 
-        glm::vec2 windowBufferCorrectionFactor = glm::vec2(
-            static_cast<float>(drawBufferResolution.x) / static_cast<float>(windowSize.x),
-            static_cast<float>(drawBufferResolution.y) / static_cast<float>(windowSize.y)
-        );
+        //glm::vec2 windowBufferCorrectionFactor = glm::vec2(
+        //    static_cast<float>(drawBufferResolution.x) / static_cast<float>(windowSize.x),
+        //    static_cast<float>(drawBufferResolution.y) / static_cast<float>(windowSize.y)
+        //);
+
+        //LINFO("DrawBufferResolution: " << std::to_string(drawBufferResolution));
+        //LINFO("Window Size: " << std::to_string(windowSize));
         
         double dt = _windowWrapper->averageDeltaTime();
 
         _gui->startFrame(
             static_cast<float>(dt),
-            glm::vec2(drawBufferResolution),
-            windowBufferCorrectionFactor,
+            glm::vec2(windowSize),
+            glm::vec2(1.f),
             mousePosition,
             mouseButtons
         );

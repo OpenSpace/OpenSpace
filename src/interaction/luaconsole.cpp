@@ -303,7 +303,8 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 void LuaConsole::render() {
     const float font_size = 10.0f;
     
-    int ySize = OsEng.windowWrapper().viewportPixelCoordinates().w;
+    int ySize = OsEng.windowWrapper().currentWindowSize().y;
+    //int ySize = OsEng.windowWrapper().viewportPixelCoordinates().w;
 
     float startY = static_cast<float>(ySize) - 2.0f * font_size;
     startY = startY - font_size * 15.0f * 2.0f;

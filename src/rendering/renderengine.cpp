@@ -369,9 +369,12 @@ void RenderEngine::updateRenderer() {
     bool windowResized = OsEng.windowWrapper().windowHasResized();
 
     if (windowResized) {
-        glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
+        glm::ivec2 res = OsEng.windowWrapper().currentWindowSize();
+        //glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
         _renderer->setResolution(res);
-        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(glm::vec2(res));
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
+            glm::vec2(res)
+        );
     }
 
     _renderer->update();
