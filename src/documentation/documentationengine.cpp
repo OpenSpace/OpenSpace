@@ -72,7 +72,25 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         result += indentMessage("Optional", (p.optional ? "true" : "false"));
         result += indentMessage("Type", p.verifier->type());
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        if (tv) {
+        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
+
+        // We have to check ReferencingVerifier first as a ReferencingVerifier is also a
+        // TableVerifier
+        if (rv) {
+            std::vector<Documentation> documentations = DocEng.documentations();
+            auto it = std::find_if(
+                documentations.begin(),
+                documentations.end(),
+                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+            );
+
+            if (it == documentations.end()) {
+                result += indentMessage("Referencing", rv->identifier + "(NOT FOUND)");
+            }
+            else {
+                result += indentMessage("Referencing", it->name);
+            }
+        } else if (tv) {
             // We have a TableVerifier, so we need to recurse
             ++indentLevel;
             result += generateTextDocumentation({ "", "", tv->documentations }, indentLevel);
@@ -104,7 +122,27 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"optional\": \"" << (p.optional ? "true" : "false") << "\",";
         result << "\"type\": \"" << p.verifier->type() << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
-        if (tv) {
+        ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
+
+        if (rv) {
+            std::vector<Documentation> documentations = DocEng.documentations();
+            auto it = std::find_if(
+                documentations.begin(),
+                documentations.end(),
+                [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+            );
+
+            if (it == documentations.end()) {
+                result << "\"reference\": {"
+                       << "\"found\": true,"
+                       << "\"identifier\": \"" << rv->identifier << "\","
+                       << "},";
+            }
+            else {
+                result << "\"reference\": { \"found\": false },";
+            }
+        }
+        else if (tv) {
             std::string json = generateJsonDocumentation({ "", "", tv->documentations });
             // We have a TableVerifier, so we need to recurse
             result << "\"restrictions\": " << json << ",";
