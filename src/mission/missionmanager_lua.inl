@@ -35,7 +35,7 @@ namespace luascriptfunctions {
         if (missionFileName.empty()) {
             return luaL_error(L, "filepath string is empty");
         }
-        MissionManager::ref().loadMission(missionFileName);
+        MissionManager::ref().loadMission(absPath(missionFileName));
     }
 
     int setCurrentMission(lua_State* L) {

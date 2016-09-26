@@ -71,6 +71,7 @@ public:
     /**
     * Sets the mission with the name <missionName> as the current mission. The current
     * mission is what is return by `currentMission()`.
+    * \pre missionName must not be empty
     */
     void setCurrentMission(const std::string& missionName);
 

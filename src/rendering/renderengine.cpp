@@ -1360,13 +1360,14 @@ void RenderEngine::renderInformation() {
                     // Add spacing
                     RenderFontCr(*_fontInfo, penPosition, nonCurrentMissionColor, " ");
 
-                    std::vector<const MissionPhase*> phaseTrace = mission.phaseTrace(currentTime);
+                    auto phaseTrace = mission.phaseTrace(currentTime);
 
                     if (phaseTrace.size()) {
-                        std::string title = "Current Mission Phase: " + phaseTrace.back()->name();
+                        const MissionPhase& phase = phaseTrace.back().get();
+                        std::string title = "Current Mission Phase: " + phase.name();
                         RenderFontCr(*_fontInfo, penPosition, missionProgressColor, title.c_str());
-                        double remaining = phaseTrace.back()->timeRange().end - currentTime;
-                        float t = static_cast<float>(1.0 - remaining / phaseTrace.back()->timeRange().duration());
+                        double remaining = phase.timeRange().end - currentTime;
+                        float t = static_cast<float>(1.0 - remaining / phase.timeRange().duration());
                         std::string progress = progressToStr(25, t);
                         //RenderFontCr(*_fontInfo, penPosition, missionProgressColor,
                         //   "%.0f s %s %.1f %%", remaining, progress.c_str(), t * 100);
@@ -1413,7 +1414,7 @@ void RenderEngine::renderInformation() {
                             // last-in-first-out from the stack, so add them in reversed order.
                             int indexLastPhase = phase->phases().size() - 1;
                             for (int i = indexLastPhase; 0 <= i; --i) {
-                                S.push({ &phase->phase(i), depth + 1 });
+                                S.push({ &phase->phases()[i], depth + 1 });
                             }
                         }
                     }
