@@ -23,10 +23,22 @@
  ****************************************************************************************/
 
 #include <openspace/util/factorymanager.h>
+#include <openspace/openspace.h>
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
+#include <iterator>
 #include <fstream>
+
+namespace {
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/factories/main.hbs";
+    const std::string FactoryTemplateFilename = "${OPENSPACE_DATA}/web/factories/factory.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/factories/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+}
 
 namespace openspace {
 
@@ -84,8 +96,32 @@ void FactoryManager::writeDocumentation(const std::string& file, const std::stri
 
     }
     else if (type == "html") {
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
 
-#ifdef JSON
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream factoryTemplateInput(absPath(FactoryTemplateFilename));
+        std::string factoryTemplateContent{ std::istreambuf_iterator<char>{factoryTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
         std::stringstream json;
 
         json << "[";
@@ -95,23 +131,66 @@ void FactoryManager::writeDocumentation(const std::string& file, const std::stri
             json << "\"classes\": [";
 
             ghoul::TemplateFactoryBase* factory = factoryInfo.factory.get();
-            for (const std::string& c : factory->registeredClasses()) {
-                json << "\"" << c << "\",";
+            const std::vector<std::string>& registeredClasses = factory->registeredClasses();
+            for (const std::string& c : registeredClasses) {
+                json << "\"" << c << "\"";
+                if (&c != &registeredClasses.back()) {
+                    json << ",";
+                }
             }
 
-            json << "]},";
+            json << "]}";
+            if (&factoryInfo != &_factories.back()) {
+                json << ",";
+            }
         }
 
         json << "]";
 
         // I did not check the output of this for correctness ---abock
         std::string jsonText = json.str();
-#else
+
         std::ofstream f;
         f.exceptions(~std::ofstream::goodbit);
         f.open(file);
 
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            }
+            else {
+                jsonString += c;
+            }
+        }
+
         std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"factoryTemplate\" type=\"text/x-handlebars-template\">\n"
+            << factoryTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var factories = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        f << html.str();
+
+        /*
         html << "<html>\n"
              << "\t<head>\n"
              << "\t\t<title>Factories</title>\n"
@@ -142,10 +221,8 @@ void FactoryManager::writeDocumentation(const std::string& file, const std::stri
         html << "\t</tbody>\n"
              << "</table>\n"
              << "</html>;";
-
         f << html.str();
-#endif
-
+        */
     }
 }
 

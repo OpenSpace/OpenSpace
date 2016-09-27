@@ -42,7 +42,7 @@
 
 namespace {
     const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
-    const std::string DocumentationTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const std::string ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
     const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
     const std::string JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
     const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
@@ -594,8 +594,8 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
             std::istreambuf_iterator<char>{} };
 
-        std::ifstream documentationTemplateInput(absPath(DocumentationTemplateFilename));
-        std::string documentationTemplateContent{ std::istreambuf_iterator<char>{documentationTemplateInput},
+        std::ifstream scriptingTemplateInput(absPath(ScriptingTemplateFilename));
+        std::string scriptingTemplateContent{ std::istreambuf_iterator<char>{scriptingTemplateInput},
             std::istreambuf_iterator<char>{} };
 
         std::ofstream file;
@@ -650,7 +650,7 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
             << mainTemplateContent << "\n"
             << "\t\t</script>\n"
             << "\t\t<script id=\"scriptingTemplate\" type=\"text/x-handlebars-template\">\n"
-            << documentationTemplateContent << "\n"
+            << scriptingTemplateContent << "\n"
             << "\t\t</script>\n"
             << "\t<script>\n"
             << "var scripting = JSON.parse('" << jsonString << "');\n"
