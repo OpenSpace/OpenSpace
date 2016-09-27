@@ -1,20 +1,18 @@
 <div id="wrapper">
-  <!-- Sidebar -->
   <div id="sidebar-wrapper">
-      <ul class="sidebar-nav">
-          <li class="sidebar-brand">
-              <a href="#">
-                  OpenSpace Documentation
-              </a>
-          </li>
-          {{#each documentation}}
-          <li>
-              <a href="#{{id}}">{{name}}</a>
-          </li>
-          {{/each}}
-      </ul>
+    <ul class="sidebar-nav">
+      <li class="sidebar-brand">
+        <a href="#">
+            OpenSpace Documentation
+        </a>
+      </li>
+      {{#each documentation}}
+        <li>
+          <a href="#{{id}}">{{name}}</a>
+        </li>
+      {{/each}}
+    </ul>
   </div>
-  <!-- /#sidebar-wrapper -->
 
   <div id="page-content-wrapper">
     <div class="container-fluid documentation-container">
