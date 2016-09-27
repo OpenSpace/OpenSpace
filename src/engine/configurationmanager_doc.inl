@@ -31,6 +31,7 @@ Documentation ConfigurationManager::Documentation() {
 
     return {
         "OpenSpace Configuration",
+        "openspace_configuraion",
         {
         {
             ConfigurationManager::KeyConfigSgct,

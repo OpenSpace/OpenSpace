@@ -37,6 +37,7 @@ Documentation StaticScale::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Scaling",
+        "base_scale_static",
         {{
             KeyValue,
             new DoubleVerifier,

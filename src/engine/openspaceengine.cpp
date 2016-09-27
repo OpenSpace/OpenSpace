@@ -417,54 +417,7 @@ bool OpenSpaceEngine::initialize() {
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
 
-    // If a LuaDocumentationFile was specified, generate it now
-    const std::string LuaDocumentationType =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartType;
-    const std::string LuaDocumentationFile =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
-
-    const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
-    const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
-    if (hasLuaDocType && hasLuaDocFile) {
-        std::string luaDocumentationType;
-        configurationManager().getValue(LuaDocumentationType, luaDocumentationType);
-        std::string luaDocumentationFile;
-        configurationManager().getValue(LuaDocumentationFile, luaDocumentationFile);
-
-        luaDocumentationFile = absPath(luaDocumentationFile);
-        _scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
-    }
-
-    // If a general documentation was specified, generate it now
-    const std::string DocumentationType =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartType;
-    const std::string DocumentationFile =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartFile;
-
-    const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
-    const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
-    if (hasDocumentationType && hasDocumentationFile) {
-        std::string documentationType;
-        configurationManager().getValue(DocumentationType, documentationType);
-        std::string documentationFile;
-        configurationManager().getValue(DocumentationFile, documentationFile);
-        documentationFile = absPath(documentationFile);
-        DocEng.writeDocumentation(documentationFile, documentationType);
-    }
-
-    const std::string FactoryDocumentationType =
-        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartType;
-
-    const std::string FactoryDocumentationFile =
-        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartFile;
-    bool hasFactoryDocumentationType = configurationManager().hasKey(FactoryDocumentationType);
-    bool hasFactoryDocumentationFile = configurationManager().hasKey(FactoryDocumentationFile);
-    if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
-        std::string type = configurationManager().value<std::string>(FactoryDocumentationType);
-        std::string file = configurationManager().value<std::string>(FactoryDocumentationFile);
-
-        FactoryManager::ref().writeDocumentation(absPath(file), type);
-    }
+    writeDocumentation();
 
     bool disableMasterRendering = false;
     configurationManager().getValue(
@@ -566,6 +519,58 @@ bool OpenSpaceEngine::initialize() {
 
     LINFO("Finished initializing");
     return true;
+}
+
+
+void OpenSpaceEngine::writeDocumentation() {
+    // If a LuaDocumentationFile was specified, generate it now
+    const std::string LuaDocumentationType =
+        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartType;
+    const std::string LuaDocumentationFile =
+        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
+
+    const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
+    const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
+    if (hasLuaDocType && hasLuaDocFile) {
+        std::string luaDocumentationType;
+        configurationManager().getValue(LuaDocumentationType, luaDocumentationType);
+        std::string luaDocumentationFile;
+        configurationManager().getValue(LuaDocumentationFile, luaDocumentationFile);
+
+        luaDocumentationFile = absPath(luaDocumentationFile);
+        _scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
+    }
+
+    // If a general documentation was specified, generate it now
+    const std::string DocumentationType =
+        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartType;
+    const std::string DocumentationFile =
+        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartFile;
+
+    const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
+    const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
+    if (hasDocumentationType && hasDocumentationFile) {
+        std::string documentationType;
+        configurationManager().getValue(DocumentationType, documentationType);
+        std::string documentationFile;
+        configurationManager().getValue(DocumentationFile, documentationFile);
+        documentationFile = absPath(documentationFile);
+        DocEng.writeDocumentation(documentationFile, documentationType);
+    }
+
+    const std::string FactoryDocumentationType =
+        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartType;
+
+    const std::string FactoryDocumentationFile =
+        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartFile;
+    bool hasFactoryDocumentationType = configurationManager().hasKey(FactoryDocumentationType);
+    bool hasFactoryDocumentationFile = configurationManager().hasKey(FactoryDocumentationFile);
+    if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
+        std::string type = configurationManager().value<std::string>(FactoryDocumentationType);
+        std::string file = configurationManager().value<std::string>(FactoryDocumentationFile);
+
+        FactoryManager::ref().writeDocumentation(absPath(file), type);
+    }
 }
 
 bool OpenSpaceEngine::isInitialized() {
@@ -1066,6 +1071,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "",
                 "Toggles the shutdown mode that will close the application after the count"
                 "down timer is reached"
+            },
+            {
+                "writeDocumentation",
+                &luascriptfunctions::writeDocumentation,
+                "",
+                "Writes out documentation files"
             }
         }
     };

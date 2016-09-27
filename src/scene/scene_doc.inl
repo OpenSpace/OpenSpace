@@ -31,6 +31,7 @@ Documentation Scene::Documentation() {
 
     return {
         "Scene Description",
+        "core_scene",
         {
         {
             "ScenePath",

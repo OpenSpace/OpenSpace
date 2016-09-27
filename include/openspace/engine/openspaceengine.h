@@ -114,6 +114,7 @@ public:
     void enableBarrier();
     void disableBarrier();
 
+    void writeDocumentation();
     void toggleShutdownMode();
     
     bool useBusyWaitForDecode();

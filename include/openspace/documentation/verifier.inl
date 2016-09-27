@@ -50,7 +50,7 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string TemplateVerifier<T>::documentation() const {
-    return "Type testing of '" + type() + "'";
+    return "Value of type '" + type() + "'";
 }
 
 template <typename T>

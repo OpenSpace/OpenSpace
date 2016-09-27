@@ -159,7 +159,7 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
                                      const std::string& key) const {
     if (dict.hasKeyAndValue<Type>(key)) {
         ghoul::Dictionary d = dict.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification({ "", documentations, exhaustive }, d);
+        TestResult res = testSpecification({documentations, exhaustive}, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
         for (TestResult::Offense& s : res.offenses) {
