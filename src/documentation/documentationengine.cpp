@@ -38,10 +38,10 @@
 namespace {
     const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/documentation/main.hbs";
     const std::string DocumentationTemplateFilename = "${OPENSPACE_DATA}/web/documentation/documentation.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/documentation/handlebars-v4.0.5.js";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
     const std::string JsFilename = "${OPENSPACE_DATA}/web/documentation/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/documentation/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/documentation/style.css";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {

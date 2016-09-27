@@ -1,0 +1,37 @@
+<div id="wrapper">
+  <!-- Sidebar -->
+  <div id="sidebar-wrapper">
+      <ul class="sidebar-nav">
+          <li class="sidebar-brand">
+              <a href="#">
+                  OpenSpace Lua Scripting
+              </a>
+          </li>
+          {{#each scripting}}
+          <li>
+              <a href="#openspace{{#if library}}.{{library}}{{/if}}">openspace{{#if library}}.{{library}}{{/if}}</a>
+          </li>
+          {{/each}}
+      </ul>
+  </div>
+  <!-- /#sidebar-wrapper -->
+
+  <div id="page-content-wrapper">
+    <div class="container-fluid documentation-container">
+      <h1>OpenSpace Lua Scripting</h1>
+      <p>Version: {{version.[0]}}.{{version.[1]}}.{{version.[2]}}</p>
+      {{#each scripting}}
+        <div class="row">
+          <div class="col-lg-12">
+            <h2>
+              <a class="documentation-name" href="#openspace{{#if library}}.{{library}}{{/if}}" name="openspace{{#if library}}.{{library}}{{/if}}">
+                openspace{{#if library}}.{{library}}{{/if}}
+              </a>
+            </h2>
+            {{> scripting}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

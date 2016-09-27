@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/openspace.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -38,6 +39,15 @@
 #include <iomanip>
 
 #include "scriptengine_lua.inl"
+
+namespace {
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
+    const std::string DocumentationTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+}
 
 namespace openspace {
 
@@ -562,18 +572,48 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         }
     }
     else if (type == "html") {
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream documentationTemplateInput(absPath(DocumentationTemplateFilename));
+        std::string documentationTemplateContent{ std::istreambuf_iterator<char>{documentationTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
         std::ofstream file;
         file.exceptions(~std::ofstream::goodbit);
         file.open(filename);
 
-#ifdef JSON
         // Create JSON
         std::stringstream json;
         json << "[";
 
+        bool first = true;
         for (const LuaLibrary& l : _registeredLibraries) {
-            json << "{";
+            if (!first) {
+                json << ",";
+            }
+            first = false;
 
+            json << "{";
             json << "\"library\": \"" << l.name << "\",";
             json << "\"functions\": [";
 
@@ -582,16 +622,53 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
                 json << "\"name\": \"" << f.name << "\", ";
                 json << "\"arguments\": \"" << f.argumentText << "\", ";
                 json << "\"help\": \"" << f.helpText << "\"";
-                json << "},";
+                json << "}";
+                if (&f != &l.functions.back()) {
+                    json << ",";
+                }
             }
-            json << "]},";
+            json << "]}";
+
         }
         json << "]";
 
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            }
+            else {
+                jsonString += c;
+            }
+        }
 
-        std::string jsonText = json.str();
-#else
         std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"scriptingTemplate\" type=\"text/x-handlebars-template\">\n"
+            << documentationTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var scripting = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        file << html.str();
+
+        /*
 
         html << "<html>\n"
              << "\t<head>\n"
@@ -644,7 +721,7 @@ void ScriptEngine::writeDocumentation(const std::string& filename, const std::st
              << "</html>";
 
         file << html.str();
-#endif
+*/
     }
     else {
         throw ghoul::RuntimeError("Undefined type '" + type + "' for Lua documentation");

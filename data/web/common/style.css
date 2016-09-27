@@ -1,8 +1,4 @@
-
-
-.container {
-  padding-top: 70px;
-}
+/* Documentation */
 
 .documentation-name, .documentation-name:hover, .documentation-name:focus {
   text-decoration: none;
@@ -34,7 +30,6 @@
   background-color: #fff;
 }
 
-
 .documentation-type {
   color: #888;
   font-size: 0.8em;
@@ -53,7 +48,6 @@
 .documentation-container {
   font-size: 1.2em;
 }
-
 
 
 /*!
