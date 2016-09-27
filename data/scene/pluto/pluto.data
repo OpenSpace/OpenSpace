@@ -1,6 +1,7 @@
 return {
     FileRequest = {
         { Identifier = "charon_textures", Destination = "textures", Version = 1 },
-        { Identifier = "pluto_textures", Destination = "textures", Version = 4 }
+        { Identifier = "pluto_textures", Destination = "textures", Version = 4 },
+        { Identifier = "pluto_spice", Destination = "${SPICE}", Version = 1 }
     }
 }
