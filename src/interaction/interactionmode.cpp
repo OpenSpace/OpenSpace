@@ -201,6 +201,8 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
     bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
     bool keyCtrlPressed = inputState.isKeyPressed(
         std::pair<Key, KeyModifier>(Key::LeftControl, KeyModifier::Control));
+    bool keyShiftPressed = inputState.isKeyPressed(
+        std::pair<Key, KeyModifier>(Key::LeftShift, KeyModifier::Shift));
 
     // Update the mouse states
     if (button1Pressed) {
@@ -481,10 +483,15 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
             directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
+        double heightToSurface =
+        _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
+        
         double distFromCenterToSurface =
             length(centerToEllipsoidSurface);
         double distFromEllipsoidSurfaceToCamera = length(ellipsoidSurfaceToCamera);
         double distFromCenterToCamera = length(posDiff);
+        double distFromSurfaceToCamera =
+            distFromEllipsoidSurfaceToCamera - heightToSurface;
 
         // Create the internal representation of the local and global camera rotations
         dmat4 lookAtMat = lookAt(
@@ -515,7 +522,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
             glm::dvec3 eulerAngles = glm::dvec3(
                 -_mouseStates->synchedGlobalRotationMouseVelocity().y,
                 -_mouseStates->synchedGlobalRotationMouseVelocity().x,
-                0) * glm::clamp(distFromEllipsoidSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
+                0) * glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
             glm::dquat rotationDiffWorldSpace =
@@ -564,8 +571,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                 glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
         }
         { // Move position towards or away from focus node
-            distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            camPos += -directionFromSurfaceToCamera * distFromEllipsoidSurfaceToCamera *
+            camPos += -directionFromSurfaceToCamera * distFromSurfaceToCamera *
                 _mouseStates->synchedTruckMovementMouseVelocity().y;
         }
         { // Roll around ellipsoid normal
