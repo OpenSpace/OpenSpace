@@ -29,20 +29,17 @@ return {
             },
             Textures = {
                 ColorTextures = {
+
+                },
+                GrayScaleOverlays = {
+
+                },
+                GrayScaleTextures = {
                     {
                         Name = "OnMoonColorGrayscale",
                         FilePath = "map_service_configs/OnMoonColor.xml",
                         Enabled = true,
                     },
-                },
-                GrayScaleOverlays = {
-                    --[[                
-                    {
-                        Name = "OnMoonColorGrayscale",
-                        FilePath = "map_service_configs/OnMoonGrayscaleOverlay.vrt",
-                        Enabled = true,
-                    },
-                    ]]
                 },
                 NightTextures = {
 

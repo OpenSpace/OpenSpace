@@ -38,6 +38,10 @@
 #define USE_COLORTEXTURE #{useColorTextures}
 #define COLORTEXTURE_BLENDING_ENABLED #{blendColorTextures}
 
+#define NUMLAYERS_GRAYSCALETEXTURE #{lastLayerIndexGrayScaleTextures} + 1
+#define USE_GRAYSCALETEXTURE #{useGrayScaleTextures}
+#define GRAYSCALETEXTURE_BLENDING_ENABLED #{blendGrayScaleTextures}
+
  // Third layer type from LayeredTextureShaderProvider is water mask
 #define NUMLAYERS_WATERMASK #{lastLayerIndexWaterMasks} + 1
 #define USE_WATERMASK #{useWaterMasks}
@@ -154,6 +158,37 @@ vec4 calculateColor(
 	#endfor
 
 	return color;	
+}
+
+vec4 calculateGrayScale(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile grayscaleTextureTiles[NUMLAYERS_GRAYSCALETEXTURE],
+	const Tile grayscaleTextureTilesParent1[NUMLAYERS_GRAYSCALETEXTURE],
+	const Tile grayscaleTextureTilesParent2[NUMLAYERS_GRAYSCALETEXTURE]) {
+
+	vec4 colorGrayScale = currentColor;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !GRAYSCALETEXTURE_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexGrayScaleTextures}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(grayscaleTextureTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(grayscaleTextureTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(grayscaleTextureTilesParent2[#{i}], uv);
+
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
+		colorGrayScale = blendOver(colorGrayScale, colorSample);
+	}
+	#endfor
+
+	return colorGrayScale;
 }
 
 float gridDots(vec2 uv, vec2 gridResolution){

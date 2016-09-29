@@ -81,6 +81,9 @@ return {
                         Enabled = true,
                     }
                 },
+                GrayScaleTextures = {
+                
+                },
                 GrayScaleOverlays = {
                    
                 },

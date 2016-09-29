@@ -33,11 +33,11 @@ return {
             Radii = marsEllipsoid,
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
-            SegmentsPerPatch = 90,
+            SegmentsPerPatch = 64,
             TextureInitData = {
                 ColorTextureMinimumSize = 512,
                 OverlayMinimumSize = 512,
-                HeightMapMinimumSize = 90,
+                HeightMapMinimumSize = 64,
             },
             Textures = {
                 ColorTextures = {
@@ -47,16 +47,23 @@ return {
                         FilePath = "../debugglobe/textures/test_tile.png",
                     },
                     {
-                        Name = "MARS_Viking_MDIM21",
+                        Name = "MARS_Viking",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        Enabled = true,
                     },
+                    --[[
                     {
                         Name = "Mars Viking Clr",
                         FilePath = "map_datasets/Viking/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
                         Enabled = true,
                     },
+                    ]]
+                },
+                GrayScaleTextures = {
+                    
                 },
                 GrayScaleOverlays = {
+                --[[
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
@@ -79,6 +86,7 @@ return {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
                     },
+                    ]]
                 },
                 NightTextures = {
 
@@ -99,6 +107,14 @@ return {
                     },
                 },
                 HeightMaps = {
+                    {
+                        Name = "Mola Elevation",
+                        FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
+                        Enabled = true,
+                        MinimumPixelSize = 64,
+                        DoPreProcessing = true,
+                    },
+                    --[[
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
@@ -123,6 +139,7 @@ return {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
                     },
+                    ]]
                 },
             },
         }

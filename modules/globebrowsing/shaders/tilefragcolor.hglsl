@@ -39,6 +39,12 @@ uniform Tile ColorTexturesParent1[NUMLAYERS_COLORTEXTURE];
 uniform Tile ColorTexturesParent2[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
+#if USE_GRAYSCALETEXTURE
+uniform Tile GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE];
+uniform Tile GrayScaleTexturesParent1[NUMLAYERS_GRAYSCALETEXTURE];
+uniform Tile GrayScaleTexturesParent2[NUMLAYERS_GRAYSCALETEXTURE];
+#endif // USE_GRAYSCALETEXTURE
+
 #if USE_NIGHTTEXTURE
 uniform Tile NightTextures[NUMLAYERS_NIGHTTEXTURE];
 uniform Tile NightTexturesParent1[NUMLAYERS_NIGHTTEXTURE];
@@ -138,6 +144,15 @@ vec4 getTileFragColor(){
 		ColorTexturesParent2);
 #endif // USE_COLORTEXTURE
 
+#if USE_GRAYSCALETEXTURE
+	color = calculateGrayScale(
+		color,
+		fs_uv,
+		levelWeights,
+		GrayScaleTextures,
+		GrayScaleTexturesParent1,
+		GrayScaleTexturesParent2);
+#endif // USE_GRAYSCALETEXTURE
 
 #if USE_GRAYSCALE_OVERLAY
 	

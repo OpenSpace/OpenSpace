@@ -54,6 +54,7 @@ return {
                         FilePath = "map_service_configs/OnMercuryImage.xml",
                     },
                 },
+                GrayScaleTextures = { },
                 GrayScaleOverlays = { },
                 NightTextures = { },
                 WaterMasks = { },
