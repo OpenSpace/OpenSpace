@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scene.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -68,6 +69,14 @@ namespace {
     const std::string KeyFocusObject = "Focus";
     const std::string KeyPositionObject = "Position";
     const std::string KeyViewOffset = "Offset";
+
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
+    const std::string PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
+    const std::string PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {
@@ -268,7 +277,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
-        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
+        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, sceneDescriptionFilePath);
     }
 
 
@@ -442,7 +451,7 @@ SceneGraph& Scene::sceneGraph() {
     return _graph;
 }
 
-void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename) {
     LDEBUG("Writing documentation for properties");
     if (type == "text") {
         std::ofstream file;
@@ -469,7 +478,37 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         file.exceptions(~std::ofstream::goodbit);
         file.open(filename);
 
-#ifdef JSON
+
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyOwnerTemplateInput(absPath(PropertyOwnerTemplateFilename));
+        std::string propertyOwnerTemplateContent{ std::istreambuf_iterator<char>{propertyOwnerTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyTemplateInput(absPath(PropertyTemplateFilename));
+        std::string propertyTemplateContent{ std::istreambuf_iterator<char>{propertyTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
         // Create JSON
         std::function<std::string(properties::PropertyOwner*)> createJson =
             [&createJson](properties::PropertyOwner* owner) -> std::string 
@@ -479,22 +518,30 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             json << "\"name\": \"" << owner->name() << "\",";
 
             json << "\"properties\": [";
-            for (properties::Property* p : owner->properties()) {
+            auto properties = owner->properties();
+            for (properties::Property* p : properties) {
                 json << "{";
                 json << "\"id\": \"" << p->identifier() << "\",";
                 json << "\"type\": \"" << p->className() << "\",";
                 json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
-                json << "\"guiName\": \"" << p->guiName() << "\",";
-                json << "},";
+                json << "\"guiName\": \"" << p->guiName() << "\"";
+                json << "}";
+                if (p != properties.back()) {
+                    json << ",";
+                }
             }
             json << "],";
 
-            json << "\"propertyOwner\": [";
-            for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+            json << "\"propertyOwners\": [";
+            auto propertyOwners = owner->propertySubOwners();
+            for (properties::PropertyOwner* o : propertyOwners) {
                 json << createJson(o);
+                if (o != propertyOwners.back()) {
+                    json << ",";
+                }
             }
-            json << "],";
-            json << "},";
+            json << "]";
+            json << "}";
 
             return json.str();
         };
@@ -502,15 +549,56 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
 
         std::stringstream json;
         json << "[";
-        for (SceneGraphNode* node : _graph.nodes()) {
+        auto nodes = _graph.nodes();
+        for (SceneGraphNode* node : nodes) {
             json << createJson(node);
+            if (node != nodes.back()) {
+                json << ",";
+            }
         }
 
         json << "]";
 
-        std::string jsonText = json.str();
-#else
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            } else {
+                jsonString += c;
+            }
+        }
+
         std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyOwnerTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyOwnerTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var propertyOwners = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << "var sceneFilename = '" << sceneFilename << "';\n"
+            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        /*
+
         html << "<html>\n"
              << "\t<head>\n"
              << "\t\t<title>Properties</title>\n"
@@ -546,9 +634,8 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
              << "</table>\n"
              << "</html>;";
 
+        */
         file << html.str();
-#endif
-
     }
     else
         LERROR("Undefined type '" << type << "' for Property documentation");

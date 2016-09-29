@@ -158,8 +158,7 @@ void FactoryManager::writeDocumentation(const std::string& file, const std::stri
         for (const char& c : json.str()) {
             if (c == '\'') {
                 jsonString += "\\'";
-            }
-            else {
+            } else {
                 jsonString += c;
             }
         }
