@@ -180,6 +180,10 @@ namespace openspace {
             std::pair<std::string, std::string>(
                 "useAtmosphere",
                 std::to_string(chunk.owner()->atmosphereEnabled)));
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "performShading",
+                std::to_string(chunk.owner()->performShading)));
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
@@ -368,7 +372,9 @@ namespace openspace {
         if (_tileProviderManager->getTileProviderGroup(
                 LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
             _tileProviderManager->getTileProviderGroup(
-                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
+            chunk.owner()->atmosphereEnabled ||
+            chunk.owner()->performShading) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
@@ -447,7 +453,9 @@ namespace openspace {
         if (_tileProviderManager->getTileProviderGroup(
                 LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
             _tileProviderManager->getTileProviderGroup(
-                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
+            chunk.owner()->atmosphereEnabled ||
+            chunk.owner()->performShading) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =

@@ -71,7 +71,7 @@ uniform vec2 vertexResolution;
 // TODO atmosphere uniforms here
 #endif // USE_ATMOSPHERE
 
-#if USE_NIGHTTEXTURE || USE_WATERMASK
+#if USE_NIGHTTEXTURE || USE_WATERMASK || USE_ATMOSPHERE || PERFORM_SHADING
 	uniform vec3 lightDirectionCameraSpace;
 #endif
 
@@ -178,6 +178,13 @@ vec4 getTileFragColor(){
 
 #endif // USE_NIGHTTEXTURE
 
+#if PERFORM_SHADING
+	color = calculateShadedColor(
+		color,
+		normalize(ellipsoidNormalCameraSpace),
+		lightDirectionCameraSpace);
+#endif // PERFORM_SHADING
+
 #if USE_ATMOSPHERE
 	// Temporary until the real atmosphere code is here
 	//color = color + vec4(0.5,0.5,1,0) * 0.3; // Just to see something for now
@@ -185,15 +192,17 @@ vec4 getTileFragColor(){
 	vec3 l = lightDirectionCameraSpace;
 	vec3 c = normalize(positionCameraSpace);
 	float cosFactor = clamp(dot(-n * 0.9, c), 0, 1);
+	cosFactor *= 1.1;
+	cosFactor -= 0.1;
+	cosFactor = clamp(cosFactor, 0, 1);
 	float shadowLight = 0.3;
 	float cosFactorLight = max(dot(-l, n), -shadowLight) + shadowLight;
 	float cosFactorScatter = max(dot(l, n) + shadowLight, 0);
 	//float cosFactorLight = max(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)), 0);
 	vec3 r = reflect(l, n);
 	float scatteredLight = pow(clamp(dot(-r,c), 0, 1), 20);
-	vec3 atmosphereColor = vec3(0.2,0.2,1) * (1 - (cosFactorScatter + scatteredLight)) + (cosFactorScatter + scatteredLight) * vec3(1,0.2,0.2);
+	vec3 atmosphereColor = vec3(0.5,0.5,1) * 2;
 	color = color + vec4(atmosphereColor,0) * (1 - cosFactor) * cosFactorLight *  0.5;
-
 #endif // USE_ATMOSPHERE
 
 #if USE_OVERLAY

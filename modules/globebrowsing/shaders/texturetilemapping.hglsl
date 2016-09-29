@@ -63,6 +63,7 @@
 
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
+#define PERFORM_SHADING #{performShading}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
@@ -207,13 +208,32 @@ vec4 calculateNight(
 	}
 	#endfor
 
-	//float cosineFactor = clamp(dot(-lightDirectionCameraSpace, ellipsoidNormalCameraSpace) * 3, 0, 1);
-	float shadowLight = 0.1;
-	float cosineFactor = clamp(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)) * 3, -shadowLight, 1) + shadowLight;
-	
-	// Blend night color with base color
-	vec4 color = currentColor * 0.1 + 0.9 * vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * vec3(nightColor * nightColor), currentColor.a);
 
+	vec3 n = normalize(ellipsoidNormalCameraSpace);
+	vec3 l = lightDirectionCameraSpace;
+	
+	float cosineFactor = clamp(dot(l, n) * 4, 0, 1);
+	
+	// Blend shaded color with base color
+	vec4 color = vec4(currentColor.rgb + (cosineFactor) * nightColor.xyz * nightColor.xyz * 1/0.1, currentColor.a);
+
+	return color;
+}
+
+vec4 calculateShadedColor(
+	const vec4 currentColor,
+	const vec3 ellipsoidNormalCameraSpace,
+	const vec3 lightDirectionCameraSpace) {
+
+	vec3 shadedColor = currentColor.rgb * 0.05;
+
+	vec3 n = normalize(ellipsoidNormalCameraSpace);
+	vec3 l = lightDirectionCameraSpace;
+	
+	float cosineFactor = clamp(dot(-l, n) * 4, 0, 1);
+	
+	// Blend shaded color with base color
+	vec4 color = vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * shadedColor, currentColor.a);
 	return color;
 }
 
@@ -326,7 +346,7 @@ vec4 calculateWater(
 	vec3 directionToFragmentCameraSpace = normalize(positionCameraSpace - vec3(0, 0, 0));
 	vec3 reflectionDirectionCameraSpace = reflect(lightDirectionCameraSpace, ellipsoidNormalCameraSpace);
 	float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
-	cosineFactor = pow(cosineFactor, 30);
+	cosineFactor = pow(cosineFactor, 100);
 
 	vec3 specularColor = vec3(1, 1, 1);
 	float specularIntensity = 0.4;

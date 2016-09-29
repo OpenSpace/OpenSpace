@@ -101,6 +101,7 @@ namespace openspace {
         float lodScaleFactor;
 
         bool atmosphereEnabled;
+        bool performShading;
 
         struct DebugOptions {
             bool showChunkEdges = false;
@@ -141,8 +142,8 @@ namespace openspace {
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
         const Ellipsoid& _ellipsoid;
-        glm::dmat4 _modelTransform;
-        glm::dmat4 _inverseModelTransform;
+        glm::dmat4 _cachedModelTransform;
+        glm::dmat4 _cachedInverseModelTransform;
 
         std::shared_ptr<Camera> _savedCamera;
         

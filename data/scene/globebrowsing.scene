@@ -50,7 +50,7 @@ return {
         "lodearth",
         "lodmoon",
         "lodmars",
-        "lodmercury",
+        --"lodmercury",
         "sun",
         "stars",
         "milkyway",    

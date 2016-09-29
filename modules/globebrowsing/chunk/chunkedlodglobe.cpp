@@ -170,10 +170,12 @@ namespace openspace {
         // Calculate the MVP matrix
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
-        dmat4 mvp = vp * _modelTransform;
+        dmat4 mvp = vp * _cachedModelTransform;
 
         // Render function
-        std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+        std::function<void(const ChunkNode&)> renderJob =
+            [this, &data, &mvp](const ChunkNode& chunkNode)
+        {
             stats.i["chunks"]++;
             const Chunk& chunk = chunkNode.getChunk();
             if (chunkNode.isLeaf()){
@@ -187,21 +189,17 @@ namespace openspace {
             }
         };
         
-        _leftRoot->reverseBreadthFirst(renderJob);
-        _rightRoot->reverseBreadthFirst(renderJob);
+        _leftRoot->breadthFirst(renderJob);
+        _rightRoot->breadthFirst(renderJob);
+        
+        //_leftRoot->reverseBreadthFirst(renderJob);
+        //_rightRoot->reverseBreadthFirst(renderJob);
 
         if (_savedCamera != nullptr) {
             DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
 
-        //LDEBUG("min distnace to camera: " << minDistToCamera);
-
         Vec3 cameraPos = data.camera.position().dvec3();
-        //LDEBUG("cam pos  x: " << cameraPos.x << "  y: " << cameraPos.y << "  z: " << cameraPos.z);
-
-        //LDEBUG("ChunkNode count: " << ChunkNode::chunkNodeCount);
-        //LDEBUG("RenderedPatches count: " << ChunkNode::renderedChunks);
-        //LDEBUG(ChunkNode::renderedChunks << " / " << ChunkNode::chunkNodeCount << " chunks rendered");
     }
 
 
@@ -233,23 +231,25 @@ namespace openspace {
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
-        glm::dmat4 translation = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+        glm::dmat4 translation =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
         glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-        glm::dmat4 scaling = glm::scale(glm::dmat4(1.0),
-            glm::dvec3(data.modelTransform.scale, data.modelTransform.scale, data.modelTransform.scale));
+        glm::dmat4 scaling =
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale,
+                data.modelTransform.scale, data.modelTransform.scale));
 
-        _modelTransform = translation * rotation * scaling;
-        _inverseModelTransform = glm::inverse(_modelTransform);
+        _cachedModelTransform = translation * rotation * scaling;
+        _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
 
         _renderer->update();
     }
 
     const glm::dmat4& ChunkedLodGlobe::modelTransform() {
-        return _modelTransform;
+        return _cachedModelTransform;
     }
 
     const glm::dmat4& ChunkedLodGlobe::inverseModelTransform() {
-        return _inverseModelTransform;
+        return _cachedInverseModelTransform;
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

@@ -29,6 +29,11 @@ return {
             },
             Textures = {
                 ColorTextures = {
+                    {
+                        Name = "OnMoonColorGrayscale",
+                        FilePath = "map_service_configs/OnMoonColor.xml",
+                        Enabled = true,
+                    },
                 },
                 GrayScaleOverlays = {
                     --[[                
