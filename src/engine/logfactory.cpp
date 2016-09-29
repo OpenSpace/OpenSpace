@@ -41,6 +41,10 @@ namespace {
 
     const std::string valueHtmlLog = "html";
     const std::string valueTextLog = "Text";
+
+    const std::string BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssPath = "${OPENSPACE_DATA}/web/log/style.css";
+    const std::string JsPath = "${OPENSPACE_DATA}/web/log/script.js";
 }
 
 namespace openspace {
@@ -81,13 +85,18 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
 
     if (type == valueHtmlLog) {
+
+        std::vector<std::string> cssFiles{absPath(BootstrapPath), absPath(CssPath)};
+        std::vector<std::string> jsFiles{absPath(JsPath)};
+
         return std::make_unique<ghoul::logging::HTMLLog>(
             filename,
             append ? Append::Yes : Append::No,
             timeStamp ? TimeStamping::Yes : TimeStamping::No,
             dateStamp ? DateStamping::Yes : DateStamping::No,
             categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
+            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+            cssFiles, jsFiles
         );
     }
     else if (type == valueTextLog) {
