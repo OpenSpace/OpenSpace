@@ -129,6 +129,15 @@ namespace interaction {
         }
         return false;
     }
+    
+    bool InputState::isKeyPressed(Key key) const {
+        for (auto it = _keysDown.begin(); it != _keysDown.end(); it++) {
+            if ((*it).first == key) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     bool InputState::isMouseButtonPressed(MouseButton mouseButton) const {
         for (auto it = _mouseButtonsDown.begin(); it != _mouseButtonsDown.end(); it++) {
@@ -199,13 +208,11 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
     bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
     bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
     bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(
-        std::pair<Key, KeyModifier>(Key::LeftControl, KeyModifier::Control));
-    bool keyShiftPressed = inputState.isKeyPressed(
-        std::pair<Key, KeyModifier>(Key::LeftShift, KeyModifier::Shift));
-
+    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
+    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
+    
     // Update the mouse states
-    if (button1Pressed) {
+    if (button1Pressed && !keyShiftPressed) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
@@ -239,7 +246,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
         _truckMovementMouseState.previousPosition = mousePosition;
         _truckMovementMouseState.velocity.decelerate(deltaTime);
     }
-    if (button3Pressed) {
+    if (button3Pressed || (keyShiftPressed && button1Pressed)) {
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRollMouseState.previousPosition - mousePosition;

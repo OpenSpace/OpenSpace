@@ -67,6 +67,7 @@ namespace interaction {
         std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames() const;
 
         bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
+        bool isKeyPressed(Key key) const;
         bool isMouseButtonPressed(MouseButton mouseButton) const;
     private:
         // Input from keyboard and mouse
