@@ -29,6 +29,7 @@ function postInitialization()
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     
+    openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true)
 
     openspace.resetCameraDirection()
     openspace.time.setDeltaTime(0)

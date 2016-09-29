@@ -57,14 +57,14 @@ return {
             Textures = {
                 ColorTextures = {
                     {
+                        Name = "ESRI Imagery World 2D",
+                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+                        Enabled = true,
+                    },
+                    {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
                         FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
-                    },
-                    {
-                        Type = "SingleImage",
-                        Name = "Debug Tiles",
-                        FilePath = "textures/test_tile.png",
                     },
                     {
                         Type = "Temporal",
@@ -76,13 +76,13 @@ return {
                         FilePath = "map_service_configs/GIBS/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
                     },
                     {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
-                        Enabled = true,
-                    }
+                        Type = "SingleImage",
+                        Name = "Debug Tiles",
+                        FilePath = "textures/test_tile.png",
+                    },
                 },
                 GrayScaleTextures = {
-                
+
                 },
                 GrayScaleOverlays = {
                    
@@ -91,12 +91,14 @@ return {
                     {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/GIBS/VIIRS_CityLights_2012.xml",
+                        Enabled = true,
                     },
                 },
                 WaterMasks = {
                     {
                         Name = "MODIS_Water_Mask",
                         FilePath = "map_service_configs/GIBS/MODIS_Water_Mask.xml",
+                        Enabled = true,
                     },
                 },
                 Overlays = {

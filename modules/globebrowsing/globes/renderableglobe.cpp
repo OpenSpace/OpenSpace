@@ -77,7 +77,7 @@ namespace openspace {
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
         , atmosphereEnabled(properties::BoolProperty("Atmosphere", "Atmosphere", false))
         , _performShading(
-            properties::BoolProperty("performShading", "Perform shading", false))
+            properties::BoolProperty("performShading", "Perform shading", true))
     {
         setName("RenderableGlobe");
         
