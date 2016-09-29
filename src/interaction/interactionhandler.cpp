@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/interactionhandler.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
@@ -49,6 +50,13 @@ namespace {
     const std::string KeyFocus = "Focus";
     const std::string KeyPosition = "Position";
     const std::string KeyRotation = "Rotation";
+
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
+    const std::string KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 #include "interactionhandler_lua.inl"
@@ -952,51 +960,91 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
         f.exceptions(~std::ofstream::goodbit);
         f.open(absPath(file));
 
-#ifdef JSON
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream keybindingTemplateInput(absPath(KeybindingTemplateFilename));
+        std::string keybindingTemplateContent{ std::istreambuf_iterator<char>{keybindingTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
         std::stringstream json;
         json << "[";
+        bool first = true;
         for (const auto& p : _keyLua) {
+            if (!first) {
+                json << ",";
+            }
+            first = false;
             json << "{";
             json << "\"key\": \"" << std::to_string(p.first) << "\",";
-            json << "\"script\": \"" << p.second << "\",";
-            json << "},";
+            json << "\"script\": \"" << p.second << "\"";
+            json << "}";
         }
         json << "]";
 
-        std::string jsonText = json.str();
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            } else {
+                jsonString += c;
+            }
+        }
 
-#else
+
         std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"keybindingTemplate\" type=\"text/x-handlebars-template\">\n"
+            << keybindingTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var keybindings = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
 
-        html << "<html>\n"
-             << "\t<head>\n"
-             << "\t\t<title>Key Bindings</title>\n"
-             << "\t</head>\n"
-             << "<body>\n"
-             << "<table cellpadding=3 cellspacing=0 border=1>\n"
-             << "\t<caption>Key Bindings</caption>\n\n"
-             << "\t<thead>\n"
-             << "\t\t<tr>\n"
-             << "\t\t\t<td>Key</td>\n"
-             << "\t\t\t<td>Binding</td>\n"
-             << "\t\t</tr>\n"
-             << "\t</thead>\n"
-             << "\t<tbody>\n";
+        f << html.str();
 
+        /*
         for (const auto& p : _keyLua) {
             html << "\t\t<tr>\n"
                  << "\t\t\t<td>" << std::to_string(p.first) << "</td>\n"
                  << "\t\t\t<td>" << p.second << "</td>\n"
                  << "\t\t</tr>\n";
-        }
-
-        html << "\t</tbody>\n"
-             << "</table>\n"
-             << "</html>";
-
-        f << html.str();
-#endif
-
+        }*/
     }
     else {
         throw ghoul::RuntimeError(
