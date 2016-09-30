@@ -67,7 +67,7 @@ public:
 
     void resetKeyBindings();
 
-    void addKeyframe(const network::datamessagestructures::CameraKeyframe &kf);
+    void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
     void clearKeyframes();
 
     void bindKeyLocal(Key key, KeyModifier modifier, std::string lua);

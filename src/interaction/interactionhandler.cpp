@@ -148,7 +148,7 @@ InteractionHandler::~InteractionHandler() {
 
 void InteractionHandler::initialize() {
     OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
-        if (OsEng.parallelConnection().status() == network::ParallelConnection::Status::ClientWithHost) {
+        if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
             setInteractionMode("Keyframe");
         } else {
             auto keyframeModeIter = _interactionModes.find("Keyframe");
@@ -581,7 +581,7 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-void InteractionHandler::addKeyframe(const network::datamessagestructures::CameraKeyframe &kf) {
+void InteractionHandler::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
     _inputState->addKeyframe(kf);
 }
 

@@ -61,9 +61,8 @@ typedef int _SOCKET;
 #endif
 
 namespace openspace {
-namespace network {
 
-class ParallelConnection{
+class ParallelConnection {
     public:
     enum class Status : uint32_t {
         Disconnected = 0,
@@ -94,11 +93,11 @@ class ParallelConnection{
 
     struct DataMessage {
         DataMessage() {};
-        DataMessage(network::datamessagestructures::Type t, const std::vector<char>& c)
+        DataMessage(datamessagestructures::Type t, const std::vector<char>& c)
             : type(t)
             , content(c)
         {};
-        network::datamessagestructures::Type type;
+        datamessagestructures::Type type;
         std::vector<char> content;
     };
 
@@ -204,7 +203,6 @@ private:
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 };
 
-} // namespace network
 } // namespace openspace
 
 #endif // __OSPARALLELCONNECTION_H__

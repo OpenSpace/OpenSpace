@@ -146,7 +146,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     , _gui(new gui::GUI)
 #endif
-    , _parallelConnection(new network::ParallelConnection)
+    , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner)
     , _isMaster(false)
@@ -1151,7 +1151,7 @@ gui::GUI& OpenSpaceEngine::gui() {
 }
 #endif
 
-network::ParallelConnection& OpenSpaceEngine::parallelConnection() {
+ParallelConnection& OpenSpaceEngine::parallelConnection() {
     ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
     return *_parallelConnection;
 }

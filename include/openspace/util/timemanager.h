@@ -33,15 +33,15 @@ namespace openspace {
 class TimeManager {
 public:
     void preSynchronization(double dt);
-    void addKeyframe(const network::datamessagestructures::TimeKeyframe& kf);
+    void addKeyframe(const datamessagestructures::TimeKeyframe& kf);
     void removeKeyframesBefore(double timestamp);
     void clearKeyframes();
 private:
     void consumeKeyframes(double dt);
-    std::deque<network::datamessagestructures::TimeKeyframe> _keyframes;
+    std::deque<datamessagestructures::TimeKeyframe> _keyframes;
     static bool compareKeyframeTimes(
-        const network::datamessagestructures::TimeKeyframe& a,
-        const network::datamessagestructures::TimeKeyframe& b);
+        const datamessagestructures::TimeKeyframe& a,
+        const datamessagestructures::TimeKeyframe& b);
     double _latestConsumedTimestamp;
 };
 

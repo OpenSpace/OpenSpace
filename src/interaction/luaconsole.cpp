@@ -94,7 +94,7 @@ void LuaConsole::initialize() {
 
     OsEng.parallelConnection().connectionEvent()->subscribe("luaConsole",
         "statusChanged", [this]() {
-        network::ParallelConnection::Status status = OsEng.parallelConnection().status();
+        ParallelConnection::Status status = OsEng.parallelConnection().status();
         parallelConnectionChanged(status);
     });
 
@@ -431,8 +431,8 @@ void LuaConsole::toggleMode() {
     }
 }
 
-void LuaConsole::parallelConnectionChanged(const network::ParallelConnection::Status& status) {
-    _remoteScripting = status == network::ParallelConnection::Status::Host;
+void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
+    _remoteScripting = status == ParallelConnection::Status::Host;
 }
 
 

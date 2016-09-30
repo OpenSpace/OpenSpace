@@ -53,11 +53,11 @@ class WindowWrapper;
 class SettingsEngine;
 class TimeManager;
 class SyncEngine;
+class ParallelConnection;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
 //namespace scripting { class ScriptEngine; }
-namespace network { class ParallelConnection; }
 namespace properties { class PropertyOwner; }
 namespace scripting { struct LuaLibrary; }
 namespace scripting { class ScriptScheduler; }
@@ -86,7 +86,7 @@ public:
     NetworkEngine& networkEngine();
     LuaConsole& console();
     ModuleEngine& moduleEngine();
-    network::ParallelConnection& parallelConnection();
+    ParallelConnection& parallelConnection();
     properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
@@ -158,7 +158,7 @@ private:
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;
 #endif
-    std::unique_ptr<network::ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 

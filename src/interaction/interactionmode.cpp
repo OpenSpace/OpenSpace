@@ -57,15 +57,15 @@ namespace interaction {
 
     }
 
-    const std::vector<network::datamessagestructures::CameraKeyframe>& InputState::keyframes() const {
+    const std::vector<datamessagestructures::CameraKeyframe>& InputState::keyframes() const {
         return _keyframes;
     }
 
-    void InputState::addKeyframe(const network::datamessagestructures::CameraKeyframe &kf) {
+    void InputState::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
         clearOldKeyframes();
 
-        auto compareTimestamps = [](const network::datamessagestructures::CameraKeyframe a,
-            network::datamessagestructures::CameraKeyframe b) {
+        auto compareTimestamps = [](const datamessagestructures::CameraKeyframe a,
+            datamessagestructures::CameraKeyframe b) {
             return a._timestamp < b._timestamp;
         };
 
@@ -77,7 +77,7 @@ namespace interaction {
 
     void InputState::clearOldKeyframes() {
         double now = OsEng.runTime();
-        auto isLater = [now](const network::datamessagestructures::CameraKeyframe kf) {
+        auto isLater = [now](const datamessagestructures::CameraKeyframe kf) {
             return kf._timestamp > now;
         };
 
@@ -201,7 +201,7 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
     }
 
     double now = OsEng.runTime();
-    auto isLater = [now](const network::datamessagestructures::CameraKeyframe kf) {
+    auto isLater = [now](const datamessagestructures::CameraKeyframe kf) {
         return kf._timestamp > now;
     };
 

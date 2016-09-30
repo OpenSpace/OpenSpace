@@ -32,7 +32,7 @@ namespace {
 
 namespace openspace {
 
-using network::datamessagestructures::TimeKeyframe;
+using datamessagestructures::TimeKeyframe;
 
 void TimeManager::preSynchronization(double dt) {
     double now = OsEng.runTime();
@@ -135,7 +135,7 @@ void TimeManager::addKeyframe(const TimeKeyframe& kf) {
 
 
 void TimeManager::removeKeyframesBefore(double timestamp) {
-    network::datamessagestructures::TimeKeyframe kf;
+    datamessagestructures::TimeKeyframe kf;
     kf._timestamp = timestamp;
     auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
     _keyframes.erase(_keyframes.begin(), iter);

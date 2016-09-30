@@ -76,8 +76,6 @@ namespace {
 
 namespace openspace {
 
-namespace network {
-        
 ParallelConnection::ParallelConnection()
     : _passCode(0)
     , _port("20501")
@@ -525,25 +523,25 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
     uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
     std::vector<char> buffer(messageContent.begin() + sizeof(uint32_t), messageContent.end());
  
-    switch(static_cast<network::datamessagestructures::Type>(type)) {
-        case network::datamessagestructures::Type::CameraData: {
+    switch(static_cast<datamessagestructures::Type>(type)) {
+        case datamessagestructures::Type::CameraData: {
 
-            network::datamessagestructures::CameraKeyframe kf(buffer);
+            datamessagestructures::CameraKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
             OsEng.interactionHandler().addKeyframe(kf);
             break;
         }
-        case network::datamessagestructures::Type::TimeData: {
+        case datamessagestructures::Type::TimeData: {
 
-            network::datamessagestructures::TimeKeyframe kf(buffer);
+            datamessagestructures::TimeKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
             OsEng.timeManager().addKeyframe(kf);
             break;
         }
-        case network::datamessagestructures::Type::ScriptData: {
-            network::datamessagestructures::ScriptMessage sm;
+        case datamessagestructures::Type::ScriptData: {
+            datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
             OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);
             
@@ -638,7 +636,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
     }
     size_t pointer = 0;
     uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
-    network::ParallelConnection::Status status = static_cast<network::ParallelConnection::Status>(statusIn);
+    ParallelConnection::Status status = static_cast<ParallelConnection::Status>(statusIn);
     pointer += sizeof(uint32_t);
 
     size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
@@ -731,7 +729,7 @@ void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& me
             
     //serialize and encode all scripts into scriptbuffer
     std::vector<std::string>::iterator script_it;
-    network::datamessagestructures::ScriptMessage sm;
+    datamessagestructures::ScriptMessage sm;
     for(script_it = scripts.begin();
         script_it != scripts.end();
         ++script_it){
@@ -913,13 +911,13 @@ bool ParallelConnection::initNetworkAPI(){
 void ParallelConnection::sendScript(const std::string& script) {
     if (!isHost()) return;
 
-    network::datamessagestructures::ScriptMessage sm;
+    datamessagestructures::ScriptMessage sm;
     sm._script = script;
     
     std::vector<char> buffer;
     sm.serialize(buffer);
 
-    queueOutDataMessage(DataMessage(network::datamessagestructures::Type::ScriptData, buffer));
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::ScriptData, buffer));
 }
 
 void ParallelConnection::preSynchronization(){
@@ -977,7 +975,7 @@ const std::string& ParallelConnection::hostName() {
 
 void ParallelConnection::sendCameraKeyframe() {
     //create a keyframe with current position and orientation of camera
-    network::datamessagestructures::CameraKeyframe kf;
+    datamessagestructures::CameraKeyframe kf;
     kf._position = OsEng.interactionHandler().camera()->positionVec3();
     kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
 
@@ -991,12 +989,12 @@ void ParallelConnection::sendCameraKeyframe() {
     kf.serialize(buffer);
 
     //send message
-    queueOutDataMessage(DataMessage(network::datamessagestructures::Type::CameraData, buffer));
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::CameraData, buffer));
 }
 
 void ParallelConnection::sendTimeKeyframe() {
     //create a keyframe with current position and orientation of camera
-    network::datamessagestructures::TimeKeyframe kf;
+    datamessagestructures::TimeKeyframe kf;
     
     kf._dt = Time::ref().deltaTime();
     kf._paused = Time::ref().paused();
@@ -1013,7 +1011,7 @@ void ParallelConnection::sendTimeKeyframe() {
     kf.serialize(buffer);
 
     //send message
-    queueOutDataMessage(DataMessage(network::datamessagestructures::Type::TimeData, buffer));
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::TimeData, buffer));
     _timeJumped = false;
 }
 
@@ -1107,7 +1105,5 @@ scripting::LuaLibrary ParallelConnection::luaLibrary() {
         }
     };
 }
-        
-} // namespace network
-    
+
 } // namespace openspace

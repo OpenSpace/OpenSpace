@@ -1328,28 +1328,28 @@ void RenderEngine::renderInformation() {
                     break;
             }
 
-        network::ParallelConnection::Status status = OsEng.parallelConnection().status();
+        ParallelConnection::Status status = OsEng.parallelConnection().status();
         size_t nConnections = OsEng.parallelConnection().nConnections();
         const std::string& hostName = OsEng.parallelConnection().hostName();
 
         std::string connectionInfo = "";
         int nClients = nConnections;
-        if (status == network::ParallelConnection::Status::Host) {
+        if (status == ParallelConnection::Status::Host) {
             nClients--;
             if (nClients == 1) {
                 connectionInfo = "Hosting session with 1 client";
             } else {
                 connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
             }
-        } else if (status == network::ParallelConnection::Status::ClientWithHost) {
+        } else if (status == ParallelConnection::Status::ClientWithHost) {
             nClients--;
             connectionInfo = "Session hosted by '" + hostName + "'";
-        } else if (status == network::ParallelConnection::Status::ClientWithoutHost) {
+        } else if (status == ParallelConnection::Status::ClientWithoutHost) {
             connectionInfo = "Host is disconnected";
         }
 
-        if (status == network::ParallelConnection::Status::ClientWithHost ||
-            status == network::ParallelConnection::Status::ClientWithoutHost) {
+        if (status == ParallelConnection::Status::ClientWithHost ||
+            status == ParallelConnection::Status::ClientWithoutHost) {
             connectionInfo += "\n";
             if (nClients > 2) {
                 connectionInfo += "You and " + std::to_string(nClients - 1) + " more clients are tuned in";

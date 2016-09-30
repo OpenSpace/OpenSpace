@@ -36,138 +36,132 @@
 #include <openspace/util/camera.h>
 
 namespace openspace{
-    
-    namespace network{
-        
-        namespace datamessagestructures {
-            enum class Type : uint32_t {
-                CameraData = 0,
-                TimeData,
-                ScriptData
-            };
+namespace datamessagestructures {
+enum class Type : uint32_t {
+    CameraData = 0,
+    TimeData,
+    ScriptData
+};
 
-            struct CameraKeyframe {
-                CameraKeyframe() {}
-                CameraKeyframe(const std::vector<char> &buffer) {
-                    deserialize(buffer);
-                }
+struct CameraKeyframe {
+    CameraKeyframe() {}
+    CameraKeyframe(const std::vector<char> &buffer) {
+        deserialize(buffer);
+    }
 
-                glm::dvec3 _position;
-                glm::dquat _rotation;
-                double _timestamp;
+    glm::dvec3 _position;
+    glm::dquat _rotation;
+    double _timestamp;
                 
-                void serialize(std::vector<char> &buffer){
-                    //add position
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
+    void serialize(std::vector<char> &buffer){
+        //add position
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
                     
-                    //add orientation
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
+        //add orientation
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
                     
-                    //add timestamp
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
-                };
+        //add timestamp
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
+    };
                 
-                void deserialize(const std::vector<char> &buffer){
-                    int offset = 0;
-                    int size = 0;
+    void deserialize(const std::vector<char> &buffer){
+        int offset = 0;
+        int size = 0;
                     
-                    //position
-                    size = sizeof(_position);
-                    memcpy(&_position, buffer.data() + offset, size);
-                    offset += size;
+        //position
+        size = sizeof(_position);
+        memcpy(&_position, buffer.data() + offset, size);
+        offset += size;
                     
-                    //orientation
-                    size = sizeof(_rotation);
-                    memcpy(&_rotation, buffer.data() + offset, size);
-                    offset += size;
+        //orientation
+        size = sizeof(_rotation);
+        memcpy(&_rotation, buffer.data() + offset, size);
+        offset += size;
                     
-                    //timestamp
-                    size = sizeof(_timestamp);
-                    memcpy(&_timestamp, buffer.data() + offset, size);
-                };
-            };
+        //timestamp
+        size = sizeof(_timestamp);
+        memcpy(&_timestamp, buffer.data() + offset, size);
+    };
+};
             
-            struct TimeKeyframe {
-                TimeKeyframe() {}
-                TimeKeyframe(const std::vector<char> &buffer) {
-                    deserialize(buffer);
-                }
+struct TimeKeyframe {
+    TimeKeyframe() {}
+    TimeKeyframe(const std::vector<char> &buffer) {
+        deserialize(buffer);
+    }
 
-                double _time;
-                double _dt;
-                bool _paused;
-                bool _requiresTimeJump;
-                double _timestamp;
+    double _time;
+    double _dt;
+    bool _paused;
+    bool _requiresTimeJump;
+    double _timestamp;
                 
-                void serialize(std::vector<char> &buffer){
-                    //add current time
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_time), reinterpret_cast<char*>(&_time) + sizeof(_time));
+    void serialize(std::vector<char> &buffer){
+        //add current time
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_time), reinterpret_cast<char*>(&_time) + sizeof(_time));
                     
-                    //add delta time
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_dt), reinterpret_cast<char*>(&_dt) + sizeof(_dt));
+        //add delta time
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_dt), reinterpret_cast<char*>(&_dt) + sizeof(_dt));
                     
-                    //add wether time is paused or not
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_paused), reinterpret_cast<char*>(&_paused) + sizeof(_paused));
+        //add wether time is paused or not
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_paused), reinterpret_cast<char*>(&_paused) + sizeof(_paused));
                     
-                    //add wether a time jump is necessary (recompute paths etc)
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
+        //add wether a time jump is necessary (recompute paths etc)
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
 
-                    //add timestamp
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
-                };
+        //add timestamp
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
+    };
                 
-                void deserialize(const std::vector<char> &buffer){
-                    int offset = 0;
-                    int size = 0;
+    void deserialize(const std::vector<char> &buffer){
+        int offset = 0;
+        int size = 0;
                     
-                    //current time
-                    size = sizeof(_time);
-                    memcpy(&_time, buffer.data() + offset, size);
-                    offset += size;
+        //current time
+        size = sizeof(_time);
+        memcpy(&_time, buffer.data() + offset, size);
+        offset += size;
                     
-                    //delta time
-                    size = sizeof(_dt);
-                    memcpy(&_dt, buffer.data() + offset, size);
-                    offset += size;
+        //delta time
+        size = sizeof(_dt);
+        memcpy(&_dt, buffer.data() + offset, size);
+        offset += size;
                     
-                    //is time paused?
-                    size = sizeof(_paused);
-                    memcpy(&_paused, buffer.data() + offset, size);
-                    offset += sizeof(_paused);
+        //is time paused?
+        size = sizeof(_paused);
+        memcpy(&_paused, buffer.data() + offset, size);
+        offset += sizeof(_paused);
     
-                    //is a time jump required?
-                    size = sizeof(_requiresTimeJump);
-                    memcpy(&_requiresTimeJump, buffer.data() + offset, size);
-                    offset += size;
+        //is a time jump required?
+        size = sizeof(_requiresTimeJump);
+        memcpy(&_requiresTimeJump, buffer.data() + offset, size);
+        offset += size;
 
-                    // timestamp
-                    size = sizeof(_timestamp);
-                    memcpy(&_timestamp, buffer.data() + offset, size);
-                    offset += size;
-                };
-            };
+        // timestamp
+        size = sizeof(_timestamp);
+        memcpy(&_timestamp, buffer.data() + offset, size);
+        offset += size;
+    };
+};
             
-            struct ScriptMessage {
-                ScriptMessage() {}
-                ScriptMessage(const std::vector<char> &buffer) {
-                    deserialize(buffer);
-                }
+struct ScriptMessage {
+    ScriptMessage() {}
+    ScriptMessage(const std::vector<char> &buffer) {
+        deserialize(buffer);
+    }
 
-                std::string _script;
+    std::string _script;
                 
-                void serialize(std::vector<char> &buffer){
-                    buffer.insert(buffer.end(), _script.begin(), _script.end());
-                };
+    void serialize(std::vector<char> &buffer){
+        buffer.insert(buffer.end(), _script.begin(), _script.end());
+    };
                 
-                void deserialize(const std::vector<char> &buffer){
-                    _script.assign(buffer.begin(), buffer.end());
-                };
-            };
+    void deserialize(const std::vector<char> &buffer){
+        _script.assign(buffer.begin(), buffer.end());
+    };
+};
             
-        } //namespace messagestructures
-
-    } // namespace network
-    
+} //namespace messagestructures
 } // namespace openspace
 
 #endif // __MESSAGESTRUCTURES_H__
