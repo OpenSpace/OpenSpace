@@ -33,33 +33,38 @@
 #include <glm/gtx/quaternion.hpp>
 
 //openspace includes
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/camera.h>
 
 namespace openspace{
     
     namespace network{
         
-        namespace datamessagestructures{
-            enum type{
-                PositionData = 0,
+        namespace datamessagestructures {
+            enum class Type : uint32_t {
+                CameraData = 0,
                 TimeData,
                 ScriptData
             };
-        
-            struct PositionKeyframe{
-                glm::quat _viewRotationQuat;
-                psc _position;
-                double _timeStamp;
+
+            struct CameraKeyframe {
+                CameraKeyframe() {}
+                CameraKeyframe(const std::vector<char> &buffer) {
+                    deserialize(buffer);
+                }
+
+                glm::dvec3 _position;
+                glm::dquat _rotation;
+                double _timestamp;
                 
                 void serialize(std::vector<char> &buffer){
                     //add position
                     buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
                     
                     //add orientation
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_viewRotationQuat), reinterpret_cast<char*>(&_viewRotationQuat) + sizeof(_viewRotationQuat));
+                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
                     
                     //add timestamp
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timeStamp), reinterpret_cast<char*>(&_timeStamp) + sizeof(_timeStamp));
+                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
                 };
                 
                 void deserialize(const std::vector<char> &buffer){
@@ -72,22 +77,27 @@ namespace openspace{
                     offset += size;
                     
                     //orientation
-                    size = sizeof(_viewRotationQuat);
-                    memcpy(&_viewRotationQuat, buffer.data() + offset, size);
+                    size = sizeof(_rotation);
+                    memcpy(&_rotation, buffer.data() + offset, size);
                     offset += size;
                     
                     //timestamp
-                    size = sizeof(_timeStamp);
-                    memcpy(&_timeStamp, buffer.data() + offset, size);
+                    size = sizeof(_timestamp);
+                    memcpy(&_timestamp, buffer.data() + offset, size);
                 };
             };
             
-            struct TimeKeyframe{
+            struct TimeKeyframe {
+                TimeKeyframe() {}
+                TimeKeyframe(const std::vector<char> &buffer) {
+                    deserialize(buffer);
+                }
 
                 double _time;
                 double _dt;
                 bool _paused;
                 bool _requiresTimeJump;
+                double _timestamp;
                 
                 void serialize(std::vector<char> &buffer){
                     //add current time
@@ -101,6 +111,9 @@ namespace openspace{
                     
                     //add wether a time jump is necessary (recompute paths etc)
                     buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
+
+                    //add timestamp
+                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
                 };
                 
                 void deserialize(const std::vector<char> &buffer){
@@ -125,34 +138,29 @@ namespace openspace{
                     //is a time jump required?
                     size = sizeof(_requiresTimeJump);
                     memcpy(&_requiresTimeJump, buffer.data() + offset, size);
+                    offset += size;
+
+                    // timestamp
+                    size = sizeof(_timestamp);
+                    memcpy(&_timestamp, buffer.data() + offset, size);
+                    offset += size;
                 };
             };
             
-            struct ScriptMessage{
-                
-                uint16_t _scriptlen;
+            struct ScriptMessage {
+                ScriptMessage() {}
+                ScriptMessage(const std::vector<char> &buffer) {
+                    deserialize(buffer);
+                }
+
                 std::string _script;
                 
                 void serialize(std::vector<char> &buffer){
-                    //add script length
-                    buffer.insert(buffer.end(), reinterpret_cast<char*>(&_scriptlen), reinterpret_cast<char*>(&_scriptlen) + sizeof(_scriptlen));
-                    
-                    //add script
                     buffer.insert(buffer.end(), _script.begin(), _script.end());
-                    
                 };
                 
                 void deserialize(const std::vector<char> &buffer){
-                    int offset = 0;
-                    int size = 0;
-                    
-                    //size of script
-                    size = sizeof(uint16_t);
-                    memcpy(&_scriptlen, buffer.data() + offset, size);
-                    offset += size;
-                    
-                    //actual script
-                    _script.assign(buffer.begin() + offset, buffer.end());
+                    _script.assign(buffer.begin(), buffer.end());
                 };
             };
             

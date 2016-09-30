@@ -753,23 +753,20 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "toggleFade",
                 &luascriptfunctions::toggleFade,
                 "number",
-                "Toggles fading in or out",
-                true
+                "Toggles fading in or out"
             },
             {
                 "fadeIn",
                 &luascriptfunctions::fadeIn,
                 "number",
-                "",
-                true
+                ""
             },
             //also temporary @JK
             {
                 "fadeOut",
                 &luascriptfunctions::fadeOut,
                 "number",
-                "",
-                true
+                ""
             },
             {
                 "registerScreenSpaceRenderable",
@@ -1328,6 +1325,45 @@ void RenderEngine::renderInformation() {
                     );
                     break;
             }
+
+        network::Status status = OsEng.parallelConnection().status();
+        size_t nConnections = OsEng.parallelConnection().nConnections();
+        const std::string& hostName = OsEng.parallelConnection().hostName();
+
+        std::string connectionInfo = "";
+        int nClients = nConnections;
+        if (status == network::Status::Host) {
+            nClients--;
+            if (nClients == 1) {
+                connectionInfo = "Hosting session with 1 client";
+            } else {
+                connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
+            }
+        } else if (status == network::Status::ClientWithHost) {
+            nClients--;
+            connectionInfo = "Session hosted by '" + hostName + "'";
+        } else if (status == network::Status::ClientWithoutHost) {
+            connectionInfo = "Host is disconnected";
+        }
+
+        if (status == network::Status::ClientWithHost || status == network::Status::ClientWithoutHost) {
+            connectionInfo += "\n";
+            if (nClients > 2) {
+                connectionInfo += "You and " + std::to_string(nClients - 1) + " more clients are tuned in";
+            } else if (nClients == 2) {
+                connectionInfo += "You and " + std::to_string(nClients - 1) + " more client are tuned in";
+            } else if (nClients == 1) {
+                connectionInfo += "You are the only client";
+            }
+        }
+
+        if (connectionInfo != "") {
+            RenderFontCr(*_fontInfo,
+                penPosition,
+                connectionInfo.c_str()
+            );
+        }
+
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 //<<<<<<< HEAD

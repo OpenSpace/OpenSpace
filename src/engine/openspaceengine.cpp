@@ -50,6 +50,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
@@ -140,6 +141,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
     , _settingsEngine(new SettingsEngine)
+    , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     , _gui(new gui::GUI)
@@ -154,6 +156,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdownWait(0.f)
     , _isFirstRenderingFirstFrame(true)
 {
+
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
@@ -179,6 +182,7 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui->deinitializeGL();
 #endif
+    _interactionHandler->deinitialize();
     _renderEngine->deinitialize();
 
     _globalPropertyNamespace = nullptr;
@@ -437,6 +441,9 @@ bool OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
+    // Initialize the InteractionHandler
+    _interactionHandler->initialize();
+
     // Load a light and a monospaced font
     loadFonts();
 
@@ -628,6 +635,7 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         
         //@JK
         //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
+        /*
         std::ifstream scriptFile;
         scriptFile.open(absoluteScriptPath.c_str());
         std::string line;
@@ -641,7 +649,7 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
                     _engine->scriptEngine().cacheScript(lib, func, line);
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -836,14 +844,13 @@ void OpenSpaceEngine::preSynchronization() {
     _syncEngine->presync(_isMaster);
     if (_isMaster) {
         double dt = _windowWrapper->averageDeltaTime();
-
-        Time::ref().advanceTime(dt);
+        _timeManager->preSynchronization(dt);
 
         auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
         while(scheduledScripts.size()){
             auto scheduledScript = scheduledScripts.front();
             LINFO(scheduledScript);
-            _scriptEngine->queueScript(scheduledScript);
+            _scriptEngine->queueScript(scheduledScript, ScriptEngine::RemoteScripting::Yes);
             scheduledScripts.pop();
         }
 
@@ -967,14 +974,13 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
                 return;
         }
 #endif
-
-        if (key == _console->commandInputButton() && (action == KeyAction::Press || action == KeyAction::Repeat))
-            _console->toggleVisibility();
-
-        if (!_console->isVisible()) {
+        if (key == _console->commandInputButton()) {
+            if (action == KeyAction::Press) {
+                _console->toggleMode();
+            }
+        } else if (!_console->isVisible()) {
             _interactionHandler->keyboardCallback(key, mod, action);
-        }
-        else {
+        } else {
             _console->keyboardCallback(key, mod, action);
         }
     }
@@ -1171,6 +1177,11 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
 DownloadManager& OpenSpaceEngine::downloadManager() {
     ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
     return *_downloadManager;
+}
+
+TimeManager& OpenSpaceEngine::timeManager() {
+    ghoul_assert(_timeManager, "Download Manager must not be nullptr");
+    return *_timeManager;
 }
 
 

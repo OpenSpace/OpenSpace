@@ -669,7 +669,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Sets a property identified by the URI in "
                 "the first argument. The second argument can be any type, but it has to "
                 "match the type that the property expects.",
-                true
             },
             {
                 "getPropertyValue",

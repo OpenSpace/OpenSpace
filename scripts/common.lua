@@ -12,24 +12,24 @@ helper.scheduledScript.reversible = {}
 -- Function that sets the most common key bindings that are common to most (all?)
 -- scenes
 helper.setCommonKeys = function()
-    openspace.bindKey("F1", "openspace.gui.toggle()")
-    openspace.bindKey("F2", "openspace.setPerformanceMeasurement(true)")
-    openspace.bindKey("F3", "openspace.setPerformanceMeasurement(false)")
+    openspace.bindKeyLocal("F1", "openspace.gui.toggle()")
+    openspace.bindKeyLocal("F2", "openspace.setPerformanceMeasurement(true)")
+    openspace.bindKeyLocal("F3", "openspace.setPerformanceMeasurement(false)")
 
-    openspace.bindKey("t", "openspace.toggleFrametimeType(1)")
-    openspace.bindKey("Shift+t", "openspace.toggleFrametimeType(0)")
+    openspace.bindKeyLocal("t", "openspace.toggleFrametimeType(1)")
+    openspace.bindKeyLocal("Shift+t", "openspace.toggleFrametimeType(0)")
 
-    openspace.bindKey("ESC", "openspace.toggleShutdown()")
+    openspace.bindKeyLocal("ESC", "openspace.toggleShutdown()")
 
-    openspace.bindKey("PRINT_SCREEN", "openspace.takeScreenshot()")
+    openspace.bindKeyLocal("PRINT_SCREEN", "openspace.takeScreenshot()")
     openspace.bindKey("SPACE", "openspace.time.togglePause()")
 
     openspace.bindKey("COMMA", "openspace.setRenderer('Framebuffer');")
     openspace.bindKey("PERIOD", "openspace.setRenderer('ABuffer');")
 
 
-    openspace.bindKey("f", helper.property.invert('Interaction.rotationalFriction'))
-    openspace.bindKey("Shift+f", helper.property.invert('Interaction.zoomFriction'))
+    openspace.bindKeyLocal("f", helper.property.invert('Interaction.rotationalFriction'))
+    openspace.bindKeyLocal("Shift+f", helper.property.invert('Interaction.zoomFriction'))
 
     openspace.bindKey("w", "openspace.toggleFade(3)")
 end

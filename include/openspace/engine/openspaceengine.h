@@ -51,6 +51,7 @@ class RenderEngine;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
+class TimeManager;
 class SyncEngine;
 
 namespace interaction { class InteractionHandler; }
@@ -90,6 +91,7 @@ public:
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     DownloadManager& downloadManager();
+    TimeManager& timeManager();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     gui::GUI& gui();
@@ -151,6 +153,7 @@ private:
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<DownloadManager> _downloadManager;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;

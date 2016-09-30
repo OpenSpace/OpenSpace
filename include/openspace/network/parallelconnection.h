@@ -33,12 +33,15 @@
 //glm includes
 #include <glm/gtx/quaternion.hpp>
 
+//ghoul includes
+#include <ghoul/designpattern/event.h>
+
 //std includes
 #include <string>
 #include <vector>
+#include <deque>
 #include <atomic>
 #include <thread>
-#include <sstream>
 #include <mutex>
 #include <map>
 #include <condition_variable>
@@ -59,48 +62,64 @@ typedef int _SOCKET;
 #include <netdb.h>
 #endif
 
-namespace openspace{
+namespace openspace {
     
-    namespace network{
+    namespace network {
         
+        enum class Status : uint32_t {
+            Disconnected = 0,
+            ClientWithoutHost,
+            ClientWithHost,
+            Host
+        };
+
+        enum class MessageType : uint32_t {
+            Authentication = 0,
+            Data,
+            ConnectionStatus,
+            HostshipRequest,
+            HostshipResignation,
+            NConnections
+        };
+
+        struct Message {
+            Message() {};
+            Message(MessageType t, const std::vector<char>& c)
+                : type(t)
+                , content(c)
+            {};
+
+            MessageType type;
+            std::vector<char> content;
+        };
+
+        struct DataMessage {
+            DataMessage() {};
+            DataMessage(network::datamessagestructures::Type t, const std::vector<char>& c)
+                : type(t)
+                , content(c)
+            {};
+            network::datamessagestructures::Type type;
+            std::vector<char> content;
+        };
+
         class ParallelConnection{
         public:
-            
             ParallelConnection();
-            
             ~ParallelConnection();
-            
             void clientConnect();
-            
             void setPort(const std::string &port);
-            
             void setAddress(const std::string &address);
-            
             void setName(const std::string& name);
-            
             bool isHost();
-            
+            const std::string& hostName();
             void requestHostship(const std::string &password);
-
+            void resignHostship();
             void setPassword(const std::string &password);
-            
             void signalDisconnect();
-            
             void preSynchronization();
-            
-            void scriptMessage(const std::string propIdentifier, const std::string propValue);
-            
-            enum MessageTypes{
-                Authentication=0,
-                Initialization,
-                Data,
-                Script, //obsolete now 
-                HostInfo,
-                InitializationRequest,
-                HostshipRequest,
-                InitializationCompleted
-            };
-            
+            void sendScript(const std::string& script);
+
             /**
              * Returns the Lua library that contains all Lua functions available to affect the
              * remote OS parallel connection. The functions contained are
@@ -109,97 +128,81 @@ namespace openspace{
              * interaction
              */
             static scripting::LuaLibrary luaLibrary();
-            
-        protected:
+            Status status();
+            size_t nConnections();
+            std::shared_ptr<ghoul::Event<>> connectionEvent();
             
         private:
             //@TODO change this into the ghoul hasher for client AND server
-            uint32_t hash(const std::string &val){
-                uint32_t hashVal = 0, i;
-                size_t len = val.length();
+            uint32_t hash(const std::string &val);
+            void queueOutMessage(const Message& message);
+            void queueOutDataMessage(const DataMessage& dataMessage);
+            void queueInMessage(const Message& message);
 
-                for (hashVal = i = 0; i < len; ++i){
-                    hashVal += val.c_str()[i];
-                    hashVal += (hashVal << 10);
-                    hashVal ^= (hashVal >> 6);
-                }
-
-                hashVal += (hashVal << 3);
-                hashVal ^= (hashVal >> 11);
-                hashVal += (hashVal << 15);
-
-                return hashVal;
-            };
-            
-            void queueMessage(std::vector<char> message);
-            
             void disconnect();
-            
-            void writeHeader(std::vector<char> &buffer, uint32_t messageType);
-
             void closeSocket();
-
             bool initNetworkAPI();
-
             void establishConnection(addrinfo *info);
-
             void sendAuthentication();
-
             void listenCommunication();
+            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
 
-            void delegateDecoding(uint32_t type);
-
-            void initializationMessageReceived();
-
-            void dataMessageReceived();
-
-            void hostInfoMessageReceived();
-            
-            void initializationRequestMessageReceived();
+            void handleMessage(const Message&);
+            void dataMessageReceived(const std::vector<char>& messageContent);
+            void connectionStatusMessageReceived(const std::vector<char>& messageContent);
+            void nConnectionsMessageReceived(const std::vector<char>& messageContent);
 
             void broadcast();
-            
-            int headerSize();
+            void sendCameraKeyframe();
+            void sendTimeKeyframe();
 
-            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
-            
             void sendFunc();
-            
-            bool parseHints(addrinfo &info);
-            
             void threadManagement();
-            
-            std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
-            
+
+            void setStatus(Status status);
+            void setHostName(const std::string& hostName);
+            void setNConnections(size_t nConnections);
+
+            double calculateBufferedKeyframeTime(double originalTime);
+
             uint32_t _passCode;
             std::string _port;
             std::string _address;
             std::string _name;
+            
             _SOCKET _clientSocket;
-            std::thread *_connectionThread;
-            std::thread *_broadcastThread;
-            std::thread *_sendThread;
-            std::thread *_listenThread;
-            std::thread *_handlerThread;
-            std::atomic<bool> _isHost;
+
             std::atomic<bool> _isConnected;
-            std::atomic<bool> _performDisconnect;
             std::atomic<bool> _isRunning;
             std::atomic<bool> _tryConnect;
+            std::atomic<bool> _disconnect;
             std::atomic<bool> _initializationTimejumpRequired;
+
+            std::atomic<size_t> _nConnections;
+            std::atomic<Status> _status;
+            std::string _hostName;
 
             std::condition_variable _disconnectCondition;
             std::mutex _disconnectMutex;
             
-            std::vector<std::vector<char>> _sendBuffer;
-            std::mutex _sendBufferMutex;
             std::condition_variable _sendCondition;
+            std::deque<Message> _sendBuffer;
+            std::mutex _sendBufferMutex;
+
+            std::deque<Message> _receiveBuffer;
+            std::mutex _receiveBufferMutex;
             
-            network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
-            std::mutex _timeKeyframeMutex;
-            std::atomic<bool> _latestTimeKeyframeValid;
-            std::map<std::string, std::string> _currentState;
-            std::mutex _currentStateMutex;
+            std::atomic<bool> _timeJumped;
+            std::mutex _latencyMutex;
+            std::deque<double> _latencyDiffs;
+            double _initialTimeDiff;
+
+            std::unique_ptr<std::thread> _connectionThread;
+            std::unique_ptr<std::thread> _broadcastThread;
+            std::unique_ptr<std::thread> _sendThread;
+            std::unique_ptr<std::thread> _listenThread;
+            std::unique_ptr<std::thread> _handlerThread;
+            std::shared_ptr<ghoul::Event<>> _connectionEvent;
         };
     } // namespace network
     

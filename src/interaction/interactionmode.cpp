@@ -57,22 +57,39 @@ namespace interaction {
 
     }
 
-    void InputState::addKeyframe(const network::datamessagestructures::PositionKeyframe &kf) {
-        _keyframeMutex.lock();
+    const std::vector<network::datamessagestructures::CameraKeyframe>& InputState::keyframes() const {
+        return _keyframes;
+    }
 
-        //save a maximum of 10 samples (1 seconds of buffer)
-        if (_keyframes.size() >= 10) {
-            _keyframes.erase(_keyframes.begin());
-        }
+    void InputState::addKeyframe(const network::datamessagestructures::CameraKeyframe &kf) {
+        clearOldKeyframes();
+
+        auto compareTimestamps = [](const network::datamessagestructures::CameraKeyframe a,
+            network::datamessagestructures::CameraKeyframe b) {
+            return a._timestamp < b._timestamp;
+        };
+
+        // Remove keyframes after the inserted keyframe.
+        _keyframes.erase(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, compareTimestamps), _keyframes.end());
+
         _keyframes.push_back(kf);
+    }
 
-        _keyframeMutex.unlock();
+    void InputState::clearOldKeyframes() {
+        double now = OsEng.runTime();
+        auto isLater = [now](const network::datamessagestructures::CameraKeyframe kf) {
+            return kf._timestamp > now;
+        };
+
+        // Remote keyframes with earlier timestamps than the current time.
+        auto nextKeyframe = std::find_if(_keyframes.begin(), _keyframes.end(), isLater);
+        if (nextKeyframe != _keyframes.begin()) {
+            _keyframes.erase(_keyframes.begin(), nextKeyframe - 1);
+        }
     }
 
     void InputState::clearKeyframes() {
-        _keyframeMutex.lock();
         _keyframes.clear();
-        _keyframeMutex.unlock();
     }
 
     void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -175,11 +192,38 @@ KeyframeInteractionMode::~KeyframeInteractionMode() {
 }
 
 void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-
+    _keyframes = inputState.keyframes();
 }
 
 void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+    if (_keyframes.size() == 0) {
+        return;
+    }
 
+    double now = OsEng.runTime();
+    auto isLater = [now](const network::datamessagestructures::CameraKeyframe kf) {
+        return kf._timestamp > now;
+    };
+
+    auto nextKeyframe = std::find_if(_keyframes.begin(), _keyframes.end(), isLater);
+    if (nextKeyframe == _keyframes.end()) {
+        return;
+    }
+
+    if (nextKeyframe == _keyframes.begin()) {
+        camera.setPositionVec3(_keyframes[0]._position);
+        camera.setRotation(_keyframes[0]._rotation);
+        return;
+    }
+    auto prevKeyframe = nextKeyframe - 1;
+
+    double prevTime = prevKeyframe->_timestamp;
+    double nextTime = nextKeyframe->_timestamp;
+
+    double t = (now - prevTime) / (nextTime - prevTime);
+
+    camera.setPositionVec3(prevKeyframe->_position * (1 - t) + nextKeyframe->_position * t);
+    camera.setRotation(glm::slerp(prevKeyframe->_rotation, nextKeyframe->_rotation, t));
 }
 
 // OrbitalInteractionMode

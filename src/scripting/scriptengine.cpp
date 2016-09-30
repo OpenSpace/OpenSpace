@@ -166,16 +166,7 @@ bool ScriptEngine::runScript(const std::string& script) {
         LERRORC(e.component, e.message);
         return false;
     }
-    
-    // if we're currently hosting the parallel session, find out if script should be synchronized.
-    if (OsEng.parallelConnection().isHost()) {
-        std::string lib, func;
-        if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
-//            OsEng.parallelConnection()->sendScript(script);
-//            cacheScript(lib, func, script);
-        }
-    }
-    
+        
     return true;
 }
     
@@ -204,7 +195,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
     return true;
 }
 
-bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
+/*bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
     std::set<LuaLibrary>::const_iterator libit;
     for (libit = _registeredLibraries.cbegin();
          libit != _registeredLibraries.cend();
@@ -229,9 +220,9 @@ bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::str
     }
     
     return false;
-}
+}*/
     
-void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
+/*void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
     _cachedScriptsMutex.lock();
     _cachedScripts[library][function] = script;
     _cachedScriptsMutex.unlock();
@@ -256,8 +247,9 @@ std::vector<std::string> ScriptEngine::cachedScripts(){
     _cachedScriptsMutex.unlock();
 
     return retVal;
-}
+}*/
     
+/*
 bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
     
     //"deconstruct the script to find library and function name
@@ -299,7 +291,7 @@ bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::strin
     //if we found a function all is good
     return !function.empty();
 }
-
+*/
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
     lua_getglobal(state, _openspaceLibraryName.c_str());
@@ -793,19 +785,26 @@ bool ScriptEngine::writeLog(const std::string& script) {
 }
 
 void ScriptEngine::presync(bool isMaster) {
-    if (isMaster) {
-        _mutex.lock();
+    if (!isMaster) return;
 
-        if (!_queuedScripts.empty()) {
-            _currentSyncedScript = _queuedScripts.back();
-            _queuedScripts.pop_back();
+    _mutex.lock();
 
-            //Not really a received script but the master also needs to run the script...
-            _receivedScripts.push_back(_currentSyncedScript);
+    if (!_queuedScripts.empty()) {
+        _currentSyncedScript = _queuedScripts.back().first;
+        bool remoteScripting = _queuedScripts.back().second;
+
+
+        //Not really a received script but the master also needs to run the script...
+        _receivedScripts.push_back(_currentSyncedScript);
+        _queuedScripts.pop_back();
+
+        if (OsEng.parallelConnection().isHost() && remoteScripting) {
+            OsEng.parallelConnection().sendScript(_currentSyncedScript);
         }
 
-        _mutex.unlock();
     }
+
+    _mutex.unlock();
 
 }
 
@@ -843,13 +842,13 @@ void ScriptEngine::postsync(bool isMaster) {
     }
 }
 
-void ScriptEngine::queueScript(const std::string &script){
+void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteScripting remoteScripting){
     if (script.empty())
         return;
     
     _mutex.lock();
 
-    _queuedScripts.insert(_queuedScripts.begin(), script);
+    _queuedScripts.insert(_queuedScripts.begin(), std::make_pair(script, remoteScripting));
 
     _mutex.unlock();
 }
