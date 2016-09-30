@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
@@ -147,7 +148,7 @@ InteractionHandler::~InteractionHandler() {
 
 void InteractionHandler::initialize() {
     OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
-        if (OsEng.parallelConnection().status() == network::Status::ClientWithHost) {
+        if (OsEng.parallelConnection().status() == network::ParallelConnection::Status::ClientWithHost) {
             setInteractionMode("Keyframe");
         } else {
             auto keyframeModeIter = _interactionModes.find("Keyframe");

@@ -60,7 +60,7 @@ public:
 
 
 private:
-    void parallelConnectionChanged(const openspace::network::Status& status);
+    void parallelConnectionChanged(const network::ParallelConnection::Status& status);
     void addToCommand(std::string c);
     std::string UnicodeToUTF8(unsigned int codepoint);
 

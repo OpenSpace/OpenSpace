@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/luaconsole.h>
 
+#include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -93,7 +94,7 @@ void LuaConsole::initialize() {
 
     OsEng.parallelConnection().connectionEvent()->subscribe("luaConsole",
         "statusChanged", [this]() {
-        openspace::network::Status status = OsEng.parallelConnection().status();
+        network::ParallelConnection::Status status = OsEng.parallelConnection().status();
         parallelConnectionChanged(status);
     });
 
@@ -430,8 +431,8 @@ void LuaConsole::toggleMode() {
     }
 }
 
-void LuaConsole::parallelConnectionChanged(const openspace::network::Status& status) {
-    _remoteScripting = status == openspace::network::Status::Host;
+void LuaConsole::parallelConnectionChanged(const network::ParallelConnection::Status& status) {
+    _remoteScripting = status == network::ParallelConnection::Status::Host;
 }
 
 

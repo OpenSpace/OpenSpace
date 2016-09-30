@@ -638,7 +638,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
     }
     size_t pointer = 0;
     uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
-    network::Status status = static_cast<network::Status>(statusIn);
+    network::ParallelConnection::Status status = static_cast<network::ParallelConnection::Status>(statusIn);
     pointer += sizeof(uint32_t);
 
     size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
@@ -931,7 +931,7 @@ void ParallelConnection::preSynchronization(){
         _receiveBuffer.pop_front();
     }
     
-    if (status() == network::Status::Host) {
+    if (status() == Status::Host) {
         if (Time::ref().timeJumped()) {
             _timeJumped = true;
         }
@@ -945,7 +945,7 @@ void ParallelConnection::setStatus(Status status) {
     }
 }
 
-Status ParallelConnection::status() {
+ParallelConnection::Status ParallelConnection::status() {
     return _status;
 }
 
