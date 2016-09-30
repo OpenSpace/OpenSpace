@@ -24,6 +24,8 @@
 
 #include <openspace/rendering/renderengine.h> 
 
+#include <openspace/network/parallelconnection.h>
+
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
 #endif
