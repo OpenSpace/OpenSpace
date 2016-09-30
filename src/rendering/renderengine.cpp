@@ -1328,7 +1328,7 @@ void RenderEngine::renderInformation() {
                     break;
             }
 
-        network::Status status = OsEng.parallelConnection().status();
+        openspace::network::Status status = OsEng.parallelConnection().status();
         size_t nConnections = OsEng.parallelConnection().nConnections();
         const std::string& hostName = OsEng.parallelConnection().hostName();
 
