@@ -107,6 +107,7 @@ return {
                     },
                 },
                 HeightMaps = {
+                    --[[
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
@@ -114,7 +115,7 @@ return {
                         MinimumPixelSize = 64,
                         DoPreProcessing = true,
                     },
-                    --[[
+                    
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
