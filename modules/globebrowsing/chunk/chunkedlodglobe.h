@@ -27,9 +27,7 @@
 
 #include <memory>
 
-
 #include <ghoul/logging/logmanager.h>
-
 
 // open space includes
 #include <openspace/rendering/renderengine.h>
@@ -38,30 +36,21 @@
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
-
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/statscollector.h>
 
-
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-    }
-}
-
 namespace openspace {
     class ChunkLevelEvaluator;
+    class RenderableGlobe;
 }
 
 namespace openspace {
-
     class ChunkedLodGlobe : public Renderable {
     public:
         ChunkedLodGlobe(
-            const Ellipsoid& ellipsoid,
+            const RenderableGlobe& owner,
             size_t segmentsPerPatch,
             std::shared_ptr<TileProviderManager> tileProviderManager);
         virtual ~ChunkedLodGlobe();
@@ -79,49 +68,19 @@ namespace openspace {
         bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
         int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
-        double minDistToCamera;
-
-        const Ellipsoid& ellipsoid() const;
-        const glm::dmat4& modelTransform();
-        const glm::dmat4& inverseModelTransform();
-
         const int minSplitDepth;
         const int maxSplitDepth;
 
-
         std::shared_ptr<TileProviderManager> getTileProviderManager() const;
 
-
-        const std::shared_ptr<const Camera> getSavedCamera() const { return _savedCamera; }
-        void setSaveCamera(std::shared_ptr<Camera> c) { 
-            _savedCamera = c; 
-        }
-
-        
-        float lodScaleFactor;
-
-        bool atmosphereEnabled;
-        bool performShading;
-
-        struct DebugOptions {
-            bool showChunkEdges = false;
-            bool showChunkBounds = false;
-            bool showChunkAABB = false;
-            bool showHeightResolution = false;
-            bool showHeightIntensities = false;
-
-            bool doHorizonCulling = true;
-            bool doFrustumCulling = true;
-            bool levelByProjAreaElseDistance = true;
-        } debugOptions;
-
         StatsCollector stats;
-
+    
     private:
-
         void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
         static const GeodeticPatch COVERAGE;
+        static const ChunkIndex LEFT_HEMISPHERE_INDEX;
+        static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;
@@ -132,24 +91,16 @@ namespace openspace {
         // the patch used for actual rendering
         std::unique_ptr<ChunkRenderer> _renderer;
 
-        static const ChunkIndex LEFT_HEMISPHERE_INDEX;
-        static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
-
         std::vector<std::unique_ptr<ChunkCuller>> _chunkCullers;
 
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
-        const Ellipsoid& _ellipsoid;
-        glm::dmat4 _cachedModelTransform;
-        glm::dmat4 _cachedInverseModelTransform;
-
-        std::shared_ptr<Camera> _savedCamera;
-        
         std::shared_ptr<TileProviderManager> _tileProviderManager;
-    };
 
+        const RenderableGlobe& _owner;
+    };
 }  // namespace openspace
 
 #endif  // __CHUNK_LOD_GLOBE__

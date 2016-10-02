@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 #include <modules/globebrowsing/tile/tileioresult.h>
@@ -42,7 +43,7 @@ namespace openspace {
 
     const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
-    Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible)
+    Chunk::Chunk(const RenderableGlobe& owner, const ChunkIndex& chunkIndex, bool initVisible)
         : _owner(owner)
         , _surfacePatch(chunkIndex)
         , _index(chunkIndex)
@@ -55,7 +56,7 @@ namespace openspace {
         return _surfacePatch;
     }
 
-    ChunkedLodGlobe* const Chunk::owner() const {
+    const RenderableGlobe& Chunk::owner() const {
         return _owner;
     }
 
@@ -72,23 +73,19 @@ namespace openspace {
         _surfacePatch = GeodeticPatch(index);
     }
 
-    void Chunk::setOwner(ChunkedLodGlobe* newOwner) {
-        _owner = newOwner;
-    }
-
     Chunk::Status Chunk::update(const RenderData& data) {
-        auto savedCamera = _owner->getSavedCamera();
+        auto savedCamera = _owner.savedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
 
         _isVisible = true;
-        if (_owner->testIfCullable(*this, myRenderData)) {
+        if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
             _isVisible = false;
             return Status::WANT_MERGE;
         }
 
-        int desiredLevel = _owner->getDesiredLevel(*this, myRenderData);
+        int desiredLevel = _owner.chunkedLodGlobe()->getDesiredLevel(*this, myRenderData);
 
         if (desiredLevel < _index.level) return Status::WANT_MERGE;
         else if (_index.level < desiredLevel) return Status::WANT_SPLIT;
@@ -103,7 +100,7 @@ namespace openspace {
 
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
-        auto tileProviderManager = owner()->getTileProviderManager();
+        auto tileProviderManager = owner().chunkedLodGlobe()->getTileProviderManager();
         
         
         auto heightMapProviders = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
@@ -148,7 +145,7 @@ namespace openspace {
     }
 
     std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
-        const Ellipsoid& ellipsoid = owner()->ellipsoid();
+        const Ellipsoid& ellipsoid = owner().ellipsoid();
         const GeodeticPatch& patch = surfacePatch();
 
         BoundingHeights boundingHeight = getBoundingHeights();

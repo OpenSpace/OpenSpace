@@ -41,7 +41,7 @@
 
 namespace openspace {
 
-    class ChunkedLodGlobe;
+    class RenderableGlobe;
 
     class Chunk {
     public:
@@ -59,7 +59,7 @@ namespace openspace {
             WANT_SPLIT,
         };
         
-        Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible = true);
+        Chunk(const RenderableGlobe& owner, const ChunkIndex& chunkIndex, bool initVisible = true);
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);
@@ -67,18 +67,16 @@ namespace openspace {
         std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
 
         const GeodeticPatch& surfacePatch() const;
-        ChunkedLodGlobe* const owner() const;
+        const RenderableGlobe& owner() const;
         const ChunkIndex index() const;
         bool isVisible() const;
         BoundingHeights getBoundingHeights() const;
 
         void setIndex(const ChunkIndex& index);
-        void setOwner(ChunkedLodGlobe* newOwner);
-
 
     private:
 
-        ChunkedLodGlobe* _owner;
+        const RenderableGlobe& _owner;
         ChunkIndex _index;
         bool _isVisible;
         GeodeticPatch _surfacePatch;

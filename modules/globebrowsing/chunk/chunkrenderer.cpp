@@ -25,6 +25,7 @@
 
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
@@ -179,27 +180,27 @@ namespace openspace {
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "useAtmosphere",
-                std::to_string(chunk.owner()->atmosphereEnabled)));
+                std::to_string(chunk.owner().generalProperties().atmosphereEnabled)));
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "performShading",
-                std::to_string(chunk.owner()->performShading)));
+                std::to_string(chunk.owner().generalProperties().performShading)));
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "showChunkEdges",
-                std::to_string(chunk.owner()->debugOptions.showChunkEdges)));
+                std::to_string(chunk.owner().debugProperties().showChunkEdges)));
 
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "showHeightResolution",
-                std::to_string(chunk.owner()->debugOptions.showHeightResolution)));
+                std::to_string(chunk.owner().debugProperties().showHeightResolution)));
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
                 "showHeightIntensities",
-                std::to_string(chunk.owner()->debugOptions.showHeightIntensities)));
+                std::to_string(chunk.owner().debugProperties().showHeightIntensities)));
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
             std::pair<std::string, std::string>(
@@ -314,7 +315,7 @@ namespace openspace {
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
-        if (chunk.owner()->debugOptions.showHeightResolution) {
+        if (chunk.owner().debugProperties().showHeightResolution) {
             programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
         }       
         
@@ -331,7 +332,7 @@ namespace openspace {
             return;
         }
 
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
+        const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
 
         bool performAnyBlending = false;
         
@@ -345,10 +346,10 @@ namespace openspace {
         if (performAnyBlending) {
             // Calculations are done in the reference frame of the globe. Hence, the camera
             // position needs to be transformed with the inverse model matrix
-            glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+            glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
             glm::dvec3 cameraPosition =
                 glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-            float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
+            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(cameraPosition));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
@@ -358,7 +359,7 @@ namespace openspace {
         Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
         auto patchSize = chunk.surfacePatch().size();
         
-        dmat4 modelTransform = chunk.owner()->modelTransform();
+        dmat4 modelTransform = chunk.owner().modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewTransform = mat4(viewTransform * modelTransform);
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix() * modelViewTransform;
@@ -373,8 +374,8 @@ namespace openspace {
                 LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
             _tileProviderManager->getTileProviderGroup(
                 LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
-            chunk.owner()->atmosphereEnabled ||
-            chunk.owner()->performShading) {
+            chunk.owner().generalProperties().atmosphereEnabled ||
+            chunk.owner().generalProperties().performShading) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
@@ -410,7 +411,7 @@ namespace openspace {
 
         using namespace glm;
 
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
+        const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
 
 
         bool performAnyBlending = false;
@@ -422,13 +423,13 @@ namespace openspace {
             }
         }
         if (performAnyBlending) {
-            float distanceScaleFactor = chunk.owner()->lodScaleFactor * chunk.owner()->ellipsoid().minimumRadius();
+            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * chunk.owner().ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
         }
 
         // Calculate other uniform variables needed for rendering
-        dmat4 modelTransform = chunk.owner()->modelTransform();
+        dmat4 modelTransform = chunk.owner().modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
@@ -454,8 +455,8 @@ namespace openspace {
                 LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
             _tileProviderManager->getTileProviderGroup(
                 LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
-            chunk.owner()->atmosphereEnabled ||
-            chunk.owner()->performShading) {
+            chunk.owner().generalProperties().atmosphereEnabled ||
+            chunk.owner().generalProperties().performShading) {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =

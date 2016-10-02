@@ -457,7 +457,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         // Declare variables to use in interaction calculations
         // Shrink interaction ellipsoid to enable interaction below height = 0
         double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
-        double minHeightAboveGround = _globe->cameraMinHeight();
+        double minHeightAboveGround = _globe->generalProperties().cameraMinHeight;
 
         // Read the current state of the camera and focusnode
         dvec3 camPos = camera.positionVec3();
@@ -474,8 +474,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
         // Sampling of height is done in the reference frame of the globe.
         // Hence, the camera position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
-        glm::dmat4 modelTransform = _globe->chunkedLodGlobe()->modelTransform();
+        glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
+        glm::dmat4 modelTransform = _globe->modelTransform();
         glm::dvec3 cameraPositionModelSpace =
             glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
 
@@ -591,7 +591,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
             // Sampling of height is done in the reference frame of the globe.
             // Hence, the camera position needs to be transformed with the inverse model matrix
-            glm::dmat4 inverseModelTransform = _globe->chunkedLodGlobe()->inverseModelTransform();
+            glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
             glm::dvec3 cameraPositionModelSpace =
                 glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
 

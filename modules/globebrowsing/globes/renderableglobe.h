@@ -26,82 +26,76 @@
 #define __RENDERABLEGLOBE_H__
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/threadpool.h>
 
-// open space includes
 #include <openspace/rendering/renderable.h>
-
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
-
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-
-
-#include <ghoul/misc/threadpool.h>
+#include <modules/globebrowsing/tile/layeredtextures.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <unordered_map>
-
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-}
-}
-
 
 namespace openspace {
 
 class ChunkedLodGlobe;
 class TileProviderManager;
+    
+class SingleTexturePropertyOwner : public properties::PropertyOwner
+{
+public:
+    SingleTexturePropertyOwner(std::string name);
+    ~SingleTexturePropertyOwner();
 
-struct ReferencedBoolSelection : public properties::SelectionProperty {
-    ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
-        : properties::SelectionProperty(identifier, guiName) { }
-
-    void addOption(const std::string& name, bool* ref) {
-        int optionId= options().size();
-        _referenceMap.insert({ optionId, ref });
-        properties::SelectionProperty::addOption({ optionId, name});
-    }
-
-    void initialize() {
-        // Set values in GUI to the current values of the references
-        int nOptions = options().size();
-        std::vector<int> selected;
-        for (int i = 0; i < nOptions; ++i) {
-            if (*_referenceMap[i]) {
-                selected.push_back(i);
-            }
-        }
-        setValue(selected);
-
-
-        onChange([this]() {
-            int nOptions = this->options().size();
-            for (int i = 0; i < nOptions; ++i) {
-                (*_referenceMap[i]) = false;
-            }
-
-            const std::vector<int>& selectedIndices = (*this);
-            for (auto selectedIndex : selectedIndices) {
-                (*_referenceMap[selectedIndex]) = true;
-            }
-        });
-    }
-
-    std::unordered_map<int, bool* const> _referenceMap;
+    properties::BoolProperty isEnabled;
+    properties::FloatProperty opacity;
 };
 
-
-
-
+class LayeredCategoryPropertyOwner : public properties::PropertyOwner
+{
+public:
+    LayeredCategoryPropertyOwner(
+        LayeredTextures::TextureCategory category,
+        TileProviderManager& tileProviderManager);
+    ~LayeredCategoryPropertyOwner();
+private:
+    TileProviderManager& _tileProviderManager;
+    std::vector<std::unique_ptr<SingleTexturePropertyOwner> >
+        _texturePropertyOwners;
+    properties::BoolProperty _levelBlendingEnabled;
+};
 
 class RenderableGlobe : public Renderable {
 public:
+    struct DebugProperties {
+        properties::BoolProperty saveOrThrowCamera;
+        properties::BoolProperty showChunkEdges;
+        properties::BoolProperty showChunkBounds;
+        properties::BoolProperty showChunkAABB;
+        properties::BoolProperty showHeightResolution;
+        properties::BoolProperty showHeightIntensities;
+        properties::BoolProperty performFrustumCulling;
+        properties::BoolProperty performHorizonCulling;
+        properties::BoolProperty levelByProjectedAreaElseDistance;
+        properties::BoolProperty resetTileProviders;
+        properties::BoolProperty toggleEnabledEveryFrame;
+    };
+    
+    struct GeneralProperties {
+        properties::BoolProperty isEnabled;
+        properties::BoolProperty performShading;
+        properties::BoolProperty atmosphereEnabled;
+        properties::FloatProperty lodScaleFactor;
+        properties::FloatProperty cameraMinHeight;
+
+    };
+    
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe();
 
@@ -112,38 +106,45 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    // Getters that perform calculations
     glm::dvec3 projectOnEllipsoid(glm::dvec3 position);
-    const Ellipsoid& ellipsoid();
     float getHeight(glm::dvec3 position);
-    float cameraMinHeight();
-    double interactionDepthBelowEllipsoid();
-    std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
-
-    // Properties 
-    properties::BoolProperty _isEnabled;
-    properties::BoolProperty _toggleEnabledEveryFrame;
-    properties::BoolProperty _performShading;
-    properties::FloatProperty lodScaleFactor;
-    std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
-    properties::BoolProperty atmosphereEnabled;
-    ReferencedBoolSelection debugSelection;
-    properties::BoolProperty _saveOrThrowCamera;
-    properties::BoolProperty _resetTileProviders;
     
-private:
-    double _interactionDepthBelowEllipsoid;
+    // Getters
+    std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
+    const Ellipsoid& ellipsoid() const;
+    const glm::dmat4& modelTransform() const;
+    const glm::dmat4& inverseModelTransform() const;
+    const DebugProperties& debugProperties() const;
+    const GeneralProperties& generalProperties() const;
+    const std::shared_ptr<const Camera> savedCamera() const;
 
+    double interactionDepthBelowEllipsoid();
+
+    // Setters
+    void setSaveCamera(std::shared_ptr<Camera> camera);    
+private:
+    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    Ellipsoid _ellipsoid;
+    std::shared_ptr<TileProviderManager> _tileProviderManager;
+    DistanceSwitch _distanceSwitch;
+    std::shared_ptr<Camera> _savedCamera;
+    
+    double _interactionDepthBelowEllipsoid;
     std::string _frame;
     double _time;
 
-    Ellipsoid _ellipsoid;
+    glm::dmat4 _cachedModelTransform;
+    glm::dmat4 _cachedInverseModelTransform;
 
-    std::shared_ptr<TileProviderManager> _tileProviderManager;
-    std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    // Properties
+    DebugProperties _debugProperties;
+    GeneralProperties _generalProperties;
+
+    properties::PropertyOwner _debugPropertyOwner;
+    properties::PropertyOwner _texturePropertyOwner;
     
-    DistanceSwitch _distanceSwitch;
-
-    properties::FloatProperty _cameraMinHeight;
+    std::vector<std::unique_ptr<LayeredCategoryPropertyOwner> > _textureProperties;
 };
 
 }  // namespace openspace

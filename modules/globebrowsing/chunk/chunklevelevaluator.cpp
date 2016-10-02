@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/chunk/chunklevelevaluator.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
 
 
@@ -45,9 +46,9 @@ namespace openspace {
     int EvaluateChunkLevelByDistance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         // Calculations are done in the reference frame of the globe. Hence, the camera
         // position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
-        ChunkedLodGlobe const * globe = chunk.owner();
-        const Ellipsoid& ellipsoid = globe->ellipsoid();
+        glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
+        const RenderableGlobe& globe = chunk.owner();
+        const Ellipsoid& ellipsoid = globe.ellipsoid();
 
         Vec3 cameraPosition =
             glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
@@ -64,7 +65,7 @@ namespace openspace {
         Scalar distanceToPatch = glm::length(cameraToChunk);
         Scalar distance = distanceToPatch -heights.min; // distance to actual minimum heights
 
-        Scalar scaleFactor = globe->lodScaleFactor * ellipsoid.minimumRadius();
+        Scalar scaleFactor = globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
         Scalar projectedScaleFactor = scaleFactor / distance;
         int desiredLevel = ceil(log2(projectedScaleFactor));
         return desiredLevel;
@@ -73,10 +74,10 @@ namespace openspace {
     int EvaluateChunkLevelByProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         // Calculations are done in the reference frame of the globe. Hence, the camera
         // position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+        glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
 
-        ChunkedLodGlobe const * globe = chunk.owner();
-        const Ellipsoid& ellipsoid = globe->ellipsoid();
+        const RenderableGlobe& globe = chunk.owner();
+        const Ellipsoid& ellipsoid = globe.ellipsoid();
         glm::dvec4 cameraPositionModelSpace = glm::dvec4(data.camera.positionVec3(), 1);
         Vec3 cameraPosition = glm::dvec3(inverseModelTransform * cameraPositionModelSpace);
         Vec3 cameraToEllipsoidCenter = -cameraPosition;
@@ -156,12 +157,12 @@ namespace openspace {
         double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
         double projectedChunkAreaApprox = 8 * areaABC;
 
-        double scaledArea = globe->lodScaleFactor * projectedChunkAreaApprox;
+        double scaledArea = globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
         return chunk.index().level + round(scaledArea - 1);
     }
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        auto tileProvidermanager = chunk.owner()->getTileProviderManager();
+        auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->getTileProviderManager();
         auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         int currLevel = chunk.index().level;
 

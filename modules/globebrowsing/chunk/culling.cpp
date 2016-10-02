@@ -27,7 +27,7 @@
 
 
 #include <modules/globebrowsing/chunk/culling.h>
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
@@ -57,7 +57,7 @@ namespace openspace {
 
     bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
         // Calculate the MVP matrix
-        dmat4 modelTransform = chunk.owner()->modelTransform();
+        dmat4 modelTransform = chunk.owner().modelTransform();
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 modelViewProjectionTransform = dmat4(data.camera.projectionMatrix())
             * viewTransform * modelTransform;
@@ -96,9 +96,9 @@ namespace openspace {
         
         // Calculations are done in the reference frame of the globe. Hence, the camera
         // position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+        glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
 
-        const Ellipsoid& ellipsoid = chunk.owner()->ellipsoid();
+        const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
         const GeodeticPatch& patch = chunk.surfacePatch();
         float maxHeight = chunk.getBoundingHeights().max;
         Vec3 globePosition = glm::dvec3(0,0,0); // In model space it is 0

@@ -25,8 +25,8 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 #include <ghoul/misc/threadpool.h>
-#include <modules/globebrowsing/tile/tileselector.h>
 
+#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
@@ -36,9 +36,10 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <modules/debugging/rendering/debugrenderer.h>
+
 // ghoul includes
 #include <ghoul/misc/assert.h>
-
 
 namespace {
     const std::string _loggerCat = "RenderableGlobe";
@@ -46,7 +47,8 @@ namespace {
     // Keys for the dictionary
     const std::string keyFrame = "Frame";
     const std::string keyRadii = "Radii";
-    const std::string keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
+    const std::string keyInteractionDepthBelowEllipsoid =
+        "InteractionDepthBelowEllipsoid";
     const std::string keyCameraMinHeight = "CameraMinHeight";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
     const std::string keyTextureInitData = "TextureInitData";
@@ -55,29 +57,82 @@ namespace {
     const std::string keyHeightMaps = "HeightMaps";
 }
 
-
-
 namespace openspace {
+    SingleTexturePropertyOwner::SingleTexturePropertyOwner(std::string name)
+    : isEnabled("isEnabled", "isEnabled", true)
+    , opacity("opacity", "opacity", 1, 0, 1) {
+        setName(name);
+        addProperty(isEnabled);
+        addProperty(opacity);
+    }
+    
+    SingleTexturePropertyOwner::~SingleTexturePropertyOwner() {
+        
+    }
+    
+    LayeredCategoryPropertyOwner::LayeredCategoryPropertyOwner(
+        LayeredTextures::TextureCategory category,
+        TileProviderManager& tileProviderManager)
+    : _tileProviderManager(tileProviderManager)
+    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", true){
+        setName(LayeredTextures::TEXTURE_CATEGORY_NAMES[category]);
+        
+        // Create the property owners
+        auto& layerGroup = _tileProviderManager.getTileProviderGroup(category);
+        for (NamedTileProvider& tileProvider : layerGroup.tileProviders) {
+            _texturePropertyOwners.push_back(
+                std::make_unique<SingleTexturePropertyOwner>(tileProvider.name));
+        }
+        
+        // Specify and add the property owners
+        for (int i = 0; i < layerGroup.tileProviders.size(); i++) {
+            NamedTileProvider &tileProvider = layerGroup.tileProviders[i];
+            SingleTexturePropertyOwner &prop = *_texturePropertyOwners[i].get();
+            prop.isEnabled.set(tileProvider.isActive);
+            prop.isEnabled.onChange([&]{
+                tileProvider.isActive = prop.isEnabled;
+            });
+            addPropertySubOwner(prop);
+        }
 
-
+        _levelBlendingEnabled.set(layerGroup.levelBlendingEnabled);
+        _levelBlendingEnabled.onChange([&]{
+            layerGroup.levelBlendingEnabled = _levelBlendingEnabled;
+        });
+        addProperty(_levelBlendingEnabled);
+    }
+    
+    LayeredCategoryPropertyOwner::~LayeredCategoryPropertyOwner() {
+        
+    }
+    
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : _isEnabled(properties::BoolProperty("Enabled", "Enabled", true))
-        , _toggleEnabledEveryFrame(properties::BoolProperty(
-            "Toggle enabled every frame", "Toggle enabled every frame", false))
-        , _saveOrThrowCamera(
-            properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
-        , _resetTileProviders(
-            properties::BoolProperty("resetTileProviders", "resetTileProviders"))
-        , _cameraMinHeight(
-            properties::FloatProperty(
-                "cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
-        , lodScaleFactor(
-            properties::FloatProperty(
-                "lodScaleFactor", "lodScaleFactor", 10.0f, 1.0f, 50.0f))
-        , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
-        , atmosphereEnabled(properties::BoolProperty("Atmosphere", "Atmosphere", false))
-        , _performShading(
-            properties::BoolProperty("performShading", "Perform shading", true))
+    : _generalProperties({
+        properties::BoolProperty("enabled", "Enabled", true),
+        properties::BoolProperty("performShading", "perform shading", true),
+        properties::BoolProperty("atmosphere", "atmosphere", false),
+        properties::FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
+        properties::FloatProperty(
+            "cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
+    })
+    , _debugProperties({
+        properties::BoolProperty("saveOrThrowCamera", "save or throw camera", false),
+        properties::BoolProperty("showChunkEdges", "show chunk edges", false),
+        properties::BoolProperty("showChunkBounds", "show chunk bounds", false),
+        properties::BoolProperty("showChunkAABB", "show chunk AABB", false),
+    	properties::BoolProperty("showHeightResolution", "show height resolution", false),
+        properties::BoolProperty(
+            "showHeightIntensities", "show height intensities", false),
+        properties::BoolProperty(
+            "performFrustumCulling", "perform frustum culling", true),
+        properties::BoolProperty(
+            "performHorizonCulling", "perform horizon culling", true),
+        properties::BoolProperty(
+            "levelByProjectedAreaElseDistance", "level by projected area (else distance)",
+            false),
+        properties::BoolProperty("resetTileProviders", "reset tile providers", false),
+        properties::BoolProperty(
+            "toggleEnabledEveryFrame", "toggle enabled every frame", false)})
     {
         setName("RenderableGlobe");
         
@@ -89,15 +144,16 @@ namespace openspace {
         _ellipsoid = Ellipsoid(radii);
         setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
 
-        // Ghoul can't read ints from lua dictionaries
+        // Ghoul can't read ints from lua dictionaries...
         double patchSegmentsd;
         dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
         int patchSegments = patchSegmentsd;
         
-        dictionary.getValue(keyInteractionDepthBelowEllipsoid, _interactionDepthBelowEllipsoid);
+        dictionary.getValue(keyInteractionDepthBelowEllipsoid,
+            _interactionDepthBelowEllipsoid);
         float cameraMinHeight;
         dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
-        _cameraMinHeight.set(cameraMinHeight);
+        _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
         // Init tile provider manager
         ghoul::Dictionary textureInitDataDictionary;
@@ -109,49 +165,39 @@ namespace openspace {
             texturesDictionary, textureInitDataDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
-            _ellipsoid, patchSegments, _tileProviderManager);
+            *this, patchSegments, _tileProviderManager);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
 
-        addProperty(_isEnabled);
-        addProperty(_toggleEnabledEveryFrame);
+        _debugPropertyOwner.setName("Debug");
+        _texturePropertyOwner.setName("Textures");
 
-
-        // Add debug options - must be after chunkedLodGlobe has been created as it 
-        // references its members
-        addProperty(debugSelection);
-        debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->debugOptions.showChunkEdges);
-        debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->debugOptions.showChunkBounds);
-        debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->debugOptions.showChunkAABB);
-        debugSelection.addOption("Show height resolution", &_chunkedLodGlobe->debugOptions.showHeightResolution);
-        debugSelection.addOption("Show height intensities", &_chunkedLodGlobe->debugOptions.showHeightIntensities);
-
-        debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->debugOptions.doFrustumCulling);
-        debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);
-
-        debugSelection.addOption("Level by proj area (else distance)", &_chunkedLodGlobe->debugOptions.levelByProjAreaElseDistance);
-
-        // Add all tile layers as being toggleable for each category
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
-            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
-            std::string categoryName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
-            auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
-            
-            auto& categoryProviders = _tileProviderManager->getTileProviderGroup(category);
-            for (auto& provider : categoryProviders.tileProviders) {
-                selection->addOption(provider.name, &provider.isActive);
-            }
-            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled);
-
-            addProperty(selection.get());
-            _categorySelections.push_back(std::move(selection));
+        addProperty(_generalProperties.isEnabled);
+        addProperty(_generalProperties.atmosphereEnabled);
+        addProperty(_generalProperties.performShading);
+        addProperty(_generalProperties.lodScaleFactor);
+        addProperty(_generalProperties.cameraMinHeight);
+        
+        _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
+        _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
+        _debugPropertyOwner.addProperty(_debugProperties.showChunkBounds);
+        _debugPropertyOwner.addProperty(_debugProperties.showChunkAABB);
+        _debugPropertyOwner.addProperty(_debugProperties.showHeightResolution);
+        _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
+        _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
+        _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
+        _debugPropertyOwner.addProperty(
+            _debugProperties.levelByProjectedAreaElseDistance);
+        _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
+        _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
+                
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
+            _textureProperties.push_back(std::make_unique<LayeredCategoryPropertyOwner>
+                (LayeredTextures::TextureCategory(i), *_tileProviderManager));
+            _texturePropertyOwner.addPropertySubOwner(*_textureProperties[i]);
         }
-
-        addProperty(atmosphereEnabled);
-        addProperty(_performShading);
-        addProperty(_saveOrThrowCamera);
-        addProperty(_resetTileProviders);
-        addProperty(lodScaleFactor);
-        addProperty(_cameraMinHeight);
+        
+        addPropertySubOwner(_debugPropertyOwner);
+        addPropertySubOwner(_texturePropertyOwner);
     }
 
     RenderableGlobe::~RenderableGlobe() {
@@ -159,11 +205,6 @@ namespace openspace {
     }
 
     bool RenderableGlobe::initialize() {
-        for (auto& selection : _categorySelections) {
-            selection->initialize();
-        }
-        debugSelection.initialize();
-
         return _distanceSwitch.initialize();
     }
 
@@ -176,23 +217,27 @@ namespace openspace {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
-        if (_toggleEnabledEveryFrame.value()) {
-            _isEnabled.setValue(!_isEnabled.value());
+        if (_debugProperties.toggleEnabledEveryFrame.value()) {
+            _generalProperties.isEnabled.setValue(
+                !_generalProperties.isEnabled.value());
         }
-        if (_isEnabled.value()) {
-            if (_saveOrThrowCamera.value()) {
-                _saveOrThrowCamera.setValue(false);
+        if (_generalProperties.isEnabled.value()) {
+            if (_debugProperties.saveOrThrowCamera.value()) {
+                _debugProperties.saveOrThrowCamera.setValue(false);
 
-                if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
+                if (savedCamera() == nullptr) { // save camera
                     LDEBUG("Saving snapshot of camera!");
-                    _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
+                    setSaveCamera(std::make_shared<Camera>(data.camera));
                 }
                 else { // throw camera
                     LDEBUG("Throwing away saved camera!");
-                    _chunkedLodGlobe->setSaveCamera(nullptr);
+                    setSaveCamera(nullptr);
                 }
             }
             _distanceSwitch.render(data);
+        }
+        if (_savedCamera != nullptr) {
+            DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
     }
 
@@ -200,13 +245,19 @@ namespace openspace {
         _time = data.time;
         _distanceSwitch.update(data);
 
-        _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
-        _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
-        _chunkedLodGlobe->performShading = _performShading.value();
+        glm::dmat4 translation =
+            glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+        glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+        glm::dmat4 scaling =
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale,
+                data.modelTransform.scale, data.modelTransform.scale));
 
-        if (_resetTileProviders) {
+        _cachedModelTransform = translation * rotation * scaling;
+        _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
+
+        if (_debugProperties.resetTileProviders) {
             _tileProviderManager->reset();
-            _resetTileProviders = false;
+            _debugProperties.resetTileProviders = false;
         }
         _tileProviderManager->update();
         _chunkedLodGlobe->update(data);
@@ -216,29 +267,31 @@ namespace openspace {
         return _ellipsoid.geodeticSurfaceProjection(position);
     }
 
-    const Ellipsoid& RenderableGlobe::ellipsoid() {
-        return _ellipsoid;
-    }
-
     float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
-        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(
+            LayeredTextures::HeightMaps).getActiveTileProviders();
         if (heightMapProviders.size() == 0)
             return 0;
         const auto& tileProvider = heightMapProviders[0];
 
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        int chunkLevel = _chunkedLodGlobe->findChunkNode(geodeticPosition).getChunk().index().level;
+        int chunkLevel = _chunkedLodGlobe->findChunkNode(
+            geodeticPosition).getChunk().index().level;
         
         ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
         GeodeticPatch patch = GeodeticPatch(chunkIdx);
-        Geodetic2 geoDiffPatch = patch.getCorner(Quad::NORTH_EAST) - patch.getCorner(Quad::SOUTH_WEST);
+        Geodetic2 geoDiffPatch =
+            patch.getCorner(Quad::NORTH_EAST) -
+            patch.getCorner(Quad::SOUTH_WEST);
         Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
-        glm::vec2 patchUV = glm::vec2(geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
+        glm::vec2 patchUV = glm::vec2(
+            geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
         // Transform the uv coordinates to the current tile texture
-        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider.get(), chunkIdx);
+        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(
+            tileProvider.get(), chunkIdx);
         const auto& tile = tileAndTransform.tile;
         const auto& uvTransform = tileAndTransform.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
@@ -247,17 +300,22 @@ namespace openspace {
         }
         glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;
 
-        // Sample and do linear interpolation (could possibly be moved as a function in ghoul texture)
+        // Sample and do linear interpolation
+        // (could possibly be moved as a function in ghoul texture)
         glm::uvec3 dimensions = tile.texture->dimensions();
         
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+        samplePos00 = glm::clamp(
+            samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
         glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
-        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
-        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos10 = glm::min(
+            samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(
+            samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(
+            samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
 
         float sample00 = tile.texture->texelAsFloat(samplePos00).x;
         float sample10 = tile.texture->texelAsFloat(samplePos10).x;
@@ -276,17 +334,42 @@ namespace openspace {
         return height;
     }
 
+    std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
+        return _chunkedLodGlobe;
+    }
+
+    const Ellipsoid& RenderableGlobe::ellipsoid() const{
+        return _ellipsoid;
+    }
+
+    const glm::dmat4& RenderableGlobe::modelTransform() const{
+        return _cachedModelTransform;
+    }
+
+    const glm::dmat4& RenderableGlobe::inverseModelTransform() const{
+        return _cachedInverseModelTransform;
+    }
+
+    const RenderableGlobe::DebugProperties&
+        RenderableGlobe::debugProperties() const{
+        return _debugProperties;
+    }
+    
+    const RenderableGlobe::GeneralProperties&
+        RenderableGlobe::generalProperties() const{
+        return _generalProperties;
+    }
+
+    const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
+        return _savedCamera;
+    }
+
     double RenderableGlobe::interactionDepthBelowEllipsoid() {
         return _interactionDepthBelowEllipsoid;
     }
 
-    float RenderableGlobe::cameraMinHeight() {
-        return _cameraMinHeight.value();
+    void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
+        _savedCamera = camera;
     }
-
-    std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() {
-        return _chunkedLodGlobe;
-    }
-
 }  // namespace openspace
 

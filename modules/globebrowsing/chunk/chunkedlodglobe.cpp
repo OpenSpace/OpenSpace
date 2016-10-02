@@ -24,12 +24,12 @@
 
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 
+#include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/chunk/culling.h>
 #include <modules/globebrowsing/chunk/chunklevelevaluator.h>
 
 #include <modules/debugging/rendering/debugrenderer.h>
-
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -47,32 +47,34 @@
 
 #include <ctime>
 #include <chrono>
+
 namespace {
-    const std::string _loggerCat = "ChunkLodGlobe";
+    const std::string _loggerCat = "ChunkedLodGlobe";
 }
 
 namespace openspace {
 
-    const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
-    const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
-
-    const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
-
+    const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX =
+        ChunkIndex(0, 0, 1);
+    const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX =
+        ChunkIndex(1, 0, 1);
+    const GeodeticPatch ChunkedLodGlobe::COVERAGE =
+        GeodeticPatch(0, 0, 90, 180);
 
     ChunkedLodGlobe::ChunkedLodGlobe(
-        const Ellipsoid& ellipsoid,
+        const RenderableGlobe& owner,
         size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
-        : _ellipsoid(ellipsoid)
-        , _leftRoot(std::make_unique<ChunkNode>(Chunk(this, LEFT_HEMISPHERE_INDEX)))
-        , _rightRoot(std::make_unique<ChunkNode>(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
+        : _owner(owner)
+        , _leftRoot(std::make_unique<ChunkNode>(
+            Chunk(owner, LEFT_HEMISPHERE_INDEX)))
+        , _rightRoot(std::make_unique<ChunkNode>(
+            Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
-        , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
-        , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
-    {
-
+        , stats(StatsCollector(absPath("test_stats"), 1,
+            StatsCollector::Enabled::No)) {
         auto geometry = std::make_shared<SkirtedGrid>(
             (unsigned int) segmentsPerPatch,
             (unsigned int) segmentsPerPatch,
@@ -81,15 +83,18 @@ namespace openspace {
             TriangleSoup::Normals::No);
 
         _chunkCullers.push_back(std::make_unique<HorizonCuller>());
-        _chunkCullers.push_back(std::make_unique<FrustumCuller>(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
+        _chunkCullers.push_back(std::make_unique<FrustumCuller>(
+            AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
+        _chunkEvaluatorByAvailableTiles =
+            std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        _chunkEvaluatorByProjectedArea =
+            std::make_unique<EvaluateChunkLevelByProjectedArea>();
+        _chunkEvaluatorByDistance =
+            std::make_unique<EvaluateChunkLevelByDistance>();
 
-        _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
-        _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
-        _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
-
-        _renderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
-
+        _renderer =
+            std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -109,42 +114,59 @@ namespace openspace {
         return ready;
     }
 
-    std::shared_ptr<TileProviderManager> ChunkedLodGlobe::getTileProviderManager() const {
+    std::shared_ptr<TileProviderManager>
+        ChunkedLodGlobe::getTileProviderManager() const {
         return _tileProviderManager;
     }
 
-    bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) const {
-        if (debugOptions.doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
+    bool ChunkedLodGlobe::testIfCullable(
+        const Chunk& chunk, const RenderData& renderData) const {
+        if (_owner.debugProperties().performHorizonCulling &&
+            _chunkCullers[0]->isCullable(chunk, renderData)) {
             return true;
         }
-        if (debugOptions.doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
+        if (_owner.debugProperties().performFrustumCulling &&
+            _chunkCullers[1]->isCullable(chunk, renderData)) {
             return true;
         }
         return false;
     }
 
     const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) const {
-        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
-        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+        ghoul_assert(COVERAGE.contains(p),
+            "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return
+            p.lon < COVERAGE.center().lon ?
+            _leftRoot->find(p) :
+            _rightRoot->find(p);
     }
 
     ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) {
-        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
-        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+        ghoul_assert(
+            COVERAGE.contains(p),
+            "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return
+            p.lon < COVERAGE.center().lon ?
+            _leftRoot->find(p) :
+            _rightRoot->find(p);
     }
 
-    int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
+    int ChunkedLodGlobe::getDesiredLevel(
+        const Chunk& chunk, const RenderData& renderData) const {
         int desiredLevel = 0;
-        if (debugOptions.levelByProjAreaElseDistance) {
-            desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
+        if (_owner.debugProperties().levelByProjectedAreaElseDistance) {
+            desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(
+                chunk, renderData);
         }
         else {
-            desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
+            desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(
+                chunk, renderData);
         }
 
-
-        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-        if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+        int desiredLevelByAvailableData =
+            _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+        if (desiredLevelByAvailableData !=
+            ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
             desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
         }
 
@@ -152,17 +174,14 @@ namespace openspace {
         return desiredLevel;
     }
     
-    void ChunkedLodGlobe::render(const RenderData& data){
-
+    void ChunkedLodGlobe::render(const RenderData& data) {
         stats.startNewRecord();
         
         int j2000s = Time::now().j2000Seconds();
-
         auto duration = std::chrono::system_clock::now().time_since_epoch();
-        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
+            duration).count();
         stats.i["time"] = millis;
-
-        minDistToCamera = INFINITY;
 
         _leftRoot->updateChunkTree(data);
         _rightRoot->updateChunkTree(data);
@@ -170,7 +189,7 @@ namespace openspace {
         // Calculate the MVP matrix
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
-        dmat4 mvp = vp * _cachedModelTransform;
+        dmat4 mvp = vp * _owner.modelTransform();
 
         // Render function
         std::function<void(const ChunkNode&)> renderJob =
@@ -194,67 +213,42 @@ namespace openspace {
         
         //_leftRoot->reverseBreadthFirst(renderJob);
         //_rightRoot->reverseBreadthFirst(renderJob);
-
-        if (_savedCamera != nullptr) {
-            DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
-        }
-
-        Vec3 cameraPos = data.camera.position().dvec3();
     }
 
-
-    void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
-        if (debugOptions.showChunkBounds || debugOptions.showChunkAABB) {
-            const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
+    void ChunkedLodGlobe::debugRenderChunk(
+        const Chunk& chunk, const glm::dmat4& mvp) const {
+        if (_owner.debugProperties().showChunkBounds ||
+            _owner.debugProperties().showChunkAABB) {
+            const std::vector<glm::dvec4> modelSpaceCorners =
+                chunk.getBoundingPolyhedronCorners();
             std::vector<glm::vec4> clippingSpaceCorners(8);
             AABB3 screenSpaceBounds;
+            
             for (size_t i = 0; i < 8; i++) {
                 const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
                 clippingSpaceCorners[i] = clippingSpaceCorner;
 
-                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
+                vec3 screenSpaceCorner =
+                    (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
                 screenSpaceBounds.expand(screenSpaceCorner);
             }
 
             unsigned int colorBits = 1 + chunk.index().level % 6;
             vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
 
-            if (debugOptions.showChunkBounds) {
+            if (_owner.debugProperties().showChunkBounds) {
                 DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
             }
 
-            if (debugOptions.showChunkAABB) {
-                auto& screenSpacePoints = DebugRenderer::ref().verticesFor(screenSpaceBounds);
+            if (_owner.debugProperties().showChunkAABB) {
+                auto& screenSpacePoints =
+                    DebugRenderer::ref().verticesFor(screenSpaceBounds);
                 DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
             }
         }
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
-        glm::dmat4 translation =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
-        glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-        glm::dmat4 scaling =
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale,
-                data.modelTransform.scale, data.modelTransform.scale));
-
-        _cachedModelTransform = translation * rotation * scaling;
-        _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
-
         _renderer->update();
     }
-
-    const glm::dmat4& ChunkedLodGlobe::modelTransform() {
-        return _cachedModelTransform;
-    }
-
-    const glm::dmat4& ChunkedLodGlobe::inverseModelTransform() {
-        return _cachedInverseModelTransform;
-    }
-
-    const Ellipsoid& ChunkedLodGlobe::ellipsoid() const
-    {
-        return _ellipsoid;
-    }
-
 }  // namespace openspace
