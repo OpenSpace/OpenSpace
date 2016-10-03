@@ -62,6 +62,16 @@ namespace openspace {
         return activeTileProviders;
     }
 
+    const std::vector<NamedTileProvider> TileProviderGroup::getActiveNamedTileProviders() const {
+        std::vector<NamedTileProvider> activeTileProviders;
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                activeTileProviders.push_back(tileProviderWithName);
+            }
+        }
+        return activeTileProviders;
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////
     //                           Tile Provider Manager                                  //
     //////////////////////////////////////////////////////////////////////////////////////

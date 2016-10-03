@@ -92,7 +92,6 @@ namespace openspace {
         // unued atm. Could be used for caching or precalculating
     }
 
-
     void ChunkRenderer::setDepthTransformUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
@@ -155,6 +154,18 @@ namespace openspace {
             tileAndTransform.uvTransform.uvOffset);
     }
 
+    void ChunkRenderer::setLayerSettingsUniforms(
+        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
+        LayeredTextures::TextureCategory textureCategory,
+        size_t layerIndex,
+        PerLayerSettings settings) {
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getSettingsId(
+                textureCategory,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::opacity),
+                settings.opacity);
+    }
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         LayeredTextureShaderProvider* layeredTextureShaderProvider,
@@ -280,6 +291,12 @@ namespace openspace {
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
                 }
+                
+                setLayerSettingsUniforms(
+                    programUniformHandler,
+                    LayeredTextures::TextureCategory(category),
+                    i,
+                    _tileProviderManager->getTileProviderGroup(category).getActiveNamedTileProviders()[i].settings);
 
                 /*
                 if (category == LayeredTextures::HeightMaps && tileAndTransform.tile.preprocessData) {

@@ -92,6 +92,11 @@ namespace openspace {
             prop.isEnabled.onChange([&]{
                 tileProvider.isActive = prop.isEnabled;
             });
+            prop.opacity.set(tileProvider.settings.opacity);
+            prop.opacity.onChange([&]{
+                tileProvider.settings.opacity = prop.opacity;
+            });
+
             addPropertySubOwner(prop);
         }
 

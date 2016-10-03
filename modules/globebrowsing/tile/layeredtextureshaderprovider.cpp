@@ -176,6 +176,12 @@ namespace openspace {
         "Parent1",
         "Parent2",
     };
+    
+    const std::string LayeredTextureShaderUniformIdHandler::layerSettingsIds[
+        NUM_LAYER_SETTINGS_VARIABLES] =
+    {
+        "opacity",
+    };
 
     LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler()
     {
@@ -215,6 +221,22 @@ namespace openspace {
                     }
                 }
             }
+            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
+            {
+                for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
+                     k++)
+                {
+                    for (size_t l = 0; l < NUM_LAYER_SETTINGS_VARIABLES; l++)
+                    {
+                        _layerSettingsUniformIds[i][k][l] =
+                        _shaderProvider->_programObject->uniformLocation(
+                                    LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
+                                    "Settings" +
+                                    "[" + std::to_string(k) + "]." +
+                                    layerSettingsIds[l]);
+                    }
+                }
+            }
             // Reset ignore errors
             _shaderProvider->_programObject->setIgnoreUniformLocationError(
                 ProgramObject::IgnoreError::No);
@@ -230,6 +252,13 @@ namespace openspace {
         return _tileUniformIds[category][blendLayer][layerIndex][tileDataId];
     }
 
+    GLint LayeredTextureShaderUniformIdHandler::getSettingsId(
+        LayeredTextures::TextureCategory category,
+        size_t layerIndex,
+        LayerSettingsIds layerSettingsId)
+    {
+        return _layerSettingsUniformIds[category][layerIndex][layerSettingsId];
+    }
     
     ProgramObject& LayeredTextureShaderUniformIdHandler::programObject()
     {

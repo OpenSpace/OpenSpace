@@ -38,11 +38,15 @@
 
 namespace openspace {
 
+    struct PerLayerSettings {
+        float opacity = 1;
+    };
     
     struct NamedTileProvider {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
+        PerLayerSettings settings;
     };
 
 
@@ -51,6 +55,7 @@ namespace openspace {
 
         void update();
         const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
+        const std::vector<NamedTileProvider> getActiveNamedTileProviders() const;
 
 
         std::vector<NamedTileProvider> tileProviders;

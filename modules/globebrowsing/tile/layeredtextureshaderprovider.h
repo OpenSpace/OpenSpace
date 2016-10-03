@@ -125,6 +125,7 @@ namespace openspace {
     public:
         static const size_t NUM_TILE_DATA_VARIABLES = 5;
         static const size_t NUM_BLEND_TEXTURES = 3;
+        static const size_t NUM_LAYER_SETTINGS_VARIABLES = 1;
 
         /**
         * Each texture can have these uniform variables associated with it in the shader
@@ -166,6 +167,10 @@ namespace openspace {
             Parent1,
             Parent2,
         };
+        
+        enum LayerSettingsIds {
+            opacity,
+        };
 
         LayeredTextureShaderUniformIdHandler();
         ~LayeredTextureShaderUniformIdHandler();
@@ -192,10 +197,15 @@ namespace openspace {
             size_t blendLayer,
             size_t layerIndex,
             GlslTileDataId tileDataId);
+        GLint getSettingsId(
+            LayeredTextures::TextureCategory category,
+            size_t layerIndex,
+            LayerSettingsIds layerSettingsId);
         ProgramObject& programObject();
     private:
         static const std::string glslTileDataNames[NUM_TILE_DATA_VARIABLES];
         static const std::string blendLayerSuffixes[NUM_BLEND_TEXTURES];
+        static const std::string layerSettingsIds[NUM_LAYER_SETTINGS_VARIABLES];
 
         std::array<
             std::array<
@@ -207,6 +217,16 @@ namespace openspace {
             NUM_BLEND_TEXTURES>,
             LayeredTextures::NUM_TEXTURE_CATEGORIES>
             _tileUniformIds;
+        
+        
+        std::array<
+        std::array<
+        std::array<
+        GLint,
+        NUM_LAYER_SETTINGS_VARIABLES>,
+        LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
+        LayeredTextures::NUM_TEXTURE_CATEGORIES>
+        _layerSettingsUniformIds;
 
         LayeredTextureShaderProvider* _shaderProvider;
     };
