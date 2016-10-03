@@ -165,6 +165,18 @@ namespace openspace {
                 layerIndex,
                 LayeredTextureShaderUniformIdHandler::LayerSettingsIds::opacity),
                 settings.opacity);
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getSettingsId(
+                textureCategory,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::gamma),
+                settings.gamma);
+        uniformIdHandler->programObject().setUniform(
+            uniformIdHandler->getSettingsId(
+                textureCategory,
+                layerIndex,
+                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::multiplier),
+                settings.multiplier);
     }
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(

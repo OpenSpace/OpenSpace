@@ -142,6 +142,8 @@ vec4 getTexVal(const MultiLevelTile multiLevelTile, const LevelWeights w, const 
 // PerLayerSettings
 struct PerLayerSettings {
 	float opacity;
+	float gamma;
+	float multiplier;
 };
 
 #endif // TEXTURETILE_HGLSL

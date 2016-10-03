@@ -55,6 +55,8 @@ public:
 
     properties::BoolProperty isEnabled;
     properties::FloatProperty opacity;
+    properties::FloatProperty gamma;
+    properties::FloatProperty multiplier;
 };
 
 class LayeredCategoryPropertyOwner : public properties::PropertyOwner

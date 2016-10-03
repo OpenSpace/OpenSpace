@@ -60,10 +60,14 @@ namespace {
 namespace openspace {
     SingleTexturePropertyOwner::SingleTexturePropertyOwner(std::string name)
     : isEnabled("isEnabled", "isEnabled", true)
-    , opacity("opacity", "opacity", 1, 0, 1) {
+    , opacity("opacity", "opacity", 1, 0, 1)
+    , gamma("gamma", "gamma", 1, 0, 5)
+    , multiplier("multiplier", "multiplier", 1, 0, 20) {
         setName(name);
         addProperty(isEnabled);
         addProperty(opacity);
+        addProperty(gamma);
+        addProperty(multiplier);
     }
     
     SingleTexturePropertyOwner::~SingleTexturePropertyOwner() {
@@ -95,6 +99,16 @@ namespace openspace {
             prop.opacity.set(tileProvider.settings.opacity);
             prop.opacity.onChange([&]{
                 tileProvider.settings.opacity = prop.opacity;
+            });
+
+            prop.gamma.set(tileProvider.settings.gamma);
+            prop.gamma.onChange([&]{
+                tileProvider.settings.gamma = prop.gamma;
+            });
+
+            prop.multiplier.set(tileProvider.settings.multiplier);
+            prop.multiplier.onChange([&]{
+                tileProvider.settings.multiplier = prop.multiplier;
             });
 
             addPropertySubOwner(prop);

@@ -40,6 +40,8 @@ namespace openspace {
 
     struct PerLayerSettings {
         float opacity = 1;
+        float gamma = 1;
+        float multiplier = 1;
     };
     
     struct NamedTileProvider {

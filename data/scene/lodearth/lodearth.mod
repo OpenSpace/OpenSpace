@@ -72,8 +72,8 @@ return {
                         FilePath = "map_service_configs/GIBS/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
                     },
                     {
-                        Name = "MODIS_Terra_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/GIBS/MODIS_Terra_CorrectedReflectance_TrueColor.xml",
+                        Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+                        FilePath = "map_service_configs/GIBS/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Type = "SingleImage",

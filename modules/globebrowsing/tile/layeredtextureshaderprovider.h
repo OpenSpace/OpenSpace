@@ -125,7 +125,7 @@ namespace openspace {
     public:
         static const size_t NUM_TILE_DATA_VARIABLES = 5;
         static const size_t NUM_BLEND_TEXTURES = 3;
-        static const size_t NUM_LAYER_SETTINGS_VARIABLES = 1;
+        static const size_t NUM_LAYER_SETTINGS_VARIABLES = 3;
 
         /**
         * Each texture can have these uniform variables associated with it in the shader
@@ -170,6 +170,8 @@ namespace openspace {
         
         enum LayerSettingsIds {
             opacity,
+            gamma,
+            multiplier,
         };
 
         LayeredTextureShaderUniformIdHandler();

@@ -73,9 +73,11 @@
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
 float performLayerSettings(float currentValue, PerLayerSettings settings) {
-	float newValue;
+	float newValue = currentValue;
 
-	newValue = currentValue * settings.opacity;
+	newValue = pow(newValue, settings.gamma);
+	newValue = newValue * settings.multiplier;
+	newValue = newValue * settings.opacity;
 
 	return newValue;
 }
@@ -281,7 +283,7 @@ vec4 calculateNight(
 	float cosineFactor = clamp(dot(l, n) * 4, 0, 1);
 	
 	// Blend shaded color with base color
-	vec4 color = vec4(currentColor.rgb + (cosineFactor) * nightColor.xyz * nightColor.xyz * 1/0.1, currentColor.a);
+	vec4 color = vec4(currentColor.rgb + (cosineFactor) * nightColor.xyz, currentColor.a);
 
 	return color;
 }

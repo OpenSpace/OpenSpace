@@ -181,6 +181,8 @@ namespace openspace {
         NUM_LAYER_SETTINGS_VARIABLES] =
     {
         "opacity",
+        "gamma",
+        "multiplier",
     };
 
     LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler()
