@@ -42,6 +42,25 @@ class RenderableGlobe;
 
 namespace interaction {
 
+    template <typename T>
+    class Interpolator
+    {
+    public:
+        Interpolator(std::function<T(double)> transferFunction)
+        : _t(0.0)
+        , _transferFunction(transferFunction) {};
+        ~Interpolator() {};
+
+        void start() { _t = 0.0; };
+        void end() { _t = 1.0; };
+        void step(double delta) { _t += delta; };
+
+        T value() { return _transferFunction(_t); };
+        bool isInterpolating() { return _t < 1.0; };
+    private:
+        std::function<T(double)> _transferFunction;
+        double _t;
+    };
 
     class InputState
     {
@@ -94,7 +113,8 @@ public:
 
     // Accessors
     SceneGraphNode* focusNode();
-
+    Interpolator<double>& rotateToFocusNodeInterpolator();
+    
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;
     virtual void updateCameraStateFromMouseStates(Camera& camera) = 0;
 
@@ -157,6 +177,9 @@ protected:
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
+    
+    
+    Interpolator<double> _rotateToFocusNodeInterpolator;
 };
 
 class KeyframeInteractionMode : public InteractionMode

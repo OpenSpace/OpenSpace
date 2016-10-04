@@ -710,30 +710,7 @@ void InteractionHandler::setCamera(Camera* camera) {
 
 void InteractionHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-
-    glm::dquat rotation = _camera->rotationQuaternion();
-    glm::dvec3 focusPosition = focusNode()->worldPosition();
-    glm::dvec3 cameraPosition = _camera->positionVec3();
-    glm::dvec3 lookUpVector = _camera->lookUpVectorWorldSpace();
-
-    glm::dvec3 directionToFocusNode = glm::normalize(focusPosition - cameraPosition);
-
-    // To make sure the lookAt function won't fail
-    static const double epsilon = 0.000001;
-    if (glm::dot(lookUpVector, directionToFocusNode) > 1.0 - epsilon) {
-        // Change the look up vector a little bit
-        lookUpVector = glm::normalize(lookUpVector + glm::dvec3(epsilon));
-    }
-
-    // Create the rotation to look at  focus node
-    glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0, 0, 0),
-        directionToFocusNode,
-        lookUpVector);
-    glm::dquat rotationLookAtFocusNode = normalize(quat_cast(inverse(lookAtMat)));
-
-    // Update camera Rotation
-    _camera->setRotation(rotationLookAtFocusNode);
+    _currentInteractionMode->rotateToFocusNodeInterpolator().start();
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
