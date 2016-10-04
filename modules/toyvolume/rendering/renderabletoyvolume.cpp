@@ -33,13 +33,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <ghoul/opengl/ghoul_gl.h>
 
-
-namespace {
-    const std::string GlslRayCastPath = "${MODULES}/toyvolume/shaders/rayCast.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
-}
-
 namespace openspace {
 
     RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
