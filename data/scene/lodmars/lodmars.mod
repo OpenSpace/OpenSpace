@@ -96,7 +96,7 @@ return {
                 },
                 Overlays = {
                     {
-                        Type = "ChunkIndex",
+                        Type = "TileIndex",
                         Name = "Indices",
                     },
                     {

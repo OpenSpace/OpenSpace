@@ -156,7 +156,7 @@ namespace openspace {
     //                             Chunk Index Tile Provider                            //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    void ChunkIndexTileProvider::renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const {
+    void TileIndexTileProvider::renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const {
         fontRenderer.render(
             *_font,
             glm::vec2(

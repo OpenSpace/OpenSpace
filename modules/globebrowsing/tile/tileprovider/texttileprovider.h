@@ -117,7 +117,7 @@ namespace openspace {
     /**
      * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
      */
-    class ChunkIndexTileProvider : public TextTileProvider {
+    class TileIndexTileProvider : public TextTileProvider {
     public:
         virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
     };

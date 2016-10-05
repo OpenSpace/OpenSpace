@@ -120,7 +120,7 @@ return {
                         FilePath = "map_service_configs/earth/Reference_Labels.xml",
                     },
                     {
-                        Type = "ChunkIndex",
+                        Type = "TileIndex",
                         Name = "Indices",
                         FilePath = "textures/test_tile.png",
                     },
