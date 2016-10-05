@@ -81,7 +81,7 @@ namespace openspace {
         : imageData(nullptr)
         , dimensions(0, 0, 0)
         , preprocessData(nullptr)
-        , chunkIndex(0, 0, 0)
+        , tileIndex(0, 0, 0)
         , error(CE_None)
         , nBytesImageData(0)
     {
@@ -105,7 +105,7 @@ namespace openspace {
 
     void TileIOResult::serializeMetaData(std::ostream& os) {
         os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
-        os << chunkIndex.x << " " << chunkIndex.y << " " << chunkIndex.level << std::endl;
+        os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
         os << error << std::endl;
 
         // preprocess data
@@ -121,7 +121,7 @@ namespace openspace {
     TileIOResult TileIOResult::deserializeMetaData(std::istream& is) {
         TileIOResult res;
         is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
-        is >> res.chunkIndex.x >> res.chunkIndex.y >> res.chunkIndex.level;
+        is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
         int err; is >> err; res.error = (CPLErr) err;
         
         res.preprocessData = nullptr;

@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -129,21 +129,21 @@ namespace openspace {
         return _asyncTextureDataProvider->getTextureDataProvider()->maxChunkLevel();
     }
 
-    Tile CachingTileProvider::getTile(const ChunkIndex& chunkIndex) {
+    Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         Tile tile = Tile::TileUnavailable;
 
-        if (chunkIndex.level > maxLevel()) {
+        if (tileIndex.level > maxLevel()) {
             tile.status = Tile::Status::OutOfRange;
             return tile;
         }
 
-        ChunkHashKey key = chunkIndex.hashKey();
+        TileHashKey key = tileIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key);
         }
         else {
-            _asyncTextureDataProvider->enqueueTileIO(chunkIndex);
+            _asyncTextureDataProvider->enqueueTileIO(tileIndex);
         }
         
         return tile;
@@ -159,7 +159,7 @@ namespace openspace {
     void CachingTileProvider::initTexturesFromLoadedData() {
         auto readyTileIOResults = _asyncTextureDataProvider->getTileIOResults();
         for(auto tileIOResult : readyTileIOResults){
-            ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
+            TileHashKey key = tileIOResult->tileIndex.hashKey();
             Tile tile = createTile(tileIOResult);
             _tileCache->put(key, tile);
         }
@@ -170,13 +170,13 @@ namespace openspace {
         _framesSinceLastRequestFlush = 0;
     }
 
-    Tile::Status CachingTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+    Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
         auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
-        if (chunkIndex.level > tileDataset->maxChunkLevel()) {
+        if (tileIndex.level > tileDataset->maxChunkLevel()) {
             return Tile::Status::OutOfRange;
         }
 
-        ChunkHashKey key = chunkIndex.hashKey();
+        TileHashKey key = tileIndex.hashKey();
 
         if (_tileCache->exist(key)) {
             return _tileCache->get(key).status;
@@ -194,7 +194,7 @@ namespace openspace {
             return{ nullptr, nullptr, Tile::Status::IOError };
         }
 
-        ChunkHashKey key = tileIOResult->chunkIndex.hashKey();
+        TileHashKey key = tileIOResult->tileIndex.hashKey();
         TileDataLayout dataLayout =
             _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         

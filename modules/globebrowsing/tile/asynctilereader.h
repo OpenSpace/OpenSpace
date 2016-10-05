@@ -58,9 +58,9 @@ namespace openspace {
 
         
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-            const ChunkIndex& chunkIndex)
+            const TileIndex& tileIndex)
             : _tileDataset(textureDataProvider)
-            , _chunkIndex(chunkIndex) 
+            , _chunkIndex(tileIndex) 
         {
 
         }
@@ -76,7 +76,7 @@ namespace openspace {
 
     protected:
 
-        ChunkIndex _chunkIndex;
+        TileIndex _chunkIndex;
         std::shared_ptr<TileDataset> _tileDataset;
         std::shared_ptr<TileIOResult> _tileIOResult;
     };
@@ -96,11 +96,11 @@ namespace openspace {
         };
         
         DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-            const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, 
+            const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
             const std::string cacheMode);
 
         DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-            const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, 
+            const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
             CacheMode cacheMode = CacheMode::ReadOnly);
 
         virtual void execute();
@@ -124,7 +124,7 @@ namespace openspace {
         ~AsyncTileDataProvider();
 
 
-        bool enqueueTileIO(const ChunkIndex& chunkIndex);        
+        bool enqueueTileIO(const TileIndex& tileIndex);        
         std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
         void reset();
@@ -134,7 +134,7 @@ namespace openspace {
 
     protected:
 
-        virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
+        virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
 
     private:
         
@@ -142,7 +142,7 @@ namespace openspace {
 
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
-        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
+        std::unordered_map<TileHashKey, TileIndex> _enqueuedTileRequests;
 
 
     };

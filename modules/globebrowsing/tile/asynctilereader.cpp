@@ -50,8 +50,8 @@ namespace openspace {
 
 
     DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-        const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, CacheMode m)
-        : TileLoadJob(textureDataProvider, chunkIndex)
+        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, CacheMode m)
+        : TileLoadJob(textureDataProvider, tileIndex)
         , _tileDiskCache(tdc)
         , _mode(m)
     {
@@ -59,8 +59,8 @@ namespace openspace {
     }
 
     DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-        const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, const std::string cacheMode)
-        : TileLoadJob(textureDataProvider, chunkIndex)
+        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, const std::string cacheMode)
+        : TileLoadJob(textureDataProvider, tileIndex)
         , _tileDiskCache(tdc)
     {
         if (cacheMode == "Disabled") _mode = CacheMode::Disabled;
@@ -104,7 +104,7 @@ namespace openspace {
             _tileIOResult = _tileDiskCache->get(_chunkIndex);
             if (_tileIOResult == nullptr) {
                 TileIOResult res = TileIOResult::createDefaultRes();
-                res.chunkIndex = _chunkIndex;
+                res.tileIndex = _chunkIndex;
                 _tileIOResult = std::make_shared<TileIOResult>(res);
             }
             break;
@@ -133,12 +133,12 @@ namespace openspace {
         return _tileDataset;
     }
 
-    bool AsyncTileDataProvider::enqueueTileIO(const ChunkIndex& chunkIndex) {
-        if (satisfiesEnqueueCriteria(chunkIndex)) {
-            auto job = std::make_shared<TileLoadJob>(_tileDataset, chunkIndex);
-            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, chunkIndex, tileDiskCache, "ReadAndWrite");
+    bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
+        if (satisfiesEnqueueCriteria(tileIndex)) {
+            auto job = std::make_shared<TileLoadJob>(_tileDataset, tileIndex);
+            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
             _concurrentJobManager.enqueueJob(job);
-            _enqueuedTileRequests[chunkIndex.hashKey()] = chunkIndex;
+            _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
 
             return true;
         }
@@ -154,10 +154,10 @@ namespace openspace {
     }
    
 
-    bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const ChunkIndex& chunkIndex) const {
+    bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
         // only allow tile to be enqueued if it's not already enqueued
-        //return _futureTileIOResults.find(chunkIndex.hashKey()) == _futureTileIOResults.end();
-        return _enqueuedTileRequests.find(chunkIndex.hashKey()) == _enqueuedTileRequests.end();
+        //return _futureTileIOResults.find(tileIndex.hashKey()) == _futureTileIOResults.end();
+        return _enqueuedTileRequests.find(tileIndex.hashKey()) == _enqueuedTileRequests.end();
 
     }
 

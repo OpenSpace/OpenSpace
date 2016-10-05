@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -65,11 +65,11 @@ namespace openspace {
         glDeleteFramebuffers(1, &_fbo);
     }
 
-    Tile TextTileProvider::getTile(const ChunkIndex& chunkIndex) {
-        ChunkHashKey key = chunkIndex.hashKey();
+    Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
+        TileHashKey key = tileIndex.hashKey();
         
         if (!_tileCache.exist(key)) {
-            _tileCache.put(key, createChunkIndexTile(chunkIndex));
+            _tileCache.put(key, createChunkIndexTile(tileIndex));
         }
 
         return _tileCache.get(key);
@@ -80,7 +80,7 @@ namespace openspace {
     }
 
 
-    Tile::Status TextTileProvider::getTileStatus(const ChunkIndex& index) {
+    Tile::Status TextTileProvider::getTileStatus(const TileIndex& index) {
         return Tile::Status::OK;
     }
 
@@ -99,8 +99,8 @@ namespace openspace {
         _tileCache.clear();
     }
 
-    Tile TextTileProvider::createChunkIndexTile(const ChunkIndex& chunkIndex) {
-        Tile tile = backgroundTile(chunkIndex);
+    Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
+        Tile tile = backgroundTile(tileIndex);
 
         // Keep track of defaultFBO and viewport to be able to reset state when done
         GLint defaultFBO;
@@ -128,7 +128,7 @@ namespace openspace {
             );
         
         ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");
-        renderText(*_fontRenderer, chunkIndex);
+        renderText(*_fontRenderer, tileIndex);
 
         // Reset state: bind default FBO and set viewport to what it was
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -141,12 +141,12 @@ namespace openspace {
         return 1337; // unlimited
     }
 
-    ChunkHashKey TextTileProvider::toHash(const ChunkIndex& chunkIndex) const {
-        return chunkIndex.hashKey();
+    TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
+        return tileIndex.hashKey();
     }
 
 
-    Tile TextTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
+    Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
         glm::uvec4 color = { 0, 0, 0, 0 };
         return Tile::createPlainTile(_textureSize, color);
     }
@@ -156,15 +156,15 @@ namespace openspace {
     //                             Chunk Index Tile Provider                            //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    void ChunkIndexTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
+    void ChunkIndexTileProvider::renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const {
         fontRenderer.render(
             *_font,
             glm::vec2(
-                _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << chunkIndex.level),
+                _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << tileIndex.level),
                 _textureSize.y / 2 + _fontSize),
             glm::vec4(1.0, 0.0, 0.0, 1.0),
             "level: %i \nx: %i \ny: %i",
-            chunkIndex.level, chunkIndex.x, chunkIndex.y
+            tileIndex.level, tileIndex.x, tileIndex.y
             );
     }
 
@@ -201,11 +201,11 @@ namespace openspace {
 
     }
 
-    void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const {
-        GeodeticPatch patch(chunkIndex);
+    void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const {
+        GeodeticPatch patch(tileIndex);
         bool aboveEquator = patch.isNorthern();
         
-        double tileLongitudalLength = roundedLongitudalLength(chunkIndex);
+        double tileLongitudalLength = roundedLongitudalLength(tileIndex);
 
         std::string unit = "m";
         if (tileLongitudalLength > 9999) {
@@ -227,8 +227,8 @@ namespace openspace {
             );
     }
 
-    int SizeReferenceTileProvider::roundedLongitudalLength(const ChunkIndex& chunkIndex) const {
-        GeodeticPatch patch(chunkIndex);
+    int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileIndex) const {
+        GeodeticPatch patch(tileIndex);
         bool aboveEquator = patch.isNorthern();
         double lat = aboveEquator ? patch.minLat() : patch.maxLat();
         double lon1 = patch.minLon();
@@ -243,13 +243,13 @@ namespace openspace {
         return l;
     }
 
-    ChunkHashKey SizeReferenceTileProvider::toHash(const ChunkIndex& chunkIndex) const {
-        int l = roundedLongitudalLength(chunkIndex);
-        ChunkHashKey key = static_cast<ChunkHashKey>(l);
+    TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
+        int l = roundedLongitudalLength(tileIndex);
+        TileHashKey key = static_cast<TileHashKey>(l);
         return key;
     }
 
-    Tile SizeReferenceTileProvider::backgroundTile(const ChunkIndex& chunkIndex) const {
+    Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const {
         if (_backgroundTile.status == Tile::Status::OK) {
             Tile tile;
             auto t = _backgroundTile.texture;
@@ -264,7 +264,7 @@ namespace openspace {
         }
         else {
             // use default background
-            return TextTileProvider::backgroundTile(chunkIndex);
+            return TextTileProvider::backgroundTile(tileIndex);
         }
     }
 

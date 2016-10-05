@@ -54,7 +54,7 @@ namespace openspace {
      * Enables a simple way of providing tiles with any type of rendered text. 
      * Internally it handles setting up a FBO for rendering the text, and defines a new 
      * interface, consisting of only a single method for subclasses to implement: 
-     * renderText(const FontRenderer&, const ChunkIndex&) const;
+     * renderText(const FontRenderer&, const TileIndex&) const;
      */
     class TextTileProvider : public TileProvider {
     public:
@@ -67,9 +67,9 @@ namespace openspace {
 
         // The TileProvider interface below is implemented in this class
 
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getTile(const TileIndex& tileIndex);
         virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual Tile::Status getTileStatus(const TileIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual void reset();
@@ -79,26 +79,26 @@ namespace openspace {
         * Returns the tile which will be used to draw text onto. 
         * Default implementation returns a tile with a plain transparent texture.
         */
-        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
+        virtual Tile backgroundTile(const TileIndex& tileIndex) const;
 
 
         /**
         * Allow overriding of hash function. 
-        * Default is <code>ChunkIndex::hashKey()</code>
+        * Default is <code>TileIndex::hashKey()</code>
         *
-        * \param chunkIndex chunkIndex to hash
+        * \param tileIndex tileIndex to hash
         * \returns hashkey used for in LRU cache for this tile
         */
-        virtual ChunkHashKey toHash(const ChunkIndex& chunkIndex) const;
+        virtual TileHashKey toHash(const TileIndex& tileIndex) const;
         
         /**
         * Uses the fontRenderer to render some text onto the tile texture provided in 
-        * backgroundTile(const ChunkIndex& chunkIndex). 
+        * backgroundTile(const TileIndex& tileIndex). 
         * 
         * \param fontRenderer used for rendering text onto texture
-        * \param chunkIndex associated with the tile to be rendered onto
+        * \param tileIndex associated with the tile to be rendered onto
         */
-        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const = 0;
+        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const = 0;
 
     protected:
         std::shared_ptr<ghoul::fontrendering::Font> _font;
@@ -106,7 +106,7 @@ namespace openspace {
         size_t _fontSize;
 
     private:
-        Tile createChunkIndexTile(const ChunkIndex& chunkIndex);
+        Tile createChunkIndexTile(const TileIndex& tileIndex);
         std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 
         TileCache _tileCache;
@@ -119,7 +119,7 @@ namespace openspace {
      */
     class ChunkIndexTileProvider : public TextTileProvider {
     public:
-        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
+        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
     };
 
     /**
@@ -130,15 +130,15 @@ namespace openspace {
     public:
         SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-        virtual void renderText(const FontRenderer& fontRenderer, const ChunkIndex& chunkIndex) const;
-        virtual Tile backgroundTile(const ChunkIndex& chunkIndex) const;
+        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
+        virtual Tile backgroundTile(const TileIndex& tileIndex) const;
 
-        virtual ChunkHashKey toHash(const ChunkIndex& chunkIndex) const;
+        virtual TileHashKey toHash(const TileIndex& tileIndex) const;
 
 
     private:
 
-        int roundedLongitudalLength(const ChunkIndex& chunkIndex) const;
+        int roundedLongitudalLength(const TileIndex& tileIndex) const;
 
         Ellipsoid _ellipsoid;
         Tile _backgroundTile;

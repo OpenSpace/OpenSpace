@@ -26,7 +26,7 @@
 #define __TILE_SELECTOR_H__
 
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <vector>
@@ -48,9 +48,9 @@ namespace openspace {
 
     class TileSelector {
     public:
-        static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents = 0);
-        static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex);
-        static std::vector<TileAndTransform> getTilesSortedByHighestResolution(const TileProviderGroup&, const ChunkIndex& chunkIndex);
+        static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
+        static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex);
+        static std::vector<TileAndTransform> getTilesSortedByHighestResolution(const TileProviderGroup&, const TileIndex& tileIndex);
 
 
         struct CompareResolution {
@@ -60,7 +60,7 @@ namespace openspace {
         static const CompareResolution HIGHEST_RES;
 
     private:
-        static void ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv);
+        static void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
 
     };
 

@@ -80,7 +80,7 @@ namespace openspace {
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
-        if (chunk.index().level < 10) {
+        if (chunk.tileIndex().level < 10) {
             renderChunkGlobally(chunk, data);
         }
         else {
@@ -184,7 +184,7 @@ namespace openspace {
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
         const Chunk& chunk)
     {
-        const ChunkIndex& chunkIndex = chunk.index();
+        const TileIndex& tileIndex = chunk.tileIndex();
 
         std::array<std::vector<std::shared_ptr<TileProvider> >,
             LayeredTextures::NUM_TEXTURE_CATEGORIES> tileProviders;
@@ -262,7 +262,7 @@ namespace openspace {
                 auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
-                TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
+                TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
                 if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
                     tileAndTransform.tile = tileProvider->getDefaultTile();
                     tileAndTransform.uvTransform.uvOffset = { 0, 0 };
@@ -279,7 +279,7 @@ namespace openspace {
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
-                    TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 1);
+                    TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 1);
                     if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent1 = tileAndTransform;
                     }
@@ -291,7 +291,7 @@ namespace openspace {
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
 
-                    TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 2);
+                    TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 2);
                     if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent2 = tileAndTransformParent1;
                     }
@@ -381,7 +381,7 @@ namespace openspace {
             float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(cameraPosition));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
-            programObject->setUniform("chunkLevel", chunk.index().level);
+            programObject->setUniform("chunkLevel", chunk.tileIndex().level);
         }
         
         // Calculate other uniform variables needed for rendering
@@ -454,7 +454,7 @@ namespace openspace {
         if (performAnyBlending) {
             float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * chunk.owner().ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
-            programObject->setUniform("chunkLevel", chunk.index().level);
+            programObject->setUniform("chunkLevel", chunk.tileIndex().level);
         }
 
         // Calculate other uniform variables needed for rendering

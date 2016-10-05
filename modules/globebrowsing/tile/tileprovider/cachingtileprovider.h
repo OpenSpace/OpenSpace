@@ -61,10 +61,10 @@ namespace openspace {
         * cache. If not, it may enqueue some IO operations on a 
         * separate thread.
         */
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getTile(const TileIndex& tileIndex);
 
         virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
+        virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual void reset();

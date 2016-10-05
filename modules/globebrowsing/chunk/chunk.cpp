@@ -43,10 +43,10 @@ namespace openspace {
 
     const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
-    Chunk::Chunk(const RenderableGlobe& owner, const ChunkIndex& chunkIndex, bool initVisible)
+    Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool initVisible)
         : _owner(owner)
-        , _surfacePatch(chunkIndex)
-        , _index(chunkIndex)
+        , _surfacePatch(tileIndex)
+        , _tileIndex(tileIndex)
         , _isVisible(initVisible) 
     {
 
@@ -60,16 +60,16 @@ namespace openspace {
         return _owner;
     }
 
-    const ChunkIndex Chunk::index() const {
-        return _index;
+    const TileIndex Chunk::tileIndex() const {
+        return _tileIndex;
     }
 
     bool Chunk::isVisible() const {
         return _isVisible;
     }
 
-    void Chunk::setIndex(const ChunkIndex& index) {
-        _index = index;
+    void Chunk::setIndex(const TileIndex& index) {
+        _tileIndex = index;
         _surfacePatch = GeodeticPatch(index);
     }
 
@@ -87,8 +87,8 @@ namespace openspace {
 
         int desiredLevel = _owner.chunkedLodGlobe()->getDesiredLevel(*this, myRenderData);
 
-        if (desiredLevel < _index.level) return Status::WANT_MERGE;
-        else if (_index.level < desiredLevel) return Status::WANT_SPLIT;
+        if (desiredLevel < _tileIndex.level) return Status::WANT_MERGE;
+        else if (_tileIndex.level < desiredLevel) return Status::WANT_SPLIT;
         else return Status::DO_NOTHING;
     }
 
@@ -108,7 +108,7 @@ namespace openspace {
         
         size_t HEIGHT_CHANNEL = 0;
         const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
-        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _index);
+        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {
             bool goodTile = tile.tile.status == Tile::Status::OK;

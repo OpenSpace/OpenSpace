@@ -220,16 +220,16 @@ namespace openspace {
     //                              Public interface                                //
     //////////////////////////////////////////////////////////////////////////////////
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(ChunkIndex chunkIndex) {
+    std::shared_ptr<TileIOResult> TileDataset::readTileData(TileIndex tileIndex) {
         ensureInitialized();
-        IODescription io = getIODescription(chunkIndex);
+        IODescription io = getIODescription(tileIndex);
         CPLErr worstError = CPLErr::CE_None;
 
         // Build the Tile IO Result from the data we queride
         std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
         result->imageData = readImageData(io, worstError);
         result->error = worstError;
-        result->chunkIndex = chunkIndex;
+        result->tileIndex = tileIndex;
         result->dimensions = glm::uvec3(io.write.region.numPixels, 1);
         result->nBytesImageData = io.write.totalNumBytes;
         
@@ -246,7 +246,7 @@ namespace openspace {
         ensureInitialized();
         PixelRegion pixelRegion = { PixelCoordinate(0, 0), PixelRange(16, 16) };
         std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
-        result->chunkIndex = { 0, 0, 0 };
+        result->tileIndex = { 0, 0, 0 };
         result->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
         result->nBytesImageData = result->dimensions.x * result->dimensions.y * _dataLayout.bytesPerPixel;
         result->imageData = new char[result->nBytesImageData];
@@ -352,16 +352,16 @@ namespace openspace {
         return ov;
     }
 
-    int TileDataset::gdalOverview(const ChunkIndex& chunkIndex) const {
+    int TileDataset::gdalOverview(const TileIndex& tileIndex) const {
         int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
+        int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
         return glm::clamp(ov, 0, overviews - 1);
     }
 
 
-    int TileDataset::gdalVirtualOverview(const ChunkIndex& chunkIndex) const {
+    int TileDataset::gdalVirtualOverview(const TileIndex& tileIndex) const {
         int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        int ov = overviews - (chunkIndex.level + _cached._tileLevelDifference + 1);
+        int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
         return ov;
     }
 
@@ -447,12 +447,12 @@ namespace openspace {
         return geodetic;
     }
 
-    IODescription TileDataset::getIODescription(const ChunkIndex& chunkIndex) const {
+    IODescription TileDataset::getIODescription(const TileIndex& tileIndex) const {
         IODescription io;
-        io.read.region = gdalPixelRegion(chunkIndex);
+        io.read.region = gdalPixelRegion(tileIndex);
 
         if (gdalHasOverviews()) {
-            int overview = gdalOverview(chunkIndex);
+            int overview = gdalOverview(tileIndex);
             io.read.overview = overview;
             io.read.region.downscalePow2(overview + 1);
             io.write.region = io.read.region;
@@ -461,7 +461,7 @@ namespace openspace {
         else {
             io.read.overview = 0;
             io.write.region = io.read.region;
-            int virtualOverview = gdalVirtualOverview(chunkIndex);
+            int virtualOverview = gdalVirtualOverview(tileIndex);
             io.write.region.downscalePow2(virtualOverview + 1);
             PixelRegion scaledPadding = padding;
 
@@ -475,7 +475,7 @@ namespace openspace {
         io.write.region.roundDownToQuadratic();
         io.write.region.roundUpNumPixelToNearestMultipleOf(2);
         if (preRound != io.write.region.numPixels) {
-            LDEBUG(chunkIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
+            LDEBUG(tileIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
         }
 
 
@@ -717,7 +717,7 @@ namespace openspace {
 
         for (size_t c = 0; c < _dataLayout.numRasters; c++) {
             if (preprocessData->maxValues[c] > 8800.0f) {
-                //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.chunkIndex);
+                //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.tileIndex);
             }
         }
 
@@ -738,7 +738,7 @@ namespace openspace {
             hasMissingData |= result->preprocessData->maxValues[c] == missingDataValue;
         }
         
-        bool onHighLevel = result->chunkIndex.level > 6;
+        bool onHighLevel = result->tileIndex.level > 6;
         if (hasMissingData && onHighLevel) {
             return CE_Fatal;
         }

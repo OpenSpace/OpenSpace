@@ -52,9 +52,9 @@ namespace openspace {
         SingleImageProvider(const std::string& imagePath);
         virtual ~SingleImageProvider() { }
 
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getTile(const TileIndex& tileIndex);
         virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& index);
+        virtual Tile::Status getTileStatus(const TileIndex& index);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual void reset();

@@ -54,31 +54,31 @@ enum CardinalDirection {
 
 
 
-using ChunkHashKey = uint64_t;
+using TileHashKey = uint64_t;
 
 
-struct ChunkIndex {
+struct TileIndex {
     
 
     int x, y, level;
     
 
-    ChunkIndex() : x(0), y(0), level(0) { }
-    ChunkIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    ChunkIndex(const ChunkIndex& other) : x(other.x), y(other.y), level(other.level) { }
-    ChunkIndex(const Geodetic2& point, int level);
+    TileIndex() : x(0), y(0), level(0) { }
+    TileIndex(int x, int y, int level) : x(x), y(y), level(level) { }
+    TileIndex(const TileIndex& other) : x(other.x), y(other.y), level(other.level) { }
+    TileIndex(const Geodetic2& point, int level);
 
 
     bool hasParent() const {
         return level > 0;
     }
 
-    ChunkIndex parent() const;
+    TileIndex parent() const;
     
-    ChunkIndex& operator--();
-    ChunkIndex operator--(int);
+    TileIndex& operator--();
+    TileIndex operator--(int);
 
-    ChunkIndex& operator-=(unsigned int levels);
+    TileIndex& operator-=(unsigned int levels);
 
     bool isWestChild() const {
         return x % 2 == 0;
@@ -97,7 +97,7 @@ struct ChunkIndex {
     }
 
 
-    ChunkIndex child(Quad q) const;
+    TileIndex child(Quad q) const;
 
 
     std::string toString() const;
@@ -106,17 +106,17 @@ struct ChunkIndex {
     Gets the tile at a specified offset from this tile.
     Accepts delta indices ranging from [-2^level, Infinity[
     */
-    ChunkIndex getRelatedTile(int deltaX, int deltaY) const;
+    TileIndex getRelatedTile(int deltaX, int deltaY) const;
 
-    int manhattan(const ChunkIndex& other) const;
+    int manhattan(const TileIndex& other) const;
 
-    ChunkHashKey hashKey() const;
+    TileHashKey hashKey() const;
 
-    bool operator==(const ChunkIndex& other) const;
+    bool operator==(const TileIndex& other) const;
 };
 
 
-std::ostream& operator<<(std::ostream& os, const ChunkIndex& ti);
+std::ostream& operator<<(std::ostream& os, const TileIndex& ti);
 
 
 } // namespace openspace

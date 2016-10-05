@@ -54,10 +54,10 @@ namespace {
 
 namespace openspace {
 
-    const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX =
-        ChunkIndex(0, 0, 1);
-    const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX =
-        ChunkIndex(1, 0, 1);
+    const TileIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX =
+        TileIndex(0, 0, 1);
+    const TileIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX =
+        TileIndex(1, 0, 1);
     const GeodeticPatch ChunkedLodGlobe::COVERAGE =
         GeodeticPatch(0, 0, 90, 180);
 
@@ -233,7 +233,7 @@ namespace openspace {
                 screenSpaceBounds.expand(screenSpaceCorner);
             }
 
-            unsigned int colorBits = 1 + chunk.index().level % 6;
+            unsigned int colorBits = 1 + chunk.tileIndex().level % 6;
             vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
 
             if (_owner.debugProperties().showChunkBounds) {

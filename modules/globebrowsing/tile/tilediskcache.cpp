@@ -56,15 +56,15 @@ namespace openspace {
         _cacheDir = cacheDir;
     }
 
-    bool TileDiskCache::has(const ChunkIndex& chunkIndex) const {
-        File metaFile = getMetaDataFile(chunkIndex);
+    bool TileDiskCache::has(const TileIndex& tileIndex) const {
+        File metaFile = getMetaDataFile(tileIndex);
         return FileSys.fileExists(metaFile);
     }
 
 
-    std::shared_ptr<TileIOResult> TileDiskCache::get(const ChunkIndex& chunkIndex) {
-        File metaDataFile = getMetaDataFile(chunkIndex);
-        File dataFile = getDataFile(chunkIndex);
+    std::shared_ptr<TileIOResult> TileDiskCache::get(const TileIndex& tileIndex) {
+        File metaDataFile = getMetaDataFile(tileIndex);
+        File dataFile = getDataFile(tileIndex);
         if (FileSys.fileExists(metaDataFile) && FileSys.fileExists(dataFile)) {
             // read meta
             std::ifstream ifsMeta;
@@ -84,8 +84,8 @@ namespace openspace {
         return nullptr;
     }
 
-    bool TileDiskCache::put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult) {
-        File metaDataFile = getMetaDataFile(chunkIndex);
+    bool TileDiskCache::put(const TileIndex& tileIndex, std::shared_ptr<TileIOResult> tileIOResult) {
+        File metaDataFile = getMetaDataFile(tileIndex);
         if (!FileSys.fileExists(metaDataFile)) {
             std::ofstream ofsMeta;
             ofsMeta.open(metaDataFile.path());
@@ -93,7 +93,7 @@ namespace openspace {
             ofsMeta.close();
 
             std::ofstream ofsData;
-            File dataFile = getDataFile(chunkIndex);
+            File dataFile = getDataFile(tileIndex);
             ofsData.open(dataFile.path(), std::ofstream::binary);
             char * data = (char*)tileIOResult->imageData;
             ofsData.write(data, tileIOResult->nBytesImageData);
@@ -103,21 +103,21 @@ namespace openspace {
         return false;
     }
 
-    std::string TileDiskCache::getFilePath(const ChunkIndex& chunkIndex) const {
+    std::string TileDiskCache::getFilePath(const TileIndex& tileIndex) const {
         std::stringstream ss;
-        ss << chunkIndex.level;
-        ss << "_" << chunkIndex.x;
-        ss << "_" << chunkIndex.y;
+        ss << tileIndex.level;
+        ss << "_" << tileIndex.x;
+        ss << "_" << tileIndex.y;
         std::string filePath = FileSys.pathByAppendingComponent(_cacheDir.path(), ss.str());
         return filePath;
     }
 
-    File TileDiskCache::getMetaDataFile(const ChunkIndex& chunkIndex) const {
-        return File(getFilePath(chunkIndex) + ".meta");
+    File TileDiskCache::getMetaDataFile(const TileIndex& tileIndex) const {
+        return File(getFilePath(tileIndex) + ".meta");
     }
 
-    File TileDiskCache::getDataFile(const ChunkIndex& chunkIndex) const {
-        return File(getFilePath(chunkIndex) + ".data");
+    File TileDiskCache::getDataFile(const TileIndex& tileIndex) const {
+        return File(getFilePath(tileIndex) + ".data");
     }
 
 

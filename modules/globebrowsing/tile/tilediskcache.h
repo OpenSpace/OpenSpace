@@ -26,7 +26,7 @@
 #define __TILE_DISK_CACHE_H__
 
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -42,9 +42,9 @@ struct TileIOResult;
     public:
         TileDiskCache(const std::string& name);
         
-        std::shared_ptr<TileIOResult> get(const ChunkIndex& chunkIndex);
-        bool has(const ChunkIndex& chunkIndex) const;
-        bool put(const ChunkIndex& chunkIndex, std::shared_ptr<TileIOResult> tileIOResult);
+        std::shared_ptr<TileIOResult> get(const TileIndex& tileIndex);
+        bool has(const TileIndex& tileIndex) const;
+        bool put(const TileIndex& tileIndex, std::shared_ptr<TileIOResult> tileIOResult);
 
         
         static const std::string CACHE_ROOT;
@@ -54,9 +54,9 @@ struct TileIOResult;
         
         Directory _cacheDir;
         
-        std::string getFilePath(const ChunkIndex& chunkIndex) const;
-        File getMetaDataFile(const ChunkIndex& chunkIndex) const;
-        File getDataFile(const ChunkIndex& chunkIndex) const;
+        std::string getFilePath(const TileIndex& tileIndex) const;
+        File getMetaDataFile(const TileIndex& tileIndex) const;
+        File getDataFile(const TileIndex& tileIndex) const;
 
     };
 

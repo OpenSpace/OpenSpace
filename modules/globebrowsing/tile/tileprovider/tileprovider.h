@@ -43,7 +43,7 @@ namespace openspace {
     
     /**
     * Interface for providing <code>Tile</code>s given a 
-    * <code>ChunkIndex</code>. 
+    * <code>TileIndex</code>. 
     */
     class TileProvider {
     public:
@@ -76,7 +76,7 @@ namespace openspace {
         virtual ~TileProvider() { }
 
         /**
-        * Method for querying tiles, given a specified <code>ChunkIndex</code>.
+        * Method for querying tiles, given a specified <code>TileIndex</code>.
         *
         * This method is expected to be invoked multiple times per frame,
         * and should therefore return quickly, e.g. not perform heavy I/O 
@@ -86,13 +86,13 @@ namespace openspace {
         * status and texture will be consistent over different invocations
         * of this method.
         *
-        * \param chunkIndex specifying a region of a map for which 
+        * \param tileIndex specifying a region of a map for which 
         * we want tile data.
         *
-        * \returns The tile corresponding to the ChunkIndex by the time
+        * \returns The tile corresponding to the TileIndex by the time
         * the method was invoked.
         */
-        virtual Tile getTile(const ChunkIndex& chunkIndex) = 0;
+        virtual Tile getTile(const TileIndex& tileIndex) = 0;
 
         /**
         * TileProviders must be able to provide a defualt
@@ -107,9 +107,9 @@ namespace openspace {
         * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
         * corresponds the <code>Tile</code> that would be returned
         * if the function <code>getTile</code> would be invoked with the same
-        * <code>ChunkIndex</code> argument at this point in time.
+        * <code>TileIndex</code> argument at this point in time.
         */
-        virtual Tile::Status getTileStatus(const ChunkIndex& index) = 0;
+        virtual Tile::Status getTileStatus(const TileIndex& index) = 0;
 
         /**
         * Get the associated depth transform for this TileProvider.
@@ -132,13 +132,13 @@ namespace openspace {
         virtual void reset() = 0;
 
         /**
-        * \returns The maximum level as defined by <code>ChunkIndex</code>
+        * \returns The maximum level as defined by <code>TileIndex</code>
         * that this TileProvider is able provide.
         */
         virtual int maxLevel() = 0;
     };
 
-    typedef LRUCache<ChunkHashKey, Tile> TileCache;
+    typedef LRUCache<TileHashKey, Tile> TileCache;
 
     struct TileProviderInitData {
         int minimumPixelSize;

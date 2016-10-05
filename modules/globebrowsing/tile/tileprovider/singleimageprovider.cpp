@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -55,7 +55,7 @@ namespace openspace {
         reset();
     }
 
-    Tile SingleImageProvider::getTile(const ChunkIndex& chunkIndex) {
+    Tile SingleImageProvider::getTile(const TileIndex& tileIndex) {
         return _tile;
     }
 
@@ -63,7 +63,7 @@ namespace openspace {
         return _tile;
     }
 
-    Tile::Status SingleImageProvider::getTileStatus(const ChunkIndex& index) {
+    Tile::Status SingleImageProvider::getTileStatus(const TileIndex& index) {
         return _tile.status;
     }
 

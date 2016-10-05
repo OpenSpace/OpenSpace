@@ -92,7 +92,7 @@ namespace openspace {
         
         /**
         * Opens a GDALDataset in readonly mode and calculates meta data required for 
-        * reading tile using a ChunkIndex.
+        * reading tile using a TileIndex.
         *
         * \param gdalDatasetDesc  - A path to a specific file or raw XML describing the dataset 
         * \param minimumPixelSize - minimum number of pixels per side per tile requested 
@@ -106,7 +106,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
         //                              Public interface                                //
         //////////////////////////////////////////////////////////////////////////////////
-        std::shared_ptr<TileIOResult> readTileData(ChunkIndex chunkIndex);
+        std::shared_ptr<TileIOResult> readTileData(TileIndex tileIndex);
         std::shared_ptr<TileIOResult> defaultTileData();
         int maxChunkLevel();
         TileDepthTransform getDepthTransform();
@@ -139,8 +139,8 @@ namespace openspace {
         GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
         bool gdalHasOverviews() const;
         int gdalOverview(const PixelRange& baseRegionSize) const;
-        int gdalOverview(const ChunkIndex& chunkIndex) const;
-        int gdalVirtualOverview(const ChunkIndex& chunkIndex) const;
+        int gdalOverview(const TileIndex& tileIndex) const;
+        int gdalVirtualOverview(const TileIndex& tileIndex) const;
         PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
         PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
         GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
@@ -152,7 +152,7 @@ namespace openspace {
 
         PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
         Geodetic2 pixelToGeodetic(const PixelCoordinate& p) const;
-        IODescription getIODescription(const ChunkIndex& chunkIndex) const;
+        IODescription getIODescription(const TileIndex& tileIndex) const;
         char* readImageData(IODescription& io, CPLErr& worstError) const;
         CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
         CPLErr repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;

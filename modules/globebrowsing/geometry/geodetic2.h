@@ -33,7 +33,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <ghoul/misc/assert.h>
 
@@ -104,7 +104,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch);
 
-    GeodeticPatch(const ChunkIndex& chunkIndex);
+    GeodeticPatch(const TileIndex& tileIndex);
 
 
     void setCenter(const Geodetic2&);

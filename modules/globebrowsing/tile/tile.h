@@ -55,7 +55,7 @@ namespace openspace {
 
             /**
             * Can be set by <code>TileProvider</code>s if the requested 
-            * <code>ChunkIndex</code> is undefined for that particular 
+            * <code>TileIndex</code> is undefined for that particular 
             * provider. 
             * texture and preprocessData are both null
             */

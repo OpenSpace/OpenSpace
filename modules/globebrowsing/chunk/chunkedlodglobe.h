@@ -79,8 +79,8 @@ namespace openspace {
         void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;
 
         static const GeodeticPatch COVERAGE;
-        static const ChunkIndex LEFT_HEMISPHERE_INDEX;
-        static const ChunkIndex RIGHT_HEMISPHERE_INDEX;
+        static const TileIndex LEFT_HEMISPHERE_INDEX;
+        static const TileIndex RIGHT_HEMISPHERE_INDEX;
 
         // Covers all negative longitudes
         std::unique_ptr<ChunkNode> _leftRoot;

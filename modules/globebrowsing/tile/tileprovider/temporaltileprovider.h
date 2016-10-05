@@ -182,9 +182,9 @@ namespace openspace {
 
         // These methods implements the TileProvider interface
 
-        virtual Tile getTile(const ChunkIndex& chunkIndex);
+        virtual Tile getTile(const TileIndex& tileIndex);
         virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const ChunkIndex& chunkIndex);
+        virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
         virtual TileDepthTransform depthTransform();
         virtual void update();
         virtual void reset();

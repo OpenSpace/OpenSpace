@@ -31,7 +31,7 @@
 #include <memory>
 #include <ostream>
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 

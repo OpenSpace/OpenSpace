@@ -30,7 +30,6 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
@@ -55,6 +54,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
@@ -82,7 +82,6 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
@@ -107,6 +106,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp

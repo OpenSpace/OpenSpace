@@ -115,10 +115,10 @@ namespace openspace {
     }
 
 
-    GeodeticPatch::GeodeticPatch(const ChunkIndex& chunkIndex) {
-        Scalar deltaLat = (2 * M_PI) / ((double)(1 << chunkIndex.level));
-        Scalar deltaLon = (2 * M_PI) / ((double)(1 << chunkIndex.level));
-        Geodetic2 nwCorner(M_PI / 2 - deltaLat * chunkIndex.y, -M_PI + deltaLon * chunkIndex.x);
+    GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
+        Scalar deltaLat = (2 * M_PI) / ((double)(1 << tileIndex.level));
+        Scalar deltaLon = (2 * M_PI) / ((double)(1 << tileIndex.level));
+        Geodetic2 nwCorner(M_PI / 2 - deltaLat * tileIndex.y, -M_PI + deltaLon * tileIndex.x);
         _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
         _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
     }

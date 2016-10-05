@@ -65,7 +65,7 @@ namespace openspace {
         char* imageData;
         glm::uvec3 dimensions;
         std::shared_ptr<TilePreprocessData> preprocessData;
-        ChunkIndex chunkIndex;
+        TileIndex tileIndex;
         CPLErr error;
         size_t nBytesImageData;
 

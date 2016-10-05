@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
 
-#include <modules/globebrowsing/chunk/chunkindex.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/engine/downloadmanager.h>
 
@@ -135,14 +135,14 @@ namespace openspace {
         return _currentTileProvider->depthTransform();
     }
 
-    Tile::Status TemporalTileProvider::getTileStatus(const ChunkIndex& chunkIndex) {
+    Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
         ensureUpdated();
-        return _currentTileProvider->getTileStatus(chunkIndex);
+        return _currentTileProvider->getTileStatus(tileIndex);
     }
 
-    Tile TemporalTileProvider::getTile(const ChunkIndex& chunkIndex) {
+    Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
         ensureUpdated();
-        return _currentTileProvider->getTile(chunkIndex);
+        return _currentTileProvider->getTile(tileIndex);
     }
 
     Tile TemporalTileProvider::getDefaultTile() {

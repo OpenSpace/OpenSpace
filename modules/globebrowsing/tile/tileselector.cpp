@@ -44,29 +44,29 @@ namespace openspace {
 
     const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
-    TileAndTransform TileSelector::getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents) {
+    TileAndTransform TileSelector::getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents) {
         TileUvTransform uvTransform;
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
 
         // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
-        for (int i = 0; i < parents && chunkIndex.level > 1; i++) {
-            ascendToParent(chunkIndex, uvTransform);
+        for (int i = 0; i < parents && tileIndex.level > 1; i++) {
+            ascendToParent(tileIndex, uvTransform);
         }
 
         // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
         //         the range of defined data.
         int maximumLevel = tileProvider->maxLevel();
-        while(chunkIndex.level > maximumLevel){
-            ascendToParent(chunkIndex, uvTransform);
+        while(tileIndex.level > maximumLevel){
+            ascendToParent(tileIndex, uvTransform);
         }
         
         // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
         //         has a loaded tile ready to use. 
-        while (chunkIndex.level > 1) {
-            Tile tile = tileProvider->getTile(chunkIndex);
+        while (tileIndex.level > 1) {
+            Tile tile = tileProvider->getTile(tileIndex);
             if (tile.status != Tile::Status::OK) {
-                ascendToParent(chunkIndex, uvTransform);
+                ascendToParent(tileIndex, uvTransform);
             }
             else return { tile, uvTransform };
         }
@@ -74,14 +74,14 @@ namespace openspace {
         return{ Tile::TileUnavailable, uvTransform };
     }
 
-    TileAndTransform TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex) {
+    TileAndTransform TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex) {
         TileAndTransform mostHighResolution;
         mostHighResolution.tile = Tile::TileUnavailable;
         mostHighResolution.uvTransform.uvScale.x = 0;
 
         auto activeProviders = tileProviderGroup.getActiveTileProviders();
         for (size_t i = 0; i < activeProviders.size(); i++) {
-            TileAndTransform tileAndTransform = getHighestResolutionTile(activeProviders[i].get(), chunkIndex);
+            TileAndTransform tileAndTransform = getHighestResolutionTile(activeProviders[i].get(), tileIndex);
             bool tileIsOk = tileAndTransform.tile.status == Tile::Status::OK;
             bool tileHasPreprocessData = tileAndTransform.tile.preprocessData != nullptr;
             bool tileIsHigherResolution = tileAndTransform.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
@@ -98,11 +98,11 @@ namespace openspace {
         return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
     }
 
-    std::vector<TileAndTransform> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const ChunkIndex& chunkIndex) {
+    std::vector<TileAndTransform> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const TileIndex& tileIndex) {
         auto activeProviders = tileProviderGroup.getActiveTileProviders();
         std::vector<TileAndTransform> tiles;
         for (auto provider : activeProviders){
-            tiles.push_back(getHighestResolutionTile(provider.get(), chunkIndex));
+            tiles.push_back(getHighestResolutionTile(provider.get(), tileIndex));
         }
 
 
@@ -111,20 +111,20 @@ namespace openspace {
         return tiles;
     }
 
-    void TileSelector::ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv) {
+    void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
-        if (chunkIndex.isEastChild()) {
+        if (tileIndex.isEastChild()) {
             uv.uvOffset.x += 0.5;
         }
 
         // In OpenGL, positive y direction is up
-        if (chunkIndex.isNorthChild()) {
+        if (tileIndex.isNorthChild()) {
             uv.uvOffset.y += 0.5;
         }
 
-        --chunkIndex;
+        --tileIndex;
     }
 
 }  // namespace openspace

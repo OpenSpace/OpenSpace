@@ -158,18 +158,18 @@ namespace openspace {
         double projectedChunkAreaApprox = 8 * areaABC;
 
         double scaledArea = globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
-        return chunk.index().level + round(scaledArea - 1);
+        return chunk.tileIndex().level + round(scaledArea - 1);
     }
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->getTileProviderManager();
         auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
-        int currLevel = chunk.index().level;
+        int currLevel = chunk.tileIndex().level;
 
         for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
             auto tileProviderGroup = tileProvidermanager->getTileProviderGroup(i);
             for (auto tileProvider : tileProviderGroup.getActiveTileProviders()) {
-                Tile::Status tileStatus = tileProvider->getTileStatus(chunk.index());
+                Tile::Status tileStatus = tileProvider->getTileStatus(chunk.tileIndex());
 
                 if (tileStatus == Tile::Status::OK) {
                     return UNKNOWN_DESIRED_LEVEL;

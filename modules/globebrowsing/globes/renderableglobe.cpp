@@ -297,9 +297,9 @@ namespace openspace {
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
         int chunkLevel = _chunkedLodGlobe->findChunkNode(
-            geodeticPosition).getChunk().index().level;
+            geodeticPosition).getChunk().tileIndex().level;
         
-        ChunkIndex chunkIdx = ChunkIndex(geodeticPosition, chunkLevel);
+        TileIndex chunkIdx = TileIndex(geodeticPosition, chunkLevel);
         GeodeticPatch patch = GeodeticPatch(chunkIdx);
         Geodetic2 geoDiffPatch =
             patch.getCorner(Quad::NORTH_EAST) -
