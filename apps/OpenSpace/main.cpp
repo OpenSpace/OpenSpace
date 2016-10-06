@@ -30,6 +30,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
+#include <thread>
+
 #include <sgct.h>
 
 sgct::Engine* _sgctEngine;
