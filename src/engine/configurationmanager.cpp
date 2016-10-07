@@ -72,6 +72,13 @@ const string ConfigurationManager::KeyDisableMasterRendering = "DisableRendering
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
 
+const string ConfigurationManager::KeyHttpProxy = "HttpProxy";
+const string ConfigurationManager::PartHttpProxyAddress = "Address";
+const string ConfigurationManager::PartHttpProxyPort = "Port";
+const string ConfigurationManager::PartHttpProxyAuthentication = "Authentication";
+const string ConfigurationManager::PartHttpProxyUser = "User";
+const string ConfigurationManager::PartHttpProxyPassword = "Password";
+
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
     

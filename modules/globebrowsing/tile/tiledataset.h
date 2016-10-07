@@ -136,6 +136,7 @@ namespace openspace {
         //////////////////////////////////////////////////////////////////////////////////
 
         void gdalEnsureInitialized();
+        void setGdalProxyConfiguration();
         GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
         bool gdalHasOverviews() const;
         int gdalOverview(const PixelRange& baseRegionSize) const;

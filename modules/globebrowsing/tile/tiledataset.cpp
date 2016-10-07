@@ -41,8 +41,8 @@
 #include <algorithm>
 
 #include <gdal_priv.h>
-
-
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
 
 
 namespace {
@@ -170,7 +170,52 @@ namespace openspace {
         if (!GdalHasBeenInitialized) {
             GDALAllRegister();
             CPLSetConfigOption("GDAL_DATA", absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str());
+            setGdalProxyConfiguration();
             GdalHasBeenInitialized = true;
+        }
+    }
+
+    void TileDataset::setGdalProxyConfiguration() {
+        ghoul::Dictionary proxySettings;
+        bool proxyEnabled = OsEng.configurationManager().getValue(ConfigurationManager::KeyHttpProxy, proxySettings);
+        if (proxyEnabled) {
+            std::string proxyAddress, proxyPort, proxyUser, proxyPassword, proxyAuth;
+
+            bool success = proxySettings.getValue(ConfigurationManager::PartHttpProxyAddress, proxyAddress);
+            success &= proxySettings.getValue(ConfigurationManager::PartHttpProxyPort, proxyPort);
+            proxySettings.getValue(ConfigurationManager::PartHttpProxyAuthentication, proxyAuth);
+
+            std::string proxyAuthString = "BASIC";
+            if (proxyAuth == "basic" || proxyAuth == "") {
+                proxyAuthString = "BASIC";
+            } else if (proxyAuth == "ntlm") {
+                proxyAuthString = "NTLM";
+            } else if (proxyAuth == "digest") {
+                proxyAuthString = "DIGEST";
+            } else if (proxyAuth == "any") {
+                proxyAuthString = "ANY";
+            } else {
+                success = false;
+            }
+
+            bool userAndPassword = proxySettings.getValue(ConfigurationManager::PartHttpProxyUser, proxyUser);
+            userAndPassword &= proxySettings.getValue(ConfigurationManager::PartHttpProxyPassword, proxyPassword);
+
+            if (success) {
+                std::string proxy = proxyAddress + ":" + proxyPort;
+                CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
+                LDEBUG("Using proxy server " << proxy);
+                if (userAndPassword) {
+                    std::string proxyUserPwd = proxyUser + ":" + proxyPassword;
+                    CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", proxyUserPwd.c_str());
+                    CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", proxyAuthString.c_str());
+                    LDEBUG("Using authentication method: " << proxyAuthString);
+                }
+            } else {
+                LERROR("Invalid proxy settings for GDAL");
+            }
+        } else {
+            LDEBUG("Setting up GDAL without proxy server");
         }
     }
 

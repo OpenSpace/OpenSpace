@@ -106,6 +106,19 @@ public:
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
     static const std::string KeyRenderingMethod;
+    /// The key that stores the http proxy settings for the downloadmanager
+    static const std::string KeyHttpProxy;
+    /// The key that stores the address of the http proxy
+    static const std::string ConfigurationManager::PartHttpProxyAddress;
+    /// The key that stores the port of the http proxy
+    static const std::string ConfigurationManager::PartHttpProxyPort;
+    /// The key that stores the authentication method of the http proxy
+    static const std::string ConfigurationManager::PartHttpProxyAuthentication;
+    /// The key that stores the username to use for authentication to access the http proxy
+    static const std::string ConfigurationManager::PartHttpProxyUser;
+    /// The key that stores the password to use for authentication to access the http proxy
+    static const std::string ConfigurationManager::PartHttpProxyPassword;
+
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
