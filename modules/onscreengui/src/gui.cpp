@@ -155,7 +155,7 @@ void addScreenSpaceRenderable(std::string texturePath) {
     std::string luaTable =
         "{Type = 'ScreenSpaceImage', TexturePath = '" + absPath(texturePath) + "' }";
     std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
-    OsEng.scriptEngine().queueScript(script);
+    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
 } // namespace 
 
@@ -453,22 +453,26 @@ void GUI::render() {
 
     if (toSun) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');"
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
     if (toPluto) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');"
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');",
+            scripting::ScriptEngine::RemoteScripting::Yes
          );
     }
     if (toJupiter) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');"
+            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
     if (to67P) {
         OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', '67P');"
+            "openspace.setPropertyValue('Interaction.coordinateSystem', '67P');",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 

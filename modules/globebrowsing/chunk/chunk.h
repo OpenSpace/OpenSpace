@@ -45,6 +45,9 @@ namespace openspace {
 
     class Chunk {
     public:
+
+        const static float DEFAULT_HEIGHT;
+
         struct BoundingHeights {
             float min, max;
             bool available;
@@ -60,8 +63,6 @@ namespace openspace {
 
         /// Updates chunk internally and returns a desired level
         Status update(const RenderData& data);
-        void render(const RenderData& data) const;
-
 
         std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
 

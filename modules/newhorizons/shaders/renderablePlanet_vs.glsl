@@ -30,13 +30,16 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec4 vs_position;
 out vec4 vs_normal;
 out vec2 vs_st;
+out vec4 vs_positionScreenSpace;
 
-uniform mat4 ModelTransform;
-uniform mat4 ViewProjection;
-uniform mat4 ProjectorMatrix;
+uniform mat4 modelTransform;
+uniform mat4 modelViewProjectionTransform;
+
+//uniform mat4 ModelTransform;
+//uniform mat4 ViewProjection;
+//uniform mat4 ProjectorMatrix;
 
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
@@ -48,7 +51,7 @@ void main() {
     
     // this is wrong for the normal. 
     // The normal transform is the transposed inverse of the model transform
-    vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+    vs_normal = normalize(modelTransform * vec4(in_normal,0));
     
 
     if (_hasHeightMap) {
@@ -58,10 +61,13 @@ void main() {
         tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;
     }
 
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
+    // convert from psc to homogeneous coordinates
+    vec4 position = vec4(tmp.xyz * pow(10, tmp.w), 1);
+    vec4 positionClipSpace = modelViewProjectionTransform * position;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
 
-    position = ViewProjection * position;
+    //vec4 position = pscTransform(tmp, ModelTransform);
+    //vs_position = tmp;
 
-    gl_Position =  z_normalization(position);
+    gl_Position = vs_positionScreenSpace;
 }

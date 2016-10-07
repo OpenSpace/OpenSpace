@@ -23,7 +23,6 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "CERES",
-            Reference = "GALACTIC",
             Observer = "SUN",
             Kernels = {
                 "${OPENSPACE_DATA}/spice/DawnKernels/pck/dawn_ceres_v01.tpc",
@@ -35,9 +34,7 @@ return {
             Type = "Spice",
             Frame = "IAU_CERES",
             Reference = "GALACTIC"
-        },
-        
-        GuiName = "/Solar/Ceres"
+        }
     },
     --[[ Ceres Trail Module
     {   
@@ -62,8 +59,7 @@ return {
             },    
             StartTime = "2010 JAN 01T00:00:00",
             EndTime = "2018 JAN 22 12:00:00"
-        },
-        GuiName = "/Solar/CeresTrail"
+        }
     }
     --]]
 }

@@ -31,6 +31,6 @@ layout(location = 0) in vec4 vertexPositionClippingSpace;
 out vec4 fs_vertexPosition;
 
 void main(){
-	fs_vertexPosition = z_normalization(vertexPositionClippingSpace);
-	gl_Position = fs_vertexPosition;
+    fs_vertexPosition = z_normalization(vertexPositionClippingSpace);
+    gl_Position = fs_vertexPosition;
 }

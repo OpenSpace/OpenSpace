@@ -23,10 +23,12 @@
  ****************************************************************************************/
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/openspace.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/exception.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
@@ -37,6 +39,15 @@
 #include <iomanip>
 
 #include "scriptengine_lua.inl"
+
+namespace {
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
+    const std::string ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+}
 
 namespace openspace {
 
@@ -51,7 +62,6 @@ namespace {
     //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
     
     const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
-
 }
 
 void ScriptEngine::initialize() {
@@ -156,16 +166,7 @@ bool ScriptEngine::runScript(const std::string& script) {
         LERRORC(e.component, e.message);
         return false;
     }
-    
-    // if we're currently hosting the parallel session, find out if script should be synchronized.
-    if (OsEng.parallelConnection().isHost()) {
-        std::string lib, func;
-        if (parseLibraryAndFunctionNames(lib, func, script) && shouldScriptBeSent(lib, func)){
-//            OsEng.parallelConnection()->sendScript(script);
-//            cacheScript(lib, func, script);
-        }
-    }
-    
+        
     return true;
 }
     
@@ -194,7 +195,7 @@ bool ScriptEngine::runScriptFile(const std::string& filename) {
     return true;
 }
 
-bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
+/*bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::string& function) {
     std::set<LuaLibrary>::const_iterator libit;
     for (libit = _registeredLibraries.cbegin();
          libit != _registeredLibraries.cend();
@@ -219,9 +220,9 @@ bool ScriptEngine::shouldScriptBeSent(const std::string& library, const std::str
     }
     
     return false;
-}
+}*/
     
-void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
+/*void ScriptEngine::cacheScript(const std::string &library, const std::string &function, const std::string &script){
     _cachedScriptsMutex.lock();
     _cachedScripts[library][function] = script;
     _cachedScriptsMutex.unlock();
@@ -246,8 +247,9 @@ std::vector<std::string> ScriptEngine::cachedScripts(){
     _cachedScriptsMutex.unlock();
 
     return retVal;
-}
+}*/
     
+/*
 bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script){
     
     //"deconstruct the script to find library and function name
@@ -289,7 +291,7 @@ bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::strin
     //if we found a function all is good
     return !function.empty();
 }
-
+*/
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
     lua_getglobal(state, _openspaceLibraryName.c_str());
@@ -487,41 +489,36 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-bool ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
-    if (type == "text") {
-        // The additional space between the longest function name and the descriptions
-        LDEBUG("Writing Lua documentation of type '" << type <<
-            "' to file '" << filename << "'");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing documentation");
-            return false;
+void ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
+    auto concatenate = [](std::string library, std::string function) {
+        std::string total = "openspace.";
+        if (!library.empty()) {
+            total += std::move(library) + ".";
         }
+        total += std::move(function);
+        return total;
+    };
 
-        auto concatenate = [](std::string library, std::string function) {
-            std::string total = "openspace.";
-            if (!library.empty())
-                total += std::move(library) + ".";
-            total += std::move(function);
-            return total;
-        };
-
+    LDEBUG("Writing Lua documentation of type '" << type <<
+           "' to file '" << filename << "'");
+    if (type == "text") {
         // Settings
         const unsigned int lineWidth = 80;
         static const std::string whitespace = " \t";
         static const std::string padding = "    ";
-        const bool commandListArguments = true;
+
+        // The additional space between the longest function name and the descriptions
+
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         file << "Available commands:\n";
         // Now write out the functions
-        for (const LuaLibrary& library : _registeredLibraries) {
-            for (const LuaLibrary::Function& function : library.functions) {
-
-                std::string functionName = concatenate(library.name, function.name);
-                file << padding << functionName;
-                if (commandListArguments)
-                    file << "(" << function.argumentText << ")";
-                file << std::endl;
+        for (const LuaLibrary& l : _registeredLibraries) {
+            for (const LuaLibrary::Function& f : l.functions) {
+                std::string name = concatenate(l.name, f.name);
+                file << padding << name << "(" << f.argumentText << ")" << std::endl;
             }
         }
         file << std::endl;
@@ -529,24 +526,32 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
         // Now write out the functions definitions
         for (const LuaLibrary& library : _registeredLibraries) {
             for (const LuaLibrary::Function& function : library.functions) {
-
-                std::string functionName = concatenate(library.name, function.name);
-                file << functionName << "(" << function.argumentText << "):" << std::endl;
+                std::string name = concatenate(library.name, function.name);
+                file << name << "(" << function.argumentText << "):" << std::endl;
 
                 std::string remainingHelptext = function.helpText;
-
-                // @CLEANUP This needs to become a bit prettier ---abock
                 while (!remainingHelptext.empty()) {
-                    const auto length = remainingHelptext.length();
-                    const auto paddingLength = padding.length();
+                    const size_t length = remainingHelptext.length();
+                    const size_t paddingLength = padding.length();
+
                     if ((length + paddingLength) > lineWidth) {
-                        auto lastSpace = remainingHelptext.find_last_of(whitespace, lineWidth - 1 - paddingLength);
-                        if (lastSpace == remainingHelptext.npos)
+                        size_t lastSpace = remainingHelptext.find_last_of(
+                            whitespace,
+                            lineWidth - 1 - paddingLength
+                        );
+                        if (lastSpace == remainingHelptext.npos) {
                             lastSpace = lineWidth;
-                        file << padding << remainingHelptext.substr(0, lastSpace) << std::endl;
-                        auto firstNotSpace = remainingHelptext.find_first_not_of(whitespace, lastSpace);
-                        if (firstNotSpace == remainingHelptext.npos)
+                        }
+                        
+                        file << padding << remainingHelptext.substr(0, lastSpace) << '\n';
+                        
+                        size_t firstNotSpace = remainingHelptext.find_first_not_of(
+                            whitespace,
+                            lastSpace
+                        );
+                        if (firstNotSpace == remainingHelptext.npos) {
                             firstNotSpace = lastSpace;
+                        }
                         remainingHelptext = remainingHelptext.substr(firstNotSpace);
                     }
                     else {
@@ -557,27 +562,182 @@ bool ScriptEngine::writeDocumentation(const std::string& filename, const std::st
                 file << std::endl;
             }
         }
-        return true;
+    }
+    else if (type == "html") {
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream scriptingTemplateInput(absPath(ScriptingTemplateFilename));
+        std::string scriptingTemplateContent{ std::istreambuf_iterator<char>{scriptingTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+        // Create JSON
+        std::stringstream json;
+        json << "[";
+
+        bool first = true;
+        for (const LuaLibrary& l : _registeredLibraries) {
+            if (!first) {
+                json << ",";
+            }
+            first = false;
+
+            json << "{";
+            json << "\"library\": \"" << l.name << "\",";
+            json << "\"functions\": [";
+
+            for (const LuaLibrary::Function& f : l.functions) {
+                json << "{";
+                json << "\"name\": \"" << f.name << "\", ";
+                json << "\"arguments\": \"" << f.argumentText << "\", ";
+                json << "\"help\": \"" << f.helpText << "\"";
+                json << "}";
+                if (&f != &l.functions.back()) {
+                    json << ",";
+                }
+            }
+            json << "]}";
+
+        }
+        json << "]";
+
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            }
+            else {
+                jsonString += c;
+            }
+        }
+
+        std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"scriptingTemplate\" type=\"text/x-handlebars-template\">\n"
+            << scriptingTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var scripting = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        file << html.str();
+
+        /*
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Script Log</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Script Log</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th rowspan=2>Library</th>\n"
+             << "\t\t\t<th colspan=3>Functions</th>\n"
+             << "\t\t</tr>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>Name</th>\n"
+             << "\t\t\t<th>Arguments</th>\n"
+             << "\t\t\t<th>Help</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+
+
+        for (const LuaLibrary& l : _registeredLibraries) {
+            html << "\t<tr>\n";
+
+            if (l.name.empty()) {
+                html << "\t\t<td>openspace</td>\n";
+            }
+            else {
+                html << "\t\t<td>openspace." << l.name << "</td>\n";
+            }
+            html << "\t\t<td></td><td></td><td></td>\n"
+                 << "\t\</tr>";
+
+            for (const LuaLibrary::Function& f : l.functions) {
+                html << "\t<tr>\n"
+                     << "\t\t<td></td>\n"
+                     << "\t\t<td>" << f.name << "</td>\n"
+                     << "\t\t<td>" << f.argumentText << "</td>\n"
+                     << "\t\t<td>" << f.helpText << "</td>\n"
+                     << "\t</tr>\n";
+            }
+
+            html << "\t<tr><td style=\"line-height: 10px;\" colspan=4></td></tr>\n";
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>";
+
+        file << html.str();
+*/
     }
     else {
-        LERROR("Undefined type '" << type << "' for Lua documentation");
-        return false;
+        throw ghoul::RuntimeError("Undefined type '" + type + "' for Lua documentation");
     }
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
+    const std::string KeyScriptLogType =
+        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartType;
+    const std::string KeyScriptLogFile =
+        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartFile;
+
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
         const bool hasType = OsEng.configurationManager()
-            .hasKey(ConfigurationManager::KeyScriptLogType);
+            .hasKey(KeyScriptLogType);
         const bool hasFile = OsEng.configurationManager()
-            .hasKey(ConfigurationManager::KeyScriptLogFile);
+            .hasKey(KeyScriptLogFile);
         if (hasType && hasFile) {
             OsEng.configurationManager()
-                .getValue(ConfigurationManager::KeyScriptLogType, _logType);
+                .getValue(KeyScriptLogType, _logType);
             OsEng.configurationManager()
-                .getValue(ConfigurationManager::KeyScriptLogFile, _logFilename);
+                .getValue(KeyScriptLogFile, _logFilename);
 
             _logFilename = absPath(_logFilename);
             _logFileExists = true;
@@ -596,8 +756,8 @@ bool ScriptEngine::writeLog(const std::string& script) {
             }
         } else {
             LDEBUG("No script log specified in 'openspace.cfg.' To log, set '"
-                   << ConfigurationManager::KeyScriptLogType << " and "
-                   << ConfigurationManager::KeyScriptLogFile
+                   << KeyScriptLogType << " and "
+                   << KeyScriptLogFile
                    << " in configuration table.");
             _logScripts = false;
             return false;
@@ -624,30 +784,53 @@ bool ScriptEngine::writeLog(const std::string& script) {
     return true;
 }
 
+void ScriptEngine::presync(bool isMaster) {
+    if (!isMaster) return;
 
-void ScriptEngine::serialize(SyncBuffer* syncBuffer){
+    _mutex.lock();
+
+    if (!_queuedScripts.empty()) {
+        _currentSyncedScript = _queuedScripts.back().first;
+        bool remoteScripting = _queuedScripts.back().second;
+
+
+        //Not really a received script but the master also needs to run the script...
+        _receivedScripts.push_back(_currentSyncedScript);
+        _queuedScripts.pop_back();
+
+        if (OsEng.parallelConnection().isHost() && remoteScripting) {
+            OsEng.parallelConnection().sendScript(_currentSyncedScript);
+        }
+
+    }
+
+    _mutex.unlock();
+
+}
+
+void ScriptEngine::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_currentSyncedScript);
     _currentSyncedScript.clear();
 }
 
-void ScriptEngine::deserialize(SyncBuffer* syncBuffer){
+void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_currentSyncedScript);
 
-    if (!_currentSyncedScript.empty()){
+    if (!_currentSyncedScript.empty()) {
         _mutex.lock();
         _receivedScripts.push_back(_currentSyncedScript);
         _mutex.unlock();
     }
 }
 
-void ScriptEngine::postSynchronizationPreDraw() {
+void ScriptEngine::postsync(bool isMaster) {
     std::vector<std::string> scripts;
 
     _mutex.lock();
     scripts.assign(_receivedScripts.begin(), _receivedScripts.end());
     _receivedScripts.clear();
     _mutex.unlock();
-    
+
     while (!scripts.empty()) {
         try {
             runScript(scripts.back());
@@ -657,31 +840,15 @@ void ScriptEngine::postSynchronizationPreDraw() {
         }
         scripts.pop_back();
     }
-    
 }
 
-void ScriptEngine::preSynchronization() {
-    
-    _mutex.lock();
-    
-    if (!_queuedScripts.empty()){
-        _currentSyncedScript = _queuedScripts.back();
-        _queuedScripts.pop_back();
-        
-        //Not really a received script but the master also needs to run the script...
-        _receivedScripts.push_back(_currentSyncedScript);
-    }
-    
-    _mutex.unlock();
-}
-
-void ScriptEngine::queueScript(const std::string &script){
+void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteScripting remoteScripting){
     if (script.empty())
         return;
     
     _mutex.lock();
 
-    _queuedScripts.insert(_queuedScripts.begin(), script);
+    _queuedScripts.insert(_queuedScripts.begin(), std::make_pair(script, remoteScripting));
 
     _mutex.unlock();
 }

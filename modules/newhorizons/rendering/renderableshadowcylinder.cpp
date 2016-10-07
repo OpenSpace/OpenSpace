@@ -111,10 +111,22 @@ void RenderableShadowCylinder::render(const RenderData& data){
     glDepthMask(false);
     _shader->activate();
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", glm::mat4(_stateMatrix));
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform("modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+
+    //_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    //_shader->setUniform("ModelTransform", glm::mat4(_stateMatrix));
+
+
     _shader->setUniform("shadowColor", _shadowColor);
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    //setPscUniforms(*_shader.get(), data.camera, data.position);
     
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));

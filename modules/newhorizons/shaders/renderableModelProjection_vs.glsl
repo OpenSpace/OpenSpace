@@ -33,26 +33,20 @@ layout(location = 2) in vec3 in_normal;
 out vec4 vs_position;
 out vec4 vs_normal;
 out vec2 vs_uv;
-out vec4 ProjTexCoord;
+out vec4 vs_ndc;
 
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
-uniform vec2 _scaling;
 
 uniform vec3 boresight;
 
 void main() {
-    vs_position  = in_position;
     
-    vec4 tmp    = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = position;
-
-    vec4 raw_pos = psc_to_meter(in_position, _scaling);
-    ProjTexCoord = ProjectorMatrix * ModelTransform * raw_pos;
-    
+    vec4 raw_pos = psc_to_meter(in_position, vec2(1.0, 0.0));
+    vs_position = ProjectorMatrix * ModelTransform * raw_pos;
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    
+    vs_ndc = vs_position / vs_position.w;
+
     //match clipping plane
     vec2 texco = (in_st * 2) - 1; 
     vs_uv = texco;

@@ -9,8 +9,16 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2014-08-15T03:05:18.101")
-    -- openspace.time.setTime("2014-11-17T03:05:18.101")
+    -- Usual start
+    openspace.time.setTime("2014-08-01T03:05:18.101")
+
+    -- Philae release
+    -- openspace.time.setTime("2014-11-12T08:00:00.000")
+    
+    -- Shadow flyby
+    -- openspace.time.setTime("2015-02-14T12:00:00.000")
+
+
     -- openspace.time.setTime("2015-07-29T06:02:10.000")
     -- openspace.time.setTime("2014 AUG 21 18:00:00")
     -- openspace.time.setTime("2015 SEP 10 19:39:00")
@@ -31,6 +39,8 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    openspace.setPropertyValue('67P.renderable.performShading', false);
+
     openspace.printInfo("Done setting default values")
 end
 
@@ -39,7 +49,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "67P",
-        Position = {1, 0, 0, 5},
+        Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
+        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
     },
     Modules = {
         "sun",
@@ -47,7 +58,7 @@ return {
         "venus",
         "earth",
         "mars",
-        "jupiter",
+        "jupiter/jupiter",
         "saturn",
         "uranus",
         "neptune",

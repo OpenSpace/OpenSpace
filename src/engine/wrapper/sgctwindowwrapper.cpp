@@ -44,6 +44,10 @@ void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
     
+void SGCTWindowWrapper::setSynchronization(bool enabled) {
+    sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
+}
+
 void SGCTWindowWrapper::clearAllWindows(const glm::vec4& clearColor) {
     size_t n = sgct::Engine::instance()->getNumberOfWindows();
     for (size_t i = 0; i < n; ++i) {
@@ -111,8 +115,7 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-}
-
+} 
     
 bool SGCTWindowWrapper::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock
@@ -136,6 +139,15 @@ bool SGCTWindowWrapper::hasGuiWindow() const {
 bool SGCTWindowWrapper::isGuiWindow() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
 }
+
+bool SGCTWindowWrapper::isSwapGroupMaster() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+}
+
+bool SGCTWindowWrapper::isUsingSwapGroups() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+}
+
     
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
@@ -177,10 +189,10 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
 
 }
     
-void SGCTWindowWrapper::takeScreenshot() const {
+void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
+    sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();
 }
-    
     
 //void forEachWindow(std::function<void (void)> function) {
 //    size_t n = sgct::Engine::instance()->getNumberOfWindows();

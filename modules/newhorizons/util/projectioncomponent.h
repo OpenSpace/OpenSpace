@@ -27,10 +27,20 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/vectorproperty.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+
+namespace ghoul {
+namespace opengl {
+
+class ProgramObject;
+
+} // namespace opengl
+} // namespace ghoul
 
 namespace openspace {
 
@@ -46,11 +56,17 @@ public:
     bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
     bool initializeParser(const ghoul::Dictionary& dictionary);
 
+    ghoul::opengl::Texture& depthTexture();
     void imageProjectBegin();
     void imageProjectEnd();
+    void depthMapRenderBegin();
+    void depthMapRenderEnd();
 
-    bool generateProjectionLayerTexture();
+
+    void update();
+
     bool auxiliaryRendertarget();
+    bool depthRendertarget();
 
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
         const std::string& texturePath,
@@ -71,6 +87,8 @@ public:
     bool needsClearProjection() const;
     float projectionFading() const;
 
+    bool needsShadowMap() const;
+
     void clearAllProjections();
 
     ghoul::opengl::Texture& projectionTexture() const;
@@ -82,17 +100,24 @@ public:
 
     float fieldOfViewY() const;
     float aspectRatio() const;
-    float nearPlane() const;
-    float farPlane() const;
+
+private:
+    bool generateProjectionLayerTexture(const glm::ivec2& size);
+    bool generateDepthTexture(const glm::ivec2& size);
 
 protected:
     properties::BoolProperty _performProjection;
     properties::BoolProperty _clearAllProjections;
     properties::FloatProperty _projectionFading;
 
-    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
+    properties::IVec2Property _textureSize;
+    properties::TriggerProperty _applyTextureSize;
+    bool _textureSizeDirty;
 
+    std::unique_ptr<ghoul::opengl::Texture> _projectionTexture;
     std::shared_ptr<ghoul::opengl::Texture> _placeholderTexture;
+
+    float _projectionTextureAspectRatio;
 
     std::string _instrumentID;
     std::string _projectorID;
@@ -101,13 +126,27 @@ protected:
     std::vector<std::string> _potentialTargets;
     float _fovy;
     float _aspectRatio;
-    float _nearPlane;
-    float _farPlane;
 
     GLuint _fboID;
+    GLuint _depthFboID;
 
     GLint _defaultFBO;
     GLint _viewport[4];
+
+    struct {
+        bool isEnabled;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+    } _shadowing;
+
+    struct {
+        bool isEnabled;
+        GLuint fbo;
+        GLuint vao;
+        GLuint vbo;
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::opengl::Texture> stencilTexture;
+    } _dilation;
 };
 
 } // namespace openspace

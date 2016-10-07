@@ -40,6 +40,7 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
                 Aberration = "NONE",
+                AspectRatio = 2
             },
             Instrument = {                
                 Name       = "NH_LORRI",
@@ -55,19 +56,19 @@ return {
                 "CHARON"
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CHARON",
-            Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHARON",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_CHARON",
+                DestinationFrame = "GALACTIC"
+            },
         },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_CHARON",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Charon"
     },
     {
         Name = "CharonText",
@@ -77,12 +78,15 @@ return {
             Size = {1.0, 6.3},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Charon-Text.png"
+            Texture = "textures/Charon-Text.png",
+            BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-             Position = {0, -10, 0, 5}
-        }
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, -1000000, 0}
+            },
+        },
     },
     {
         Name = "CharonShadow",
@@ -97,10 +101,6 @@ return {
             MainFrame = "GALACTIC",
             Aberration = "NONE",
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 5}
-        }
     },    
     -- CharonTrail module
     {   
@@ -121,6 +121,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/CharonTrail"
     }
 }

@@ -25,7 +25,6 @@ return {
         Ephemeris = {
             Type = "Spice",
             Body = "DAWN",
-            Reference = "GALACTIC",
             Observer = "SUN",
             Kernels = {
                 "${OPENSPACE_DATA}/spice/DawnKernels/spk/dawn_ref_070926-150201_070829.bsp",
@@ -621,8 +620,7 @@ return {
                 "${OPENSPACE_DATA}/spice/DawnKernels/ck/dawn_sa_120903_120909.bc",
                 "${OPENSPACE_DATA}/spice/DawnKernels/ck/dawn_sa_120910_120916.bc",
             }
-        },
-        GuiName = "/Solar/Dawn"
+        }
     },
 
      -- Dawn Solar Array module 1
@@ -719,7 +717,6 @@ return {
             StartTime = "2007 SEP 26 13:28:00",
             EndTime = "2012 SEP 12 12:00:00"
         },
-        GuiName = "DawnTrail"
     },
  --
 --          -- Dawn Trail Module
@@ -771,7 +768,6 @@ return {
                 "CERES"
             }
         },
-        GuiName = "/Solar/Dawn_FC1"
     },
 
      -- DawnFov 1
@@ -798,6 +794,5 @@ return {
                 "CERES"
             }
         },
-        GuiName = "/Solar/Dawn_FC"
     },
 }

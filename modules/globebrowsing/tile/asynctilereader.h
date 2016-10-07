@@ -33,21 +33,30 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <ghoul/misc/threadpool.h>
+#include <modules/globebrowsing/other/threadpool.h>
+//#include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tiledataset.h>
+
 
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <sstream>
 
 
 
 namespace openspace {
+
+    struct LoadJob : public Job<TileIOResult> {
+        virtual void execute() = 0;
+        virtual std::shared_ptr<TileIOResult> product() = 0;
+    };
    
 
+    struct TileLoadJob : LoadJob {
 
-    struct TileLoadJob : public Job<TileIOResult> {
+        
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
             const ChunkIndex& chunkIndex)
             : _tileDataset(textureDataProvider)
@@ -58,23 +67,50 @@ namespace openspace {
 
         virtual ~TileLoadJob() { }
 
-        virtual void execute() {
-            _uninitedTexture = _tileDataset->readTileData(_chunkIndex);
-        }
-
-
+        virtual void execute();
 
         virtual std::shared_ptr<TileIOResult> product() {
-            return _uninitedTexture;
+            return _tileIOResult;
         }
 
 
-    private:
+    protected:
+
         ChunkIndex _chunkIndex;
         std::shared_ptr<TileDataset> _tileDataset;
-        std::shared_ptr<TileIOResult> _uninitedTexture;
+        std::shared_ptr<TileIOResult> _tileIOResult;
     };
 
+
+
+
+    class TileDiskCache;
+
+    struct DiskCachedTileLoadJob : public TileLoadJob {
+        enum CacheMode {
+            Disabled,
+            ReadOnly,
+            ReadAndWrite,
+            WriteOnly,
+            CacheHitsOnly,
+        };
+        
+        DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
+            const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, 
+            const std::string cacheMode);
+
+        DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
+            const ChunkIndex& chunkIndex, std::shared_ptr<TileDiskCache> tdc, 
+            CacheMode cacheMode = CacheMode::ReadOnly);
+
+        virtual void execute();
+
+    protected:
+
+        std::shared_ptr<TileDiskCache> _tileDiskCache;
+        CacheMode _mode;
+
+    };
 
 
 
@@ -83,16 +119,15 @@ namespace openspace {
     public:
 
         AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-            std::shared_ptr<ghoul::ThreadPool> pool);
+            std::shared_ptr<ThreadPool> pool);
 
         ~AsyncTileDataProvider();
 
 
-
-        bool enqueueTextureData(const ChunkIndex& chunkIndex);
-        bool hasLoadedTextureData() const;
-        std::shared_ptr<TileIOResult> nextTileIOResult();
+        bool enqueueTileIO(const ChunkIndex& chunkIndex);        
+        std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
+        void reset();
         void clearRequestQueue();
 
         std::shared_ptr<TileDataset> getTextureDataProvider() const;
@@ -102,10 +137,12 @@ namespace openspace {
         virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
 
     private:
+        
+
 
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
-        std::unordered_map<HashKey, ChunkIndex> _enqueuedTileRequests;
+        std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
 
 
     };

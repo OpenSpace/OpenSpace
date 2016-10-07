@@ -53,12 +53,23 @@
 #define USE_OVERLAY #{useOverlays}
 #define OVERLAY_BLENDING_ENABLED #{blendOverlays}
 
+// Sixth layer type from LayeredTextureShaderProvider is grayscale overlay
+#define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleOverlays} + 1
+#define USE_GRAYSCALE_OVERLAY #{useGrayScaleOverlays}
+#define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleOverlays}
+
+// Global constants
+#define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
+
 // Other key value pairs used for settings
 #define USE_ATMOSPHERE #{useAtmosphere}
 #define SHOW_CHUNK_EDGES #{showChunkEdges}
+#define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
+#define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
-float calculateHeight(
-	const vec2 uv,
+
+float calculateUntransformedHeight(
+	vec2 uv,
 	LevelWeights levelWeights,
 	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
 	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
@@ -71,7 +82,35 @@ float calculateHeight(
 #if !HEIGHTMAP_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
+	
+	
+	#for i in 0..#{lastLayerIndexHeightMaps}
+	{
+		height = 
+			levelWeights.w1 * getTexVal(heightTiles[#{i}], uv).r +
+			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
+			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
+	}
+	#endfor
+	return height;
+}
 
+float calculateHeight(
+	vec2 uv,
+	LevelWeights levelWeights,
+	const Tile heightTiles[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent1[NUMLAYERS_HEIGHTMAP],
+	const Tile heightTilesParent2[NUMLAYERS_HEIGHTMAP]) {
+
+	float height = 0;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !HEIGHTMAP_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // HEIGHTMAP_BLENDING_ENABLED
+	
+	
 	#for i in 0..#{lastLayerIndexHeightMaps}
 	{
 		float untransformedHeight = 
@@ -79,11 +118,11 @@ float calculateHeight(
 			levelWeights.w2 * getTexVal(heightTilesParent1[#{i}], uv).r + 
 			levelWeights.w3 * getTexVal(heightTilesParent2[#{i}], uv).r;
 
-		// OBS! Only the values from the last height map will be used!
-		height = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
+		float heightSample = getTransformedTexVal(heightTiles[#{i}].depthTransform, untransformedHeight);
+		if (heightSample > -100000)
+			height = heightSample;
 	}
 	#endfor
-
 	return height;
 }
 
@@ -113,8 +152,31 @@ vec4 calculateColor(
 	}
 	#endfor
 
-	return color;
+	return color;	
 }
+
+float gridDots(vec2 uv, vec2 gridResolution){
+	vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
+
+	vec2 uvDotSpace = abs(2*(uvVertexSpace-0.5));
+	return 1-length(1-uvDotSpace);
+}
+
+vec4 calculateDebugColor(vec2 uv, vec4 fragPos, vec2 vertexResolution){
+	vec2 uvVertexSpace = fract(vertexResolution * uv);
+	vec3 colorUv = vec3(0.3*uv.x, 0.3*uv.y, 0);
+	vec3 colorDistance = vec3(0, 0, min( 0.4*log(fragPos.w) - 3.9, 1));
+	vec3 colorVertex = (1.0-length(uvVertexSpace)) * vec3(0.5);
+	vec3 colorSum = colorUv + colorDistance + colorVertex;
+	return vec4(0.5 * colorSum, 1);
+}
+
+float tileResolution(vec2 tileUV, const Tile tile){
+	vec2 heightResolution = textureSize(tile.textureSampler, 0);
+	vec2 uv = TileUVToTextureSamplePosition(tile, tileUV);
+	return gridDots(uv, heightResolution);
+}
+
 
 vec4 calculateNight(
 	const vec4 currentColor,
@@ -123,10 +185,8 @@ vec4 calculateNight(
 	const Tile nightTiles[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent1[NUMLAYERS_NIGHTTEXTURE],
 	const Tile nightTilesParent2[NUMLAYERS_NIGHTTEXTURE],
-	const vec3 ellipsoidNormalCameraSpace) {
-
-	vec3 lightDirection = normalize(vec3(-1,-1,-1));
-	float cosineFactor = clamp(dot(-lightDirection, ellipsoidNormalCameraSpace), 0, 1);
+	const vec3 ellipsoidNormalCameraSpace,
+	const vec3 lightDirectionCameraSpace) {
 
 	vec4 nightColor = vec4(0,0,0,0);
 
@@ -147,8 +207,12 @@ vec4 calculateNight(
 	}
 	#endfor
 
+	//float cosineFactor = clamp(dot(-lightDirectionCameraSpace, ellipsoidNormalCameraSpace) * 3, 0, 1);
+	float shadowLight = 0.1;
+	float cosineFactor = clamp(dot(-lightDirectionCameraSpace, normalize(ellipsoidNormalCameraSpace)) * 3, -shadowLight, 1) + shadowLight;
+	
 	// Blend night color with base color
-	vec4 color = vec4(cosineFactor * vec3(currentColor) + (1 - cosineFactor) * vec3(nightColor), currentColor.a);
+	vec4 color = currentColor * 0.1 + 0.9 * vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * vec3(nightColor * nightColor), currentColor.a);
 
 	return color;
 }
@@ -183,13 +247,62 @@ vec4 calculateOverlay(
 	return color;
 }
 
+vec4 calculateGrayScaleOverlay(
+	const vec4 currentColor,
+	const vec2 uv,
+	LevelWeights levelWeights,
+	const Tile grayscaleOverlayTiles[NUMLAYERS_GRAYSCALE_OVERLAY],
+	const Tile grayscaleOverlayTilesParent1[NUMLAYERS_GRAYSCALE_OVERLAY],
+	const Tile grayscaleOverlayTilesParent2[NUMLAYERS_GRAYSCALE_OVERLAY]) {
+
+	vec4 colorGrayScale = currentColor;
+
+	// The shader compiler will remove unused code when variables are multiplied by
+	// a constant 0
+#if !GRAYSCALE_OVERLAY_BLENDING_ENABLED
+	levelWeights = getDefaultLevelWeights();
+#endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
+
+	#for i in 0..#{lastLayerIndexGrayScaleOverlays}
+	{
+		vec4 colorSample =
+			levelWeights.w1 * getTexVal(grayscaleOverlayTiles[#{i}], uv) +
+			levelWeights.w2 * getTexVal(grayscaleOverlayTilesParent1[#{i}], uv) +
+			levelWeights.w3 * getTexVal(grayscaleOverlayTilesParent2[#{i}], uv);
+
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
+		colorGrayScale = blendOver(colorGrayScale, colorSample);
+	}
+	#endfor
+
+	// HSV blending
+	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
+	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, colorGrayScale.r);
+	vec3 rgbNew = hsv2rgb(hsvNew);
+/*
+	// HSL blending
+	vec3 hslCurrent = rgb2hsl(currentColor.rgb);
+	//hslCurrent.y = hslCurrent.z > 0.7 ? 0 : hslCurrent.y;
+	vec3 hslNew = vec3(hslCurrent.x, hslCurrent.y, colorGrayScale.r);
+	vec3 rgbNew = hsl2rgb(hslNew);
+*/
+	// No color blending, use grayscale
+	//vec3 rgbNew = colorGrayScale.rgb;
+	vec4 color = blendOver(currentColor, vec4(rgbNew, colorGrayScale.a));
+
+	return color;
+}
+
 vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
 	const Tile waterTiles[NUMLAYERS_WATERMASK],
 	const Tile waterTilesParent1[NUMLAYERS_WATERMASK],
-	const Tile waterTilesParent2[NUMLAYERS_WATERMASK]) {
+	const Tile waterTilesParent2[NUMLAYERS_WATERMASK],
+	const vec3 ellipsoidNormalCameraSpace,
+	const vec3 lightDirectionCameraSpace,
+	const vec3 positionCameraSpace) {
 
 	vec4 waterColor = vec4(0,0,0,0);
 
@@ -210,7 +323,18 @@ vec4 calculateWater(
 	}
 	#endfor
 
-	return blendOver(currentColor, waterColor);
+	vec3 directionToFragmentCameraSpace = normalize(positionCameraSpace - vec3(0, 0, 0));
+	vec3 reflectionDirectionCameraSpace = reflect(lightDirectionCameraSpace, ellipsoidNormalCameraSpace);
+	float cosineFactor = clamp(dot(-reflectionDirectionCameraSpace, directionToFragmentCameraSpace), 0, 1);
+	cosineFactor = pow(cosineFactor, 30);
+
+	vec3 specularColor = vec3(1, 1, 1);
+	float specularIntensity = 0.4;
+
+	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
+
+	//return blendOver(currentColor, waterColor);
+	return currentColor + vec4(specularTotal, 1);
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL

@@ -26,7 +26,7 @@
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 namespace {
-	const std::string _loggerCat = "DistanceSwitch";
+    const std::string _loggerCat = "DistanceSwitch";
 }
 
 namespace openspace {
@@ -40,59 +40,59 @@ DistanceSwitch::~DistanceSwitch() {
 }
 
 bool DistanceSwitch::initialize() {
-	for (int i = 0; i < _renderables.size(); ++i) {
-		_renderables[i]->initialize();
-	}
-	return true;
+    for (int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->initialize();
+    }
+    return true;
 }
 
 bool DistanceSwitch::deinitialize() {
-	for (int i = 0; i < _renderables.size(); ++i) {
-		_renderables[i]->deinitialize();
-	}
-	return true;
+    for (int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->deinitialize();
+    }
+    return true;
 }
 
 bool DistanceSwitch::isReady() const {
-	return true;
+    return true;
 }
 
 void DistanceSwitch::render(const RenderData& data) {
-	if (_maxDistances.size() == 0) {
-		return;
-	}
+    if (_maxDistances.size() == 0) {
+        return;
+    }
 
-	pss pssDistanceToCamera = (data.camera.position() - data.position).length();
-	double distanceToCamera = pssDistanceToCamera.lengthd();
+    pss pssDistanceToCamera = (data.camera.position() - data.position).length();
+    double distanceToCamera = pssDistanceToCamera.lengthd();
 
-	if (distanceToCamera > _maxDistances.back()) {
-		return;
-	}
+    if (distanceToCamera > _maxDistances.back()) {
+        return;
+    }
 
-	// linear search through nodes to find which Renderable to render
-	for (int i = 0; i < _renderables.size(); ++i) {
-		if (distanceToCamera < _maxDistances[i]) {
-			_renderables[i]->render(data);
-			return;
-		}
-	}
+    // linear search through nodes to find which Renderable to render
+    for (int i = 0; i < _renderables.size(); ++i) {
+        if (distanceToCamera < _maxDistances[i]) {
+            _renderables[i]->render(data);
+            return;
+        }
+    }
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
-	for (int i = 0; i < _renderables.size(); ++i) {
-		_renderables[i]->update(data);
-	}
+    for (int i = 0; i < _renderables.size(); ++i) {
+        _renderables[i]->update(data);
+    }
 }
 
 
 void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance) {
-	ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
-	if (_maxDistances.size() > 0){
-		ghoul_assert(maxDistance > _maxDistances.back(),
-			"Renderables must be inserted in ascending order wrt distance");
-	}
-	_renderables.push_back(renderable);
-	_maxDistances.push_back(maxDistance);
+    ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
+    if (_maxDistances.size() > 0){
+        ghoul_assert(maxDistance > _maxDistances.back(),
+            "Renderables must be inserted in ascending order wrt distance");
+    }
+    _renderables.push_back(renderable);
+    _maxDistances.push_back(maxDistance);
 }
 
 }  // namespace openspace

@@ -55,7 +55,9 @@
 //openspace includes
 #include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/openspace.h>
 #include <ghoul/logging/logmanager.h>
@@ -64,13 +66,16 @@
 #include "parallelconnection_lua.inl"
 
 namespace {
+    const uint32_t ProtocolVersion = 2;
+    const size_t MaxLatencyDiffs = 64;
+    const double BroadcastIntervalMilliseconds = 100;
     const std::string _loggerCat = "ParallelConnection";
+    const int nFrametimesBuffer = 4;
+    const int nBroadcastIntervalsBuffer = 2;
 }
 
 namespace openspace {
 
-namespace network {
-        
 ParallelConnection::ParallelConnection()
     : _passCode(0)
     , _port("20501")
@@ -83,15 +88,16 @@ ParallelConnection::ParallelConnection()
     , _listenThread(nullptr)
     , _handlerThread(nullptr)
     , _isRunning(true)
-    , _isHost(false)
+    , _nConnections(0)
+    , _status(Status::Disconnected)
+    , _hostName("")
     , _isConnected(false)
     , _tryConnect(false)
-    , _performDisconnect(false)
-    , _latestTimeKeyframeValid(false)
+    , _disconnect(false)
     , _initializationTimejumpRequired(false)
 {
-    //create handler thread
-    _handlerThread = new (std::nothrow) std::thread(&ParallelConnection::threadManagement, this);
+    _connectionEvent = std::make_shared<ghoul::Event<>>();
+    _handlerThread = std::make_unique<std::thread>(&ParallelConnection::threadManagement, this);
 }
         
 ParallelConnection::~ParallelConnection(){
@@ -104,9 +110,6 @@ ParallelConnection::~ParallelConnection(){
             
     //join handler
     _handlerThread->join();
-            
-    //and delete handler
-    delete _handlerThread;
 }
         
 void ParallelConnection::threadManagement(){
@@ -114,13 +117,13 @@ void ParallelConnection::threadManagement(){
     // How about moving this out of the thread and into the destructor? ---abock
     
     //while we're still running
-    while(_isRunning.load()){
+    while(_isRunning){
         {
             //lock disconnect mutex mutex
             //not really needed since no data is modified but conditions need a mutex
-            std::unique_lock<std::mutex> unqlock(_disconnectMutex);
+            std::unique_lock<std::mutex> disconnectLock(_disconnectMutex);
             //wait for a signal to disconnect
-            _disconnectCondition.wait(unqlock);
+            _disconnectCondition.wait(disconnectLock, [this]() { return _disconnect.load(); });
                 
             //perform actual disconnect
             disconnect();
@@ -131,7 +134,9 @@ void ParallelConnection::threadManagement(){
         
 void ParallelConnection::signalDisconnect(){
     //signal handler thread to disconnect
-    _disconnectCondition.notify_all();
+    _disconnect = true;
+    _sendCondition.notify_all(); // Allow send function to terminate.
+    _disconnectCondition.notify_all(); // Unblock thread management thread.
 }
         
 void ParallelConnection::closeSocket(){
@@ -174,41 +179,34 @@ void ParallelConnection::disconnect(){
         _isConnected.store(false);
                 
         //tell broadcast thread to stop broadcasting (we're no longer host)
-        _isHost.store(false);
-                
-        //signal send thread to stop waiting and finish current run
-        _sendCondition.notify_all();
-                
+        setStatus(Status::Disconnected);
+               
         //join connection thread and delete it
         if(_connectionThread != nullptr){
             _connectionThread->join();
-            delete _connectionThread;
             _connectionThread = nullptr;
         }
                 
         //join send thread and delete it
         if (_sendThread != nullptr){
             _sendThread->join();
-            delete _sendThread;
             _sendThread = nullptr;
         }
                 
         //join listen thread and delete it
         if( _listenThread != nullptr){
             _listenThread->join();
-            delete _listenThread;
             _listenThread = nullptr;
         }
                 
         //join broadcast thread and delete it
         if(_broadcastThread != nullptr){
             _broadcastThread->join();
-            delete _broadcastThread;
             _broadcastThread = nullptr;
         }
                 
         // disconnect and cleanup completed
-        _performDisconnect.store(false);
+        _disconnect = false;
     }
 }
         
@@ -225,11 +223,9 @@ void ParallelConnection::clientConnect(){
     }
             
     struct addrinfo *addresult = NULL, *ptr = NULL, hints;
-    #ifdef __WIN32__ //WinSock
-        ZeroMemory(&hints, sizeof(hints));
-    #else
-        memset(&hints, 0, sizeof(hints));
-    #endif
+    
+    memset(&hints, 0, sizeof(hints));
+    
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
@@ -250,7 +246,7 @@ void ParallelConnection::clientConnect(){
     _tryConnect.store(true);
             
     //start connection thread
-    _connectionThread = new (std::nothrow) std::thread(&ParallelConnection::establishConnection, this, addresult);
+    _connectionThread = std::make_unique<std::thread>(&ParallelConnection::establishConnection, this, addresult);
             
 }
 
@@ -266,14 +262,15 @@ void ParallelConnection::establishConnection(addrinfo *info){
         signalDisconnect();
     }
             
-    int flag = 1;
+    int trueFlag = 1;
+    int falseFlag = 0;
     int result;
             
     //set no delay
     result = setsockopt(_clientSocket,      /* socket affected */
                         IPPROTO_TCP,        /* set option at TCP level */
                         TCP_NODELAY,        /* name of option */
-                        (char *)&flag,      /* the cast is historical cruft */
+                        (char *)&trueFlag,  /* the cast is historical cruft */
                         sizeof(int));       /* length of option value */
             
     //set send timeout
@@ -293,11 +290,11 @@ void ParallelConnection::establishConnection(addrinfo *info){
                         (char *)&timeout,
                         sizeof(timeout));
 
-    result = setsockopt(_clientSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&flag, sizeof(int));
+    result = setsockopt(_clientSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&falseFlag, sizeof(int));
     if (result == SOCKET_ERROR)
         LERROR("Failed to set socket option 'reuse address'. Error code: " << _ERRNO);
             
-    result = setsockopt(_clientSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&flag, sizeof(int));
+    result = setsockopt(_clientSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&trueFlag, sizeof(int));
     if (result == SOCKET_ERROR)
         LERROR("Failed to set socket option 'keep alive'. Error code: " << _ERRNO);
 
@@ -320,19 +317,25 @@ void ParallelConnection::establishConnection(addrinfo *info){
             _isConnected.store(true);
                     
             //start sending messages
-            _sendThread = new (std::nothrow) std::thread(&ParallelConnection::sendFunc, this);
+            _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
                     
             //start listening for communication
-            _listenThread = new (std::nothrow) std::thread(&ParallelConnection::listenCommunication, this);
+            _listenThread = std::make_unique<std::thread>(&ParallelConnection::listenCommunication, this);
                     
             //we no longer need to try to establish connection
             _tryConnect.store(false);
                     
+            _sendBufferMutex.lock();
+            _sendBuffer.clear();
+            _sendBufferMutex.unlock();
+
             //send authentication
             sendAuthentication();
+        } else {
+            LINFO("Connection attempt failed.");
         }
                 
-#ifdef __WIN32__
+#ifdef WIN32
         //on windows: try to connect once per second
         std::this_thread::sleep_for(std::chrono::seconds(1));
 #else
@@ -353,52 +356,46 @@ void ParallelConnection::establishConnection(addrinfo *info){
     freeaddrinfo(info);
 }
 
-void ParallelConnection::sendAuthentication(){
+void ParallelConnection::sendAuthentication() {
     //length of this nodes name
-    uint16_t namelen = static_cast<uint16_t>(_name.length());
+    uint32_t nameLength = static_cast<uint32_t>(_name.length());
             
-    //total size of the buffer, header + size of passcodde + namelength + size of namelength
-    int size = headerSize() + sizeof(uint32_t) + sizeof(namelen) + static_cast<int>(namelen);
+    //total size of the buffer: (passcode + namelength + name)
+    size_t size = 2 * sizeof(uint32_t) + nameLength;
 
     //create and reserve buffer
     std::vector<char> buffer;
     buffer.reserve(size);
 
-    //write header to buffer
-    writeHeader(buffer, MessageTypes::Authentication);
-
     //write passcode to buffer
     buffer.insert(buffer.end(), reinterpret_cast<char*>(&_passCode), reinterpret_cast<char*>(&_passCode) + sizeof(uint32_t));
 
     //write the length of the nodes name to buffer
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&namelen), reinterpret_cast<char*>(&namelen) + sizeof(uint16_t));
+    buffer.insert(buffer.end(), reinterpret_cast<char*>(&nameLength), reinterpret_cast<char*>(&nameLength) + sizeof(uint32_t));
 
-    //write this nodes name to buffer
+    //write this node's name to buffer
     buffer.insert(buffer.end(), _name.begin(), _name.end());
             
     //send buffer
-    queueMessage(buffer);
+    queueOutMessage(Message(MessageType::Authentication, buffer));
 }
 
-void ParallelConnection::delegateDecoding(uint32_t type){
-    switch (type){
-    case MessageTypes::Authentication:
-        //not used
+
+void ParallelConnection::queueInMessage(const Message& message) {
+    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    _receiveBuffer.push_back(message);
+}
+
+void ParallelConnection::handleMessage(const Message& message) {
+    switch (message.type){
+    case MessageType::Data:
+        dataMessageReceived(message.content);
         break;
-    case MessageTypes::Initialization:
-        initializationMessageReceived();
+    case MessageType::ConnectionStatus:
+        connectionStatusMessageReceived(message.content);
         break;
-    case MessageTypes::Data:
-        dataMessageReceived();
-        break;
-    case MessageTypes::Script:
-            //not used
-        break;
-    case MessageTypes::HostInfo:
-        hostInfoMessageReceived();
-        break;
-    case MessageTypes::InitializationRequest:
-        initializationRequestMessageReceived();
+    case MessageType::NConnections:
+        nConnectionsMessageReceived(message.content);
         break;
     default:
         //unknown message type
@@ -406,6 +403,7 @@ void ParallelConnection::delegateDecoding(uint32_t type){
     }
 }
 
+/*
 void ParallelConnection::initializationMessageReceived(){
             
     int result;
@@ -476,116 +474,77 @@ void ParallelConnection::initializationMessageReceived(){
     writeHeader(buffer, MessageTypes::InitializationCompleted);
             
     //let the server know
-    queueMessage(buffer);
+    std::cout << "initialization message recieved queue" << std::endl;
+    queueMessage(InitializationCompleted, buffer);
             
     //we also need to force a time jump just to ensure that the server and client are synced
     _initializationTimejumpRequired.store(true);
             
 }
+*/
 
-void ParallelConnection::dataMessageReceived(){
-    int result;
-    uint16_t msglen;
-    uint16_t type;
+double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
+    std::lock_guard<std::mutex> latencyLock(_latencyMutex);
 
-    //create a buffer to hold the size of streamdata message
-    std::vector<char> buffer;
-    buffer.resize(sizeof(type));
-            
-    //read type of data message
-    result = receiveData(_clientSocket, buffer, sizeof(type), 0);
-
-    if (result <= 0){
-        //error
-        LERROR("Failed to read type of data message received.");
-        return;
+    double timeDiff = OsEng.runTime() - originalTime;
+    if (_latencyDiffs.size() == 0) {
+        _initialTimeDiff = timeDiff;
     }
-            
+    double latencyDiff = timeDiff - _initialTimeDiff;
+    if (_latencyDiffs.size() >= MaxLatencyDiffs) {
+        _latencyDiffs.pop_front();
+    }
+    _latencyDiffs.push_back(latencyDiff);
+
+    double accumulatedLatencyDiffSquared = 0;
+    double accumulatedLatencyDiff = 0;
+    for (double diff : _latencyDiffs) {
+        accumulatedLatencyDiff += diff;
+        accumulatedLatencyDiffSquared += diff*diff;
+    }
+    double expectedLatencyDiffSquared = accumulatedLatencyDiffSquared / _latencyDiffs.size();
+    double expectedLatencyDiff = accumulatedLatencyDiff / _latencyDiffs.size();
+
+    // V(X) = E(x^2) - E(x)^2
+    double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
+    double latencyStandardDeviation = std::sqrt(latencyVariance);
+
+    double frametime = OsEng.windowWrapper().averageDeltaTime();
+
+    double latencyCompensation = std::max(expectedLatencyDiff + 2 * latencyStandardDeviation, latencyDiff);
+
+    return originalTime + timeDiff + nBroadcastIntervalsBuffer * BroadcastIntervalMilliseconds / 1000 + latencyCompensation + nFrametimesBuffer * frametime;
+
+}
+
+void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
+    
     //the type of data message received
-    type =(*(reinterpret_cast<uint16_t*>(buffer.data())));
-            
-    //read size of streamdata message
-    result = receiveData(_clientSocket, buffer, sizeof(msglen), 0);
-            
-    if (result <= 0){
-        //error
-        LERROR("Failed to read size of data message received.");
-        return;
-    }
-            
-    //the size in bytes of the streamdata message
-    msglen = (*(reinterpret_cast<uint16_t*>(buffer.data())));
+    uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
+    std::vector<char> buffer(messageContent.begin() + sizeof(uint32_t), messageContent.end());
+ 
+    switch(static_cast<datamessagestructures::Type>(type)) {
+        case datamessagestructures::Type::CameraData: {
 
-    //resize the buffer to be able to read the streamdata
-    buffer.clear();
-    buffer.resize(msglen);
+            datamessagestructures::CameraKeyframe kf(buffer);
+            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
-    //read the data into buffer
-    result = receiveData(_clientSocket, buffer, msglen, 0);
-            
-    if (result <= 0){
-        //error
-        LERROR("Failed to read data message.");
-        return;
-    }
-            
-    //which type of data message was received?
-    switch(type){
-        case network::datamessagestructures::PositionData:{
-            //position data message
-            //create and read a position keyframe from the data buffer
-            network::datamessagestructures::PositionKeyframe kf;
-            kf.deserialize(buffer);
-                    
-            //add the keyframe to the interaction handler
             OsEng.interactionHandler().addKeyframe(kf);
             break;
         }
-        case network::datamessagestructures::TimeData:{
-            //time data message
-            //create and read a time keyframe from the data buffer
-            network::datamessagestructures::TimeKeyframe tf;
-            tf.deserialize(buffer);
-                    
-            //lock mutex and assign latest time keyframe parameters
-            _timeKeyframeMutex.lock();
-                    
-            _latestTimeKeyframe._dt = tf._dt;
-            _latestTimeKeyframe._time = tf._time;
-            _latestTimeKeyframe._paused = tf._paused;
-                    
-            //ensure that we never miss a timejump
-            //if last keyframe required a jump and that keyframe has not been used yet
-            if(_latestTimeKeyframe._requiresTimeJump && _latestTimeKeyframeValid){
-                //do nothing to the boolean. Old value must be executed
-            }else{
-                //either the latest keyframe didnt require a jump, or we have already spent that keyframe.
-                //in either case we can go ahead and write the bool value of newest frame
-                _latestTimeKeyframe._requiresTimeJump = tf._requiresTimeJump;
-            }
-                    
-            //if we're just initialized we need to perform a time jump as soon as a valid keyframe has been received
-            if(_initializationTimejumpRequired.load() && _latestTimeKeyframeValid){
-                _latestTimeKeyframe._requiresTimeJump = true;
-                _initializationTimejumpRequired.store(false);
-            }
-                    
-            //unlock mutex
-            _timeKeyframeMutex.unlock();
-                    
-            //the keyframe is now valid for use
-            _latestTimeKeyframeValid.store(true);
-                    
+        case datamessagestructures::Type::TimeData: {
+
+            datamessagestructures::TimeKeyframe kf(buffer);
+            kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
+
+            OsEng.timeManager().addKeyframe(kf);
             break;
         }
-        case network::datamessagestructures::ScriptData:{
-            //script data message
-            //create and read a script message from data buffer
-            network::datamessagestructures::ScriptMessage sm;
+        case datamessagestructures::Type::ScriptData: {
+            datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
-                    
-            //Que script to be executed by script engine
-            OsEng.scriptEngine().queueScript(sm._script);
+            OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);
+            
             break;
         }
         default:{
@@ -595,113 +554,152 @@ void ParallelConnection::dataMessageReceived(){
     }
 }
 
-void ParallelConnection::queueMessage(std::vector<char> message){
-    {
-        std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
-        _sendBuffer.push_back(message);
-        _sendCondition.notify_all();
-    }
+void ParallelConnection::queueOutDataMessage(const DataMessage& dataMessage) {
+    uint32_t dataMessageTypeOut = static_cast<uint32_t>(dataMessage.type);
+
+    std::vector<char> messageContent;
+    messageContent.insert(messageContent.end(),
+        reinterpret_cast<const char*>(&dataMessageTypeOut),
+        reinterpret_cast<const char*>(&dataMessageTypeOut) + sizeof(uint32_t));
+
+    messageContent.insert(messageContent.end(),
+        dataMessage.content.begin(),
+        dataMessage.content.end());
+
+    queueOutMessage(Message(MessageType::Data, messageContent));
+}
+
+void ParallelConnection::queueOutMessage(const Message& message) {
+    std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
+    _sendBuffer.push_back(message);
+    _sendCondition.notify_all();
 }
         
 void ParallelConnection::sendFunc(){
     int result;
     //while we're connected
-    while(_isConnected.load()){
-        {
-            //wait for signal then lock mutex and send first queued message
-            std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
-            _sendCondition.wait_for(unqlock, std::chrono::milliseconds(500));
-                    
-            if(!_sendBuffer.empty()){
-                while(!_sendBuffer.empty()){
-                    result = send(_clientSocket, _sendBuffer.front().data(), _sendBuffer.front().size(), 0);
-                    _sendBuffer.erase(_sendBuffer.begin());
-                            
-                    //make sure everything went well
-                    if (result == SOCKET_ERROR){
-                        //failed to send message
-                        LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
-                                
-                        //signal that a disconnect should be performed
-                        signalDisconnect();
-                    }
-                }
-            }
+    while(_isConnected && !_disconnect) {
+        //wait for signal then lock mutex and send first queued message
+        std::unique_lock<std::mutex> unqlock(_sendBufferMutex);
+        _sendCondition.wait(unqlock);
+
+        if (_disconnect) {
+            break;
         }
-                
+
+        while (!_sendBuffer.empty()) {
+            Message message = _sendBuffer.front();
+            unqlock.unlock();
+            std::vector<char> header;
+
+            //insert header into buffer
+            header.push_back('O');
+            header.push_back('S');
+
+            uint32_t messageTypeOut = static_cast<uint32_t>(message.type);
+            uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
+
+
+            header.insert(header.end(),
+                reinterpret_cast<const char*>(&ProtocolVersion),
+                reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint32_t));
+
+            header.insert(header.end(),
+                reinterpret_cast<const char*>(&messageTypeOut),
+                reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint32_t));
+
+            header.insert(header.end(),
+                reinterpret_cast<const char*>(&messageSizeOut),
+                reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t));
+
+            result = send(_clientSocket, header.data(), header.size(), 0);
+            result = send(_clientSocket, message.content.data(), message.content.size(), 0);
+
+            if (result == SOCKET_ERROR) {
+                LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                signalDisconnect();
+            }
+
+            unqlock.lock();
+            _sendBuffer.erase(_sendBuffer.begin());
+        }
     }
+    std::lock_guard<std::mutex> sendLock(_sendBufferMutex);
+    _sendBuffer.clear();
+
 }
         
-void ParallelConnection::hostInfoMessageReceived(){
-    //create buffer
-    std::vector<char> hostflag;
-    //resize to hold a flag saying if we're host or not
-    hostflag.resize(1);
-            
-    //read data into buffer
-    int result = receiveData(_clientSocket, hostflag, 1, 0);
+void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>& message) {
+    if (message.size() < 2 * sizeof(uint32_t)) {
+        LERROR("Malformed connection status message.");
+        return;
+    }
+    size_t pointer = 0;
+    uint32_t statusIn = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    ParallelConnection::Status status = static_cast<ParallelConnection::Status>(statusIn);
+    pointer += sizeof(uint32_t);
 
-    //enough data was read
-    if (result > 0){
-                
-        //we've been assigned as host
-        if (hostflag.at(0) == 1){
-                    
-            //we're already host, do nothing (dummy check)
-            if (_isHost.load()){
-                return;
-            }
-            else{
-                        
-                //we're the host
-                _isHost.store(true);
+    size_t hostNameSize = *(reinterpret_cast<const uint32_t*>(&message[pointer]));
+    pointer += sizeof(uint32_t);
 
-                //start broadcasting
-                _broadcastThread = new (std::nothrow) std::thread(&ParallelConnection::broadcast, this);
-            }
-        }
-        else{   //we've been assigned as client
-                    
-            //we were broadcasting but should stop now
-            if (_isHost.load()){
+    if (hostNameSize > message.size() - pointer) {
+        LERROR("Malformed connection status message.");
+        return;
+    }
 
-                //stop broadcast loop
-                _isHost.store(false);
-                        
-                //and delete broadcasting thread
-                if (_broadcastThread != nullptr){
-                    _broadcastThread->join();
-                    delete _broadcastThread;
-                    _broadcastThread = nullptr;
-                }                       
-            }
-            else{
-                //we were not broadcasting so nothing to do
-            }
-                    
-            //clear buffered any keyframes
-            OsEng.interactionHandler().clearKeyframes();
-                    
-            //request init package from the host
-            int size = headerSize();
-            std::vector<char> buffer;
-            buffer.reserve(size);
-                    
-            //write header
-            writeHeader(buffer, MessageTypes::InitializationRequest);
+    std::string hostName = "";
+    if (hostNameSize > 0) {
+        hostName = std::string(&message[pointer], hostNameSize);
+    }
+    pointer += hostNameSize;
+    
+    if (status > Status::Host) {
+        LERROR("Invalid status.");
+        return;
+    }
 
-            //send message
-            queueMessage(buffer);
+    _latencyMutex.lock();
+    _latencyDiffs.clear();
+    _latencyMutex.unlock();
+    setHostName(hostName);
+
+    if (status == _status) {
+        //status remains unchanged.
+        return;
+    }
+
+    setStatus(status);
+
+    if (status == Status::Host) { // assigned as host 
+        _broadcastThread = std::make_unique<std::thread>(&ParallelConnection::broadcast, this);
+    } else { // assigned as client
+        
+        // delete broadcasting thread
+        // (the thread is allowed to terminate once the status is set to non-host.)
+        if (_broadcastThread != nullptr) {
+            _broadcastThread->join();
+            _broadcastThread = nullptr;
         }
     }
-    else{
-        LERROR("Error " << _ERRNO << " detected in connection, disconnecting.");
-        signalDisconnect();
-    }
+    OsEng.interactionHandler().clearKeyframes();
+    OsEng.timeManager().clearKeyframes();
+
 }
 
-void ParallelConnection::initializationRequestMessageReceived(){
-            
+void ParallelConnection::nConnectionsMessageReceived(const std::vector<char>& message) {
+    if (message.size() < sizeof(uint32_t)) {
+        LERROR("Malformed host info message.");
+        return;
+    }
+    uint32_t nConnections = *(reinterpret_cast<const uint32_t*>(&message[0]));
+    setNConnections(nConnections);
+}
+
+
+
+
+//void ParallelConnection::initializationRequestMessageReceived(const std::vector<char>& message){
+            /*
     //get current state as scripts
     std::vector<std::string> scripts;
     std::map<std::string, std::string>::iterator state_it;
@@ -731,7 +729,7 @@ void ParallelConnection::initializationRequestMessageReceived(){
             
     //serialize and encode all scripts into scriptbuffer
     std::vector<std::string>::iterator script_it;
-    network::datamessagestructures::ScriptMessage sm;
+    datamessagestructures::ScriptMessage sm;
     for(script_it = scripts.begin();
         script_it != scripts.end();
         ++script_it){
@@ -767,56 +765,70 @@ void ParallelConnection::initializationRequestMessageReceived(){
     buffer.insert(buffer.end(), scriptbuffer.begin(), scriptbuffer.end());
             
     //queue message
-    queueMessage(buffer);
-}
+    std::cout << "initializationRequest queue" << std::endl;
+    queueMessage(MessageType::Initialization, buffer);
+    */
+//}
 
-void ParallelConnection::listenCommunication(){
+void ParallelConnection::listenCommunication() {
             
+    constexpr size_t headerSize = 2 * sizeof(char) + 3 * sizeof(uint32_t);
+
     //create basic buffer for receiving first part of messages
-    std::vector<char> buffer;
-    //size of the header
-    buffer.resize(headerSize());
-            
-    int result;
+    std::vector<char> headerBuffer(headerSize);
+    std::vector<char> messageBuffer;
+
+    int nBytesRead = 0;
             
     //while we're still connected
-    while (_isConnected.load()){
-        //receive the first parts of a message
-        result = receiveData(_clientSocket, buffer, headerSize(), 0);
+    while (_isConnected.load()) {
+        //receive the header data
+        nBytesRead = receiveData(_clientSocket, headerBuffer, headerSize, 0);
 
         //if enough data was received
-        if (result > 0){
-                
-            //make sure that header matches this version of OpenSpace
-            if (buffer[0] == 'O' &&                     //Open
-                buffer[1] == 'S' &&                     //Space
-                buffer[2] == OPENSPACE_VERSION_MAJOR && // major version
-                buffer[3] == OPENSPACE_VERSION_MINOR    // minor version
-                )
-            {
-                //parse type
-                uint32_t type = (*(reinterpret_cast<uint32_t*>(&buffer[4])));
-
-                //and delegate decoding depending on type
-                delegateDecoding(type);
+        if (nBytesRead <= 0) {
+            if (!_disconnect) {
+                LERROR("Error " << _ERRNO << " detected in connection when reading header, disconnecting!");
+                signalDisconnect();
             }
-            else{
-                LERROR("Error: Client OpenSpace version " << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << " does not match server version " << buffer[2] <<", " << buffer[3] << std::endl << "Message not decoded.");
-            }
+            break;
         }
-        else{
-            if (result == 0){
-                //connection rejected
-                LERROR("Parallel connection rejected, disconnecting...");
-            }
-            else{
-                LERROR("Error " << _ERRNO << " detected in connection, disconnecting!");
-            }
 
-            //signal that a disconnect should be performed
+        //make sure that header matches this version of OpenSpace
+        if (!(headerBuffer[0] == 'O' && headerBuffer[1] && 'S')) {
+            LERROR("Expected to read message header 'OS' from socket.");
             signalDisconnect();
             break;
         }
+
+        uint32_t *ptr = reinterpret_cast<uint32_t*>(&headerBuffer[2]);
+
+        uint32_t protocolVersionIn = *(ptr++);
+        uint32_t messageTypeIn = *(ptr++);
+        uint32_t messageSizeIn = *(ptr++);
+
+        if (protocolVersionIn != ProtocolVersion) {
+            LERROR("Protocol versions do not match. Server version: " << protocolVersionIn << ", Client version: " << ProtocolVersion);
+            signalDisconnect();
+            break;
+        }
+
+        size_t messageSize = messageSizeIn;
+
+        // receive the payload
+        messageBuffer.resize(messageSize);
+        nBytesRead = receiveData(_clientSocket, messageBuffer, messageSize, 0);
+
+        if (nBytesRead <= 0) {
+            if (!_disconnect) {
+                LERROR("Error " << _ERRNO << " detected in connection when reading message, disconnecting!");
+                signalDisconnect();
+            }
+            break;
+        }
+
+        //and delegate decoding depending on type
+        queueInMessage(Message(static_cast<MessageType>(messageTypeIn), messageBuffer));
     }
 
 }
@@ -853,24 +865,17 @@ void ParallelConnection::setName(const std::string& name){
     _name = name;
 }
         
-bool ParallelConnection::isHost(){
-    return _isHost.load();
-}
-        
+       
 void ParallelConnection::requestHostship(const std::string &password){
     std::vector<char> buffer;
-    buffer.reserve(headerSize());
-          
     uint32_t passcode = hash(password);
-            
-    //write header
-    writeHeader(buffer, MessageTypes::HostshipRequest);
-            
-    //write passcode
     buffer.insert(buffer.end(), reinterpret_cast<char*>(&passcode), reinterpret_cast<char*>(&passcode) + sizeof(uint32_t));
-            
-    //send message
-    queueMessage(buffer);
+    queueOutMessage(Message(MessageType::HostshipRequest, buffer));
+}
+
+void ParallelConnection::resignHostship() {
+    std::vector<char> buffer;
+    queueOutMessage(Message(MessageType::HostshipResignation, buffer));
 }
 
 void ParallelConnection::setPassword(const std::string& pwd){
@@ -878,7 +883,7 @@ void ParallelConnection::setPassword(const std::string& pwd){
 }
 
 bool ParallelConnection::initNetworkAPI(){
-    #if defined(__WIN32__)
+    #if defined(WIN32)
         WSADATA wsaData;
         WORD version;
         int error;
@@ -903,203 +908,148 @@ bool ParallelConnection::initNetworkAPI(){
     return true;
 }
 
+void ParallelConnection::sendScript(const std::string& script) {
+    if (!isHost()) return;
+
+    datamessagestructures::ScriptMessage sm;
+    sm._script = script;
+    
+    std::vector<char> buffer;
+    sm.serialize(buffer);
+
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::ScriptData, buffer));
+}
+
 void ParallelConnection::preSynchronization(){
-            
-    //if we're the host
-    if(_isHost){
-        //get current time parameters and create a keyframe
-        network::datamessagestructures::TimeKeyframe tf;
-        tf._dt = Time::ref().deltaTime();
-        tf._paused = Time::ref().paused();
-        tf._requiresTimeJump = Time::ref().timeJumped();
-        tf._time = Time::ref().currentTime();
-                
-        //create a buffer and serialize message
-        std::vector<char> tbuffer;
-        tf.serialize(tbuffer);
-                
-        //get the size of the keyframebuffer
-        uint16_t msglen = static_cast<uint16_t>(tbuffer.size());
-                
-        //the type of data message
-        uint16_t type = static_cast<uint16_t>(network::datamessagestructures::TimeData);
-                
-        //create the full buffer
-        std::vector<char> buffer;
-        buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-                
-        //write header
-        writeHeader(buffer, MessageTypes::Data);
-                
-        //type of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-                
-        //size of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-                
-        //actual message
-        buffer.insert(buffer.end(), tbuffer.begin(), tbuffer.end());
-                
-        //send message
-        queueMessage(buffer);
+
+    std::unique_lock<std::mutex> unqlock(_receiveBufferMutex);
+    while (!_receiveBuffer.empty()) {
+        Message& message = _receiveBuffer.front();
+        handleMessage(message);
+        _receiveBuffer.pop_front();
     }
-    else{
-        //if we're not the host and we have a valid keyframe (one that hasnt been used before)
-        if(_latestTimeKeyframeValid.load()){
-                    
-            //lock mutex and retrieve parameters from latest keyframe
-            _timeKeyframeMutex.lock();
-                    
-            double dt = _latestTimeKeyframe._dt;
-            double time = _latestTimeKeyframe._time;
-            bool jump = _latestTimeKeyframe._requiresTimeJump;
-            bool paused = _latestTimeKeyframe._paused;
-                    
-            _timeKeyframeMutex.unlock();
-                    
-            //this keyframe is now spent
-            _latestTimeKeyframeValid.store(false);
-                    
-            //assign latest params
-            Time::ref().setDeltaTime(dt);
-            Time::ref().setTime(time, jump);
-            Time::ref().setPause(paused);
-                    
+    
+    if (status() == Status::Host) {
+        if (Time::ref().timeJumped()) {
+            _timeJumped = true;
         }
     }
 }
-        
-void ParallelConnection::scriptMessage(const std::string propIdentifier, const std::string propValue){
-            
-    //save script as current state
-    {
-        //mutex protect
-        std::lock_guard<std::mutex> lock(_currentStateMutex);
-        _currentState[propIdentifier] = propValue;
+         
+void ParallelConnection::setStatus(Status status) {
+    if (_status != status) {
+        _status = status;
+        _connectionEvent->publish("statusChanged");
     }
-            
-    //if we're connected and we're the host, also send the script
-    if(_isConnected.load() && _isHost.load()){
-        //construct script
-        std::string script = scriptFromPropertyAndValue(propIdentifier, propValue);
-                
-        //create a script message
-        network::datamessagestructures::ScriptMessage sm;
-        sm._script = script;
-        sm._scriptlen = static_cast<uint16_t>(script.length());
-                
-        //create a buffer for the script
-        std::vector<char> sbuffer;
-                
-        //fill the script buffer
-        sm.serialize(sbuffer);
-                
-        //get the size of the keyframebuffer
-        uint16_t msglen = static_cast<uint16_t>(sbuffer.size());
-                
-        //the type of message
-        uint16_t type = static_cast<uint16_t>(network::datamessagestructures::ScriptData);
-                
-        //create the full buffer
-        std::vector<char> buffer;
-        buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-                
-        //write header
-        writeHeader(buffer, MessageTypes::Data);
-                
-        //type of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-                
-        //size of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-                
-        //actual message
-        buffer.insert(buffer.end(), sbuffer.begin(), sbuffer.end());
-                
-        //send message
-        queueMessage(buffer);
-    }
+}
 
+ParallelConnection::Status ParallelConnection::status() {
+    return _status;
 }
-        
-std::string ParallelConnection::scriptFromPropertyAndValue(const std::string property, const std::string value){
-    //consruct script
-    std::string script = "openspace.setPropertyValue(\"" + property + "\"," + value + ");";
-    return script;
+
+void ParallelConnection::setNConnections(size_t nConnections) {
+    if (_nConnections != nConnections) {
+        _nConnections = nConnections;
+        _connectionEvent->publish("nConnectionsChanged");
+    }
 }
-        
+
+size_t ParallelConnection::nConnections() {
+    return _nConnections;
+}
+
+bool ParallelConnection::isHost() {
+    return _status == Status::Host;
+}
+
+void ParallelConnection::setHostName(const std::string& hostName) {
+    if (_hostName != hostName) {
+        _hostName = hostName;
+        _connectionEvent->publish("hostNameChanged");
+    }
+}
+
+const std::string& ParallelConnection::hostName() {
+    return _hostName;
+}
+
+void ParallelConnection::sendCameraKeyframe() {
+    //create a keyframe with current position and orientation of camera
+    datamessagestructures::CameraKeyframe kf;
+    kf._position = OsEng.interactionHandler().camera()->positionVec3();
+    kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
+
+    //timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.runTime();
+
+    //create a buffer for the keyframe
+    std::vector<char> buffer;
+
+    //fill the keyframe buffer
+    kf.serialize(buffer);
+
+    //send message
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::CameraData, buffer));
+}
+
+void ParallelConnection::sendTimeKeyframe() {
+    //create a keyframe with current position and orientation of camera
+    datamessagestructures::TimeKeyframe kf;
+    
+    kf._dt = Time::ref().deltaTime();
+    kf._paused = Time::ref().paused();
+    kf._requiresTimeJump = _timeJumped;
+    kf._time = Time::ref().j2000Seconds();
+
+    //timestamp as current runtime of OpenSpace instance
+    kf._timestamp = OsEng.runTime();
+
+    //create a buffer for the keyframe
+    std::vector<char> buffer;
+
+    //fill the keyframe buffer
+    kf.serialize(buffer);
+
+    //send message
+    queueOutDataMessage(DataMessage(datamessagestructures::Type::TimeData, buffer));
+    _timeJumped = false;
+}
+
+
 void ParallelConnection::broadcast(){
-            
+    _timeJumped = true;
     //while we're still connected and we're the host
-    while (_isConnected.load() && _isHost.load()){
-
-        //create a keyframe with current position and orientation of camera
-        network::datamessagestructures::PositionKeyframe kf;
-        kf._position = OsEng.interactionHandler().camera()->position();
-        kf._viewRotationQuat = glm::quat_cast(glm::mat4(OsEng.interactionHandler().camera()->viewRotationMatrix()));
-                
-        //timestamp as current runtime of OpenSpace instance
-        kf._timeStamp = OsEng.runTime();
-                
-        //create a buffer for the keyframe
-        std::vector<char> kfBuffer;
-                
-        //fill the keyframe buffer
-        kf.serialize(kfBuffer);
-                
-        //get the size of the keyframebuffer
-        uint16_t msglen = static_cast<uint16_t>(kfBuffer.size());
-                
-        //the type of message
-        uint16_t type = static_cast<uint16_t>(network::datamessagestructures::PositionData);
-                
-        //create the full buffer
-        std::vector<char> buffer;
-        buffer.reserve(headerSize() + sizeof(type) + sizeof(msglen) + msglen);
-                
-        //write header
-        writeHeader(buffer, MessageTypes::Data);
-                
-        //type of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&type), reinterpret_cast<char*>(&type) + sizeof(type));
-
-        //size of message
-        buffer.insert(buffer.end(), reinterpret_cast<char*>(&msglen), reinterpret_cast<char*>(&msglen) + sizeof(msglen));
-
-        //actual message
-        buffer.insert(buffer.end(), kfBuffer.begin(), kfBuffer.end());
-
-        //send message
-        queueMessage(buffer);
+    while (_isConnected && isHost()) {
+        sendCameraKeyframe();
+        sendTimeKeyframe();
 
         //100 ms sleep - send keyframes 10 times per second
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(BroadcastIntervalMilliseconds)));
     }
-}
-        
-void ParallelConnection::writeHeader(std::vector<char> &buffer, uint32_t messageType){
-    //make sure the buffer is large enough to hold at least the header
-    if(buffer.size() < headerSize()){
-        buffer.reserve(headerSize());
-    }
-            
-    //get the current running version of openspace
-    uint8_t versionMajor = static_cast<uint8_t>(OPENSPACE_VERSION_MAJOR);
-    uint8_t versionMinor = static_cast<uint8_t>(OPENSPACE_VERSION_MINOR);
-            
-    //insert header into buffer
-    buffer.insert(buffer.end(), 'O');
-    buffer.insert(buffer.end(), 'S');
-    buffer.insert(buffer.end(), versionMajor);
-    buffer.insert(buffer.end(), versionMinor);
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&messageType), reinterpret_cast<char*>(&messageType) + sizeof(messageType));
-}
-        
-int ParallelConnection::headerSize(){
-    //minor and major version (as uint8_t -> 1 byte) + two bytes for the chars 'O' and 'S' + 4 bytes for type of message
-    return 2 * sizeof(uint8_t) + 2 + sizeof(uint32_t);
 }
 
+uint32_t ParallelConnection::hash(const std::string &val) {
+    uint32_t hashVal = 0, i;
+    size_t len = val.length();
+
+    for (hashVal = i = 0; i < len; ++i) {
+        hashVal += val.c_str()[i];
+        hashVal += (hashVal << 10);
+        hashVal ^= (hashVal >> 6);
+    }
+
+    hashVal += (hashVal << 3);
+    hashVal ^= (hashVal >> 11);
+    hashVal += (hashVal << 15);
+
+    return hashVal;
+};
+
+
+std::shared_ptr<ghoul::Event<>> ParallelConnection::connectionEvent() {
+    return _connectionEvent;
+}
+        
 scripting::LuaLibrary ParallelConnection::luaLibrary() {
     return {
         "parallel",
@@ -1146,10 +1096,14 @@ scripting::LuaLibrary ParallelConnection::luaLibrary() {
                 "string",
                 "Request to be the host for this session"
             },
+            {
+                "resignHostship",
+                &luascriptfunctions::resignHostship,
+                "",
+                "Resign hostship"
+            },
         }
     };
 }
-        
-} // namespace network
-    
+
 } // namespace openspace

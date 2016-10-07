@@ -108,7 +108,7 @@ protected:
 
 private:
     bool readyToRender() const override;
-    bool downloadTextureResource(double timestamp = Time::ref().currentTime()) override;
+    bool downloadTextureResource(double timestamp = Time::ref().j2000Seconds()) override;
 };
 } //namespace openspace
 

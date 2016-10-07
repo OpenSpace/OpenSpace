@@ -131,20 +131,18 @@ void RenderablePlaneProjection::render(const RenderData& data) {
     if (!_hasImage || (_moving && !active))
         return;
 
-    glm::mat4 transform = glm::mat4(1.0);
-
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-
     // Activate shader
     _shader->activate();
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(_stateMatrix);
+    glm::mat4 modelViewProjectionTransform =
+        data.camera.projectionMatrix() *
+        glm::mat4(data.camera.combinedViewMatrix() *
+            modelTransform);
+
+    _shader->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -168,14 +166,14 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
     
-    double timePast = abs(img.startTime - _previousTime);
+    double timePast = abs(img.timeRange.start - _previousTime);
     
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
         updatePlane(img, time);
 
     else if (timePast > DBL_EPSILON) {
-        _previousTime = time = img.startTime;
+        _previousTime = time = img.timeRange.start;
         updatePlane(img, time);
     }
 
@@ -315,21 +313,8 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     bool hasBody, found = false;
     std::string targetBody;
 
-    for (auto node : nodes) {
-        possibleTarget = node->renderable();
-        if (possibleTarget != nullptr) {
-            hasBody = possibleTarget->hasBody();
-            if (hasBody && possibleTarget->getBody(targetBody) && (targetBody == body)) {
-                _target.node = node->name(); // get name from propertyOwner
-                found = true;
-                break;
-            }
-        }
-    }
-    if (found) {
-        _target.body = body;
-        _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
-    }
+    _target.body = body;
+    _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
 }
 
 std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
@@ -344,32 +329,9 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
     PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
     PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
 
-    std::string closestTarget = "";
-
-    double lt;
-    glm::dvec3 p =
-    SpiceManager::ref().targetPosition(_spacecraft, "SSB", GalacticFrame, {}, currentTime, lt);
-    psc spacecraftPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 
 
-    for (auto node : nodes)
-    {
-        possibleTarget = node->renderable();
-        if (possibleTarget != nullptr) {
-            hasBody = possibleTarget->hasBody();
-            if (hasBody && possibleTarget->getBody(targetBody)) {
-                found = SpiceManager::ref().isTargetInFieldOfView(targetBody, _spacecraft, _instrument, SpiceManager::FieldOfViewMethod::Ellipsoid, {}, currentTime);
-                if (found){
-                    targets.push_back(node->name()); // get name from propertyOwner
-                    distance = (node->worldPosition() - spacecraftPos).length();
-                    if (distance < min)
-                        closestTarget = targetBody;
-                }
-            }
-        }
-    }
-
-    return closestTarget;
+    return targetBody;
 }
 
 } // namespace openspace

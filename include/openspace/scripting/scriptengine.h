@@ -26,6 +26,7 @@
 #define __SCRIPTENGINE_H__
 
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/syncdata.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 
@@ -47,8 +48,9 @@ namespace scripting {
  * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine {
+class ScriptEngine : public Syncable {
 public:
+    using RemoteScripting = ghoul::Boolean;
     /**
      * Initializes the internal Lua state and registers a common set of library functions
      * \throw LuaRuntimeException If the creation of the new Lua state fails
@@ -69,19 +71,16 @@ public:
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
 
-    bool writeDocumentation(const std::string& filename, const std::string& type) const;
+    void writeDocumentation(const std::string& filename, const std::string& type) const;
 
     bool writeLog(const std::string& script);
 
-    void serialize(SyncBuffer* syncBuffer);
+    virtual void presync(bool isMaster);
+    virtual void encode(SyncBuffer* syncBuffer);
+    virtual void decode(SyncBuffer* syncBuffer);
+    virtual void postsync(bool isMaster);
 
-    void deserialize(SyncBuffer* syncBuffer);
-
-    void postSynchronizationPreDraw();
-
-    void preSynchronization();
-
-    void queueScript(const std::string &script);
+    void queueScript(const std::string &script, RemoteScripting remoteScripting);
 
     void setLogFile(const std::string& filename, const std::string& type);
 
@@ -90,9 +89,9 @@ public:
     std::vector<std::string> allLuaFunctions() const;
     
     //parallel functions
-    bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
-    bool shouldScriptBeSent(const std::string &library, const std::string &function);
-    void cacheScript(const std::string &library, const std::string &function, const std::string &script);
+    //bool parseLibraryAndFunctionNames(std::string &library, std::string &function, const std::string &script);
+    //bool shouldScriptBeSent(const std::string &library, const std::string &function);
+    //void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
 private:
 
@@ -109,13 +108,13 @@ private:
     
     //sync variables
     std::mutex _mutex;
-    std::vector<std::string> _queuedScripts;
+    std::vector<std::pair<std::string, bool>> _queuedScripts;
     std::vector<std::string> _receivedScripts;
     std::string _currentSyncedScript;
     
     //parallel variables
-    std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
-    std::mutex _cachedScriptsMutex;
+    //std::map<std::string, std::map<std::string, std::string>> _cachedScripts;
+    //std::mutex _cachedScriptsMutex;
 
     //logging variables
     bool _logFileExists = false;

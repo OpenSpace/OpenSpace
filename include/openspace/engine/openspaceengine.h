@@ -28,16 +28,14 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 
-#include <openspace/scripting/scriptengine.h>
-
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace ghoul {
+class Dictionary;
 namespace cmdparser { class CommandlineParser; }
 namespace fontrendering { class FontManager; }
 }
@@ -50,16 +48,20 @@ class LuaConsole;
 class NetworkEngine;
 class GUI;
 class RenderEngine;
-class SyncBuffer;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
+class TimeManager;
+class SyncEngine;
+class ParallelConnection;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
 //namespace scripting { class ScriptEngine; }
-namespace network { class ParallelConnection; }
 namespace properties { class PropertyOwner; }
+namespace scripting { struct LuaLibrary; }
+namespace scripting { class ScriptScheduler; }
+namespace scripting { class ScriptEngine; }
  
 class OpenSpaceEngine {
 public:
@@ -80,14 +82,16 @@ public:
     interaction::InteractionHandler& interactionHandler();
     RenderEngine& renderEngine();
     scripting::ScriptEngine& scriptEngine();
+    scripting::ScriptScheduler& scriptScheduler();
     NetworkEngine& networkEngine();
     LuaConsole& console();
     ModuleEngine& moduleEngine();
-    network::ParallelConnection& parallelConnection();
+    ParallelConnection& parallelConnection();
     properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     DownloadManager& downloadManager();
+    TimeManager& timeManager();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     gui::GUI& gui();
@@ -112,7 +116,11 @@ public:
     void enableBarrier();
     void disableBarrier();
 
+    void writeDocumentation();
     void toggleShutdownMode();
+    
+    bool useBusyWaitForDecode();
+    bool logSGCTOutOfOrderErrors();
 
     void runPostInitializationScripts(const std::string& sceneDescription);
 
@@ -127,7 +135,7 @@ private:
     ~OpenSpaceEngine();
 
     void clearAllWindows();
-    bool gatherCommandlineArguments();
+    void gatherCommandlineArguments();
     void loadFonts();
     void runScripts(const ghoul::Dictionary& scripts);
     void runPreInitializationScripts(const std::string& sceneDescription);
@@ -138,22 +146,24 @@ private:
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<NetworkEngine> _networkEngine;
+    std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<DownloadManager> _downloadManager;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;
 #endif
-    std::unique_ptr<network::ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
-    std::unique_ptr<SyncBuffer> _syncBuffer;
     
     bool _isMaster;
     double _runTime;
@@ -165,6 +175,10 @@ private:
     float _shutdownWait;
     // The current state of the countdown; if it reaches '0', the application will close
     float _shutdownCountdown;
+
+    // The first frame might take some more time in the update loop, so we need to know to
+    // disable the synchronization; otherwise a hardware sync will kill us after 1 sec
+    bool _isFirstRenderingFirstFrame;
 
     static OpenSpaceEngine* _engine;
 };

@@ -36,7 +36,7 @@ namespace {
 
 namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
-    //								   GEODETIC2										//
+    //                                   GEODETIC2                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
     Geodetic2::Geodetic2()
@@ -84,7 +84,7 @@ namespace openspace {
 
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //							 	GEODETICPATCH										//
+    //                                 GEODETICPATCH                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
     GeodeticPatch::GeodeticPatch(
@@ -181,7 +181,12 @@ namespace openspace {
         return _center.lon + _halfSize.lon;
     }
 
-     
+    
+    bool GeodeticPatch::contains(const Geodetic2& p) const {
+        Geodetic2 diff = _center - p;
+        return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
+    }
+
 
     Scalar GeodeticPatch::edgeLatitudeNearestEquator() const {
         return _center.lat + _halfSize.lat * (isNorthern() ? -1 : 1);

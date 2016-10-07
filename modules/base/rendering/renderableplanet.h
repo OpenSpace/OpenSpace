@@ -218,6 +218,8 @@ private:
     bool tempPic;
 
     unsigned int count;
+
+
 };
 
 }  // namespace openspace

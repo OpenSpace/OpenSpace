@@ -97,8 +97,7 @@ namespace openspace {
         LayeredTexturePreprocessingData preprocessingData)
     {
         _updatedOnLastCall = false;
-        if (!(preprocessingData == _preprocessingData) || _programObject == nullptr)
-        { // No need to recompile shader. Shader is up to date and can be returned.
+        if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
             recompileShaderProgram(preprocessingData);
             _updatedOnLastCall = true;
         }
@@ -112,21 +111,27 @@ namespace openspace {
         ghoul::Dictionary shaderDictionary;
         
 
-        // Different texture types can be height maps or color texture for example
+        // Different texture types can be height maps or color texture for example.
         // These are used differently within the shaders.
         auto textureTypes = _preprocessingData.layeredTextureInfo;
         for (size_t i = 0; i < textureTypes.size(); i++) {
             // lastLayerIndex must be at least 0 for the shader to compile,
-            // the layer type is inactivated by setting useThisLayerType to false
+            // the layer type is inactivated by setting use to false
             shaderDictionary.setValue(
-                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::lastLayerIndex] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], glm::max(textureTypes[i].lastLayerIdx, 0));
+                LayeredTextureInfo::glslKeyPrefixes[
+                    LayeredTextureInfo::GlslKeyPrefixes::lastLayerIndex] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
+                        glm::max(textureTypes[i].lastLayerIdx, 0));
             shaderDictionary.setValue(
-                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::use] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], textureTypes[i].lastLayerIdx >= 0);
+                LayeredTextureInfo::glslKeyPrefixes[
+                    LayeredTextureInfo::GlslKeyPrefixes::use] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
+                        textureTypes[i].lastLayerIdx >= 0);
             shaderDictionary.setValue(
-                LayeredTextureInfo::glslKeyPrefixes[LayeredTextureInfo::GlslKeyPrefixes::blend] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i], textureTypes[i].layerBlendingEnabled);
+                LayeredTextureInfo::glslKeyPrefixes[
+                    LayeredTextureInfo::GlslKeyPrefixes::blend] +
+                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
+                        textureTypes[i].layerBlendingEnabled);
         }
 
         // Other settings such as "useAtmosphere"
@@ -134,8 +139,9 @@ namespace openspace {
         for (size_t i = 0; i < keyValuePairs.size(); i++) {
             shaderDictionary.setValue(keyValuePairs[i].first, keyValuePairs[i].second);
         }
+
         // Remove old program
-        _programObject.release();
+        OsEng.renderEngine().removeRenderProgram(_programObject);
 
         _programObject = OsEng.renderEngine().buildRenderProgram(
             _shaderName,
@@ -153,7 +159,8 @@ namespace openspace {
     }
 
 
-    const std::string LayeredTextureShaderUniformIdHandler::glslTileDataNames[NUM_TILE_DATA_VARIABLES] =
+    const std::string LayeredTextureShaderUniformIdHandler::glslTileDataNames[
+        NUM_TILE_DATA_VARIABLES] =
     {
         "textureSampler",
         "depthTransform.depthScale",
@@ -162,7 +169,8 @@ namespace openspace {
         "uvTransform.uvScale"
     };
 
-    const std::string LayeredTextureShaderUniformIdHandler::blendLayerSuffixes[NUM_BLEND_TEXTURES] =
+    const std::string LayeredTextureShaderUniformIdHandler::blendLayerSuffixes[
+        NUM_BLEND_TEXTURES] =
     {
         "",
         "Parent1",
@@ -176,32 +184,40 @@ namespace openspace {
 
     LayeredTextureShaderUniformIdHandler::~LayeredTextureShaderUniformIdHandler()
     {
+
     }
 
-    void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider)
+    void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(
+        LayeredTextureShaderProvider* shaderProvider)
     {
         if (shaderProvider->updatedOnLastCall())
         {
             _shaderProvider = shaderProvider;
-            _shaderProvider->_programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
+            // Ignore errors since this loops through even uniforms that does not exist.
+            _shaderProvider->_programObject->setIgnoreUniformLocationError(
+                ProgramObject::IgnoreError::Yes);
             for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
             {
                 for (size_t j = 0; j < NUM_BLEND_TEXTURES; j++)
                 {
-                    for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY; k++)
+                    for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
+                        k++)
                     {
                         for (size_t l = 0; l < NUM_TILE_DATA_VARIABLES; l++)
                         {
-                            _tileUniformIds[i][j][k][l] = _shaderProvider->_programObject->uniformLocation(
-                                LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
-                                blendLayerSuffixes[j] +
-                                "[" + std::to_string(k) + "]." +
-                                glslTileDataNames[l]);
+                            _tileUniformIds[i][j][k][l] =
+                                _shaderProvider->_programObject->uniformLocation(
+                                    LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
+                                    blendLayerSuffixes[j] +
+                                    "[" + std::to_string(k) + "]." +
+                                    glslTileDataNames[l]);
                         }
                     }
                 }
             }
-            _shaderProvider->_programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
+            // Reset ignore errors
+            _shaderProvider->_programObject->setIgnoreUniformLocationError(
+                ProgramObject::IgnoreError::No);
         }
     }
 

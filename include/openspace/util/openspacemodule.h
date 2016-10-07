@@ -27,6 +27,8 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/documentation/documentation.h>
+
 #include <string>
 #include <vector>
 
@@ -63,6 +65,8 @@ public:
      * module-specific customization.
      */
     void deinitialize();
+
+    virtual std::vector<Documentation> documentations() const;
 
 protected:
     /**

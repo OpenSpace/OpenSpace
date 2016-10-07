@@ -69,10 +69,10 @@ function (set_compile_settings project)
 
     if (MSVC)
         target_compile_options(${project} PUBLIC
-            "/MP"  # Multi-threading support
-            "/ZI"  # Edit and continue support
-            "/wd4201" # Disable nameless struct warning
-            "/wd4127" # Disable conditional expression is constant warning
+            "/MP"       # Multi-threading support
+            "/ZI"       # Edit and continue support
+            "/wd4201"   # Disable "nameless struct" warning
+            "/wd4127"   # Disable "conditional expression is constant" warning
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PUBLIC "/WX")
@@ -242,6 +242,7 @@ function (handle_applications)
 
                     if (WIN32)
                         copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+                        ghl_copy_shared_libraries(${APPLICATION_NAME} ${OPENSPACE_EXT_DIR}/ghoul)
                     endif ()
             endif ()
 
@@ -290,8 +291,17 @@ endfunction ()
 function (handle_option_tests)
     if (OPENSPACE_HAVE_TESTS)
         if (NOT TARGET gtest)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
+            set(BUILD_GTEST ON CACHE BOOL "")
+            set(BUILD_GMOCK OFF CACHE BOOL "")
+            set(gtest_force_shared_crt ON CACHE BOOL "")
+            # set(BUILD_GMOCK OFF CACHE BOOL "")
+            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
+            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
+            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
+            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
+            # add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
             set_property(TARGET gtest PROPERTY FOLDER "External")
+            set_property(TARGET gtest_main PROPERTY FOLDER "External")
         endif ()
 
         file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
@@ -300,7 +310,7 @@ function (handle_option_tests)
         target_include_directories(OpenSpaceTest PUBLIC
             "${OPENSPACE_BASE_DIR}/include"
             "${OPENSPACE_BASE_DIR}/tests"
-            "${OPENSPACE_EXT_DIR}/ghoul/ext/gtest/include"
+            "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
         )
         target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
@@ -315,7 +325,13 @@ function (handle_option_tests)
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
         if (NOT TARGET gtest)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
+            set(BUILD_GTEST ON CACHE BOOL "")
+            set(BUILD_GMOCK OFF CACHE BOOL "")
+            set(gtest_force_shared_crt ON CACHE BOOL "")
+            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
+            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
+            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
+            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
         endif ()
 
         set_property(TARGET gtest PROPERTY FOLDER "External")
@@ -333,6 +349,7 @@ function (handle_internal_modules)
             set(defaultModule OFF)
             if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
                 unset(OPENSPACE_DEPENDENCIES)
+                unset(EXTERNAL_LIBRAY)
                 unset(DEFAULT_MODULE)
                 include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
 
@@ -367,12 +384,14 @@ function (handle_internal_modules)
 
     # Automatically set dependent modules to ON
     set(dir_list ${sortedModules})
+    set(dll_list "")
     list(REVERSE dir_list)
     foreach (dir ${dir_list})
         create_option_name(${dir} optionName)
         if (${optionName})
             if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
                 unset(OPENSPACE_DEPENDENCIES)
+                unset(EXTERNAL_LIBRAY)
                 unset(DEFAULT_MODULE)
                 include(${OPENSPACE_MODULE_DIR}/${dir}/include.cmake)
 
@@ -434,8 +453,14 @@ function (handle_internal_modules)
                 "#include <${MODULE_PATH}>\n"
                 #"#endif\n\n"
             )
-
             list(APPEND MODULE_CLASSES "        new ${MODULE_NAME},\n")
+
+            if (EXTERNAL_LIBRARY)
+                foreach (library ${EXTERNAL_LIBRARY})
+                    get_filename_component(lib ${library} ABSOLUTE)
+                    list(APPEND dll_list ${lib})
+                endforeach()
+            endif ()
         endif ()
     endforeach ()
 
@@ -451,11 +476,20 @@ function (handle_internal_modules)
         ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
         ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
     )
+
+    list(REMOVE_DUPLICATES dll_list)
+
+    if (WIN32)
+    foreach (application ${OPENSPACE_APPLICATIONS})
+        foreach (dll ${dll_list})
+            copy_files(${application} ${dll})
+        endforeach ()
+    endforeach ()
+    endif ()
 endfunction ()
 
 function (copy_dynamic_libraries)
     if (WIN32)
-
         copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
 
         # Copy DLLs needed by Ghoul into the executable directory

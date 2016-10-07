@@ -77,7 +77,7 @@ float PowerScaledScalar::lengthf() const {
 }
 
 double PowerScaledScalar::lengthd() const {
-	return static_cast<double>(_data[0]) * pow(k, static_cast<double>(_data[1]));
+    return static_cast<double>(_data[0]) * pow(k, static_cast<double>(_data[1]));
 }
 
 PowerScaledScalar& PowerScaledScalar::operator=(const PowerScaledScalar &rhs) {

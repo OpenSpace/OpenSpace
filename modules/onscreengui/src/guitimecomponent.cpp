@@ -35,10 +35,11 @@ namespace gui {
 void GuiTimeComponent::render() {
     float deltaTime = static_cast<float>(Time::ref().deltaTime());
     
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -500000.f, 500000.f);
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -5000.f, 5000.f);
     if (changed) {
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")"
+            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 }

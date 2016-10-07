@@ -32,10 +32,10 @@ namespace openspace {
 std::string licenseText();
     
 const int OPENSPACE_VERSION_MAJOR = 0;
-const int OPENSPACE_VERSION_MINOR = 4;
+const int OPENSPACE_VERSION_MINOR = 5;
 const int OPENSPACE_VERSION_PATCH = 0;
     
-const std::string OPENSPACE_VERSION_STRING = "prerelease-9 (IPS)";
+const std::string OPENSPACE_VERSION_STRING = "prerelease-10 (Kulturnatten)";
 
 } // namespace openspace
 

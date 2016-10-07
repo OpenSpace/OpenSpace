@@ -51,7 +51,10 @@ NewHorizonsModule::NewHorizonsModule()
 void NewHorizonsModule::internalInitialize() {
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
+        "Decoder"
+    );
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");

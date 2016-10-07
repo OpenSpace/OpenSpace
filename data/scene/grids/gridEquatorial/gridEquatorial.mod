@@ -3,7 +3,6 @@ return {
     {   
         Name = "SphericalGrid",
         Parent = "Root",
-        Static = true,
         Renderable = {
             Type = "RenderableSphericalGrid",
             GridType = "ICRF",
@@ -13,11 +12,6 @@ return {
                            -0.483835  ,  0.7469823,  0.4559838, 0.0,
                              0.0       ,  0.0      ,  0.0      , 1.0 },
             GridSegments = 36,
-        },
-        Ephemeris = {
-            Type = "Static" -- for now, might change.
-        },
-
-        GuiName = "/Grid/Equatorial"
+        }
     }
 }

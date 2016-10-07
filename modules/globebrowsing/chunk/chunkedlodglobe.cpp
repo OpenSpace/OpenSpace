@@ -37,23 +37,26 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <openspace/util/time.h>
+
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <ctime>
+#include <chrono>
 namespace {
     const std::string _loggerCat = "ChunkLodGlobe";
 }
 
 namespace openspace {
 
-    const GeodeticPatch ChunkedLodGlobe::LEFT_HEMISPHERE = GeodeticPatch(0, -M_PI/2, M_PI/2, M_PI/2);
-    const GeodeticPatch ChunkedLodGlobe::RIGHT_HEMISPHERE = GeodeticPatch(0, M_PI/2, M_PI/2, M_PI/2);
-
     const ChunkIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX = ChunkIndex(0, 0, 1);
     const ChunkIndex ChunkedLodGlobe::RIGHT_HEMISPHERE_INDEX = ChunkIndex(1, 0, 1);
+
+    const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 
     ChunkedLodGlobe::ChunkedLodGlobe(
@@ -61,12 +64,13 @@ namespace openspace {
         size_t segmentsPerPatch,
         std::shared_ptr<TileProviderManager> tileProviderManager)
         : _ellipsoid(ellipsoid)
-        , _leftRoot(new ChunkNode(Chunk(this, LEFT_HEMISPHERE_INDEX)))
-        , _rightRoot(new ChunkNode(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
+        , _leftRoot(std::make_unique<ChunkNode>(Chunk(this, LEFT_HEMISPHERE_INDEX)))
+        , _rightRoot(std::make_unique<ChunkNode>(Chunk(this, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
+        , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     {
 
         auto geometry = std::make_shared<SkirtedGrid>(
@@ -76,16 +80,16 @@ namespace openspace {
             TriangleSoup::TextureCoordinates::Yes,
             TriangleSoup::Normals::No);
 
-        _chunkCullers.push_back(new HorizonCuller());
-        _chunkCullers.push_back(new FrustumCuller(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
+        _chunkCullers.push_back(std::make_unique<HorizonCuller>());
+        _chunkCullers.push_back(std::make_unique<FrustumCuller>(AABB3(vec3(-1, -1, 0), vec3(1, 1, 1e35))));
 
-        
-        
+
         _chunkEvaluatorByAvailableTiles = std::make_unique<EvaluateChunkLevelByAvailableTileData>();
         _chunkEvaluatorByProjectedArea = std::make_unique<EvaluateChunkLevelByProjectedArea>();
         _chunkEvaluatorByDistance = std::make_unique<EvaluateChunkLevelByDistance>();
 
-        _patchRenderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
+        _renderer = std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
+
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -109,85 +113,86 @@ namespace openspace {
         return _tileProviderManager;
     }
 
-
-    ChunkRenderer& ChunkedLodGlobe::getPatchRenderer() const{
-        return *_patchRenderer;
-    }
-
     bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk, const RenderData& renderData) const {
-        if (doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
+        if (debugOptions.doHorizonCulling && _chunkCullers[0]->isCullable(chunk, renderData)) {
             return true;
         }
-        if (doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
+        if (debugOptions.doFrustumCulling && _chunkCullers[1]->isCullable(chunk, renderData)) {
             return true;
         }
         return false;
     }
 
+    const ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) const {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    }
+
+    ChunkNode& ChunkedLodGlobe::findChunkNode(const Geodetic2 p) {
+        ghoul_assert(COVERAGE.contains(p), "Point must be in lat [-90, 90] and lon [-180, 180]");
+        return p.lon < COVERAGE.center().lon ? _leftRoot->find(p) : _rightRoot->find(p);
+    }
+
     int ChunkedLodGlobe::getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const {
         int desiredLevel = 0;
-        if (levelByProjArea) {
+        if (debugOptions.levelByProjAreaElseDistance) {
             desiredLevel = _chunkEvaluatorByProjectedArea->getDesiredLevel(chunk, renderData);
         }
         else {
             desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
         }
 
-        if (limitLevelByAvailableHeightData) {
-            int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-            if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
-                desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
-            }
+
+        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+        if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
         }
 
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
         return desiredLevel;
     }
-
     
     void ChunkedLodGlobe::render(const RenderData& data){
+
+        stats.startNewRecord();
+        
+        int j2000s = Time::now().j2000Seconds();
+
+        auto duration = std::chrono::system_clock::now().time_since_epoch();
+        auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        stats.i["time"] = millis;
+
         minDistToCamera = INFINITY;
-        ChunkNode::renderedChunks = 0;
 
         _leftRoot->updateChunkTree(data);
         _rightRoot->updateChunkTree(data);
 
-        renderChunkTree(_leftRoot.get(), data);
-        renderChunkTree(_rightRoot.get(), data);
-
-
         // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
-        dmat4 mvp = dmat4(data.camera.projectionMatrix())
-            * viewTransform * modelTransform;
+        dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
+        dmat4 mvp = vp * _modelTransform;
 
-        if (showChunkBounds) {
-            std::function<void(const ChunkNode&)> chunkDebugRenderer = [&data, &mvp](const ChunkNode& chunkNode) {
-                const Chunk& chunk = chunkNode.getChunk();
-                if (chunkNode.isLeaf() && chunk.isVisible()) {
-                    const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
-                    std::vector<glm::vec4> clippingSpaceCorners(8);
-                    for (size_t i = 0; i < 8; i++) {
-                        clippingSpaceCorners[i] = mvp * modelSpaceCorners[i];
-                    }
-
-                    unsigned int colorBits = 1 + chunk.index().level % 6;
-                    vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
-                    DebugRenderer::ref()->renderBoxFaces(clippingSpaceCorners, color);
-
-                    glLineWidth(4.0f);
-                    DebugRenderer::ref()->renderBoxEdges(clippingSpaceCorners, color);
-
-                    glPointSize(20.0f);
-                    DebugRenderer::ref()->renderVertices(clippingSpaceCorners, GL_POINTS, color);
+        // Render function
+        std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+            stats.i["chunks"]++;
+            const Chunk& chunk = chunkNode.getChunk();
+            if (chunkNode.isLeaf()){
+                stats.i["chunks leafs"]++;
+                if (chunk.isVisible()) {
+                    stats.i["rendered chunks"]++;
+                    double t0 = Time::now().j2000Seconds();
+                    _renderer->renderChunk(chunkNode.getChunk(), data);
+                    debugRenderChunk(chunk, mvp);
                 }
-            };
+            }
+        };
+        
+        _leftRoot->reverseBreadthFirst(renderJob);
+        _rightRoot->reverseBreadthFirst(renderJob);
 
-            _leftRoot->depthFirst(chunkDebugRenderer);
-            _rightRoot->depthFirst(chunkDebugRenderer);
+        if (_savedCamera != nullptr) {
+            DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
-       
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 
@@ -199,29 +204,52 @@ namespace openspace {
         //LDEBUG(ChunkNode::renderedChunks << " / " << ChunkNode::chunkNodeCount << " chunks rendered");
     }
 
-    void ChunkedLodGlobe::renderChunkTree(ChunkNode* node, const RenderData& data) const {
-        if (renderSmallChunksFirst) {
-            node->renderReversedBreadthFirst(data);
+
+    void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp) const {
+        if (debugOptions.showChunkBounds || debugOptions.showChunkAABB) {
+            const std::vector<glm::dvec4> modelSpaceCorners = chunk.getBoundingPolyhedronCorners();
+            std::vector<glm::vec4> clippingSpaceCorners(8);
+            AABB3 screenSpaceBounds;
+            for (size_t i = 0; i < 8; i++) {
+                const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
+                clippingSpaceCorners[i] = clippingSpaceCorner;
+
+                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
+                screenSpaceBounds.expand(screenSpaceCorner);
+            }
+
+            unsigned int colorBits = 1 + chunk.index().level % 6;
+            vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
+
+            if (debugOptions.showChunkBounds) {
+                DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
+            }
+
+            if (debugOptions.showChunkAABB) {
+                auto& screenSpacePoints = DebugRenderer::ref().verticesFor(screenSpaceBounds);
+                DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
+            }
         }
-        else {
-            node->renderDepthFirst(data);
-        }
-        
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
-        _patchRenderer->update();
-        
+        glm::dmat4 translation = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+        glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+        glm::dmat4 scaling = glm::scale(glm::dmat4(1.0),
+            glm::dvec3(data.modelTransform.scale, data.modelTransform.scale, data.modelTransform.scale));
+
+        _modelTransform = translation * rotation * scaling;
+        _inverseModelTransform = glm::inverse(_modelTransform);
+
+        _renderer->update();
     }
 
-    void ChunkedLodGlobe::setStateMatrix(const glm::dmat3& stateMatrix)
-    {
-        _stateMatrix = stateMatrix;
+    const glm::dmat4& ChunkedLodGlobe::modelTransform() {
+        return _modelTransform;
     }
 
-    const glm::dmat3& ChunkedLodGlobe::stateMatrix()
-    {
-        return _stateMatrix;
+    const glm::dmat4& ChunkedLodGlobe::inverseModelTransform() {
+        return _inverseModelTransform;
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

@@ -3,7 +3,6 @@ return {
     {   
         Name = "SphericalGrid",
         Parent = "Root",
-        Static = true,
         Renderable = {
             Type = "RenderableSphericalGrid",
             GridType = "ECLIPJ2000",
@@ -13,22 +12,6 @@ return {
                            -0.09647644,  0.8622859,  0.4971472   , 0.0,
                             0.0       ,  0.0      ,  0.0         , 1.0 },
             GridSegments = 36,
-        },
-        Ephemeris = {
-            Type = "Static" -- for now, might change.
-        },
-    
-        --[[
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH",
-            Reference = "ECLIPJ2000",
-            Observer = "EARTH BARYCENTER",
-            Kernels = {
-                "kernels/earth.bsp"
-            }
-        },    
-        --]]
-        GuiName = "/Grid/Ecliptic"
+        }
     }
 }

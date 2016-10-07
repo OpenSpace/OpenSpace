@@ -42,7 +42,7 @@ namespace openspace {
 std::map<std::string, ImageSubset> SequenceParser::getSubsetMap(){
     return _subsetMap;
 }
-std::vector<std::pair<std::string, TimeRange>> SequenceParser::getIstrumentTimes(){
+std::vector<std::pair<std::string, TimeRange>> SequenceParser::getInstrumentTimes(){
     return _instrumentTimes;
 }
 std::vector<std::pair<double, std::string>> SequenceParser::getTargetTimes(){
@@ -52,6 +52,9 @@ std::vector<double> SequenceParser::getCaptureProgression(){
     return _captureProgression;
 };
 
+std::map<std::string, std::unique_ptr<Decoder>>& SequenceParser::getTranslation() {
+    return _fileTranslation;
+}
 
 template <typename T>
 void writeToBuffer(std::vector<char>& buffer, size_t& currentWriteLocation, T value) {
@@ -130,11 +133,11 @@ void SequenceParser::sendPlaybookInformation(const std::string& name) {
 
     for (auto target : _subsetMap){
         for (auto image : target.second._subset){
-            writeToBuffer(buffer, currentWriteLocation, image.startTime);
-            writeToBuffer(buffer, currentWriteLocation, image.stopTime);
+            writeToBuffer(buffer, currentWriteLocation, image.timeRange.start);
+            writeToBuffer(buffer, currentWriteLocation, image.timeRange.end);
 
-            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.startTime);
-            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.stopTime);
+            std::string timeBegin = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.start);
+            std::string timeEnd = SpiceManager::ref().dateFromEphemerisTime(image.timeRange.end);
 
             writeToBuffer(buffer, currentWriteLocation, timeBegin);
             writeToBuffer(buffer, currentWriteLocation, timeEnd);

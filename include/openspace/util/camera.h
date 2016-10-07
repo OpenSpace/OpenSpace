@@ -29,15 +29,15 @@
 
 // open space includes
 #include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/syncbuffer.h>
 #include <openspace/rendering/renderengine.h>
+
+#include <openspace/util/syncdata.h>
 
 // glm includes
 #include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
-
 
 namespace openspace {
     class SyncBuffer;
@@ -119,12 +119,11 @@ namespace openspace {
         // of the old calls to the function wrong..
         const Mat4& combinedViewMatrix() const;
 
-        // Synchronization
-        void postSynchronizationPreDraw();
-        void preSynchronization();
-        void serialize(SyncBuffer* syncBuffer);
-        void deserialize(SyncBuffer* syncBuffer);
+        void invalidateCache();
 
+        void serialize(std::ostream& os) const;
+        void deserialize(std::istream& is);
+        
         /**
         Handles SGCT's internal matrices. Also caches a calculated viewProjection
         matrix. This is the data that is different for different cameras within
@@ -174,31 +173,17 @@ namespace openspace {
         const glm::mat4& projectionMatrix() const;
         [[deprecated("Replaced by Camera::SgctInternal::viewProjectionMatrix()")]]
         const glm::mat4& viewProjectionMatrix() const;
+
+
+        std::vector<Syncable*> getSyncables();
+
+
     private:
-        /**
-        Class encapsulating data that needs to be synched between SGCT nodes.
-        Are all three variables (i.e. local, shared, synced) really neccessary? /EB
-        */
-        template <typename T>
-        struct SyncData {
-            SyncData() {}
-            SyncData(const SyncData& d)
-                : local(d.local), shared(d.shared), synced(d.synced) {}
 
-            void serialize(SyncBuffer* syncBuffer) { syncBuffer->encode(shared); }
-            void deserialize(SyncBuffer* syncBuffer) { syncBuffer->decode(shared); }
-            void postSynchronizationPreDraw() { synced = shared; }
-            void preSynchronization() { shared = local; }
-
-            T local;
-            T shared;
-            T synced;
-        };
-
-        // State of the camera
         SyncData<Vec3> _position;
         SyncData<Quat> _rotation;
         SyncData<glm::vec2> _scaling;
+
 
         // _focusPosition to be removed
         Vec3 _focusPosition;
@@ -206,6 +191,7 @@ namespace openspace {
 
         // Cached data
         mutable Cached<Vec3> _cachedViewDirection;
+        mutable Cached<Vec3> _cachedLookupVector;
         mutable Cached<Mat4> _cachedViewRotationMatrix;
         mutable Cached<Mat4> _cachedCombinedViewMatrix;
         mutable Cached<float> _cachedSinMaxFov;

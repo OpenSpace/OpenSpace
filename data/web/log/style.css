@@ -1,0 +1,93 @@
+table {
+  width: 100%;
+}
+
+td, th {
+  padding: 4px 15px 3px;
+}
+
+.log-date {
+  width: 8em;
+}
+
+h1 {
+  padding-left: 15px;
+}
+
+.hidden {
+  display: none;
+}
+
+p, label {
+  margin-left: 15px;
+  margin-bottom: 15px;
+}
+
+label {
+  margin-right: 0.5em;
+}
+
+.log-level-debug {
+  background-color: #bbdda9;
+  border-bottom: 1px solid #7bc142;
+  color: #265127;
+}
+.log-level-debug td:first-child {
+  border-left: 10px solid #7bc142;
+}
+
+thead, .log-level-info {
+  color: #333333;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eaeaea;
+}
+.log-level-info td:first-child {
+  border-left: 10px solid #eaeaea;
+}
+
+thead th:first-child {
+  border-left 10px solid #fff;
+}
+
+.log-level-warning {
+  color: #3e3115;
+  background-color: #fef8c3;
+  border-bottom: 1px solid #efcd3f;
+}
+.log-level-warning td:first-child {
+  border-left: 10px solid #efcd3f;
+}
+
+.log-level-error {
+  color: #4c1315;
+  background-color: #fcdcdc;
+  border-bottom: 1px solid #d66767;
+}
+.log-level-error td:first-child {
+  border-left: 10px solid #d66767;
+}
+
+.log-level-fatal {
+  color: #220f21;
+  background-color: #ff7dc1;
+  border-bottom: 1px solid #b84398;
+}
+.log-level-fatal td:first-child {
+  border-left: 10px solid #b84398;
+}
+
+.summary {
+  padding: 5px;
+}
+.summary-warning {
+  background-color: #fef8c3;
+}
+.summary-error {
+  background-color: #fcdcdc;
+}
+.summary-fatal {
+  background-color: #ff7dc1;
+}
+.summary-ok {
+  background-color: #bbdda9;
+}

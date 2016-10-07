@@ -4,15 +4,14 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
+        --Transform = {
+        --    Translation = {
+        --        Type = "Spice",
+        --        Body = "EARTH BARYCENTER",
+        --        Observer = "SUN",
+        --        Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+        --    },
+        --}
     },
     -- Earth module
     {   
@@ -102,7 +101,23 @@ return {
                 -- },                
             }
         },
-        
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_EARTH",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        },
         GuiName = "/Solar/Planets/Earth"
     },
     -- EarthTrail module
@@ -118,9 +133,9 @@ return {
             TropicalOrbitPeriod = 365.242,
             EarthOrbitRatio = 1,
             DayLength = 24
-        },
-        GuiName = "/Solar/EarthTrail"
+        }
     },
+    --[[
     {
         Name = "EarthMarker",
         Parent = "Earth",
@@ -129,13 +144,15 @@ return {
             Size = {3.0, 11.0},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/marker.png"
+            Texture = "textures/marker.png",
+            BlendMode = "Additive"
         },
 		Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }
     }
+    ]]
  -- Plane
     -- {   
     --     Name = "EarthPlane",

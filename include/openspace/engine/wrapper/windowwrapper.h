@@ -34,6 +34,8 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
+
 /**
  * A WindowWrapper is a class that handles the abstraction between OpenSpace and a
  * specific window creation framework.<br>
@@ -42,6 +44,12 @@ namespace openspace {
  */
 class WindowWrapper {
 public:
+    /**
+    * Returns the Lua library that contains all Lua functions available to affect the
+    * windowing system.
+    */
+    static scripting::LuaLibrary luaLibrary();
+
     /**
      * This method closes the application by calling the necessary terminate function of
      * the window management system
@@ -55,6 +63,14 @@ public:
      * disables it
      */
     virtual void setBarrier(bool enabled);
+
+    /**
+    * This method enables or disables a framelock barrier. If the specific windowing
+    * framework does not provide a framelock, this method defaults to a no-op.
+    * \param enabled If <code>true</code> the framelock is enabled, <code>false</code>
+    * disables it
+    */
+    virtual void setSynchronization(bool enabled);
     
     /**
      * This method clears all the rendering windows with the specified \p clearColor. In
@@ -79,11 +95,11 @@ public:
      */
     virtual double averageDeltaTime() const;
 
-	/**
-	* Returns the frametime in seconds. On default, this method returns <code>0.0</code>.
-	* \return The frametime in seconds
-	*/
-	virtual double deltaTime() const;
+    /**
+    * Returns the frametime in seconds. On default, this method returns <code>0.0</code>.
+    * \return The frametime in seconds
+    */
+    virtual double deltaTime() const;
 
     /**
      * Returns the location of the mouse cursor in pixel screen coordinates. On default,
@@ -154,6 +170,16 @@ public:
     virtual bool isGuiWindow() const;
 
     /**
+    * Returns <code>true</code> if the current rendering window is using swap groups.
+    */
+    virtual bool isUsingSwapGroups() const;
+
+    /**
+    * Returns <code>true</code> if the current rendering window is master of the swap its group. 
+    */
+    virtual bool isSwapGroupMaster() const;
+
+    /**
      * Returns the currently employed view-projection matrix. On default, this method will
      * return the identity matrix.
      * \return The currently employed view-projection matrix
@@ -216,7 +242,7 @@ public:
     /**
      * Advises the windowing system to take a screenshot. This method defaults to a no-op.
      */
-    virtual void takeScreenshot() const;
+    virtual void takeScreenshot(bool applyWarping = false) const;
 
     struct WindowWrapperException : public ghoul::RuntimeError {
         explicit WindowWrapperException(const std::string& msg);

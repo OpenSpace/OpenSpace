@@ -71,10 +71,25 @@ struct Tile {
 	TileUvTransform uvTransform;
 };
 
+vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Tile tile, vec2 tileUV){
+	ivec2 resolution = textureSize(tile.textureSampler, 0);
 
-vec4 getTexVal(const Tile tile, const vec2 tileUV){
-	vec2 samplePos = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	vec4 texVal = texture(tile.textureSampler, samplePos);
+	vec2 sourceSize = vec2(resolution) + sizeDiff;
+	vec2 currentSize = vec2(resolution);
+	vec2 sourceToCurrentSize = currentSize / sourceSize;
+	tileUV = sourceToCurrentSize * (tileUV - startOffset / sourceSize);
+	return tileUV;
+}
+
+vec2 TileUVToTextureSamplePosition(const Tile tile, vec2 tileUV){
+	vec2 uv = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
+	uv = compensateSourceTextureSampling(vec2(-2), vec2(4), tile, uv);
+	return uv;
+}
+
+vec4 getTexVal(const Tile tile, vec2 tileUV){
+	vec2 samplePosition = TileUVToTextureSamplePosition(tile, tileUV);
+	vec4 texVal = texture(tile.textureSampler, samplePosition);
 	return texVal;
 }
 
@@ -94,6 +109,12 @@ struct LevelWeights {
 	float w2;
 	float w3;
 };
+
+float getLevelInterpolationParameter(int chunkLevel, float distanceScaleFactor, float distToVertexOnEllipsoid){
+	float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
+	float desiredLevel = log2(projectedScaleFactor);
+	return chunkLevel - desiredLevel;
+}
 
 LevelWeights getLevelWeights(float levelInterpolationParameter){
 	LevelWeights levelWeights;

@@ -21,13 +21,15 @@ function postInitialization()
     ]]--
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.enabled", false)
-    openspace.setPropertyValue("SunMarker.renderable.enabled", true)
-    openspace.setPropertyValue("EarthMarker.renderable.enabled", true)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    openspace.resetCameraDirection()
+    
     openspace.printInfo("Done setting default values")
 
     if openspace.modules.isLoaded("ISWA") then
@@ -41,7 +43,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {1, 0, 0, 2},
+        Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
+        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
     },
     Modules = {
         "sun",

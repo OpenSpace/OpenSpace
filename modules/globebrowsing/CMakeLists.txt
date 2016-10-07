@@ -48,19 +48,31 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     
 
 )
@@ -88,18 +100,30 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/temporaltileprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
+    
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -124,6 +148,7 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
+
 if (WIN32)
     target_include_directories(
         openspace-module-globebrowsing
@@ -135,6 +160,9 @@ if (WIN32)
         openspace-module-globebrowsing
         ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
     )
+
+    set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+
 else (WIN32)
     find_package(GDAL REQUIRED)
 

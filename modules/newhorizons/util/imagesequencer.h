@@ -29,11 +29,14 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
+#include <openspace/util/timerange.h>
 #include <unordered_map>
 #include <map>
 #include <vector>
 
+
 #include <modules/newhorizons/util/sequenceparser.h>
+
 
 namespace openspace {
     /**
@@ -149,7 +152,7 @@ private:
      * \see Decoder
      * \see (projection mod files)
      */
-    std::map<std::string, Decoder*> _fileTranslation;
+    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     /*
      * This is the main container of image data. The key is the target name, 

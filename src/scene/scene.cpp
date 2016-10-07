@@ -24,8 +24,10 @@
 
 #include <openspace/scene/scene.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -55,18 +57,26 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {
     const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
-    const std::string _defaultCommonDirectory = "common";
     const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyCamera = "Camera";
     const std::string KeyFocusObject = "Focus";
     const std::string KeyPositionObject = "Position";
     const std::string KeyViewOffset = "Offset";
+
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
+    const std::string PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
+    const std::string PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {
@@ -90,23 +100,31 @@ bool Scene::deinitialize() {
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
-        try {
-            // Reset the InteractionManager to Orbital/default mode
-            // TODO: Decide if it belongs in the scene and/or how it gets reloaded
-            OsEng.interactionHandler().setInteractionModeToOrbital();
-
+        try {          
             loadSceneInternal(_sceneGraphToLoad);
 
+            // Reset the InteractionManager to Orbital/default mode
+            // TODO: Decide if it belongs in the scene and/or how it gets reloaded
+            OsEng.interactionHandler().setInteractionMode("Orbital");
+
             // After loading the scene, the keyboard bindings have been set
-            
+            const std::string KeyboardShortcutsType =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartType;
+
+            const std::string KeyboardShortcutsFile =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartFile;
+
+
             std::string type;
             std::string file;
             bool hasType = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsType, type
+                KeyboardShortcutsType, type
             );
             
             bool hasFile = OsEng.configurationManager().getValue(
-                ConfigurationManager::KeyKeyboardShortcutsFile, file
+                KeyboardShortcutsFile, file
             );
             
             if (hasType && hasFile) {
@@ -174,11 +192,15 @@ void Scene::clearSceneGraph() {
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     ghoul::Dictionary dictionary;
     
+    OsEng.windowWrapper().setSynchronization(false);
+    OnExit(
+        [](){ OsEng.windowWrapper().setSynchronization(true); }
+    );
     
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
            // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
+           [state](){ ghoul::lua::destroyLuaState(state); }
            );
     
     OsEng.scriptEngine().initializeLuaState(state);
@@ -189,35 +211,15 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         state
     );
 
+    // Perform testing against the documentation/specification
+    openspace::documentation::testSpecificationAndThrow(
+        Scene::Documentation(),
+        dictionary,
+        "Scene"
+    );
+
+
     _graph.loadFromFile(sceneDescriptionFilePath);
-
-    // TODO: Make it less hard-coded and more flexible when nodes are not found
-    ghoul::Dictionary cameraDictionary;
-    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
-        LDEBUG("Camera dictionary found");
-        std::string focus;
-
-        if (cameraDictionary.hasKey(KeyFocusObject)
-            && cameraDictionary.getValue(KeyFocusObject, focus))
-        {
-            auto focusIterator = std::find_if(
-                _graph.nodes().begin(),
-                _graph.nodes().end(),
-                [focus](SceneGraphNode* node) {
-                    return node->name() == focus;
-                }
-            );
-
-            if (focusIterator != _graph.nodes().end()) {
-                _focus = focus;
-                LDEBUG("Setting camera focus to '" << _focus << "'");
-            }
-            else {
-                LERROR("Could not find focus object '" << focus << "'");
-                _focus = "Root";
-            }
-        }
-    }
 
     // Initialize all nodes
     for (SceneGraphNode* node : _graph.nodes()) {
@@ -233,12 +235,15 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         }
     }
 
-
     // update the position of all nodes
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
-            node->update({ Time::ref().currentTime() });
+            node->update({
+                glm::dvec3(0),
+                glm::dmat3(1),
+                1,
+                Time::ref().j2000Seconds() });
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -248,120 +253,31 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
         (*it)->calculateBoundingSphere();
 
-
-    // Calculate the bounding sphere for the scenegraph
-    //_root->calculateBoundingSphere();
-
-    // set the camera position
-    Camera* c = OsEng.ref().renderEngine().camera();
-    //auto focusIterator = _allNodes.find(_focus);
-    auto focusIterator = std::find_if(
-                _graph.nodes().begin(),
-                _graph.nodes().end(),
-                [&](SceneGraphNode* node) {
-        return node->name() == _focus;
+    // Read the camera dictionary and set the camera state
+    ghoul::Dictionary cameraDictionary;
+    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
+        OsEng.interactionHandler().setCameraStateFromDictionary(cameraDictionary);
     }
-    );
-
-    glm::vec2 cameraScaling(1);
-    psc cameraPosition(0,0,1,0);
-
-    //if (_focus->)
-    if (focusIterator != _graph.nodes().end()) {
-        LDEBUG("Camera focus is '" << _focus << "'");
-        SceneGraphNode* focusNode = *focusIterator;
-        //Camera* c = OsEng.interactionHandler().getCamera();
-
-        // TODO: Make distance depend on radius
-        // TODO: Set distance and camera direction in some more smart way
-        // TODO: Set scaling dependent on the position and distance
-        // set position for camera
-        const PowerScaledScalar bound = focusNode->calculateBoundingSphere();
-
-        // this part is full of magic!
-        glm::vec2 boundf = bound.vec2();
-        //glm::vec2 scaling{1.0f, -boundf[1]};
-
-        cameraScaling = glm::vec2(1.f, -boundf[1]);
-        //boundf[0] *= 5.0f;
-
-        
-        //psc cameraPosition = focusNode->position();
-        //cameraPosition += psc(glm::vec4(0.f, 0.f, boundf));
-
-        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f,0.f));
-
-        cameraPosition = focusNode->position();
-        cameraPosition += psc(glm::vec4(boundf[0], 0.f, 0.f, boundf[1]));
-        
-        //why this line? (JK)
-        //cameraPosition = psc(glm::vec4(0.f, 0.f, 1.f, 0.f));
-
-
-        //c->setPosition(cameraPosition);
-       // c->setCameraDirection(glm::vec3(0, 0, -1));
-      //  c->setScaling(scaling);
-
-        // Set the focus node for the interactionhandler
-        OsEng.interactionHandler().setFocusNode(focusNode);
-    }
-    else
-        OsEng.interactionHandler().setFocusNode(_graph.rootNode());
-
-    glm::vec4 position;
-    if (cameraDictionary.hasKeyAndValue<glm::vec4>(KeyPositionObject)) {
-        try {
-            position = cameraDictionary.value<glm::vec4>(KeyPositionObject);
-
-            LDEBUG("Camera position is ("
-                << position[0] << ", "
-                << position[1] << ", "
-                << position[2] << ", "
-                << position[3] << ")");
-
-            cameraPosition = psc(position);
-        }
-        catch (const ghoul::Dictionary::DictionaryError& e) {
-            LERROR("Error loading Camera location: " << e.what());
-        }
-    }
-
-    // the camera position
-    const SceneGraphNode* fn = OsEng.interactionHandler().focusNode();
-    if (!fn) {
-        throw ghoul::RuntimeError("Could not find focus node");
-    }
-
-    // Check crash for when fn == nullptr
-    glm::vec3 target = glm::normalize(fn->worldPosition().vec3() - cameraPosition.vec3());
-    glm::mat4 la = glm::lookAt(glm::vec3(0, 0, 0), target, glm::vec3(c->lookUpVectorCameraSpace()));
-
-    c->setRotation(glm::quat_cast(la));
-    c->setPosition(cameraPosition);
-    c->setScaling(cameraScaling);
-
-    glm::vec3 viewOffset;
-    if (cameraDictionary.hasKey(KeyViewOffset)
-        && cameraDictionary.getValue(KeyViewOffset, viewOffset)) {
-        glm::quat rot = glm::quat(viewOffset);
-        c->rotate(rot);
-    }
-
-    // explicitly update and sync the camera
-    c->preSynchronization();
-    c->postSynchronizationPreDraw();
 
     // If a PropertyDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const std::string KeyPropertyDocumentationType =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartType;
+
+    const std::string KeyPropertyDocumentationFile =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartFile;
+
+    const bool hasType = OsEng.configurationManager().hasKey(KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
-        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
+        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, sceneDescriptionFilePath);
     }
 
 
@@ -535,14 +451,12 @@ SceneGraph& Scene::sceneGraph() {
     return _graph;
 }
 
-void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename) {
+    LDEBUG("Writing documentation for properties");
     if (type == "text") {
-        LDEBUG("Writing documentation for properties");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing property documentation");
-            return;
-        }
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         using properties::Property;
         for (SceneGraphNode* node : _graph.nodes()) {
@@ -551,12 +465,177 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
                 file << node->name() << std::endl;
 
                 for (Property* p : properties) {
-                    file << p->fullyQualifiedIdentifier() << ":   " << p->guiName() << std::endl;
+                    file << p->fullyQualifiedIdentifier() << ":   " <<
+                        p->guiName() << std::endl;
                 }
 
                 file << std::endl;
             }
         }
+    }
+    else if (type == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyOwnerTemplateInput(absPath(PropertyOwnerTemplateFilename));
+        std::string propertyOwnerTemplateContent{ std::istreambuf_iterator<char>{propertyOwnerTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyTemplateInput(absPath(PropertyTemplateFilename));
+        std::string propertyTemplateContent{ std::istreambuf_iterator<char>{propertyTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        // Create JSON
+        std::function<std::string(properties::PropertyOwner*)> createJson =
+            [&createJson](properties::PropertyOwner* owner) -> std::string 
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"name\": \"" << owner->name() << "\",";
+
+            json << "\"properties\": [";
+            auto properties = owner->properties();
+            for (properties::Property* p : properties) {
+                json << "{";
+                json << "\"id\": \"" << p->identifier() << "\",";
+                json << "\"type\": \"" << p->className() << "\",";
+                json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+                json << "\"guiName\": \"" << p->guiName() << "\"";
+                json << "}";
+                if (p != properties.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+
+            json << "\"propertyOwners\": [";
+            auto propertyOwners = owner->propertySubOwners();
+            for (properties::PropertyOwner* o : propertyOwners) {
+                json << createJson(o);
+                if (o != propertyOwners.back()) {
+                    json << ",";
+                }
+            }
+            json << "]";
+            json << "}";
+
+            return json.str();
+        };
+
+
+        std::stringstream json;
+        json << "[";
+        auto nodes = _graph.nodes();
+        for (SceneGraphNode* node : nodes) {
+            json << createJson(node);
+            if (node != nodes.back()) {
+                json << ",";
+            }
+        }
+
+        json << "]";
+
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            } else {
+                jsonString += c;
+            }
+        }
+
+        std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyOwnerTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyOwnerTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var propertyOwners = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << "var sceneFilename = '" << sceneFilename << "';\n"
+            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        /*
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Properties</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Properties</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>ID</th>\n"
+             << "\t\t\t<th>Type</th>\n"
+             << "\t\t\t<th>Description</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (SceneGraphNode* node : _graph.nodes()) {
+            for (properties::Property* p : node->propertiesRecursive()) {
+                html << "\t\t<tr>\n"
+                     << "\t\t\t<td>" << p->fullyQualifiedIdentifier() << "</td>\n"
+                     << "\t\t\t<td>" << p->className() << "</td>\n"
+                     << "\t\t\t<td>" << p->guiName() << "</td>\n"
+                     << "\t\t</tr>\n";
+            }
+
+            if (!node->propertiesRecursive().empty()) {
+                html << "\t<tr><td style=\"line-height: 10px;\" colspan=3></td></tr>\n";
+            }
+
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>;";
+
+        */
+        file << html.str();
     }
     else
         LERROR("Undefined type '" << type << "' for Property documentation");
@@ -577,6 +656,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
+                "string, *",
                 "Sets all properties that pass the regular expression in the first "
                 "argument. The second argument can be any type, but it has to match the "
                 "type of the properties that matched the regular expression. The regular "
@@ -589,7 +669,6 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "Sets a property identified by the URI in "
                 "the first argument. The second argument can be any type, but it has to "
                 "match the type that the property expects.",
-                true
             },
             {
                 "getPropertyValue",

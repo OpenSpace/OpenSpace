@@ -48,7 +48,10 @@ public:
     bool setStringValue(std::string value) override;
 
     T minValue() const;
+    void setMinValue(T value);
+
     T maxValue() const;
+    void setMaxValue(T value);
 
     virtual std::string className() const override;
 

@@ -88,7 +88,7 @@ struct Geodetic3 {
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-//							 	GEODETICPATCH										//
+//                                 GEODETICPATCH                                        //
 //////////////////////////////////////////////////////////////////////////////////////
 class GeodeticPatch {
 public:
@@ -108,7 +108,7 @@ public:
 
 
     void setCenter(const Geodetic2&);
-    void setHalfSize(const Geodetic2&);	
+    void setHalfSize(const Geodetic2&);    
 
     /**
         returns the latitude boundary which is closest to the equator
@@ -126,6 +126,11 @@ public:
     Scalar maxLat() const;
     Scalar minLon() const;
     Scalar maxLon() const;
+
+    /**
+     * returns true if the specified coordinate is contained within the patch
+     */
+    bool contains(const Geodetic2& p) const;
 
 
     /**

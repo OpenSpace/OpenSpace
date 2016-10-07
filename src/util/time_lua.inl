@@ -139,18 +139,18 @@ int time_setTime(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-    lua_pushnumber(L, openspace::Time::ref().currentTime());
+    lua_pushnumber(L, openspace::Time::ref().j2000Seconds());
     return 1;
 }
 
 /**
  * \ingroup LuaScripts
- * currentTimeUTC():
+ * UTC():
  * Returns the current simulation time as a structured ISO 8601 string using the UTC
- * timezone by calling the Time::currentTimeUTC method
+ * timezone by calling the Time::UTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-    lua_pushstring(L, openspace::Time::ref().currentTimeUTC().c_str());
+    lua_pushstring(L, openspace::Time::ref().UTC().c_str());
     return 1;
 }
 

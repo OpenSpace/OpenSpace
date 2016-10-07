@@ -55,7 +55,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    virtual void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
 
@@ -74,6 +74,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
 
@@ -100,7 +101,6 @@ private:
     bool _capture;
         
     psc _sunPosition;
-
     properties::BoolProperty _performShading;
 };
 

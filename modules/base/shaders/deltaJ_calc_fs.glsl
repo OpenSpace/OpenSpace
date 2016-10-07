@@ -59,9 +59,9 @@ void getMuMuSNu(const float r, vec4 dhdH, out float mu, out float mu_s, out floa
 }
 
 vec3 transmittanceFromTexture(const float r, const float mu) {
-	float u_r  = sqrt((r - Rg) / (Rt - Rg));
+    float u_r  = sqrt((r - Rg) / (Rt - Rg));
     // See Colliene to understand the different mapping.
-	float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
+    float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
     
     return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
 }
@@ -106,7 +106,7 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
     float rmu = r * mu;
     float delta = rmu * rmu - r * r + Rg * Rg;
     vec4 cst = rmu < 0.0 && delta > 0.0 ? vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : vec4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU));
-	float u_r = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
+    float u_r = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
     float u_mu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU));
     float u_mu_s = 0.5 / float(RES_MU_S) + (atan(max(mu_s, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S));
     float lerp = (nu + 1.0) / 2.0 * (float(RES_NU) - 1.0);

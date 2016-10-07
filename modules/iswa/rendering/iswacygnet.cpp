@@ -178,7 +178,7 @@ void IswaCygnet::update(const UpdateData& data){
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
     double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
-    _openSpaceTime = Time::ref().currentTime();
+    _openSpaceTime = Time::ref().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
 
@@ -222,7 +222,7 @@ void IswaCygnet::unregisterProperties(){
 }
 
 void IswaCygnet::initializeTime(){
-    _openSpaceTime = Time::ref().currentTime();
+    _openSpaceTime = Time::ref().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());

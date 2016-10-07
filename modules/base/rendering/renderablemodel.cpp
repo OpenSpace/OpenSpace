@@ -46,8 +46,6 @@
 
 namespace { 
     const std::string _loggerCat     = "RenderableModel";
-    const std::string keySource      = "Rotation.Source";
-    const std::string keyDestination = "Rotation.Destination";
     const std::string keyGeometry    = "Geometry";
     const std::string keyBody        = "Body";
     const std::string keyStart       = "StartTime";
@@ -66,6 +64,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _performFade("performFading", "Perform Fading", false)
     , _fading("fading", "Fade", 0)
+    , _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
     , _programObject(nullptr)
     , _texture(nullptr)
     , _geometry(nullptr)
@@ -95,17 +94,19 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
-    dictionary.getValue(keySource, _source);
-    dictionary.getValue(keyDestination, _destination);
+    addProperty(_debugModelRotation);
+
+    //dictionary.getValue(keySource, _source);
+    //dictionary.getValue(keyDestination, _destination);
     if (dictionary.hasKeyAndValue<glm::dmat3>(keyModelTransform))
         dictionary.getValue(keyModelTransform, _modelTransform);
     else
         _modelTransform = glm::dmat3(1.f);
     dictionary.getValue(keyBody, _target);
 
-    openspace::SpiceManager::ref().addFrame(_target, _source);
+    //openspace::SpiceManager::ref().addFrame(_target, _source);
 
-    setBoundingSphere(pss(1.f, 9.f));
+    //setBoundingSphere(pss(1.f, 9.f));
     addProperty(_performShading);
 
     if (dictionary.hasKeyAndValue<bool>(keyFading)) {
@@ -147,8 +148,8 @@ bool RenderableModel::initialize() {
 
     completeSuccess &= (_texture != nullptr);
     completeSuccess &= _geometry->initialize(this); 
-    completeSuccess &= !_source.empty();
-    completeSuccess &= !_destination.empty();
+    //completeSuccess &= !_source.empty();
+    //completeSuccess &= !_destination.empty();
 
     return completeSuccess;
 }
@@ -173,54 +174,58 @@ bool RenderableModel::deinitialize() {
 
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
-    _frameCount++;
-
-    double lt;
-    glm::mat4 transform = glm::mat4(1.f);
-
-    glm::mat4 tmp = glm::mat4(1);
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            tmp[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-    transform *= tmp;
     
-    double time = openspace::Time::ref().currentTime();
+    double lt;
+    
+    // Fade away if it does not have spice coverage
+    double time = openspace::Time::ref().j2000Seconds();
     bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
-    if (!targetPositionCoverage){
+    if (!targetPositionCoverage) {
         int frame = _frameCount % 180;
-        
+
         float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
         _alpha = 0.5f + fadingFactor * 0.5f;
     }
     else
         _alpha = 1.0f;
 
-    glm::dvec3 p =
-    SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, time, lt);
-    psc tmppos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-    glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - tmppos.vec3());
-    _programObject->setUniform("cam_dir", cam_dir);
-    _programObject->setUniform("transparency", _alpha);
-    _programObject->setUniform("sun_pos", _sunPosition.vec3());
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
-    setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
-    _programObject->setUniform("_performShading", _performShading);
-
-    _geometry->setUniforms(*_programObject);
-
-    if (_performFade && _fading > 0.f){
+    // Fading
+    if (_performFade && _fading > 0.f) {
         _fading = _fading - 0.01f;
     }
-    else if (!_performFade && _fading < 1.f){
+    else if (!_performFade && _fading < 1.f) {
         _fading = _fading + 0.01f;
 
     }
 
+
+    // debug rotation controlled from GUI
+    glm::mat4 unitMat4(1);
+    glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
+    glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
+    glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
+    glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
+    glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
+
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+        debugModelRotation; // debug model rotation controlled from GUI
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    glm::vec3 directionToSun = glm::normalize(_sunPos - data.modelTransform.translation);
+    glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+
+    _programObject->setUniform("transparency", _alpha);
+    _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("performShading", _performShading);
     _programObject->setUniform("fading", _fading);
+
+    _geometry->setUniforms(*_programObject);
 
     // Bind texture
     ghoul::opengl::TextureUnit unit;
@@ -255,15 +260,8 @@ void RenderableModel::update(const UpdateData& data) {
     //    _time = futureTime;
     //}
 
-    // set spice-orientation in accordance to timestamp
-    if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, _time) * _modelTransform;
-    }
-
     double  lt;
-    glm::dvec3 p =
-    openspace::SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
-    _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
+    _sunPos = openspace::SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
 }
 
 void RenderableModel::loadTexture() {

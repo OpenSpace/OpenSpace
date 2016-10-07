@@ -9,8 +9,5 @@ return {
             Texture = "textures/halo.png",
             ColorMap = "denver_colorbv.cmap"
         },
-        Ephemeris = {
-            Type = "Static"
-        }
     }
 }

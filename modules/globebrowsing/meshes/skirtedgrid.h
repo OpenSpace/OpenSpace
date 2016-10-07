@@ -34,18 +34,24 @@
 
 namespace openspace {
 
+/**
+* This grid is the same as <code>BasicGrid</code> except it has skirts around its edges.
+* The areas covered by the skirts have position coordinates and texture coordinates
+* that are outside of the range [0, 1]. The width of the skirts is half the size of one
+* segment width or a cell.
+*/
 class SkirtedGrid : public Grid
 {
 public:
     /**
-    \param xSegments is the number of grid cells in the x direction.
-    \param ySegments is the number of grid cells in the y direction.
-    \param usePositions determines whether or not to upload any vertex position data
-    to the GPU.
-    \param useTextureCoordinates determines whether or not to upload any vertex texture
-    coordinate data to the GPU.
-    \param useNormals determines whether or not to upload any vertex normal data
-    to the GPU.
+    * \param xSegments is the number of grid cells in the x direction.
+    * \param ySegments is the number of grid cells in the y direction.
+    * \param usePositions determines whether or not to upload any vertex position data
+    * to the GPU.
+    * \param useTextureCoordinates determines whether or not to upload any vertex texture
+    * coordinate data to the GPU.
+    * \param useNormals determines whether or not to upload any vertex normal data
+    * to the GPU.
     */
     SkirtedGrid(
         unsigned int xSegments,
@@ -55,15 +61,14 @@ public:
         TriangleSoup::Normals useNormals);
     ~SkirtedGrid();
 
-
     virtual int xSegments() const;
     virtual int ySegments() const;
 
 private:
-    virtual std::vector<GLuint>		CreateElements(int xRes, int yRes);
-    virtual std::vector<glm::vec4>	CreatePositions(int xRes, int yRes);
-    virtual std::vector<glm::vec2>	CreateTextureCoordinates(int xRes, int yRes);
-    virtual std::vector<glm::vec3>	CreateNormals(int xRes, int yRes);
+    virtual std::vector<GLuint>        CreateElements(int xRes, int yRes);
+    virtual std::vector<glm::vec4>    CreatePositions(int xRes, int yRes);
+    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xRes, int yRes);
+    virtual std::vector<glm::vec3>    CreateNormals(int xRes, int yRes);
 
     void validate(int xSegments, int ySegments);
 

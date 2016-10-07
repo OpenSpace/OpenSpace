@@ -57,7 +57,7 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
     float rmu = r * mu;
     float delta = rmu * rmu - r * r + Rg * Rg;
     vec4 cst = rmu < 0.0 && delta > 0.0 ? vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : vec4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU));
-	float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
+    float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
     float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU));
     float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S));
     float lerp = (nu + 1.0) / 2.0 * (float(RES_NU) - 1.0);

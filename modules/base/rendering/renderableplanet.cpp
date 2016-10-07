@@ -159,8 +159,7 @@ namespace openspace {
 
     dictionary.getValue(keyFrame, _frame);
     dictionary.getValue(keyBody, _target);
-    if (_target != "")
-        setBody(_target);
+
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -615,8 +614,7 @@ bool RenderablePlanet::isReady() const {
     return ready;
 }
 
-void RenderablePlanet::render(const RenderData& data)
-{
+void RenderablePlanet::render(const RenderData& data) {
     // activate shader
     _programObject->activate();
 
@@ -886,14 +884,12 @@ void RenderablePlanet::render(const RenderData& data)
         _programObject->setUniform("exposure", 0.4f);
         
     }
-
     
     // render
     _geometry->render();
 
     // disable shader
     _programObject->deactivate();
-
     
     // DEBUG: Deferred Rendering of the atmosphere to a texture.
     // Render Atmosphere to a texture:

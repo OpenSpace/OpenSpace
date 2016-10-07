@@ -26,19 +26,20 @@
 #define __PARALLELCONNECTION_H__
 
 //openspace includes
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/network/messagestructures.h>
 
 //glm includes
 #include <glm/gtx/quaternion.hpp>
 
+//ghoul includes
+#include <ghoul/designpattern/event.h>
+
 //std includes
 #include <string>
 #include <vector>
+#include <deque>
 #include <atomic>
 #include <thread>
-#include <sstream>
 #include <mutex>
 #include <map>
 #include <condition_variable>
@@ -59,150 +60,149 @@ typedef int _SOCKET;
 #include <netdb.h>
 #endif
 
-namespace openspace{
-    
-    namespace network{
-        
-        class ParallelConnection{
-        public:
-            
-            ParallelConnection();
-            
-            ~ParallelConnection();
-            
-            void clientConnect();
-            
-            void setPort(const std::string &port);
-            
-            void setAddress(const std::string &address);
-            
-            void setName(const std::string& name);
-            
-            bool isHost();
-            
-            void requestHostship(const std::string &password);
+namespace openspace {
 
-            void setPassword(const std::string &password);
-            
-            void signalDisconnect();
-            
-            void preSynchronization();
-            
-            void scriptMessage(const std::string propIdentifier, const std::string propValue);
-            
-            enum MessageTypes{
-                Authentication=0,
-                Initialization,
-                Data,
-                Script, //obsolete now 
-                HostInfo,
-                InitializationRequest,
-                HostshipRequest,
-                InitializationCompleted
-            };
-            
-            /**
-             * Returns the Lua library that contains all Lua functions available to affect the
-             * remote OS parallel connection. The functions contained are
-             * -
-             * \return The Lua library that contains all Lua functions available to affect the
-             * interaction
-             */
-            static scripting::LuaLibrary luaLibrary();
-            
-        protected:
-            
-        private:
-            //@TODO change this into the ghoul hasher for client AND server
-            uint32_t hash(const std::string &val){
-                uint32_t hashVal = 0, i;
-                size_t len = val.length();
+class ParallelConnection {
+    public:
+    enum class Status : uint32_t {
+        Disconnected = 0,
+        ClientWithoutHost,
+        ClientWithHost,
+        Host
+    };
 
-                for (hashVal = i = 0; i < len; ++i){
-                    hashVal += val.c_str()[i];
-                    hashVal += (hashVal << 10);
-                    hashVal ^= (hashVal >> 6);
-                }
+    enum class MessageType : uint32_t {
+        Authentication = 0,
+        Data,
+        ConnectionStatus,
+        HostshipRequest,
+        HostshipResignation,
+        NConnections
+    };
 
-                hashVal += (hashVal << 3);
-                hashVal ^= (hashVal >> 11);
-                hashVal += (hashVal << 15);
+    struct Message {
+        Message() {};
+        Message(MessageType t, const std::vector<char>& c)
+            : type(t)
+            , content(c)
+        {};
 
-                return hashVal;
-            };
+        MessageType type;
+        std::vector<char> content;
+    };
+
+    struct DataMessage {
+        DataMessage() {};
+        DataMessage(datamessagestructures::Type t, const std::vector<char>& c)
+            : type(t)
+            , content(c)
+        {};
+        datamessagestructures::Type type;
+        std::vector<char> content;
+    };
+
+    ParallelConnection();
+    ~ParallelConnection();
+    void clientConnect();
+    void setPort(const std::string &port);
+    void setAddress(const std::string &address);
+    void setName(const std::string& name);
+    bool isHost();
+    const std::string& hostName();
+    void requestHostship(const std::string &password);
+    void resignHostship();
+    void setPassword(const std::string &password);
+    void signalDisconnect();
+    void preSynchronization();
+    void sendScript(const std::string& script);
+
+    /**
+        * Returns the Lua library that contains all Lua functions available to affect the
+        * remote OS parallel connection. The functions contained are
+        * -
+        * \return The Lua library that contains all Lua functions available to affect the
+        * interaction
+        */
+    static scripting::LuaLibrary luaLibrary();
+    Status status();
+    size_t nConnections();
+    std::shared_ptr<ghoul::Event<>> connectionEvent();
+
             
-            void queueMessage(std::vector<char> message);
             
-            void disconnect();
+private:
+    //@TODO change this into the ghoul hasher for client AND server
+    uint32_t hash(const std::string &val);
+    void queueOutMessage(const Message& message);
+    void queueOutDataMessage(const DataMessage& dataMessage);
+    void queueInMessage(const Message& message);
+
+    void disconnect();
+    void closeSocket();
+    bool initNetworkAPI();
+    void establishConnection(addrinfo *info);
+    void sendAuthentication();
+    void listenCommunication();
+    int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
+
+    void handleMessage(const Message&);
+    void dataMessageReceived(const std::vector<char>& messageContent);
+    void connectionStatusMessageReceived(const std::vector<char>& messageContent);
+    void nConnectionsMessageReceived(const std::vector<char>& messageContent);
+
+    void broadcast();
+    void sendCameraKeyframe();
+    void sendTimeKeyframe();
+
+    void sendFunc();
+    void threadManagement();
+
+    void setStatus(Status status);
+    void setHostName(const std::string& hostName);
+    void setNConnections(size_t nConnections);
+
+    double calculateBufferedKeyframeTime(double originalTime);
+
+    uint32_t _passCode;
+    std::string _port;
+    std::string _address;
+    std::string _name;
             
-            void writeHeader(std::vector<char> &buffer, uint32_t messageType);
+    _SOCKET _clientSocket;
 
-            void closeSocket();
+    std::atomic<bool> _isConnected;
+    std::atomic<bool> _isRunning;
+    std::atomic<bool> _tryConnect;
+    std::atomic<bool> _disconnect;
+    std::atomic<bool> _initializationTimejumpRequired;
 
-            bool initNetworkAPI();
+    std::atomic<size_t> _nConnections;
+    std::atomic<Status> _status;
+    std::string _hostName;
 
-            void establishConnection(addrinfo *info);
-
-            void sendAuthentication();
-
-            void listenCommunication();
-
-            void delegateDecoding(uint32_t type);
-
-            void initializationMessageReceived();
-
-            void dataMessageReceived();
-
-            void hostInfoMessageReceived();
+    std::condition_variable _disconnectCondition;
+    std::mutex _disconnectMutex;
             
-            void initializationRequestMessageReceived();
+    std::condition_variable _sendCondition;
+    std::deque<Message> _sendBuffer;
+    std::mutex _sendBufferMutex;
 
-            void broadcast();
+    std::deque<Message> _receiveBuffer;
+    std::mutex _receiveBufferMutex;
             
-            int headerSize();
+    std::atomic<bool> _timeJumped;
+    std::mutex _latencyMutex;
+    std::deque<double> _latencyDiffs;
+    double _initialTimeDiff;
 
-            int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
-            
-            void sendFunc();
-            
-            bool parseHints(addrinfo &info);
-            
-            void threadManagement();
-            
-            std::string scriptFromPropertyAndValue(const std::string property, const std::string value);
-            
-            uint32_t _passCode;
-            std::string _port;
-            std::string _address;
-            std::string _name;
-            _SOCKET _clientSocket;
-            std::thread *_connectionThread;
-            std::thread *_broadcastThread;
-            std::thread *_sendThread;
-            std::thread *_listenThread;
-            std::thread *_handlerThread;
-            std::atomic<bool> _isHost;
-            std::atomic<bool> _isConnected;
-            std::atomic<bool> _performDisconnect;
-            std::atomic<bool> _isRunning;
-            std::atomic<bool> _tryConnect;
-            std::atomic<bool> _initializationTimejumpRequired;
+    std::unique_ptr<std::thread> _connectionThread;
+    std::unique_ptr<std::thread> _broadcastThread;
+    std::unique_ptr<std::thread> _sendThread;
+    std::unique_ptr<std::thread> _listenThread;
+    std::unique_ptr<std::thread> _handlerThread;
+    std::shared_ptr<ghoul::Event<>> _connectionEvent;
+};
 
-            std::condition_variable _disconnectCondition;
-            std::mutex _disconnectMutex;
-            
-            std::vector<std::vector<char>> _sendBuffer;
-            std::mutex _sendBufferMutex;
-            std::condition_variable _sendCondition;
-            
-            network::datamessagestructures::TimeKeyframe _latestTimeKeyframe;
-            std::mutex _timeKeyframeMutex;
-            std::atomic<bool> _latestTimeKeyframeValid;
-            std::map<std::string, std::string> _currentState;
-            std::mutex _currentStateMutex;
-        };
-    } // namespace network
-    
 } // namespace openspace
 
 #endif // __OSPARALLELCONNECTION_H__

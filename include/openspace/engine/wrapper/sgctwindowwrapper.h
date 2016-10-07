@@ -38,6 +38,7 @@ class SGCTWindowWrapper : public WindowWrapper {
 public:
     void terminate() override;
     void setBarrier(bool enabled) override;
+    void setSynchronization(bool enabled) override;
     void clearAllWindows(const glm::vec4& clearColor) override;
     bool windowHasResized() const override;
 
@@ -53,6 +54,8 @@ public:
     bool isRegularRendering() const override;
     bool hasGuiWindow() const override;
     bool isGuiWindow() const override;
+    bool isUsingSwapGroups() const override;
+    bool isSwapGroupMaster() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;
@@ -66,7 +69,7 @@ public:
 
     bool isSimpleRendering() const override;
 
-    void takeScreenshot() const override;
+    void takeScreenshot(bool applyWarping = false) const override;
 };
 
 } // namespace openspace

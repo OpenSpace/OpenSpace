@@ -64,7 +64,7 @@ int toggle(lua_State* L) {
     if (nArguments != 0)
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-    OsEng.console().toggleVisibility();
+    OsEng.console().toggleMode();
     return 0;
 }
 

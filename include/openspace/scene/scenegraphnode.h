@@ -26,8 +26,12 @@
 #define __SCENEGRAPHNODE_H__
 
 // open space includes
+#include <openspace/documentation/documentation.h>
+
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scene.h>
@@ -50,8 +54,7 @@ public:
         long long updateTimeEphemeris;  // time in ns
     };
 
-    static std::string RootNodeName;
-
+    static const std::string RootNodeName;
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
@@ -76,8 +79,13 @@ public:
     void setParent(SceneGraphNode* parent);
     //bool abandonChild(SceneGraphNode* child);
 
-    const psc& position() const;
-    psc worldPosition() const;
+    glm::dvec3 position() const;
+    const glm::dmat3& rotationMatrix() const;
+    double scale() const;
+
+    glm::dvec3 worldPosition() const;
+    const glm::dmat3& worldRotationMatrix() const;
+    double worldScale() const;
 
     SceneGraphNode* parent() const;
     const std::vector<SceneGraphNode*>& children() const;
@@ -94,17 +102,23 @@ public:
     Renderable* renderable();
 
     // @TODO Remove once the scalegraph is in effect ---abock
-    void setEphemeris(Ephemeris* eph) {
-        delete _ephemeris;
-        _ephemeris = eph;
+    
+    void setEphemeris(Translation* eph) {
+        delete _translation;
+        _translation = eph;
     }
+
+    static documentation::Documentation Documentation();
 
 private:
     bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
 
+    glm::dvec3 calculateWorldPosition() const;
+    glm::dmat3 calculateWorldRotation() const;
+    double calculateWorldScale() const;
+
     std::vector<SceneGraphNode*> _children;
     SceneGraphNode* _parent;
-    Ephemeris* _ephemeris;
 
     PerformanceRecord _performanceRecord;
 
@@ -113,6 +127,16 @@ private:
 
     bool _boundingSphereVisible;
     PowerScaledScalar _boundingSphere;
+
+    // Transformation defined by ephemeris, rotation and scale
+    Translation* _translation;
+    Rotation* _rotation;
+    Scale* _scale;
+
+    // Cached transform data
+    glm::dvec3 _worldPositionCached;
+    glm::dmat3 _worldRotationCached;
+    double _worldScaleCached;
 };
 
 } // namespace openspace
