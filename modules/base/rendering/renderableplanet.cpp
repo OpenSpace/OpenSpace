@@ -48,6 +48,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+//#define _ATMOSPHERE_DEBUG
+
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
 
@@ -476,6 +478,7 @@ bool RenderablePlanet::initialize() {
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
+#ifdef _ATMOSPHERE_DEBUG
     _deferredAtmosphereProgramObject = renderEngine.buildRenderProgram(
         "atmosphereDeferredProgram",
         "${MODULE_BASE}/shaders/atmosphere_deferred_vs.glsl",
@@ -484,6 +487,8 @@ bool RenderablePlanet::initialize() {
     _deferredAtmosphereProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
     if (!_deferredAtmosphereProgramObject)
         return false;
+#endif
+
 
     while ((err = glGetError()) != GL_NO_ERROR) {
         const GLubyte * errString = gluErrorString(err);
@@ -517,10 +522,10 @@ bool RenderablePlanet::initialize() {
         _atmosphereCalculated = true;
         
         preCalculateAtmosphereParam();
-
+#ifdef _ATMOSPHERE_DEBUG
         // DEBUG: FBO for atmosphere deferred rendering.
         createAtmosphereFBO();
-
+#endif
         createRenderQuad(&_atmosphereRenderVAO, &_atmosphereRenderVBO, 6);
     }
 
@@ -891,6 +896,7 @@ void RenderablePlanet::render(const RenderData& data) {
     // disable shader
     _programObject->deactivate();
     
+#ifdef _ATMOSPHERE_DEBUG
     // DEBUG: Deferred Rendering of the atmosphere to a texture.
     // Render Atmosphere to a texture:
     if (_atmosphereEnabled) {
@@ -1168,6 +1174,7 @@ void RenderablePlanet::render(const RenderData& data) {
         glViewport(m_viewport[0], m_viewport[1],
             m_viewport[2], m_viewport[3]);
     }
+#endif
 }
 
 void RenderablePlanet::update(const UpdateData& data) {
@@ -1837,9 +1844,10 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
     _transmittanceProgramObject->activate();
     loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject);
     renderQuadForCalc(vao, vertexSize);
+#ifdef _ATMOSPHERE_DEBUG
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("transmittance_texture.ppm"), 
         TRANSMITTANCE_TABLE_WIDTH, TRANSMITTANCE_TABLE_HEIGHT);
-
+#endif
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
         const GLubyte * errString = gluErrorString(err);
@@ -1856,9 +1864,10 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
     _irradianceProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
     loadAtmosphereDataIntoShaderProgram(_irradianceProgramObject);
     renderQuadForCalc(vao, vertexSize);
+#ifdef _ATMOSPHERE_DEBUG
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("deltaE_table_texture.ppm"),
         DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
-
+#endif
     while ((err = glGetError()) != GL_NO_ERROR) {
         const GLubyte * errString = gluErrorString(err);
         std::stringstream ss;
@@ -1880,10 +1889,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
         step3DTexture(_inScatteringProgramObject, layer);
         renderQuadForCalc(vao, vertexSize);
     }
+#ifdef _ATMOSPHERE_DEBUG
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("deltaS_rayleigh_texture.ppm"),
     MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT1, std::string("deltaS_mie_texture.ppm"),
     MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
+#endif
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
     glDrawBuffers(1, drawBuffers);
 
@@ -1906,9 +1917,10 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
     _deltaEProgramObject->setUniform("deltaETexture", _deltaETableTextureUnit);
     loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);
     renderQuadForCalc(vao, vertexSize);
+#ifdef _ATMOSPHERE_DEBUG
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("irradiance_texture.ppm"), 
         DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
-
+#endif
     while ((err = glGetError()) != GL_NO_ERROR) {
         const GLubyte * errString = gluErrorString(err);
         std::stringstream ss;
@@ -1928,9 +1940,10 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
         step3DTexture(_deltaSProgramObject, layer, false);
         renderQuadForCalc(vao, vertexSize);
     }
+#ifdef _ATMOSPHERE_DEBUG
     saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("S_texture.ppm"),
     MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
-
+#endif
     while ((err = glGetError()) != GL_NO_ERROR) {
         const GLubyte * errString = gluErrorString(err);
         std::stringstream ss;
@@ -1959,11 +1972,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
             step3DTexture(_deltaJProgramObject, layer);
             renderQuadForCalc(vao, vertexSize);
         }
+#ifdef _ATMOSPHERE_DEBUG
         std::stringstream sst;
         sst << "deltaJ_texture-scattering_order-" << scatteringOrder << ".ppm";
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
         MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
-
+#endif
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             std::stringstream ss;
@@ -1985,11 +1999,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
         _irradianceSupTermsProgramObject->setUniform("deltaSMTexture", _deltaSMieTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
         renderQuadForCalc(vao, vertexSize);
+#ifdef _ATMOSPHERE_DEBUG
         sst.str(std::string());
         sst << "deltaE_texture-scattering_order-" << scatteringOrder << ".ppm";
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
         DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
-
+#endif
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             std::stringstream ss;
@@ -2013,11 +2028,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
             step3DTexture(_inScatteringSupTermsProgramObject, layer);
             renderQuadForCalc(vao, vertexSize);
         }
+#ifdef _ATMOSPHERE_DEBUG
         sst.str(std::string());
         sst << "deltaS_texture-scattering_order-" << scatteringOrder << ".ppm";
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
         MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
-
+#endif
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             std::stringstream ss;
@@ -2038,11 +2054,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
         _deltaEProgramObject->setUniform("deltaETexture", _deltaETableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);
         renderQuadForCalc(vao, vertexSize);
+#ifdef _ATMOSPHERE_DEBUG
         sst.str(std::string());
         sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
         DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
-
+#endif
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             std::stringstream ss;
@@ -2061,11 +2078,12 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
             step3DTexture(_deltaSSupTermsProgramObject, layer, false);
             renderQuadForCalc(vao, vertexSize);
         }
+#ifdef _ATMOSPHERE_DEBUG
         sst.str(std::string());
         sst << "inscatteringTable_order-" << scatteringOrder << ".ppm";
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
         MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
-
+#endif
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             std::stringstream ss;
