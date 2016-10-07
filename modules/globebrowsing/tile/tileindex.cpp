@@ -97,18 +97,22 @@ namespace openspace {
 
 
     /**
-    Creates a hash which can be used as key in hash maps
-        BITS | USAGE
-         0-6 | level
-        6-26 | x
-       26-46 | y
-       46-64 | reserved for future use, e.g. time key
+    Creates a hash which can be used as key in hash maps.
+    
+    +-------+------------+-------+------------+
+    | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+    +-------+------------+-------+------------+
+    | level |   0 -  5   |   5   |         31 |
+    |     x |   6 - 34   |  30   | 1073741824 |
+    |     y |  35 - 63   |  29   |  536870912 |
+    +-------+------------+-------+------------+
+     
     */
     TileHashKey TileIndex::hashKey() const {
         TileHashKey key = 0LL;
         key |= level;
-        key |= x << 6;
-        key |= ((TileHashKey)y) << 26;
+        key |= x << 5;
+        key |= ((TileHashKey)y) << 35;
         return key;
     }
 
