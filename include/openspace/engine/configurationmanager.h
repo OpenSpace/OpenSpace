@@ -109,15 +109,15 @@ public:
     /// The key that stores the http proxy settings for the downloadmanager
     static const std::string KeyHttpProxy;
     /// The key that stores the address of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyAddress;
+    static const std::string PartHttpProxyAddress;
     /// The key that stores the port of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyPort;
+    static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyAuthentication;
+    static const std::string PartHttpProxyAuthentication;
     /// The key that stores the username to use for authentication to access the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyUser;
+    static const std::string PartHttpProxyUser;
     /// The key that stores the password to use for authentication to access the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyPassword;
+    static const std::string PartHttpProxyPassword;
 
 
     /**
