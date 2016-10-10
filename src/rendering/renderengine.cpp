@@ -83,7 +83,6 @@
 
 #include <array>
 #include <fstream>
-#include <sgct.h>
 #include <stack>
 
 // ABuffer defines
