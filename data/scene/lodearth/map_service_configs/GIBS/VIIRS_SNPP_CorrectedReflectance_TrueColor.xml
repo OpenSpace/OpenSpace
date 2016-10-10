@@ -1,6 +1,6 @@
 <GDAL_WMS>
     <Service name="TMS">
-        <ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/2016-05-16/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
+        <ServerUrl>http://map1.vis.earthdata.nasa.gov/wmts-geo/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/2016-10-01/EPSG4326_250m/${z}/${y}/${x}.jpg</ServerUrl>
     </Service>
     <DataWindow>
         <UpperLeftX>-180.0</UpperLeftX>
