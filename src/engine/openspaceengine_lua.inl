@@ -41,5 +41,21 @@ int toggleShutdown(lua_State* L) {
     return 1;
 }
 
+/**
+* \ingroup LuaScripts
+* writeDocumentation():
+* Writes out documentation files
+*/
+int writeDocumentation(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0)
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+
+    OsEng.writeDocumentation();
+
+    return 1;
+}
+
+
 } // namespace luascriptfunctions
 } // namespace openspace

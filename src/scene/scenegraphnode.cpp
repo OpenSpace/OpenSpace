@@ -39,7 +39,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/translation/statictranslation.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/staticscale.h>
 
@@ -106,9 +106,9 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
-        result->_ephemeris = 
-            (Ephemeris::createFromDictionary(translationDictionary));
-        if (result->_ephemeris == nullptr) {
+        result->_translation = 
+            (Translation::createFromDictionary(translationDictionary));
+        if (result->_translation == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                 << result->name() << "'");
             delete result;
@@ -167,7 +167,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _ephemeris(new StaticEphemeris())
+    , _translation(new StaticTranslation())
     , _rotation(new StaticRotation())
     , _scale(new StaticScale())
     , _performanceRecord({0, 0, 0})
@@ -185,8 +185,8 @@ bool SceneGraphNode::initialize() {
     if (_renderable)
         _renderable->initialize();
 
-    if (_ephemeris)
-        _ephemeris->initialize();
+    if (_translation)
+        _translation->initialize();
     if (_rotation)
         _rotation->initialize();
     if (_scale)
@@ -203,9 +203,9 @@ bool SceneGraphNode::deinitialize() {
         delete _renderable;
         _renderable = nullptr;
     }
-    if (_ephemeris) {
-        delete _ephemeris;
-        _ephemeris = nullptr;
+    if (_translation) {
+        delete _translation;
+        _translation = nullptr;
     }
     if (_rotation) {
         delete _rotation;
@@ -235,19 +235,19 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    if (_ephemeris) {
+    if (_translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(data);
+            _translation->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
             _performanceRecord.updateTimeEphemeris = (end - start).count();
         }
         else
-            _ephemeris->update(data);
+            _translation->update(data);
     }
 
     if (_rotation) {
@@ -431,7 +431,7 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 
 glm::dvec3 SceneGraphNode::position() const
 {
-    return _ephemeris->position();
+    return _translation->position();
 }
 
 const glm::dmat3& SceneGraphNode::rotationMatrix() const

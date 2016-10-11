@@ -5,7 +5,7 @@ return {
         Parent = "SolarSystemBarycenter", 
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "CHURYUMOV-GERASIMENKO",
                 Observer = "SUN",
             },

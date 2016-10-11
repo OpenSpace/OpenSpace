@@ -26,6 +26,7 @@
 #define LUACONSOLE_H
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <openspace/util/keys.h>
 
@@ -50,12 +51,16 @@ public:
 
     bool isVisible() const;
     void setVisible(bool visible);
-    void toggleVisibility();
+    bool isRemoteScripting() const;
+    void setRemoteScripting(bool remoteScripting);
+
+    void toggleMode();
         
     static scripting::LuaLibrary luaLibrary();
 
 
 private:
+    void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
     std::string UnicodeToUTF8(unsigned int codepoint);
 
@@ -73,6 +78,7 @@ private:
     } _autoCompleteInfo;
 
     bool _isVisible;
+    bool _remoteScripting;
 };
 
 } // namespace openspace

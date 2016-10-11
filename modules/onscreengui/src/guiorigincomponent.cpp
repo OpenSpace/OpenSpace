@@ -65,7 +65,8 @@ void GuiOriginComponent::render() {
     if (hasChanged) {
         OsEng.scriptEngine().queueScript(
             "openspace.setPropertyValue('Interaction.origin', '" +
-            nodes[currentPosition]->name() + "');"
+            nodes[currentPosition]->name() + "');",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 }

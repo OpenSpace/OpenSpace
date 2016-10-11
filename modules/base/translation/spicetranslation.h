@@ -22,65 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/ephemeris.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
+#ifndef __SPICETRANSLATION_H__
+#define __SPICETRANSLATION_H__
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/scene/translation.h>
 
-namespace {
-    const std::string _loggerCat = "Ephemeris";
-    const std::string KeyType = "Type";
-}
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-
-Documentation Ephemeris::Documentation() {
-    using namespace openspace::documentation;
-
-    return{
-        "Transformation Translation",
-        "core_transform_translation",
-        {
-            {
-                KeyType,
-                new StringAnnotationVerifier("Must name a valid Translation type"),
-                "The type of translation that is described in this element. "
-                "The available types of translations depend on the "
-                "configuration of the application and can be written to disk "
-                "on application startup into the FactoryDocumentation.",
-                Optional::No
-            }
-        },
-        Exhaustive::No
-    };
-}
-
-Ephemeris* Ephemeris::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Ephemeris did not have key '" << KeyType << "'");
-        return nullptr;
-    }
-
-    std::string ephemerisType;
-    dictionary.getValue(KeyType, ephemerisType);
-    ghoul::TemplateFactory<Ephemeris>* factory
-          = FactoryManager::ref().factory<Ephemeris>();
-    Ephemeris* result = factory->create(ephemerisType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed creating Ephemeris object of type '" << ephemerisType << "'");
-        return nullptr;
-    }
-
-    return result;
-}
-
-Ephemeris::~Ephemeris() {}
     
-bool Ephemeris::initialize() {
-    return true;
-}
-    
-void Ephemeris::update(const UpdateData& data) {}
+class SpiceTranslation : public Translation {
+public:
+    SpiceTranslation(const ghoul::Dictionary& dictionary);
+    glm::dvec3 position() const;
+    void update(const UpdateData& data) override;
 
+    static openspace::Documentation Documentation();
+
+private:
+    properties::StringProperty _target;
+    properties::StringProperty _origin;
+
+    glm::dvec3 _position;
+    bool _kernelsLoadedSuccessfully;
+};
+    
 } // namespace openspace
+
+#endif // __SPICETRANSLATION_H__

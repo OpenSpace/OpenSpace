@@ -22,30 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICEPHEMERIS_H__
-#define __STATICEPHEMERIS_H__
+#include <openspace/scene/translation.h>
 
-#include <openspace/scene/ephemeris.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/documentation/verifier.h>
+
+namespace {
+    const std::string _loggerCat = "Translation";
+    const std::string KeyType = "Type";
+}
 
 namespace openspace {
-    
-class StaticEphemeris : public Ephemeris {
-public:
-    StaticEphemeris();
-    StaticEphemeris(const ghoul::Dictionary& dictionary);
-    virtual ~StaticEphemeris();
-    virtual glm::dvec3 position() const;
-    virtual void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+Documentation Translation::Documentation() {
+    using namespace openspace::documentation;
 
-private:
-    properties::DVec3Property _position;
-};
+    return{
+        "Transformation Translation",
+        "core_transform_translation",
+        {
+            {
+                KeyType,
+                new StringAnnotationVerifier("Must name a valid Translation type"),
+                "The type of translation that is described in this element. "
+                "The available types of translations depend on the "
+                "configuration of the application and can be written to disk "
+                "on application startup into the FactoryDocumentation.",
+                Optional::No
+            }
+        },
+        Exhaustive::No
+    };
+}
+
+Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    if (!dictionary.hasValue<std::string>(KeyType)) {
+        LERROR("Translation did not have key '" << KeyType << "'");
+        return nullptr;
+    }
+
+    std::string translationType;
+    dictionary.getValue(KeyType, translationType);
+    ghoul::TemplateFactory<Translation>* factory
+          = FactoryManager::ref().factory<Translation>();
+    Translation* result = factory->create(translationType, dictionary);
+    if (result == nullptr) {
+        LERROR("Failed creating Translation object of type '" << translationType << "'");
+        return nullptr;
+    }
+
+    return result;
+}
+
+Translation::~Translation() {}
     
+bool Translation::initialize() {
+    return true;
+}
+    
+void Translation::update(const UpdateData& data) {}
+
 } // namespace openspace
-
-#endif // __STATICEPHEMERIS_H__

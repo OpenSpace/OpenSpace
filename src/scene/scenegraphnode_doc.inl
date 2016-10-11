@@ -31,6 +31,7 @@ Documentation SceneGraphNode::Documentation() {
 
     return {
         "Scenegraph Node",
+        "core_scene_node",
         {
         {
             "Name",

@@ -69,11 +69,36 @@ struct TestResult {
         /// The Reason that caused this offense
         Reason reason;
     };
+    
+    /**
+     * A warning is some value that that does not exactly adhere to the specification, but
+     * that also does not violate so badly to warrant an Offense. This, for example, could
+     * be that a value is marked deprecated and should not be used anymore as the value
+     * might be removed in a latter version.
+     */
+    struct Warning {
+        /**
+         * The reason for the warning
+         */
+        enum class Reason {
+            Deprecated          ///< The value is marked as deprecated and should not used
+        };
+
+        /// The offending key that caused the Warning. In the case of a nested table,
+        /// this value will be the fully qualified name of the key
+        std::string offender;
+        /// The Reason that caused this Warning
+        Reason reason;
+    };
+
+
     /// Is \c true if the TestResult is positive, \c false otherwise
     bool success;
     /// Contains a list of offenses that were found in the test. Is empty if
     /// TestResult::Success is \c true
     std::vector<Offense> offenses;
+    /// Contains a list of warnings that were found in the test
+    std::vector<Warning> warnings;
 };
 
 /**

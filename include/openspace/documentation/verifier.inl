@@ -50,7 +50,7 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string TemplateVerifier<T>::documentation() const {
-    return "Type testing of '" + type() + "'";
+    return "Value of type '" + type() + "'";
 }
 
 template <typename T>
@@ -263,7 +263,7 @@ NotInRangeVerifier<T>::NotInRangeVerifier(typename T::Type lower, typename T::Ty
 
 template <typename T>
 TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
-                                          const std::string& key) const {
+                                             const std::string& key) const {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
         typename T::Type val = dict.value<typename T::Type>(key);
@@ -297,6 +297,20 @@ AnnotationVerifier<T>::AnnotationVerifier(std::string annotation)
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {
     return annotation;
+}
+
+template <typename T>
+TestResult DeprecatedVerifier<T>::operator()(const ghoul::Dictionary& dict,
+                                             const std::string& key) const
+{
+    TestResult res = T::operator()(dict, key);
+    res.warnings.push_back(TestResult::Warning{ key, TestResult::Warning::Reason::Deprecated });
+    return res;
+}
+
+template <typename T>
+std::string DeprecatedVerifier<T>::documentation() const {
+    return T::documentation() + " (deprecated)";
 }
 
 } // namespace documentation

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/ephemeris/spiceephemeris.h>
+#include <modules/base/translation/spicetranslation.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -41,7 +41,7 @@ namespace {
 
 namespace openspace {
     
-Documentation SpiceEphemeris::Documentation() {
+Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -50,7 +50,7 @@ Documentation SpiceEphemeris::Documentation() {
         {
             {
                 "Type",
-                new StringEqualVerifier("SpiceEphemeris"),
+                new StringEqualVerifier("SpiceTranslation"),
                 "",
                 Optional::No
             },
@@ -89,7 +89,7 @@ Documentation SpiceEphemeris::Documentation() {
     };
 }
 
-SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
+SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target("target", "Target", "")
     , _origin("origin", "Origin", "")
     , _kernelsLoadedSuccessfully(true)
@@ -97,7 +97,7 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "SpiceEphemeris"
+        "SpiceTranslation"
     );
 
     _target = dictionary.value<std::string>(KeyBody);
@@ -132,11 +132,11 @@ SpiceEphemeris::SpiceEphemeris(const ghoul::Dictionary& dictionary)
     }
 }
     
-glm::dvec3 SpiceEphemeris::position() const {
+glm::dvec3 SpiceTranslation::position() const {
     return _position;
 }
 
-void SpiceEphemeris::update(const UpdateData& data) {
+void SpiceTranslation::update(const UpdateData& data) {
     double lightTime = 0.0;
     _position = SpiceManager::ref().targetPosition(
         _target, _origin, ReferenceFrame, {}, data.time, lightTime

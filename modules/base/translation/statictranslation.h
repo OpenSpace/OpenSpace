@@ -22,32 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SPICEEPHEMERIS_H__
-#define __SPICEEPHEMERIS_H__
+#ifndef __STATICTRANSLATION_H__
+#define __STATICTRANSLATION_H__
 
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace openspace {
     
-class SpiceEphemeris : public Ephemeris {
+class StaticTranslation : public Translation {
 public:
-    SpiceEphemeris(const ghoul::Dictionary& dictionary);
-    glm::dvec3 position() const;
-    void update(const UpdateData& data) override;
+    StaticTranslation();
+    StaticTranslation(const ghoul::Dictionary& dictionary);
+    virtual ~StaticTranslation();
+    virtual glm::dvec3 position() const;
+    virtual void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _target;
-    properties::StringProperty _origin;
-
-    glm::dvec3 _position;
-    bool _kernelsLoadedSuccessfully;
+    properties::DVec3Property _position;
 };
     
 } // namespace openspace
 
-#endif // __SPICEEPHEMERIS_H__
+#endif // __STATICTRANSLATION_H__

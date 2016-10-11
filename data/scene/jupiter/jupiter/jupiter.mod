@@ -5,7 +5,7 @@ return {
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "JUPITER BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
@@ -37,7 +37,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {0, 0, 0}, -- jupiter is at its barycenter
             },
             Rotation = {

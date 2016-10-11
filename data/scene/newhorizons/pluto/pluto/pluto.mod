@@ -23,7 +23,7 @@ return {
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "PLUTO BARYCENTER",
                 Observer = "SUN",
                 Kernels = NewHorizonsKernels
@@ -157,7 +157,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "PLUTO",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
@@ -197,7 +197,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {0, -2000000, 0}
             },
         },
@@ -215,7 +215,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {0, -4000000, 0}
             },
         },

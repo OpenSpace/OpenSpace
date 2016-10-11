@@ -5,7 +5,7 @@ return {
         Parent = "EarthBarycenter",
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "MOON",
                 Observer = "EARTH BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"

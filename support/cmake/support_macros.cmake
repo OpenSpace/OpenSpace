@@ -291,8 +291,17 @@ endfunction ()
 function (handle_option_tests)
     if (OPENSPACE_HAVE_TESTS)
         if (NOT TARGET gtest)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
+            set(BUILD_GTEST ON CACHE BOOL "")
+            set(BUILD_GMOCK OFF CACHE BOOL "")
+            set(gtest_force_shared_crt ON CACHE BOOL "")
+            # set(BUILD_GMOCK OFF CACHE BOOL "")
+            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
+            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
+            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
+            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
+            # add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
             set_property(TARGET gtest PROPERTY FOLDER "External")
+            set_property(TARGET gtest_main PROPERTY FOLDER "External")
         endif ()
 
         file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
@@ -301,7 +310,7 @@ function (handle_option_tests)
         target_include_directories(OpenSpaceTest PUBLIC
             "${OPENSPACE_BASE_DIR}/include"
             "${OPENSPACE_BASE_DIR}/tests"
-            "${OPENSPACE_EXT_DIR}/ghoul/ext/gtest/include"
+            "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
         )
         target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
@@ -316,7 +325,13 @@ function (handle_option_tests)
     endif (OPENSPACE_HAVE_TESTS)
     if (TARGET GhoulTest)
         if (NOT TARGET gtest)
-            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
+            set(BUILD_GTEST ON CACHE BOOL "")
+            set(BUILD_GMOCK OFF CACHE BOOL "")
+            set(gtest_force_shared_crt ON CACHE BOOL "")
+            # option(BUILD_GTEST "Builds the googletest subproject" CACHE ON)
+            # option(BUILD_GMOCK "Builds the googlemock subproject" CACHE OFF)
+            # option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." CACHE ON)
+            add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
         endif ()
 
         set_property(TARGET gtest PROPERTY FOLDER "External")

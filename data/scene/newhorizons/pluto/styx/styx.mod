@@ -29,7 +29,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "STYX",
                 Observer = "PLUTO BARYCENTER",
                 Kernels = NewHorizonsKernels
@@ -54,7 +54,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "StaticEphemeris",
+                Type = "StaticTranslation",
                 Position = {1000000, 0, 1000000}
             },
         },

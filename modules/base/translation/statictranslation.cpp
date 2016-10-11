@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/translation/statictranslation.h>
 
 #include <openspace/documentation/verifier.h>
 
@@ -32,7 +32,7 @@ namespace {
 
 namespace openspace {
 
-Documentation StaticEphemeris::Documentation() {
+Documentation StaticTranslation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Translation",
@@ -40,7 +40,7 @@ Documentation StaticEphemeris::Documentation() {
         {
             {
                 "Type",
-                new StringEqualVerifier("StaticEphemeris"),
+                new StringEqualVerifier("StaticTranslation"),
                 "",
                 Optional::No
             },
@@ -57,7 +57,7 @@ Documentation StaticEphemeris::Documentation() {
 }
 
 
-StaticEphemeris::StaticEphemeris()
+StaticTranslation::StaticTranslation()
     : _position(
         "position",
         "Position",
@@ -69,8 +69,8 @@ StaticEphemeris::StaticEphemeris()
     addProperty(_position);
 }
 
-StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
-    : StaticEphemeris()
+StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
+    : StaticTranslation()
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -81,12 +81,12 @@ StaticEphemeris::StaticEphemeris(const ghoul::Dictionary& dictionary)
     _position = dictionary.value<glm::dvec3>(KeyPosition);
 }
 
-StaticEphemeris::~StaticEphemeris() {}
+StaticTranslation::~StaticTranslation() {}
 
-glm::dvec3 StaticEphemeris::position() const {
+glm::dvec3 StaticTranslation::position() const {
     return _position;
 }
 
-void StaticEphemeris::update(const UpdateData&) {}
+void StaticTranslation::update(const UpdateData&) {}
 
 } // namespace openspace

@@ -22,30 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __EPHEMERIS_H__
-#define __EPHEMERIS_H__
-
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/misc/dictionary.h>
-
 namespace openspace {
 
-class Ephemeris : public properties::PropertyOwner {
-public:
-    static Ephemeris* createFromDictionary(const ghoul::Dictionary& dictionary);
+namespace luascriptfunctions { 
+    int loadMission(lua_State* L) {
+        using ghoul::lua::luaTypeToString;
+        int nArguments = lua_gettop(L);
+        if (nArguments != 1)
+            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-    virtual ~Ephemeris();
-    virtual bool initialize();
-    virtual glm::dvec3 position() const = 0;
-    virtual void update(const UpdateData& data);
+        std::string missionFileName = luaL_checkstring(L, -1);
+        if (missionFileName.empty()) {
+            return luaL_error(L, "filepath string is empty");
+        }
+        MissionManager::ref().loadMission(absPath(missionFileName));
+    }
 
-    static openspace::Documentation Documentation();
-};
+    int setCurrentMission(lua_State* L) {
+        using ghoul::lua::luaTypeToString;
+        int nArguments = lua_gettop(L);
+        if (nArguments != 1)
+            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
-}  // namespace openspace
+        std::string missionName = luaL_checkstring(L, -1);
+        if (missionName.empty()) {
+            return luaL_error(L, "mission name string is empty");
+        }
+        MissionManager::ref().setCurrentMission(missionName);
+    }
 
-#endif // __EPHEMERIS_H__
+} // namespace luascriptfunction
+} // namespace openspace

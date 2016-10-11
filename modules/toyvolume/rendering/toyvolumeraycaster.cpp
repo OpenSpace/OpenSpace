@@ -34,8 +34,8 @@
 
 namespace {
     const std::string GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
+    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
 }
 
 namespace openspace {

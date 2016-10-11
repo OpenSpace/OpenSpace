@@ -38,7 +38,8 @@ void GuiTimeComponent::render() {
     bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -5000.f, 5000.f);
     if (changed) {
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")"
+            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 }

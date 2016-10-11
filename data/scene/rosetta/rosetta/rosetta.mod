@@ -62,7 +62,7 @@ return {
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "ROSETTA",
                 Observer = "SUN",
                 Kernels = RosettaKernels
@@ -273,7 +273,7 @@ return {
         -- translated
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "PHILAE",
                 Observer = "CHURYUMOV-GERASIMENKO",
                 Kernels = RosettaKernels

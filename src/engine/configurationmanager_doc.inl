@@ -31,6 +31,7 @@ Documentation ConfigurationManager::Documentation() {
 
     return {
         "OpenSpace Configuration",
+        "openspace_configuraion",
         {
         {
             ConfigurationManager::KeyConfigSgct,
@@ -324,7 +325,45 @@ Documentation ConfigurationManager::Documentation() {
             "or just managing the state of the network. This is desired in cases where "
             "the master computer does not have the resources to render a scene.",
             Optional::Yes
-        }
+        },
+        {
+            ConfigurationManager::KeyHttpProxy,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartHttpProxyAddress,
+                    new StringVerifier,
+                    "The address of the http proxy"
+                },
+                {
+                    ConfigurationManager::PartHttpProxyPort,
+                    new StringVerifier,
+                    "The port of the http proxy"
+                },
+                {
+                    ConfigurationManager::PartHttpProxyAuthentication,
+                    new StringInListVerifier(
+                        { "basic", "ntlm", "digest", "any" }
+                    ),
+                    "The authentication method of the http proxy",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartHttpProxyUser,
+                    new StringVerifier,
+                    "The user of the http proxy",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartHttpProxyPassword,
+                    new StringVerifier,
+                    "The password of the http proxy",
+                    Optional::Yes
+                }
+            }),
+            "This defines the use for a proxy when fetching data over http."
+            "No proxy will be used if this is left out.",
+            Optional::Yes
+            }
         }
     };
 };

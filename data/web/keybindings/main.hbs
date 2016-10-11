@@ -1,0 +1,10 @@
+<div id="page-content-wrapper">
+  <div class="container-fluid documentation-container">
+    <h1>OpenSpace Keybindings</h1>
+    <p>Version: {{version.[0]}}.{{version.[1]}}.{{version.[2]}}</p>
+    <p>Generated: {{generationTime}}</p>
+    {{#each keybindings}}
+      {{> keybinding}}
+    {{/each}}
+  </div>
+</div>
