@@ -126,7 +126,7 @@ return {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/ESRI/TERRAIN.wms",
                         Enabled = true,
-                        MinimumPixelSize = 90,
+                        MinimumPixelSize = 64,
                         DoPreProcessing = true,
                     },
                 },
