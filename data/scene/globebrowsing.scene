@@ -14,6 +14,32 @@ function preInitialization()
 
     openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+
+
+    -- Toggle trails
+    openspace.bindKey("t",
+        helper.property.invert('EarthTrail.renderable.enabled') ..
+        helper.property.invert('MarsTrail.renderable.enabled') ..
+        helper.property.invert('MoonTrail.renderable.enabled')
+    )
+
+    -- Toggle night texture, shading, atmosphere and water
+    openspace.bindKey("s",
+        helper.property.invert('Earth.RenderableGlobe.Textures.NightTextures.Earth at Night 2012.isEnabled') ..
+        helper.property.invert('Earth.RenderableGlobe.performShading') ..
+        helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Textures.WaterMasks.MODIS_Water_Mask.isEnabled')
+    )
+
+    -- Toggle background
+    openspace.bindKey("b",
+        helper.property.invert('MilkyWay.renderable.enabled') ..
+        helper.property.invert('Sun.renderable.enabled') ..
+        helper.property.invert('Moon.RenderableGlobe.enabled') ..
+        helper.property.invert('Mars.RenderableGlobe.enabled') ..
+        helper.property.invert('Stars.renderable.enabled')
+    )
+
 end
 
 function postInitialization()
