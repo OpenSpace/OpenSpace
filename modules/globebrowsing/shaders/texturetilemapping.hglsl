@@ -280,7 +280,7 @@ vec4 calculateNight(
 	vec3 n = normalize(ellipsoidNormalCameraSpace);
 	vec3 l = lightDirectionCameraSpace;
 	
-	float cosineFactor = clamp(dot(l, n) * 4, 0, 1);
+	float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
 	
 	// Blend shaded color with base color
 	vec4 color = vec4(currentColor.rgb + (cosineFactor) * nightColor.xyz, currentColor.a);
@@ -298,7 +298,7 @@ vec4 calculateShadedColor(
 	vec3 n = normalize(ellipsoidNormalCameraSpace);
 	vec3 l = lightDirectionCameraSpace;
 	
-	float cosineFactor = clamp(dot(-l, n) * 3, 0, 1);
+	float cosineFactor = pow(clamp(dot(-l, n), 0, 1), 0.8);
 	
 	// Blend shaded color with base color
 	vec4 color = vec4(cosineFactor * currentColor.xyz + (1 - cosineFactor) * shadedColor, currentColor.a);
