@@ -35,6 +35,8 @@
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/util/updatestructures.h>
 
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
@@ -123,6 +125,8 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);    
 private:
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
+    std::shared_ptr<PointGlobe> _pointGlobe;
+
     Ellipsoid _ellipsoid;
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     DistanceSwitch _distanceSwitch;

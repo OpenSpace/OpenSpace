@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
@@ -78,6 +79,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
@@ -138,6 +140,9 @@ set(SHADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_fs.glsl
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
