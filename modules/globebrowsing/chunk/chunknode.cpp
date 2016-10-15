@@ -30,7 +30,7 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/chunk/culling.h>
 
 

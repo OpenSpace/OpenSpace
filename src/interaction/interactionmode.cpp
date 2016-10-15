@@ -37,7 +37,7 @@
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #endif
 
 

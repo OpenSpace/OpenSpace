@@ -24,7 +24,7 @@
 
 
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
@@ -160,9 +160,9 @@ namespace openspace {
         size_t layerIndex,
         PerLayerSettings settings) {
         
-        for (int i = 0; i < settings.array.size(); i++) {
-            settings.array[i]->uploadUniform(
-                &uniformIdHandler->programObject(),
+        for (int i = 0; i < settings.array().size(); i++) {
+            settings.array()[i]->uploadUniform(
+                uniformIdHandler->programObject(),
                 uniformIdHandler->getSettingsId(
                     textureCategory,
                     layerIndex,

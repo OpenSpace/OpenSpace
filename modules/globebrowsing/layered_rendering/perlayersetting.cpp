@@ -39,9 +39,9 @@ namespace openspace {
     PerLayerFloatSetting::~PerLayerFloatSetting(){};
 
     void PerLayerFloatSetting::uploadUniform(
-        ProgramObject* programObject,
+        ProgramObject& programObject,
         GLint settingsId) {
-        programObject->setUniform(settingsId, _property);
+        programObject.setUniform(settingsId, _property);
     }
 
     properties::Property* PerLayerFloatSetting::property() {

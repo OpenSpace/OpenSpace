@@ -124,37 +124,14 @@ namespace openspace {
 
     class PerLayerSettings {
     public:
-        PerLayerSettings()
-        {
-            // Here, all the per layer settings are specified and added
-            array[LayeredTextures::LayerSettingsIds::opacity] = std::make_shared<PerLayerFloatSetting>(
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::opacity],
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::opacity],
-                1,
-                0,
-                1);
-            array[LayeredTextures::LayerSettingsIds::gamma] = std::make_shared<PerLayerFloatSetting>(
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::gamma],
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::gamma],
-                1,
-                0,
-                5);
-            array[LayeredTextures::LayerSettingsIds::multiplier] = std::make_shared<PerLayerFloatSetting>(
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::multiplier],
-                LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::multiplier],
-                1,
-                0,
-                20);
-
-            // Make sure all settings have been spacified and added
-            for (int i = 0; i < LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES; ++i) {
-                ghoul_assert(array[i], "The setting " +
-                    LayeredTextures::layerSettingsIds[i] + "is not specified!");
-            }
-        }
-
+        PerLayerSettings();
+        ~PerLayerSettings();
+        
+        const std::array<std::shared_ptr<PerLayerSetting>,
+            LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES>& array() const;
+    private:
         std::array<std::shared_ptr<PerLayerSetting>,
-            LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES> array;
+            LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES> _array;
     };
 
 } // namespace openspace

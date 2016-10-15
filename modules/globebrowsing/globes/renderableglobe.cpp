@@ -27,7 +27,7 @@
 #include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 // open space includes
@@ -91,7 +91,7 @@ namespace openspace {
                 tileProvider.isActive = prop.isEnabled;
             });
             
-            for (auto setting : tileProvider.settings.array) {
+            for (auto setting : tileProvider.settings.array()) {
                 prop.addProperty(setting->property());
             }
   
@@ -169,7 +169,7 @@ namespace openspace {
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _tileProviderManager);
-        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
+        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e10);
 
         _debugPropertyOwner.setName("Debug");
         _texturePropertyOwner.setName("Textures");

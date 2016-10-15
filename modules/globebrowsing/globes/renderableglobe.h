@@ -92,7 +92,6 @@ public:
         properties::BoolProperty atmosphereEnabled;
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
-
     };
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);

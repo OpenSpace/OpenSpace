@@ -26,14 +26,13 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.h
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
@@ -64,28 +63,27 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
-    
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.h
 )
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.cpp
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
@@ -115,15 +113,15 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.cpp
+
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

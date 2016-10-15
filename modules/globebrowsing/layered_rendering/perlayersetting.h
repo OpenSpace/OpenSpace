@@ -26,6 +26,7 @@
 #define __PER_LAYER_SETTING_H__
 
 #include <string>
+#include <memory>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -41,7 +42,7 @@ namespace openspace {
         ~PerLayerSetting();
 
         virtual void uploadUniform(
-            ProgramObject* programObject,
+            ProgramObject& programObject,
             GLint settingsId) = 0;
         virtual properties::Property* property() = 0;
     private:
@@ -56,7 +57,7 @@ namespace openspace {
             float minimumValue,
             float maximumValue);
         ~PerLayerFloatSetting();
-        virtual void uploadUniform(ProgramObject* programObject, GLint settingsId);
+        virtual void uploadUniform(ProgramObject& programObject, GLint settingsId);
         virtual properties::Property* property();
     private:
         properties::FloatProperty _property;
