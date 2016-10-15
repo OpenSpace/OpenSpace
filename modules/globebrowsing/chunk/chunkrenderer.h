@@ -36,7 +36,7 @@
 
 #include <modules/globebrowsing/meshes/grid.h>
 
-#include <modules/globebrowsing/tile/layeredtextureshaderprovider.h>
+#include <modules/globebrowsing/layered_rendering/layeredtextureshaderprovider.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 
 #include <modules/globebrowsing/chunk/chunknode.h>
@@ -68,14 +68,14 @@ namespace openspace {
         void setDepthTransformUniforms(
             std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
             LayeredTextures::TextureCategory textureCategory,
-            LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
+            LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
             size_t layerIndex,
             const TileDepthTransform& tileDepthTransform);
 
         void activateTileAndSetTileUniforms(
             std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
             LayeredTextures::TextureCategory textureCategory,
-            LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
+            LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
             size_t layerIndex,
             ghoul::opengl::TextureUnit& texUnit,
             const TileAndTransform& tileAndTransform);

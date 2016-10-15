@@ -25,7 +25,6 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkedlodglobe.h
@@ -63,8 +62,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
@@ -74,7 +71,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.h
 )
 
 set(SOURCE_FILES
@@ -114,16 +113,17 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextureshaderprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layeredtextures.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -132,6 +132,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ellipsoid.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilefragcolor.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexheight.hglsl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl

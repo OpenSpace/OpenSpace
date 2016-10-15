@@ -26,7 +26,7 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 // open space includes
@@ -95,7 +95,7 @@ namespace openspace {
     void ChunkRenderer::setDepthTransformUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
+        LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
@@ -104,7 +104,7 @@ namespace openspace {
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
-                LayeredTextureShaderUniformIdHandler::GlslTileDataId::depthTransform_depthScale),
+                LayeredTextures::GlslTileDataId::depthTransform_depthScale),
             tileDepthTransform.depthScale);
 
         uniformIdHandler->programObject().setUniform(
@@ -112,7 +112,7 @@ namespace openspace {
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
-                LayeredTextureShaderUniformIdHandler::GlslTileDataId::depthTransform_depthOffset),
+                LayeredTextures::GlslTileDataId::depthTransform_depthOffset),
             tileDepthTransform.depthOffset);
 
     }
@@ -120,7 +120,7 @@ namespace openspace {
     void ChunkRenderer::activateTileAndSetTileUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
+        LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
         const TileAndTransform& tileAndTransform)
@@ -136,21 +136,21 @@ namespace openspace {
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
-                LayeredTextureShaderUniformIdHandler::GlslTileDataId::textureSampler),
+                LayeredTextures::GlslTileDataId::textureSampler),
             texUnit);
         uniformIdHandler->programObject().setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
-                LayeredTextureShaderUniformIdHandler::GlslTileDataId::uvTransform_uvScale),
+                LayeredTextures::GlslTileDataId::uvTransform_uvScale),
             tileAndTransform.uvTransform.uvScale);
         uniformIdHandler->programObject().setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
-                LayeredTextureShaderUniformIdHandler::GlslTileDataId::uvTransform_uvOffset),
+                LayeredTextures::GlslTileDataId::uvTransform_uvOffset),
             tileAndTransform.uvTransform.uvOffset);
     }
 
@@ -159,24 +159,15 @@ namespace openspace {
         LayeredTextures::TextureCategory textureCategory,
         size_t layerIndex,
         PerLayerSettings settings) {
-        uniformIdHandler->programObject().setUniform(
-            uniformIdHandler->getSettingsId(
-                textureCategory,
-                layerIndex,
-                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::opacity),
-                settings.opacity);
-        uniformIdHandler->programObject().setUniform(
-            uniformIdHandler->getSettingsId(
-                textureCategory,
-                layerIndex,
-                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::gamma),
-                settings.gamma);
-        uniformIdHandler->programObject().setUniform(
-            uniformIdHandler->getSettingsId(
-                textureCategory,
-                layerIndex,
-                LayeredTextureShaderUniformIdHandler::LayerSettingsIds::multiplier),
-                settings.multiplier);
+        
+        for (int i = 0; i < settings.array.size(); i++) {
+            settings.array[i]->uploadUniform(
+                &uniformIdHandler->programObject(),
+                uniformIdHandler->getSettingsId(
+                    textureCategory,
+                    layerIndex,
+                    LayeredTextures::LayerSettingsIds(i)));
+        }
     }
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
@@ -272,7 +263,7 @@ namespace openspace {
                 activateTileAndSetTileUniforms(
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
-                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
+                    LayeredTextures::BlendLayerSuffixes::none,
                     i,
                     texUnits[category][i].blendTexture0,
                     tileAndTransform);
@@ -286,7 +277,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent1,
+                        LayeredTextures::BlendLayerSuffixes::Parent1,
                         i,
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
@@ -298,7 +289,7 @@ namespace openspace {
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent2,
+                        LayeredTextures::BlendLayerSuffixes::Parent2,
                         i,
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
@@ -334,7 +325,7 @@ namespace openspace {
             setDepthTransformUniforms(
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
+                LayeredTextures::BlendLayerSuffixes::none,
                 i,
                 depthTransform);
             i++;

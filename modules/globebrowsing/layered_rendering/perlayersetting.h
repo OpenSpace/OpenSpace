@@ -22,71 +22,45 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __PER_LAYER_SETTING_H__
+#define __PER_LAYER_SETTING_H__
 
-
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
-
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/assert.h>
-
-#include <memory>
-#include <vector>
 #include <string>
 
+#include <ghoul/opengl/programobject.h>
+
+#include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
-    
-    struct NamedTileProvider {
-        std::string name;
-        std::shared_ptr<TileProvider> tileProvider;
-        bool isActive;
 
-        PerLayerSettings settings;
-    };
+    using namespace ghoul::opengl;
 
-
-
-    struct TileProviderGroup {
-
-        void update();
-        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
-        const std::vector<NamedTileProvider> getActiveNamedTileProviders() const;
-
-
-        std::vector<NamedTileProvider> tileProviders;
-        bool levelBlendingEnabled;
-
-    };
-
-
-
-    class TileProviderManager {
+    class PerLayerSetting {
     public:
+        PerLayerSetting();
+        ~PerLayerSetting();
 
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
-
-
-        TileProviderGroup& getTileProviderGroup(size_t groupId);
-        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
-
-        void update();
-        void reset(bool includingInactive = false);
-
-
+        virtual void uploadUniform(
+            ProgramObject* programObject,
+            GLint settingsId) = 0;
+        virtual properties::Property* property() = 0;
     private:
-        static void initTexures(
-            std::vector<NamedTileProvider>& destination, 
-            const ghoul::Dictionary& dict, 
-            const TileProviderInitData& initData);
+    };
 
-        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+    class PerLayerFloatSetting : public PerLayerSetting {
+    public:
+        PerLayerFloatSetting(
+            std::string name,
+            std::string guiName,
+            float defaultValue,
+            float minimumValue,
+            float maximumValue);
+        ~PerLayerFloatSetting();
+        virtual void uploadUniform(ProgramObject* programObject, GLint settingsId);
+        virtual properties::Property* property();
+    private:
+        properties::FloatProperty _property;
     };
 
 } // namespace openspace
-#endif  // __TILE_PROVIDER_MANAGER_H__
+#endif  // __PER_LAYER_SETTING_H__

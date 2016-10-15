@@ -22,19 +22,20 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/layeredtextures.h>
-
+#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 namespace {
     const std::string _loggerCat = "LayeredTextures";
 }
 
-
 namespace openspace {
-
 
     const size_t LayeredTextures::NUM_TEXTURE_CATEGORIES;
     const size_t LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
+    const size_t LayeredTextures::NUM_SETTINGS_PER_CATEGORY;
+    const size_t LayeredTextures::NUM_TILE_DATA_VARIABLES;
+    const size_t LayeredTextures::NUM_BLEND_TEXTURES;
+    const size_t LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES;
 
     const std::string LayeredTextures::TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES] =
     {
@@ -45,6 +46,39 @@ namespace openspace {
         "WaterMasks",
         "Overlays",
         "HeightMaps",
+    };
+
+    const std::string LayeredTextures::glslKeyPrefixes[NUM_SETTINGS_PER_CATEGORY] =
+    {
+        "lastLayerIndex",
+        "use",
+        "blend",
+    };
+
+    const std::string LayeredTextures::glslTileDataNames[
+        NUM_TILE_DATA_VARIABLES] =
+    {
+        "textureSampler",
+        "depthTransform.depthScale",
+        "depthTransform.depthOffset",
+        "uvTransform.uvOffset",
+        "uvTransform.uvScale"
+    };
+
+    const std::string LayeredTextures::blendLayerSuffixes[
+        NUM_BLEND_TEXTURES] =
+    {
+        "",
+        "Parent1",
+        "Parent2",
+    };
+    
+    const std::string LayeredTextures::layerSettingsIds[
+        NUM_LAYER_SETTINGS_VARIABLES] =
+    {
+        "opacity",
+        "gamma",
+        "multiplier",
     };
 
 }  // namespace openspace

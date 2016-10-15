@@ -22,34 +22,30 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LAYERED_TEXTURES_H__
-#define __LAYERED_TEXTURES_H__
-
-#include <memory>
-#include <vector>
-#include <string>
+#include <modules/globebrowsing/layered_rendering/perlayersetting.h>
 
 namespace openspace {
 
-    class LayeredTextures {
+    PerLayerSetting::PerLayerSetting() {}
+    PerLayerSetting::~PerLayerSetting() {}
 
-    public:
+    PerLayerFloatSetting::PerLayerFloatSetting(
+        std::string name,
+        std::string guiName,
+        float defaultValue,
+        float minimumValue,
+        float maximumValue)
+        : _property(name, guiName, defaultValue, minimumValue, maximumValue) { }
+    PerLayerFloatSetting::~PerLayerFloatSetting(){};
 
-        static const size_t NUM_TEXTURE_CATEGORIES = 7;
-        static const size_t MAX_NUM_TEXTURES_PER_CATEGORY = 5;
+    void PerLayerFloatSetting::uploadUniform(
+        ProgramObject* programObject,
+        GLint settingsId) {
+        programObject->setUniform(settingsId, _property);
+    }
 
-        enum TextureCategory {
-            ColorTextures,
-            GrayScaleTextures,
-            GrayScaleOverlays,
-            NightTextures,
-            WaterMasks,
-            Overlays,
-            HeightMaps,
-        };
-
-        static const std::string TEXTURE_CATEGORY_NAMES[NUM_TEXTURE_CATEGORIES];
-    };
+    properties::Property* PerLayerFloatSetting::property() {
+        return &_property;
+    }
 
 } // namespace openspace
-#endif  // __LAYERED_TEXTURES_H__

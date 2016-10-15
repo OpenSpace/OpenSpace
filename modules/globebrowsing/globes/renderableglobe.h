@@ -37,7 +37,7 @@
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <unordered_map>
@@ -46,7 +46,7 @@ namespace openspace {
 
 class ChunkedLodGlobe;
 class TileProviderManager;
-    
+
 class SingleTexturePropertyOwner : public properties::PropertyOwner
 {
 public:
@@ -54,9 +54,6 @@ public:
     ~SingleTexturePropertyOwner();
 
     properties::BoolProperty isEnabled;
-    properties::FloatProperty opacity;
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
 };
 
 class LayeredCategoryPropertyOwner : public properties::PropertyOwner
