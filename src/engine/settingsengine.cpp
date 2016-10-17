@@ -133,7 +133,8 @@ void SettingsEngine::initSceneFiles() {
     std::string sceneDir = "${SCENE}";
     std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
     for (std::size_t i = 0; i < scenes.size(); ++i) {
-        _scenes.addOption(i, scenes[i]);
+        std::size_t found = scenes[i].find_last_of("/\\");
+        _scenes.addOption(i, scenes[i].substr(found+1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load
