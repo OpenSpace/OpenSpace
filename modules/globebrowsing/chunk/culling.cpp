@@ -112,10 +112,30 @@ namespace openspace {
         Geodetic2 cameraPositionOnGlobe =
             ellipsoid.cartesianToGeodetic2(globeToCamera);
         Geodetic2 closestPatchPoint = patch.closestPoint(cameraPositionOnGlobe);
-        const Vec3& objectPosition = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
+        Vec3 objectPosition = ellipsoid.cartesianSurfacePosition(closestPatchPoint);
 
+        // objectPosition is closest in latlon space but not guaranteed to be closest in
+        // castesian coordinates. Therefore we compare it to the corners and pick the
+        // real closest point,
+        glm::dvec3 corners[4];
+        corners[0] = ellipsoid.cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(NORTH_WEST));
+        corners[1] = ellipsoid.cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(NORTH_EAST));
+        corners[2] = ellipsoid.cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(SOUTH_WEST));
+        corners[3] = ellipsoid.cartesianSurfacePosition(
+            chunk.surfacePatch().getCorner(SOUTH_EAST));
+
+        for (int i = 0; i < 4; ++i) {
+            float distance = glm::length(cameraPosition - corners[i]);
+            if (distance < glm::length(cameraPosition - objectPosition)) {
+                objectPosition = corners[i];
+            }
+        }
+        
         return isCullable(cameraPosition, globePosition, objectPosition,
-            maxHeight, minimumGlobeRadius);
+                          maxHeight, minimumGlobeRadius);
     }
 
     bool HorizonCuller::isCullable(
