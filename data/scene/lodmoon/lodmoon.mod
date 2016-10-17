@@ -55,6 +55,7 @@ return {
                         Name = "OnMoonHeight",
                         FilePath = "map_service_configs/OnMoonHeight.xml",
                         Enabled = true,
+                        DoPreProcessing = true,
                     },
                 },
             },
