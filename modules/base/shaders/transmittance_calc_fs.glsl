@@ -54,13 +54,13 @@ float opticalDepth(const float r, const float mu, const float scaleHeight) {
     
     float r2 = r*r;
     // Is ray below horizon?
-     // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
+    // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
     float cosZenithHorizon = -sqrt(1.0 - ((Rg*Rg)/r2));
     if (mu < cosZenithHorizon)
         return 1e9;
     
     // Integrating using the Trapezoidal rule:
-    // Integral(f(y)dy)(from a to b) = (b-a)/2n_steps*(Sum(f(y_i+1)+f(y_i)))
+    // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
     float b_a = rayDistance(r, mu);
     float deltaStep = b_a / float(TRANSMITTANCE_STEPS);
     // cosine law

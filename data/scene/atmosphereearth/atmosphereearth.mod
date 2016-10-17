@@ -23,14 +23,14 @@ return {
 			Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.371, 6 },
+                Radius = { 6.3781366, 6 },
                 Segments = 100
             },
             Shadow_Group = {
                 Source1 = {
                     Name = "Sun",
                     -- All radius in meters
-                    Radius = {696.3, 6}
+                    Radius = {696.0, 6}
                 },
                 --Source2 = { Name = "Monolith", Radius = {0.01, 6} },
                 Caster1 = { 
@@ -44,7 +44,7 @@ return {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
 				Night = "textures/earth_night.jpg",
-                --Height = "textures/earth_bluemarble_height.jpg",                
+                Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",
                 Clouds = "textures/earth_clouds.jpg"
@@ -54,7 +54,8 @@ return {
                 AtmoshereRadius = 6420,
                 --AtmoshereRadius = 6390,
                 --PlanetRadius    = 6371,
-                PlanetRadius    = 6360,
+                --PlanetRadius    = 6360,
+                PlanetRadius    = 6378.1366,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {

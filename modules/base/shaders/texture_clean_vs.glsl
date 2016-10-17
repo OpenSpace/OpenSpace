@@ -24,63 +24,8 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-uniform mat4 NormalTransform;
-uniform sampler2D heightTex;
-uniform bool _hasHeightMap;
-uniform float _heightExaggeration;
+layout(location = 0) in vec3 in_position;
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
-//layout(location = 3) in vec2 in_nightTex;
-
-
-out vec2 vs_st;
-out vec4 vs_normal;
-out vec4 vs_position;
-out vec4 vs_posWorld;
-out float s;
-out vec4 ray;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main()
-{
-    // set variables
-    vs_st = in_st;
-    vs_position = in_position;
-    vec4 tmp = in_position;
-
-    // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-    //vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    
-    // This is the wright transformation for the normals
-    vs_normal = normalize(NormalTransform * vec4(in_normal,0));
-
-    // The position is not in world coordinates, it is in
-    // regular view/eye coordinates.
-    vec4 position = pscTransform(tmp, ModelTransform);
-
-    // Vertex position in world coordinates in meters and 
-    // with no powerscalling coordiantes    
-    vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
-    vec4 vP = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);    
-    vec4 conv = vec4(vP.xyz * pow(10,vP.w), 1.0);
-    vs_posWorld = conv;
-    
-    vs_position = tmp;
-
-    if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        vec3 displacementDirection = abs(normalize(in_normal.xyz));
-        float displacementFactor = height * _heightExaggeration;
-        position.xyz = position.xyz + displacementDirection * displacementFactor;
-    }
-    
-    // Now the position is transformed from view coordinates to SGCT projection
-    // coordinates.
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+void main() {
+    gl_Position = vec4(in_position, 1.0);
 }

@@ -456,10 +456,15 @@ Fragment getFragment() {
         vec4 viewport = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
         vec4 ndcPos;
         ndcPos.xy = ((2.0 * gl_FragCoord.xy) - (2.0 * viewport.xy)) / (viewport.zw) - 1;
-        ndcPos.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
+        //ndcPos.x = ((2.0f * gl_FragCoord.x) - (2.0f * viewport.x)) / viewport.z - 1.0f;
+        //ndcPos.y = 1.0f - (2.0f * gl_FragCoord.y) / viewport.w;
+        ndcPos.z = (2.0f * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
         (gl_DepthRange.far - gl_DepthRange.near);
-        ndcPos.w = 1.0;
+        ndcPos.w = 1.0f;
         vec4 clipPos = ndcPos / gl_FragCoord.w;
+        //vec4 clipPos = ndcPos;
+        //clipPos.z = -1.0;
+        //clipPos.w = 1.0;
         vec4 projCoords = projInverse * clipPos;
         vec4 viewDirection =  normalize(completeInverse * vec4(projCoords.xyz, 0.0));
         vec3 v = normalize(viewDirection.xyz);

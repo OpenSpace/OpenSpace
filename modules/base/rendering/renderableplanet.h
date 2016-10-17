@@ -118,9 +118,11 @@ private:
     void createComputationTextures();
     void deleteComputationTextures();
     void deleteUnusedComputationTextures();
+    void updateAtmosphereParameters();
     void loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg);
-    void executeCalculations(const GLuint vao, const GLenum drawBuffers[2], const GLsizei vertexSize);
+    void executeCalculations(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
     void preCalculateAtmosphereParam();
+    void resetAtmosphereTextures(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
     void createAtmosphereFBO();
     void createRenderQuad(GLuint * vao, GLuint * vbo, const GLfloat size);
     void renderQuadForCalc(const GLuint vao, const GLsizei size);
@@ -149,6 +151,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _cleanTextureProgramObject;
     ghoul::opengl::TextureUnit _dummyTextureUnit;
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
@@ -180,9 +183,21 @@ private:
     properties::FloatProperty _heightExaggeration;
 
     planetgeometry::PlanetGeometry* _geometry;
+    planetgeometry::PlanetGeometry* _atmosphereGeometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
 
+    
+    // ATMOSPHERE PROPERTIES
+    properties::FloatProperty _atmosphereHeightP;
+    properties::FloatProperty _groundAverageReflectanceP;
+    properties::FloatProperty _rayleighHeightScaleP;
+    properties::FloatProperty _mieHeightScaleP;
+    properties::FloatProperty _mieScatteringCoefficientP;
+    properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
+    properties::FloatProperty _mieAsymmetricFactorGP;
+
+    
     // DEBUG Properties:
     properties::BoolProperty _saveDeferredFramebuffer;
 
