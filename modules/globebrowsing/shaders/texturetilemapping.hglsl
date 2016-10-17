@@ -75,7 +75,7 @@
 float performLayerSettings(float currentValue, PerLayerSettings settings) {
 	float newValue = currentValue;
 
-	newValue = pow(newValue, settings.gamma);
+	newValue = sign(newValue) * pow(newValue, settings.gamma);
 	newValue = newValue * settings.multiplier;
 	newValue = newValue * settings.opacity;
 
