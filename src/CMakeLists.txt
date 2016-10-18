@@ -215,6 +215,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
 
 # Place files into source groups
