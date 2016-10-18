@@ -191,8 +191,8 @@ namespace globebrowsing {
         _debugPropertyOwner.addProperty(
             _debugProperties.levelByProjectedAreaElseDistance);
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-        _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
-                
+        //_debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
+              
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
             _textureProperties.push_back(std::make_unique<LayeredCategoryPropertyOwner>
                 (LayeredTextures::TextureCategory(i), *_tileProviderManager));
