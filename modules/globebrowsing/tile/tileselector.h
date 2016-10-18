@@ -28,22 +28,12 @@
 
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
-
+#include <modules/globebrowsing/tile/tile.h>
 #include <vector>
 
 
 
 namespace openspace {
-
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
-    };
-
-    struct TileAndTransform {
-        Tile tile;
-        TileUvTransform uvTransform;
-    };
 
 
     class TileSelector {
