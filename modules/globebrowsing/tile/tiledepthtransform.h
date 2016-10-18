@@ -25,9 +25,15 @@
 #ifndef __TILEDEPTHTRANSFORM_H__
 #define __TILEDEPTHTRANSFORM_H__
 
+namespace openspace {
+namespace globebrowsing {
+
 struct TileDepthTransform {
     float depthScale;
     float depthOffset;
 };
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif // __TILEDEPTHTRANSFORM_H__

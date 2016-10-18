@@ -28,13 +28,13 @@
 
 #include <ghoul/misc/assert.h>
 
-
-
 namespace {
     const std::string _loggerCat = "Geodetic2";
 }
 
 namespace openspace {
+namespace globebrowsing {
+
     //////////////////////////////////////////////////////////////////////////////////////
     //                                   GEODETIC2                                        //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -47,16 +47,11 @@ namespace openspace {
     Geodetic2::Geodetic2(Scalar latitude, Scalar longitude)
         : lat(latitude)
         , lon(longitude)
-    {
-
-    }
+    {}
 
     Geodetic2::Geodetic2(const Geodetic2& p)
         : Geodetic2(p.lat, p.lon)
-    {
-
-    }
-
+    {}
 
     Vec2 Geodetic2::toLonLatVec2() const {
         return Vec2(lon, lat);
@@ -82,7 +77,6 @@ namespace openspace {
         return Geodetic2(lat / scalar, lon / scalar);
     }
 
-
     //////////////////////////////////////////////////////////////////////////////////////
     //                                 GEODETICPATCH                                        //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -94,26 +88,19 @@ namespace openspace {
         Scalar halfSizeLon)
         : _center(Geodetic2(centerLat, centerLon))
         , _halfSize(Geodetic2(halfSizeLat, halfSizeLon))
-    {
-
-    }
+    {}
 
     GeodeticPatch::GeodeticPatch(
         const Geodetic2& center,
         const Geodetic2& halfSize)
         : _center(center)
         , _halfSize(halfSize)
-    {
-
-    }
+    {}
 
     GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
         : _center(patch._center)
         , _halfSize(patch._halfSize)
-    {
-
-    }
-
+    {}
 
     GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
         Scalar deltaLat = (2 * M_PI) / ((double)(1 << tileIndex.level));
@@ -122,9 +109,6 @@ namespace openspace {
         _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
         _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);
     }
-
-
-
 
     void GeodeticPatch::setCenter(const Geodetic2& center) {
         _center = center;
@@ -180,13 +164,11 @@ namespace openspace {
     Scalar GeodeticPatch::maxLon() const {
         return _center.lon + _halfSize.lon;
     }
-
     
     bool GeodeticPatch::contains(const Geodetic2& p) const {
         Geodetic2 diff = _center - p;
         return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
     }
-
 
     Scalar GeodeticPatch::edgeLatitudeNearestEquator() const {
         return _center.lat + _halfSize.lat * (isNorthern() ? -1 : 1);
@@ -195,7 +177,6 @@ namespace openspace {
     Scalar GeodeticPatch::isNorthern() const {
         return _center.lat > 0.0;
     }
-
 
     Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
         using Ang = Angle<Scalar>;
@@ -222,7 +203,6 @@ namespace openspace {
             );
     }
 
-
     Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
         using Ang = Angle<Scalar>;
 
@@ -247,7 +227,6 @@ namespace openspace {
         return Geodetic2(cornerLat, cornerLon);
     }
 
-    
     Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
         // This method finds the closest point on the patch, to the provided
         // point p. As we are deali ng with latitude-longitude patches, distance in this 
@@ -311,4 +290,5 @@ namespace openspace {
         return Geodetic2(clampedLat, clampedLon);
     }
 
+} // namespace globebrowsing
 } // namespace openspace

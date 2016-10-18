@@ -35,7 +35,7 @@
 #include <vector>
 
 namespace openspace {
-
+namespace globebrowsing {
 
 /**
     Selects a specific Renderable to be used for rendering, based on distance to the 
@@ -64,11 +64,12 @@ public:
     void addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance);
 
 private:
-    
-
     std::vector<std::shared_ptr<Renderable>> _renderables;
     std::vector<double> _maxDistances;
 
 };
+
+} // namespace globebrowsing
 } // openspace
+
 #endif //__DISTANCESWITCH_H__

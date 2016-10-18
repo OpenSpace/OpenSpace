@@ -36,10 +36,10 @@ namespace {
     const std::string _loggerCat = "TileDiskCache";
 }
 
-
 namespace openspace {
-    const std::string TileDiskCache::CACHE_ROOT = "tilecache";
+namespace globebrowsing {
 
+    const std::string TileDiskCache::CACHE_ROOT = "tilecache";
 
     TileDiskCache::TileDiskCache(const std::string& name)
         : _name(name)
@@ -60,7 +60,6 @@ namespace openspace {
         File metaFile = getMetaDataFile(tileIndex);
         return FileSys.fileExists(metaFile);
     }
-
 
     std::shared_ptr<TileIOResult> TileDiskCache::get(const TileIndex& tileIndex) {
         File metaDataFile = getMetaDataFile(tileIndex);
@@ -120,6 +119,5 @@ namespace openspace {
         return File(getFilePath(tileIndex) + ".data");
     }
 
-
-
+} // namespace globebrowsing
 }  // namespace openspace

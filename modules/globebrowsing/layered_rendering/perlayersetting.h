@@ -33,6 +33,7 @@
 #include <openspace/properties/scalarproperty.h>
 
 namespace openspace {
+namespace globebrowsing {
 
     using namespace ghoul::opengl;
 
@@ -63,5 +64,7 @@ namespace openspace {
         properties::FloatProperty _property;
     };
 
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif  // __PER_LAYER_SETTING_H__

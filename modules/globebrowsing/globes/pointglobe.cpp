@@ -33,7 +33,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
-
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
@@ -45,6 +44,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     PointGlobe::PointGlobe(const RenderableGlobe& owner)
         : _owner(owner) {
@@ -107,7 +107,6 @@ namespace openspace {
     void PointGlobe::render(const RenderData& data) {
         _programObject->activate();
 
-
         // Calculate variables to be used as uniform variables in shader
         glm::dvec3 bodyPosition = data.modelTransform.translation;
 
@@ -143,5 +142,6 @@ namespace openspace {
     void PointGlobe::update(const UpdateData& data) {
         
     }
-    
-}  // namespace openspace
+
+} // namespace globebrowsing
+} // namespace openspace

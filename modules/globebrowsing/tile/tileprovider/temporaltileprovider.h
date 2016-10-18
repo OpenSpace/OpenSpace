@@ -25,7 +25,6 @@
 #ifndef __TEMPORAL_TILE_PROVIDER_H__
 #define __TEMPORAL_TILE_PROVIDER_H__
 
-
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -39,14 +38,12 @@
 
 #include <gdal_priv.h>
 
-
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
+namespace globebrowsing {
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                                 Time Id Providers                                //
@@ -83,8 +80,6 @@ namespace openspace {
         virtual std::string stringify(const Time& t) const;
     };
 
-
-
     /**
     * Static factory class for providing different TimeFormats.
     * A time format stringifier is retrieved by a name of the format.
@@ -112,8 +107,6 @@ namespace openspace {
         static std::unordered_map<std::string, std::unique_ptr<TimeFormat>> _timeIdProviderMap;
         static bool initialized;
     };
-
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                                  Time Quantizer                                  //
@@ -156,7 +149,6 @@ namespace openspace {
         TimeRange _timerange;
         double _resolution;
     };
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                              Temporal tile Provider                              //
@@ -317,11 +309,7 @@ namespace openspace {
         TimeQuantizer _timeQuantizer;
     };
 
-
-
-}  // namespace openspace
-
-
-
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __TEMPORAL_TILE_PROVIDER_H__

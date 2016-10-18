@@ -57,6 +57,8 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
+
     SingleTexturePropertyOwner::SingleTexturePropertyOwner(std::string name)
     : isEnabled("isEnabled", "isEnabled", true) {
         setName(name);
@@ -376,5 +378,6 @@ namespace openspace {
     void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
         _savedCamera = camera;
     }
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 

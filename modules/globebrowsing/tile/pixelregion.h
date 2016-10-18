@@ -28,6 +28,7 @@
 #include <glm/glm.hpp>
 
 namespace openspace {
+namespace globebrowsing {
 
     typedef glm::ivec2 PixelCoordinate;
     typedef glm::ivec2 PixelRange;
@@ -41,7 +42,6 @@ namespace openspace {
         PixelRegion();
         PixelRegion(const PixelRegion& o);
         PixelRegion(const PixelCoordinate& pixelStart, const PixelRange& numberOfPixels);
-
         
         //////////////////////////////////////////////////////////////////////////////////
         //                                  Mutators                                    //
@@ -72,7 +72,6 @@ namespace openspace {
         void alignTop(int y);
         void alignRight(int x);
         void alignBottom(int y);
-
         
         void scale(const glm::dvec2& s);
         void scale(double s);
@@ -87,10 +86,8 @@ namespace openspace {
         void roundUpNumPixelToNearestMultipleOf(unsigned int multiple);
         void roundDownToQuadratic();
 
-
         PixelRegion globalCut(Side side, int globalPos);
         PixelRegion localCut(Side side, int localPos);
-
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                 Accessors                                    //
@@ -101,7 +98,6 @@ namespace openspace {
         int edgeDirectionSign(Side side) const;
         PixelCoordinate end() const;
 
-
         //////////////////////////////////////////////////////////////////////////////////
         //                                Comparators                                   //
         //////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +105,6 @@ namespace openspace {
         bool lineIntersect(Side side, int p);
         bool isInside(const PixelRegion& r) const;
         bool equals(const PixelRegion& r) const;
-
 
         //////////////////////////////////////////////////////////////////////////////////
         //                                   Members                                    //
@@ -119,11 +114,7 @@ namespace openspace {
         PixelRange numPixels;
     };
 
-
-
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif  // __PIXEL_REGION_H__

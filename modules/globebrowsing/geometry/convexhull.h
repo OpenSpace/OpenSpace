@@ -27,18 +27,14 @@
 
 #include <modules/globebrowsing/geometry/aabb.h>
 
-
 #include <vector>
 #include <stack>
 
 #include <memory>
 #include <glm/glm.hpp>
 
-// open space includes
-
-
-
 namespace openspace {
+namespace globebrowsing {
 
     using namespace glm;
     
@@ -58,7 +54,6 @@ namespace openspace {
         bool intersects(const ConvexHull2& o) const;
 
         AABB1 projectedRegion(glm::vec2 direction) const;
-        
     
     private:
         bool hasPerpendicularLineWhereProjectedPointsOverlap(const ConvexHull2& other) const;
@@ -72,13 +67,12 @@ namespace openspace {
         static int orientation(const Point2& p, const Point2& q, const Point2& r);
         static float dist(const Point2& p1, const Point2& p2);
 
-
     private:
         static Point2 p0;
         std::vector<Point2> _points;
     };
 
-   
-}  // namespace openspace
+} // namespace globebrowsing   
+} // namespace openspace
 
 #endif  // __CONVEX_HULL_H__

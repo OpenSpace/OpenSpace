@@ -131,17 +131,22 @@ namespace openspace {
          */
         void renderCameraFrustum(const RenderData& data, const Camera& otherCamera, RGBA rgba = { 1, 1, 1, 0.3 }) const;
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         /**
          *  Renders a screen space AABB2 to the screen with the provided color
          */
-        void renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba = { 1, 1, 1, 0.3 }) const;
+        void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB, RGBA rgba = { 1, 1, 1, 0.3 }) const;
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
+        
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         /**
         *  Takes a AABB3 in screen space and returns vertices representing the corner points 
         *  of the AABB. The ordering of the corner points is compatible with the box rendering 
         *  methods in this class.
         */
-        const Vertices verticesFor(const AABB3& screenSpaceAABB) const;
+        const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         
     protected:
         std::unique_ptr<ProgramObject> _programObject;

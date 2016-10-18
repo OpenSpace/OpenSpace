@@ -38,32 +38,25 @@
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 
-
 #include <memory>
 #include <queue>
 #include <unordered_map>
 #include <sstream>
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
     struct LoadJob : public Job<TileIOResult> {
         virtual void execute() = 0;
         virtual std::shared_ptr<TileIOResult> product() = 0;
     };
-   
 
     struct TileLoadJob : LoadJob {
-
-        
         TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
             const TileIndex& tileIndex)
             : _tileDataset(textureDataProvider)
             , _chunkIndex(tileIndex) 
-        {
-
-        }
+        {}
 
         virtual ~TileLoadJob() { }
 
@@ -73,16 +66,11 @@ namespace openspace {
             return _tileIOResult;
         }
 
-
     protected:
-
         TileIndex _chunkIndex;
         std::shared_ptr<TileDataset> _tileDataset;
         std::shared_ptr<TileIOResult> _tileIOResult;
     };
-
-
-
 
     class TileDiskCache;
 
@@ -106,23 +94,17 @@ namespace openspace {
         virtual void execute();
 
     protected:
-
         std::shared_ptr<TileDiskCache> _tileDiskCache;
         CacheMode _mode;
 
     };
 
-
-
-
     class AsyncTileDataProvider {
     public:
-
         AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
             std::shared_ptr<ThreadPool> pool);
 
         ~AsyncTileDataProvider();
-
 
         bool enqueueTileIO(const TileIndex& tileIndex);        
         std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
@@ -133,22 +115,15 @@ namespace openspace {
         std::shared_ptr<TileDataset> getTextureDataProvider() const;
 
     protected:
-
         virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
 
     private:
-        
-
-
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
         std::unordered_map<TileHashKey, TileIndex> _enqueuedTileRequests;
-
-
     };
 
-
-
+} // namespace globebrowsing
 } // namespace openspace
 
 

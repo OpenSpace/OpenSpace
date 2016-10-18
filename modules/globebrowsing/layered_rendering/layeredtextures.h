@@ -37,6 +37,7 @@
 #include <modules/globebrowsing/layered_rendering/perlayersetting.h>
 
 namespace openspace {
+namespace globebrowsing {
     
     class LayeredTextures {
 
@@ -134,5 +135,7 @@ namespace openspace {
             LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES> _array;
     };
 
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif  // __LAYERED_TEXTURES_H__

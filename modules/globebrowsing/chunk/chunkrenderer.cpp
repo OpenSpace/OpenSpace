@@ -56,6 +56,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     ChunkRenderer::ChunkRenderer(
         std::shared_ptr<Grid> grid,
@@ -500,4 +501,5 @@ namespace openspace {
         // disable shader
         programObject->deactivate();
     }
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

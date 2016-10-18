@@ -32,9 +32,9 @@
 
 #include "gdal_priv.h"
 
-
 namespace openspace {
-   
+namespace globebrowsing {
+
     struct TileDataType {
 
         static GLuint getOpenGLDataType(GDALDataType gdalType);
@@ -51,10 +51,7 @@ namespace openspace {
 
     };
 
+} // namespace globebrowsing
 } // namespace openspace
-
-
-
-
 
 #endif  // __TILE_DATA_TYPE_H__

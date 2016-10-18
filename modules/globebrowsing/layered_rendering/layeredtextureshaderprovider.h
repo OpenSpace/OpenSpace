@@ -33,11 +33,9 @@
 #include <array>
 #include <string>
 
-//////////////////////////////////////////////////////////////////////////////////////////
-//                              LAYERED TEXTURE SHADER PROVIDER                         //
-//////////////////////////////////////////////////////////////////////////////////////////
-
 namespace openspace {
+namespace globebrowsing {
+
     using namespace ghoul::opengl;
 
     class LayeredTextureShaderUniformIdHandler;
@@ -158,7 +156,6 @@ namespace openspace {
             LayeredTextures::NUM_TEXTURE_CATEGORIES>
             _tileUniformIds;
         
-        
         std::array<
         std::array<
         std::array<
@@ -170,6 +167,8 @@ namespace openspace {
 
         LayeredTextureShaderProvider* _shaderProvider;
     };
-}  // namespace openspace
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __LAYERED_TEXTURE_SHADER_PROVIDER__

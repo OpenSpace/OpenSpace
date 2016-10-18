@@ -39,16 +39,10 @@
 
 #include <functional>
 
-
-
-// forward declaration
 namespace openspace {
-    class ChunkedLodGlobe;
-}
+namespace globebrowsing {
 
-
-namespace openspace {
-
+class ChunkedLodGlobe;
 
 class ChunkNode {
 public:
@@ -87,6 +81,7 @@ private:
     Chunk _chunk;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
 

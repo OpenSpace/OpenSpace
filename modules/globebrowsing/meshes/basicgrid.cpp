@@ -29,6 +29,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
 BasicGrid::BasicGrid(
     unsigned int xSegments,
@@ -61,9 +62,7 @@ BasicGrid::BasicGrid(
 }
 
 BasicGrid::~BasicGrid()
-{
-
-}
+{}
 
 int BasicGrid::xSegments() const {
     return _xSegments;
@@ -172,4 +171,5 @@ std::vector<glm::vec3> BasicGrid::CreateNormals(int xSegments, int ySegments) {
     return normals;
 }
 
-}// namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

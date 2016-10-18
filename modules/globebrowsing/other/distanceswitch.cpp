@@ -30,6 +30,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
 DistanceSwitch::DistanceSwitch(){
 
@@ -84,7 +85,6 @@ void DistanceSwitch::update(const UpdateData& data) {
     }
 }
 
-
 void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, double maxDistance) {
     ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
     if (_maxDistances.size() > 0){
@@ -95,5 +95,6 @@ void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable, doub
     _maxDistances.push_back(maxDistance);
 }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 

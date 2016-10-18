@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/layered_rendering/perlayersetting.h>
 
 namespace openspace {
+namespace globebrowsing {
 
     PerLayerSetting::PerLayerSetting() {}
     PerLayerSetting::~PerLayerSetting() {}
@@ -48,4 +49,5 @@ namespace openspace {
         return &_property;
     }
 
+} // namespace globebrowsing
 } // namespace openspace

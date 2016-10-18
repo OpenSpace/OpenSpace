@@ -39,6 +39,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
 int ChunkNode::chunkNodeCount = 0;
 
@@ -219,6 +220,5 @@ const Chunk& ChunkNode::getChunk() const {
     return _chunk;
 }
 
-
-
+} // namespace globebrowsing
 } // namespace openspace

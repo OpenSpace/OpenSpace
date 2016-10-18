@@ -33,14 +33,12 @@
 
 #include "gdal_priv.h"
 
-
-
 namespace {
     const std::string _loggerCat = "TileSelector";
 }
 
-
 namespace openspace {
+namespace globebrowsing {
 
     const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
@@ -105,7 +103,6 @@ namespace openspace {
             tiles.push_back(getHighestResolutionTile(provider.get(), tileIndex));
         }
 
-
         std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);
 
         return tiles;
@@ -127,4 +124,5 @@ namespace openspace {
         --tileIndex;
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

@@ -29,6 +29,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     SkirtedGrid::SkirtedGrid(
         unsigned int xSegments,
@@ -171,4 +172,6 @@ namespace openspace {
 
         return normals;
     }
-}// namespace openspace
+
+} // namespace globebrowsing
+} // namespace openspace

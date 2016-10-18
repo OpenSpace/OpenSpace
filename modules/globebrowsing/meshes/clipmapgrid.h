@@ -31,9 +31,10 @@
 #include <glm/glm.hpp>
 
 namespace openspace {
+namespace globebrowsing {
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                            CLIPMAP GRID    (Abstract class)                            //
+//                            CLIPMAP GRID    (Abstract class)                          //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -64,7 +65,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    OUTER CLIPMAP GRID                                    //
+//                                    OUTER CLIPMAP GRID                                //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -80,10 +81,10 @@ public:
     ~OuterClipMapGrid();
 
 protected:
-    virtual std::vector<GLuint>        CreateElements(int xSegments, int ySegments);
-    virtual std::vector<glm::vec4>    CreatePositions(int xSegments, int ySegments);
-    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xSegments, int ySegments);
-    virtual std::vector<glm::vec3>    CreateNormals(int xSegments, int ySegments);
+    virtual std::vector<GLuint> CreateElements(int xSegments, int ySegments);
+    virtual std::vector<glm::vec4> CreatePositions(int xSegments, int ySegments);
+    virtual std::vector<glm::vec2> CreateTextureCoordinates(int xSegments, int ySegments);
+    virtual std::vector<glm::vec3> CreateNormals(int xSegments, int ySegments);
 
 private:
     void validate(int xSegments, int ySegments);
@@ -98,7 +99,7 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    INNER CLIPMAP GRID                                    //
+//                                    INNER CLIPMAP GRID                                //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -114,10 +115,10 @@ public:
     ~InnerClipMapGrid();
 
 private:
-    virtual std::vector<GLuint>        CreateElements(    int xSegments, int ySegments);
-    virtual std::vector<glm::vec4>    CreatePositions(int xSegments, int ySegments);
-    virtual std::vector<glm::vec2>    CreateTextureCoordinates(int xSegments, int ySegments);
-    virtual std::vector<glm::vec3>    CreateNormals(int xSegments, int ySegments);
+    virtual std::vector<GLuint> CreateElements(    int xSegments, int ySegments);
+    virtual std::vector<glm::vec4> CreatePositions(int xSegments, int ySegments);
+    virtual std::vector<glm::vec2> CreateTextureCoordinates(int xSegments, int ySegments);
+    virtual std::vector<glm::vec3> CreateNormals(int xSegments, int ySegments);
 
     void validate(int xSegments, int ySegments);
 
@@ -125,5 +126,7 @@ private:
     static size_t numVertices(int segments);
 };
 
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif // __CLIPMAPGEOMETRY_H__

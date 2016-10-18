@@ -28,15 +28,14 @@
 
 #include <ghoul/logging/logmanager.h>
 
-
 namespace {
     const std::string _loggerCat = "TileProvider";
 
     const std::string KeyType = "Type";
 }
 
-
 namespace openspace {
+namespace globebrowsing {
 
 TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
     if (!dictionary.hasValue<std::string>(KeyType)) {
@@ -60,4 +59,5 @@ TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictio
 
 TileProvider::TileProvider(const ghoul::Dictionary& dictionary) { };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

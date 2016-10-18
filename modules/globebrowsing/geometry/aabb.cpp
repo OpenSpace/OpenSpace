@@ -32,6 +32,8 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
+
     AABB1::AABB1() : min(1e35), max(-1e35) { }
     AABB1::AABB1(float min, float max) : min(min), max(max) { }
 
@@ -68,11 +70,6 @@ namespace openspace {
         }
         return AABBSpatialRelation::None;
     }
-
-
-
-
-
 
     AABB2::AABB2() : min(1e35), max(-1e35) { }
     AABB2::AABB2(const vec2& min, const vec2& max) : min(min), max(max) { }
@@ -115,9 +112,6 @@ namespace openspace {
         }
         return AABBSpatialRelation::None;
     }
-
-
-
 
     AABB3::AABB3() : min(1e35), max(-1e35) { }
     AABB3::AABB3(const vec3& min, const vec3& max) : min(min), max(max) { }
@@ -166,6 +160,5 @@ namespace openspace {
         return AABBSpatialRelation::None;
     }
 
-
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

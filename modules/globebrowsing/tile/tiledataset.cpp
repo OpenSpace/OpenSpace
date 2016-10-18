@@ -44,16 +44,14 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
 
-
 namespace {
     const std::string _loggerCat = "TileDataset";
 }
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
-    std::ostream& operator<<(std::ostream& os, const openspace::PixelRegion& pr) {
+    std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
         return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
     }
 
@@ -75,8 +73,6 @@ namespace openspace {
         textureFormat = TileDataType::getTextureFormat(numRasters, gdalType);
     }
   
-
-
     IODescription IODescription::cut(PixelRegion::Side side, int pos) {
         PixelRegion readPreCut = read.region;
         PixelRegion writePreCut = write.region;
@@ -107,12 +103,6 @@ namespace openspace {
         return whatCameOff;
     }
 
-
-
-
-
-
-
     //////////////////////////////////////////////////////////////////////////////////
     //                               Tile Dataset                                   //
     //////////////////////////////////////////////////////////////////////////////////
@@ -123,8 +113,6 @@ namespace openspace {
     const PixelRegion TileDataset::padding = PixelRegion(tilePixelStartOffset, tilePixelSizeDifference);
     
     bool TileDataset::GdalHasBeenInitialized = false;
-
-
 
     TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
         : _config(config)
@@ -672,8 +660,6 @@ namespace openspace {
 
         // The return error from a repeated rasterIO is ONLY based on the main region,
         // which in the usual case will cover the main area of the patch anyway
-        
-        
 
         return err;
     }
@@ -701,7 +687,6 @@ namespace openspace {
         // handle requested write region
         dataDest -= io.write.region.start.y * io.write.bytesPerLine; // note -= since flipped y axis
         dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
-
         
         return rasterBand->RasterIO(
             GF_Read,
@@ -716,7 +701,6 @@ namespace openspace {
             _dataLayout.bytesPerPixel,            // Pixel spacing
             -io.write.bytesPerLine);             // Line spacing
     }
-
 
     std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const {
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
@@ -736,9 +720,6 @@ namespace openspace {
             preprocessData->hasMissingData[c] = false;
             noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
         }
-
-        
-
 
         for (size_t y = 0; y < region.numPixels.y; y++) {
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
@@ -799,5 +780,5 @@ namespace openspace {
         return CE_None;
     }
 
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

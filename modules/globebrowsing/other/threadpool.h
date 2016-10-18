@@ -35,12 +35,10 @@
 
 #include <ghoul/misc/assert.h>
 
-
-
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-    
+namespace globebrowsing {    
 
     class ThreadPool;
 
@@ -73,9 +71,7 @@ namespace openspace {
         bool stop;
     };
 
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif // __THREAD_POOL_H__

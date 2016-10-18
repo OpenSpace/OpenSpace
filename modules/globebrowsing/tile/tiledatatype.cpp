@@ -22,16 +22,15 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+
+#include <modules/globebrowsing/tile/tiledatatype.h>
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
 #include <ghoul/misc/assert.h>
-
-
-#include <modules/globebrowsing/tile/tiledatatype.h>
-
 
 #include <modules/globebrowsing/geometry/angle.h>
 
@@ -40,17 +39,13 @@
 #include <sstream>
 #include <algorithm>
 
-
-
-
-
 namespace {
     const std::string _loggerCat = "TileIOResult";
 }
 
-
-
 namespace openspace {
+namespace globebrowsing {
+
     float TileDataType::interpretFloat(GDALDataType gdalType, const char* src) {
         switch (gdalType) {
         case GDT_Byte:      return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
@@ -66,8 +61,6 @@ namespace openspace {
             return -1.0;
         }
     }
-
-
 
     size_t TileDataType::numberOfBytes(GDALDataType gdalType) {
         switch (gdalType) {
@@ -97,7 +90,6 @@ namespace openspace {
             return -1;
         }
     }
-
 
     TextureFormat TileDataType::getTextureFormat(
         int rasterCount, GDALDataType gdalType)
@@ -164,11 +156,6 @@ namespace openspace {
         return format;
     }
 
-
-
-
-
-
     GLuint TileDataType::getOpenGLDataType(GDALDataType gdalType) {
         switch (gdalType) {
         case GDT_Byte: return GL_UNSIGNED_BYTE;
@@ -199,4 +186,5 @@ namespace openspace {
         }
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

@@ -27,7 +27,6 @@
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
-
 #include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/engine/downloadmanager.h>
@@ -43,8 +42,6 @@
 
 #include "cpl_minixml.h"
 
-
-
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
 
@@ -55,8 +52,8 @@ namespace {
     const std::string KeyFlushInterval = "FlushInterval";
 }
 
-
 namespace openspace {
+namespace globebrowsing {
 
     const std::string TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
@@ -64,7 +61,6 @@ namespace openspace {
     const std::string TemporalTileProvider::TemporalXMLTags::TIME_END = "OpenSpaceTimeEnd";
     const std::string TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION = "OpenSpaceTimeResolution";
     const std::string TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
-
 
     TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
         : _initDict(dictionary) 
@@ -84,9 +80,6 @@ namespace openspace {
         _gdalXmlTemplate = consumeTemporalMetaData(xml);
         _defaultTile = getTileProvider()->getDefaultTile();
     }
-
-
-
 
     std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
         CPLXMLNode* node = CPLParseXMLString(xml.c_str());
@@ -118,7 +111,6 @@ namespace openspace {
         CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
         return CPLSerializeXMLTree(gdalNode);
     }
-
 
     std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key, const std::string& defaultVal) {
         CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
@@ -203,7 +195,6 @@ namespace openspace {
         }
     }
 
-
     std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
         _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
@@ -224,10 +215,6 @@ namespace openspace {
         return timeSpecifiedXml;
     }
 
-
-
-
-
     //////////////////////////////////////////////////////////////////////////////////////
     //                                 Time Id Providers                                //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -238,8 +225,6 @@ namespace openspace {
     std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
         return t.ISO8601().substr(0, 19) + "Z";
     }
-
-    
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                            Time Id Providers Facotry                             //
@@ -264,9 +249,6 @@ namespace openspace {
             "Unsupported Time format: " << format);
         return _timeIdProviderMap[format].get();
     }
-
-
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                                  Time Quantizer                                  //
@@ -330,4 +312,5 @@ namespace openspace {
         }
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

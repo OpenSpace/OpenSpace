@@ -32,6 +32,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     /**
     Creates the geodetic tile index for the Geodetic patch that covers the
@@ -78,7 +79,6 @@ namespace openspace {
         return *this;
     }
 
-
     /**
     Gets the tile at a specified offset from this tile.
     Accepts delta indices ranging from [-2^level, Infinity[
@@ -94,7 +94,6 @@ namespace openspace {
         ghoul_assert(level == other.level, "makes no sense if not on same level");
         return std::abs(x - other.x) + std::abs(y - other.y);
     }
-
 
     /**
     Creates a hash which can be used as key in hash maps.
@@ -115,7 +114,6 @@ namespace openspace {
         key |= ((TileHashKey)y) << 35;
         return key;
     }
-
 
     std::string TileIndex::toString() const {
         std::stringstream ss;
@@ -143,5 +141,5 @@ namespace openspace {
         return os;
     }
 
-
+} // namespace globebrowsing
 } // namespace openspace

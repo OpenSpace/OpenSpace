@@ -28,44 +28,27 @@
 #include <ghoul/misc/assert.h>
 #include <iostream>
 
-
-
-
-
 namespace {
     const std::string _loggerCat = "PixelRegion";
 }
 
-
-
-
 namespace openspace {
-
+namespace globebrowsing {
    
-
     PixelRegion::PixelRegion()
         : start(0)
         , numPixels(0) 
-    {
-
-    }
+    {}
 
     PixelRegion::PixelRegion(const PixelRegion& o) 
         : start(o.start)
         , numPixels(o.numPixels) 
-    {
-    
-    }
+    {}
 
     PixelRegion::PixelRegion(const PixelCoordinate& pixelStart, const PixelRange& numberOfPixels)
         : start(pixelStart)
         , numPixels(numberOfPixels) 
-    {
-    
-    }
-
-
-
+    {}
 
     //////////////////////////////////////////////////////////////////////////////////
     //                                  Mutators                                    //
@@ -98,7 +81,6 @@ namespace openspace {
         numPixels.y = y - start.y;
     }
 
-
     void PixelRegion::align(Side side, int pos) {
         switch (side) {
         case LEFT: alignLeft(pos); break;
@@ -123,8 +105,6 @@ namespace openspace {
     void PixelRegion::alignBottom(int y) { 
         start.y = y - numPixels.y; 
     }
-
-
 
     void PixelRegion::scale(const glm::dvec2& s) {
         start = PixelCoordinate(glm::round(s * glm::dvec2(start)));
@@ -152,8 +132,6 @@ namespace openspace {
         numPixels.y <<= exponent;
         start -= wrt;
     }
-
-
 
     void PixelRegion::move(Side side, int amount) {
         switch (side) {
@@ -237,7 +215,6 @@ namespace openspace {
         else return globalCut(side, edge(side) - edgeDirectionSign(side) * p);
     }
 
-
     //////////////////////////////////////////////////////////////////////////////////
     //                                 Accessors                                    //
     //////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +222,6 @@ namespace openspace {
     int PixelRegion::area() const {
         return numPixels.x * numPixels.y;
     }
-
 
     int PixelRegion::edge(Side side) const {
         switch (side) {
@@ -268,16 +244,15 @@ namespace openspace {
     //                                Comparators                                   //
     //////////////////////////////////////////////////////////////////////////////////
 
-
     bool PixelRegion::lineIntersect(Side side, int p) {
         switch (side)
         {
-        case openspace::PixelRegion::LEFT:
-        case openspace::PixelRegion::RIGHT:
+        case PixelRegion::LEFT:
+        case PixelRegion::RIGHT:
             return start.x <= p && p <= (start.x + numPixels.x);
 
-        case openspace::PixelRegion::TOP:
-        case openspace::PixelRegion::BOTTOM:
+        case PixelRegion::TOP:
+        case PixelRegion::BOTTOM:
             return start.y <= p && p <= (start.y + numPixels.y);
         }
     }
@@ -293,5 +268,5 @@ namespace openspace {
         return start == r.start && numPixels == r.numPixels;
     }
 
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

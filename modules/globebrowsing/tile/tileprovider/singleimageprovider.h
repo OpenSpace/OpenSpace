@@ -42,7 +42,8 @@
 #include <set>
 
 namespace openspace {
-    
+namespace globebrowsing {
+
     using namespace ghoul::opengl;    
 
     class SingleImageProvider : public TileProvider {
@@ -64,6 +65,7 @@ namespace openspace {
         std::string _imagePath;
     };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __SINGLE_IMAGE_PROVIDER_H__

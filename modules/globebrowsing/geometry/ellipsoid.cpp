@@ -33,6 +33,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     Ellipsoid::Ellipsoid() : Ellipsoid(1,1,1) {
 
@@ -65,9 +66,6 @@ namespace openspace {
         _cached._medianRadius = radii[1];
         _cached._maximumRadius = radii[2];
     }
-
-    
-
 
     Vec3 Ellipsoid::geocentricSurfaceProjection(const Vec3& p) const {
         Scalar beta = 1.0 / sqrt(dot(p * p, _cached._oneOverRadiiSquared));
@@ -188,4 +186,5 @@ namespace openspace {
         return rSurface + geodetic3.height * normal;
     }
 
+} // namespace globebrowsing
 } // namespace openspace

@@ -34,6 +34,7 @@
 #include <vector>
 
 namespace openspace {
+namespace globebrowsing {
 
 /**
 * Class to hold vertex data and handling OpenGL interfacing and rendering.
@@ -104,6 +105,7 @@ private:
     bool _gpuDataNeedUpdate;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
 #endif // __TRIANGLESOUP_H__

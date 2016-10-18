@@ -25,14 +25,13 @@
 #ifndef __TILE_DISK_CACHE_H__
 #define __TILE_DISK_CACHE_H__
 
-
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <ghoul/filesystem/filesystem>
 
-
 namespace openspace {
+namespace globebrowsing {
 
 struct TileIOResult;
 
@@ -45,7 +44,6 @@ struct TileIOResult;
         std::shared_ptr<TileIOResult> get(const TileIndex& tileIndex);
         bool has(const TileIndex& tileIndex) const;
         bool put(const TileIndex& tileIndex, std::shared_ptr<TileIOResult> tileIOResult);
-
         
         static const std::string CACHE_ROOT;
     
@@ -60,7 +58,7 @@ struct TileIOResult;
 
     };
 
-}  // namespace openspace
-
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __TILE_DISK_CACHE_H__

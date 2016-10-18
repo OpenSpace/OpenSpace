@@ -37,6 +37,8 @@
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
 namespace openspace {
+namespace globebrowsing {
+
     using namespace ghoul::opengl;
     class RenderableGlobe;
 
@@ -59,6 +61,8 @@ namespace openspace {
         GLuint _vertexBufferID;
         GLuint _vaoID;
     };
-}  // namespace openspace
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __POINT_GLOBE__

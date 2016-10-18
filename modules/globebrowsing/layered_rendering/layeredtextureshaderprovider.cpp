@@ -36,6 +36,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {
@@ -60,11 +61,11 @@ namespace openspace {
             }
             // Commented this for-loop. Not necessary since the keyValuePairs
             // are always supposed to be equal. Comparing strings takes time.
-            /*
-            for (size_t i = 0; i < keyValuePairs.size(); i++) {
-                equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
-            }
-            */
+            
+            //for (size_t i = 0; i < keyValuePairs.size(); i++) {
+            //    equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
+            //}
+            
             return equal;
         }
     }
@@ -77,9 +78,7 @@ namespace openspace {
         , _vsPath(vsPath)
         , _fsPath(fsPath)
         , _updatedOnLastCall(false)
-    {
-    
-    }
+    {}
     
     LayeredTextureShaderProvider::~LayeredTextureShaderProvider()
     {
@@ -156,14 +155,10 @@ namespace openspace {
     }
 
     LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler()
-    {
-
-    }
+    {}
 
     LayeredTextureShaderUniformIdHandler::~LayeredTextureShaderUniformIdHandler()
-    {
-
-    }
+    {}
 
     void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(
         LayeredTextureShaderProvider* shaderProvider)
@@ -236,5 +231,6 @@ namespace openspace {
     {
         return *_shaderProvider->_programObject;
     }
-    
-}  // namespace openspace
+
+} // namespace globebrowsing
+} // namespace openspace

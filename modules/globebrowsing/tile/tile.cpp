@@ -30,12 +30,11 @@ namespace {
     const std::string _loggerCat = "Tile";
 }
 
-
 namespace openspace {
+namespace globebrowsing {
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
     
-
     Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
         using namespace ghoul::opengl;
         
@@ -67,6 +66,5 @@ namespace openspace {
         return tile;
     }
 
-
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

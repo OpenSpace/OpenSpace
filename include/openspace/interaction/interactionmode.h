@@ -31,6 +31,10 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#endif
 
 #include <list>
 
@@ -258,7 +262,7 @@ public:
 
 private:
     //void updateCameraStateFromMouseStates(Camera& camera);
-    RenderableGlobe* _globe;
+    globebrowsing::RenderableGlobe* _globe;
 };
 
 } // namespace interaction
