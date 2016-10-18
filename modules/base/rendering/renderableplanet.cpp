@@ -131,6 +131,7 @@ namespace openspace {
         , _mieExtinctionCoeff(glm::vec3(0.f))
         , _rayleighScatteringCoeff(glm::vec3(0.f))
         , _mieScatteringCoeff(glm::vec3(0.f))
+        , _sunRadianceIntensity(50.0f)
         , _hasNightTexture(false)
         , _hasHeightTexture(false)
         , _hasReflectanceTexture(false)
@@ -144,6 +145,7 @@ namespace openspace {
         , _mieScatteringExtinctionPropCoefficientP("mieScatteringExtinctionPropCoefficient", 
             "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.1f, 1.0f)
         , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 1.0f, -1.0f, 1.0f)
+        , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 100.0f)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -449,6 +451,10 @@ namespace openspace {
         _mieAsymmetricFactorGP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
         addProperty(_mieAsymmetricFactorGP);
 
+        _sunIntensityP.set(_sunRadianceIntensity);
+        _sunIntensityP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
+        addProperty(_sunIntensityP);
+
         ghoul::Dictionary atmosphereGeometryDictionary;
         success = dictionary.getValue(keyGeometry, atmosphereGeometryDictionary);
         if (success) {
@@ -599,7 +605,7 @@ bool RenderablePlanet::initialize() {
     //========================================================================
     //============ Pre-compute all necessary Atmosphere Tables  ==============
     //========================================================================
-    if (_atmosphereEnabled && !_atmosphereCalculated) {            
+    if (_atmosphereEnabled && !_atmosphereCalculated) { 
         preCalculateAtmosphereParam();
 #ifdef _ATMOSPHERE_DEBUG
         // DEBUG: FBO for atmosphere deferred rendering.
@@ -916,6 +922,7 @@ void RenderablePlanet::render(const RenderData& data) {
         _programObject->setUniform("betaMSca", _mieScatteringCoeff);
         _programObject->setUniform("betaMEx", _mieExtinctionCoeff);
         _programObject->setUniform("mieG", _miePhaseConstant);
+        _programObject->setUniform("ISun", _sunRadianceIntensity);
 
 
         ghoul::opengl::TextureUnit reflectanceUnit;
@@ -1920,7 +1927,7 @@ void RenderablePlanet::updateAtmosphereParameters() {
     _mieScatteringCoeff = glm::vec3(_mieScatteringCoefficientP);
     _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f/static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
     _miePhaseConstant = _mieAsymmetricFactorGP;
-
+    _sunRadianceIntensity = _sunIntensityP;
     //_atmosphereCalculated = false;
     preCalculateAtmosphereParam();
 
@@ -1936,6 +1943,8 @@ void RenderablePlanet::loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul
     shaderProg->setUniform("betaMSca", _mieScatteringCoeff);
     shaderProg->setUniform("betaMEx", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
+    shaderProg->setUniform("ISun", _sunRadianceIntensity);
+
 }
 
 
@@ -2187,6 +2196,24 @@ void RenderablePlanet::executeCalculations(const GLuint vao, const GLenum drawBu
 }
 
 void RenderablePlanet::preCalculateAtmosphereParam() {
+
+    std::stringstream ss;
+    ss << "\n\n==== Atmosphere Values Used in Pre-Computation ====\n"
+        << "Atmosphere Radius: " << _atmosphereRadius << std::endl
+        << "Planet Radius: " << _atmospherePlanetRadius << std::endl
+        << "Average Reflection: " << _planetAverageGroundReflectance << std::endl
+        << "Rayleigh HR: " << _rayleighHeightScale << std::endl
+        << "Mie HR: " << _mieHeightScale << std::endl
+        << "Mie G phase constant: " << _miePhaseConstant << std::endl
+        << "Mie Extinction coeff: " << _mieExtinctionCoeff << std::endl
+        << "Rayleigh Scattering coeff: " << _rayleighScatteringCoeff << std::endl
+        << "Mie Scattering coeff: " << _mieScatteringCoeff << std::endl
+        << "Textures:" << std::endl
+        << "NightTexture: " << _hasNightTexture << std::endl
+        << "ReflectanceTexture: " << _hasReflectanceTexture << std::endl
+        << "HeightTexture: " << _hasHeightTexture << std::endl
+        << "CloudsTextures: " << _hasCloudsTexture << std::endl;
+    std::cout << ss.str() << std::endl;
 
     //==========================================================
     //========= Load Shader Programs for Calculations ==========

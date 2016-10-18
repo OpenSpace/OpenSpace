@@ -25,7 +25,7 @@
 #define EPSILON 0.0001f
 
 // Sun Irradiance
-const float ISun = 50.0;
+//const float ISun = 50.0;
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
@@ -63,6 +63,7 @@ uniform sampler2D texture1;
 uniform sampler2D nightTex;
 uniform sampler2D cloudsTexture;
 
+uniform float ISun;
 uniform sampler2D reflectanceTexture;
 uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;

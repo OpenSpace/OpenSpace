@@ -196,6 +196,7 @@ private:
     properties::FloatProperty _mieScatteringCoefficientP;
     properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
     properties::FloatProperty _mieAsymmetricFactorGP;
+    properties::FloatProperty _sunIntensityP;
 
     
     // DEBUG Properties:
@@ -225,6 +226,7 @@ private:
     float _rayleighHeightScale;
     float _mieHeightScale;
     float _miePhaseConstant;
+    float _sunRadianceIntensity;
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _mieScatteringCoeff;
