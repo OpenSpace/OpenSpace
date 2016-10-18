@@ -739,7 +739,6 @@ namespace openspace {
 
         
 
-        float noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
 
         for (size_t y = 0; y < region.numPixels.y; y++) {
             size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
@@ -747,6 +746,7 @@ namespace openspace {
             for (size_t x = 0; x < region.numPixels.x; x++) {
                 
                 for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+                    float noDataValue = _dataset->GetRasterBand(c + 1)->GetNoDataValue();
                     float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
                     if (val != noDataValue) {
                         preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);

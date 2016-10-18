@@ -46,7 +46,7 @@
 #include <math.h>
 
 namespace {
-    const std::string _loggerCat = "PatchRenderer";
+    const std::string _loggerCat = "ChunkRenderer";
 
     const std::string keyFrame = "Frame";
     const std::string keyGeometry = "Geometry";
@@ -56,7 +56,6 @@ namespace {
 }
 
 namespace openspace {
-
 
     ChunkRenderer::ChunkRenderer(
         std::shared_ptr<Grid> grid,
@@ -74,12 +73,15 @@ namespace openspace {
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
 
-        _globalProgramUniformHandler = std::make_shared<LayeredTextureShaderUniformIdHandler>();
-        _localProgramUniformHandler = std::make_shared<LayeredTextureShaderUniformIdHandler>();
+        _globalProgramUniformHandler =
+            std::make_shared<LayeredTextureShaderUniformIdHandler>();
+        _localProgramUniformHandler =
+            std::make_shared<LayeredTextureShaderUniformIdHandler>();
 
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
+        // A little arbitrary but it works
         if (chunk.tileIndex().level < 10) {
             renderChunkGlobally(chunk, data);
         }
@@ -89,7 +91,7 @@ namespace openspace {
     }
 
     void ChunkRenderer::update() {
-        // unued atm. Could be used for caching or precalculating
+        // unused atm. Could be used for caching or precalculating
     }
 
     void ChunkRenderer::setDepthTransformUniforms(
@@ -125,7 +127,6 @@ namespace openspace {
         ghoul::opengl::TextureUnit& texUnit,
         const TileAndTransform& tileAndTransform)
     {
-
         // Blend tile with two parents
         // The texture needs a unit to sample from
         texUnit.activate();
@@ -181,14 +182,19 @@ namespace openspace {
             LayeredTextures::NUM_TEXTURE_CATEGORIES> tileProviders;
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
 
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            tileProviders[category] = _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders();
+        for (size_t category = 0;
+            category < LayeredTextures::NUM_TEXTURE_CATEGORIES;
+            category++) {
+            tileProviders[category] = _tileProviderManager->getTileProviderGroup(
+                    category).getActiveTileProviders();
 
             LayeredTextureInfo layeredTextureInfo;
             layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
-            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->getTileProviderGroup(category).levelBlendingEnabled;
+            layeredTextureInfo.layerBlendingEnabled =
+                _tileProviderManager->getTileProviderGroup(category).levelBlendingEnabled;
 
-            layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
+            layeredTexturePreprocessingData.layeredTextureInfo[category] =
+                layeredTextureInfo;
         }
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
@@ -220,9 +226,6 @@ namespace openspace {
             std::pair<std::string, std::string>(
                 "defaultHeight",
                 std::to_string(Chunk::DEFAULT_HEIGHT)));
-        
-
-
 
         // Now the shader program can be accessed
         ProgramObject* programObject =

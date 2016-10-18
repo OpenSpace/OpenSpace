@@ -49,15 +49,26 @@ namespace openspace {
 class ChunkedLodGlobe;
 class TileProviderManager;
 
+/**
+ Property owner that owns all property of a single texture layer.
+ These properties include all the per layer settings defined for each texture layer.
+*/
 class SingleTexturePropertyOwner : public properties::PropertyOwner
 {
 public:
     SingleTexturePropertyOwner(std::string name);
     ~SingleTexturePropertyOwner();
 
+    // This property is not part of the per layer settings since it should not be used
+    // as a uniform in the shaders. It is instead passed as a pre processor macro
+    // so that the glsl code can be optimised to not use the texture id if is not enabled.
     properties::BoolProperty isEnabled;
 };
 
+/**
+ Property owner defined to carry properties for each layer category.
+ Layer categories are defined in <code>LayeredTextures</code>.
+*/
 class LayeredCategoryPropertyOwner : public properties::PropertyOwner
 {
 public:
@@ -72,8 +83,16 @@ private:
     properties::BoolProperty _levelBlendingEnabled;
 };
 
+/**
+ A <code>RenderableGlobe</code> is a globe modeled as an ellipsoid using a chunked LOD
+ algorithm for rendering.
+*/
 class RenderableGlobe : public Renderable {
 public:
+    /**
+     These properties are specific for <code>ChunkedLodGlobe</code> and separated from
+     the general properties of <code>RenderableGlobe</code>.
+    */
     struct DebugProperties {
         properties::BoolProperty saveOrThrowCamera;
         properties::BoolProperty showChunkEdges;
@@ -118,12 +137,15 @@ public:
     const DebugProperties& debugProperties() const;
     const GeneralProperties& generalProperties() const;
     const std::shared_ptr<const Camera> savedCamera() const;
-
     double interactionDepthBelowEllipsoid();
 
     // Setters
     void setSaveCamera(std::shared_ptr<Camera> camera);    
 private:
+    // Globes. These are renderables inserted in a distance switch so that the heavier
+    // <code>ChunkedLodGlobe</code> does not have to be rendered qt far distances.
+    // Currently we only have the <code>ChunkedLodGlobe</code> and a simple globe rendered
+    // as a point.
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     std::shared_ptr<PointGlobe> _pointGlobe;
 
@@ -142,10 +164,8 @@ private:
     // Properties
     DebugProperties _debugProperties;
     GeneralProperties _generalProperties;
-
     properties::PropertyOwner _debugPropertyOwner;
     properties::PropertyOwner _texturePropertyOwner;
-    
     std::vector<std::unique_ptr<LayeredCategoryPropertyOwner> > _textureProperties;
 };
 
