@@ -25,6 +25,12 @@
 #ifndef TEXTURETILE_HGLSL
 #define TEXTURETILE_HGLSL
 
+// Must match the values in tiledataset.cpp
+// (could be set as shader preprocessing data so that multiple definitions
+// are not needed)
+#define TILE_PIXEL_START_OFFSET ivec2(-2)
+#define TILE_PIXEL_SIZE_DIFFERENCE ivec2(4)
+
 vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
 	vec2 uvOffset = uv - vec2(0.5);
 	float thres = 0.5 - borderSize/2;
@@ -83,7 +89,8 @@ vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Tile
 
 vec2 TileUVToTextureSamplePosition(const Tile tile, vec2 tileUV){
 	vec2 uv = tile.uvTransform.uvOffset + tile.uvTransform.uvScale * tileUV;
-	uv = compensateSourceTextureSampling(vec2(-2), vec2(4), tile, uv);
+	uv = compensateSourceTextureSampling(
+		TILE_PIXEL_START_OFFSET, TILE_PIXEL_SIZE_DIFFERENCE, tile, uv);
 	return uv;
 }
 

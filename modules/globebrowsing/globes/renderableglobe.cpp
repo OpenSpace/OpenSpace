@@ -305,7 +305,12 @@ namespace globebrowsing {
         if (tile.status != Tile::Status::OK) {
             return 0;
         }
-        glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;
+        //glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;
+
+        glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
+            uvTransform,
+            patchUV,
+            glm::uvec2(tile.texture->dimensions()));
 
         // Sample and do linear interpolation
         // (could possibly be moved as a function in ghoul texture)
