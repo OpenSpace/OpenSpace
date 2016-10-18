@@ -22,8 +22,13 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tilepile.h>
 
+#include <modules/globebrowsing/tile/tilepile.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileselector.h>
+
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -32,6 +37,15 @@ namespace {
 
 
 namespace openspace {
+namespace globebrowsing {
 
+    void TilePile::update(TileProvider* tileProvider, const TileIndex& tileIndex){
+        
+    }
 
+    void TilePile::bind(ProgramObject* programObject){
+    	
+    }
+    
+}  // namespace globebrowsing
 }  // namespace openspace

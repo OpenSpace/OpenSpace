@@ -27,8 +27,9 @@
 
 
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/tileandtransform.h>
 #include <vector>
 
 namespace openspace {

@@ -52,7 +52,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileandtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
@@ -67,6 +69,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.h
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.h
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/layer/layer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
@@ -103,8 +107,10 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
-    
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileandtransform.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
@@ -114,6 +120,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/layer/layer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.cpp
