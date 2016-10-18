@@ -50,7 +50,6 @@ namespace {
         "InteractionDepthBelowEllipsoid";
     const std::string keyCameraMinHeight = "CameraMinHeight";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
-    const std::string keyTextureInitData = "TextureInitData";
     const std::string keyTextures = "Textures";
     const std::string keyColorTextures = "ColorTextures";
     const std::string keyHeightMaps = "HeightMaps";
@@ -160,13 +159,10 @@ namespace globebrowsing {
         _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
         // Init tile provider manager
-        ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
-        dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
 
-        _tileProviderManager = std::make_shared<TileProviderManager>(
-            texturesDictionary, textureInitDataDictionary);
+        _tileProviderManager = std::make_shared<TileProviderManager>(texturesDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _tileProviderManager);

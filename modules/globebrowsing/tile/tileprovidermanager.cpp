@@ -72,8 +72,7 @@ namespace globebrowsing {
     //                           Tile Provider Manager                                  //
     //////////////////////////////////////////////////////////////////////////////////////
     TileProviderManager::TileProviderManager(
-        const ghoul::Dictionary& textureCategoriesDictionary,
-        const ghoul::Dictionary& textureInitDictionary){
+        const ghoul::Dictionary& textureCategoriesDictionary){
         // Create all the categories of tile providers
         for (size_t i = 0; i < textureCategoriesDictionary.size(); i++) {
             ghoul::Dictionary texturesDict = textureCategoriesDictionary.value<ghoul::Dictionary>(
@@ -86,22 +85,7 @@ namespace globebrowsing {
 
             TileProviderInitData initData;
 
-            if (i == LayeredTextures::ColorTextures ||
-                i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks    ||
-                i == LayeredTextures::GrayScaleOverlays) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
-            }
-            else if (i == LayeredTextures::Overlays) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
-            }
-            else if (i == LayeredTextures::HeightMaps) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
-            }
-            else {
-                initData.minimumPixelSize = 512;
-            }
-
+            initData.minimumPixelSize = 512;
             initData.threads = 1;
             initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
