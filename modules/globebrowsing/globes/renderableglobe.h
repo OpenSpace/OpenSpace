@@ -45,6 +45,7 @@
 #include <unordered_map>
 
 namespace openspace {
+namespace globebrowsing {
 
 class ChunkedLodGlobe;
 class TileProviderManager;
@@ -169,6 +170,7 @@ private:
     std::vector<std::unique_ptr<LayeredCategoryPropertyOwner> > _textureProperties;
 };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __RENDERABLEGLOBE_H__

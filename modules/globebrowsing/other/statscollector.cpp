@@ -26,9 +26,8 @@
 
 #include <modules/globebrowsing/other/statscollector.h>
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
-
+} // namespace globebrowsing
 } // namespace openspace

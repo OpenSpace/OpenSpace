@@ -31,9 +31,8 @@
 #include <unordered_map>
 #include <list>
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
     // Templated class implementing a Least-Recently-Used Cache
     template<typename KeyType, typename ValueType>
@@ -42,30 +41,24 @@ namespace openspace {
         LRUCache(size_t size);
         ~LRUCache();
 
-
         void put(const KeyType& key, const ValueType& value);
         void clear();
         bool exist(const KeyType& key) const;
         ValueType get(const KeyType& key);
         size_t size() const;
 
-
     private:
         void clean();
 
-
     // Member varialbes
     private:
-        
         std::list<std::pair<KeyType, ValueType>> _itemList;
         std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
         size_t _cacheSize;
-
     };
 
-
+} // namespace globebrowsing
 } // namespace openspace
-
 
 #include <modules/globebrowsing/other/lrucache.inl>
 

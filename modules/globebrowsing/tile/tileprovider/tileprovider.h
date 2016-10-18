@@ -39,7 +39,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
-    
+namespace globebrowsing {
+
     using namespace ghoul::opengl;
     
     /**
@@ -149,6 +150,7 @@ namespace openspace {
         bool preprocessTiles = false;
     };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __TILE_PROVIDER_H__

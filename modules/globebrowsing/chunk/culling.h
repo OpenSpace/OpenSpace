@@ -38,19 +38,17 @@
 
 
 namespace openspace {
+namespace globebrowsing {
 
     using namespace glm;
 
-
     class Chunk;
-
 
     class ChunkCuller {
     public:
         virtual void update() { }
         virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
     };
-
 
     class FrustumCuller : public ChunkCuller {
     public:
@@ -64,7 +62,6 @@ namespace openspace {
         const AABB3 _viewFrustum;
 
     };
-
 
     //In the current implementation of the horizon culling and the distance to the
     //camera, the closer the ellipsoid is to a
@@ -85,7 +82,7 @@ namespace openspace {
 
     };
 
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __CULLING_H__

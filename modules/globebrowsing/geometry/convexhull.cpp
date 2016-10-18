@@ -22,7 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #include <modules/globebrowsing/geometry/convexhull.h>
 
 #include <string>
@@ -30,15 +29,14 @@
 #include <algorithm>
 #include <functional>
 
-
 namespace {
     const std::string _loggerCat = "ConvexHull";
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     Point2 ConvexHull2::p0(0,0);
-
 
     ConvexHull2::ConvexHull2(){ }
 
@@ -129,7 +127,6 @@ namespace openspace {
         return true;
     }
 
-
     AABB1 ConvexHull2::projectedRegion(glm::vec2 direction) const {
         AABB1 projectedRegion;
         for (size_t i = 0; i < _points.size(); i++) {
@@ -137,8 +134,6 @@ namespace openspace {
         }
         return projectedRegion;
     }
-
-
 
     Point2 ConvexHull2::oneBelowTop(std::stack<Point2>& S) {
         Point2 p = S.top();
@@ -179,5 +174,5 @@ namespace openspace {
 
         return (o == 2) ? -1 : 1;
     }
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

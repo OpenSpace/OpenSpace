@@ -22,15 +22,13 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
-
 
 #include <modules/globebrowsing/geometry/angle.h>
 
@@ -38,16 +36,12 @@ namespace {
     const std::string _loggerCat = "AsyncTextureDataProvider";
 }
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
     void TileLoadJob::execute() {
         _tileIOResult = _tileDataset->readTileData(_chunkIndex);
     }
-
-
-
 
     DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
         const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, CacheMode m)
@@ -69,8 +63,6 @@ namespace openspace {
         else if (cacheMode == "WriteOnly") _mode = CacheMode::WriteOnly;
         else if (cacheMode == "CacheHitsOnly") _mode = CacheMode::CacheHitsOnly;
     }
-
-
 
     void DiskCachedTileLoadJob::execute() {
         _tileIOResult = nullptr;
@@ -109,25 +101,17 @@ namespace openspace {
             }
             break;
         }
-
-        
     }
-
-
 
     AsyncTileDataProvider::AsyncTileDataProvider(
         std::shared_ptr<TileDataset> tileDataset,
         std::shared_ptr<ThreadPool> pool)
         : _tileDataset(tileDataset)
         , _concurrentJobManager(pool)
-    {
+    {}
 
-    }
-
-    AsyncTileDataProvider::~AsyncTileDataProvider() {
-        
-    }
-
+    AsyncTileDataProvider::~AsyncTileDataProvider()
+    {}
 
     std::shared_ptr<TileDataset> AsyncTileDataProvider::getTextureDataProvider() const {
         return _tileDataset;
@@ -151,8 +135,7 @@ namespace openspace {
             readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
         }
         return readyResults;
-    }
-   
+    }   
 
     bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
         // only allow tile to be enqueued if it's not already enqueued
@@ -180,4 +163,5 @@ namespace openspace {
         _enqueuedTileRequests.clear();
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

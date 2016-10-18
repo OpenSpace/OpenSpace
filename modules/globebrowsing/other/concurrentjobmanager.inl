@@ -29,11 +29,10 @@
 #include <ghoul/misc/assert.h>
 //#include <modules/globebrowsing/datastructures/lrucache.h>
 
-
 namespace openspace {
+namespace globebrowsing {
 
-
-
+} // namespace globebrowsing
 } // namespace openspace
 
 #endif // 

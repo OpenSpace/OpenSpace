@@ -36,15 +36,12 @@
 
 #include <sstream>
 
-
-
-
 namespace {
     const std::string _loggerCat = "TextTileProvider";
 }
 
-
 namespace openspace {
+namespace globebrowsing {
 
     TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
         : _tileCache(500)
@@ -150,7 +147,6 @@ namespace openspace {
         glm::uvec4 color = { 0, 0, 0, 0 };
         return Tile::createPlainTile(_textureSize, color);
     }
-
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                             Chunk Index Tile Provider                            //
@@ -268,7 +264,5 @@ namespace openspace {
         }
     }
 
-
-
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

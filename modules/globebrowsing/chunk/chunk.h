@@ -40,6 +40,7 @@
 
 
 namespace openspace {
+namespace globebrowsing {
 
     class RenderableGlobe;
 
@@ -83,8 +84,8 @@ namespace openspace {
 
     };
 
-
-}
+} // namespace globebrowsing
+} // namespace openspace
 
 
 

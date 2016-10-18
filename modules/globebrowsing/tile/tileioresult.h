@@ -30,18 +30,15 @@
 
 #include <ghoul/filesystem/file.h>
 
-
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 #include "gdal_priv.h"
 
-
 #include <memory>
 #include <iostream>
 
-
-
 namespace openspace {
+namespace globebrowsing {
     using namespace ghoul::opengl;
     using namespace ghoul::filesystem;
 
@@ -76,13 +73,7 @@ namespace openspace {
 
     };
 
-
-
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
-
-
 
 #endif  // __TILE_IO_RESULT_H__

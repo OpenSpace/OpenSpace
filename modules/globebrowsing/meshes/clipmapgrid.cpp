@@ -31,21 +31,23 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                            CLIPMAP GRID    (Abstract class)                            //
+//                            CLIPMAP GRID  (Abstract class)                            //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 ClipMapGrid::ClipMapGrid(unsigned int segments)
-    : Grid(segments, segments, TriangleSoup::Positions::No, TriangleSoup::TextureCoordinates::Yes, TriangleSoup::Normals::No)
-{
-
-}
+    : Grid(
+        segments,
+        segments,
+        TriangleSoup::Positions::No,
+        TriangleSoup::TextureCoordinates::Yes,
+        TriangleSoup::Normals::No)
+{}
 
 ClipMapGrid::~ClipMapGrid()
-{
-
-}
+{}
 
 int ClipMapGrid::xSegments() const {
     return segments();
@@ -60,7 +62,7 @@ int ClipMapGrid::segments() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    OUTER CLIPMAP GRID                                    //
+//                                    OUTER CLIPMAP GRID                                //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 OuterClipMapGrid::OuterClipMapGrid(unsigned int segments)
@@ -254,7 +256,6 @@ std::vector<glm::vec4> OuterClipMapGrid::CreatePositions(int xRes, int yRes)
     return positions;
 }
 
-
 std::vector<glm::vec2> OuterClipMapGrid::CreateTextureCoordinates(int xRes, int yRes){
     validate(xRes, yRes);
     int segments = xRes;
@@ -316,9 +317,8 @@ std::vector<glm::vec3> OuterClipMapGrid::CreateNormals(int xRes, int yRes) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    INNER CLIPMAP GRID                                    //
+//                                    INNER CLIPMAP GRID                                //
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 InnerClipMapGrid::InnerClipMapGrid(unsigned int segments)
     : ClipMapGrid(segments)
@@ -410,7 +410,6 @@ std::vector<glm::vec4> InnerClipMapGrid::CreatePositions(int xRes, int yRes)
     return positions;
 }
 
-
 std::vector<glm::vec2> InnerClipMapGrid::CreateTextureCoordinates(int xRes, int yRes) {
     validate(xRes, yRes);
     int segments = xRes;
@@ -444,5 +443,5 @@ std::vector<glm::vec3> InnerClipMapGrid::CreateNormals(int xRes, int yRes) {
     return normals;
 }
 
-
-}// namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

@@ -38,17 +38,12 @@
 #include <sstream>
 #include <algorithm>
 
-
-
-
-
 namespace {
     const std::string _loggerCat = "TileIOResult";
 }
 
-
-
 namespace openspace {
+namespace globebrowsing {
     void TilePreprocessData::serialize(std::ostream& os) {
         os << maxValues.size() << std::endl;
         for (float f : maxValues) {
@@ -60,7 +55,6 @@ namespace openspace {
         }
         os << std::endl;
     }
-
 
     TilePreprocessData TilePreprocessData::deserialize(std::istream& is) {
         TilePreprocessData res;
@@ -84,11 +78,7 @@ namespace openspace {
         , tileIndex(0, 0, 0)
         , error(CE_None)
         , nBytesImageData(0)
-    {
-
-    }
-
-
+    {}
         
     TileIOResult TileIOResult::createDefaultRes() {
         TileIOResult defaultRes;
@@ -100,8 +90,6 @@ namespace openspace {
         std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
         return std::move(defaultRes);
     }
-
-
 
     void TileIOResult::serializeMetaData(std::ostream& os) {
         os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
@@ -116,7 +104,6 @@ namespace openspace {
         
         os << nBytesImageData << std::endl;
     }
-
 
     TileIOResult TileIOResult::deserializeMetaData(std::istream& is) {
         TileIOResult res;
@@ -141,5 +128,5 @@ namespace openspace {
         return std::move(res);
     }
 
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

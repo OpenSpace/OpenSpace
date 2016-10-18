@@ -40,6 +40,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
@@ -204,5 +205,5 @@ namespace openspace {
         return corners;
     }
 
-
+} // namespace globebrowsing
 } // namespace openspace

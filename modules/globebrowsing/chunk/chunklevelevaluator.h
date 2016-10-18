@@ -32,8 +32,8 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 
-
 namespace openspace {
+namespace globebrowsing {
 
     class ChunkLevelEvaluator {
     public:
@@ -57,8 +57,8 @@ namespace openspace {
     public:
         virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
     };
-
-}
+} // namespace globebrowsing
+} // namespace openspace
 
 
 

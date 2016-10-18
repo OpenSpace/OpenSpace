@@ -31,7 +31,6 @@
 #include <iostream>
 #include <unordered_map>
 
-
 #include <ghoul/filesystem/file.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/threadpool.h>
@@ -40,8 +39,8 @@
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-
 namespace openspace {
+namespace globebrowsing {
 
     struct TileDataLayout {
         TileDataLayout();
@@ -70,15 +69,11 @@ namespace openspace {
             size_t totalNumBytes;
         } write;
 
-
         IODescription cut(PixelRegion::Side side, int pos);
     };
 
-
-
     using namespace ghoul::opengl;
     using namespace ghoul::filesystem;
-
 
     class TileDataset {
     public:
@@ -190,10 +185,7 @@ namespace openspace {
         bool hasBeenInitialized;
     };
 
-
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif  // __TILE_DATASET_H__

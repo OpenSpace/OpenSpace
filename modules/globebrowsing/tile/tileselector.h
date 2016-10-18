@@ -31,17 +31,14 @@
 #include <modules/globebrowsing/tile/tile.h>
 #include <vector>
 
-
-
 namespace openspace {
-
+namespace globebrowsing {
 
     class TileSelector {
     public:
         static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
         static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex);
         static std::vector<TileAndTransform> getTilesSortedByHighestResolution(const TileProviderGroup&, const TileIndex& tileIndex);
-
 
         struct CompareResolution {
             bool operator() (const TileAndTransform& a, const TileAndTransform& b);
@@ -51,13 +48,9 @@ namespace openspace {
 
     private:
         static void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
-
     };
 
-    
-
-
-}  // namespace openspace
-
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __TILE_SELECTOR_H__

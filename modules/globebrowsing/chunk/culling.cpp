@@ -42,6 +42,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                            FRUSTUM CULLER                                            //
@@ -158,4 +159,5 @@ namespace openspace {
         return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

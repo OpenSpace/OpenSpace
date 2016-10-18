@@ -31,7 +31,7 @@
 
 
 namespace openspace {
-
+namespace globebrowsing {
     
     template<typename KeyType, typename ValueType>
     LRUCache<KeyType, ValueType>::LRUCache(size_t size)
@@ -41,7 +41,6 @@ namespace openspace {
     LRUCache<KeyType, ValueType>::~LRUCache() {    
         // Clean up list and map!
     }
-
 
     //////////////////////////////
     //        PUBLIC INTERFACE    //
@@ -67,13 +66,11 @@ namespace openspace {
         clean();
     }
 
-
     template<typename KeyType, typename ValueType>
     bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const
     {
         return _itemMap.count(key) > 0;
     }
-
 
     template<typename KeyType, typename ValueType>
     ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key)
@@ -91,8 +88,6 @@ namespace openspace {
         return _itemMap.size();
     }
 
-
-
     //////////////////////////////
     //        PRIVATE HELPERS        //
     //////////////////////////////
@@ -106,7 +101,7 @@ namespace openspace {
         }
     }
 
-
+} // namespace globebrowsing
 } // namespace openspace
 
-#endif // !__LRU_CACHE__
+#endif // __LRU_CACHE__

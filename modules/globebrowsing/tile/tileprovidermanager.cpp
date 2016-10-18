@@ -30,15 +30,12 @@
 
 #include "cpl_minixml.h"
 
-
 namespace {
     const std::string _loggerCat = "TileProviderManager";
 }
 
-
 namespace openspace {
-
-
+namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
     //                            Tile Provider Group                                   //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +47,6 @@ namespace openspace {
             }
         }
     }
-
 
     const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const {
         std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
@@ -75,8 +71,6 @@ namespace openspace {
     //////////////////////////////////////////////////////////////////////////////////////
     //                           Tile Provider Manager                                  //
     //////////////////////////////////////////////////////////////////////////////////////
-
-
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
         const ghoul::Dictionary& textureInitDictionary){
@@ -194,6 +188,5 @@ namespace openspace {
         }
     }
 
-   
-
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

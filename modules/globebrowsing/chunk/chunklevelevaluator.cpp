@@ -41,7 +41,7 @@ namespace {
 }
 
 namespace openspace {
-
+namespace globebrowsing {
     
     int EvaluateChunkLevelByDistance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         // Calculations are done in the reference frame of the globe. Hence, the camera
@@ -179,5 +179,5 @@ namespace openspace {
 
         return currLevel - 1;;
     }
-
+} // namespace globebrowsing
 } // namespace openspace

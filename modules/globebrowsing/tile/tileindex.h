@@ -31,10 +31,8 @@
 #include <vector>
 #include <stdint.h>
 
-
-
 namespace openspace {
-    
+namespace globebrowsing {
 
 class Geodetic2;
 
@@ -52,17 +50,11 @@ enum CardinalDirection {
     SOUTH,
 };
 
-
-
 using TileHashKey = uint64_t;
 
-
 struct TileIndex {
-    
-
     int x, y, level;
     
-
     TileIndex() : x(0), y(0), level(0) { }
     TileIndex(int x, int y, int level) : x(x), y(y), level(level) { }
     TileIndex(const TileIndex& other) : x(other.x), y(other.y), level(other.level) { }
@@ -96,7 +88,6 @@ struct TileIndex {
         return y % 2 == 1;
     }
 
-
     TileIndex child(Quad q) const;
 
 
@@ -115,12 +106,9 @@ struct TileIndex {
     bool operator==(const TileIndex& other) const;
 };
 
-
 std::ostream& operator<<(std::ostream& os, const TileIndex& ti);
 
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif // __TILE_INDEX_H__

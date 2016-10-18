@@ -28,14 +28,16 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 namespace openspace {
+namespace globebrowsing {
 
     /**
     This class is based largely on the Ellipsoid class defined in the book
     "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
     described using ellipsoids than spheres. All inputs and outputs to this class is
-    in the WGS84 standard coordinate system where the x-axis points towards geographic
+    based on the WGS84 standard coordinate system where the x-axis points towards geographic
     (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
-    z-axis points towards the north pole.
+    z-axis points towards the north pole. For other globes than earth of course the radii
+    can differ.
     */
 class Ellipsoid {
 public:
@@ -55,7 +57,6 @@ public:
     Ellipsoid(Scalar x, Scalar y, Scalar z);
     ~Ellipsoid();
 
-
     /**
     Scales a point along the geocentric normal and places it on the surface of the
     Ellipsoid.
@@ -63,7 +64,6 @@ public:
     of the Ellipsoid
     */
     Vec3 geocentricSurfaceProjection(const Vec3& p) const;
-
 
     /**
     Scales a point along the geodetic normal and places it on the surface of the
@@ -81,7 +81,6 @@ public:
     const Vec3& oneOverRadiiSquared() const;
     const Vec3& radiiToTheFourth() const;
     
-
     Scalar minimumRadius() const;
     Scalar maximumRadius() const;
     Scalar averageRadius() const;
@@ -107,6 +106,8 @@ private:
 
     Vec3 _radii;
 };
+
+} // namespace globebrowsing
 } // namespace openspace
 
 #endif // __ELLIPSOID_H__

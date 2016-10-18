@@ -29,6 +29,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     Grid::Grid(
         int xSegments,
@@ -38,18 +39,15 @@ namespace openspace {
         TriangleSoup::Normals useNormals)
     : _xSegments(xSegments)
     , _ySegments(ySegments)
-{
-
-}
+{}
 
 Grid::~Grid()
-{
-
-}
+{}
 
 TriangleSoup& Grid::geometry()
 {
     return *_geometry;
 }
 
-}// namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

@@ -29,9 +29,9 @@
 
 #include <modules/globebrowsing/tile/asynctilereader.h> // TilePreprocessData
 
-
 namespace openspace {
-    
+namespace globebrowsing {
+
     using namespace ghoul::opengl;
 
     /**
@@ -40,7 +40,6 @@ namespace openspace {
     struct Tile {
         std::shared_ptr<Texture> texture;
         std::shared_ptr<TilePreprocessData> preprocessData;
-
 
         /**
         * Describe if this Tile is good for usage (OK) or otherwise
@@ -73,7 +72,6 @@ namespace openspace {
             */
             OK 
         } status;
-    
         
         /**
          * Instantiates a new tile with a single color. 
@@ -104,9 +102,8 @@ namespace openspace {
         TileUvTransform uvTransform;
     };
 
-}  // namespace openspace
-
-
+} // namespace globebrowsing
+} // namespace openspace
 
 
 #endif  // __TILE_H__

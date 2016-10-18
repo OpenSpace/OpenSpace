@@ -39,6 +39,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
         // Required input
@@ -92,4 +93,5 @@ namespace openspace {
         return 1337; // unlimited
     }
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

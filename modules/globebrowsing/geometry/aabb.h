@@ -28,11 +28,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-// open space includes
-
-
-
 namespace openspace {
+namespace globebrowsing {
 
     using namespace glm;
 
@@ -59,7 +56,6 @@ namespace openspace {
         float max;
     };
 
-
     struct AABB2 {
         AABB2();
         AABB2(const vec2& min, const vec2& max);
@@ -76,7 +72,6 @@ namespace openspace {
         vec2 max;
     };
 
-
     struct AABB3 {
         AABB3();
         AABB3(const vec3& min, const vec3& max);
@@ -89,11 +84,11 @@ namespace openspace {
         bool intersects(const AABB3& o) const;
         AABBSpatialRelation relationTo(const AABB3& o) const;
 
-
         vec3 min;
         vec3 max;
     };
-   
-}  // namespace openspace
+
+} // namespace globebrowsing   
+} // namespace openspace
 
 #endif  // __AABB_H__

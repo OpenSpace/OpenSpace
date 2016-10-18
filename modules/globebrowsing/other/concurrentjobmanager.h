@@ -37,10 +37,8 @@
 
 #include <ghoul/misc/assert.h>
 
-
-
 namespace openspace {
-
+namespace globebrowsing {
 
     // Templated abstract base class representing a job to be done.
     // Client code derive from this class and implement the virtual execute() method
@@ -54,9 +52,6 @@ namespace openspace {
         virtual std::shared_ptr<P> product() = 0;
     
     };
-
-
-
 
     /* 
      * Templated Concurrent Job Manager
@@ -73,7 +68,6 @@ namespace openspace {
         ~ConcurrentJobManager() {
 
         }
-
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
             //threadPool->queue([this, job]() {
@@ -105,16 +99,13 @@ namespace openspace {
             threadPool->clearTasks();
         }
 
-    
     private:
 
         ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
         std::shared_ptr<ThreadPool> threadPool;
     };
 
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif // __CONCURRENT_JOB_MANAGER_H__

@@ -36,9 +36,9 @@
 #include <vector>
 #include <string>
 
-
 namespace openspace {
-    
+namespace globebrowsing {
+
     struct NamedTileProvider {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
@@ -46,8 +46,6 @@ namespace openspace {
 
         PerLayerSettings settings;
     };
-
-
 
     struct TileProviderGroup {
 
@@ -61,8 +59,6 @@ namespace openspace {
 
     };
 
-
-
     class TileProviderManager {
     public:
 
@@ -71,14 +67,11 @@ namespace openspace {
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
 
-
         TileProviderGroup& getTileProviderGroup(size_t groupId);
         TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
 
         void update();
         void reset(bool includingInactive = false);
-
-
     private:
         static void initTexures(
             std::vector<NamedTileProvider>& destination, 
@@ -88,5 +81,7 @@ namespace openspace {
         std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif  // __TILE_PROVIDER_MANAGER_H__

@@ -33,6 +33,7 @@
 #include <vector>
 
 namespace openspace {
+namespace globebrowsing {
 
 class BasicGrid : public Grid
 {
@@ -69,5 +70,8 @@ private:
     inline size_t numElements(int xSegments, int ySegments);
     inline size_t numVertices(int xSegments, int ySegments);
 };
+
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif // __BASICGRIDGEOMETRY_H__

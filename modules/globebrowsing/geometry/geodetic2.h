@@ -37,31 +37,24 @@
 
 #include <ghoul/misc/assert.h>
 
-
-
-
 // Using double precision
 typedef double Scalar;
 typedef glm::dvec2 Vec2;
 typedef glm::dvec3 Vec3;
 
 namespace openspace {
+namespace globebrowsing {
 
-    // Forward declaration
-    class Ellipsoid;
+// Forward declaration
+class Ellipsoid;
 
 struct Geodetic2 {
     Geodetic2();
     Geodetic2(Scalar latitude, Scalar longitude);
     Geodetic2(const Geodetic2& src);
-
     
-    /*
-    static Geodetic2 fromCartesian(const Vec3& v);
-    Vec3 asUnitCartesian() const;
-    */
-
-
+    //static Geodetic2 fromCartesian(const Vec3& v);
+    //Vec3 asUnitCartesian() const;
 
     Vec2 toLonLatVec2() const;
 
@@ -77,15 +70,10 @@ struct Geodetic2 {
     Scalar lon;
 };
 
-
-
 struct Geodetic3 {
     Geodetic2 geodetic2;
     Scalar height;
 };
-
- 
-
 
 //////////////////////////////////////////////////////////////////////////////////////
 //                                 GEODETICPATCH                                        //
@@ -105,7 +93,6 @@ public:
     GeodeticPatch(const GeodeticPatch& patch);
 
     GeodeticPatch(const TileIndex& tileIndex);
-
 
     void setCenter(const Geodetic2&);
     void setHalfSize(const Geodetic2&);    
@@ -168,6 +155,7 @@ private:
     Geodetic2 _halfSize;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
 #endif // __GEODETIC2_H__

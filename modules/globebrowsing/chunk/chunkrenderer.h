@@ -51,7 +51,8 @@ namespace opengl {
 }
 
 namespace openspace {
-    
+namespace globebrowsing {
+
     class ChunkRenderer {
     public:
         ChunkRenderer(std::shared_ptr<Grid> grid,
@@ -127,6 +128,7 @@ namespace openspace {
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> _localProgramUniformHandler;
     };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif  // __CHUNK_RENDERER_H__

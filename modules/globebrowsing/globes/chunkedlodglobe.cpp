@@ -53,6 +53,7 @@ namespace {
 }
 
 namespace openspace {
+namespace globebrowsing {
 
     const TileIndex ChunkedLodGlobe::LEFT_HEMISPHERE_INDEX =
         TileIndex(0, 0, 1);
@@ -251,4 +252,6 @@ namespace openspace {
     void ChunkedLodGlobe::update(const UpdateData& data) {
         _renderer->update();
     }
-}  // namespace openspace
+    
+} // namespace globebrowsing
+} // namespace openspace

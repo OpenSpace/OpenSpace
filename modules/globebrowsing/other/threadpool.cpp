@@ -33,9 +33,8 @@
 #include <ghoul/misc/assert.h>
 #include <iostream>
 
-
-
 namespace openspace {
+namespace globebrowsing {
 
     Worker::Worker(ThreadPool& pool)
         : pool(pool)
@@ -70,13 +69,7 @@ namespace openspace {
             // execute the task
             task();
         }
-
-        
     }
-
-
-
-
 
     ThreadPool::ThreadPool(size_t numThreads)
         : stop(false)
@@ -97,7 +90,6 @@ namespace openspace {
             workers[i].join();
         }
     }
-    
 
     // add new work item to the pool
     void ThreadPool::enqueue(std::function<void()> f) {
@@ -119,5 +111,5 @@ namespace openspace {
         } // release lock
     }
 
-
+} // namespace globebrowsing
 } // namespace openspace

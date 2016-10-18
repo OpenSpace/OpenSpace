@@ -41,13 +41,13 @@
 #include <modules/globebrowsing/other/lrucache.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                    TILE PROVIDER                                        //
 //////////////////////////////////////////////////////////////////////////////////////////
 
-
 namespace openspace {
+namespace globebrowsing {
+
     using namespace ghoul::fontrendering;
 
     /**
@@ -66,7 +66,6 @@ namespace openspace {
         virtual ~TextTileProvider();
 
         // The TileProvider interface below is implemented in this class
-
         virtual Tile getTile(const TileIndex& tileIndex);
         virtual Tile getDefaultTile();
         virtual Tile::Status getTileStatus(const TileIndex& index);
@@ -113,7 +112,6 @@ namespace openspace {
         GLuint _fbo;
     };
 
-
     /**
      * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
      */
@@ -135,7 +133,6 @@ namespace openspace {
 
         virtual TileHashKey toHash(const TileIndex& tileIndex) const;
 
-
     private:
 
         int roundedLongitudalLength(const TileIndex& tileIndex) const;
@@ -144,7 +141,8 @@ namespace openspace {
         Tile _backgroundTile;
     };
 
-}  // namespace openspace
+} // namespace globebrowsing
+} // namespace openspace
 
 
 

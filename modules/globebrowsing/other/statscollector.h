@@ -28,7 +28,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem>
 
-
 #include <fstream>
 #include <iomanip>
 #include <unordered_map>
@@ -36,10 +35,8 @@
 #include <set>
 #include <memory>
 
-
-
 namespace openspace {
-    
+namespace globebrowsing {    
 
     template <typename T> 
     struct StatsRecord : public std::unordered_map<std::string, T> {
@@ -50,7 +47,6 @@ namespace openspace {
     struct StatsCollection : public std::vector<StatsRecord<T>> {
         std::set<std::string> keys;
     };
-
 
     template <typename T> class TemplatedStatsCollector{
     public:
@@ -126,7 +122,6 @@ namespace openspace {
             }
         }
 
-
     private:
         
         StatsCollection<T> _data;
@@ -135,7 +130,6 @@ namespace openspace {
 
         size_t _writePos;
         std::string _delimiter;
-
     };
 
     class StatsCollector {
@@ -280,11 +274,7 @@ namespace openspace {
     };
     */
 
-
+} // namespace globebrowsing
 } // namespace openspace
-
-
-
-
 
 #endif  // __STATS_TRACKER_H__

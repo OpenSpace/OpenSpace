@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __CHUNK_LOD_GLOBE__
-#define __CHUNK_LOD_GLOBE__
+#ifndef __CHUNKED_LOD_GLOBE__
+#define __CHUNKED_LOD_GLOBE__
 
 #include <memory>
 
@@ -42,11 +42,11 @@
 #include <modules/globebrowsing/other/statscollector.h>
 
 namespace openspace {
+namespace globebrowsing {
+
     class ChunkLevelEvaluator;
     class RenderableGlobe;
-}
 
-namespace openspace {
     class ChunkedLodGlobe : public Renderable {
     public:
         ChunkedLodGlobe(
@@ -101,6 +101,8 @@ namespace openspace {
 
         const RenderableGlobe& _owner;
     };
-}  // namespace openspace
 
-#endif  // __CHUNK_LOD_GLOBE__
+} // namespace globebrowsing
+} // namespace openspace
+
+#endif  // __CHUNKED_LOD_GLOBE__

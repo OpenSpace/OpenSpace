@@ -33,6 +33,7 @@
 #include <vector>
 
 namespace openspace {
+namespace globebrowsing {
 
 /**
 * Abstract class defining an interface used for geometries with grid structures.
@@ -47,7 +48,8 @@ public:
         int xSegments,
         int ySegments,
         TriangleSoup::Positions usePositions = TriangleSoup::Positions::No,
-        TriangleSoup::TextureCoordinates useTextures = TriangleSoup::TextureCoordinates::No,
+        TriangleSoup::TextureCoordinates useTextures =
+            TriangleSoup::TextureCoordinates::No,
         TriangleSoup::Normals useNormals = TriangleSoup::Normals::No);
     ~Grid();
 
@@ -74,9 +76,9 @@ protected:
     virtual std::vector<GLuint> CreateElements(int xSegments, int ySegments) = 0;
     
     /**
-    * Should return the positions of vertices for a grid with size <code>xSegments</code> *
-    * <code>ySegments</code>. Where the number of vertices in each direction is the number
-    * of segments + 1.
+    * Should return the positions of vertices for a grid with size <code>xSegments</code>
+    * * <code>ySegments</code>. Where the number of vertices in each direction is the
+    * number of segments + 1.
     */
     virtual std::vector<glm::vec4> CreatePositions(int xSegments, int ySegments) = 0;
     
@@ -85,7 +87,8 @@ protected:
     * <code>xSegments</code> * <code>ySegments</code>. Where the number of vertices in
     * each direction is the number of segments + 1.
     */
-    virtual std::vector<glm::vec2> CreateTextureCoordinates(int xSegments, int ySegments) = 0;
+    virtual std::vector<glm::vec2>
+        CreateTextureCoordinates(int xSegments, int ySegments) = 0;
     
     /**
     * Should return the normals of vertices for a grid with size <code>xSegments</code> *
@@ -99,5 +102,8 @@ protected:
     const int _xSegments;
     const int _ySegments;
 };
+
+} // namespace globebrowsing
 } // namespace openspace
+
 #endif // __GRIDGEOMETRY_H__

@@ -34,8 +34,7 @@
 #include <condition_variable>
 
 namespace openspace {
-
-
+namespace globebrowsing {
 
 /**
  * Templated thread-safe queue based on std::thread and std::queue
@@ -91,6 +90,7 @@ private:
     mutable std::condition_variable _cond;
 };
 
-}
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif // __CONCURRENT_QUEUE_H__

@@ -224,17 +224,20 @@ namespace openspace {
         glEnable(GL_CULL_FACE);
     }
     
-    void DebugRenderer::renderAABB2(const AABB2& screenSpaceAABB, RGBA rgba) const {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    void DebugRenderer::renderAABB2(const globebrowsing::AABB2& screenSpaceAABB, RGBA rgba) const {
         Vertices vertices(4);
-        vertices[0] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
-        vertices[1] = vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
-        vertices[2] = vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1);
-        vertices[3] = vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1);
+        vertices[0] = glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.min.y, 1, 1);
+        vertices[1] = glm::vec4(screenSpaceAABB.min.x, screenSpaceAABB.max.y, 1, 1);
+        vertices[2] = glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.min.y, 1, 1);
+        vertices[3] = glm::vec4(screenSpaceAABB.max.x, screenSpaceAABB.max.y, 1, 1);
 
         renderVertices(vertices, GL_LINES, rgba);
     }
-
-    const DebugRenderer::Vertices DebugRenderer::verticesFor(const AABB3& screenSpaceAABB) const {
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    const DebugRenderer::Vertices DebugRenderer::verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const {
         Vertices vertices(8);
         for (size_t i = 0; i < 8; i++) {
             bool cornerIsRight = i % 2 == 0;
@@ -245,11 +248,11 @@ namespace openspace {
             double y = cornerIsUp ? screenSpaceAABB.max.y : screenSpaceAABB.min.y;
             double z = cornerIsFar ? screenSpaceAABB.max.z : screenSpaceAABB.min.z;
 
-            vertices[i] = vec4(x, y, z, 1);
+            vertices[i] = glm::vec4(x, y, z, 1);
         }
         return std::move(vertices);
     }
-
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 } // namespace openspace
 

@@ -33,6 +33,7 @@
 #include <vector>
 
 namespace openspace {
+namespace globebrowsing {
 
 /**
 * This grid is the same as <code>BasicGrid</code> except it has skirts around its edges.
@@ -75,5 +76,7 @@ private:
     inline size_t numElements(int xSegments, int ySegments);
     inline size_t numVertices(int xSegments, int ySegments);
 };
+
+} // namespace globebrowsing
 } // namespace openspace
 #endif // __SKIRTEDGRID_H__

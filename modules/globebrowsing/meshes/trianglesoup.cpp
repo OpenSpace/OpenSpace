@@ -28,8 +28,8 @@ namespace {
     const std::string _loggerCat = "TriangleSoup";
 }
 
-namespace openspace
-{
+namespace openspace {
+namespace globebrowsing {
 
 TriangleSoup::TriangleSoup(std::vector<unsigned int> elements,
     Positions usePositions, TextureCoordinates useTextures, Normals useNormals)
@@ -170,4 +170,5 @@ void TriangleSoup::drawUsingActiveProgram() {
     glBindVertexArray(0);
 }
 
+} // namespace globebrowsing
 } // namespace openspace
