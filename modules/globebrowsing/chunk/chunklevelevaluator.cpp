@@ -163,14 +163,12 @@ namespace globebrowsing {
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
         auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+        auto heightLayers = tileProvidermanager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
         int currLevel = chunk.tileIndex().level;
 
         for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-            auto tileProviderGroup = tileProvidermanager->getTileProviderGroup(i);
-            for (auto tileProvider : tileProviderGroup.getActiveTileProviders()) {
-                Tile::Status tileStatus = tileProvider->getTileStatus(chunk.tileIndex());
-
+            for (auto layer : tileProvidermanager->layerGroup(i).activeLayers()) {
+                Tile::Status tileStatus = layer.tileProvider->getTileStatus(chunk.tileIndex());
                 if (tileStatus == Tile::Status::OK) {
                     return UNKNOWN_DESIRED_LEVEL;
                 }

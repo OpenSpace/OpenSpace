@@ -40,28 +40,19 @@ namespace globebrowsing {
     //                            Tile Provider Group                                   //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    void TileProviderGroup::update() {
-        activeTileProviders.clear();
-        for (auto tileProviderWithName : tileProviders) {
-            if (tileProviderWithName.isActive) {
-                tileProviderWithName.tileProvider->update();
-                activeTileProviders.push_back(tileProviderWithName.tileProvider);
+    void LayerGroup::update() {
+        _activeLayers.clear();
+
+        for (auto layer : layers) {
+            if (layer.isActive) {
+                layer.tileProvider->update();
+                _activeLayers.push_back(layer);
             }
         }
     }
 
-    const std::vector<std::shared_ptr<TileProvider>>& TileProviderGroup::getActiveTileProviders() const {
-        return activeTileProviders;
-    }
-
-    const std::vector<NamedTileProvider> TileProviderGroup::getActiveNamedTileProviders() const {
-        std::vector<NamedTileProvider> activeNamedTileProviders;
-        for (auto tileProviderWithName : tileProviders) {
-            if (tileProviderWithName.isActive) {
-                activeNamedTileProviders.push_back(tileProviderWithName);
-            }
-        }
-        return activeNamedTileProviders;
+    const std::vector<Layer>& LayerGroup::activeLayers() const {
+        return _activeLayers;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -105,12 +96,12 @@ namespace globebrowsing {
             initData.preprocessTiles = i == LayeredTextures::HeightMaps;
 
             initTexures(
-                _layerCategories[i].tileProviders,
+                layerGroups[i].layers,
                 texturesDict,
                 initData);
 
             // init level blending to be true
-            _layerCategories[i].levelBlendingEnabled = true;
+            layerGroups[i].levelBlendingEnabled = true;
         }
     }
 
@@ -118,7 +109,7 @@ namespace globebrowsing {
     {
     }
 
-    void TileProviderManager::initTexures(std::vector<NamedTileProvider>& dest,
+    void TileProviderManager::initTexures(std::vector<Layer>& dest,
         const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
         // Create TileProviders for all textures within this category
@@ -157,29 +148,28 @@ namespace globebrowsing {
         }
     }
 
-    TileProviderGroup& TileProviderManager::getTileProviderGroup(size_t groupId) {
-        return _layerCategories[groupId];
+    LayerGroup& TileProviderManager::layerGroup(size_t groupId) {
+        return layerGroups[groupId];
     }
 
-    TileProviderGroup& TileProviderManager::getTileProviderGroup(LayeredTextures::TextureCategory category) {
-        return _layerCategories[category];
+    LayerGroup& TileProviderManager::layerGroup(LayeredTextures::TextureCategory category) {
+        return layerGroups[category];
     }
 
     void TileProviderManager::update() {
-        for (auto& tileProviderGroup : _layerCategories) {
-            //tileProviderGroup.activeTileProviders.resize(5);
-            tileProviderGroup.update();
+        for (auto& layerGroup : layerGroups) {
+            layerGroup.update();
         }
     }
 
     void TileProviderManager::reset(bool includingInactive) {
-        for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory.tileProviders) {
-                if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->reset();
+        for (auto layerGroup : layerGroups) {
+            for (auto layer : layerGroup.layers) {
+                if (layer.isActive) {
+                    layer.tileProvider->reset();
                 }
                 else if (includingInactive) {
-                    tileProviderWithName.tileProvider->reset();
+                    layer.tileProvider->reset();
                 }
             }
         }

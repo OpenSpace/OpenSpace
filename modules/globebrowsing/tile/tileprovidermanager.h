@@ -39,7 +39,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-    struct NamedTileProvider {
+    struct Layer {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
@@ -47,17 +47,16 @@ namespace globebrowsing {
         PerLayerSettings settings;
     };
 
-    struct TileProviderGroup {
+    struct LayerGroup {
 
         void update();
-        const std::vector<std::shared_ptr<TileProvider>>& getActiveTileProviders() const;
-        const std::vector<NamedTileProvider> getActiveNamedTileProviders() const;
+        const std::vector<Layer>& activeLayers() const;
 
-
-        std::vector<NamedTileProvider> tileProviders;
+        std::vector<Layer> layers;
         bool levelBlendingEnabled;
 
-        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
+    private:
+        std::vector<Layer> _activeLayers;
     };
 
     class TileProviderManager {
@@ -68,18 +67,18 @@ namespace globebrowsing {
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
 
-        TileProviderGroup& getTileProviderGroup(size_t groupId);
-        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
+        LayerGroup& layerGroup(size_t groupId);
+        LayerGroup& layerGroup(LayeredTextures::TextureCategory);
 
         void update();
         void reset(bool includingInactive = false);
     private:
         static void initTexures(
-            std::vector<NamedTileProvider>& destination, 
+            std::vector<Layer>& destination, 
             const ghoul::Dictionary& dict, 
             const TileProviderInitData& initData);
 
-        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        std::array<LayerGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> layerGroups;
 
     };
 

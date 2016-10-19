@@ -72,14 +72,14 @@ namespace globebrowsing {
         return{ Tile::TileUnavailable, uvTransform };
     }
 
-    ChunkTile TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex) {
+    ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex) {
         ChunkTile mostHighResolution;
         mostHighResolution.tile = Tile::TileUnavailable;
         mostHighResolution.uvTransform.uvScale.x = 0;
 
-        auto activeProviders = tileProviderGroup.getActiveTileProviders();
-        for (size_t i = 0; i < activeProviders.size(); i++) {
-            ChunkTile chunkTile = getHighestResolutionTile(activeProviders[i].get(), tileIndex);
+        auto layers = layerGroup.activeLayers();
+        for (size_t i = 0; i < layers.size(); i++) {
+            ChunkTile chunkTile = getHighestResolutionTile(layers[i].tileProvider.get(), tileIndex);
             bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
             bool tileHasPreprocessData = chunkTile.tile.preprocessData != nullptr;
             bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
@@ -96,11 +96,11 @@ namespace globebrowsing {
         return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
     }
 
-    std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const TileIndex& tileIndex) {
-        auto activeProviders = tileProviderGroup.getActiveTileProviders();
+    std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
+        auto layers = layerGroup.activeLayers();
         std::vector<ChunkTile> tiles;
-        for (auto provider : activeProviders){
-            tiles.push_back(getHighestResolutionTile(provider.get(), tileIndex));
+        for (auto layer : layers){
+            tiles.push_back(getHighestResolutionTile(layer.tileProvider.get(), tileIndex));
         }
 
         std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);

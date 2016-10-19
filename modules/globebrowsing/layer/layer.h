@@ -39,6 +39,7 @@
 namespace openspace {
 namespace globebrowsing {
 
+/*
 class TileProvider;
     
 class Layer : public properties::PropertyOwner {
@@ -66,7 +67,7 @@ private:
     bool _enabled;
     
 };
-
+*/
 } // namespace globebrowsing
 } // namespace openspace
 #endif  // LAYER_H

@@ -186,8 +186,8 @@ namespace globebrowsing {
             category++) {
 
             LayeredTextureInfo layeredTextureInfo;
-            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
-            layeredTextureInfo.lastLayerIdx = layerGroup.getActiveTileProviders().size() - 1;
+            auto layerGroup = _tileProviderManager->layerGroup(category);
+            layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
             layeredTextureInfo.layerBlendingEnabled = layerGroup.levelBlendingEnabled;
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
@@ -241,18 +241,18 @@ namespace globebrowsing {
         };
         std::array<std::vector<BlendTexUnits>, LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
-            texUnits[category].resize(layerGroup.getActiveTileProviders().size());
+            auto layerGroup = _tileProviderManager->layerGroup(category);
+            texUnits[category].resize(layerGroup.activeLayers().size());
         }
 
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             // Go through all the providers in this category
-            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
-            auto activeProviders = layerGroup.getActiveTileProviders();
+            auto layerGroup = _tileProviderManager->layerGroup(category);
+            const auto& layers = layerGroup.activeLayers();
             int i = 0;
-            for (auto it = activeProviders.begin(); it != activeProviders.end(); it++) {
-                auto tileProvider = it->get();
+            for (auto it = layers.begin(); it != layers.end(); it++) {
+                auto tileProvider = it->tileProvider.get();
 
                 // Get the texture that should be used for rendering
                 ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
@@ -301,7 +301,7 @@ namespace globebrowsing {
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
                     i,
-                    _tileProviderManager->getTileProviderGroup(category).getActiveNamedTileProviders()[i].settings);
+                    _tileProviderManager->layerGroup(category).activeLayers()[i].settings);
 
                 /*
                 if (category == LayeredTextures::HeightMaps && chunkTile.tile.preprocessData) {
@@ -318,9 +318,9 @@ namespace globebrowsing {
 
         // Go through all the height maps and set depth tranforms
         int i = 0;
-        auto activeHeightProviders = _tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
-        for (auto it = activeHeightProviders.begin(); it != activeHeightProviders.end(); it++) {
-            auto tileProvider = *it;
+        auto heightLayers = _tileProviderManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        for (auto it = heightLayers.begin(); it != heightLayers.end(); it++) {
+            auto tileProvider = it->tileProvider;
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
             setDepthTransformUniforms(
@@ -359,7 +359,7 @@ namespace globebrowsing {
         
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if(_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0){
+            if(_tileProviderManager->layerGroup(i).levelBlendingEnabled && _tileProviderManager->layerGroup(category).activeLayers().size() > 0){
                 performAnyBlending = true; 
                 break;
             }
@@ -391,10 +391,10 @@ namespace globebrowsing {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_tileProviderManager->getTileProviderGroup(
-                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
-            _tileProviderManager->getTileProviderGroup(
-                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
+        if (_tileProviderManager->layerGroup(
+                LayeredTextures::NightTextures).activeLayers().size() > 0 ||
+            _tileProviderManager->layerGroup(
+                LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
             glm::vec3 directionToSunWorldSpace =
@@ -438,7 +438,7 @@ namespace globebrowsing {
         bool performAnyBlending = false;
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0) {
+            if (_tileProviderManager->layerGroup(i).levelBlendingEnabled && _tileProviderManager->layerGroup(category).activeLayers().size() > 0) {
                 performAnyBlending = true;
                 break;
             }
@@ -472,10 +472,10 @@ namespace globebrowsing {
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        if (_tileProviderManager->getTileProviderGroup(
-                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
-            _tileProviderManager->getTileProviderGroup(
-                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0 ||
+        if (_tileProviderManager->layerGroup(
+                LayeredTextures::NightTextures).activeLayers().size() > 0 ||
+            _tileProviderManager->layerGroup(
+                LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
             glm::vec3 directionToSunWorldSpace =

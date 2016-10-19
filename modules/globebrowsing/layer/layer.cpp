@@ -46,17 +46,18 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-    
+    /*
     Layer::Layer(const ghoul::Dictionary& dict){
         dict.getValue(KEY_NAME, _name);
         dict.getValue(KEY_ENABLED, _enabled);
         _tileProvider = std::unique_ptr<TileProvider>(TileProvider::createFromDictionary(dict));
         
         
-    }
+    }*/
 
+    /*
     void Layer::bind(ProgramObject* programObject, const TileIndex& tileIndex){
-        /*
+        
         ChunkTile tat = TileSelector::getHighestResolutionTile(_tileProvider.get(), tileIndex);
         if (tat.tile.status == Tile::Status::Unavailable) {
             tat.tile = _tileProvider->getDefaultTile();
@@ -98,9 +99,10 @@ namespace globebrowsing {
                 texUnits[category][i].blendTexture2,
                 tatParent2);
         }
-         */
+         
         
     }
+    */
     /*
     void Layer::ensureIdsAreUpdated(LayeredTextureShaderProvider* shaderProvider){
         if (shaderProvider->updatedOnLastCall())

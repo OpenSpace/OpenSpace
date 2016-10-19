@@ -77,22 +77,22 @@ namespace globebrowsing {
         setName(LayeredTextures::TEXTURE_CATEGORY_NAMES[category]);
         
         // Create the property owners
-        auto& layerGroup = _tileProviderManager.getTileProviderGroup(category);
-        for (NamedTileProvider& tileProvider : layerGroup.tileProviders) {
+        auto& layerGroup = _tileProviderManager.layerGroup(category);
+        for (Layer& layer : layerGroup.layers) {
             _texturePropertyOwners.push_back(
-                std::make_unique<SingleTexturePropertyOwner>(tileProvider.name));
+                std::make_unique<SingleTexturePropertyOwner>(layer.name));
         }
         
         // Specify and add the property owners
-        for (int i = 0; i < layerGroup.tileProviders.size(); i++) {
-            NamedTileProvider &tileProvider = layerGroup.tileProviders[i];
+        for (int i = 0; i < layerGroup.layers.size(); i++) {
+            Layer &layer = layerGroup.layers[i];
             SingleTexturePropertyOwner &prop = *_texturePropertyOwners[i].get();
-            prop.isEnabled.set(tileProvider.isActive);
+            prop.isEnabled.set(layer.isActive);
             prop.isEnabled.onChange([&]{
-                tileProvider.isActive = prop.isEnabled;
+                layer.isActive = prop.isEnabled;
             });
             
-            for (auto setting : tileProvider.settings.array()) {
+            for (auto setting : layer.settings.array()) {
                 prop.addProperty(setting->property());
             }
   
@@ -276,11 +276,11 @@ namespace globebrowsing {
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
-        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(
-            LayeredTextures::HeightMaps).getActiveTileProviders();
-        if (heightMapProviders.size() == 0)
+        const auto& heightLayers = _tileProviderManager->layerGroup(
+            LayeredTextures::HeightMaps).activeLayers();
+        if (heightLayers.size() == 0)
             return 0;
-        const auto& tileProvider = heightMapProviders[0];
+        const auto& tileProvider = heightLayers[0].tileProvider;
 
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
