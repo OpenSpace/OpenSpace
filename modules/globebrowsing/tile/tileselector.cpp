@@ -42,7 +42,7 @@ namespace globebrowsing {
 
     const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
-    TileAndTransform TileSelector::getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents) {
+    ChunkTile TileSelector::getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents) {
         TileUvTransform uvTransform;
         uvTransform.uvOffset = glm::vec2(0, 0);
         uvTransform.uvScale = glm::vec2(1, 1);
@@ -72,33 +72,33 @@ namespace globebrowsing {
         return{ Tile::TileUnavailable, uvTransform };
     }
 
-    TileAndTransform TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex) {
-        TileAndTransform mostHighResolution;
+    ChunkTile TileSelector::getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex) {
+        ChunkTile mostHighResolution;
         mostHighResolution.tile = Tile::TileUnavailable;
         mostHighResolution.uvTransform.uvScale.x = 0;
 
         auto activeProviders = tileProviderGroup.getActiveTileProviders();
         for (size_t i = 0; i < activeProviders.size(); i++) {
-            TileAndTransform tileAndTransform = getHighestResolutionTile(activeProviders[i].get(), tileIndex);
-            bool tileIsOk = tileAndTransform.tile.status == Tile::Status::OK;
-            bool tileHasPreprocessData = tileAndTransform.tile.preprocessData != nullptr;
-            bool tileIsHigherResolution = tileAndTransform.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
+            ChunkTile chunkTile = getHighestResolutionTile(activeProviders[i].get(), tileIndex);
+            bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
+            bool tileHasPreprocessData = chunkTile.tile.preprocessData != nullptr;
+            bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
             if (tileIsOk && tileHasPreprocessData && tileIsHigherResolution) {
-                mostHighResolution = tileAndTransform;
+                mostHighResolution = chunkTile;
             }
         }
 
         return mostHighResolution;
     }
 
-    bool TileSelector::CompareResolution::operator()(const TileAndTransform& a, const TileAndTransform& b) {
+    bool TileSelector::CompareResolution::operator()(const ChunkTile& a, const ChunkTile& b) {
         // large uv scale means smaller resolution
         return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
     }
 
-    std::vector<TileAndTransform> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const TileIndex& tileIndex) {
+    std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const TileProviderGroup& tileProviderGroup, const TileIndex& tileIndex) {
         auto activeProviders = tileProviderGroup.getActiveTileProviders();
-        std::vector<TileAndTransform> tiles;
+        std::vector<ChunkTile> tiles;
         for (auto provider : activeProviders){
             tiles.push_back(getHighestResolutionTile(provider.get(), tileIndex));
         }

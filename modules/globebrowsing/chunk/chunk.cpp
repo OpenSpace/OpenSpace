@@ -109,7 +109,7 @@ namespace globebrowsing {
         
         size_t HEIGHT_CHANNEL = 0;
         const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
-        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
+        std::vector<ChunkTile> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {
             bool goodTile = tile.tile.status == Tile::Status::OK;

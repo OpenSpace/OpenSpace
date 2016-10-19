@@ -102,7 +102,7 @@ namespace globebrowsing {
             LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
             size_t layerIndex,
             ghoul::opengl::TextureUnit& texUnit,
-            const TileAndTransform& tileAndTransform);
+            const ChunkTile& chunkTile);
         
         void setLayerSettingsUniforms(
             std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,

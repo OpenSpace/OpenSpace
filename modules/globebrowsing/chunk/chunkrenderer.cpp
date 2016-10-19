@@ -126,12 +126,12 @@ namespace globebrowsing {
         LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
-        const TileAndTransform& tileAndTransform)
+        const ChunkTile& chunkTile)
     {
         // Blend tile with two parents
         // The texture needs a unit to sample from
         texUnit.activate();
-        tileAndTransform.tile.texture->bind();
+        chunkTile.tile.texture->bind();
 
         uniformIdHandler->programObject().setUniform(
             uniformIdHandler->getId(
@@ -146,14 +146,14 @@ namespace globebrowsing {
                 blendLayerSuffix,
                 layerIndex,
                 LayeredTextures::GlslTileDataId::uvTransform_uvScale),
-            tileAndTransform.uvTransform.uvScale);
+            chunkTile.uvTransform.uvScale);
         uniformIdHandler->programObject().setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
                 LayeredTextures::GlslTileDataId::uvTransform_uvOffset),
-            tileAndTransform.uvTransform.uvOffset);
+            chunkTile.uvTransform.uvOffset);
     }
 
     void ChunkRenderer::setLayerSettingsUniforms(
@@ -257,11 +257,11 @@ namespace globebrowsing {
                 auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
-                TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
-                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
-                    tileAndTransform.tile = tileProvider->getDefaultTile();
-                    tileAndTransform.uvTransform.uvOffset = { 0, 0 };
-                    tileAndTransform.uvTransform.uvScale = { 1, 1 };
+                ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
+                if (chunkTile.tile.status == Tile::Status::Unavailable) {
+                    chunkTile.tile = tileProvider->getDefaultTile();
+                    chunkTile.uvTransform.uvOffset = { 0, 0 };
+                    chunkTile.uvTransform.uvScale = { 1, 1 };
                 }
 
                 activateTileAndSetTileUniforms(
@@ -270,13 +270,13 @@ namespace globebrowsing {
                     LayeredTextures::BlendLayerSuffixes::none,
                     i,
                     texUnits[category][i].blendTexture0,
-                    tileAndTransform);
+                    chunkTile);
 
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
-                    TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 1);
-                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
-                        tileAndTransformParent1 = tileAndTransform;
+                    ChunkTile chunkTileParent1 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 1);
+                    if (chunkTileParent1.tile.status == Tile::Status::Unavailable) {
+                        chunkTileParent1 = chunkTile;
                     }
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
@@ -284,11 +284,11 @@ namespace globebrowsing {
                         LayeredTextures::BlendLayerSuffixes::Parent1,
                         i,
                         texUnits[category][i].blendTexture1,
-                        tileAndTransformParent1);
+                        chunkTileParent1);
 
-                    TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 2);
-                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
-                        tileAndTransformParent2 = tileAndTransformParent1;
+                    ChunkTile chunkTileParent2 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 2);
+                    if (chunkTileParent2.tile.status == Tile::Status::Unavailable) {
+                        chunkTileParent2 = chunkTileParent1;
                     }
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
@@ -296,7 +296,7 @@ namespace globebrowsing {
                         LayeredTextures::BlendLayerSuffixes::Parent2,
                         i,
                         texUnits[category][i].blendTexture2,
-                        tileAndTransformParent2);
+                        chunkTileParent2);
                 }
                 
                 setLayerSettingsUniforms(
@@ -306,8 +306,8 @@ namespace globebrowsing {
                     _tileProviderManager->getTileProviderGroup(category).getActiveNamedTileProviders()[i].settings);
 
                 /*
-                if (category == LayeredTextures::HeightMaps && tileAndTransform.tile.preprocessData) {
-                    //auto preprocessingData = tileAndTransform.tile.preprocessData;
+                if (category == LayeredTextures::HeightMaps && chunkTile.tile.preprocessData) {
+                    //auto preprocessingData = chunkTile.tile.preprocessData;
                     //float noDataValue = preprocessingData->noDataValues[0];
                     programObject->setUniform(
                         "minimumValidHeight[" + std::to_string(i) + "]",

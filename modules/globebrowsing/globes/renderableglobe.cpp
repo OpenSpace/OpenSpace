@@ -297,10 +297,10 @@ namespace globebrowsing {
             geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
         // Transform the uv coordinates to the current tile texture
-        TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(
+        ChunkTile chunkTile = TileSelector::getHighestResolutionTile(
             tileProvider.get(), chunkIdx);
-        const auto& tile = tileAndTransform.tile;
-        const auto& uvTransform = tileAndTransform.uvTransform;
+        const auto& tile = chunkTile.tile;
+        const auto& uvTransform = chunkTile.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
         if (tile.status != Tile::Status::OK) {
             return 0;

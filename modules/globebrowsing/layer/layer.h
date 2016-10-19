@@ -22,16 +22,51 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tileandtransform.h>
+#ifndef LAYER_H
+#define LAYER_H
 
-#include <ghoul/logging/logmanager.h>
+#include <memory>
+#include <string>
 
-namespace {
-    const std::string _loggerCat = "TileAndTransform";
-}
+#include <array>
+
+#include <ghoul/opengl/programobject.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <modules/globebrowsing/layered_rendering/perlayersetting.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace {
 namespace globebrowsing {
 
+class TileProvider;
+    
+class Layer : public properties::PropertyOwner {
+public:
+    Layer(const ghoul::Dictionary& dict);
+    
+    void bind(ProgramObject* program, const TileIndex& tileIndex);
+
+
+    static const size_t NUM_LAYER_SETTINGS_VARIABLES = 3;
+    static const size_t NUM_TILE_DATA_VARIABLES = 3;
+    static const size_t NUM_BLEND_TEXTURES = 3;
+
+private:
+    
+    //void ensureIdsAreUpdated(LayeredTextureShaderProvider* shaderProvider);
+
+
+    std::string _name;
+    std::unique_ptr<TileProvider> _tileProvider;
+
+    std::array<std::array<GLint, NUM_TILE_DATA_VARIABLES>,NUM_BLEND_TEXTURES> _tileUniformIds;
+    std::array<GLint, NUM_LAYER_SETTINGS_VARIABLES> _layerSettingsUniformIds;
+
+    bool _enabled;
+    
+};
+
 } // namespace globebrowsing
 } // namespace openspace
+#endif  // LAYER_H

@@ -22,30 +22,16 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILEANDTRANSFORM_H__
-#define __TILEANDTRANSFORM_H__
+#include <modules/globebrowsing/tile/chunktile.h>
 
+#include <ghoul/logging/logmanager.h>
 
-
-#include <modules/globebrowsing/tile/tile.h>
+namespace {
+    const std::string _loggerCat = "ChunkTile";
+}
 
 namespace openspace {
 namespace globebrowsing {
 
-    using namespace ghoul::opengl;
-
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
-    };
-
-    struct TileAndTransform {
-        Tile tile;
-        TileUvTransform uvTransform;
-    };
-
 } // namespace globebrowsing
 } // namespace openspace
-
-
-#endif  // __TILEANDTRANSFORM_H__

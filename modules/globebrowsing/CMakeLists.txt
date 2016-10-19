@@ -54,7 +54,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileandtransform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
@@ -110,7 +110,7 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileandtransform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp

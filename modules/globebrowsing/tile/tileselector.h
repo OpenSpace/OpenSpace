@@ -29,7 +29,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
-#include <modules/globebrowsing/tile/tileandtransform.h>
+#include <modules/globebrowsing/tile/chunktile.h>
 #include <vector>
 
 namespace openspace {
@@ -37,12 +37,12 @@ namespace globebrowsing {
 
     class TileSelector {
     public:
-        static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
-        static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex);
-        static std::vector<TileAndTransform> getTilesSortedByHighestResolution(const TileProviderGroup&, const TileIndex& tileIndex);
+        static ChunkTile getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
+        static ChunkTile getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, TileIndex tileIndex);
+        static std::vector<ChunkTile> getTilesSortedByHighestResolution(const TileProviderGroup&, const TileIndex& tileIndex);
 
         struct CompareResolution {
-            bool operator() (const TileAndTransform& a, const TileAndTransform& b);
+            bool operator() (const ChunkTile& a, const ChunkTile& b);
         };
 
         static const CompareResolution HIGHEST_RES;

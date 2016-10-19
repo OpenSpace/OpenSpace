@@ -22,40 +22,30 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILEPILE_H__
-#define __TILEPILE_H__
+#ifndef __TILEANDTRANSFORM_H__
+#define __TILEANDTRANSFORM_H__
 
-#include <ghoul/opengl/texture.h> // Texture
-#include <ghoul/opengl/programobject.h> // Texture
+
 
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-#include <vector>
-
 
 namespace openspace {
 namespace globebrowsing {
-    
+
     using namespace ghoul::opengl;
-    
-    class TilePile {
-    public:
-        
-        void update(TileProvider* tileProvider, const TileIndex& tileIndex);
-        void bind(ProgramObject* programObject);
-        
-    private:
-        std::vector<ChunkTile> pile;
-        
+
+    struct TileUvTransform {
+        glm::vec2 uvOffset;
+        glm::vec2 uvScale;
     };
 
-}  // namespace globebrowsing
-}  // namespace openspace
+    struct ChunkTile {
+        Tile tile;
+        TileUvTransform uvTransform;
+    };
+
+} // namespace globebrowsing
+} // namespace openspace
 
 
-
-
-#endif  // __TILEPILE_H__
+#endif  // __TILEANDTRANSFORM_H__
