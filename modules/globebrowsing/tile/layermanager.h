@@ -59,13 +59,13 @@ namespace globebrowsing {
         std::vector<Layer> _activeLayers;
     };
 
-    class TileProviderManager {
+    class LayerManager {
     public:
 
-        TileProviderManager(
+        LayerManager(
             const ghoul::Dictionary& textureCategoriesDictionary,
             const ghoul::Dictionary& textureInitDictionary);
-        ~TileProviderManager();
+        ~LayerManager();
 
         LayerGroup& layerGroup(size_t groupId);
         LayerGroup& layerGroup(LayeredTextures::TextureCategory);

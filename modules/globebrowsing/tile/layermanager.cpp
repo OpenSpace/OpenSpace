@@ -24,14 +24,14 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
 
 namespace {
-    const std::string _loggerCat = "TileProviderManager";
+    const std::string _loggerCat = "LayerManager";
 }
 
 namespace openspace {
@@ -58,7 +58,7 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
     //                           Tile Provider Manager                                  //
     //////////////////////////////////////////////////////////////////////////////////////
-    TileProviderManager::TileProviderManager(
+    LayerManager::LayerManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
         const ghoul::Dictionary& textureInitDictionary){
         // Create all the categories of tile providers
@@ -105,11 +105,11 @@ namespace globebrowsing {
         }
     }
 
-    TileProviderManager::~TileProviderManager()
+    LayerManager::~LayerManager()
     {
     }
 
-    void TileProviderManager::initTexures(std::vector<Layer>& dest,
+    void LayerManager::initTexures(std::vector<Layer>& dest,
         const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
         // Create TileProviders for all textures within this category
@@ -148,21 +148,21 @@ namespace globebrowsing {
         }
     }
 
-    LayerGroup& TileProviderManager::layerGroup(size_t groupId) {
+    LayerGroup& LayerManager::layerGroup(size_t groupId) {
         return layerGroups[groupId];
     }
 
-    LayerGroup& TileProviderManager::layerGroup(LayeredTextures::TextureCategory category) {
+    LayerGroup& LayerManager::layerGroup(LayeredTextures::TextureCategory category) {
         return layerGroups[category];
     }
 
-    void TileProviderManager::update() {
+    void LayerManager::update() {
         for (LayerGroup& layerGroup : layerGroups) {
             layerGroup.update();
         }
     }
 
-    void TileProviderManager::reset(bool includingInactive) {
+    void LayerManager::reset(bool includingInactive) {
         for (LayerGroup& layerGroup : layerGroups) {
             for (Layer& layer : layerGroup.layers) {
                 if (layer.isActive) {

@@ -48,7 +48,7 @@ namespace openspace {
 namespace globebrowsing {
 
 class ChunkedLodGlobe;
-class TileProviderManager;
+class LayerManager;
 
 /**
  Property owner that owns all property of a single texture layer.
@@ -75,10 +75,10 @@ class LayeredCategoryPropertyOwner : public properties::PropertyOwner
 public:
     LayeredCategoryPropertyOwner(
         LayeredTextures::TextureCategory category,
-        TileProviderManager& tileProviderManager);
+        LayerManager& layerManager);
     ~LayeredCategoryPropertyOwner();
 private:
-    TileProviderManager& _tileProviderManager;
+    LayerManager& _layerManager;
     std::vector<std::unique_ptr<SingleTexturePropertyOwner> >
         _texturePropertyOwners;
     properties::BoolProperty _levelBlendingEnabled;
@@ -151,7 +151,7 @@ private:
     std::shared_ptr<PointGlobe> _pointGlobe;
 
     Ellipsoid _ellipsoid;
-    std::shared_ptr<TileProviderManager> _tileProviderManager;
+    std::shared_ptr<LayerManager> _layerManager;
     DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
     

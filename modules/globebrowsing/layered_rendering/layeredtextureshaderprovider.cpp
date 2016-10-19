@@ -23,7 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/layered_rendering/layeredtextureshaderprovider.h>
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,7 +39,7 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-    LayeredTexturePreprocessingData::LayeredTexturePreprocessingData(TileProviderManager* tpm){
+    LayeredTexturePreprocessingData::LayeredTexturePreprocessingData(LayerManager* tpm){
         
     }
 
@@ -58,19 +58,14 @@ namespace globebrowsing {
             keyValuePairs.size() != other.keyValuePairs.size()) {
             return false;
         }
-        else
-        {
+        else {
             bool equal = true;
             for (size_t i = 0; i < layeredTextureInfo.size(); i++) {
-                equal = equal && (layeredTextureInfo[i] == other.layeredTextureInfo[i]);
+                equal &= (layeredTextureInfo[i] == other.layeredTextureInfo[i]);
             }
-            // Commented this for-loop. Not necessary since the keyValuePairs
-            // are always supposed to be equal. Comparing strings takes time.
-            
-            //for (size_t i = 0; i < keyValuePairs.size(); i++) {
-            //    equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
-            //}
-            
+            for (size_t i = 0; i < keyValuePairs.size(); i++) {
+                equal &= (keyValuePairs[i] == other.keyValuePairs[i]);
+            }
             return equal;
         }
     }

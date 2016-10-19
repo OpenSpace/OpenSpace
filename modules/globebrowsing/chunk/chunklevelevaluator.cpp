@@ -162,7 +162,7 @@ namespace globebrowsing {
     }
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->getTileProviderManager();
+        auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->layerManager();
         auto heightLayers = tileProvidermanager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
         int currLevel = chunk.tileIndex().level;
 

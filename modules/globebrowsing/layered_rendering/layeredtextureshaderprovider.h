@@ -38,7 +38,7 @@ namespace globebrowsing {
 
     using namespace ghoul::opengl;
 
-    class TileProviderManager;
+    class LayerManager;
 
     class LayeredTextureShaderUniformIdHandler;
 
@@ -64,7 +64,7 @@ namespace globebrowsing {
     * levels.
     */
     struct LayeredTexturePreprocessingData {
-        LayeredTexturePreprocessingData(TileProviderManager* tpm = nullptr);
+        LayeredTexturePreprocessingData(LayerManager* tpm = nullptr);
 
         std::array<LayeredTextureInfo, LayeredTextures::NUM_TEXTURE_CATEGORIES>
             layeredTextureInfo;

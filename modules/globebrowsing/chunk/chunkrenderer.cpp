@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -60,8 +60,8 @@ namespace globebrowsing {
 
     ChunkRenderer::ChunkRenderer(
         std::shared_ptr<Grid> grid,
-        std::shared_ptr<TileProviderManager> tileProviderManager)
-        : _tileProviderManager(tileProviderManager)
+        std::shared_ptr<LayerManager> layerManager)
+        : _layerManager(layerManager)
         , _grid(grid)
     {
         _globalRenderingShaderProvider = std::make_shared<LayeredTextureShaderProvider>(
@@ -186,7 +186,7 @@ namespace globebrowsing {
             category++) {
 
             LayeredTextureInfo layeredTextureInfo;
-            auto layerGroup = _tileProviderManager->layerGroup(category);
+            auto layerGroup = _layerManager->layerGroup(category);
             layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
             layeredTextureInfo.layerBlendingEnabled = layerGroup.levelBlendingEnabled;
 
@@ -241,16 +241,15 @@ namespace globebrowsing {
         };
         std::array<std::vector<BlendTexUnits>, LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            auto layerGroup = _tileProviderManager->layerGroup(category);
-            texUnits[category].resize(layerGroup.activeLayers().size());
+            size_t activeLayers = _layerManager->layerGroup(category).activeLayers().size();
+            texUnits[category].resize(activeLayers);
         }
 
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             // Go through all the providers in this category
-            const auto& layers = _tileProviderManager->layerGroup(category).activeLayers();
             int i = 0;
-            for (const Layer& layer : layers) {
+            for (const Layer& layer : _layerManager->layerGroup(category).activeLayers()) {
                 TileProvider* tileProvider = layer.tileProvider.get();
                 // Get the texture that should be used for rendering
                 ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
@@ -316,7 +315,7 @@ namespace globebrowsing {
 
         // Go through all the height maps and set depth tranforms
         int i = 0;
-        const auto& heightLayers = _tileProviderManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        const auto& heightLayers = _layerManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
 
         for (const Layer& heightLayer : heightLayers) {
             TileDepthTransform depthTransform = heightLayer.tileProvider->depthTransform();
@@ -356,7 +355,7 @@ namespace globebrowsing {
         
 
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            const LayerGroup& layerGroup = _tileProviderManager->layerGroup(i);
+            const LayerGroup& layerGroup = _layerManager->layerGroup(i);
             if(layerGroup.levelBlendingEnabled && layerGroup.activeLayers().size() > 0){
                 performAnyBlending = true; 
                 break;
@@ -389,9 +388,9 @@ namespace globebrowsing {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_tileProviderManager->layerGroup(
+        if (_layerManager->layerGroup(
                 LayeredTextures::NightTextures).activeLayers().size() > 0 ||
-            _tileProviderManager->layerGroup(
+            _layerManager->layerGroup(
                 LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
@@ -436,7 +435,7 @@ namespace globebrowsing {
         bool performAnyBlending = false;
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_tileProviderManager->layerGroup(i).levelBlendingEnabled && _tileProviderManager->layerGroup(category).activeLayers().size() > 0) {
+            if (_layerManager->layerGroup(i).levelBlendingEnabled && _layerManager->layerGroup(category).activeLayers().size() > 0) {
                 performAnyBlending = true;
                 break;
             }
@@ -470,9 +469,9 @@ namespace globebrowsing {
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        if (_tileProviderManager->layerGroup(
+        if (_layerManager->layerGroup(
                 LayeredTextures::NightTextures).activeLayers().size() > 0 ||
-            _tileProviderManager->layerGroup(
+            _layerManager->layerGroup(
                 LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {

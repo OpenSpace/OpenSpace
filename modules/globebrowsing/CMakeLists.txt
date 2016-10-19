@@ -63,7 +63,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
@@ -118,7 +118,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovidermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/layer/layer.cpp

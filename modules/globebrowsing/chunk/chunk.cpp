@@ -101,14 +101,14 @@ namespace globebrowsing {
 
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
-        auto tileProviderManager = owner().chunkedLodGlobe()->getTileProviderManager();
+        auto layerManager = owner().chunkedLodGlobe()->layerManager();
         
         
-        auto heightMapProviders = tileProviderManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        auto heightMapProviders = layerManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
        
         
         size_t HEIGHT_CHANNEL = 0;
-        const LayerGroup& heightmaps = tileProviderManager->layerGroup(LayeredTextures::HeightMaps);
+        const LayerGroup& heightmaps = layerManager->layerGroup(LayeredTextures::HeightMaps);
         std::vector<ChunkTile> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {

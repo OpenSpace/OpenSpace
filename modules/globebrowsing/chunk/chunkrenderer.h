@@ -56,7 +56,7 @@ namespace globebrowsing {
     class ChunkRenderer {
     public:
         ChunkRenderer(std::shared_ptr<Grid> grid,
-            std::shared_ptr<TileProviderManager> tileProviderManager);
+            std::shared_ptr<LayerManager> layerManager);
 
         /**
          Chooses to render a chunk either locally or globally depending on the chunklevel
@@ -117,7 +117,7 @@ namespace globebrowsing {
 
         // shared pointer to a grid which can be the same for all rendered chunks.
         std::shared_ptr<Grid> _grid;
-        std::shared_ptr<TileProviderManager> _tileProviderManager;
+        std::shared_ptr<LayerManager> _layerManager;
 
         // Two different shader programs. One for global and one for local rendering.
         std::shared_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;

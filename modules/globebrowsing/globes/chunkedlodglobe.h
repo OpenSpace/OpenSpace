@@ -52,7 +52,7 @@ namespace globebrowsing {
         ChunkedLodGlobe(
             const RenderableGlobe& owner,
             size_t segmentsPerPatch,
-            std::shared_ptr<TileProviderManager> tileProviderManager);
+            std::shared_ptr<LayerManager> layerManager);
         virtual ~ChunkedLodGlobe();
 
         bool initialize() override;
@@ -71,7 +71,7 @@ namespace globebrowsing {
         const int minSplitDepth;
         const int maxSplitDepth;
 
-        std::shared_ptr<TileProviderManager> getTileProviderManager() const;
+        std::shared_ptr<LayerManager> layerManager() const;
 
         StatsCollector stats;
     
@@ -97,7 +97,7 @@ namespace globebrowsing {
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
-        std::shared_ptr<TileProviderManager> _tileProviderManager;
+        std::shared_ptr<LayerManager> _layerManager;
 
         const RenderableGlobe& _owner;
     };

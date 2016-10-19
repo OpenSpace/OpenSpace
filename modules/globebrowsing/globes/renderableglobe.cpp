@@ -27,7 +27,7 @@
 #include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -71,13 +71,13 @@ namespace globebrowsing {
     
     LayeredCategoryPropertyOwner::LayeredCategoryPropertyOwner(
         LayeredTextures::TextureCategory category,
-        TileProviderManager& tileProviderManager)
-    : _tileProviderManager(tileProviderManager)
+        LayerManager& layerManager)
+    : _layerManager(layerManager)
     , _levelBlendingEnabled("blendTileLevels", "blend tile levels", true){
         setName(LayeredTextures::TEXTURE_CATEGORY_NAMES[category]);
         
         // Create the property owners
-        auto& layerGroup = _tileProviderManager.layerGroup(category);
+        auto& layerGroup = _layerManager.layerGroup(category);
         for (Layer& layer : layerGroup.layers) {
             _texturePropertyOwners.push_back(
                 std::make_unique<SingleTexturePropertyOwner>(layer.name));
@@ -165,11 +165,11 @@ namespace globebrowsing {
         dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
 
-        _tileProviderManager = std::make_shared<TileProviderManager>(
+        _layerManager = std::make_shared<LayerManager>(
             texturesDictionary, textureInitDataDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
-            *this, patchSegments, _tileProviderManager);
+            *this, patchSegments, _layerManager);
         _pointGlobe = std::make_shared<PointGlobe>(*this);
         
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e9);
@@ -199,7 +199,7 @@ namespace globebrowsing {
                 
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
             _textureProperties.push_back(std::make_unique<LayeredCategoryPropertyOwner>
-                (LayeredTextures::TextureCategory(i), *_tileProviderManager));
+                (LayeredTextures::TextureCategory(i), *_layerManager));
             _texturePropertyOwner.addPropertySubOwner(*_textureProperties[i]);
         }
         
@@ -263,10 +263,10 @@ namespace globebrowsing {
         _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
 
         if (_debugProperties.resetTileProviders) {
-            _tileProviderManager->reset();
+            _layerManager->reset();
             _debugProperties.resetTileProviders = false;
         }
-        _tileProviderManager->update();
+        _layerManager->update();
         _chunkedLodGlobe->update(data);
     }
 
@@ -276,7 +276,7 @@ namespace globebrowsing {
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
-        const auto& heightLayers = _tileProviderManager->layerGroup(
+        const auto& heightLayers = _layerManager->layerGroup(
             LayeredTextures::HeightMaps).activeLayers();
         if (heightLayers.size() == 0)
             return 0;

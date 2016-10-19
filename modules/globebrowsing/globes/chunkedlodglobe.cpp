@@ -65,7 +65,7 @@ namespace globebrowsing {
     ChunkedLodGlobe::ChunkedLodGlobe(
         const RenderableGlobe& owner,
         size_t segmentsPerPatch,
-        std::shared_ptr<TileProviderManager> tileProviderManager)
+        std::shared_ptr<LayerManager> layerManager)
         : _owner(owner)
         , _leftRoot(std::make_unique<ChunkNode>(
             Chunk(owner, LEFT_HEMISPHERE_INDEX)))
@@ -73,7 +73,7 @@ namespace globebrowsing {
             Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
         , minSplitDepth(2)
         , maxSplitDepth(22)
-        , _tileProviderManager(tileProviderManager)
+        , _layerManager(layerManager)
         , stats(StatsCollector(absPath("test_stats"), 1,
             StatsCollector::Enabled::No)) {
         auto geometry = std::make_shared<SkirtedGrid>(
@@ -95,7 +95,7 @@ namespace globebrowsing {
             std::make_unique<EvaluateChunkLevelByDistance>();
 
         _renderer =
-            std::make_unique<ChunkRenderer>(geometry, tileProviderManager);
+            std::make_unique<ChunkRenderer>(geometry, layerManager);
     }
 
     ChunkedLodGlobe::~ChunkedLodGlobe() {
@@ -115,9 +115,9 @@ namespace globebrowsing {
         return ready;
     }
 
-    std::shared_ptr<TileProviderManager>
-        ChunkedLodGlobe::getTileProviderManager() const {
-        return _tileProviderManager;
+    std::shared_ptr<LayerManager>
+        ChunkedLodGlobe::layerManager() const {
+        return _layerManager;
     }
 
     bool ChunkedLodGlobe::testIfCullable(
