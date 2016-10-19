@@ -31,6 +31,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 #include <string>
+#include <memory>
 
 namespace openspace {
 
@@ -44,12 +45,30 @@ public:
         program->setUniform(_uniformLocation, val);
     }
 
-    void updateUniformLocation(ProgramObject* program, const std::string& name){
+    void update(ProgramObject* program, const std::string& name){
         _uniformLocation = program->uniformLocation(name);
     }
 
 protected:
     GLint _uniformLocation = -1;
+};
+
+
+class GPUTexture{
+public:
+    void setValue(ProgramObject* program, std::shared_ptr<Texture> texture){
+        _texUnit.activate();
+        texture->bind();
+        program->setUniform(_uniformLocation, _texUnit);
+    }
+
+    void update(ProgramObject* program, const std::string& name){
+        _uniformLocation = program->uniformLocation(name);
+    }
+
+private:
+    GLint _uniformLocation = -1;  
+    TextureUnit _texUnit;
 };
 
 } // namespace openspace
