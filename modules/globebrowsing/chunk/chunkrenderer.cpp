@@ -248,12 +248,10 @@ namespace globebrowsing {
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             // Go through all the providers in this category
-            auto layerGroup = _tileProviderManager->layerGroup(category);
-            const auto& layers = layerGroup.activeLayers();
+            const auto& layers = _tileProviderManager->layerGroup(category).activeLayers();
             int i = 0;
-            for (auto it = layers.begin(); it != layers.end(); it++) {
-                auto tileProvider = it->tileProvider.get();
-
+            for (const Layer& layer : layers) {
+                TileProvider* tileProvider = layer.tileProvider.get();
                 // Get the texture that should be used for rendering
                 ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
                 if (chunkTile.tile.status == Tile::Status::Unavailable) {
@@ -301,7 +299,7 @@ namespace globebrowsing {
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
                     i,
-                    _tileProviderManager->layerGroup(category).activeLayers()[i].settings);
+                    layer.settings);
 
                 /*
                 if (category == LayeredTextures::HeightMaps && chunkTile.tile.preprocessData) {
@@ -318,11 +316,10 @@ namespace globebrowsing {
 
         // Go through all the height maps and set depth tranforms
         int i = 0;
-        auto heightLayers = _tileProviderManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
-        for (auto it = heightLayers.begin(); it != heightLayers.end(); it++) {
-            auto tileProvider = it->tileProvider;
+        const auto& heightLayers = _tileProviderManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
 
-            TileDepthTransform depthTransform = tileProvider->depthTransform();
+        for (const Layer& heightLayer : heightLayers) {
+            TileDepthTransform depthTransform = heightLayer.tileProvider->depthTransform();
             setDepthTransformUniforms(
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
@@ -357,9 +354,10 @@ namespace globebrowsing {
 
         bool performAnyBlending = false;
         
+
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if(_tileProviderManager->layerGroup(i).levelBlendingEnabled && _tileProviderManager->layerGroup(category).activeLayers().size() > 0){
+            const LayerGroup& layerGroup = _tileProviderManager->layerGroup(i);
+            if(layerGroup.levelBlendingEnabled && layerGroup.activeLayers().size() > 0){
                 performAnyBlending = true; 
                 break;
             }

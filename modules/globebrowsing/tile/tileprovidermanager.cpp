@@ -43,7 +43,7 @@ namespace globebrowsing {
     void LayerGroup::update() {
         _activeLayers.clear();
 
-        for (auto layer : layers) {
+        for (Layer& layer : layers) {
             if (layer.isActive) {
                 layer.tileProvider->update();
                 _activeLayers.push_back(layer);
@@ -157,14 +157,14 @@ namespace globebrowsing {
     }
 
     void TileProviderManager::update() {
-        for (auto& layerGroup : layerGroups) {
+        for (LayerGroup& layerGroup : layerGroups) {
             layerGroup.update();
         }
     }
 
     void TileProviderManager::reset(bool includingInactive) {
-        for (auto layerGroup : layerGroups) {
-            for (auto layer : layerGroup.layers) {
+        for (LayerGroup& layerGroup : layerGroups) {
+            for (Layer& layer : layerGroup.layers) {
                 if (layer.isActive) {
                     layer.tileProvider->reset();
                 }

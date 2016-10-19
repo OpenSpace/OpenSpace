@@ -167,7 +167,7 @@ namespace globebrowsing {
         int currLevel = chunk.tileIndex().level;
 
         for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-            for (auto layer : tileProvidermanager->layerGroup(i).activeLayers()) {
+            for (auto& layer : tileProvidermanager->layerGroup(i).activeLayers()) {
                 Tile::Status tileStatus = layer.tileProvider->getTileStatus(chunk.tileIndex());
                 if (tileStatus == Tile::Status::OK) {
                     return UNKNOWN_DESIRED_LEVEL;

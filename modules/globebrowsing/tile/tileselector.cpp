@@ -77,9 +77,8 @@ namespace globebrowsing {
         mostHighResolution.tile = Tile::TileUnavailable;
         mostHighResolution.uvTransform.uvScale.x = 0;
 
-        auto layers = layerGroup.activeLayers();
-        for (size_t i = 0; i < layers.size(); i++) {
-            ChunkTile chunkTile = getHighestResolutionTile(layers[i].tileProvider.get(), tileIndex);
+        for (const Layer& layer : layerGroup.activeLayers()) {
+            ChunkTile chunkTile = getHighestResolutionTile(layer.tileProvider.get(), tileIndex);
             bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
             bool tileHasPreprocessData = chunkTile.tile.preprocessData != nullptr;
             bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
@@ -97,9 +96,8 @@ namespace globebrowsing {
     }
 
     std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
-        auto layers = layerGroup.activeLayers();
         std::vector<ChunkTile> tiles;
-        for (auto layer : layers){
+        for (const Layer& layer : layerGroup.activeLayers()){
             tiles.push_back(getHighestResolutionTile(layer.tileProvider.get(), tileIndex));
         }
 
