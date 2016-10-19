@@ -23,6 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/layered_rendering/layeredtextureshaderprovider.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
@@ -37,6 +38,10 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+
+    LayeredTexturePreprocessingData::LayeredTexturePreprocessingData(TileProviderManager* tpm){
+        
+    }
 
     bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
     {

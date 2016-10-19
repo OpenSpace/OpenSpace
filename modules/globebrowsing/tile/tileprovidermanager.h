@@ -50,13 +50,14 @@ namespace globebrowsing {
     struct TileProviderGroup {
 
         void update();
-        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
+        const std::vector<std::shared_ptr<TileProvider>>& getActiveTileProviders() const;
         const std::vector<NamedTileProvider> getActiveNamedTileProviders() const;
 
 
         std::vector<NamedTileProvider> tileProviders;
         bool levelBlendingEnabled;
 
+        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
     };
 
     class TileProviderManager {
@@ -79,6 +80,7 @@ namespace globebrowsing {
             const TileProviderInitData& initData);
 
         std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+
     };
 
 } // namespace globebrowsing

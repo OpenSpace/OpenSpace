@@ -41,31 +41,27 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
 
     void TileProviderGroup::update() {
+        activeTileProviders.clear();
         for (auto tileProviderWithName : tileProviders) {
             if (tileProviderWithName.isActive) {
                 tileProviderWithName.tileProvider->update();
+                activeTileProviders.push_back(tileProviderWithName.tileProvider);
             }
         }
     }
 
-    const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const {
-        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
-        for (auto tileProviderWithName : tileProviders) {
-            if (tileProviderWithName.isActive) {
-                activeTileProviders.push_back(tileProviderWithName.tileProvider);
-            }
-        }
+    const std::vector<std::shared_ptr<TileProvider>>& TileProviderGroup::getActiveTileProviders() const {
         return activeTileProviders;
     }
 
     const std::vector<NamedTileProvider> TileProviderGroup::getActiveNamedTileProviders() const {
-        std::vector<NamedTileProvider> activeTileProviders;
+        std::vector<NamedTileProvider> activeNamedTileProviders;
         for (auto tileProviderWithName : tileProviders) {
             if (tileProviderWithName.isActive) {
-                activeTileProviders.push_back(tileProviderWithName);
+                activeNamedTileProviders.push_back(tileProviderWithName);
             }
         }
-        return activeTileProviders;
+        return activeNamedTileProviders;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -170,7 +166,8 @@ namespace globebrowsing {
     }
 
     void TileProviderManager::update() {
-        for (auto tileProviderGroup : _layerCategories) {
+        for (auto& tileProviderGroup : _layerCategories) {
+            //tileProviderGroup.activeTileProviders.resize(5);
             tileProviderGroup.update();
         }
     }

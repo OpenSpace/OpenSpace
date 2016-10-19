@@ -179,23 +179,18 @@ namespace globebrowsing {
     {
         const TileIndex& tileIndex = chunk.tileIndex();
 
-        std::array<std::vector<std::shared_ptr<TileProvider> >,
-            LayeredTextures::NUM_TEXTURE_CATEGORIES> tileProviders;
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
-
+        
         for (size_t category = 0;
             category < LayeredTextures::NUM_TEXTURE_CATEGORIES;
             category++) {
-            tileProviders[category] = _tileProviderManager->getTileProviderGroup(
-                    category).getActiveTileProviders();
 
             LayeredTextureInfo layeredTextureInfo;
-            layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
-            layeredTextureInfo.layerBlendingEnabled =
-                _tileProviderManager->getTileProviderGroup(category).levelBlendingEnabled;
+            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
+            layeredTextureInfo.lastLayerIdx = layerGroup.getActiveTileProviders().size() - 1;
+            layeredTextureInfo.layerBlendingEnabled = layerGroup.levelBlendingEnabled;
 
-            layeredTexturePreprocessingData.layeredTextureInfo[category] =
-                layeredTextureInfo;
+            layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
 
         layeredTexturePreprocessingData.keyValuePairs.push_back(
@@ -246,14 +241,17 @@ namespace globebrowsing {
         };
         std::array<std::vector<BlendTexUnits>, LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            texUnits[category].resize(tileProviders[category].size());
+            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
+            texUnits[category].resize(layerGroup.getActiveTileProviders().size());
         }
 
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             // Go through all the providers in this category
+            auto layerGroup = _tileProviderManager->getTileProviderGroup(category);
+            auto activeProviders = layerGroup.getActiveTileProviders();
             int i = 0;
-            for (auto it = tileProviders[category].begin(); it != tileProviders[category].end(); it++) {
+            for (auto it = activeProviders.begin(); it != activeProviders.end(); it++) {
                 auto tileProvider = it->get();
 
                 // Get the texture that should be used for rendering
@@ -320,9 +318,8 @@ namespace globebrowsing {
 
         // Go through all the height maps and set depth tranforms
         int i = 0;
-        auto it = tileProviders[LayeredTextures::HeightMaps].begin();
-        auto end = tileProviders[LayeredTextures::HeightMaps].end();
-        for (; it != end; it++) {
+        auto activeHeightProviders = _tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+        for (auto it = activeHeightProviders.begin(); it != activeHeightProviders.end(); it++) {
             auto tileProvider = *it;
 
             TileDepthTransform depthTransform = tileProvider->depthTransform();
