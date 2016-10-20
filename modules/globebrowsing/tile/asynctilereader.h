@@ -113,6 +113,7 @@ namespace globebrowsing {
         void clearRequestQueue();
 
         std::shared_ptr<TileDataset> getTextureDataProvider() const;
+        float noDataValueAsFloat();
 
     protected:
         virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;

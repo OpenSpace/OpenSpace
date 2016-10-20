@@ -137,6 +137,11 @@ namespace globebrowsing {
         * that this TileProvider is able provide.
         */
         virtual int maxLevel() = 0;
+        
+        /**
+        * \returns the no data value for the dataset. Default is the minimum float avalue.
+        */
+        virtual float noDataValueAsFloat();
     };
 
     typedef LRUCache<TileHashKey, Tile> TileCache;

@@ -163,5 +163,9 @@ namespace globebrowsing {
         _enqueuedTileRequests.clear();
     }
 
+    float AsyncTileDataProvider::noDataValueAsFloat() {
+        return _tileDataset->noDataValueAsFloat();
+    }
+
 } // namespace globebrowsing
 } // namespace openspace

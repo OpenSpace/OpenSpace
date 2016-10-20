@@ -70,6 +70,7 @@ namespace globebrowsing {
         virtual void update();
         virtual void reset();
         virtual int maxLevel();
+        virtual float noDataValueAsFloat();
 
     private:
 

@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <limits>
+
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <openspace/util/factorymanager.h>
@@ -58,6 +60,10 @@ TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictio
 }
 
 TileProvider::TileProvider(const ghoul::Dictionary& dictionary) { };
+
+float TileProvider::noDataValueAsFloat() {
+    return std::numeric_limits<float>::min();
+}
 
 } // namespace globebrowsing
 } // namespace openspace
