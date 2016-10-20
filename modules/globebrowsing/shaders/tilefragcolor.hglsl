@@ -98,7 +98,6 @@ in vec3 positionCameraSpace;
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
 
-uniform ChunkTilePile test;
 
 ///////////////////////////////////////////////////////////////////// 
 
@@ -269,7 +268,6 @@ vec4 getTileFragColor(){
 	#endif
 #endif
 
-	color = 0.1*color + getTexVal(test, levelWeights, fs_uv);
 
 	return color;
 }

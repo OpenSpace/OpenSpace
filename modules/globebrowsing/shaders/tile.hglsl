@@ -71,12 +71,6 @@ struct Tile {
 	TileUvTransform uvTransform;
 };
 
-struct ChunkTilePile {
-	Tile chunkTile0;
-	Tile chunkTile1;
-	Tile chunkTile2;
-};
-
 vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Tile tile, vec2 tileUV){
 	ivec2 resolution = textureSize(tile.textureSampler, 0);
 
@@ -104,10 +98,10 @@ vec4 getTexVal(const Tile tile, vec2 tileUV){
 /////////////////////////////////////////////////////////////////////
 //                       Multi Level Tile                          //
 /////////////////////////////////////////////////////////////////////
-struct MultiLevelTile {
-	Tile tile0;
-	Tile tile1;
-	Tile tile2;
+struct MultiChunkTile {
+	Tile level0;
+	Tile level1;
+	Tile level2;
 };
 
 struct LevelWeights {
@@ -139,16 +133,10 @@ LevelWeights getDefaultLevelWeights(){
 }
 
 
-vec4 getTexVal(const MultiLevelTile multiLevelTile, const LevelWeights w, const vec2 uv){
-	return w.w1 * getTexVal(multiLevelTile.tile0, uv) + 
-		w.w2 * getTexVal(multiLevelTile.tile1, uv) + 
-		w.w3 * getTexVal(multiLevelTile.tile2, uv);
-}
-
-vec4 getTexVal(const ChunkTilePile chunkTilePine, const LevelWeights w, const vec2 uv){
-	return w.w1 * getTexVal(chunkTilePine.chunkTile0, uv) + 
-		w.w2 * getTexVal(chunkTilePine.chunkTile1, uv) + 
-		w.w3 * getTexVal(chunkTilePine.chunkTile2, uv);
+vec4 getTexVal(const MultiChunkTile multiChunkTile, const LevelWeights w, const vec2 uv){
+	return w.w1 * getTexVal(multiChunkTile.level0, uv) + 
+		w.w2 * getTexVal(multiChunkTile.level1, uv) + 
+		w.w3 * getTexVal(multiChunkTile.level2, uv);
 }
 
 // PerLayerSettings

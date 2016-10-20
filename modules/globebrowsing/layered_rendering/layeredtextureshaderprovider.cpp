@@ -161,33 +161,24 @@ namespace globebrowsing {
     {}
 
     void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(
-        LayeredTextureShaderProvider* shaderProvider)
-    {
-        if (shaderProvider->updatedOnLastCall())
-        {
-            _shaderProvider = shaderProvider;
-            // Ignore errors since this loops through even uniforms that does not exist.
-            _shaderProvider->_programObject->setIgnoreUniformLocationError(
-                ProgramObject::IgnoreError::Yes);
-            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
-            {
-                for (size_t j = 0; j < LayeredTextures::NUM_BLEND_TEXTURES; j++)
-                {
-                    for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
-                        k++)
-                    {
-                        for (size_t l = 0; l < LayeredTextures::NUM_TILE_DATA_VARIABLES; l++)
-                        {
-                            _tileUniformIds[i][j][k][l] =
-                                _shaderProvider->_programObject->uniformLocation(
-                                    LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
-                                    LayeredTextures::blendLayerSuffixes[j] +
-                                    "[" + std::to_string(k) + "]." +
-                                    LayeredTextures::glslTileDataNames[l]);
-                        }
-                    }
-                }
+        LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager) {
+        
+        if (shaderProvider->updatedOnLastCall()) {
+            ProgramObject* programObject = shaderProvider->_programObject.get();
+            
+            
+            programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
+            
+            for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
+                LayerGroup& layerGroup = layerManager->layerGroup(category);
+                std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[category];
+                int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
+                int numActiveLayers = layerGroup.activeLayers().size();
+                _gpuLayerGroups[category].updateUniformLocations(programObject, nameBase, pileSize, numActiveLayers);
             }
+            
+            // Ignore errors since this loops through even uniforms that does not exist.
+            programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
             for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
             {
                 for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
@@ -196,7 +187,7 @@ namespace globebrowsing {
                     for (size_t l = 0; l < LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES; l++)
                     {
                         _layerSettingsUniformIds[i][k][l] =
-                        _shaderProvider->_programObject->uniformLocation(
+                        programObject->uniformLocation(
                                     LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
                                     "Settings" +
                                     "[" + std::to_string(k) + "]." +
@@ -205,7 +196,7 @@ namespace globebrowsing {
                 }
             }
             // Reset ignore errors
-            _shaderProvider->_programObject->setIgnoreUniformLocationError(
+            programObject->setIgnoreUniformLocationError(
                 ProgramObject::IgnoreError::No);
         }
     }
@@ -226,11 +217,5 @@ namespace globebrowsing {
     {
         return _layerSettingsUniformIds[category][layerIndex][layerSettingsId];
     }
-    
-    ProgramObject& LayeredTextureShaderUniformIdHandler::programObject()
-    {
-        return *_shaderProvider->_programObject;
-    }
-
 } // namespace globebrowsing
 } // namespace openspace

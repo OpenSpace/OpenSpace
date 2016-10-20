@@ -97,13 +97,14 @@ namespace globebrowsing {
     }
 
     void ChunkRenderer::setDepthTransformUniforms(
+        ProgramObject* programObject,
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
         LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
-        uniformIdHandler->programObject().setUniform(
+        programObject->setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
@@ -111,7 +112,7 @@ namespace globebrowsing {
                 LayeredTextures::GlslTileDataId::depthTransform_depthScale),
             tileDepthTransform.depthScale);
 
-        uniformIdHandler->programObject().setUniform(
+        programObject->setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
@@ -122,6 +123,7 @@ namespace globebrowsing {
     }
 
     void ChunkRenderer::activateTileAndSetTileUniforms(
+        ProgramObject* programObject,
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
         LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
@@ -134,21 +136,21 @@ namespace globebrowsing {
         texUnit.activate();
         chunkTile.tile.texture->bind();
 
-        uniformIdHandler->programObject().setUniform(
+        programObject->setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
                 LayeredTextures::GlslTileDataId::textureSampler),
             texUnit);
-        uniformIdHandler->programObject().setUniform(
+        programObject->setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
                 layerIndex,
                 LayeredTextures::GlslTileDataId::uvTransform_uvScale),
             chunkTile.uvTransform.uvScale);
-        uniformIdHandler->programObject().setUniform(
+        programObject->setUniform(
             uniformIdHandler->getId(
                 textureCategory,
                 blendLayerSuffix,
@@ -158,6 +160,7 @@ namespace globebrowsing {
     }
 
     void ChunkRenderer::setLayerSettingsUniforms(
+        ProgramObject* programObject,
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
         size_t layerIndex,
@@ -165,7 +168,7 @@ namespace globebrowsing {
         
         for (int i = 0; i < settings.array().size(); i++) {
             settings.array()[i]->uploadUniform(
-                uniformIdHandler->programObject(),
+                *programObject,
                 uniformIdHandler->getSettingsId(
                     textureCategory,
                     layerIndex,
@@ -229,7 +232,11 @@ namespace globebrowsing {
             layeredTextureShaderProvider->getUpdatedShaderProgram(
                 layeredTexturePreprocessingData);
         
-        programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider);
+        if (layeredTextureShaderProvider->updatedOnLastCall()) {
+            // Need to update uniforms            
+            programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider, _layerManager.get());
+        }
+        
 
         // Activate the shader program
         programObject->activate();
@@ -248,54 +255,18 @@ namespace globebrowsing {
 
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            // Go through all the providers in this category
+            LayerGroup& layerGroup = _layerManager->layerGroup(category);
             int i = 0;
-            for (const Layer& layer : _layerManager->layerGroup(category).activeLayers()) {
+            for (const Layer& layer : layerGroup.activeLayers()) {
                 TileProvider* tileProvider = layer.tileProvider.get();
-                // Get the texture that should be used for rendering
-                ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
-                if (chunkTile.tile.status == Tile::Status::Unavailable) {
-                    chunkTile.tile = tileProvider->getDefaultTile();
-                    chunkTile.uvTransform.uvOffset = { 0, 0 };
-                    chunkTile.uvTransform.uvScale = { 1, 1 };
-                }
-
-                activateTileAndSetTileUniforms(
-                    programUniformHandler,
-                    LayeredTextures::TextureCategory(category),
-                    LayeredTextures::BlendLayerSuffixes::none,
-                    i,
-                    texUnits[category][i].blendTexture0,
-                    chunkTile);
-
-                // If blending is enabled, two more textures are needed
-                if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
-                    ChunkTile chunkTileParent1 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 1);
-                    if (chunkTileParent1.tile.status == Tile::Status::Unavailable) {
-                        chunkTileParent1 = chunkTile;
-                    }
-                    activateTileAndSetTileUniforms(
-                        programUniformHandler,
-                        LayeredTextures::TextureCategory(category),
-                        LayeredTextures::BlendLayerSuffixes::Parent1,
-                        i,
-                        texUnits[category][i].blendTexture1,
-                        chunkTileParent1);
-
-                    ChunkTile chunkTileParent2 = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, 2);
-                    if (chunkTileParent2.tile.status == Tile::Status::Unavailable) {
-                        chunkTileParent2 = chunkTileParent1;
-                    }
-                    activateTileAndSetTileUniforms(
-                        programUniformHandler,
-                        LayeredTextures::TextureCategory(category),
-                        LayeredTextures::BlendLayerSuffixes::Parent2,
-                        i,
-                        texUnits[category][i].blendTexture2,
-                        chunkTileParent2);
-                }
+                
+                int pileSize = layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled ? 3 : 1;
+                
+                ChunkTilePile chunkTilePile = TileSelector::getHighestResolutionTilePile(tileProvider, tileIndex, pileSize);
+                programUniformHandler->_gpuLayerGroups[category].gpuActiveLayers[i].setValue(programObject, chunkTilePile);
                 
                 setLayerSettingsUniforms(
+                    programObject,
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
                     i,
@@ -321,6 +292,7 @@ namespace globebrowsing {
         for (const Layer& heightLayer : heightLayers) {
             TileDepthTransform depthTransform = heightLayer.tileProvider->depthTransform();
             setDepthTransformUniforms(
+                programObject,
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
                 LayeredTextures::BlendLayerSuffixes::none,
@@ -409,11 +381,19 @@ namespace globebrowsing {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
         
-        TileIndex ti(2,2,2);
-        TileProvider* tp = _layerManager->layerGroup(0).activeLayers()[0].tileProvider.get();
-        ChunkTilePile tilePile = TileSelector::getHighestResolutionTilePile(tp, ti);
-        _globalRenderingShaderProvider->gpuChunkTilePile.updateUniformLocations(programObject, "test.");
-        _globalRenderingShaderProvider->gpuChunkTilePile.setValue(programObject, tilePile);
+        /*
+        TileIndex ti(5,5,5);
+        const auto& layers = _layerManager->layerGroup(0).activeLayers();
+        if(layers.size() > 0){
+            TileProvider* tp = layers[0].tileProvider.get();
+            int pileSize = _layerManager->layerGroup(0).levelBlendingEnabled ? 3 : 1;
+            ChunkTilePile tilePile = TileSelector::getHighestResolutionTilePile(tp, ti, pileSize);
+            auto& gpuChunkTilePile = _globalRenderingShaderProvider->gpuChunkTilePile;
+            gpuChunkTilePile.updateUniformLocations(programObject, "test.", pileSize);
+            gpuChunkTilePile.setValue(programObject, tilePile);
+        }
+         */
+        
 
         // render
         _grid->geometry().drawUsingActiveProgram();

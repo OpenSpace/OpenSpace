@@ -32,6 +32,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/assert.h>
 
+#include <openspace/util/gpudata.h>
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -39,12 +41,37 @@
 namespace openspace {
 namespace globebrowsing {
 
+
+    template<typename T> class LayerSetting;
+    
+    class ILayerSetting{
+    public:
+        virtual void setValue(ProgramObject* programObject) = 0;
+    };
+
+
+    template<typename T>
+    class LayerSetting : public ILayerSetting {
+    public:
+        LayerSetting(T t): data(t) {}
+
+        virtual void setValue(ProgramObject* programObject) override {
+            gpuData.setValue(programObject, data);
+        }
+
+    private:
+        GPUData<T> gpuData;
+        T data;
+    };
+
+
     struct Layer {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
 
         PerLayerSettings settings;
+        std::vector<ILayerSetting*> isettings;
     };
 
     struct LayerGroup {

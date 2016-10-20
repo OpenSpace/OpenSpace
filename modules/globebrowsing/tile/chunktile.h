@@ -46,7 +46,7 @@ namespace globebrowsing {
 
     struct ChunkTilePile {
     	static const size_t SIZE = 3;
-    	std::array<ChunkTile, SIZE> chunkTiles;
+    	std::vector<ChunkTile> chunkTiles;
     };
 
 } // namespace globebrowsing

@@ -23,10 +23,10 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileselector.h>
-
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 
 #include <sstream>
 #include <algorithm>
@@ -42,19 +42,16 @@ namespace globebrowsing {
 
     const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
-    ChunkTilePile TileSelector::getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex){
+    ChunkTilePile TileSelector::getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex, int pileSize){
+        ghoul_assert(pileSize >= 0, "pileSize must be positive");
         ChunkTilePile chunkTilePile;
-        for (size_t i = 0; i < ChunkTilePile::SIZE; ++i){
+        chunkTilePile.chunkTiles.resize(pileSize);
+        for (size_t i = 0; i < pileSize; ++i){
             chunkTilePile.chunkTiles[i] = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, i);
             if (chunkTilePile.chunkTiles[i].tile.status == Tile::Status::Unavailable) {
-                if(i>0){
-                    chunkTilePile.chunkTiles[i] = chunkTilePile.chunkTiles[i-1];
-                }
-                else{
-                    chunkTilePile.chunkTiles[i].tile = tileProvider->getDefaultTile();
-                    chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
-                    chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };    
-                }
+                chunkTilePile.chunkTiles[i].tile = tileProvider->getDefaultTile();
+                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
+                chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
             }
         }
         return std::move(chunkTilePile);

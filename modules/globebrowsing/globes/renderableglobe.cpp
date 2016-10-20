@@ -95,6 +95,7 @@ namespace globebrowsing {
             for (auto setting : layer.settings.array()) {
                 prop.addProperty(setting->property());
             }
+            
   
             addPropertySubOwner(prop);
         }

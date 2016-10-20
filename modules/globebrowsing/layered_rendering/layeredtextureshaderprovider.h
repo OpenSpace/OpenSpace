@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 #include <modules/globebrowsing/tile/gpustructs.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 #include "ghoul/opengl/programobject.h"
 
@@ -98,7 +99,6 @@ namespace globebrowsing {
 
         bool updatedOnLastCall();
         
-        GPUChunkTilePile gpuChunkTilePile;
     private:
         
         
@@ -124,7 +124,7 @@ namespace globebrowsing {
 
         LayeredTextureShaderUniformIdHandler();
         ~LayeredTextureShaderUniformIdHandler();
-        void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider);
+        void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager);
 
         /**
         * \param <code>category</code> can be one of the categories specified in
@@ -152,6 +152,8 @@ namespace globebrowsing {
             size_t layerIndex,
             LayeredTextures::LayerSettingsIds layerSettingsId);
         ProgramObject& programObject();
+
+        std::array<GPULayerGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
     private:
 
         std::array<
@@ -164,6 +166,9 @@ namespace globebrowsing {
             LayeredTextures::NUM_BLEND_TEXTURES>,
             LayeredTextures::NUM_TEXTURE_CATEGORIES>
             _tileUniformIds;
+
+        
+
         
         std::array<
         std::array<
@@ -173,8 +178,6 @@ namespace globebrowsing {
         LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
         LayeredTextures::NUM_TEXTURE_CATEGORIES>
         _layerSettingsUniformIds;
-
-        LayeredTextureShaderProvider* _shaderProvider;
     };
 
 } // namespace globebrowsing

@@ -26,6 +26,8 @@
 
 #include <modules/globebrowsing/tile/layermanager.h>
 
+#include <openspace/properties/scalarproperty.h>
+
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
@@ -36,8 +38,10 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+
+
     //////////////////////////////////////////////////////////////////////////////////////
-    //                            Tile Provider Group                                   //
+    //                               Layer Group                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
     void LayerGroup::update() {

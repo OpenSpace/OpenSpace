@@ -30,7 +30,7 @@
 
 #include <glm/glm.hpp>
 
-#include <array>
+#include <vector>
 
 
 namespace ghoul{
@@ -88,10 +88,35 @@ class GPUChunkTilePile{
 public:
     
     void setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile);
-    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
 
 private:
-    std::array<GPUChunkTile, ChunkTilePile::SIZE> gpuChunkTilePile;
+    std::vector<GPUChunkTile> gpuChunkTiles;
+};
+
+
+class LayerSettings;
+class GPULayerSettings{
+public:
+    void setValue(ProgramObject* programObject, const LayerSettings& layerSettings);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+private:
+    GPUData<int> gpu_hej;
+    GPUData<float> gpu_tja;
+    GPUData<bool> gpu_senare;
+};
+
+
+class LayerGroup;
+class GPULayerGroup{
+public:
+    
+    void setValue(ProgramObject* programObject, const LayerGroup& layerGroup);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers);
+
+    std::vector<GPUChunkTilePile> gpuActiveLayers;
+
+
 };
 
 

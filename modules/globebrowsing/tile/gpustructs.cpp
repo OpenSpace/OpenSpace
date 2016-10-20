@@ -24,10 +24,11 @@
 
 #include <modules/globebrowsing/tile/gpustructs.h>
 
+#include <modules/globebrowsing/tile/tileIndex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
@@ -89,15 +90,36 @@ namespace globebrowsing {
     // ChunkTilePile
     
     void GPUChunkTilePile::setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile){
-        for (size_t i = 0; i < ChunkTilePile::SIZE; ++i){
-            gpuChunkTilePile[i].setValue(programObject, chunkTilePile.chunkTiles[i]);
+        ghoul_assert(gpuChunkTiles.size() == chunkTilePile.chunkTiles.size(), "GPU and CPU ChunkTilePile must have same size!");
+        for (size_t i = 0; i < gpuChunkTiles.size(); ++i){
+            gpuChunkTiles[i].setValue(programObject, chunkTilePile.chunkTiles[i]);
         }
     }
 
-    void GPUChunkTilePile::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase){
-        for (size_t i = 0; i < ChunkTilePile::SIZE; ++i){
-            std::string nameExtension = "chunkTile" + std::to_string(i) + ".";
-            gpuChunkTilePile[i].updateUniformLocations(programObject, nameBase + nameExtension);
+    void GPUChunkTilePile::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize){
+        gpuChunkTiles.resize(pileSize);
+        for (size_t i = 0; i < gpuChunkTiles.size(); ++i){
+            std::string nameExtension = "level" + std::to_string(i) + ".";
+            gpuChunkTiles[i].updateUniformLocations(programObject, nameBase + nameExtension);
+        }
+    }
+
+    
+    // LayerGroup
+
+    void GPULayerGroup::setValue(ProgramObject* programObject, const LayerGroup& layerGroup){
+        size_t numActiveLayers = layerGroup.activeLayers().size();
+        ghoul_assert(numActiveLayers == gpuActiveLayers.size(), "GPU and CPU active layers must have same size!");
+        for (int i = 0; i < numActiveLayers; ++i){
+            //gpuActiveLayers[i].setValue(programObject, layerGroup.activeLayers()[i]);
+        }
+    }
+
+    void GPULayerGroup::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers){
+        gpuActiveLayers.resize(numActiveLayers);
+        for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
+            std::string nameExtension = "[" + std::to_string(i) + "].";
+            gpuActiveLayers[i].updateUniformLocations(programObject, nameBase + nameExtension, pileSize);
         }
     }
 

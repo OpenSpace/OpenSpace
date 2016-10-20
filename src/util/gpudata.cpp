@@ -43,7 +43,7 @@ namespace openspace {
 	void UpdatableUniformLocation::updateUniformLocations(ProgramObject* program, const std::string& name){
         _uniformLocation = program->uniformLocation(name);
         LDEBUG(name);
-    }    
+    }
 
 } // namespace openspace
 

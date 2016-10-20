@@ -85,22 +85,19 @@ namespace globebrowsing {
     PerLayerSettings::PerLayerSettings()
     {
         // Here, all the per layer settings are specified and added
-        _array[LayeredTextures::LayerSettingsIds::opacity] =
-            std::make_shared<PerLayerFloatSetting>(
+        _array[LayeredTextures::LayerSettingsIds::opacity] = std::make_shared<PerLayerFloatSetting>(
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::opacity],
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::opacity],
             1,
             0,
             1);
-        _array[LayeredTextures::LayerSettingsIds::gamma] =
-            std::make_shared<PerLayerFloatSetting>(
+        _array[LayeredTextures::LayerSettingsIds::gamma] = std::make_shared<PerLayerFloatSetting>(
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::gamma],
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::gamma],
             1,
             0,
             5);
-        _array[LayeredTextures::LayerSettingsIds::multiplier] =
-            std::make_shared<PerLayerFloatSetting>(
+        _array[LayeredTextures::LayerSettingsIds::multiplier] = std::make_shared<PerLayerFloatSetting>(
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::multiplier],
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::multiplier],
             1,
@@ -119,7 +116,7 @@ namespace globebrowsing {
     const std::array<std::shared_ptr<PerLayerSetting>,
         LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES>& PerLayerSettings::array() const {
             return _array;
-    }
+        }
 
-} // namespace globebrowsing
-} // namespace openspace
+}  // namespace globebrowsing
+}  // namespace openspace
