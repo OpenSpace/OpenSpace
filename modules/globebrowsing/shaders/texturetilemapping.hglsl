@@ -72,7 +72,7 @@
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
-float performLayerSettings(float currentValue, PerLayerSettings settings) {
+float performLayerSettings(float currentValue, const PerLayerSettings settings) {
 	float newValue = currentValue;
 
 	newValue = sign(newValue) * pow(newValue, settings.gamma);
@@ -82,7 +82,7 @@ float performLayerSettings(float currentValue, PerLayerSettings settings) {
 	return newValue;
 }
 
-vec4 performLayerSettings(vec4 currentValue, PerLayerSettings settings) {
+vec4 performLayerSettings(vec4 currentValue, const PerLayerSettings settings) {
 	vec4 newValue = vec4(
 		performLayerSettings(currentValue.r, settings),
 		performLayerSettings(currentValue.g, settings),
