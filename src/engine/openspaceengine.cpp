@@ -744,7 +744,7 @@ void OpenSpaceEngine::loadFonts() {
         LERROR("Error initializing default font renderer");
     
     ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-        glm::vec2(_windowWrapper->currentWindowSize())
+        _renderEngine->fontResolution()
     );
     
 }
@@ -896,6 +896,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
         //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
         glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
+        glm::ivec2 renderingSize = _windowWrapper->currentWindowResolution();
         uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
 
         //glm::vec2 windowBufferCorrectionFactor = glm::vec2(
@@ -911,7 +912,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _gui->startFrame(
             static_cast<float>(dt),
             glm::vec2(windowSize),
-            glm::vec2(1.f),
+            glm::vec2(renderingSize),
             mousePosition,
             mouseButtons
         );
