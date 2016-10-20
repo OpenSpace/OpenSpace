@@ -120,7 +120,7 @@ public:
     Interpolator<double>& rotateToFocusNodeInterpolator();
     
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;
-    virtual void updateCameraStateFromMouseStates(Camera& camera) = 0;
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime) = 0;
 
 protected:
     /**
@@ -193,7 +193,7 @@ public:
     ~KeyframeInteractionMode();
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 
 private:
     std::vector<datamessagestructures::CameraKeyframe> _keyframes;
@@ -243,10 +243,10 @@ public:
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 
 protected:
-    //void updateCameraStateFromMouseStates(Camera& camera);
+    //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     std::shared_ptr<MouseStates> _mouseStates;
 };
 
@@ -258,10 +258,10 @@ public:
 
     virtual void setFocusNode(SceneGraphNode* focusNode);
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 
 private:
-    //void updateCameraStateFromMouseStates(Camera& camera);
+    //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     globebrowsing::RenderableGlobe* _globe;
 };
 

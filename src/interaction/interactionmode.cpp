@@ -212,7 +212,7 @@ void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& input
     _keyframes = inputState.keyframes();
 }
 
-void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
     if (_keyframes.size() == 0) {
         return;
     }
@@ -268,7 +268,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
+            _localRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
             _globalRotationMouseState.previousPosition = mousePosition;
             _globalRotationMouseState.velocity.decelerate(deltaTime);
@@ -276,7 +276,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
+            _globalRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
             _localRotationMouseState.previousPosition = mousePosition;
             _localRotationMouseState.velocity.decelerate(deltaTime);
@@ -292,7 +292,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
     if (button2Pressed) {
         glm::dvec2 mousePositionDelta =
             _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
+        _truckMovementMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
     }
     else { // !button2Pressed
         _truckMovementMouseState.previousPosition = mousePosition;
@@ -302,7 +302,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
         if (keyCtrlPressed) {
             glm::dvec2 mousePositionDelta =
                 _localRollMouseState.previousPosition - mousePosition;
-            _localRollMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
+            _localRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
             _globalRollMouseState.previousPosition = mousePosition;
             _globalRollMouseState.velocity.decelerate(deltaTime);
@@ -310,7 +310,7 @@ void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const Input
         else {
             glm::dvec2 mousePositionDelta =
                 _globalRollMouseState.previousPosition - mousePosition;
-            _globalRollMouseState.velocity.set(mousePositionDelta * deltaTime * _sensitivity, deltaTime);
+            _globalRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
 
             _localRollMouseState.previousPosition = mousePosition;
             _localRollMouseState.velocity.decelerate(deltaTime);
@@ -382,7 +382,7 @@ OrbitalInteractionMode::~OrbitalInteractionMode() {
 
 }
 
-void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
     // Update synched data
 
     using namespace glm;
@@ -431,7 +431,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
         { // Interpolate local rotation to focus node
             double t = _rotateToFocusNodeInterpolator.value();
             localCameraRotation = slerp(localCameraRotation, dquat(dvec3(0.0)), t);
-            _rotateToFocusNodeInterpolator.step(0.002); // Should probably depend on dt
+            _rotateToFocusNodeInterpolator.step(deltaTime * 0.1); // Should probably depend on dt
             // This is a fast but ugly solution to slow regaining of control...
             if (t > 0.18) {
                 _rotateToFocusNodeInterpolator.end();
@@ -513,7 +513,7 @@ void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
 
-void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera) {
+void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
     
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     using namespace glm;
@@ -555,7 +555,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
         double heightToSurface =
-        _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
+            _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
         
         double distFromCenterToSurface =
             length(centerToEllipsoidSurface);

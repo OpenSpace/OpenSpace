@@ -857,7 +857,7 @@ void OpenSpaceEngine::preSynchronization() {
         _interactionHandler->updateInputStates(dt);
         
         _renderEngine->updateSceneGraph();
-        _interactionHandler->updateCamera();
+        _interactionHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
