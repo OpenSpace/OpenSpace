@@ -38,14 +38,14 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+    /*
     void TilePile::update(TileProvider* tileProvider, const TileIndex& tileIndex){
         
     }
 
     void TilePile::bind(ProgramObject* programObject){
     	
-    }
+    }*/
     
 }  // namespace globebrowsing
 }  // namespace openspace

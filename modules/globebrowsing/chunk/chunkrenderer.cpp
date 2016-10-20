@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/tile/layermanager.h>
+#include <modules/globebrowsing/tile/chunktile.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -227,7 +228,7 @@ namespace globebrowsing {
         ProgramObject* programObject =
             layeredTextureShaderProvider->getUpdatedShaderProgram(
                 layeredTexturePreprocessingData);
-
+        
         programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider);
 
         // Activate the shader program
@@ -407,6 +408,12 @@ namespace globebrowsing {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        
+        TileIndex ti(2,2,2);
+        TileProvider* tp = _layerManager->layerGroup(0).activeLayers()[0].tileProvider.get();
+        ChunkTilePile tilePile = TileSelector::getHighestResolutionTilePile(tp, ti);
+        _globalRenderingShaderProvider->gpuChunkTilePile.updateUniformLocations(programObject, "test.");
+        _globalRenderingShaderProvider->gpuChunkTilePile.setValue(programObject, tilePile);
 
         // render
         _grid->geometry().drawUsingActiveProgram();

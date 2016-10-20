@@ -33,6 +33,7 @@
 // Below are all the tiles that are used for contributing 
 // the actual fragment color
 
+
 #if USE_COLORTEXTURE
 uniform Tile ColorTextures[NUMLAYERS_COLORTEXTURE];
 uniform Tile ColorTexturesParent1[NUMLAYERS_COLORTEXTURE];
@@ -97,7 +98,7 @@ in vec3 positionCameraSpace;
 // The value increases with the distance from the vertex (or fragment) to the camera
 in LevelWeights levelWeights;
 
-
+uniform ChunkTilePile test;
 
 ///////////////////////////////////////////////////////////////////// 
 
@@ -267,6 +268,8 @@ vec4 getTileFragColor(){
 		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
 	#endif
 #endif
+
+	color = 0.1*color + getTexVal(test, levelWeights, fs_uv);
 
 	return color;
 }

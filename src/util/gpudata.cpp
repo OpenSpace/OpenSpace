@@ -22,56 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GPUDATA_H__
-#define __GPUDATA_H__
 
+#include <openspace/util/gpudata.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <string>
 #include <memory>
 
+namespace {
+	const std::string _loggerCat = "GPUData";
+}
+
 namespace openspace {
 
-using namespace ghoul::opengl;
-
-
-
-class UpdatableUniformLocation {
-public:
-    void updateUniformLocations(ProgramObject* program, const std::string& name);
-    
-protected:
-    GLint _uniformLocation = -1;  
-};
-
-    
-template<typename T>
-class GPUData : public UpdatableUniformLocation{
-public:
-    
-    void setValue(ProgramObject* program, T val){
-        program->setUniform(_uniformLocation, val);
-    }
-
-};
-
-
-class GPUTexture : public UpdatableUniformLocation{
-public:
-    void setValue(ProgramObject* program, std::shared_ptr<Texture> texture){
-        _texUnit.activate();
-        texture->bind();
-        program->setUniform(_uniformLocation, _texUnit);
-    }
-
-private:
-
-    TextureUnit _texUnit;
-};
+	void UpdatableUniformLocation::updateUniformLocations(ProgramObject* program, const std::string& name){
+        _uniformLocation = program->uniformLocation(name);
+        LDEBUG(name);
+    }    
 
 } // namespace openspace
 
-#endif // __GPUDATA_H__

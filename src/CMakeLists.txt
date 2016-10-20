@@ -117,6 +117,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
 
 set(OPENSPACE_HEADER

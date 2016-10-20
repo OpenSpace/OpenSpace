@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
+#include <modules/globebrowsing/tile/gpustructs.h>
+
 #include "ghoul/opengl/programobject.h"
 
 #include <vector>
@@ -95,7 +97,11 @@ namespace globebrowsing {
             LayeredTexturePreprocessingData preprocessingData);
 
         bool updatedOnLastCall();
+        
+        GPUChunkTilePile gpuChunkTilePile;
     private:
+        
+        
         friend class LayeredTextureShaderUniformIdHandler;
         void recompileShaderProgram(LayeredTexturePreprocessingData preprocessingData);
 

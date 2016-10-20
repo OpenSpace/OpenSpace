@@ -22,35 +22,67 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILEANDTRANSFORM_H__
-#define __TILEANDTRANSFORM_H__
+#ifndef __TILE_PROVIDER_MANAGER_H__
+#define __TILE_PROVIDER_MANAGER_H__
 
 
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
-#include <modules/globebrowsing/tile/tile.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/assert.h>
+
+#include <memory>
+#include <vector>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-    using namespace ghoul::opengl;
+    struct Layer {
+        std::string name;
+        std::shared_ptr<TileProvider> tileProvider;
+        bool isActive;
 
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
+        PerLayerSettings settings;
     };
 
-    struct ChunkTile {
-        Tile tile;
-        TileUvTransform uvTransform;
+    struct LayerGroup {
+
+        void update();
+        const std::vector<Layer>& activeLayers() const;
+
+        std::vector<Layer> layers;
+        bool levelBlendingEnabled;
+
+    private:
+        std::vector<Layer> _activeLayers;
     };
 
-    struct ChunkTilePile {
-    	static const size_t SIZE = 3;
-    	std::array<ChunkTile, SIZE> chunkTiles;
+    class LayerManager {
+    public:
+
+        LayerManager(
+            const ghoul::Dictionary& textureCategoriesDictionary,
+            const ghoul::Dictionary& textureInitDictionary);
+        ~LayerManager();
+
+        LayerGroup& layerGroup(size_t groupId);
+        LayerGroup& layerGroup(LayeredTextures::TextureCategory);
+
+        void update();
+        void reset(bool includingInactive = false);
+    private:
+        static void initTexures(
+            std::vector<Layer>& destination, 
+            const ghoul::Dictionary& dict, 
+            const TileProviderInitData& initData);
+
+        std::array<LayerGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> layerGroups;
+
     };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-
-#endif  // __TILEANDTRANSFORM_H__
+#endif  // __TILE_PROVIDER_MANAGER_H__

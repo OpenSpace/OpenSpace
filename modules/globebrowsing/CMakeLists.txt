@@ -52,6 +52,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gpustructs.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
@@ -108,6 +109,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gpustructs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.cpp

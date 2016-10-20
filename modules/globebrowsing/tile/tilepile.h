@@ -26,31 +26,24 @@
 #define __TILEPILE_H__
 
 #include <ghoul/opengl/texture.h> // Texture
-#include <ghoul/opengl/programobject.h> // Texture
 
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <vector>
+#include <array>
 
 
 namespace openspace {
 namespace globebrowsing {
     
     using namespace ghoul::opengl;
-    
-    class TilePile {
-    public:
-        
-        void update(TileProvider* tileProvider, const TileIndex& tileIndex);
-        void bind(ProgramObject* programObject);
-        
-    private:
-        std::vector<ChunkTile> pile;
-        
+    /*
+    struct ChunkTilePile {
+        std::array<ChunkTile, 3> chunkTiles;
     };
+    */
 
 }  // namespace globebrowsing
 }  // namespace openspace

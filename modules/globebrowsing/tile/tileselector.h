@@ -39,6 +39,7 @@ namespace globebrowsing {
     public:
         static ChunkTile getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
         static ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex);
+        static ChunkTilePile getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex);
         static std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup&, const TileIndex& tileIndex);
 
         struct CompareResolution {

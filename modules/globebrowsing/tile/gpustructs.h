@@ -22,35 +22,79 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILEANDTRANSFORM_H__
-#define __TILEANDTRANSFORM_H__
+#ifndef GPU_STRUCTS_H
+#define GPU_STRUCTS_H
+
+#include <openspace/util/gpudata.h>
+#include <modules/globebrowsing/tile/chunktile.h>
+
+#include <glm/glm.hpp>
+
+#include <array>
 
 
+namespace ghoul{
+namespace opengl{
+    class ProgramObject;
+}//namespace opengl
+}//namespace ghoul
 
-#include <modules/globebrowsing/tile/tile.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-    using namespace ghoul::opengl;
+using namespace ghoul::opengl;
 
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
-    };
 
-    struct ChunkTile {
-        Tile tile;
-        TileUvTransform uvTransform;
-    };
+class GPUTileUvTransform {
+public:
 
-    struct ChunkTilePile {
-    	static const size_t SIZE = 3;
-    	std::array<ChunkTile, SIZE> chunkTiles;
-    };
+	void setValue(ProgramObject* programObject, const TileUvTransform& uvTransform);
+	void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+	
+private:
+	GPUData<glm::vec2> gpuUvOffset;
+	GPUData<glm::vec2> gpuUvScale;
+};
+
+
+class GPUTileDepthTransform {
+public:
+
+    void setValue(ProgramObject* programObject, const TileDepthTransform& depthTransform);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+    
+private:
+    GPUData<float> gpuDepthOffset;
+    GPUData<float> gpuDepthScale;
+};
+
+
+
+class GPUChunkTile {
+public:
+
+	void setValue(ProgramObject* programObject, const ChunkTile& chunkTile);
+	void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+
+private:
+	GPUTexture gpuTexture;
+	GPUTileUvTransform gpuTileUvTransform;
+};
+
+
+
+class GPUChunkTilePile{
+public:
+    
+    void setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+
+private:
+    std::array<GPUChunkTile, ChunkTilePile::SIZE> gpuChunkTilePile;
+};
+
 
 } // namespace globebrowsing
 } // namespace openspace
-
-
-#endif  // __TILEANDTRANSFORM_H__
+#endif  // GPU_STRUCTS_H
