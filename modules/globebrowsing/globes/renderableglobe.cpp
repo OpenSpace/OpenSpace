@@ -166,10 +166,10 @@ namespace globebrowsing {
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _tileProviderManager);
-        _pointGlobe = std::make_shared<PointGlobe>(*this);
+        //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
-        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e9);
-        _distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
+        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 5e9);
+        //_distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
 
         _debugPropertyOwner.setName("Debug");
         _texturePropertyOwner.setName("Textures");

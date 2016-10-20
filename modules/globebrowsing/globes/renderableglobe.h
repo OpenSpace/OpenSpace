@@ -148,7 +148,7 @@ private:
     // Currently we only have the <code>ChunkedLodGlobe</code> and a simple globe rendered
     // as a point.
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-    std::shared_ptr<PointGlobe> _pointGlobe;
+    //std::shared_ptr<PointGlobe> _pointGlobe;
 
     Ellipsoid _ellipsoid;
     std::shared_ptr<TileProviderManager> _tileProviderManager;
