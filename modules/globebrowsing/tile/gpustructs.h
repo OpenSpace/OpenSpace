@@ -82,7 +82,6 @@ public:
 private:
 	GPUTexture gpuTexture;
 	GPUTileUvTransform gpuTileUvTransform;
-    GPUTileDepthTransform gpuTileDepthTransform;
 };
 
 
@@ -117,27 +116,35 @@ private:
 class Layer;
 class GPULayer {
 public:
-    void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
-    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
-    void deactivate();
+    virtual void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
+    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+    virtual void deactivate();
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerSettings gpuLayerSettings;
 };
+
+class GPUHeightLayer : public GPULayer{
+public:
+    virtual void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
+    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+private:
+    GPUTileDepthTransform gpuDepthTransform;
+};
+
 
 
 class LayerGroup;
 class GPULayerGroup{
 public:
     
-    void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize);
-    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers);
-    void deactivate();
-
-    std::vector<GPULayer> gpuActiveLayers;
-
-
+    virtual void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize);
+    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers);
+    virtual void deactivate();
+private:
+    std::vector<std::unique_ptr<GPULayer>> gpuActiveLayers;
 };
+
 
 
 } // namespace globebrowsing

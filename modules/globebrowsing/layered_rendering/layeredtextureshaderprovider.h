@@ -131,9 +131,11 @@ namespace globebrowsing {
             size_t layerIndex,
             LayeredTextures::LayerSettingsIds layerSettingsId);
         ProgramObject& programObject();
-
-        std::array<GPULayerGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
+        
+        GPULayerGroup* gpuLayerGroup(int i) const;
+        
     private:
+        std::array<std::unique_ptr<GPULayerGroup>, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
         
         std::array<
         std::array<

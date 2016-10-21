@@ -79,13 +79,11 @@ namespace globebrowsing {
     void GPUChunkTile::setValue(ProgramObject* programObject, const ChunkTile& chunkTile){
         gpuTexture.setValue(programObject, chunkTile.tile.texture);
         gpuTileUvTransform.setValue(programObject, chunkTile.uvTransform);
-        gpuTileDepthTransform.setValue(programObject, chunkTile.depthTransform);
     }
 
     void GPUChunkTile::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase){
         gpuTexture.updateUniformLocations(programObject, nameBase + "textureSampler");
         gpuTileUvTransform.updateUniformLocations(programObject, nameBase + "uvTransform.");
-        gpuTileDepthTransform.updateUniformLocations(programObject, nameBase + "depthTransform.");
     }
 
     void GPUChunkTile::deactivate(){
@@ -135,6 +133,19 @@ namespace globebrowsing {
     }
 
 
+    // Override behavior for HeightLayer
+
+    void GPUHeightLayer::setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize){
+        GPULayer::setValue(programObject, layer, tileIndex, pileSize);
+        gpuDepthTransform.setValue(programObject, layer.tileProvider->depthTransform());
+    }
+
+    void GPUHeightLayer::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize){
+        GPULayer::updateUniformLocations(programObject, nameBase, pileSize);
+        gpuDepthTransform.updateUniformLocations(programObject, nameBase);
+    }
+
+
     
     // LayerGroup
 
@@ -142,23 +153,29 @@ namespace globebrowsing {
         auto& activeLayers = layerGroup.activeLayers();
         ghoul_assert(activeLayers.size() == gpuActiveLayers.size(), "GPU and CPU active layers must have same size!");
         for (int i = 0; i < activeLayers.size(); ++i){
-            gpuActiveLayers[i].setValue(programObject, activeLayers[i], tileIndex, pileSize);
+            gpuActiveLayers[i]->setValue(programObject, activeLayers[i], tileIndex, pileSize);
         }
     }
 
     void GPULayerGroup::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers){
         gpuActiveLayers.resize(numActiveLayers);
         for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
+            gpuActiveLayers[i] = std::make_unique<GPULayer>();
             std::string nameExtension = "[" + std::to_string(i) + "].";
-            gpuActiveLayers[i].updateUniformLocations(programObject, nameBase + nameExtension, pileSize);
+            gpuActiveLayers[i]->updateUniformLocations(programObject, nameBase + nameExtension, pileSize);
         }
     }
 
     void GPULayerGroup::deactivate(){
         for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
-            gpuActiveLayers[i].deactivate();
+            gpuActiveLayers[i]->deactivate();
         }
     }
+
+
+    
+
+
 
 
 

@@ -154,11 +154,19 @@ namespace globebrowsing {
         return _updatedOnLastCall;
     }
 
-    LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler()
-    {}
+    LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler(){
+        for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
+            _gpuLayerGroups[i] = std::make_unique<GPULayerGroup>();
+        }
+    }
 
     LayeredTextureShaderUniformIdHandler::~LayeredTextureShaderUniformIdHandler()
     {}
+    
+    GPULayerGroup* LayeredTextureShaderUniformIdHandler::gpuLayerGroup(int i) const{
+        return _gpuLayerGroups[i].get();
+    }
+
 
     void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(
         LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager) {
@@ -174,7 +182,7 @@ namespace globebrowsing {
                 std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[category];
                 int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
                 int numActiveLayers = layerGroup.activeLayers().size();
-                _gpuLayerGroups[category].updateUniformLocations(programObject, nameBase, pileSize, numActiveLayers);
+                _gpuLayerGroups[category]->updateUniformLocations(programObject, nameBase, pileSize, numActiveLayers);
             }
             
             // Ignore errors since this loops through even uniforms that does not exist.

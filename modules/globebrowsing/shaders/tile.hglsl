@@ -114,8 +114,6 @@ struct Layer {
 	LayerSettings settings;
 };
 
-
-
 struct LevelWeights {
 	float w1;
 	float w2;

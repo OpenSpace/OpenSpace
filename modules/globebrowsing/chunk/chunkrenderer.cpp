@@ -218,12 +218,13 @@ namespace globebrowsing {
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             LayerGroup& layerGroup = _layerManager->layerGroup(category);
-            GPULayerGroup& gpuLayerGroup = programUniformHandler->_gpuLayerGroups[category];
+            GPULayerGroup* gpuLayerGroup = programUniformHandler->gpuLayerGroup(category);
+            
+            int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
+            gpuLayerGroup->setValue(programObject, layerGroup, tileIndex, pileSize);
+            
             int i = 0;
             for (const Layer& layer : layerGroup.activeLayers()) {
-                int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
-                gpuLayerGroup.setValue(programObject, layerGroup, tileIndex, pileSize);
-                
                 setLayerSettingsUniforms(
                     programObject,
                     programUniformHandler,
@@ -357,8 +358,8 @@ namespace globebrowsing {
         // render
         _grid->geometry().drawUsingActiveProgram();
         
-        for (auto& layerGroup : _globalProgramUniformHandler->_gpuLayerGroups) {
-            layerGroup.deactivate();
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
+            _globalProgramUniformHandler->gpuLayerGroup(i)->deactivate();
         }
 
         // disable shader
@@ -443,6 +444,10 @@ namespace globebrowsing {
 
         // render
         _grid->geometry().drawUsingActiveProgram();
+        
+        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
+            _localProgramUniformHandler->gpuLayerGroup(i)->deactivate();
+        }
 
         // disable shader
         programObject->deactivate();
