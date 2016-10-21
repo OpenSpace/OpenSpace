@@ -27,6 +27,8 @@
 
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -69,6 +71,8 @@ namespace globebrowsing {
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
+
+        ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 
         PerLayerSettings settings;
         std::vector<ILayerSetting*> isettings;

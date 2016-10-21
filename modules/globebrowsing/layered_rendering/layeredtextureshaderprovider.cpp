@@ -201,15 +201,6 @@ namespace globebrowsing {
         }
     }
 
-    GLint LayeredTextureShaderUniformIdHandler::getId(
-        LayeredTextures::TextureCategory category,
-        size_t blendLayer,
-        size_t layerIndex,
-        LayeredTextures::GlslTileDataId tileDataId)
-    {
-        return _tileUniformIds[category][blendLayer][layerIndex][tileDataId];
-    }
-
     GLint LayeredTextureShaderUniformIdHandler::getSettingsId(
         LayeredTextures::TextureCategory category,
         size_t layerIndex,

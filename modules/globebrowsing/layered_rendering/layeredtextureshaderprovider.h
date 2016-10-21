@@ -126,27 +126,6 @@ namespace globebrowsing {
         ~LayeredTextureShaderUniformIdHandler();
         void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager);
 
-        /**
-        * \param <code>category</code> can be one of the categories specified in
-        * <code>LayeredTextures::TextureCategory</code>.
-        * \param <code>blendLayer</code> can have a value between 0 and
-        * <code>NUM_BLEND_TEXTURES</code> and specified that it is the  uniform of that
-        * specific blend layer that is requested.
-        * \param <code>layerIndex</code> should have a value between 0 and
-        * <code>LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY - 1</code> and will specify
-        * which of the texture layers that is requested.
-        * \param <code>tileDataId</code> specifies what variable for the texture that
-        * should be returned. It can have any of the values specified in
-        * <code>GlslTileDataId</code>.
-        *
-        * \returns an OpenGL uniform ID for the specified arguments. If the uniform does
-        * not exist in the shader program it returns -1.
-        */
-        GLint getId(
-            LayeredTextures::TextureCategory category,
-            size_t blendLayer,
-            size_t layerIndex,
-            LayeredTextures::GlslTileDataId tileDataId);
         GLint getSettingsId(
             LayeredTextures::TextureCategory category,
             size_t layerIndex,
@@ -155,20 +134,6 @@ namespace globebrowsing {
 
         std::array<GPULayerGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
     private:
-
-        std::array<
-            std::array<
-            std::array<
-            std::array<
-            GLint,
-            LayeredTextures::NUM_TILE_DATA_VARIABLES>,
-            LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
-            LayeredTextures::NUM_BLEND_TEXTURES>,
-            LayeredTextures::NUM_TEXTURE_CATEGORIES>
-            _tileUniformIds;
-
-        
-
         
         std::array<
         std::array<

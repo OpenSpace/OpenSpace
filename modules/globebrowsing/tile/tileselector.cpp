@@ -49,9 +49,16 @@ namespace globebrowsing {
         for (size_t i = 0; i < pileSize; ++i){
             chunkTilePile.chunkTiles[i] = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, i);
             if (chunkTilePile.chunkTiles[i].tile.status == Tile::Status::Unavailable) {
-                chunkTilePile.chunkTiles[i].tile = tileProvider->getDefaultTile();
-                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
-                chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
+                if(i>0){
+                    chunkTilePile.chunkTiles[i].tile = chunkTilePile.chunkTiles[i-1].tile;
+                    chunkTilePile.chunkTiles[i].uvTransform.uvOffset = chunkTilePile.chunkTiles[i-1].uvTransform.uvOffset;
+                    chunkTilePile.chunkTiles[i].uvTransform.uvScale = chunkTilePile.chunkTiles[i-1].uvTransform.uvScale;
+                }
+                else{
+                    chunkTilePile.chunkTiles[i].tile = tileProvider->getDefaultTile();
+                    chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
+                    chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
+                }
             }
         }
         return std::move(chunkTilePile);

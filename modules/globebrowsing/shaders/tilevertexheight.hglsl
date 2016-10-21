@@ -31,9 +31,7 @@
 
 
 #if USE_HEIGHTMAP
-uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
+uniform ChunkTilePile HeightMaps[NUMLAYERS_HEIGHTMAP];
 uniform PerLayerSettings HeightMapsSettings[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
@@ -53,7 +51,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateUntransformedHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);	// Three textures to sample from
+		HeightMaps, HeightMapsSettings);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -70,7 +68,7 @@ float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);	// Three textures to sample from
+		HeightMaps, HeightMapsSettings);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -90,15 +88,15 @@ vec3 getTileVertexNormal(
 	float heightCenter = calculateHeight(
 		uv,
 		levelWeights,
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);
+		HeightMaps, HeightMapsSettings);
 	float heightOffsetX = calculateHeight(
 		uv + vec2(sampleDelta, 0.0),
 		levelWeights,
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);
+		HeightMaps, HeightMapsSettings);
 	float heightOffsetY = calculateHeight(
 		uv + vec2(0.0, sampleDelta),
 		levelWeights,
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);
+		HeightMaps, HeightMapsSettings);
 
 	vec3 e0 = normalize(cross(vec3(0,0,1), ellipsoidNormal));
 	vec3 e1 = cross(ellipsoidNormal, e0);

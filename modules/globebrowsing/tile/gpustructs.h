@@ -26,6 +26,7 @@
 #define GPU_STRUCTS_H
 
 #include <openspace/util/gpudata.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 
 #include <glm/glm.hpp>
@@ -76,10 +77,12 @@ public:
 
 	void setValue(ProgramObject* programObject, const ChunkTile& chunkTile);
 	void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+    void deactivate();
 
 private:
 	GPUTexture gpuTexture;
 	GPUTileUvTransform gpuTileUvTransform;
+    GPUTileDepthTransform gpuTileDepthTransform;
 };
 
 
@@ -89,9 +92,12 @@ public:
     
     void setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile);
     void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+    void deactivate();
 
 private:
+
     std::vector<GPUChunkTile> gpuChunkTiles;
+
 };
 
 
@@ -100,10 +106,23 @@ class GPULayerSettings{
 public:
     void setValue(ProgramObject* programObject, const LayerSettings& layerSettings);
     void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+    void deactivate();
+
 private:
-    GPUData<int> gpu_hej;
-    GPUData<float> gpu_tja;
-    GPUData<bool> gpu_senare;
+
+};
+
+
+
+class Layer;
+class GPULayer {
+public:
+    void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
+    void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+    void deactivate();
+private:
+    GPUChunkTilePile gpuChunkTilePile;
+    GPULayerSettings gpuLayerSettings;
 };
 
 
@@ -111,10 +130,11 @@ class LayerGroup;
 class GPULayerGroup{
 public:
     
-    void setValue(ProgramObject* programObject, const LayerGroup& layerGroup);
+    void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize);
     void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers);
+    void deactivate();
 
-    std::vector<GPUChunkTilePile> gpuActiveLayers;
+    std::vector<GPULayer> gpuActiveLayers;
 
 
 };

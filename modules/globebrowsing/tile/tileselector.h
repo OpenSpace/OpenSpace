@@ -34,6 +34,8 @@
 
 namespace openspace {
 namespace globebrowsing {
+    
+    class LayerGroup;
 
     class TileSelector {
     public:

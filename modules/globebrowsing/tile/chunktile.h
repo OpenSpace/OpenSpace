@@ -28,6 +28,7 @@
 
 
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -42,10 +43,10 @@ namespace globebrowsing {
     struct ChunkTile {
         Tile tile;
         TileUvTransform uvTransform;
+        TileDepthTransform depthTransform;
     };
 
     struct ChunkTilePile {
-    	static const size_t SIZE = 3;
     	std::vector<ChunkTile> chunkTiles;
     };
 

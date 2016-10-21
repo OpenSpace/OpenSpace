@@ -62,14 +62,20 @@ public:
 class GPUTexture : public UpdatableUniformLocation{
 public:
     void setValue(ProgramObject* program, std::shared_ptr<Texture> texture){
-        _texUnit.activate();
+        _texUnit = std::make_unique<TextureUnit>();
+        _texUnit->activate();
         texture->bind();
-        program->setUniform(_uniformLocation, _texUnit);
+        program->setUniform(_uniformLocation, *_texUnit);
+    }
+
+    void deactivate(){
+        _texUnit = nullptr;
     }
 
 private:
 
-    TextureUnit _texUnit;
+    std::unique_ptr<TextureUnit> _texUnit;
+
 };
 
 } // namespace openspace

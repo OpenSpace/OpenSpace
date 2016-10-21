@@ -40,6 +40,10 @@ namespace openspace {
 namespace globebrowsing {
 
 
+    ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const{
+        return std::move(TileSelector::getHighestResolutionTilePile(tileProvider.get(), tileIndex, pileSize));
+    }
+
     //////////////////////////////////////////////////////////////////////////////////////
     //                               Layer Group                                        //
     //////////////////////////////////////////////////////////////////////////////////////

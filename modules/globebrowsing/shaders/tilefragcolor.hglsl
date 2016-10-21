@@ -33,46 +33,33 @@
 // Below are all the tiles that are used for contributing 
 // the actual fragment color
 
-
 #if USE_COLORTEXTURE
-uniform Tile ColorTextures[NUMLAYERS_COLORTEXTURE];
-uniform Tile ColorTexturesParent1[NUMLAYERS_COLORTEXTURE];
-uniform Tile ColorTexturesParent2[NUMLAYERS_COLORTEXTURE];
+uniform ChunkTilePile ColorTextures[NUMLAYERS_COLORTEXTURE];
 uniform PerLayerSettings ColorTexturesSettings[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALETEXTURE
-uniform Tile GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE];
-uniform Tile GrayScaleTexturesParent1[NUMLAYERS_GRAYSCALETEXTURE];
-uniform Tile GrayScaleTexturesParent2[NUMLAYERS_GRAYSCALETEXTURE];
+uniform ChunkTilePile GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE];
 uniform PerLayerSettings GrayScaleTexturesSettings[NUMLAYERS_GRAYSCALETEXTURE];
 #endif // USE_GRAYSCALETEXTURE
 
 #if USE_NIGHTTEXTURE
-uniform Tile NightTextures[NUMLAYERS_NIGHTTEXTURE];
-uniform Tile NightTexturesParent1[NUMLAYERS_NIGHTTEXTURE];
-uniform Tile NightTexturesParent2[NUMLAYERS_NIGHTTEXTURE];
+uniform ChunkTilePile NightTextures[NUMLAYERS_NIGHTTEXTURE];
 uniform PerLayerSettings NightTexturesSettings[NUMLAYERS_NIGHTTEXTURE];
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
-uniform Tile Overlays[NUMLAYERS_OVERLAY];
-uniform Tile OverlaysParent1[NUMLAYERS_OVERLAY];
-uniform Tile OverlaysParent2[NUMLAYERS_OVERLAY];
+uniform ChunkTilePile Overlays[NUMLAYERS_OVERLAY];
 uniform PerLayerSettings OverlaysSettings[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
 #if USE_GRAYSCALE_OVERLAY
-uniform Tile GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY];
-uniform Tile GrayScaleOverlaysParent1[NUMLAYERS_GRAYSCALE_OVERLAY];
-uniform Tile GrayScaleOverlaysParent2[NUMLAYERS_GRAYSCALE_OVERLAY];
+uniform ChunkTilePile GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY];
 uniform PerLayerSettings GrayScaleOverlaysSettings[NUMLAYERS_GRAYSCALE_OVERLAY];
 #endif // USE_GRAYSCALE_OVERLAY
 
 #if USE_WATERMASK
-uniform Tile WaterMasks[NUMLAYERS_WATERMASK];
-uniform Tile WaterMasksParent1[NUMLAYERS_WATERMASK];
-uniform Tile WaterMasksParent2[NUMLAYERS_WATERMASK];
+uniform ChunkTilePile WaterMasks[NUMLAYERS_WATERMASK];
 uniform PerLayerSettings WaterMasksSettings[NUMLAYERS_WATERMASK];
 #endif // USE_WATERMASK
 
@@ -105,9 +92,7 @@ in LevelWeights levelWeights;
 // the alignment and resolution of the heightmaps
 
 #if USE_HEIGHTMAP
-uniform Tile HeightMaps[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent1[NUMLAYERS_HEIGHTMAP];
-uniform Tile HeightMapsParent2[NUMLAYERS_HEIGHTMAP];
+uniform ChunkTilePile HeightMaps[NUMLAYERS_HEIGHTMAP];
 uniform PerLayerSettings HeightMapsSettings[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
@@ -120,7 +105,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateUntransformedHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps, HeightMapsParent1, HeightMapsParent2, HeightMapsSettings);	// Three textures to sample from
+		HeightMaps, HeightMapsSettings);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -147,8 +132,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		ColorTextures,
-		ColorTexturesParent1,
-		ColorTexturesParent2,
 		ColorTexturesSettings);
 #endif // USE_COLORTEXTURE
 
@@ -158,8 +141,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		GrayScaleTextures,
-		GrayScaleTexturesParent1,
-		GrayScaleTexturesParent2,
 		GrayScaleTexturesSettings);
 #endif // USE_GRAYSCALETEXTURE
 
@@ -170,8 +151,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		GrayScaleOverlays,
-		GrayScaleOverlaysParent1,
-		GrayScaleOverlaysParent2,
 		GrayScaleOverlaysSettings);
 
 #endif // USE_COLORTEXTURE
@@ -182,8 +161,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		WaterMasks,
-		WaterMasksParent1,
-		WaterMasksParent2,
 		WaterMasksSettings,
 		normalize(ellipsoidNormalCameraSpace),
 		lightDirectionCameraSpace, // Should already be normalized
@@ -197,8 +174,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		NightTextures,
-		NightTexturesParent1,
-		NightTexturesParent2,
 		NightTexturesSettings,
 		normalize(ellipsoidNormalCameraSpace),
 		lightDirectionCameraSpace); // Should already be normalized
@@ -240,8 +215,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		Overlays,
-		OverlaysParent1,
-		OverlaysParent2,
 		OverlaysSettings);
 
 #endif // USE_OVERLAY
@@ -264,7 +237,7 @@ vec4 getTileFragColor(){
 	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
 	#if USE_HEIGHTMAP
 		color.r = min(color.r, 0.8);
-		color.r += tileResolution(fs_uv, HeightMaps[0]) > 0.9 ? 1 : 0;
+		color.r += tileResolution(fs_uv, HeightMaps[0].chunkTile0) > 0.9 ? 1 : 0;
 	#endif
 #endif
 

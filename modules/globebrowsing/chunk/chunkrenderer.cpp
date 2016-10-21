@@ -104,22 +104,7 @@ namespace globebrowsing {
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
-        programObject->setUniform(
-            uniformIdHandler->getId(
-                textureCategory,
-                blendLayerSuffix,
-                layerIndex,
-                LayeredTextures::GlslTileDataId::depthTransform_depthScale),
-            tileDepthTransform.depthScale);
-
-        programObject->setUniform(
-            uniformIdHandler->getId(
-                textureCategory,
-                blendLayerSuffix,
-                layerIndex,
-                LayeredTextures::GlslTileDataId::depthTransform_depthOffset),
-            tileDepthTransform.depthOffset);
-
+        
     }
 
     void ChunkRenderer::activateTileAndSetTileUniforms(
@@ -131,32 +116,9 @@ namespace globebrowsing {
         ghoul::opengl::TextureUnit& texUnit,
         const ChunkTile& chunkTile)
     {
-        // Blend tile with two parents
-        // The texture needs a unit to sample from
-        texUnit.activate();
-        chunkTile.tile.texture->bind();
 
-        programObject->setUniform(
-            uniformIdHandler->getId(
-                textureCategory,
-                blendLayerSuffix,
-                layerIndex,
-                LayeredTextures::GlslTileDataId::textureSampler),
-            texUnit);
-        programObject->setUniform(
-            uniformIdHandler->getId(
-                textureCategory,
-                blendLayerSuffix,
-                layerIndex,
-                LayeredTextures::GlslTileDataId::uvTransform_uvScale),
-            chunkTile.uvTransform.uvScale);
-        programObject->setUniform(
-            uniformIdHandler->getId(
-                textureCategory,
-                blendLayerSuffix,
-                layerIndex,
-                LayeredTextures::GlslTileDataId::uvTransform_uvOffset),
-            chunkTile.uvTransform.uvOffset);
+
+
     }
 
     void ChunkRenderer::setLayerSettingsUniforms(
@@ -256,14 +218,11 @@ namespace globebrowsing {
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
             LayerGroup& layerGroup = _layerManager->layerGroup(category);
+            GPULayerGroup& gpuLayerGroup = programUniformHandler->_gpuLayerGroups[category];
             int i = 0;
             for (const Layer& layer : layerGroup.activeLayers()) {
-                TileProvider* tileProvider = layer.tileProvider.get();
-                
-                int pileSize = layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled ? 3 : 1;
-                
-                ChunkTilePile chunkTilePile = TileSelector::getHighestResolutionTilePile(tileProvider, tileIndex, pileSize);
-                programUniformHandler->_gpuLayerGroups[category].gpuActiveLayers[i].setValue(programObject, chunkTilePile);
+                int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
+                gpuLayerGroup.setValue(programObject, layerGroup, tileIndex, pileSize);
                 
                 setLayerSettingsUniforms(
                     programObject,
@@ -397,9 +356,15 @@ namespace globebrowsing {
 
         // render
         _grid->geometry().drawUsingActiveProgram();
+        
+        for (auto& layerGroup : _globalProgramUniformHandler->_gpuLayerGroups) {
+            layerGroup.deactivate();
+        }
 
         // disable shader
         programObject->deactivate();
+        
+        
     }
 
 
@@ -481,6 +446,8 @@ namespace globebrowsing {
 
         // disable shader
         programObject->deactivate();
+        
+        
     }
 } // namespace globebrowsing
 } // namespace openspace
