@@ -108,6 +108,10 @@ glm::ivec2 WindowWrapper::currentWindowResolution() const {
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
     return currentWindowSize();
 }
+    
+glm::vec2 WindowWrapper::dpiScaling() const {
+    return glm::vec2(1.f);
+}
 
 int WindowWrapper::currentNumberOfAaSamples() const {
     return 1;

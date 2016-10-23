@@ -120,6 +120,13 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
     }
     throw WindowWrapperException("No viewport available");
 }
+    
+glm::vec2 SGCTWindowWrapper::dpiScaling() const {
+    return glm::vec2(
+        sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
+        sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
+    );
+}
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
