@@ -439,7 +439,10 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
 void IswaManager::createScreenSpace(int id){
     std::string script = "openspace.iswa.addScreenSpaceCygnet("
         "{CygnetId =" + std::to_string(id) + "});";
-    OsEng.scriptEngine().queueScript(script);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
@@ -475,7 +478,10 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     std::string luaTable = jsonPlaneToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -504,7 +510,10 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     std::string luaTable = jsonSphereToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -536,7 +545,10 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
         std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }else{
         LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
@@ -570,7 +582,10 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath, std::st
         "}";
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }else{
         LWARNING( cdfPath + " is not a cdf file or can't be found.");
@@ -661,21 +676,18 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCygnet,
                 "int, string, string",
                 "Adds a IswaCygnet",
-                true
             },
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
                 "int, string, string",
                 "Adds a Screen Space Cygnets",
-                true
             },
             {
                 "addKameleonPlanes",
                 &luascriptfunctions::iswa_addKameleonPlanes,
                 "string, int",
                 "Adds KameleonPlanes from cdf file.",
-                true
             },
             // {
             //     "addKameleonPlane",
@@ -689,35 +701,30 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCdfFiles,
                 "string",
                 "Adds a cdf files to choose from.",
-                true
             },
             {
                 "removeCygnet",
                 &luascriptfunctions::iswa_removeCygnet,
                 "string",
                 "Remove a Cygnets",
-                true
             },
             {
                 "removeScreenSpaceCygnet",
                 &luascriptfunctions::iswa_removeScrenSpaceCygnet,
                 "int",
                 "Remove a Screen Space Cygnets",
-                true
             },
             {
                 "removeGroup",
                 &luascriptfunctions::iswa_removeGroup,
                 "int",
                 "Remove a group of Cygnets",
-                true
             },
             {
                 "setBaseUrl",
                 &luascriptfunctions::iswa_setBaseUrl,
                 "string",
                 "sets the base url",
-                true
             }
         }
     };
