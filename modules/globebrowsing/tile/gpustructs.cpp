@@ -115,17 +115,26 @@ namespace globebrowsing {
     }
 
 
+
     // Layer
 
     void GPULayer::setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize){
         ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
         gpuChunkTilePile.setValue(programObject, chunkTilePile);
+        
         // do settings
+        /*for(int i = 0; i<layer.layerSettings.size(); ++i){
+            layer.layerSettings[i]->setValue(programObject);
+        }*/
     }
 
     void GPULayer::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize){
-        gpuChunkTilePile.updateUniformLocations(programObject, nameBase, pileSize);
+        gpuChunkTilePile.updateUniformLocations(programObject, nameBase + "pile.", pileSize);
+        
         // do settings
+        /*for(int i = 0; i<layer.layerSettings.size(); ++i){
+            layer.layerSettings[i]->updateUniformLocations(programObject, nameBase);
+        }*/
     }
 
     void GPULayer::deactivate(){
@@ -142,11 +151,11 @@ namespace globebrowsing {
 
     void GPUHeightLayer::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize){
         GPULayer::updateUniformLocations(programObject, nameBase, pileSize);
-        gpuDepthTransform.updateUniformLocations(programObject, nameBase);
+        gpuDepthTransform.updateUniformLocations(programObject, nameBase + "depthTransform.");
     }
 
 
-    
+
     // LayerGroup
 
     void GPULayerGroup::setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize){
@@ -157,10 +166,13 @@ namespace globebrowsing {
         }
     }
 
-    void GPULayerGroup::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers){
+    void GPULayerGroup::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers, int category){
         gpuActiveLayers.resize(numActiveLayers);
         for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
-            gpuActiveLayers[i] = std::make_unique<GPULayer>();
+            // should maybe a proper GPULayer factory
+            gpuActiveLayers[i] = category == LayeredTextures::TextureCategory::HeightMaps ? 
+                std::make_unique<GPUHeightLayer>() : 
+                std::make_unique<GPULayer>();
             std::string nameExtension = "[" + std::to_string(i) + "].";
             gpuActiveLayers[i]->updateUniformLocations(programObject, nameBase + nameExtension, pileSize);
         }
@@ -171,13 +183,6 @@ namespace globebrowsing {
             gpuActiveLayers[i]->deactivate();
         }
     }
-
-
-    
-
-
-
-
 
 
 }  // namespace globebrowsing

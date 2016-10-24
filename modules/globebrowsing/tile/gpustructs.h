@@ -99,7 +99,7 @@ private:
 
 };
 
-
+/*
 class LayerSettings;
 class GPULayerSettings{
 public:
@@ -108,9 +108,11 @@ public:
     void deactivate();
 
 private:
-
+    GPUData<float> gpuOpacity;
+    GPUData<float> gpuGamma;
+    GPUData<float> gpuMultiplier;
 };
-
+*/
 
 
 class Layer;
@@ -121,7 +123,6 @@ public:
     virtual void deactivate();
 private:
     GPUChunkTilePile gpuChunkTilePile;
-    GPULayerSettings gpuLayerSettings;
 };
 
 class GPUHeightLayer : public GPULayer{
@@ -139,7 +140,7 @@ class GPULayerGroup{
 public:
     
     virtual void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize);
-    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers);
+    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers, int category);
     virtual void deactivate();
 private:
     std::vector<std::unique_ptr<GPULayer>> gpuActiveLayers;

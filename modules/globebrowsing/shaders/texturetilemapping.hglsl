@@ -72,7 +72,7 @@
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
-float performLayerSettings(float currentValue, PerLayerSettings settings) {
+float performLayerSettings(float currentValue, LayerSettings settings) {
 	float newValue = currentValue;
 
 	newValue = sign(newValue) * pow(newValue, settings.gamma);
@@ -82,7 +82,7 @@ float performLayerSettings(float currentValue, PerLayerSettings settings) {
 	return newValue;
 }
 
-vec4 performLayerSettings(vec4 currentValue, PerLayerSettings settings) {
+vec4 performLayerSettings(vec4 currentValue, LayerSettings settings) {
 	vec4 newValue = vec4(
 		performLayerSettings(currentValue.r, settings),
 		performLayerSettings(currentValue.g, settings),
@@ -95,8 +95,7 @@ vec4 performLayerSettings(vec4 currentValue, PerLayerSettings settings) {
 float calculateUntransformedHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile heightTiles[NUMLAYERS_HEIGHTMAP],
-	const PerLayerSettings layerSettings[NUMLAYERS_HEIGHTMAP]) {
+	const Layer HeightTextures[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -109,9 +108,9 @@ float calculateUntransformedHeight(
 	
 	#for i in 0..#{lastLayerIndexHeightMaps}
 	{
-		height = getTexVal(heightTiles[#{i}], levelWeights, uv).r;
+		height = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
 
-		height = performLayerSettings(height, layerSettings[#{i}]);
+		height = performLayerSettings(height, HeightTextures[#{i}].settings);
 	}
 	#endfor
 	return height;
@@ -120,8 +119,7 @@ float calculateUntransformedHeight(
 float calculateHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile heightTiles[NUMLAYERS_HEIGHTMAP],
-	const PerLayerSettings layerSettings[NUMLAYERS_HEIGHTMAP]) {
+	const Layer HeightTextures[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -134,11 +132,11 @@ float calculateHeight(
 	
 	#for i in 0..#{lastLayerIndexHeightMaps}
 	{
-		float untransformedHeight = getTexVal(heightTiles[#{i}], levelWeights, uv).r;
+		float untransformedHeight = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
 
-		float heightSample = getTransformedTexVal(heightTiles[#{i}].chunkTile0.depthTransform, untransformedHeight);
+		float heightSample = getTransformedTexVal(HeightTextures[#{i}].depthTransform, untransformedHeight);
 		if (heightSample > -100000) {
-			heightSample = performLayerSettings(heightSample, layerSettings[#{i}]);
+			heightSample = performLayerSettings(heightSample, HeightTextures[#{i}].settings);
 			height = heightSample;
 		}
 	}
@@ -149,8 +147,7 @@ float calculateHeight(
 vec4 calculateColor(
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile colorTiles[NUMLAYERS_COLORTEXTURE],
-	const PerLayerSettings layerSettings[NUMLAYERS_COLORTEXTURE]) {
+	const Layer ColorTextures[NUMLAYERS_COLORTEXTURE]) {
 
 	vec4 color = vec4(0);
 
@@ -162,9 +159,9 @@ vec4 calculateColor(
 
 	#for i in 0..#{lastLayerIndexColorTextures}
 	{
-		vec4 colorSample = getTexVal(colorTiles[#{i}], levelWeights, uv);
+		vec4 colorSample = getTexVal(ColorTextures[#{i}].pile, levelWeights, uv);
 
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		colorSample = performLayerSettings(colorSample, ColorTextures[#{i}].settings);
 
 		color = blendOver(color, colorSample);
 	}
@@ -177,8 +174,7 @@ vec4 calculateGrayScale(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile grayscaleTextureTiles[NUMLAYERS_GRAYSCALETEXTURE],
-	const PerLayerSettings layerSettings[NUMLAYERS_GRAYSCALETEXTURE]) {
+	const Layer GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE]) {
 
 	vec4 colorGrayScale = currentColor;
 
@@ -190,10 +186,10 @@ vec4 calculateGrayScale(
 
 	#for i in 0..#{lastLayerIndexGrayScaleTextures}
 	{
-		vec4 colorSample = getTexVal(grayscaleTextureTiles[#{i}], levelWeights, uv);
+		vec4 colorSample = getTexVal(GrayScaleTextures[#{i}].pile, levelWeights, uv);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		colorSample = performLayerSettings(colorSample, GrayScaleTextures[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}
@@ -229,8 +225,7 @@ vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile nightTiles[NUMLAYERS_NIGHTTEXTURE],
-	const PerLayerSettings layerSettings[NUMLAYERS_NIGHTTEXTURE],
+	const Layer NightTextures[NUMLAYERS_NIGHTTEXTURE],
 	const vec3 ellipsoidNormalCameraSpace,
 	const vec3 lightDirectionCameraSpace) {
 
@@ -244,8 +239,8 @@ vec4 calculateNight(
 
 	#for i in 0..#{lastLayerIndexNightTextures}
 	{
-		vec4 colorSample = getTexVal(nightTiles[#{i}], levelWeights, uv);
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		vec4 colorSample = getTexVal(NightTextures[#{i}].pile, levelWeights, uv);
+		colorSample = performLayerSettings(colorSample, NightTextures[#{i}].settings);
 
 		nightColor = blendOver(nightColor, colorSample);
 	}
@@ -284,8 +279,7 @@ vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile overlayTiles[NUMLAYERS_OVERLAY],
-	const PerLayerSettings layerSettings[NUMLAYERS_OVERLAY]) {
+	const Layer Overlays[NUMLAYERS_OVERLAY]) {
 
 	vec4 color = currentColor;
 
@@ -297,8 +291,8 @@ vec4 calculateOverlay(
 
 	#for i in 0..#{lastLayerIndexOverlays}
 	{
-		vec4 colorSample = getTexVal(overlayTiles[#{i}], levelWeights, uv);
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		vec4 colorSample = getTexVal(Overlays[#{i}].pile, levelWeights, uv);
+		colorSample = performLayerSettings(colorSample, Overlays[#{i}].settings);
 
 		color = blendOver(color, colorSample);
 	}
@@ -311,8 +305,7 @@ vec4 calculateGrayScaleOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile grayscaleOverlayTiles[NUMLAYERS_GRAYSCALE_OVERLAY],
-	const PerLayerSettings layerSettings[NUMLAYERS_GRAYSCALE_OVERLAY]) {
+	const Layer GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY]) {
 
 	vec4 colorGrayScale = currentColor;
 
@@ -324,10 +317,10 @@ vec4 calculateGrayScaleOverlay(
 
 	#for i in 0..#{lastLayerIndexGrayScaleOverlays}
 	{
-		vec4 colorSample = getTexVal(grayscaleOverlayTiles[#{i}], levelWeights, uv);
+		vec4 colorSample = getTexVal(GrayScaleOverlays[#{i}].pile, levelWeights, uv);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		colorSample = performLayerSettings(colorSample, GrayScaleOverlays[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}
@@ -355,8 +348,7 @@ vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const ChunkTilePile waterTiles[NUMLAYERS_WATERMASK],
-	const PerLayerSettings layerSettings[NUMLAYERS_WATERMASK],
+	const Layer WaterMasks[NUMLAYERS_WATERMASK],
 	const vec3 ellipsoidNormalCameraSpace,
 	const vec3 lightDirectionCameraSpace,
 	const vec3 positionCameraSpace) {
@@ -371,9 +363,9 @@ vec4 calculateWater(
 
 	#for i in 0..#{lastLayerIndexWaterMasks}
 	{
-		vec4 colorSample = getTexVal(waterTiles[#{i}], levelWeights, uv);
+		vec4 colorSample = getTexVal(WaterMasks[#{i}].pile, levelWeights, uv);
 
-		colorSample = performLayerSettings(colorSample, layerSettings[#{i}]);
+		colorSample = performLayerSettings(colorSample, WaterMasks[#{i}].settings);
 
 		waterColor = blendOver(waterColor, colorSample);
 	}

@@ -39,6 +39,26 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
+    FloatLayerSetting::FloatLayerSetting(properties::FloatProperty floatProp)
+        : _property(floatProp)
+    {
+
+    }
+
+    void FloatLayerSetting::setValue(ProgramObject* programObject){
+        gpuData.setValue(programObject, _property.value());
+    }
+
+    void FloatLayerSetting::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase){
+        gpuData.updateUniformLocations(programObject, nameBase + _property.identifier());
+    }
+
+    properties::Property* FloatLayerSetting::property() {
+        return &_property;
+    }
+
+
+
 
     ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const{
         return std::move(TileSelector::getHighestResolutionTilePile(tileProvider.get(), tileIndex, pileSize));

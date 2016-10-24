@@ -43,15 +43,30 @@
 namespace openspace {
 namespace globebrowsing {
 
-
-    template<typename T> class LayerSetting;
     
-    class ILayerSetting{
+    class LayerSetting{
     public:
         virtual void setValue(ProgramObject* programObject) = 0;
+        virtual void updateUniformLocations(ProgramObject* programObject) = 0;
+        virtual void deactivate() { };
+        virtual properties::Property* property() const = 0;
+    };
+
+    class FloatLayerSetting : public LayerSetting {
+    public:
+        FloatLayerSetting(properties::FloatProperty);
+        virtual void setValue(ProgramObject* programObject);
+        virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
+        virtual properties::Property* property();
+
+    private:
+        properties::FloatProperty _property;
+        GPUData<float> gpuData;
     };
 
 
+
+/*
     template<typename T>
     class LayerSetting : public ILayerSetting {
     public:
@@ -66,16 +81,26 @@ namespace globebrowsing {
         T data;
     };
 
+    class LayerSettings {
+        LayerSetting* setting(int i) { return layerSettings[i].get(); };
+    private:
+        
+    };
+*/
 
     struct Layer {
+        
+        
+        
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
-
-        ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
-
+        
+        std::vector<std::shared_ptr<LayerSetting>> layerSettings;
+        
         PerLayerSettings settings;
-        std::vector<ILayerSetting*> isettings;
+    
+        ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     };
 
     struct LayerGroup {

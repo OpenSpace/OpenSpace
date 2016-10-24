@@ -182,7 +182,7 @@ namespace globebrowsing {
                 std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[category];
                 int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
                 int numActiveLayers = layerGroup.activeLayers().size();
-                _gpuLayerGroups[category]->updateUniformLocations(programObject, nameBase, pileSize, numActiveLayers);
+                _gpuLayerGroups[category]->updateUniformLocations(programObject, nameBase, pileSize, numActiveLayers, category);
             }
             
             // Ignore errors since this loops through even uniforms that does not exist.
@@ -197,8 +197,7 @@ namespace globebrowsing {
                         _layerSettingsUniformIds[i][k][l] =
                         programObject->uniformLocation(
                                     LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
-                                    "Settings" +
-                                    "[" + std::to_string(k) + "]." +
+                                    "[" + std::to_string(k) + "].settings." +
                                     LayeredTextures::layerSettingsIds[l]);
                     }
                 }

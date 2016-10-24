@@ -66,8 +66,6 @@ struct TileUvTransform {
 /////////////////////////////////////////////////////////////////////
 struct ChunkTile {
 	sampler2D textureSampler;
-	
-	TileDepthTransform depthTransform;
 	TileUvTransform uvTransform;
 };
 
@@ -105,11 +103,13 @@ struct ChunkTilePile {
 };
 
 struct LayerSettings {
-	float lol;
+	float opacity;
+	float gamma;
+	float multiplier;
 };
 
 struct Layer {
-	ChunkTilePile chunkTilePile;
+	ChunkTilePile pile;
 	TileDepthTransform depthTransform;
 	LayerSettings settings;
 };
@@ -149,11 +149,5 @@ vec4 getTexVal(const ChunkTilePile chunkTilePile, const LevelWeights w, const ve
 		w.w3 * getTexVal(chunkTilePile.chunkTile2, uv);
 }
 
-// PerLayerSettings
-struct PerLayerSettings {
-	float opacity;
-	float gamma;
-	float multiplier;
-};
 
 #endif // TEXTURETILE_HGLSL

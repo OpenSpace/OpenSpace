@@ -158,36 +158,17 @@ namespace globebrowsing {
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
-
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "useAtmosphere",
-                std::to_string(chunk.owner().generalProperties().atmosphereEnabled)));
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "performShading",
-                std::to_string(chunk.owner().generalProperties().performShading)));
-
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "showChunkEdges",
-                std::to_string(chunk.owner().debugProperties().showChunkEdges)));
-
-
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "showHeightResolution",
-                std::to_string(chunk.owner().debugProperties().showHeightResolution)));
-
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "showHeightIntensities",
-                std::to_string(chunk.owner().debugProperties().showHeightIntensities)));
-
-        layeredTexturePreprocessingData.keyValuePairs.push_back(
-            std::pair<std::string, std::string>(
-                "defaultHeight",
-                std::to_string(Chunk::DEFAULT_HEIGHT)));
+        
+        const auto& generalProps = chunk.owner().generalProperties();
+        const auto& debugProps = chunk.owner().debugProperties();
+        auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
+        
+        pairs.push_back(std::make_pair("useAtmosphere",std::to_string(generalProps.atmosphereEnabled)));
+        pairs.push_back(std::make_pair("performShading", std::to_string(generalProps.performShading)));
+        pairs.push_back(std::make_pair("showChunkEdges", std::to_string(debugProps.showChunkEdges)));
+        pairs.push_back(std::make_pair("showHeightResolution", std::to_string(debugProps.showHeightResolution)));
+        pairs.push_back(std::make_pair("showHeightIntensities", std::to_string(debugProps.showHeightIntensities)));
+        pairs.push_back(std::make_pair("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT)));
 
         // Now the shader program can be accessed
         ProgramObject* programObject =
@@ -203,17 +184,6 @@ namespace globebrowsing {
         // Activate the shader program
         programObject->activate();
 
-        // Initialize all texture units
-        struct BlendTexUnits {
-            ghoul::opengl::TextureUnit blendTexture0;
-            ghoul::opengl::TextureUnit blendTexture1;
-            ghoul::opengl::TextureUnit blendTexture2;
-        };
-        std::array<std::vector<BlendTexUnits>, LayeredTextures::NUM_TEXTURE_CATEGORIES> texUnits;
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            size_t activeLayers = _layerManager->layerGroup(category).activeLayers().size();
-            texUnits[category].resize(activeLayers);
-        }
 
         // Go through all the categories
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
@@ -243,22 +213,6 @@ namespace globebrowsing {
                 */
                 i++;
             }
-        }
-
-        // Go through all the height maps and set depth tranforms
-        int i = 0;
-        const auto& heightLayers = _layerManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
-
-        for (const Layer& heightLayer : heightLayers) {
-            TileDepthTransform depthTransform = heightLayer.tileProvider->depthTransform();
-            setDepthTransformUniforms(
-                programObject,
-                programUniformHandler,
-                LayeredTextures::TextureCategory::HeightMaps,
-                LayeredTextures::BlendLayerSuffixes::none,
-                i,
-                depthTransform);
-            i++;
         }
 
         // The length of the skirts is proportional to its size
@@ -340,19 +294,6 @@ namespace globebrowsing {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-        
-        /*
-        TileIndex ti(5,5,5);
-        const auto& layers = _layerManager->layerGroup(0).activeLayers();
-        if(layers.size() > 0){
-            TileProvider* tp = layers[0].tileProvider.get();
-            int pileSize = _layerManager->layerGroup(0).levelBlendingEnabled ? 3 : 1;
-            ChunkTilePile tilePile = TileSelector::getHighestResolutionTilePile(tp, ti, pileSize);
-            auto& gpuChunkTilePile = _globalRenderingShaderProvider->gpuChunkTilePile;
-            gpuChunkTilePile.updateUniformLocations(programObject, "test.", pileSize);
-            gpuChunkTilePile.setValue(programObject, tilePile);
-        }
-         */
         
 
         // render
