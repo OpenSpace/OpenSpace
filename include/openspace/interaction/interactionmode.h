@@ -262,7 +262,9 @@ public:
 
 private:
     //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     globebrowsing::RenderableGlobe* _globe;
+#endif
 };
 
 } // namespace interaction
