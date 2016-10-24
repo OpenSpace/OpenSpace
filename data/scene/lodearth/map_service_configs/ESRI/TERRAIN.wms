@@ -10,4 +10,5 @@
   	<LowerRightY>-90.0</LowerRightY>
   	<YOrigin>bottom</YOrigin>
   </DataWindow>
+  <Timeout>2</Timeout>
 </GDAL_WMS>
