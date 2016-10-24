@@ -697,9 +697,9 @@ namespace globebrowsing {
             dataDest,                           // Where to put data
             io.write.region.numPixels.x,        // width to write x in destination
             io.write.region.numPixels.y,        // width to write y in destination
-            _dataLayout.gdalType,                // Type
-            _dataLayout.bytesPerPixel,            // Pixel spacing
-            -io.write.bytesPerLine);             // Line spacing
+            _dataLayout.gdalType,               // Type
+            _dataLayout.bytesPerPixel,          // Pixel spacing
+            -io.write.bytesPerLine);            // Line spacing
     }
 
     std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const {

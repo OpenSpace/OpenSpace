@@ -39,26 +39,47 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-    FloatLayerSetting::FloatLayerSetting(properties::FloatProperty floatProp)
+    GPUFloatProperty::GPUFloatProperty(properties::FloatProperty&& floatProp)
         : _property(floatProp)
     {
 
     }
 
-    void FloatLayerSetting::setValue(ProgramObject* programObject){
+    void GPUFloatProperty::updateValue(ProgramObject* programObject){
         gpuData.setValue(programObject, _property.value());
     }
 
-    void FloatLayerSetting::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase){
+    void GPUFloatProperty::updateUniformLocation(ProgramObject* programObject, const std::string& nameBase){
         gpuData.updateUniformLocations(programObject, nameBase + _property.identifier());
     }
 
-    properties::Property* FloatLayerSetting::property() {
-        return &_property;
+
+    void GPUPropertyCollection::updateValues(ProgramObject* programObject) const{
+        for (auto gpuProperty : _gpuProperties){
+            gpuProperty->updateValue(programObject);
+        }
+    }
+
+    void GPUPropertyCollection::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase) const{
+        for (auto gpuProperty : _gpuProperties){
+            gpuProperty->updateUniformLocation(programObject, nameBase);
+        }
+    }
+
+    const std::vector<std::shared_ptr<GPUProperty>>& GPUPropertyCollection::gpuProperties() const {
+        return _gpuProperties;
     }
 
 
-
+    LayerRenderConfig::LayerRenderConfig(){
+        using namespace properties;
+        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
+            FloatProperty("opacity", "opacity", 1, 0, 1)));
+        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
+            FloatProperty("gamma", "gamma", 1, 0, 5)));
+        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
+            FloatProperty("multiplier", "multiplier", 1, 0, 20)));
+    }
 
     ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const{
         return std::move(TileSelector::getHighestResolutionTilePile(tileProvider.get(), tileIndex, pileSize));
@@ -81,6 +102,10 @@ namespace globebrowsing {
 
     const std::vector<Layer>& LayerGroup::activeLayers() const {
         return _activeLayers;
+    }
+
+    int LayerGroup::pileSize() const{
+        return levelBlendingEnabled ? 3 : 1;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////

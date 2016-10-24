@@ -91,9 +91,13 @@ namespace globebrowsing {
             prop.isEnabled.onChange([&]{
                 layer.isActive = prop.isEnabled;
             });
-            
+            /*
             for (auto setting : layer.settings.array()) {
                 prop.addProperty(setting->property());
+            }*/
+
+            for (std::shared_ptr<GPUProperty> gpuProperty : layer.renderConfig.gpuProperties()) {
+                prop.addProperty(*gpuProperty);
             }
             
   

@@ -203,7 +203,6 @@ vec4 getTileFragColor(){
 		fs_uv,
 		levelWeights,
 		Overlays);
-
 #endif // USE_OVERLAY
 
 
@@ -224,7 +223,7 @@ vec4 getTileFragColor(){
 	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
 	#if USE_HEIGHTMAP
 		color.r = min(color.r, 0.8);
-		color.r += tileResolution(fs_uv, HeightMaps[0].chunkTile0) > 0.9 ? 1 : 0;
+		color.r += tileResolution(fs_uv, HeightMaps[0].pile.chunkTile0) > 0.9 ? 1 : 0;
 	#endif
 #endif
 

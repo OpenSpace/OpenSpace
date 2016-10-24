@@ -178,6 +178,7 @@ namespace globebrowsing {
         if (layeredTextureShaderProvider->updatedOnLastCall()) {
             // Need to update uniforms            
             programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider, _layerManager.get());
+            
         }
         
 
@@ -191,17 +192,18 @@ namespace globebrowsing {
             GPULayerGroup* gpuLayerGroup = programUniformHandler->gpuLayerGroup(category);
             
             int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
-            gpuLayerGroup->setValue(programObject, layerGroup, tileIndex, pileSize);
+            gpuLayerGroup->setValue(programObject, layerGroup, tileIndex);
             
-            int i = 0;
             for (const Layer& layer : layerGroup.activeLayers()) {
+                //layer.renderConfig.updateValues(programObject);
+                /*
                 setLayerSettingsUniforms(
                     programObject,
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
                     i,
                     layer.settings);
-
+                */
                 /*
                 if (category == LayeredTextures::HeightMaps && chunkTile.tile.preprocessData) {
                     //auto preprocessingData = chunkTile.tile.preprocessData;
@@ -211,7 +213,6 @@ namespace globebrowsing {
                         -100000);
                 }
                 */
-                i++;
             }
         }
 

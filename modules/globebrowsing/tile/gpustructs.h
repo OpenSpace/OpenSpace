@@ -28,6 +28,7 @@
 #include <openspace/util/gpudata.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/layermanager.h>
 
 #include <glm/glm.hpp>
 
@@ -119,7 +120,7 @@ class Layer;
 class GPULayer {
 public:
     virtual void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
-    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+    virtual void updateUniformLocations(ProgramObject* programObject, const Layer& layer, const std::string& nameBase, int pileSize);
     virtual void deactivate();
 private:
     GPUChunkTilePile gpuChunkTilePile;
@@ -128,7 +129,7 @@ private:
 class GPUHeightLayer : public GPULayer{
 public:
     virtual void setValue(ProgramObject* programObject, const Layer& layer, const TileIndex& tileIndex, int pileSize);
-    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize);
+    virtual void updateUniformLocations(ProgramObject* programObject, const Layer& layer, const std::string& nameBase, int pileSize);
 private:
     GPUTileDepthTransform gpuDepthTransform;
 };
@@ -139,8 +140,8 @@ class LayerGroup;
 class GPULayerGroup{
 public:
     
-    virtual void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex, int pileSize);
-    virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase, int pileSize, int numActiveLayers, int category);
+    virtual void setValue(ProgramObject* programObject, const LayerGroup& layerGroup, const TileIndex& tileIndex);
+    virtual void updateUniformLocations(ProgramObject* programObject, const LayerGroup& layerGroup, const std::string& nameBase, int category);
     virtual void deactivate();
 private:
     std::vector<std::unique_ptr<GPULayer>> gpuActiveLayers;

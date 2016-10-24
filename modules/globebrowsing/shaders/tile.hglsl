@@ -94,7 +94,7 @@ vec4 getTexVal(const ChunkTile chunkTile, vec2 tileUV){
 
 
 /////////////////////////////////////////////////////////////////////
-//                       Multi Level ChunkTile                          //
+//                         Chunk Tile Pile                         //
 /////////////////////////////////////////////////////////////////////
 struct ChunkTilePile {
 	ChunkTile chunkTile0;

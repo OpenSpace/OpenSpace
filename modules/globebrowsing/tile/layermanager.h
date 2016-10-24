@@ -43,70 +43,133 @@
 namespace openspace {
 namespace globebrowsing {
 
-    
-    class LayerSetting{
+    /**
+     * Interface for uniform values that automatically may update its
+     * uniform locations and setting values within the shader.
+     * This interface may easily be implemented using a templated 
+     * <code>GPUData</code> in combination with a regular 
+     * <code>properties::Propery</code>. See GPUFloatProperty as an example.
+     */
+    class GPUProperty{
     public:
-        virtual void setValue(ProgramObject* programObject) = 0;
-        virtual void updateUniformLocations(ProgramObject* programObject) = 0;
+
+        /** 
+         * Updates the uniform value within the shader program. Make
+         * sure <code>updateUniformLocation</code> has been called
+         * before calling this method.
+         * @param programObject shader program to update uniform value within.
+         */
+        virtual void updateValue(ProgramObject* programObject) = 0;
+
+        /** 
+         * Updates the uniform location ID of the GPUProperty. This 
+         * must be done before updating values within the shader program.
+         * @param programObject shader program to update uniform location within.
+         * @param nameBase may be used if defining uniform within glsl structs
+         */
+        virtual void updateUniformLocation(ProgramObject* programObject, const std::string& nameBase) = 0;
+
+        /** 
+         * Allows deactivation of certain GPUProperties after rendering.
+         * This is usedful when dealing with Textures, as one may
+         * need unassign texture units after rendering.
+         */
         virtual void deactivate() { };
-        virtual properties::Property* property() const = 0;
+
+        /** 
+         * Defines an implicity cast to a regular Property pointer, 
+         * for convenience.
+         */
+        virtual operator properties::Property*() = 0;
     };
 
-    class FloatLayerSetting : public LayerSetting {
+    /**
+     * Defines a FloatProperty which automatically updates the uniform
+     * float value within a shader program from the value defined within
+     * property.
+     */
+    class GPUFloatProperty : public GPUProperty {
     public:
-        FloatLayerSetting(properties::FloatProperty);
-        virtual void setValue(ProgramObject* programObject);
-        virtual void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
-        virtual properties::Property* property();
-
+        GPUFloatProperty(properties::FloatProperty&&);
+        virtual void updateValue(ProgramObject* programObject);
+        virtual void updateUniformLocation(ProgramObject* programObject, const std::string& nameBase);
+        virtual operator properties::Property*() {
+            return &_property;
+        };
     private:
         properties::FloatProperty _property;
         GPUData<float> gpuData;
     };
 
-
-
-/*
-    template<typename T>
-    class LayerSetting : public ILayerSetting {
+    /**
+     * A container class for dealing multiple GPUProperties instances
+     * within the same shader program. This is a general, convenient 
+     * class which more specific GPUProperty collections may in order
+     * to reduce boilerplate code.
+     */
+    class GPUPropertyCollection {
     public:
-        LayerSetting(T t): data(t) {}
 
-        virtual void setValue(ProgramObject* programObject) override {
-            gpuData.setValue(programObject, data);
-        }
+        /**
+         * Updates the uniform values of all 
+         * <code>GPUProperty</code>s within the collection.
+         * @param programObject shader program to update uniform locations within.
+         */
+        void updateValues(ProgramObject* programObject) const;
 
-    private:
-        GPUData<T> gpuData;
-        T data;
+        /**
+         * Updates the uniform locations of all 
+         * <code>GPUProperty</code>s within the collection.
+         * @param programObject shader program to update uniform locations within.
+         */
+        void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase) const;
+
+        /**
+        * @returns a const vector of all GPU properties
+        */
+        const std::vector<std::shared_ptr<GPUProperty>>& gpuProperties() const;
+    protected:
+        std::vector<std::shared_ptr<GPUProperty>> _gpuProperties;
     };
 
-    class LayerSettings {
-        LayerSetting* setting(int i) { return layerSettings[i].get(); };
-    private:
-        
-    };
-*/
 
+    /**
+     * Rendering configurations implements the default constructor in 
+     * which the settings are added
+     */
+    struct LayerRenderConfig : public GPUPropertyCollection {
+        LayerRenderConfig();
+    };
+
+    /**
+    * Simple struct which is used to enable/disable <code>TileProvider</code> 
+    * and associate is with a name. It also holds layer specific information
+    * which is used in rendering of layer.
+    */
     struct Layer {
-        
-        
-        
         std::string name;
         std::shared_ptr<TileProvider> tileProvider;
         bool isActive;
         
-        std::vector<std::shared_ptr<LayerSetting>> layerSettings;
-        
-        PerLayerSettings settings;
+        LayerRenderConfig renderConfig;
     
         ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     };
 
+    /**
+     * Convenience class for dealing with multiple <code>Layer</code>s.
+     */
     struct LayerGroup {
 
+        /// Updates all layers tile providers within this group
         void update();
+
+        /// @returns const vector of all active layers
         const std::vector<Layer>& activeLayers() const;
+
+        /// @returns the size of the pile to be used in rendering of this layer
+        int pileSize() const;
+
 
         std::vector<Layer> layers;
         bool levelBlendingEnabled;
@@ -115,6 +178,9 @@ namespace globebrowsing {
         std::vector<Layer> _activeLayers;
     };
 
+    /**
+    * Manages multiple LayerGroups.
+    */
     class LayerManager {
     public:
 

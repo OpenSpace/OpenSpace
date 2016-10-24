@@ -84,6 +84,7 @@ namespace globebrowsing {
 
     PerLayerSettings::PerLayerSettings()
     {
+        /*
         // Here, all the per layer settings are specified and added
         _array[LayeredTextures::LayerSettingsIds::opacity] = std::make_shared<PerLayerFloatSetting>(
             LayeredTextures::layerSettingsIds[LayeredTextures::LayerSettingsIds::opacity],
@@ -109,6 +110,7 @@ namespace globebrowsing {
             ghoul_assert(_array[i], "The setting " +
                 LayeredTextures::layerSettingsIds[i] + "is not specified!");
         }
+        */
     }
 
     PerLayerSettings::~PerLayerSettings() {};
