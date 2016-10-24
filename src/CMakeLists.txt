@@ -152,6 +152,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/syncdata.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/task.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
@@ -293,6 +295,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h

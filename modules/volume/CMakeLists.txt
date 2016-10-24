@@ -26,7 +26,10 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.h
+<<<<<<< HEAD
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolume.inl
+=======
+>>>>>>> 4bf7b71... Add support for converting and rendering volumetric data in the cdf format. Replace DataConverter by a more general purpose TaskRunner.
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.h

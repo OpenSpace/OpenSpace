@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2016                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,36 +21,26 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#include "volumeutils.h"
+layout(location = 0) in vec4 vertPosition;
 
-namespace openspace {
-namespace volumeutils {
+uniform mat4 viewProjection;
+
+out vec3 vPosition;
+out vec4 worldPosition;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main() {
+    vPosition = vertPosition.xyz;
+    worldPosition = vertPosition;
     
-size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-//    size_t d = dims.z;
-//    
-//    size_t x = coords.x;
-//    size_t y = coords.y;
-//    size_t z = coords.z;
+    vec4 position = pscTransform(worldPosition, mat4(1.0));
     
-    return coords.z * (h * w) + coords.y * w + coords.x;
+    // project the position to view space
+    gl_Position = viewProjection * position;
+
+    gl_Position.z = 1.0;
 }
-
-glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-    size_t d = dims.z;
-    
-    size_t x = index % w;
-    size_t y = (index / w) % h;
-    size_t z = index / w / h;
-    
-    return glm::uvec3(x, y, z);
-}
-    
-} // namespace volumeutils
-
-} // namespace openspace

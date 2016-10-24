@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__
+#include <modules/kameleonvolume/kameleonvolumemodule.h>
 
-#include <functional>
+#include <openspace/util/factorymanager.h>
+
+#include <ghoul/misc/assert.h>
+#include <vector>
+
+#include <modules/kameleonvolume/rendering/renderablekameleonvolume.h>
+#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
+#include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
 
 namespace openspace {
-namespace dataconverter {
 
-class ConversionTask {
-public:
-    virtual void perform(const std::function<void(float)>& onProgress) = 0;
-};
+KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule("KameleonVolume") {}
 
-} // namespace dataconverter
+void KameleonVolumeModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableKameleonVolume>("RenderableKameleonVolume");
+
+    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<KameleonMetadataToJsonTask>("KameleonMetadataToJsonTask");
+    fTask->registerClass<KameleonDocumentationTask>("KameleonDocumentationTask");
+
+  
+}
+
+std::vector<Documentation> KameleonVolumeModule::documentations() const
+{
+    return std::vector<Documentation>{KameleonMetadataToJsonTask::documentation()};
+}
+
 } // namespace openspace
-
-#endif // __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__

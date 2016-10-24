@@ -2,12 +2,12 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy of this *
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
- * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ *  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to   *
  * permit persons to whom the Software is furnished to do so, subject to the following   *
  * conditions:                                                                           *
  *                                                                                       *
@@ -22,38 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
 
 
 namespace openspace {
-namespace dataconverter {
 
-/**
- * Converts ascii based point data
- * int64_t n
- * (float x, float y, float z, float r, float g, float b) * n
- * to a binary (floating point) representation with the same layout.
- */
-class MilkyWayPointsConversionTask : public ConversionTask {
-public:
-    MilkyWayPointsConversionTask(const std::string& inFilename,
-                                 const std::string& outFilename);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
-private:
-    std::string _inFilename;    
-    std::string _outFilename;
-};
+    //KameleonMetaData KameleonVolumeReader::getMetaData() {
+        /*
+        using GridUnits = std::tuple<std::string, std::string, std::string>;
+        GridUnits units = _kameleonWrapper.getGridUnits();
+        std::string unit0 = std::get<0>(units);
+        std::string unit1 = std::get<1>(units);
+        std::string unit2 = std::get<2>(units);
 
-} // namespace dataconverter
-} // namespace openspace
+        glm::vec3 scaling;
+        if (unit0 == 'R' && unit1 == 'R' && unit2 == 'R') {
+            scaling.x = scaling.y = scaling.z = openspace::distanceconstants::EarthRadius;
+        }
+        if (unit0 == '')
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+        VolumeMetaData metaData(VolumeMetaData::GridType::Cartesian, scaling );
+        */
+
+
+        //}
+
+
+
+
+}

@@ -22,35 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "volumeutils.h"
+#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+
+#include <openspace/util/task.h>
+#include <string>
+#include <ghoul/glm.h>
+#include <functional>
+#include <modules/volume/textureslicevolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
+
 
 namespace openspace {
-namespace volumeutils {
-    
-size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-//    size_t d = dims.z;
-//    
-//    size_t x = coords.x;
-//    size_t y = coords.y;
-//    size_t z = coords.z;
-    
-    return coords.z * (h * w) + coords.y * w + coords.x;
-}
+namespace dataconverter {
 
-glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-    size_t d = dims.z;
+/**
+ * Converts a set of exr image slices to a raw volume
+ * with floating point RGBA data (32 bit per channel).
+ */
+class MilkyWayConversionTask : public Task {
+public:
+    MilkyWayConversionTask(const std::string& inFilenamePrefix,
+                           const std::string& inFilenameSuffix,
+                           size_t inFirstIndex,
+                           size_t inNSlices, 
+                           const std::string& outFilename,
+                           const glm::ivec3& outDimensions);
     
-    size_t x = index % w;
-    size_t y = (index / w) % h;
-    size_t z = index / w / h;
-    
-    return glm::uvec3(x, y, z);
-}
-    
-} // namespace volumeutils
+    void perform(const std::function<void(float)>& onProgress) override;
+private:
+    std::string _inFilenamePrefix;
+    std::string _inFilenameSuffix;
+    size_t _inFirstIndex;
+    size_t _inNSlices;
+    std::string _outFilename;
+    glm::ivec3 _outDimensions;
+};
 
+} // namespace dataconverter
 } // namespace openspace
+
+#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__

@@ -22,62 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
+#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+
+#include <modules/galaxy/conversiontask.h>
 #include <string>
 #include <ghoul/glm.h>
+#include <functional>
+#include <modules/volume/textureslicevolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
 
-#include <openspace/util/progressbar.h>
+namespace openspace {
+namespace dataconverter {
 
-#include <apps/DataConverter/milkywayconversiontask.h>
-#include <apps/DataConverter/milkywaypointsconversiontask.h>
-
-int main(int argc, char** argv) {
-    using namespace openspace;
-    using namespace dataconverter;
-
-    ghoul::initialize();
-
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
-    #endif // GHOUL_USE_FREEIMAGE
-
-    openspace::ProgressBar pb(100);
-    std::function<void(float)> onProgress = [&](float progress) {
-        pb.print(progress * 100);
-    };
-
-    // TODO: Make the converter configurable using either
-    // config files (json, lua dictionaries),
-    // lua scripts,
-    // or at the very least: a command line interface.
- 
-    MilkyWayConversionTask mwConversionTask(
-        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
-        ".exr",
-        1385,
-        512,
-        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
-        glm::vec3(512, 512, 64));
+/**
+ * Converts ascii based point data
+ * int64_t n
+ * (float x, float y, float z, float r, float g, float b) * n
+ * to a binary (floating point) representation with the same layout.
+ */
+class MilkyWayPointsConversionTask : public Task {
+public:
+    MilkyWayPointsConversionTask(const std::string& inFilename,
+                                 const std::string& outFilename);
     
-    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
-
-
-    mwConversionTask.perform(onProgress);
-    //mwpConversionTask.perform(onProgress);
-
-
-    std::cout << "Done." << std::endl;
-
-    std::cin.get();
-    return 0;
+    void perform(const std::function<void(float)>& onProgress) override;
+private:
+    std::string _inFilename;    
+    std::string _outFilename;
 };
+
+} // namespace dataconverter
+} // namespace openspace
+
+#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__

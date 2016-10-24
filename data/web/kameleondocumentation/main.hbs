@@ -1,0 +1,59 @@
+<div id="wrapper">
+  <div id="sidebar-wrapper">
+    <ul class="sidebar-nav">
+      <li class="sidebar-brand">
+        <a href="#">
+          Attributes
+        </a>
+      </li>
+      <li>
+          <a href="#global">Global</a>
+      </li>
+      {{#each kameleon.variableAttributes}}
+        <li>
+          <a href="#{{urlify @key}}">{{@key}}</a>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+  <div id="page-content-wrapper">
+    <div class="container-fluid documentation-container">
+      <h1>OpenSpace Kameleon Documentation</h1>
+      <p>Version: {{version}}</p>
+      <p>CDF File: {{input}}</p>
+      <h2><a href="#global" name="global">Global Attributes</a></h2>
+      {{#each kameleon.globalAttributes}}
+      <div class="documentation-item">
+        <div class="row">
+          <div class="col-lg-12">
+            <p>
+              <a href="#{{urlify @key}}" name="{{urlify @key}}">
+                <span class="documentation-key">{{@key}}</span>
+              </a>
+              <p>{{this}}</p>
+            </p>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+      <h2>Variable Attributes</h2>
+      {{#each kameleon.variableAttributes}}
+        <h3><a href="#{{urlify @key}}" name="{{@key}}">{{@key}}</a></h3>
+        {{#each this}}
+          <div class="documentation-item">
+            <div class="row">
+              <div class="col-lg-12">
+                <p>
+                  <a href="#{{urlify @key}}" name="{{urlify @key}}">
+                    <span class="documentation-key">{{@key}}</span>
+                  </a>
+                  <p>{{this}}</p>
+                </p>
+              </div>
+            </div>
+          </div>
+        {{/each}}
+      {{/each}}
+    </div>
+  </div>
+</div>

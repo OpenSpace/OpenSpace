@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2016                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,35 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "volumeutils.h"
+uniform float maxStepSize#{id} = 0.02;
+uniform sampler3D volumeTexture_#{id};
+uniform sampler1D transferFunction_#{id};
+uniform int gridType_#{id} = 0;
 
-namespace openspace {
-namespace volumeutils {
+
+void sample#{id}(vec3 samplePos,
+             vec3 dir,
+             inout vec3 accumulatedColor,
+             inout vec3 accumulatedAlpha,
+             inout float stepSize) {
+
+    vec3 transformedPos = samplePos;
+    if (gridType_#{id} == 1) {
+        transformedPos = kameleon_cartesianToSpherical(samplePos);
+    }
+
+    float val = texture(volumeTexture_#{id}, transformedPos).r;
+    vec4 color = texture(transferFunction_#{id}, val);
+    vec3 backColor = color.rgb;
+    vec3 backAlpha = color.aaa;
+
+    backColor *= stepSize;
+    backAlpha *= stepSize;
+
+    backColor = clamp(backColor, 0.0, 1.0);
+    backAlpha = clamp(backAlpha, 0.0, 1.0);
     
-size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-//    size_t d = dims.z;
-//    
-//    size_t x = coords.x;
-//    size_t y = coords.y;
-//    size_t z = coords.z;
-    
-    return coords.z * (h * w) + coords.y * w + coords.x;
+    vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+    accumulatedColor += oneMinusFrontAlpha * backColor;
+    accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
+
+    stepSize = maxStepSize#{id};
 }
 
-glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-    size_t d = dims.z;
-    
-    size_t x = index % w;
-    size_t y = (index / w) % h;
-    size_t z = index / w / h;
-    
-    return glm::uvec3(x, y, z);
+float stepSize#{id}(vec3 samplePos, vec3 dir) {
+    return maxStepSize#{id};
 }
-    
-} // namespace volumeutils
-
-} // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,39 +22,68 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RAWVOLUME___H__
+#ifndef __KAMELEONVOLUMERAYCASTER_H__
+#define __KAMELEONVOLUMERAYCASTER_H__
+
+
+#include <string>
+#include <vector>
 
 #include <ghoul/glm.h>
-#include <functional>
-#include <vector>
+#include <ghoul/opengl/texture.h>
+
+#include <openspace/rendering/volumeraycaster.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/util/blockplaneintersectiongeometry.h>
+#include <openspace/rendering/transferfunction.h>
+
+#include <modules/volume/volumegridtype.h>
+
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+        class ProgramObject;
+    }
+}
 
 namespace openspace {
 
-template <typename Voxel>
-class RawVolume {
+class RenderData;
+class RaycastData;
+
+class KameleonVolumeRaycaster : public VolumeRaycaster {
 public:
-    typedef Voxel VoxelType;
-    RawVolume(const glm::uvec3& dimensions);
-    glm::uvec3 dimensions() const;
-    void setDimensions(const glm::uvec3& dimensions);
-    size_t nCells() const;
-    VoxelType get(const glm::uvec3& coordinates) const;
-    VoxelType get(const size_t index) const;
-    void set(const glm::uvec3& coordinates, const VoxelType& value);
-    void set(size_t index, const VoxelType& value);
-    void forEachVoxel(const std::function<void(const glm::uvec3&, const VoxelType&)>& fn);
-    const VoxelType* data() const;
-    size_t coordsToIndex(const glm::uvec3& cartesian) const;
-    glm::uvec3 indexToCoords(size_t linear) const;
-    VoxelType* data();
+
+    KameleonVolumeRaycaster(
+        std::shared_ptr<ghoul::opengl::Texture> texture,
+        std::shared_ptr<TransferFunction> transferFunction);
+
+    virtual ~KameleonVolumeRaycaster();
+    void initialize();
+    void deinitialize();
+    void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
+    void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+
+    std::string getBoundsVsPath() const override;
+    std::string getBoundsFsPath() const override;
+    std::string getRaycastPath() const override;
+    std::string getHelperPath() const override;
+
+    void setStepSize(float stepSize);
+    void setGridType(VolumeGridType gridType);
 private:
-    glm::uvec3 _dimensions;
-    std::vector<VoxelType> _data;
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::shared_ptr<TransferFunction> _transferFunction;
+    BoxGeometry _boundingBox;
+    VolumeGridType _gridType;
+
+    std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    float _stepSize;
 };
 
-} // namespace openspace
+} // openspace
 
-#include "rawvolume.inl"
-
-#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUME___H__
+#endif  // __KAMELEONVOLUMERAYCASTER_H__ 

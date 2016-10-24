@@ -2,9 +2,9 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014 - 2016                                                             *
  *                                                                                       *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy of this *
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
@@ -22,35 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "volumeutils.h"
+#ifndef __KAMELEONVOLUMEREADER_H__
+#define __KAMELEONVOLUMEREADER_H__
+
+#include <string>
+#include <memory>
+#include <modules/volume/rawvolume.h>
+#include <ghoul/misc/dictionary.h>
+
+#include <ccmc/Kameleon.h>
+#include <ccmc/Model.h>
+#include <ccmc/Interpolator.h>
+#include <ccmc/BATSRUS.h>
+#include <ccmc/ENLIL.h>
+#include <ccmc/CCMCTime.h>
+#include <ccmc/Attribute.h>
+
 
 namespace openspace {
-namespace volumeutils {
-    
-size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-//    size_t d = dims.z;
-//    
-//    size_t x = coords.x;
-//    size_t y = coords.y;
-//    size_t z = coords.z;
-    
-    return coords.z * (h * w) + coords.y * w + coords.x;
+
+class KameleonVolumeReader {
+public:
+    KameleonVolumeReader(const std::string& path);
+    //KameleonMetaData readMetaData();
+
+    std::unique_ptr<RawVolume<float>> readFloatVolume(
+        const glm::uvec3& dimensions,
+        const std::string& variable,
+        const glm::vec3& lowerBound,
+        const glm::vec3& upperBound) const;
+    ghoul::Dictionary readMetaData() const;
+    float minValue(const std::string& variable) const;
+    float maxValue(const std::string& variable) const;
+
+    std::vector<std::string> gridVariableNames() const;
+    std::vector<std::string> gridUnits() const;
+    std::vector<std::string> variableNames() const;
+    std::vector<std::string> variableAttributeNames() const;
+    std::vector<std::string> globalAttributeNames() const;
+
+private:
+    static void addAttributeToDictionary(ghoul::Dictionary& dictionary, const std::string& key, ccmc::Attribute& attr);
+    std::string _path;
+    ccmc::Kameleon _kameleon;
+    ccmc::Model* _model;
+    std::unique_ptr<ccmc::Interpolator> _interpolator;
+
+};
+
 }
 
-glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dims) {
-    size_t w = dims.x;
-    size_t h = dims.y;
-    size_t d = dims.z;
-    
-    size_t x = index % w;
-    size_t y = (index / w) % h;
-    size_t z = index / w / h;
-    
-    return glm::uvec3(x, y, z);
-}
-    
-} // namespace volumeutils
+#include <modules/kameleonvolume/kameleonvolumereader.inl>
 
-} // namespace openspace
+#endif
