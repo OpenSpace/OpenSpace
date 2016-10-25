@@ -438,8 +438,24 @@ namespace globebrowsing {
     }
 
 
-
-
+    std::array<double, 6> TileDataset::getGeoTransform() const {
+        std::array<double, 6> padfTransform;
+        CPLErr err = _dataset->GetGeoTransform(&padfTransform[0]);
+        if (err == CE_Failure) {
+            GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2, M_PI));
+            padfTransform[1] = Angle<Scalar>::fromRadians(
+                globalCoverage.size().lon).asDegrees() / _dataset->GetRasterXSize();
+            padfTransform[5] = -Angle<Scalar>::fromRadians(
+                globalCoverage.size().lat).asDegrees() / _dataset->GetRasterYSize();
+            padfTransform[0] = Angle<Scalar>::fromRadians(
+                globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
+            padfTransform[3] = Angle<Scalar>::fromRadians(
+                globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
+            padfTransform[2] = 0;
+            padfTransform[4] = 0;
+        }
+        return padfTransform;
+    }
 
     //////////////////////////////////////////////////////////////////////////////////
     //                          ReadTileData helper functions                       //
@@ -447,11 +463,8 @@ namespace globebrowsing {
 
     PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
 
-        double padfTransform[6];
-        CPLErr err = _dataset->GetGeoTransform(padfTransform);
-
-        ghoul_assert(err != CE_Failure, "Failed to get transform");
-
+        std::array<double, 6> padfTransform = getGeoTransform();
+        
         Scalar Y = Angle<Scalar>::fromRadians(geo.lat).asDegrees();
         Scalar X = Angle<Scalar>::fromRadians(geo.lon).asDegrees();
 
@@ -484,10 +497,9 @@ namespace globebrowsing {
     }
 
     Geodetic2 TileDataset::pixelToGeodetic(const PixelCoordinate& p) const {
-        double padfTransform[6];
-        CPLErr err = _dataset->GetGeoTransform(padfTransform);
-        ghoul_assert(err != CE_Failure, "Failed to get transform");
+        std::array<double, 6> padfTransform = getGeoTransform();
         Geodetic2 geodetic;
+        // Should be using radians and not degrees?
         geodetic.lon = padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2];
         geodetic.lat = padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5];
         return geodetic;
