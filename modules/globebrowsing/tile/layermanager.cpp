@@ -116,7 +116,7 @@ namespace globebrowsing {
         _activeLayers.clear();
 
         for (auto layer : layers) {
-            if (layer->isActive()) {
+            if (layer->enabled()) {
                 layer->tileProvider()->update();
                 _activeLayers.push_back(layer);
             }
@@ -184,10 +184,10 @@ namespace globebrowsing {
         }
     }
 
-    void LayerManager::reset(bool includingInactive) {
+    void LayerManager::reset(bool includeDisabled) {
         for (auto& layerGroup : layerGroups) {
             for (auto layer : layerGroup->layers) {
-                if (layer->isActive() || includingInactive) {
+                if (layer->enabled() || includeDisabled) {
                     layer->tileProvider()->reset();
                 }
             }

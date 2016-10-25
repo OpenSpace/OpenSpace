@@ -63,7 +63,7 @@ namespace globebrowsing {
 
         ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 
-        bool isActive() const { return _enabled.value(); }
+        bool enabled() const { return _enabled.value(); }
         TileProvider* tileProvider() const { return _tileProvider.get(); }
         const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 

@@ -151,27 +151,6 @@ namespace globebrowsing {
             
             int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
             gpuLayerGroup->setValue(programObject, layerGroup, tileIndex);
-            
-            for (auto layer : layerGroup.activeLayers()) {
-                //layer.renderConfig.updateValues(programObject);
-                /*
-                setLayerSettingsUniforms(
-                    programObject,
-                    programUniformHandler,
-                    LayeredTextures::TextureCategory(category),
-                    i,
-                    layer.settings);
-                */
-                /*
-                if (category == LayeredTextures::HeightMaps && chunkTile.tile.preprocessData) {
-                    //auto preprocessingData = chunkTile.tile.preprocessData;
-                    //float noDataValue = preprocessingData->noDataValues[0];
-                    programObject->setUniform(
-                        "minimumValidHeight[" + std::to_string(i) + "]",
-                        -100000);
-                }
-                */
-            }
         }
 
         // The length of the skirts is proportional to its size
