@@ -84,6 +84,9 @@ namespace globebrowsing {
         /// Updates all layers tile providers within this group
         void update();
 
+        /// @returns const vector of all layers
+        const std::vector<std::shared_ptr<Layer>>& layers() const;
+
         /// @returns const vector of all active layers
         const std::vector<std::shared_ptr<Layer>>& activeLayers() const;
 
@@ -92,10 +95,9 @@ namespace globebrowsing {
 
         bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
 
-        std::vector<std::shared_ptr<Layer>> layers;
-
     private:
         
+        std::vector<std::shared_ptr<Layer>> _layers;
         std::vector<std::shared_ptr<Layer>> _activeLayers;
 
         properties::BoolProperty _levelBlendingEnabled;

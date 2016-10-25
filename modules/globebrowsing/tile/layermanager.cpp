@@ -49,6 +49,10 @@ namespace globebrowsing {
         addProperty(gamma);
         addProperty(multiplier);
     }
+    
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                     Layer                                        //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     Layer::Layer(const ghoul::Dictionary& layerDict)
         : _enabled(properties::BoolProperty("enabled", "enabled", false))
@@ -81,6 +85,7 @@ namespace globebrowsing {
         return std::move(TileSelector::getHighestResolutionTilePile(_tileProvider.get(), tileIndex, pileSize));
     }
 
+    
     //////////////////////////////////////////////////////////////////////////////////////
     //                               Layer Group                                        //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +105,7 @@ namespace globebrowsing {
             ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
             try {
-                layers.push_back(std::make_shared<Layer>(layerDict));
+                _layers.push_back(std::make_shared<Layer>(layerDict));
             }
             catch (const ghoul::RuntimeError& e) {
                 LERROR(e.what());
@@ -108,7 +113,7 @@ namespace globebrowsing {
             }
         }
 
-        for(auto layer : layers){
+        for(auto layer : _layers){
             addPropertySubOwner(layer.get());
         }
     }
@@ -116,12 +121,16 @@ namespace globebrowsing {
     void LayerGroup::update() {
         _activeLayers.clear();
 
-        for (auto layer : layers) {
+        for (auto layer : _layers) {
             if (layer->enabled()) {
                 layer->tileProvider()->update();
                 _activeLayers.push_back(layer);
             }
         }
+    }
+
+    const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
+        return _layers;
     }
 
     const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
@@ -133,7 +142,7 @@ namespace globebrowsing {
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                           Tile Provider Manager                                  //
+    //                                 LayerManager                                     //
     //////////////////////////////////////////////////////////////////////////////////////
     LayerManager::LayerManager(const ghoul::Dictionary& textureCategoriesDictionary) {
 
@@ -201,7 +210,7 @@ namespace globebrowsing {
 
     void LayerManager::reset(bool includeDisabled) {
         for (auto& layerGroup : _layerGroups) {
-            for (auto layer : layerGroup->layers) {
+            for (auto layer : layerGroup->layers()) {
                 if (layer->enabled() || includeDisabled) {
                     layer->tileProvider()->reset();
                 }
