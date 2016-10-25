@@ -296,6 +296,18 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyOnScreenTextScaling,
+            new StringInListVerifier({
+                // Values from RenderEngine:updateRenderer
+                "window", "framebuffer"
+            }),
+            "The method for scaling the onscreen text in the window. As the resolution "
+            "of the rendering can be different from the size of the window, the onscreen "
+            "text can either be scaled according to the window size (\"window\"), or the "
+            "rendering resolution (\"framebuffer\"). This value defaults to \"window\".",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyDownloadRequestURL,
             new OrVerifier(
                 new StringVerifier,

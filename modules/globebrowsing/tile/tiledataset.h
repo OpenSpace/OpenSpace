@@ -107,6 +107,7 @@ namespace globebrowsing {
         TileDepthTransform getDepthTransform();
         const TileDataLayout& getDataLayout();
         void reset();
+        float noDataValueAsFloat();
 
 
         const static glm::ivec2 tilePixelStartOffset;

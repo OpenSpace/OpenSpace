@@ -67,6 +67,7 @@ namespace globebrowsing {
             const ghoul::Dictionary& textureInitDictionary);
         ~LayerManager();
 
+
         LayerGroup& layerGroup(size_t groupId);
         LayerGroup& layerGroup(LayeredTextures::TextureCategory);
 

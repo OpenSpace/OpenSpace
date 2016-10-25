@@ -35,11 +35,6 @@ namespace globebrowsing {
 
     using namespace ghoul::opengl;
 
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
-    };
-
     struct ChunkTile {
         Tile tile;
         TileUvTransform uvTransform;
