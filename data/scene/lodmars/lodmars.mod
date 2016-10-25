@@ -34,11 +34,6 @@ return {
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
-            TextureInitData = {
-                ColorTextureMinimumSize = 512,
-                OverlayMinimumSize = 512,
-                HeightMapMinimumSize = 64,
-            },
             Textures = {
                 ColorTextures = {
                     {

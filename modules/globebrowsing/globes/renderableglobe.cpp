@@ -50,7 +50,6 @@ namespace {
         "InteractionDepthBelowEllipsoid";
     const std::string keyCameraMinHeight = "CameraMinHeight";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
-    const std::string keyTextureInitData = "TextureInitData";
     const std::string keyTextures = "Textures";
     const std::string keyColorTextures = "ColorTextures";
     const std::string keyHeightMaps = "HeightMaps";
@@ -160,20 +159,17 @@ namespace globebrowsing {
         _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
         // Init tile provider manager
-        ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
-        dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
 
-        _tileProviderManager = std::make_shared<TileProviderManager>(
-            texturesDictionary, textureInitDataDictionary);
+        _tileProviderManager = std::make_shared<TileProviderManager>(texturesDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _tileProviderManager);
-        _pointGlobe = std::make_shared<PointGlobe>(*this);
+        //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
-        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e9);
-        _distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
+        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 5e9);
+        //_distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
 
         _debugPropertyOwner.setName("Debug");
         _texturePropertyOwner.setName("Textures");
@@ -195,8 +191,8 @@ namespace globebrowsing {
         _debugPropertyOwner.addProperty(
             _debugProperties.levelByProjectedAreaElseDistance);
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
-        _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
-                
+        //_debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
+              
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
             _textureProperties.push_back(std::make_unique<LayeredCategoryPropertyOwner>
                 (LayeredTextures::TextureCategory(i), *_tileProviderManager));
@@ -275,18 +271,12 @@ namespace globebrowsing {
     }
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
-        // Get the tile provider for the height map
-        const auto& heightLayers = _tileProviderManager->layerGroup(
-            LayeredTextures::HeightMaps).activeLayers();
-        if (heightLayers.size() == 0)
-            return 0;
-        const auto& tileProvider = heightLayers[0].tileProvider;
-
+        float height = 0;
+        
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
         int chunkLevel = _chunkedLodGlobe->findChunkNode(
             geodeticPosition).getChunk().tileIndex().level;
-        
         TileIndex chunkIdx = TileIndex(geodeticPosition, chunkLevel);
         GeodeticPatch patch = GeodeticPatch(chunkIdx);
         Geodetic2 geoDiffPatch =
@@ -296,47 +286,76 @@ namespace globebrowsing {
         glm::vec2 patchUV = glm::vec2(
             geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
-        // Transform the uv coordinates to the current tile texture
-        ChunkTile chunkTile = TileSelector::getHighestResolutionTile(
-            tileProvider.get(), chunkIdx);
-        const auto& tile = chunkTile.tile;
-        const auto& uvTransform = chunkTile.uvTransform;
-        const auto& depthTransform = tileProvider->depthTransform();
-        if (tile.status != Tile::Status::OK) {
-            return 0;
+        // Get the tile providers for the height maps
+        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(
+            LayeredTextures::HeightMaps).getActiveTileProviders();
+        
+        for (const auto& tileProvider : heightMapProviders) {
+            // Transform the uv coordinates to the current tile texture
+            TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(
+                tileProvider.get(), chunkIdx);
+            const auto& tile = tileAndTransform.tile;
+            const auto& uvTransform = tileAndTransform.uvTransform;
+            const auto& depthTransform = tileProvider->depthTransform();
+            if (tile.status != Tile::Status::OK) {
+                return 0;
+            }
+
+            glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
+                uvTransform,
+                patchUV,
+                glm::uvec2(tile.texture->dimensions()));
+
+            // Sample and do linear interpolation
+            // (could possibly be moved as a function in ghoul texture)
+            // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
+            // in range [0,1] and uses the set interpolation method and clamping.
+
+            glm::uvec3 dimensions = tile.texture->dimensions();
+            
+            glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
+            glm::uvec2 samplePos00 = samplePos;
+            samplePos00 = glm::clamp(
+                samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+            glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
+
+            glm::uvec2 samplePos10 = glm::min(
+                samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+            glm::uvec2 samplePos01 = glm::min(
+                samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+            glm::uvec2 samplePos11 = glm::min(
+                samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+
+            float sample00 = tile.texture->texelAsFloat(samplePos00).x;
+            float sample10 = tile.texture->texelAsFloat(samplePos10).x;
+            float sample01 = tile.texture->texelAsFloat(samplePos01).x;
+            float sample11 = tile.texture->texelAsFloat(samplePos11).x;
+
+            // In case the texture has NaN or no data values don't use this height map.
+            bool anySampleIsNaN =
+                isnan(sample00) ||
+                isnan(sample01) ||
+                isnan(sample10) ||
+                isnan(sample11);
+
+            bool anySampleIsNoData =
+                sample00 == tileProvider->noDataValueAsFloat() ||
+                sample01 == tileProvider->noDataValueAsFloat() ||
+                sample10 == tileProvider->noDataValueAsFloat() ||
+                sample11 == tileProvider->noDataValueAsFloat();
+        
+            if (anySampleIsNaN || anySampleIsNoData) {
+                continue;
+            }
+
+            float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
+            float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
+
+            float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
+
+            // Perform depth transform to get the value in meters
+            height = depthTransform.depthOffset + depthTransform.depthScale * sample;
         }
-        glm::vec2 transformedUv = uvTransform.uvOffset + uvTransform.uvScale * patchUV;
-
-        // Sample and do linear interpolation
-        // (could possibly be moved as a function in ghoul texture)
-        glm::uvec3 dimensions = tile.texture->dimensions();
-        
-        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
-        glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(
-            samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
-        glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
-
-        glm::uvec2 samplePos10 = glm::min(
-            samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
-        glm::uvec2 samplePos01 = glm::min(
-            samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
-        glm::uvec2 samplePos11 = glm::min(
-            samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
-
-        float sample00 = tile.texture->texelAsFloat(samplePos00).x;
-        float sample10 = tile.texture->texelAsFloat(samplePos10).x;
-        float sample01 = tile.texture->texelAsFloat(samplePos01).x;
-        float sample11 = tile.texture->texelAsFloat(samplePos11).x;
-
-        float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
-        float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
-
-        float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
-
-        // Perform depth transform to get the value in meters
-        float height = depthTransform.depthOffset + depthTransform.depthScale * sample;
-        
         // Return the result
         return height;
     }

@@ -72,7 +72,7 @@ InteractionHandler::InteractionHandler()
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
-    , _sensitivity("sensitivity", "Sensitivity", 0.002, 0.0001, 0.02)
+    , _sensitivity("sensitivity", "Sensitivity", 0.5, 0.001, 1)
     , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
 {
     setName("Interaction");
@@ -94,7 +94,7 @@ InteractionHandler::InteractionHandler()
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
-    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(_sensitivity * pow(10.0,-4), 1);
     _interactionModes.insert(
         std::pair<std::string, std::shared_ptr<InteractionMode>>(
             "Orbital",
@@ -125,7 +125,7 @@ InteractionHandler::InteractionHandler()
         _mouseStates->setVerticalFriction(_verticalFriction);
     });
     _sensitivity.onChange([&]() {
-        _mouseStates->setSensitivity(_sensitivity);
+        _mouseStates->setSensitivity(_sensitivity * pow(10.0,-4));
     });
     _rapidness.onChange([&]() {
         _mouseStates->setVelocityScaleFactor(_rapidness);
@@ -218,7 +218,7 @@ void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
     _currentInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 
-void InteractionHandler::updateCamera() {
+void InteractionHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -227,7 +227,7 @@ void InteractionHandler::updateCamera() {
     }
     else {
         if (_camera && focusNode()) {
-            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera, deltaTime);
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }

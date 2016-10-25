@@ -190,6 +190,9 @@ public:
 
     void sortScreenspaceRenderables();
 
+    glm::ivec2 renderingResolution() const;
+    glm::ivec2 fontResolution() const;
+
     // This is temporary until a proper screenspace solution is found ---abock
     struct OnScreenInformation{
         glm::vec2 _position;

@@ -25,5 +25,9 @@
 project(Imgui)
 message(STATUS "Generating Imgui project")
 
-add_library(Imgui ${PROJECT_SOURCE_DIR}/imgui.cpp)
+add_library(Imgui
+    ${PROJECT_SOURCE_DIR}/imgui.cpp
+    ${PROJECT_SOURCE_DIR}/imgui_demo.cpp
+    ${PROJECT_SOURCE_DIR}/imgui_draw.cpp
+)
 target_include_directories(Imgui PUBLIC ${PROJECT_SOURCE_DIR})

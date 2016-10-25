@@ -150,6 +150,10 @@ namespace globebrowsing {
         return tile;
     }
 
+    float CachingTileProvider::noDataValueAsFloat() {
+        return _asyncTextureDataProvider->noDataValueAsFloat();
+    }
+
     Tile CachingTileProvider::getDefaultTile() {
         if (_defaultTile.texture == nullptr) {
             _defaultTile = createTile(_asyncTextureDataProvider->getTextureDataProvider()->defaultTileData());

@@ -64,12 +64,9 @@ namespace globebrowsing {
             for (size_t i = 0; i < layeredTextureInfo.size(); i++) {
                 equal = equal && (layeredTextureInfo[i] == other.layeredTextureInfo[i]);
             }
-            // Commented this for-loop. Not necessary since the keyValuePairs
-            // are always supposed to be equal. Comparing strings takes time.
-            
-            //for (size_t i = 0; i < keyValuePairs.size(); i++) {
-            //    equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
-            //}
+            for (size_t i = 0; i < keyValuePairs.size(); i++) {
+                equal = equal && (keyValuePairs[i] == other.keyValuePairs[i]);
+            }
             
             return equal;
         }

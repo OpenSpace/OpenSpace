@@ -62,9 +62,7 @@ namespace globebrowsing {
     class TileProviderManager {
     public:
 
-        TileProviderManager(
-            const ghoul::Dictionary& textureCategoriesDictionary,
-            const ghoul::Dictionary& textureInitDictionary);
+        TileProviderManager(const ghoul::Dictionary& textureCategoriesDictionary);
         ~TileProviderManager();
 
         LayerGroup& layerGroup(size_t groupId);

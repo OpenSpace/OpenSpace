@@ -22,6 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <limits>
+
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
 
@@ -131,6 +133,17 @@ namespace globebrowsing {
         }
         
         initialize();
+    }
+
+    float TileDataset::noDataValueAsFloat() {
+        float noDataValue;
+        if (_dataset && _dataset->GetRasterBand(1))
+        {
+            noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();;
+        }
+        else
+            noDataValue = std::numeric_limits<float>::min();
+        return noDataValue;
     }
 
     void TileDataset::ensureInitialized() {

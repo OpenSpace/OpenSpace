@@ -90,12 +90,20 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
+    //return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
+    //                  sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
+
     return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
                       sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
-    int x,y;
+    //int width, height;
+    //auto window = sgct::Engine::instance()->getCurrentWindowPtr()->getWindowHandle();
+    //glfwGetFramebufferSize(window, &width, &height);
+    //return glm::ivec2(width, height);
+
+    int x, y;
     sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }

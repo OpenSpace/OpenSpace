@@ -76,7 +76,7 @@ public:
     void unlockControls();
 
     //void update(double deltaTime);
-    void updateCamera();
+    void updateCamera(double deltaTime);
     void updateInputStates(double timeSinceLastUpdate);    
 
     // Accessors

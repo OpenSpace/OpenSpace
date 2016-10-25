@@ -370,11 +370,10 @@ void RenderEngine::updateRenderer() {
     bool windowResized = OsEng.windowWrapper().windowHasResized();
 
     if (windowResized) {
-        glm::ivec2 res = OsEng.windowWrapper().currentWindowSize();
-        //glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
-        _renderer->setResolution(res);
+        _renderer->setResolution(renderingResolution());
+
         ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-            glm::vec2(res)
+            fontResolution()
         );
     }
 
@@ -386,6 +385,31 @@ void RenderEngine::updateScreenSpaceRenderables() {
         screenspacerenderable->update();
     }
 }
+
+glm::ivec2 RenderEngine::renderingResolution() const {
+    if (OsEng.windowWrapper().isRegularRendering()) {
+        return OsEng.windowWrapper().currentWindowResolution();
+    }
+    else {
+        return OsEng.windowWrapper().currentDrawBufferResolution();
+    }
+}
+
+glm::ivec2 RenderEngine::fontResolution() const {
+    std::string value;
+    bool hasValue = OsEng.configurationManager().getValue(
+        ConfigurationManager::KeyOnScreenTextScaling,
+        value
+    );
+    if (hasValue && value == "framebuffer") {
+        return OsEng.windowWrapper().currentWindowResolution();
+    }
+    else {
+        // The default is to use the window size
+        return OsEng.windowWrapper().currentWindowSize();
+    }
+}
+
 
 void RenderEngine::updateFade() {
     //temporary fade funtionality
@@ -686,14 +710,12 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
  * Set renderer
  */
 void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
-    glm::ivec2 res = OsEng.windowWrapper().currentDrawBufferResolution();
-
     if (_renderer) {
         _renderer->deinitialize();
     }
 
     _renderer = std::move(renderer);
-    _renderer->setResolution(res);
+    _renderer->setResolution(renderingResolution());
     _renderer->setNAaSamples(_nAaSamples);
     _renderer->initialize();
     _renderer->setCamera(_mainCamera);
@@ -1279,7 +1301,8 @@ void RenderEngine::renderInformation() {
     if (_fontDate) {
         glm::vec2 penPosition = glm::vec2(
             10.f,
-            OsEng.windowWrapper().viewportPixelCoordinates().w
+            fontResolution().y
+            //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
         penPosition.y -= _fontDate->height();
 
