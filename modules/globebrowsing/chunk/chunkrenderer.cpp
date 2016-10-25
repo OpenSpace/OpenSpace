@@ -164,17 +164,7 @@ namespace globebrowsing {
 
         const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
 
-        bool performAnyBlending = false;
-        
-
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            const LayerGroup& layerGroup = _layerManager->layerGroup(i);
-            if(layerGroup.layerBlendingEnabled() && layerGroup.activeLayers().size() > 0){
-                performAnyBlending = true; 
-                break;
-            }
-        }
-        if (performAnyBlending) {
+        if (_layerManager->hasAnyBlendingLayersEnabled()) {
             // Calculations are done in the reference frame of the globe. Hence, the camera
             // position needs to be transformed with the inverse model matrix
             glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
@@ -249,15 +239,7 @@ namespace globebrowsing {
         const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
 
 
-        bool performAnyBlending = false;
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_layerManager->layerGroup(i).layerBlendingEnabled() && _layerManager->layerGroup(category).activeLayers().size() > 0) {
-                performAnyBlending = true;
-                break;
-            }
-        }
-        if (performAnyBlending) {
+        if (_layerManager->hasAnyBlendingLayersEnabled()) {
             float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * chunk.owner().ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.tileIndex().level);

@@ -92,7 +92,7 @@ namespace globebrowsing {
 
         bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
 
-        std::vector<std::shared_ptr<Layer>> layers;        
+        std::vector<std::shared_ptr<Layer>> layers;
 
     private:
         
@@ -112,6 +112,8 @@ namespace globebrowsing {
 
         LayerGroup& layerGroup(size_t groupId);
         LayerGroup& layerGroup(LayeredTextures::TextureCategory);
+
+        bool hasAnyBlendingLayersEnabled() const;
 
         const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
 

@@ -179,6 +179,15 @@ namespace globebrowsing {
         return *_layerGroups[category];
     }
 
+    bool LayerManager::hasAnyBlendingLayersEnabled() const {
+        for (const auto& layerGroup : _layerGroups){
+            if (layerGroup->layerBlendingEnabled() && layerGroup->activeLayers().size() > 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
     const std::vector<std::shared_ptr<LayerGroup>>& LayerManager::layerGroups() const {
         return _layerGroups;
     }
