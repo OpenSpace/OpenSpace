@@ -92,7 +92,7 @@ namespace globebrowsing {
 
         ProgramObject* getActivatedProgramWithTileData(
             LayeredTextureShaderProvider* layeredTextureShaderProvider,
-            std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
+            GPULayerManager * gpuLayerManager,
             const Chunk& chunk);
 
         // shared pointer to a grid which can be the same for all rendered chunks.
@@ -104,8 +104,8 @@ namespace globebrowsing {
         std::shared_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
 
         // Layered texture uniforms are chached in the uniform ID handles.
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> _globalProgramUniformHandler;
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> _localProgramUniformHandler;
+        std::shared_ptr<GPULayerManager> _globalGpuLayerManager;
+        std::shared_ptr<GPULayerManager> _localGpuLayerManager;
     };
 
 } // namespace globebrowsing

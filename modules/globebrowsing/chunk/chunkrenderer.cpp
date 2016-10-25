@@ -75,10 +75,8 @@ namespace globebrowsing {
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
 
-        _globalProgramUniformHandler =
-            std::make_shared<LayeredTextureShaderUniformIdHandler>();
-        _localProgramUniformHandler =
-            std::make_shared<LayeredTextureShaderUniformIdHandler>();
+        _globalGpuLayerManager = std::make_shared<GPULayerManager>();
+        _localGpuLayerManager = std::make_shared<GPULayerManager>();
 
     }
 
@@ -98,7 +96,7 @@ namespace globebrowsing {
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         LayeredTextureShaderProvider* layeredTextureShaderProvider,
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
+        GPULayerManager * gpuLayerManager,
         const Chunk& chunk)
     {
         const TileIndex& tileIndex = chunk.tileIndex();
@@ -121,7 +119,7 @@ namespace globebrowsing {
         const auto& debugProps = chunk.owner().debugProperties();
         auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
         
-        pairs.push_back(std::make_pair("useAtmosphere",std::to_string(generalProps.atmosphereEnabled)));
+        pairs.push_back(std::make_pair("useAtmosphere", std::to_string(generalProps.atmosphereEnabled)));
         pairs.push_back(std::make_pair("performShading", std::to_string(generalProps.performShading)));
         pairs.push_back(std::make_pair("showChunkEdges", std::to_string(debugProps.showChunkEdges)));
         pairs.push_back(std::make_pair("showHeightResolution", std::to_string(debugProps.showHeightResolution)));
@@ -134,24 +132,14 @@ namespace globebrowsing {
                 layeredTexturePreprocessingData);
         
         if (layeredTextureShaderProvider->updatedOnLastCall()) {
-            // Need to update uniforms            
-            programUniformHandler->updateIdsIfNecessary(layeredTextureShaderProvider, _layerManager.get());
-            
+            gpuLayerManager->updateUniformLocations(programObject, *_layerManager);
         }
         
 
         // Activate the shader program
         programObject->activate();
-
-
-        // Go through all the categories
-        for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            LayerGroup& layerGroup = _layerManager->layerGroup(category);
-            GPULayerGroup* gpuLayerGroup = programUniformHandler->gpuLayerGroup(category);
-            
-            int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
-            gpuLayerGroup->setValue(programObject, layerGroup, tileIndex);
-        }
+        
+        gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
 
         // The length of the skirts is proportional to its size
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
@@ -168,7 +156,7 @@ namespace globebrowsing {
 
         ProgramObject* programObject = getActivatedProgramWithTileData(
             _globalRenderingShaderProvider.get(),
-            _globalProgramUniformHandler,
+            _globalGpuLayerManager.get(),
             chunk);
         if (programObject == nullptr) {
             return;
@@ -237,13 +225,10 @@ namespace globebrowsing {
         // render
         _grid->geometry().drawUsingActiveProgram();
         
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            _globalProgramUniformHandler->gpuLayerGroup(i)->deactivate();
-        }
-
+        _globalGpuLayerManager->deactivate();
+    
         // disable shader
         programObject->deactivate();
-        
         
     }
 
@@ -253,7 +238,7 @@ namespace globebrowsing {
         
         ProgramObject* programObject = getActivatedProgramWithTileData(
             _localRenderingShaderProvider.get(),
-            _localProgramUniformHandler,
+            _localGpuLayerManager.get(),
             chunk);
         if (programObject == nullptr) {
             return;
@@ -324,9 +309,7 @@ namespace globebrowsing {
         // render
         _grid->geometry().drawUsingActiveProgram();
         
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
-            _localProgramUniformHandler->gpuLayerGroup(i)->deactivate();
-        }
+        _localGpuLayerManager->deactivate();
 
         // disable shader
         programObject->deactivate();

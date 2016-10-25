@@ -39,14 +39,8 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-    LayeredTexturePreprocessingData::LayeredTexturePreprocessingData(LayerManager* tpm){
-        
-    }
-
-    bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const
-    {
-        return
-            lastLayerIdx == other.lastLayerIdx &&
+    bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const {
+        return lastLayerIdx == other.lastLayerIdx &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
@@ -152,38 +146,6 @@ namespace globebrowsing {
 
     bool LayeredTextureShaderProvider::updatedOnLastCall() {
         return _updatedOnLastCall;
-    }
-
-    LayeredTextureShaderUniformIdHandler::LayeredTextureShaderUniformIdHandler(){
-        for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-            _gpuLayerGroups[i] = std::make_unique<GPULayerGroup>();
-        }
-    }
-
-    LayeredTextureShaderUniformIdHandler::~LayeredTextureShaderUniformIdHandler()
-    {}
-    
-    GPULayerGroup* LayeredTextureShaderUniformIdHandler::gpuLayerGroup(int i) const{
-        return _gpuLayerGroups[i].get();
-    }
-
-
-    void LayeredTextureShaderUniformIdHandler::updateIdsIfNecessary(
-        LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager) {
-        
-        if (shaderProvider->updatedOnLastCall()) {
-            ProgramObject* programObject = shaderProvider->_programObject.get();
-            
-            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-                LayerGroup& layerGroup = layerManager->layerGroup(i);
-                std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
-                _gpuLayerGroups[i]->updateUniformLocations(programObject, layerGroup, nameBase, i);
-            }
-            
-            // Reset ignore errors
-            programObject->setIgnoreUniformLocationError(
-                ProgramObject::IgnoreError::No);
-        }
     }
 
 } // namespace globebrowsing

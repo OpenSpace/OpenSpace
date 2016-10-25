@@ -147,6 +147,17 @@ private:
 };
 
 
+class LayerManager;
+class GPULayerManager{
+public:
+    
+    virtual void setValue(ProgramObject* programObject, const LayerManager& layerManager, const TileIndex& tileIndex);
+    virtual void updateUniformLocations(ProgramObject* programObject, const LayerManager& layerManager);
+    virtual void deactivate();
+private:
+    std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
+};
+
 
 } // namespace globebrowsing
 } // namespace openspace

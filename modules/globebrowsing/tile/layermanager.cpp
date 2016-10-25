@@ -158,10 +158,10 @@ namespace globebrowsing {
             initData.preprocessTiles = i == LayeredTextures::HeightMaps;
             std::string groupName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             
-            layerGroups.push_back(std::make_shared<LayerGroup>(groupName, texturesDict));
+            _layerGroups.push_back(std::make_shared<LayerGroup>(groupName, texturesDict));
         }
         
-        for(auto layerGroup : layerGroups){
+        for(auto layerGroup : _layerGroups){
             addPropertySubOwner(layerGroup.get());
         }
     }
@@ -171,21 +171,26 @@ namespace globebrowsing {
     }
 
     LayerGroup& LayerManager::layerGroup(size_t groupId) {
-        return *layerGroups[groupId];
+        return *_layerGroups[groupId];
     }
 
     LayerGroup& LayerManager::layerGroup(LayeredTextures::TextureCategory category) {
-        return *layerGroups[category];
+        return *_layerGroups[category];
     }
 
+    const std::vector<std::shared_ptr<LayerGroup>>& LayerManager::layerGroups() const {
+        return _layerGroups;
+    }
+    
+
     void LayerManager::update() {
-        for (auto& layerGroup : layerGroups) {
+        for (auto& layerGroup : _layerGroups) {
             layerGroup->update();
         }
     }
 
     void LayerManager::reset(bool includeDisabled) {
-        for (auto& layerGroup : layerGroups) {
+        for (auto& layerGroup : _layerGroups) {
             for (auto layer : layerGroup->layers) {
                 if (layer->enabled() || includeDisabled) {
                     layer->tileProvider()->reset();

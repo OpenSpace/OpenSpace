@@ -43,8 +43,6 @@ namespace globebrowsing {
 
     class LayerManager;
 
-    class LayeredTextureShaderUniformIdHandler;
-
     /**
     * Settings per texture category that contains shader preprocessing information.
     */
@@ -67,7 +65,6 @@ namespace globebrowsing {
     * levels.
     */
     struct LayeredTexturePreprocessingData {
-        LayeredTexturePreprocessingData(LayerManager* tpm = nullptr);
 
         std::array<LayeredTextureInfo, LayeredTextures::NUM_TEXTURE_CATEGORIES>
             layeredTextureInfo;
@@ -101,8 +98,6 @@ namespace globebrowsing {
         
     private:
         
-        
-        friend class LayeredTextureShaderUniformIdHandler;
         void recompileShaderProgram(LayeredTexturePreprocessingData preprocessingData);
 
         std::unique_ptr<ProgramObject> _programObject;
@@ -115,24 +110,6 @@ namespace globebrowsing {
         bool _updatedOnLastCall;
     };
 
-    /**
-    * This class caches OpenGL uniform IDs for <code>LayeredTextureShaderProvider</code>s.
-    */
-    class LayeredTextureShaderUniformIdHandler
-    {
-    public:
-
-        LayeredTextureShaderUniformIdHandler();
-        ~LayeredTextureShaderUniformIdHandler();
-        void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager);
-
-        ProgramObject& programObject();
-        
-        GPULayerGroup* gpuLayerGroup(int i) const;
-        
-    private:
-        std::array<std::unique_ptr<GPULayerGroup>, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
-    };
 
 } // namespace globebrowsing
 } // namespace openspace

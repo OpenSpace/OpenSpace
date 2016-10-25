@@ -192,5 +192,39 @@ namespace globebrowsing {
     }
 
 
+    // LayerManager
+        
+    void GPULayerManager::setValue(ProgramObject* programObject, const LayerManager& layerManager, const TileIndex& tileIndex){
+        auto layerGroups = layerManager.layerGroups();
+        for (size_t i = 0; i < layerGroups.size(); ++i){
+            std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            gpuLayerGroups[i]->setValue(programObject, *layerGroups[i], tileIndex);
+        }
+    }
+
+    void GPULayerManager::updateUniformLocations(ProgramObject* programObject, const LayerManager& layerManager){
+        auto layerGroups = layerManager.layerGroups();
+        if(gpuLayerGroups.size() != layerGroups.size()){
+            gpuLayerGroups.resize(layerGroups.size());
+            for(auto& gpuLayerGroup : gpuLayerGroups){
+                gpuLayerGroup = std::make_unique<GPULayerGroup>();
+            }
+        }
+        
+        for (size_t i = 0; i < layerGroups.size(); ++i){
+            std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            gpuLayerGroups[i]->updateUniformLocations(programObject, *layerGroups[i], nameBase, i);
+        }
+    }
+
+    void GPULayerManager::deactivate(){
+        for (size_t i = 0; i < gpuLayerGroups.size(); ++i){
+            gpuLayerGroups[i]->deactivate();
+        }
+    }
+
+    
+
+
 }  // namespace globebrowsing
 }  // namespace openspace

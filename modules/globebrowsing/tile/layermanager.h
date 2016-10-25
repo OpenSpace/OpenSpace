@@ -111,12 +111,14 @@ namespace globebrowsing {
         LayerGroup& layerGroup(size_t groupId);
         LayerGroup& layerGroup(LayeredTextures::TextureCategory);
 
+        const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
+
         void update();
         void reset(bool includingInactive = false);
 
     private:
 
-        std::vector<std::shared_ptr<LayerGroup>> layerGroups;
+        std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 
     };
 
