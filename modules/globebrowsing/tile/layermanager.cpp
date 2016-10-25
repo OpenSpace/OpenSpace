@@ -86,9 +86,10 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
 
     LayerGroup::LayerGroup(std::string name)
-        : levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
+        : _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
     {
         setName(name);
+        addProperty(_levelBlendingEnabled);
     }
 
     LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
@@ -128,7 +129,7 @@ namespace globebrowsing {
     }
 
     int LayerGroup::pileSize() const{
-        return levelBlendingEnabled ? 3 : 1;
+        return _levelBlendingEnabled.value() ? 3 : 1;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////

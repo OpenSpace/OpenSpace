@@ -110,7 +110,7 @@ namespace globebrowsing {
             LayeredTextureInfo layeredTextureInfo;
             auto layerGroup = _layerManager->layerGroup(category);
             layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
-            layeredTextureInfo.layerBlendingEnabled = layerGroup.levelBlendingEnabled;
+            layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
@@ -169,7 +169,7 @@ namespace globebrowsing {
 
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             const LayerGroup& layerGroup = _layerManager->layerGroup(i);
-            if(layerGroup.levelBlendingEnabled && layerGroup.activeLayers().size() > 0){
+            if(layerGroup.layerBlendingEnabled() && layerGroup.activeLayers().size() > 0){
                 performAnyBlending = true; 
                 break;
             }
@@ -252,7 +252,7 @@ namespace globebrowsing {
         bool performAnyBlending = false;
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_layerManager->layerGroup(i).levelBlendingEnabled && _layerManager->layerGroup(category).activeLayers().size() > 0) {
+            if (_layerManager->layerGroup(i).layerBlendingEnabled() && _layerManager->layerGroup(category).activeLayers().size() > 0) {
                 performAnyBlending = true;
                 break;
             }

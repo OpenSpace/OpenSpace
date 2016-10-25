@@ -90,13 +90,15 @@ namespace globebrowsing {
         /// @returns the size of the pile to be used in rendering of this layer
         int pileSize() const;
 
+        bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
 
-        std::vector<std::shared_ptr<Layer>> layers;
-
-        properties::BoolProperty levelBlendingEnabled;
+        std::vector<std::shared_ptr<Layer>> layers;        
 
     private:
+        
         std::vector<std::shared_ptr<Layer>> _activeLayers;
+
+        properties::BoolProperty _levelBlendingEnabled;
     };
 
     /**
