@@ -174,48 +174,17 @@ namespace globebrowsing {
         if (shaderProvider->updatedOnLastCall()) {
             ProgramObject* programObject = shaderProvider->_programObject.get();
             
-            
-            programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::No);
-            
-            for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-                LayerGroup& layerGroup = layerManager->layerGroup(category);
-                std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[category];
-                _gpuLayerGroups[category]->updateUniformLocations(programObject, layerGroup, nameBase, category);
+            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
+                LayerGroup& layerGroup = layerManager->layerGroup(i);
+                std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+                _gpuLayerGroups[i]->updateUniformLocations(programObject, layerGroup, nameBase, i);
             }
             
-            
-            
-            // Ignore errors since this loops through even uniforms that does not exist.
-            /*
-            programObject->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
-            for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++)
-            {
-                for (size_t k = 0; k < LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY;
-                     k++)
-                {
-                    for (size_t l = 0; l < LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES; l++)
-                    {
-                        _layerSettingsUniformIds[i][k][l] =
-                        programObject->uniformLocation(
-                                    LayeredTextures::TEXTURE_CATEGORY_NAMES[i] +
-                                    "[" + std::to_string(k) + "].settings." +
-                                    LayeredTextures::layerSettingsIds[l]);
-                    }
-                }
-            }
-             */
             // Reset ignore errors
             programObject->setIgnoreUniformLocationError(
                 ProgramObject::IgnoreError::No);
         }
     }
 
-    GLint LayeredTextureShaderUniformIdHandler::getSettingsId(
-        LayeredTextures::TextureCategory category,
-        size_t layerIndex,
-        LayeredTextures::LayerSettingsIds layerSettingsId)
-    {
-        return _layerSettingsUniformIds[category][layerIndex][layerSettingsId];
-    }
 } // namespace globebrowsing
 } // namespace openspace

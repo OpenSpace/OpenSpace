@@ -58,62 +58,7 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
-    SingleTexturePropertyOwner::SingleTexturePropertyOwner(std::string name)
-    : isEnabled("isEnabled", "isEnabled", true) {
-        setName(name);
-        addProperty(isEnabled);
-    }
     
-    SingleTexturePropertyOwner::~SingleTexturePropertyOwner() {
-        
-    }
-    
-    LayeredCategoryPropertyOwner::LayeredCategoryPropertyOwner(
-        LayeredTextures::TextureCategory category,
-        LayerManager& layerManager)
-    : _layerManager(layerManager)
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", true){
-        setName(LayeredTextures::TEXTURE_CATEGORY_NAMES[category]);
-        
-        // Create the property owners
-        auto& layerGroup = _layerManager.layerGroup(category);
-        for (Layer& layer : layerGroup.layers) {
-            _texturePropertyOwners.push_back(
-                std::make_unique<SingleTexturePropertyOwner>(layer.name));
-        }
-        
-        // Specify and add the property owners
-        for (int i = 0; i < layerGroup.layers.size(); i++) {
-            Layer &layer = layerGroup.layers[i];
-            SingleTexturePropertyOwner &prop = *_texturePropertyOwners[i].get();
-            prop.isEnabled.set(layer.isActive);
-            prop.isEnabled.onChange([&]{
-                layer.isActive = prop.isEnabled;
-            });
-            /*
-            for (auto setting : layer.settings.array()) {
-                prop.addProperty(setting->property());
-            }*/
-
-            for (std::shared_ptr<GPUProperty> gpuProperty : layer.renderConfig.gpuProperties()) {
-                prop.addProperty(*gpuProperty);
-            }
-            
-  
-            addPropertySubOwner(prop);
-        }
-
-        _levelBlendingEnabled.set(layerGroup.levelBlendingEnabled);
-        _levelBlendingEnabled.onChange([&]{
-            layerGroup.levelBlendingEnabled = _levelBlendingEnabled;
-        });
-        addProperty(_levelBlendingEnabled);
-    }
-    
-    LayeredCategoryPropertyOwner::~LayeredCategoryPropertyOwner() {
-        
-    }
     
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _generalProperties({
@@ -165,13 +110,11 @@ namespace globebrowsing {
         _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
         // Init tile provider manager
-        ghoul::Dictionary textureInitDataDictionary;
         ghoul::Dictionary texturesDictionary;
-        dictionary.getValue(keyTextureInitData, textureInitDataDictionary);
         dictionary.getValue(keyTextures, texturesDictionary);
 
         _layerManager = std::make_shared<LayerManager>(
-            texturesDictionary, textureInitDataDictionary);
+            texturesDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _layerManager);
@@ -201,15 +144,9 @@ namespace globebrowsing {
             _debugProperties.levelByProjectedAreaElseDistance);
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
         _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
-                
-        for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-            _textureProperties.push_back(std::make_unique<LayeredCategoryPropertyOwner>
-                (LayeredTextures::TextureCategory(i), *_layerManager));
-            _texturePropertyOwner.addPropertySubOwner(*_textureProperties[i]);
-        }
         
         addPropertySubOwner(_debugPropertyOwner);
-        addPropertySubOwner(_texturePropertyOwner);
+        addPropertySubOwner(_layerManager.get());
     }
 
     RenderableGlobe::~RenderableGlobe() {
@@ -285,15 +222,15 @@ namespace globebrowsing {
             LayeredTextures::HeightMaps).activeLayers();
         if (heightLayers.size() == 0)
             return 0;
-        const auto& tileProvider = heightLayers[0].tileProvider;
+        TileProvider* tileProvider = heightLayers[0]->tileProvider();
 
         // Get the uv coordinates to sample from
         Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
         int chunkLevel = _chunkedLodGlobe->findChunkNode(
             geodeticPosition).getChunk().tileIndex().level;
         
-        TileIndex chunkIdx = TileIndex(geodeticPosition, chunkLevel);
-        GeodeticPatch patch = GeodeticPatch(chunkIdx);
+        TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
+        GeodeticPatch patch = GeodeticPatch(tileIndex);
         Geodetic2 geoDiffPatch =
             patch.getCorner(Quad::NORTH_EAST) -
             patch.getCorner(Quad::SOUTH_WEST);
@@ -303,7 +240,7 @@ namespace globebrowsing {
 
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = TileSelector::getHighestResolutionTile(
-            tileProvider.get(), chunkIdx);
+            tileProvider, tileIndex);
         const auto& tile = chunkTile.tile;
         const auto& uvTransform = chunkTile.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();

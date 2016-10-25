@@ -96,48 +96,6 @@ namespace globebrowsing {
         // unused atm. Could be used for caching or precalculating
     }
 
-    void ChunkRenderer::setDepthTransformUniforms(
-        ProgramObject* programObject,
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-        LayeredTextures::TextureCategory textureCategory,
-        LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
-        size_t layerIndex,
-        const TileDepthTransform& tileDepthTransform)
-    {   
-        
-    }
-
-    void ChunkRenderer::activateTileAndSetTileUniforms(
-        ProgramObject* programObject,
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-        LayeredTextures::TextureCategory textureCategory,
-        LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
-        size_t layerIndex,
-        ghoul::opengl::TextureUnit& texUnit,
-        const ChunkTile& chunkTile)
-    {
-
-
-
-    }
-
-    void ChunkRenderer::setLayerSettingsUniforms(
-        ProgramObject* programObject,
-        std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-        LayeredTextures::TextureCategory textureCategory,
-        size_t layerIndex,
-        PerLayerSettings settings) {
-        
-        for (int i = 0; i < settings.array().size(); i++) {
-            settings.array()[i]->uploadUniform(
-                *programObject,
-                uniformIdHandler->getSettingsId(
-                    textureCategory,
-                    layerIndex,
-                    LayeredTextures::LayerSettingsIds(i)));
-        }
-    }
-
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         LayeredTextureShaderProvider* layeredTextureShaderProvider,
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> programUniformHandler,
@@ -194,7 +152,7 @@ namespace globebrowsing {
             int pileSize = layerGroup.levelBlendingEnabled ? 3 : 1;
             gpuLayerGroup->setValue(programObject, layerGroup, tileIndex);
             
-            for (const Layer& layer : layerGroup.activeLayers()) {
+            for (auto layer : layerGroup.activeLayers()) {
                 //layer.renderConfig.updateValues(programObject);
                 /*
                 setLayerSettingsUniforms(

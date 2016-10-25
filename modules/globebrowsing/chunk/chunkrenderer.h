@@ -89,29 +89,6 @@ namespace globebrowsing {
         */
         void renderChunkLocally(const Chunk& chunk, const RenderData& data);
 
-        void setDepthTransformUniforms(
-            ProgramObject* programObject,
-            std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-            LayeredTextures::TextureCategory textureCategory,
-            LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
-            size_t layerIndex,
-            const TileDepthTransform& tileDepthTransform);
-
-        void activateTileAndSetTileUniforms(
-            ProgramObject* programObject,
-            std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-            LayeredTextures::TextureCategory textureCategory,
-            LayeredTextures::BlendLayerSuffixes blendLayerSuffix,
-            size_t layerIndex,
-            ghoul::opengl::TextureUnit& texUnit,
-            const ChunkTile& chunkTile);
-        
-        void setLayerSettingsUniforms(
-            ProgramObject* programObject,
-            std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
-            LayeredTextures::TextureCategory textureCategory,
-            size_t layerIndex,
-            PerLayerSettings settings);
 
         ProgramObject* getActivatedProgramWithTileData(
             LayeredTextureShaderProvider* layeredTextureShaderProvider,

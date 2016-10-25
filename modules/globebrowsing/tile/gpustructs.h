@@ -100,20 +100,18 @@ private:
 
 };
 
-/*
-class LayerSettings;
-class GPULayerSettings{
+
+class LayerRenderSettings;
+class GPULayerRenderSettings{
 public:
-    void setValue(ProgramObject* programObject, const LayerSettings& layerSettings);
+    void setValue(ProgramObject* programObject, const LayerRenderSettings& layerSettings);
     void updateUniformLocations(ProgramObject* programObject, const std::string& nameBase);
-    void deactivate();
 
 private:
     GPUData<float> gpuOpacity;
     GPUData<float> gpuGamma;
     GPUData<float> gpuMultiplier;
 };
-*/
 
 
 class Layer;
@@ -124,6 +122,7 @@ public:
     virtual void deactivate();
 private:
     GPUChunkTilePile gpuChunkTilePile;
+    GPULayerRenderSettings gpuRenderSettings;
 };
 
 class GPUHeightLayer : public GPULayer{

@@ -126,25 +126,12 @@ namespace globebrowsing {
         ~LayeredTextureShaderUniformIdHandler();
         void updateIdsIfNecessary(LayeredTextureShaderProvider* shaderProvider, LayerManager* layerManager);
 
-        GLint getSettingsId(
-            LayeredTextures::TextureCategory category,
-            size_t layerIndex,
-            LayeredTextures::LayerSettingsIds layerSettingsId);
         ProgramObject& programObject();
         
         GPULayerGroup* gpuLayerGroup(int i) const;
         
     private:
         std::array<std::unique_ptr<GPULayerGroup>, LayeredTextures::NUM_TEXTURE_CATEGORIES> _gpuLayerGroups;
-        
-        std::array<
-        std::array<
-        std::array<
-        GLint,
-        LayeredTextures::NUM_LAYER_SETTINGS_VARIABLES>,
-        LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY>,
-        LayeredTextures::NUM_TEXTURE_CATEGORIES>
-        _layerSettingsUniformIds;
     };
 
 } // namespace globebrowsing

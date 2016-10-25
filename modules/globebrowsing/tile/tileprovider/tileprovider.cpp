@@ -38,12 +38,8 @@ namespace openspace {
 namespace globebrowsing {
 
 TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("TileProvider did not have key '" << KeyType << "'");
-        return nullptr;
-    }
-
-    std::string type;
+    
+    std::string type = "LRUCaching";
     dictionary.getValue(KeyType, type);
     ghoul::TemplateFactory<TileProvider>* factory
         = FactoryManager::ref().factory<TileProvider>();

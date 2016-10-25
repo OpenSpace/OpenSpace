@@ -39,68 +39,91 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-    GPUFloatProperty::GPUFloatProperty(properties::FloatProperty&& floatProp)
-        : _property(floatProp)
+    LayerRenderSettings::LayerRenderSettings()
+        : opacity(properties::FloatProperty("opacity", "opacity", 1, 0, 1))    
+        , gamma(properties::FloatProperty("gamma", "gamma", 1, 0, 5))
+        , multiplier(properties::FloatProperty("multiplier", "multiplier", 1, 0, 20))
     {
-
+        setName("settings");
+        addProperty(opacity);
+        addProperty(gamma);
+        addProperty(multiplier);
     }
 
-    void GPUFloatProperty::updateValue(ProgramObject* programObject){
-        gpuData.setValue(programObject, _property.value());
-    }
-
-    void GPUFloatProperty::updateUniformLocation(ProgramObject* programObject, const std::string& nameBase){
-        gpuData.updateUniformLocations(programObject, nameBase + _property.identifier());
-    }
-
-
-    void GPUPropertyCollection::updateValues(ProgramObject* programObject) const{
-        for (auto gpuProperty : _gpuProperties){
-            gpuProperty->updateValue(programObject);
+    Layer::Layer(const ghoul::Dictionary& layerDict)
+        : _enabled(properties::BoolProperty("enabled", "enabled", false))
+    {
+        std::string layerName = "error!";
+        layerDict.getValue("Name", layerName);
+        setName(layerName);
+        
+        
+        _tileProvider = std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(layerDict));
+        
+        // Something else went wrong and no exception was thrown
+        if (_tileProvider == nullptr) {
+            throw ghoul::RuntimeError("Unable to create TileProvider '" + name() + "'");
         }
+
+        bool enabled = false; // defaults to false if unspecified
+        layerDict.getValue("Enabled", enabled);
+        _enabled.setValue(enabled);
+        addProperty(_enabled);
+
+        addPropertySubOwner(_renderSettings);
     }
 
-    void GPUPropertyCollection::updateUniformLocations(ProgramObject* programObject, const std::string& nameBase) const{
-        for (auto gpuProperty : _gpuProperties){
-            gpuProperty->updateUniformLocation(programObject, nameBase);
-        }
-    }
+    Layer::~Layer(){
 
-    const std::vector<std::shared_ptr<GPUProperty>>& GPUPropertyCollection::gpuProperties() const {
-        return _gpuProperties;
-    }
-
-
-    LayerRenderConfig::LayerRenderConfig(){
-        using namespace properties;
-        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
-            FloatProperty("opacity", "opacity", 1, 0, 1)));
-        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
-            FloatProperty("gamma", "gamma", 1, 0, 5)));
-        _gpuProperties.push_back(std::make_shared<GPUFloatProperty>(
-            FloatProperty("multiplier", "multiplier", 1, 0, 20)));
     }
 
     ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const{
-        return std::move(TileSelector::getHighestResolutionTilePile(tileProvider.get(), tileIndex, pileSize));
+        return std::move(TileSelector::getHighestResolutionTilePile(_tileProvider.get(), tileIndex, pileSize));
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                               Layer Group                                        //
     //////////////////////////////////////////////////////////////////////////////////////
 
+    LayerGroup::LayerGroup(std::string name)
+        : levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
+    {
+        setName(name);
+    }
+
+    LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
+        : LayerGroup(name)
+    {
+        for (size_t i = 0; i < dict.size(); i++) {
+            std::string dictKey = std::to_string(i + 1);
+            ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
+
+            try {
+                layers.push_back(std::make_shared<Layer>(layerDict));
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.what());
+                continue;
+            }
+        }
+
+        for(auto layer : layers){
+            addPropertySubOwner(layer.get());
+        }
+    }
+
     void LayerGroup::update() {
         _activeLayers.clear();
 
-        for (Layer& layer : layers) {
-            if (layer.isActive) {
-                layer.tileProvider->update();
+        for (auto layer : layers) {
+            if (layer->isActive()) {
+                layer->tileProvider()->update();
                 _activeLayers.push_back(layer);
             }
         }
     }
 
-    const std::vector<Layer>& LayerGroup::activeLayers() const {
+    const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
         return _activeLayers;
     }
 
@@ -111,9 +134,10 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
     //                           Tile Provider Manager                                  //
     //////////////////////////////////////////////////////////////////////////////////////
-    LayerManager::LayerManager(
-        const ghoul::Dictionary& textureCategoriesDictionary,
-        const ghoul::Dictionary& textureInitDictionary){
+    LayerManager::LayerManager(const ghoul::Dictionary& textureCategoriesDictionary) {
+
+        setName("Layers");
+        
         // Create all the categories of tile providers
         for (size_t i = 0; i < textureCategoriesDictionary.size(); i++) {
             ghoul::Dictionary texturesDict = textureCategoriesDictionary.value<ghoul::Dictionary>(
@@ -125,104 +149,46 @@ namespace globebrowsing {
                 << LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY);
 
             TileProviderInitData initData;
-
-            if (i == LayeredTextures::ColorTextures ||
-                i == LayeredTextures::NightTextures ||
-                i == LayeredTextures::WaterMasks    ||
-                i == LayeredTextures::GrayScaleOverlays) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("ColorTextureMinimumSize");
-            }
-            else if (i == LayeredTextures::Overlays) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("OverlayMinimumSize");
-            }
-            else if (i == LayeredTextures::HeightMaps) {
-                initData.minimumPixelSize = textureInitDictionary.value<double>("HeightMapMinimumSize");
-            }
-            else {
-                initData.minimumPixelSize = 512;
-            }
-
+            initData.minimumPixelSize = 512;
             initData.threads = 1;
             initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
+            
             // Only preprocess height maps.
             initData.preprocessTiles = i == LayeredTextures::HeightMaps;
-
-            initTexures(
-                layerGroups[i].layers,
-                texturesDict,
-                initData);
-
-            // init level blending to be true
-            layerGroups[i].levelBlendingEnabled = true;
-        }
-    }
-
-    LayerManager::~LayerManager()
-    {
-    }
-
-    void LayerManager::initTexures(std::vector<Layer>& dest,
-        const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
-    {
-        // Create TileProviders for all textures within this category
-        for (size_t i = 0; i < texturesDict.size(); i++) {
-            std::string name, path;
+            std::string groupName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             
-            std::string dictKey = std::to_string(i + 1);
-            ghoul::Dictionary texDict = texturesDict.value<ghoul::Dictionary>(dictKey);
-            texDict.getValue("Name", name);
-            texDict.getValue("FilePath", path);
-
-            std::string type = "LRUCaching"; // if type is unspecified
-            texDict.getValue("Type", type);
-
-            TileProvider* tileProvider;
-            auto tileProviderFactory = FactoryManager::ref().factory<TileProvider>();
-            try {
-                tileProvider = tileProviderFactory->create(type, texDict);
-            }
-            catch (const ghoul::RuntimeError& e) {
-                LERROR(e.what());
-                continue;
-            }
-
-            // Something else went wrong and no exception was thrown
-            if (tileProvider == nullptr) {
-                LERROR("Unable to create TileProvider '" << name << "' of type '"
-                    << type << "'");
-                continue;
-            }
-
-            bool enabled = false; // defaults to false if unspecified
-            texDict.getValue("Enabled", enabled);
-
-            dest.push_back({ name, std::shared_ptr<TileProvider>(tileProvider), enabled });
+            layerGroups.push_back(std::make_shared<LayerGroup>(groupName, texturesDict));
         }
+        
+        for(auto layerGroup : layerGroups){
+            addPropertySubOwner(layerGroup.get());
+        }
+    }
+
+    LayerManager::~LayerManager(){
+        
     }
 
     LayerGroup& LayerManager::layerGroup(size_t groupId) {
-        return layerGroups[groupId];
+        return *layerGroups[groupId];
     }
 
     LayerGroup& LayerManager::layerGroup(LayeredTextures::TextureCategory category) {
-        return layerGroups[category];
+        return *layerGroups[category];
     }
 
     void LayerManager::update() {
-        for (LayerGroup& layerGroup : layerGroups) {
-            layerGroup.update();
+        for (auto& layerGroup : layerGroups) {
+            layerGroup->update();
         }
     }
 
     void LayerManager::reset(bool includingInactive) {
-        for (LayerGroup& layerGroup : layerGroups) {
-            for (Layer& layer : layerGroup.layers) {
-                if (layer.isActive) {
-                    layer.tileProvider->reset();
-                }
-                else if (includingInactive) {
-                    layer.tileProvider->reset();
+        for (auto& layerGroup : layerGroups) {
+            for (auto layer : layerGroup->layers) {
+                if (layer->isActive() || includingInactive) {
+                    layer->tileProvider()->reset();
                 }
             }
         }
