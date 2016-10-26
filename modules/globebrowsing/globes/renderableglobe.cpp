@@ -118,7 +118,12 @@ namespace globebrowsing {
         //_pointGlobe = std::make_shared<PointGlobe>(*this);
 
         
-        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 5e9);
+        // This distance will be enough to render the globe as one pixel if the field of
+        // view is 'fov' radians and the screen resolution is 'res' pixels.
+        double fov = 2 * M_PI / 6; // 60 degrees
+        int res = 2880;
+        double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
+        _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
         //_distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
 
         _debugPropertyOwner.setName("Debug");
