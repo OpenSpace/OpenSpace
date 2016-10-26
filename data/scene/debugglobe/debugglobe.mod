@@ -32,7 +32,7 @@ return {
                 HeightMapMinimumSize = 64,
             },
             Textures = {
-                ColorTextures = {
+                ColorLayers = {
                     {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
@@ -79,7 +79,7 @@ return {
                     },
                     ]]
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/mars/CTX_Mosaic.xml",
@@ -94,7 +94,7 @@ return {
                     }]]
                     
                 },
-                NightTextures = {
+                NightLayers = {
                     {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/earth/VIIRS_CityLights_2012.xml",
@@ -106,7 +106,7 @@ return {
                         FilePath = "map_service_configs/earth/MODIS_Water_Mask.xml",
                     },
                 },
-                Overlays = {
+                ColorOverlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/earth/Coastlines.xml",
@@ -125,7 +125,7 @@ return {
                         FilePath = "textures/test_tile.png",
                     },
                 },
-                HeightMaps = {
+                HeightLayers = {
 
                     {
                         Name = "Mola Elevation",
@@ -148,7 +148,7 @@ return {
                         FilePath = "map_service_configs/mercury/OnMercuryElevationGaskell.xml",
                     },
                 },
-                HeightMapOverlays = {
+                HeightMapColorOverlays = {
                     --[[
                     {
                         Name = "West_Candor_Chasma_DEM_longlat_global2",

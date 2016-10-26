@@ -22,30 +22,30 @@ return {
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 5000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
-            Textures = {
-                ColorTextures = {
+            Layers = {
+                ColorLayers = {
 
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
 
                 },
-                GrayScaleTextures = {
+                GrayScaleLayers = {
                     {
                         Name = "OnMoonColorGrayscale",
                         FilePath = "map_service_configs/OnMoonColor.xml",
                         Enabled = true,
                     },
                 },
-                NightTextures = {
+                NightLayers = {
 
                 },
                 WaterMasks = {
                     
                 },
-                Overlays = {
+                ColorOverlays = {
                     
                 },
-                HeightMaps = {
+                HeightLayers = {
                     {
                         Name = "OnMoonHeight",
                         FilePath = "map_service_configs/OnMoonHeight.xml",

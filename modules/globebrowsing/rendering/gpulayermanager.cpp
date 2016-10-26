@@ -175,7 +175,7 @@ namespace globebrowsing {
         int pileSize = layerGroup.pileSize();
         for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
             // should maybe a proper GPULayer factory
-            gpuActiveLayers[i] = category == LayerManager::HeightMaps ?
+            gpuActiveLayers[i] = category == LayerManager::HeightLayers ?
                 std::make_unique<GPUHeightLayer>() : 
                 std::make_unique<GPULayer>();
             std::string nameExtension = "[" + std::to_string(i) + "].";

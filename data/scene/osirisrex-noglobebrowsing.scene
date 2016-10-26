@@ -188,7 +188,7 @@ function postInitialization()
 
     -- Activate night textures and water masks
     openspace.setPropertyValue("Earth.RenderableGlobe.WaterMasks", {0, 1});
-    openspace.setPropertyValue("Earth.RenderableGlobe.NightTextures", {0, 1});
+    openspace.setPropertyValue("Earth.RenderableGlobe.NightLayers", {0, 1});
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true);
 
     openspace.printInfo("Done setting default values")

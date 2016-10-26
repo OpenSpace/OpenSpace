@@ -114,13 +114,13 @@ namespace globebrowsing {
         static const size_t NUM_LAYER_GROUPS = 7;
         static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS];
         static enum LayerGroupId{
-            ColorTextures,
-            GrayScaleTextures,
-            GrayScaleOverlays,
-            NightTextures,
+            HeightLayers,
+            ColorLayers,
+            ColorOverlays,
+            GrayScaleLayers,
+            GrayScaleColorOverlays,
+            NightLayers,
             WaterMasks,
-            Overlays,
-            HeightMaps
         };
 
         LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);

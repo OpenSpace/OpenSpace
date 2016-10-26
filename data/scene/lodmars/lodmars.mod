@@ -34,8 +34,8 @@ return {
             CameraMinHeight = 1000,
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
-            Textures = {
-                ColorTextures = {
+            Layers = {
+                ColorLayers = {
                     {
                         Type = "SingleImage",
                         Name = "Debug Tiles",
@@ -54,10 +54,10 @@ return {
                     },
                     ]]
                 },
-                GrayScaleTextures = {
+                GrayScaleLayers = {
                     
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                 --[[
                     {
                         Name = "CTX Mosaic",
@@ -83,13 +83,13 @@ return {
                     },
                     ]]
                 },
-                NightTextures = {
+                NightLayers = {
 
                 },
                 WaterMasks = {
 
                 },
-                Overlays = {
+                ColorOverlays = {
                     {
                         Type = "TileIndex",
                         Name = "Indices",
@@ -101,7 +101,7 @@ return {
                         BackgroundImagePath = "../debugglobe/textures/arrows.png",
                     },
                 },
-                HeightMaps = {
+                HeightLayers = {
                     --[[
                     {
                         Name = "Mola Elevation",

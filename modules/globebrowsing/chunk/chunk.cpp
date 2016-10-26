@@ -103,11 +103,11 @@ namespace globebrowsing {
         auto layerManager = owner().chunkedLodGlobe()->layerManager();
         
         
-        auto heightMapProviders = layerManager->layerGroup(LayerManager::HeightMaps).activeLayers();
+        auto heightMapProviders = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
        
         
         size_t HEIGHT_CHANNEL = 0;
-        const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightMaps);
+        const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
         std::vector<ChunkTile> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {

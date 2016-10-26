@@ -37,8 +37,8 @@ return {
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
-            Textures = {
-                ColorTextures = {
+            Layers = {
+                ColorLayers = {
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/OnMercuryColor.xml",
@@ -49,12 +49,12 @@ return {
                         FilePath = "map_service_configs/OnMercuryImage.xml",
                     },
                 },
-                GrayScaleTextures = { },
-                GrayScaleOverlays = { },
-                NightTextures = { },
+                GrayScaleLayers = { },
+                GrayScaleColorOverlays = { },
+                NightLayers = { },
                 WaterMasks = { },
-                Overlays = { },
-                HeightMaps = {
+                ColorOverlays = { },
+                HeightLayers = {
                     {
                         Name = "On Mercury Height",
                         FilePath = "map_service_configs/OnMercuryElevationGaskell.xml",

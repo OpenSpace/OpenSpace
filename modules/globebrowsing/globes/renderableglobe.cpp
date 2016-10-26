@@ -49,9 +49,7 @@ namespace {
         "InteractionDepthBelowEllipsoid";
     const std::string keyCameraMinHeight = "CameraMinHeight";
     const std::string keySegmentsPerPatch = "SegmentsPerPatch";
-    const std::string keyTextures = "Textures";
-    const std::string keyColorTextures = "ColorTextures";
-    const std::string keyHeightMaps = "HeightMaps";
+    const std::string keyLayers = "Layers";
 }
 
 namespace openspace {
@@ -108,11 +106,11 @@ namespace globebrowsing {
         _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
         // Init tile provider manager
-        ghoul::Dictionary texturesDictionary;
-        dictionary.getValue(keyTextures, texturesDictionary);
+        ghoul::Dictionary layersDictionary;
+        dictionary.getValue(keyLayers, layersDictionary);
 
 
-        _layerManager = std::make_shared<LayerManager>(texturesDictionary);
+        _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _layerManager);
@@ -234,7 +232,7 @@ namespace globebrowsing {
             geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
         // Get the tile providers for the height maps
-        const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightMaps).activeLayers();
+        const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
         
         for (const auto& layer : heightMapLayers) {
             TileProvider* tileProvider = layer->tileProvider();

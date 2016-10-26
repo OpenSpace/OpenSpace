@@ -187,7 +187,7 @@ namespace globebrowsing {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_layerManager->layerGroup(LayerManager::NightTextures).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(LayerManager::NightLayers).activeLayers().size() > 0 ||
             _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
@@ -262,7 +262,7 @@ namespace globebrowsing {
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        if (_layerManager->layerGroup(LayerManager::NightTextures).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(LayerManager::NightLayers).activeLayers().size() > 0 ||
             _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading)

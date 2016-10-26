@@ -31,7 +31,7 @@
 
 
 #if USE_HEIGHTMAP
-uniform Layer HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 uniform int xSegments;
@@ -50,7 +50,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateUntransformedHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps);	// Three textures to sample from
+		HeightLayers);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -67,7 +67,7 @@ float getTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps);	// Three textures to sample from
+		HeightLayers);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -87,15 +87,15 @@ vec3 getTileVertexNormal(
 	float heightCenter = calculateHeight(
 		uv,
 		levelWeights,
-		HeightMaps);
+		HeightLayers);
 	float heightOffsetX = calculateHeight(
 		uv + vec2(sampleDelta, 0.0),
 		levelWeights,
-		HeightMaps);
+		HeightLayers);
 	float heightOffsetY = calculateHeight(
 		uv + vec2(0.0, sampleDelta),
 		levelWeights,
-		HeightMaps);
+		HeightLayers);
 
 	vec3 e0 = normalize(cross(vec3(0,0,1), ellipsoidNormal));
 	vec3 e1 = cross(ellipsoidNormal, e0);

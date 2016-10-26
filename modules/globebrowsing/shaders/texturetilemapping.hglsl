@@ -29,18 +29,18 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
 // First layer type from LayerShaderManager is height map
-#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightMaps} + 1
-#define USE_HEIGHTMAP #{useHeightMaps}
-#define HEIGHTMAP_BLENDING_ENABLED #{blendHeightMaps}
+#define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightLayers} + 1
+#define USE_HEIGHTMAP #{useHeightLayers}
+#define HEIGHTMAP_BLENDING_ENABLED #{blendHeightLayers}
 
 // Second layer type from LayerShaderManager is color texture
-#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColorTextures} + 1
-#define USE_COLORTEXTURE #{useColorTextures}
-#define COLORTEXTURE_BLENDING_ENABLED #{blendColorTextures}
+#define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColorLayers} + 1
+#define USE_COLORTEXTURE #{useColorLayers}
+#define COLORTEXTURE_BLENDING_ENABLED #{blendColorLayers}
 
-#define NUMLAYERS_GRAYSCALETEXTURE #{lastLayerIndexGrayScaleTextures} + 1
-#define USE_GRAYSCALETEXTURE #{useGrayScaleTextures}
-#define GRAYSCALETEXTURE_BLENDING_ENABLED #{blendGrayScaleTextures}
+#define NUMLAYERS_GRAYSCALETEXTURE #{lastLayerIndexGrayScaleLayers} + 1
+#define USE_GRAYSCALETEXTURE #{useGrayScaleLayers}
+#define GRAYSCALETEXTURE_BLENDING_ENABLED #{blendGrayScaleLayers}
 
  // Third layer type from LayerShaderManager is water mask
 #define NUMLAYERS_WATERMASK #{lastLayerIndexWaterMasks} + 1
@@ -48,19 +48,19 @@
 #define WATERMASK_BLENDING_ENABLED #{blendWaterMasks}
 
 // Fourth layer type from LayerShaderManager is night texture
-#define NUMLAYERS_NIGHTTEXTURE #{lastLayerIndexNightTextures} + 1
-#define USE_NIGHTTEXTURE #{useNightTextures}
-#define NIGHTTEXTURE_BLENDING_ENABLED #{blendNightTextures}
+#define NUMLAYERS_NIGHTTEXTURE #{lastLayerIndexNightLayers} + 1
+#define USE_NIGHTTEXTURE #{useNightLayers}
+#define NIGHTTEXTURE_BLENDING_ENABLED #{blendNightLayers}
 
 // Fifth layer type from LayerShaderManager is overlay
-#define NUMLAYERS_OVERLAY #{lastLayerIndexOverlays} + 1
-#define USE_OVERLAY #{useOverlays}
-#define OVERLAY_BLENDING_ENABLED #{blendOverlays}
+#define NUMLAYERS_OVERLAY #{lastLayerIndexColorOverlays} + 1
+#define USE_OVERLAY #{useColorOverlays}
+#define OVERLAY_BLENDING_ENABLED #{blendColorOverlays}
 
 // Sixth layer type from LayerShaderManager is grayscale overlay
-#define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleOverlays} + 1
-#define USE_GRAYSCALE_OVERLAY #{useGrayScaleOverlays}
-#define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleOverlays}
+#define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleColorOverlays} + 1
+#define USE_GRAYSCALE_OVERLAY #{useGrayScaleColorOverlays}
+#define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleColorOverlays}
 
 // Global constants
 #define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
@@ -107,7 +107,7 @@ float calculateUntransformedHeight(
 #endif // HEIGHTMAP_BLENDING_ENABLED
 	
 	
-	#for i in 0..#{lastLayerIndexHeightMaps}
+	#for i in 0..#{lastLayerIndexHeightLayers}
 	{
 		height = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
 
@@ -131,7 +131,7 @@ float calculateHeight(
 #endif // HEIGHTMAP_BLENDING_ENABLED
 	
 	
-	#for i in 0..#{lastLayerIndexHeightMaps}
+	#for i in 0..#{lastLayerIndexHeightLayers}
 	{
 		float untransformedHeight = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
 
@@ -148,7 +148,7 @@ float calculateHeight(
 vec4 calculateColor(
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer ColorTextures[NUMLAYERS_COLORTEXTURE]) {
+	const Layer ColorLayers[NUMLAYERS_COLORTEXTURE]) {
 
 	vec4 color = vec4(0);
 
@@ -158,11 +158,11 @@ vec4 calculateColor(
 	levelWeights = getDefaultLevelWeights();
 #endif // COLORTEXTURE_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexColorTextures}
+	#for i in 0..#{lastLayerIndexColorLayers}
 	{
-		vec4 colorSample = getTexVal(ColorTextures[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getTexVal(ColorLayers[#{i}].pile, levelWeights, uv);
 
-		colorSample = performLayerSettings(colorSample, ColorTextures[#{i}].settings);
+		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
 		color = blendOver(color, colorSample);
 	}
@@ -175,7 +175,7 @@ vec4 calculateGrayScale(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE]) {
+	const Layer GrayScaleLayers[NUMLAYERS_GRAYSCALETEXTURE]) {
 
 	vec4 colorGrayScale = currentColor;
 
@@ -185,12 +185,12 @@ vec4 calculateGrayScale(
 	levelWeights = getDefaultLevelWeights();
 #endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexGrayScaleTextures}
+	#for i in 0..#{lastLayerIndexGrayScaleLayers}
 	{
-		vec4 colorSample = getTexVal(GrayScaleTextures[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getTexVal(GrayScaleLayers[#{i}].pile, levelWeights, uv);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
-		colorSample = performLayerSettings(colorSample, GrayScaleTextures[#{i}].settings);
+		colorSample = performLayerSettings(colorSample, GrayScaleLayers[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}
@@ -226,7 +226,7 @@ vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer NightTextures[NUMLAYERS_NIGHTTEXTURE],
+	const Layer NightLayers[NUMLAYERS_NIGHTTEXTURE],
 	const vec3 ellipsoidNormalCameraSpace,
 	const vec3 lightDirectionCameraSpace) {
 
@@ -238,10 +238,10 @@ vec4 calculateNight(
 	levelWeights = getDefaultLevelWeights();
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexNightTextures}
+	#for i in 0..#{lastLayerIndexNightLayers}
 	{
-		vec4 colorSample = getTexVal(NightTextures[#{i}].pile, levelWeights, uv);
-		colorSample = performLayerSettings(colorSample, NightTextures[#{i}].settings);
+		vec4 colorSample = getTexVal(NightLayers[#{i}].pile, levelWeights, uv);
+		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
 		nightColor = blendOver(nightColor, colorSample);
 	}
@@ -280,7 +280,7 @@ vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer Overlays[NUMLAYERS_OVERLAY]) {
+	const Layer ColorOverlays[NUMLAYERS_OVERLAY]) {
 
 	vec4 color = currentColor;
 
@@ -290,10 +290,10 @@ vec4 calculateOverlay(
 	levelWeights = getDefaultLevelWeights();
 #endif // OVERLAY_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexOverlays}
+	#for i in 0..#{lastLayerIndexColorOverlays}
 	{
-		vec4 colorSample = getTexVal(Overlays[#{i}].pile, levelWeights, uv);
-		colorSample = performLayerSettings(colorSample, Overlays[#{i}].settings);
+		vec4 colorSample = getTexVal(ColorOverlays[#{i}].pile, levelWeights, uv);
+		colorSample = performLayerSettings(colorSample, ColorOverlays[#{i}].settings);
 
 		color = blendOver(color, colorSample);
 	}
@@ -306,7 +306,7 @@ vec4 calculateGrayScaleOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY]) {
+	const Layer GrayScaleColorOverlays[NUMLAYERS_GRAYSCALE_OVERLAY]) {
 
 	vec4 colorGrayScale = currentColor;
 
@@ -316,12 +316,12 @@ vec4 calculateGrayScaleOverlay(
 	levelWeights = getDefaultLevelWeights();
 #endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexGrayScaleOverlays}
+	#for i in 0..#{lastLayerIndexGrayScaleColorOverlays}
 	{
-		vec4 colorSample = getTexVal(GrayScaleOverlays[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getTexVal(GrayScaleColorOverlays[#{i}].pile, levelWeights, uv);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
-		colorSample = performLayerSettings(colorSample, GrayScaleOverlays[#{i}].settings);
+		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
 	}

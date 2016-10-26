@@ -25,7 +25,7 @@ function preInitialization()
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",
-        helper.property.invert('Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.enabled') ..
         helper.property.invert('Earth.RenderableGlobe.performShading') ..
         helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
         helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled')
@@ -56,8 +56,8 @@ function postInitialization()
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     
     openspace.setPropertyValue("Earth.RenderableGlobe.atmosphere", true)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.settings.gamma", 1.8)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.settings.multiplier", 10)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.gamma", 1.8)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.multiplier", 10)
 
     openspace.resetCameraDirection()
     openspace.time.setDeltaTime(0)

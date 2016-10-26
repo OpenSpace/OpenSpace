@@ -145,13 +145,13 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
 
     const std::string LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
-        "ColorTextures",
-        "GrayScaleTextures",
-        "GrayScaleOverlays",
-        "NightTextures",
+        "HeightLayers",
+        "ColorLayers",
+        "ColorOverlays",
+        "GrayScaleLayers",
+        "GrayScaleColorOverlays",
+        "NightLayers",
         "WaterMasks",
-        "Overlays",
-        "HeightMaps",
     };
 
     LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) {
@@ -168,7 +168,7 @@ namespace globebrowsing {
             initData.threads = 1;
             initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles = (i == LayerManager::HeightMaps); // Only preprocess height maps.
+            initData.preprocessTiles = (i == LayerManager::HeightLayers); // Only preprocess height maps.
             
             _layerGroups.push_back(std::make_shared<LayerGroup>(groupName, layerGroupDict));
         }

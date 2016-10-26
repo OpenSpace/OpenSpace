@@ -49,8 +49,8 @@ return {
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
-            Textures = {
-                ColorTextures = {
+            Layers = {
+                ColorLayers = {
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
@@ -76,13 +76,13 @@ return {
                         FilePath = "textures/test_tile.png",
                     },
                 },
-                GrayScaleTextures = {
+                GrayScaleLayers = {
 
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                    
                 },
-                NightTextures = {
+                NightLayers = {
                     {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/GIBS/VIIRS_CityLights_2012.xml",
@@ -96,7 +96,7 @@ return {
                         Enabled = true,
                     },
                 },
-                Overlays = {
+                ColorOverlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/GIBS/Coastlines.xml",
@@ -116,7 +116,7 @@ return {
                         BackgroundImagePath = "../debugglobe/textures/arrows.png",
                     },
                 },
-                HeightMaps = {
+                HeightLayers = {
                     {
                         Name = "Terrain tileset",
                         FilePath = "map_service_configs/ESRI/TERRAIN.wms",

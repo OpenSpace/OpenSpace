@@ -48,8 +48,8 @@ return {
                 OverlayMinimumSize = 512,
                 HeightMapMinimumSize = 64,
             },
-            Textures = {
-                ColorTextures = {
+            Layers = {
+                ColorLayers = {
                     {
                         Name = "Black Marble Next Generation (January)",
                         FilePath = "earth/BmngJan.wms",
@@ -61,23 +61,23 @@ return {
                     },
                       
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                    
                 },
-                NightTextures = {
+                NightLayers = {
                 },
                 WaterMasks = {
                 },
-                Overlays = {
+                ColorOverlays = {
                 },
-                HeightMaps = {
+                HeightLayers = {
                     {
                         Name = "Black Marble Next Generation (Januray)",
                         FilePath = "earth/BmngJanTopo.wms",
                         Enabled = true,
                     },
                 },
-                HeightMapOverlays = {
+                HeightMapColorOverlays = {
                 },
             },
         }
@@ -110,7 +110,7 @@ return {
                 HeightMapMinimumSize = 64,
             },
             Textures = {
-                ColorTextures = {
+                ColorLayers = {
                     {
                         Name = "ClemUvvis",
                         FilePath = "moon/ClemUvvis.wms",
@@ -142,23 +142,23 @@ return {
                     },
 
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                    
                 },
-                NightTextures = {
+                NightLayers = {
                 },
                 WaterMasks = {
                 },
-                Overlays = {
+                ColorOverlays = {
                 },
-                HeightMaps = {
+                HeightLayers = {
                     {
                         Name = "LolaDem",
                         FilePath = "moon/LolaDem.wms",
                         Enabled = true,
                     },
                 },
-                HeightMapOverlays = {
+                HeightMapColorOverlays = {
 
                 },
             },
@@ -192,7 +192,7 @@ return {
                 HeightMapMinimumSize = 64,
             },
             Textures = {
-                ColorTextures = {
+                ColorLayers = {
                     {
                         Name = "MDIM",
                         FilePath = "mars/Mdim.wms",
@@ -203,7 +203,7 @@ return {
                         FilePath = "mars/MolaPseudoColor.wms",
                     },
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                     {
                         Name = "ThemisIRDay",
                         FilePath = "mars/ThemisIRDay.wms",
@@ -214,20 +214,20 @@ return {
                     },
                    
                 },
-                NightTextures = {
+                NightLayers = {
                 },
                 WaterMasks = {
                 },
-                Overlays = {
+                ColorOverlays = {
                 },
-                HeightMaps = {
+                HeightLayers = {
                     {
                         Name = "MolaElevation",
                         FilePath = "mars/MolaElevation.wms",
                         Enabled = true,
                     },
                 },
-                HeightMapOverlays = {
+                HeightMapColorOverlays = {
                 },
             },
         }
@@ -260,7 +260,7 @@ return {
                 HeightMapMinimumSize = 64,
             },
             Textures = {
-                ColorTextures = {
+                ColorLayers = {
                     {
                         Name = "MessengerMdis",
                         FilePath = "mercury/MessengerMdis.wms",
@@ -271,18 +271,18 @@ return {
                         FilePath = "mercury/MessengerMosaic.wms",
                     }
                 },
-                GrayScaleOverlays = {
+                GrayScaleColorOverlays = {
                    
                 },
-                NightTextures = {
+                NightLayers = {
                 },
                 WaterMasks = {
                 },
-                Overlays = {
+                ColorOverlays = {
                 },
-                HeightMaps = {
+                HeightLayers = {
                 },
-                HeightMapOverlays = {
+                HeightMapColorOverlays = {
 
                 },
             },

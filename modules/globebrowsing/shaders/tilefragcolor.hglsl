@@ -34,23 +34,23 @@
 // the actual fragment color
 
 #if USE_COLORTEXTURE
-uniform Layer ColorTextures[NUMLAYERS_COLORTEXTURE];
+uniform Layer ColorLayers[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALETEXTURE
-uniform Layer GrayScaleTextures[NUMLAYERS_GRAYSCALETEXTURE];
+uniform Layer GrayScaleLayers[NUMLAYERS_GRAYSCALETEXTURE];
 #endif // USE_GRAYSCALETEXTURE
 
 #if USE_NIGHTTEXTURE
-uniform Layer NightTextures[NUMLAYERS_NIGHTTEXTURE];
+uniform Layer NightLayers[NUMLAYERS_NIGHTTEXTURE];
 #endif // USE_NIGHTTEXTURE
 
 #if USE_OVERLAY
-uniform Layer Overlays[NUMLAYERS_OVERLAY];
+uniform Layer ColorOverlays[NUMLAYERS_OVERLAY];
 #endif // USE_OVERLAY
 
 #if USE_GRAYSCALE_OVERLAY
-uniform Layer GrayScaleOverlays[NUMLAYERS_GRAYSCALE_OVERLAY];
+uniform Layer GrayScaleColorOverlays[NUMLAYERS_GRAYSCALE_OVERLAY];
 #endif // USE_GRAYSCALE_OVERLAY
 
 #if USE_WATERMASK
@@ -86,7 +86,7 @@ in LevelWeights levelWeights;
 // the alignment and resolution of the heightmaps
 
 #if USE_HEIGHTMAP
-uniform Layer HeightMaps[NUMLAYERS_HEIGHTMAP];
+uniform Layer HeightLayers[NUMLAYERS_HEIGHTMAP];
 #endif // USE_HEIGHTMAP
 
 float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
@@ -98,7 +98,7 @@ float getUntransformedTileVertexHeight(vec2 uv, LevelWeights levelWeights){
 	height = calculateUntransformedHeight(
 		uv,
 		levelWeights, 							// Variable to determine which texture to sample from
-		HeightMaps);	// Three textures to sample from
+		HeightLayers);	// Three textures to sample from
 
 #endif // USE_HEIGHTMAP
 
@@ -124,7 +124,7 @@ vec4 getTileFragColor(){
 	color = calculateColor(
 		fs_uv,
 		levelWeights,
-		ColorTextures);
+		ColorLayers);
 #endif // USE_COLORTEXTURE
 
 #if USE_GRAYSCALETEXTURE
@@ -132,7 +132,7 @@ vec4 getTileFragColor(){
 		color,
 		fs_uv,
 		levelWeights,
-		GrayScaleTextures);
+		GrayScaleLayers);
 #endif // USE_GRAYSCALETEXTURE
 
 #if USE_GRAYSCALE_OVERLAY
@@ -141,7 +141,7 @@ vec4 getTileFragColor(){
 		color,
 		fs_uv,
 		levelWeights,
-		GrayScaleOverlays);
+		GrayScaleColorOverlays);
 
 #endif // USE_COLORTEXTURE
 
@@ -162,7 +162,7 @@ vec4 getTileFragColor(){
 		color,
 		fs_uv,
 		levelWeights,
-		NightTextures,
+		NightLayers,
 		normalize(ellipsoidNormalCameraSpace),
 		lightDirectionCameraSpace); // Should already be normalized
 
@@ -202,7 +202,7 @@ vec4 getTileFragColor(){
 		color,
 		fs_uv,
 		levelWeights,
-		Overlays);
+		ColorOverlays);
 #endif // USE_OVERLAY
 
 
@@ -223,7 +223,7 @@ vec4 getTileFragColor(){
 	color += 0.0001*calculateDebugColor(fs_uv, fs_position, vertexResolution);
 	#if USE_HEIGHTMAP
 		color.r = min(color.r, 0.8);
-		color.r += tileResolution(fs_uv, HeightMaps[0].pile.chunkTile0) > 0.9 ? 1 : 0;
+		color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
 	#endif
 #endif
 
