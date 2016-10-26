@@ -52,18 +52,23 @@ namespace globebrowsing {
 
         Vec3 cameraPosition =
             glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
+        
         Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
             ellipsoid.cartesianToGeodetic2(cameraPosition));
+        Vec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
+        Vec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
         
         Chunk::BoundingHeights heights = chunk.getBoundingHeights();
+        Scalar heightToChunk = heights.min;
 
-        Vec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
+        // Offset position according to height
+        patchPosition += patchNormal * heightToChunk;
+    
         Vec3 cameraToChunk = patchPosition - cameraPosition;
-
 
         // Calculate desired level based on distance
         Scalar distanceToPatch = glm::length(cameraToChunk);
-        Scalar distance = distanceToPatch -heights.min; // distance to actual minimum heights
+        Scalar distance = distanceToPatch;
 
         Scalar scaleFactor = globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
         Scalar projectedScaleFactor = scaleFactor / distance;
