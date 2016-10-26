@@ -147,6 +147,15 @@ namespace globebrowsing {
         //                          ReadTileData helper functions                       //
         //////////////////////////////////////////////////////////////////////////////////
 
+        /**
+         Returns the geo transform from raster space to projection coordinates as defined
+         by GDAL.
+
+         If the transform is not available, the function returns a transform to map
+         the pixel coordinates to cover the whole geodetic lat long space.
+        */
+        std::array<double, 6> getGeoTransform() const;
+
         PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
         Geodetic2 pixelToGeodetic(const PixelCoordinate& p) const;
         IODescription getIODescription(const TileIndex& tileIndex) const;
