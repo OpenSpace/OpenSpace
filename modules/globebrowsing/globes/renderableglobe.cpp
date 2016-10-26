@@ -105,10 +105,10 @@ namespace globebrowsing {
         dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
         _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
-        // Init tile provider manager
+        // Init layer manager
         ghoul::Dictionary layersDictionary;
-        dictionary.getValue(keyLayers, layersDictionary);
-
+        if(!dictionary.getValue(keyLayers, layersDictionary))
+            throw ghoul::RuntimeError(keyLayers + " must be specified specified!");
 
         _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
