@@ -236,6 +236,100 @@ struct Vector4Verifier : public TemplateVerifier<glm::tvec4<T>>, public VectorVe
 };
 
 //----------------------------------------------------------------------------------------
+// Matrix verifiers
+//----------------------------------------------------------------------------------------
+
+/**
+* This struct is the base class for all Verifier%s that check for \c glm matrix types.
+* The template parameter for the subclasses is the containing type, not the full matrix
+* type. For example to check for <code>glm::dmat4x3</code>, one would create a
+* <code>Matrix4x3Verifier<double></code>.
+*/
+struct MatrixVerifier {};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat2x2<T></code>
+*/
+template <typename T>
+struct Matrix2x2Verifier :
+    public TemplateVerifier<glm::tmat2x2<T>>, public MatrixVerifier
+{
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat2x3<T></code>
+*/
+template <typename T>
+struct Matrix2x3Verifier :
+    public TemplateVerifier<glm::tmat2x3<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat2x4<T></code>
+*/
+template <typename T>
+struct Matrix2x4Verifier :
+    public TemplateVerifier<glm::tmat2x4<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat3x2<T></code>
+*/
+template <typename T>
+struct Matrix3x2Verifier :
+    public TemplateVerifier<glm::tmat3x2<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat3x3<T></code>
+*/
+template <typename T>
+struct Matrix3x3Verifier :
+    public TemplateVerifier<glm::tmat3x3<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat3x4<T></code>
+*/
+template <typename T>
+struct Matrix3x4Verifier :
+    public TemplateVerifier<glm::tmat3x4<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat4x2<T></code>
+*/
+template <typename T>
+struct Matrix4x2Verifier :
+    public TemplateVerifier<glm::tmat4x2<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat4x3<T></code>
+*/
+template <typename T>
+struct Matrix4x3Verifier :
+    public TemplateVerifier<glm::tmat4x3<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+/**
+* This Verifier checks whether the value is of type <code>glm::mat4x4<T></code>
+*/
+template <typename T>
+struct Matrix4x4Verifier :
+    public TemplateVerifier<glm::tmat4x4<T>>, public MatrixVerifier {
+    std::string type() const override;
+};
+
+//----------------------------------------------------------------------------------------
 // Operator verifiers
 //----------------------------------------------------------------------------------------
 
@@ -840,6 +934,28 @@ using IntVector4Verifier = Vector4Verifier<int>;
 /// A short-hand definition for a Verifier checking for <code>glm::dvec4</code>
 using DoubleVector4Verifier = Vector4Verifier<double>;
 
+/// A short-hand definition for a Verifier checking for <code>glm::dmat2x2</code>
+using DoubleMatrix2x2Verifier = Matrix2x2Verifier<double>;
+using DoubleMatrix2Verifier = DoubleMatrix2x2Verifier;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat2x3</code>
+using DoubleMatrix2x3Verifier = Matrix2x3Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat2x4</code>
+using DoubleMatrix2x4Verifier = Matrix2x4Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat3x2</code>
+using DoubleMatrix3x2Verifier = Matrix3x2Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat3x3</code>
+using DoubleMatrix3x3Verifier = Matrix3x3Verifier<double>;
+using DoubleMatrix3Verifier = DoubleMatrix3x3Verifier;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat3x4</code>
+using DoubleMatrix3x4Verifier = Matrix3x4Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat4x2</code>
+using DoubleMatrix4x2Verifier = Matrix4x2Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat4x3</code>
+using DoubleMatrix4x3Verifier = Matrix4x3Verifier<double>;
+/// A short-hand definition for a Verifier checking for <code>glm::dmat4x4</code>
+using DoubleMatrix4x4Verifier = Matrix4x4Verifier<double>;
+using DoubleMatrix4Verifier = DoubleMatrix4x4Verifier;
+
 /// A short-hand definition for a LessVerifier with a type check for \c int
 using IntLessVerifier = LessVerifier<IntVerifier>;
 /// A short-hand definition for a LessVerifier with a type check for \c double
@@ -935,6 +1051,16 @@ extern template struct Vector3Verifier<double>;
 extern template struct Vector4Verifier<bool>;
 extern template struct Vector4Verifier<int>;
 extern template struct Vector4Verifier<double>;
+
+extern template struct Matrix2x2Verifier<double>;
+extern template struct Matrix2x3Verifier<double>;
+extern template struct Matrix2x4Verifier<double>;
+extern template struct Matrix3x2Verifier<double>;
+extern template struct Matrix3x3Verifier<double>;
+extern template struct Matrix3x4Verifier<double>;
+extern template struct Matrix4x2Verifier<double>;
+extern template struct Matrix4x3Verifier<double>;
+extern template struct Matrix4x4Verifier<double>;
 
 extern template struct LessVerifier<IntVerifier>;
 extern template struct LessVerifier<DoubleVerifier>;

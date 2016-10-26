@@ -39,13 +39,15 @@ public:
     Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation();
     virtual bool initialize();
-    virtual const glm::dmat3& matrix() const = 0;
+    const glm::dmat3& matrix() const;
     virtual void update(const UpdateData& data);
 
     static openspace::Documentation Documentation();
 
 protected:
     Rotation();
+
+    glm::dmat3 _matrix;
 };
 
 }  // namespace openspace

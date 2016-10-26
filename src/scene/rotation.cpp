@@ -79,6 +79,10 @@ bool Rotation::initialize() {
     return true;
 }
     
+const glm::dmat3& Rotation::matrix() const {
+    return _matrix;
+}
+
 void Rotation::update(const UpdateData& data) {}
 
 } // namespace openspace

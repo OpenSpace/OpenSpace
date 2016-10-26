@@ -24,6 +24,8 @@
 
 #include <modules/base/rotation/spicerotation.h>
 
+#include <openspace/documentation/verifier.h>
+
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
@@ -38,55 +40,89 @@ namespace {
 
 namespace openspace {
     
-SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
-    : _sourceFrame("")
-    , _destinationFrame("")
-    , _rotationMatrix(1.0)
-    , _kernelsLoadedSuccessfully(true)
-{
-    const bool hasSourceFrame = dictionary.getValue(KeySourceFrame, _sourceFrame);
-    if (!hasSourceFrame)
-        LERROR("SpiceRotation does not contain the key '" << KeySourceFrame << "'");
-
-    const bool hasDestinationFrame = dictionary.getValue(KeyDestinationFrame, _destinationFrame);
-    if (!hasDestinationFrame)
-        LERROR("SpiceRotation does not contain the key '" << KeyDestinationFrame << "'");
-
-    ghoul::Dictionary kernels;
-    dictionary.getValue(KeyKernels, kernels);
-    for (size_t i = 1; i <= kernels.size(); ++i) {
-        std::string kernel;
-        bool success = kernels.getValue(std::to_string(i), kernel);
-        if (!success)
-            LERROR("'" << KeyKernels << "' has to be an array-style table");
-
-        try {
-            SpiceManager::ref().loadKernel(kernel);
-            _kernelsLoadedSuccessfully = true;
+Documentation SpiceRotation::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Spice Rotation",
+        "base_transform_rotation_spice",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("SpiceRotation"),
+                "",
+                Optional::No
+            },
+            {
+                KeySourceFrame,
+                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
+                "The source frame that is used as the basis for the coordinate "
+                "transformation. This has to be a valid SPICE name.",
+                Optional::No
+            },
+            {
+                KeyDestinationFrame,
+                new StringAnnotationVerifier("A valid SPICE NAIF name or integer"),
+                "The destination frame that is used for the coordinate transformation. "
+                "This has to be a valid SPICE name.",
+                Optional::No
+            },
+            {
+                KeyKernels,
+                new OrVerifier(
+                    new TableVerifier({
+                        { "*", new StringVerifier }
+                    }),
+                    new StringVerifier
+                ),
+                "A single kernel or list of kernels that this SpiceTranslation depends "
+                "on. All provided kernels will be loaded before any other operation is "
+                "performed.",
+                Optional::Yes
+            }
         }
-        catch (const SpiceManager::SpiceException& e) {
-            LERROR("Could not load SPICE kernel: " << e.what());
-            _kernelsLoadedSuccessfully = false;
+    };
+}
+
+SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
+    : _sourceFrame("source", "Source", "")
+    , _destinationFrame("destination", "Destination", "")
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "SpiceRotation"
+    );
+
+    _sourceFrame = dictionary.value<std::string>(KeySourceFrame);
+    _destinationFrame = dictionary.value<std::string>(KeyDestinationFrame);
+
+    if (dictionary.hasKeyAndValue<std::string>(KeyKernels)) {
+        SpiceManager::ref().loadKernel(dictionary.value<std::string>(KeyKernels));
+    }
+    else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyKernels)) {
+        ghoul::Dictionary kernels = dictionary.value<ghoul::Dictionary>(KeyKernels);
+        for (size_t i = 1; i <= kernels.size(); ++i) {
+            if (!kernels.hasKeyAndValue<std::string>(std::to_string(i))) {
+                throw ghoul::RuntimeError("Kernels has to be an array-style table");
+            }
+
+            std::string kernel = kernels.value<std::string>(std::to_string(i));
+            SpiceManager::ref().loadKernel(kernel);
         }
     }
 }
     
-const glm::dmat3& SpiceRotation::matrix() const {
-    return _rotationMatrix;
-}
-
 void SpiceRotation::update(const UpdateData& data) {
-    if (!_kernelsLoadedSuccessfully)
-        return;
     try {
-        _rotationMatrix = SpiceManager::ref().positionTransformMatrix(
+        _matrix = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
-            data.time);
+            data.time
+        );
     }
     catch (const ghoul::RuntimeError&) {
         // In case of missing coverage
-        _rotationMatrix = glm::dmat3(1);
+        _matrix = glm::dmat3(1);
     }
 }
 
