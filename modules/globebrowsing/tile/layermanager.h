@@ -29,11 +29,12 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/assert.h>
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 #include <openspace/util/gpudata.h>
 
 #include <memory>
@@ -78,6 +79,7 @@ namespace globebrowsing {
      * Convenience class for dealing with multiple <code>Layer</code>s.
      */
     struct LayerGroup : public properties::PropertyOwner {
+
         LayerGroup(std::string name);
         LayerGroup(std::string name, const ghoul::Dictionary& dict);
 
@@ -109,18 +111,30 @@ namespace globebrowsing {
     class LayerManager : public properties::PropertyOwner  {
     public:
 
+        static const size_t NUM_LAYER_GROUPS = 7;
+        static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS];
+        static enum LayerGroupId{
+            ColorTextures,
+            GrayScaleTextures,
+            GrayScaleOverlays,
+            NightTextures,
+            WaterMasks,
+            Overlays,
+            HeightMaps
+        };
+
         LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
         ~LayerManager();
 
         LayerGroup& layerGroup(size_t groupId);
-        LayerGroup& layerGroup(LayeredTextures::TextureCategory);
+        LayerGroup& layerGroup(LayerGroupId);
 
         bool hasAnyBlendingLayersEnabled() const;
 
         const std::vector<std::shared_ptr<LayerGroup>>& layerGroups() const;
 
         void update();
-        void reset(bool includingInactive = false);
+        void reset(bool includingDisabled = false);
 
     private:
 

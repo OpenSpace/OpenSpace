@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/tile/tileioresult.h>
 
 #include <algorithm>
@@ -104,11 +103,11 @@ namespace globebrowsing {
         auto layerManager = owner().chunkedLodGlobe()->layerManager();
         
         
-        auto heightMapProviders = layerManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        auto heightMapProviders = layerManager->layerGroup(LayerManager::HeightMaps).activeLayers();
        
         
         size_t HEIGHT_CHANNEL = 0;
-        const LayerGroup& heightmaps = layerManager->layerGroup(LayeredTextures::HeightMaps);
+        const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightMaps);
         std::vector<ChunkTile> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {

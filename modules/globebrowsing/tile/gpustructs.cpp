@@ -23,14 +23,11 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/gpustructs.h>
-
 #include <modules/globebrowsing/tile/tileIndex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/layermanager.h>
-
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/assert.h>
@@ -177,7 +174,7 @@ namespace globebrowsing {
         int pileSize = layerGroup.pileSize();
         for (size_t i = 0; i < gpuActiveLayers.size(); ++i){
             // should maybe a proper GPULayer factory
-            gpuActiveLayers[i] = category == LayeredTextures::TextureCategory::HeightMaps ? 
+            gpuActiveLayers[i] = category == LayerManager::HeightMaps ?
                 std::make_unique<GPUHeightLayer>() : 
                 std::make_unique<GPULayer>();
             std::string nameExtension = "[" + std::to_string(i) + "].";
@@ -197,7 +194,6 @@ namespace globebrowsing {
     void GPULayerManager::setValue(ProgramObject* programObject, const LayerManager& layerManager, const TileIndex& tileIndex){
         auto layerGroups = layerManager.layerGroups();
         for (size_t i = 0; i < layerGroups.size(); ++i){
-            std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             gpuLayerGroups[i]->setValue(programObject, *layerGroups[i], tileIndex);
         }
     }
@@ -212,7 +208,7 @@ namespace globebrowsing {
         }
         
         for (size_t i = 0; i < layerGroups.size(); ++i){
-            std::string nameBase = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            std::string nameBase = LayerManager::LAYER_GROUP_NAMES[i];
             gpuLayerGroups[i]->updateUniformLocations(programObject, *layerGroups[i], nameBase, i);
         }
     }

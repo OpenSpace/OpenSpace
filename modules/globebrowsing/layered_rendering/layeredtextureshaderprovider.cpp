@@ -107,21 +107,10 @@ namespace globebrowsing {
         for (size_t i = 0; i < textureTypes.size(); i++) {
             // lastLayerIndex must be at least 0 for the shader to compile,
             // the layer type is inactivated by setting use to false
-            shaderDictionary.setValue(
-                LayeredTextures::glslKeyPrefixes[
-                    LayeredTextures::GlslKeyPrefixes::lastLayerIndex] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
-                        glm::max(textureTypes[i].lastLayerIdx, 0));
-            shaderDictionary.setValue(
-                LayeredTextures::glslKeyPrefixes[
-                    LayeredTextures::GlslKeyPrefixes::use] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
-                        textureTypes[i].lastLayerIdx >= 0);
-            shaderDictionary.setValue(
-                LayeredTextures::glslKeyPrefixes[
-                    LayeredTextures::GlslKeyPrefixes::blend] +
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i],
-                        textureTypes[i].layerBlendingEnabled);
+            std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
+            shaderDictionary.setValue("lastLayerIndex" + groupName, glm::max(textureTypes[i].lastLayerIdx, 0));
+            shaderDictionary.setValue("use" + groupName, textureTypes[i].lastLayerIdx >= 0);
+            shaderDictionary.setValue("blend" + groupName, textureTypes[i].layerBlendingEnabled);
         }
 
         // Other settings such as "useAtmosphere"

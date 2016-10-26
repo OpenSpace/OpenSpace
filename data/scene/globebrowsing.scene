@@ -56,8 +56,8 @@ function postInitialization()
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     
     openspace.setPropertyValue("Earth.RenderableGlobe.atmosphere", true)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.gamma", 1.8)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.multiplier", 10)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.settings.gamma", 1.8)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightTextures.Earth at Night 2012.settings.multiplier", 10)
 
     openspace.resetCameraDirection()
     openspace.time.setDeltaTime(0)

@@ -144,31 +144,34 @@ namespace globebrowsing {
     //////////////////////////////////////////////////////////////////////////////////////
     //                                 LayerManager                                     //
     //////////////////////////////////////////////////////////////////////////////////////
-    LayerManager::LayerManager(const ghoul::Dictionary& textureCategoriesDictionary) {
+
+    const std::string LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+        "ColorTextures",
+        "GrayScaleTextures",
+        "GrayScaleOverlays",
+        "NightTextures",
+        "WaterMasks",
+        "Overlays",
+        "HeightMaps",
+    };
+
+    LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) {
 
         setName("Layers");
         
         // Create all the categories of tile providers
-        for (size_t i = 0; i < textureCategoriesDictionary.size(); i++) {
-            ghoul::Dictionary texturesDict = textureCategoriesDictionary.value<ghoul::Dictionary>(
-                LayeredTextures::TEXTURE_CATEGORY_NAMES[i]);
-
-            ghoul_assert(texturesDict.size() <=
-                LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY,
-                "Too many textures! Number of textures per category must be less than or equal to "
-                << LayeredTextures::MAX_NUM_TEXTURES_PER_CATEGORY);
+        for (size_t i = 0; i < layerGroupsDict.size(); i++) {
+            std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
+            ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(groupName);
 
             TileProviderInitData initData;
             initData.minimumPixelSize = 512;
             initData.threads = 1;
             initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
+            initData.preprocessTiles = (i == LayerManager::HeightMaps); // Only preprocess height maps.
             
-            // Only preprocess height maps.
-            initData.preprocessTiles = i == LayeredTextures::HeightMaps;
-            std::string groupName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
-            
-            _layerGroups.push_back(std::make_shared<LayerGroup>(groupName, texturesDict));
+            _layerGroups.push_back(std::make_shared<LayerGroup>(groupName, layerGroupDict));
         }
         
         for(auto layerGroup : _layerGroups){
@@ -184,8 +187,8 @@ namespace globebrowsing {
         return *_layerGroups[groupId];
     }
 
-    LayerGroup& LayerManager::layerGroup(LayeredTextures::TextureCategory category) {
-        return *_layerGroups[category];
+    LayerGroup& LayerManager::layerGroup(LayerGroupId groupId) {
+        return *_layerGroups[groupId];
     }
 
     bool LayerManager::hasAnyBlendingLayersEnabled() const {

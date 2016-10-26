@@ -68,10 +68,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/layer/layer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
@@ -123,11 +120,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/layer/layer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextures.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/perlayersetting.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl

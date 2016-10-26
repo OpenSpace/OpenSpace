@@ -39,7 +39,6 @@
 #include <modules/globebrowsing/globes/pointglobe.h>
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <unordered_map>

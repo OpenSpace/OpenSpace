@@ -235,7 +235,7 @@ namespace globebrowsing {
             geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
 
         // Get the tile providers for the height maps
-        const auto& heightMapLayers = _layerManager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightMaps).activeLayers();
         
         for (const auto& layer : heightMapLayers) {
             TileProvider* tileProvider = layer->tileProvider();

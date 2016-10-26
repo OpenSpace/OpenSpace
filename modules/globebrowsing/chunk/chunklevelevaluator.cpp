@@ -31,7 +31,6 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 
 
 #include <algorithm>
@@ -162,12 +161,12 @@ namespace globebrowsing {
     }
 
     int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        auto tileProvidermanager = chunk.owner().chunkedLodGlobe()->layerManager();
-        auto heightLayers = tileProvidermanager->layerGroup(LayeredTextures::HeightMaps).activeLayers();
+        auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
+        auto heightLayers = layerManager->layerGroup(LayerManager::HeightMaps).activeLayers();
         int currLevel = chunk.tileIndex().level;
-
-        for (size_t i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; i++) {
-            for (auto& layer : tileProvidermanager->layerGroup(i).activeLayers()) {
+        
+        for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
+            for (auto& layer : layerManager->layerGroup(i).activeLayers()) {
                 Tile::Status tileStatus = layer->tileProvider()->getTileStatus(chunk.tileIndex());
                 if (tileStatus == Tile::Status::OK) {
                     return UNKNOWN_DESIRED_LEVEL;

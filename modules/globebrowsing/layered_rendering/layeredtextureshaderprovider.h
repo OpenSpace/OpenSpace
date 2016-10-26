@@ -25,8 +25,6 @@
 #ifndef __LAYERED_TEXTURE_SHADER_PROVIDER__
 #define __LAYERED_TEXTURE_SHADER_PROVIDER__
 
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
-
 #include <modules/globebrowsing/tile/gpustructs.h>
 #include <modules/globebrowsing/tile/layermanager.h>
 
@@ -66,7 +64,7 @@ namespace globebrowsing {
     */
     struct LayeredTexturePreprocessingData {
 
-        std::array<LayeredTextureInfo, LayeredTextures::NUM_TEXTURE_CATEGORIES>
+        std::array<LayeredTextureInfo, LayerManager::NUM_LAYER_GROUPS>
             layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayeredTexturePreprocessingData& other) const;

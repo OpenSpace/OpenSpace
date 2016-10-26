@@ -26,7 +26,6 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/layered_rendering/layeredtextures.h>
 #include <modules/globebrowsing/tile/layermanager.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 
@@ -103,16 +102,13 @@ namespace globebrowsing {
 
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
         
-        for (size_t category = 0;
-            category < LayeredTextures::NUM_TEXTURE_CATEGORIES;
-            category++) {
-
+        for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
             LayeredTextureInfo layeredTextureInfo;
-            auto layerGroup = _layerManager->layerGroup(category);
+            auto layerGroup = _layerManager->layerGroup(i);
             layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
             layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
-            layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
+            layeredTexturePreprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
         }
         
         const auto& generalProps = chunk.owner().generalProperties();
@@ -191,10 +187,8 @@ namespace globebrowsing {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_layerManager->layerGroup(
-                LayeredTextures::NightTextures).activeLayers().size() > 0 ||
-            _layerManager->layerGroup(
-                LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(LayerManager::NightTextures).activeLayers().size() > 0 ||
+            _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
             glm::vec3 directionToSunWorldSpace =
@@ -268,12 +262,11 @@ namespace globebrowsing {
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        if (_layerManager->layerGroup(
-                LayeredTextures::NightTextures).activeLayers().size() > 0 ||
-            _layerManager->layerGroup(
-                LayeredTextures::WaterMasks).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(LayerManager::NightTextures).activeLayers().size() > 0 ||
+            _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
-            chunk.owner().generalProperties().performShading) {
+            chunk.owner().generalProperties().performShading)
+        {
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
