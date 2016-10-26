@@ -28,12 +28,12 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.hglsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/blending.hglsl>
 
-// First layer type from LayeredTextureShaderProvider is height map
+// First layer type from LayerShaderManager is height map
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightMaps} + 1
 #define USE_HEIGHTMAP #{useHeightMaps}
 #define HEIGHTMAP_BLENDING_ENABLED #{blendHeightMaps}
 
-// Second layer type from LayeredTextureShaderProvider is color texture
+// Second layer type from LayerShaderManager is color texture
 #define NUMLAYERS_COLORTEXTURE #{lastLayerIndexColorTextures} + 1
 #define USE_COLORTEXTURE #{useColorTextures}
 #define COLORTEXTURE_BLENDING_ENABLED #{blendColorTextures}
@@ -42,22 +42,22 @@
 #define USE_GRAYSCALETEXTURE #{useGrayScaleTextures}
 #define GRAYSCALETEXTURE_BLENDING_ENABLED #{blendGrayScaleTextures}
 
- // Third layer type from LayeredTextureShaderProvider is water mask
+ // Third layer type from LayerShaderManager is water mask
 #define NUMLAYERS_WATERMASK #{lastLayerIndexWaterMasks} + 1
 #define USE_WATERMASK #{useWaterMasks}
 #define WATERMASK_BLENDING_ENABLED #{blendWaterMasks}
 
-// Fourth layer type from LayeredTextureShaderProvider is night texture
+// Fourth layer type from LayerShaderManager is night texture
 #define NUMLAYERS_NIGHTTEXTURE #{lastLayerIndexNightTextures} + 1
 #define USE_NIGHTTEXTURE #{useNightTextures}
 #define NIGHTTEXTURE_BLENDING_ENABLED #{blendNightTextures}
 
-// Fifth layer type from LayeredTextureShaderProvider is overlay
+// Fifth layer type from LayerShaderManager is overlay
 #define NUMLAYERS_OVERLAY #{lastLayerIndexOverlays} + 1
 #define USE_OVERLAY #{useOverlays}
 #define OVERLAY_BLENDING_ENABLED #{blendOverlays}
 
-// Sixth layer type from LayeredTextureShaderProvider is grayscale overlay
+// Sixth layer type from LayerShaderManager is grayscale overlay
 #define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleOverlays} + 1
 #define USE_GRAYSCALE_OVERLAY #{useGrayScaleOverlays}
 #define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleOverlays}

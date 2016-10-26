@@ -22,12 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+
 #include <modules/globebrowsing/globes/renderableglobe.h>
-
-#include <ghoul/misc/threadpool.h>
-
 #include <modules/globebrowsing/tile/tileselector.h>
-#include <modules/globebrowsing/tile/layermanager.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -39,6 +37,7 @@
 
 // ghoul includes
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/threadpool.h>
 
 namespace {
     const std::string _loggerCat = "RenderableGlobe";

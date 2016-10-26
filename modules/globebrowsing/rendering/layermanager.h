@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILE_PROVIDER_MANAGER_H__
-#define __TILE_PROVIDER_MANAGER_H__
+#ifndef __LAYER_MANAGER_H__
+#define __LAYER_MANAGER_H__
 
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
@@ -145,4 +145,4 @@ namespace globebrowsing {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __TILE_PROVIDER_MANAGER_H__
+#endif  // __LAYER_MANAGER_H__

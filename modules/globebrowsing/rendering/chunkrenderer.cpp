@@ -22,12 +22,12 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
-#include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/tile/layermanager.h>
 #include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
+
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -64,12 +64,12 @@ namespace globebrowsing {
         : _layerManager(layerManager)
         , _grid(grid)
     {
-        _globalRenderingShaderProvider = std::make_shared<LayeredTextureShaderProvider>(
+        _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
                 "GlobalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/globalchunkedlodpatch_fs.glsl");
 
-        _localRenderingShaderProvider = std::make_shared<LayeredTextureShaderProvider>(
+        _localLayerShaderManager = std::make_shared<LayerShaderManager>(
                 "LocalChunkedLodPatch",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_vs.glsl",
                 "${MODULE_GLOBEBROWSING}/shaders/localchunkedlodpatch_fs.glsl");
@@ -94,16 +94,16 @@ namespace globebrowsing {
     }
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
-        LayeredTextureShaderProvider* layeredTextureShaderProvider,
+        LayerShaderManager* layeredTextureShaderProvider,
         GPULayerManager * gpuLayerManager,
         const Chunk& chunk)
     {
         const TileIndex& tileIndex = chunk.tileIndex();
 
-        LayeredTexturePreprocessingData layeredTexturePreprocessingData;
+        LayerShaderPreprocessingData layeredTexturePreprocessingData;
         
         for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
-            LayeredTextureInfo layeredTextureInfo;
+            LayerGroupPreprocessingData layeredTextureInfo;
             auto layerGroup = _layerManager->layerGroup(i);
             layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
             layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
@@ -124,7 +124,7 @@ namespace globebrowsing {
 
         // Now the shader program can be accessed
         ProgramObject* programObject =
-            layeredTextureShaderProvider->getUpdatedShaderProgram(
+            layeredTextureShaderProvider->programObject(
                 layeredTexturePreprocessingData);
         
         if (layeredTextureShaderProvider->updatedOnLastCall()) {
@@ -151,7 +151,7 @@ namespace globebrowsing {
     void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
 
         ProgramObject* programObject = getActivatedProgramWithTileData(
-            _globalRenderingShaderProvider.get(),
+            _globalLayerShaderManager.get(),
             _globalGpuLayerManager.get(),
             chunk);
         if (programObject == nullptr) {
@@ -221,7 +221,7 @@ namespace globebrowsing {
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
         
         ProgramObject* programObject = getActivatedProgramWithTileData(
-            _localRenderingShaderProvider.get(),
+            _localLayerShaderManager.get(),
             _localGpuLayerManager.get(),
             chunk);
         if (programObject == nullptr) {

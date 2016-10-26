@@ -22,11 +22,11 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LAYERED_TEXTURE_SHADER_PROVIDER__
-#define __LAYERED_TEXTURE_SHADER_PROVIDER__
+#ifndef __LAYER_SHADER_MANAGER_H__
+#define __LAYER_SHADER_MANAGER_H__
 
-#include <modules/globebrowsing/tile/gpustructs.h>
-#include <modules/globebrowsing/tile/layermanager.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/gpulayermanager.h>
 
 #include "ghoul/opengl/programobject.h"
 
@@ -44,43 +44,38 @@ namespace globebrowsing {
     /**
     * Settings per texture category that contains shader preprocessing information.
     */
-    struct LayeredTextureInfo
-    {
+    struct LayerGroupPreprocessingData {
         int lastLayerIdx;
         bool layerBlendingEnabled;
-
-        bool operator==(const LayeredTextureInfo& other) const;
+        bool operator==(const LayerGroupPreprocessingData& other) const;
     };
 
     /**
     * Data needed for shader preprocessing before compiling a layered texture shader
     * program.
     *
-    * If a <code>LayeredTexturePreprocessingData</code> is compared with another it can
-    * be determined wheter or not a <code>LayeredTextureShaderProvider</code> needs to
+    * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
+    * be determined wheter or not a <code>LayerShaderManager</code> needs to
     * recompile its shader program. For each <code>TextureCategory</code> there is
     * information about how many layers it has and whether or not to blend the texture
     * levels.
     */
-    struct LayeredTexturePreprocessingData {
-
-        std::array<LayeredTextureInfo, LayerManager::NUM_LAYER_GROUPS>
-            layeredTextureInfo;
+    struct LayerShaderPreprocessingData {
+        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS> layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
-        bool operator==(const LayeredTexturePreprocessingData& other) const;
+        bool operator==(const LayerShaderPreprocessingData& other) const;
     };
 
     /**
     * This class has ownership of an updated shader program for rendering tiles.
     */
-    class LayeredTextureShaderProvider
-    {
+    class LayerShaderManager {
     public:
-        LayeredTextureShaderProvider(
+        LayerShaderManager(
             const std::string& shaderName,
             const std::string& vsPath,
             const std::string& fsPath);
-        ~LayeredTextureShaderProvider();
+        ~LayerShaderManager();
 
         /**
         * Returns a pointer to a <code>ProgramObject</code> for rendering tiles.
@@ -89,17 +84,17 @@ namespace globebrowsing {
         * from the last time this function was called the shader program will be
         * recompiled before returned.
         */
-        ProgramObject* getUpdatedShaderProgram(
-            LayeredTexturePreprocessingData preprocessingData);
+        ProgramObject* programObject(
+            LayerShaderPreprocessingData preprocessingData);
 
         bool updatedOnLastCall();
         
     private:
         
-        void recompileShaderProgram(LayeredTexturePreprocessingData preprocessingData);
+        void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
         std::unique_ptr<ProgramObject> _programObject;
-        LayeredTexturePreprocessingData _preprocessingData;
+        LayerShaderPreprocessingData _preprocessingData;
 
         const std::string _shaderName;
         const std::string _vsPath;
@@ -112,4 +107,4 @@ namespace globebrowsing {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __LAYERED_TEXTURE_SHADER_PROVIDER__
+#endif  // __LAYER_SHADER_MANAGER_H__

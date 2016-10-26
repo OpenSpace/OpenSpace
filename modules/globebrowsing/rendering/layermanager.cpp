@@ -23,10 +23,9 @@
 ****************************************************************************************/
 
 #include <openspace/util/factorymanager.h>
-
-#include <modules/globebrowsing/tile/layermanager.h>
-
 #include <openspace/properties/scalarproperty.h>
+
+#include <modules/globebrowsing/rendering/layermanager.h>
 
 #include <ghoul/logging/logmanager.h>
 

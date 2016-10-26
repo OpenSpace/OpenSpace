@@ -22,13 +22,14 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef GPU_STRUCTS_H
-#define GPU_STRUCTS_H
+#ifndef __GPU_LAYER_MANAGER_H__
+#define __GPU_LAYER_MANAGER_H__
 
-#include <openspace/util/gpudata.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/layermanager.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
+
+#include <openspace/util/gpudata.h>
 
 #include <glm/glm.hpp>
 
@@ -161,4 +162,4 @@ private:
 
 } // namespace globebrowsing
 } // namespace openspace
-#endif  // GPU_STRUCTS_H
+#endif  // __GPU_LAYER_MANAGER_H__

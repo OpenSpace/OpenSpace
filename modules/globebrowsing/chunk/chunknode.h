@@ -30,14 +30,14 @@
 #include <stack>
 #include <memory>
 #include <ostream>
+#include <functional>
 
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunkrenderer.h>
-
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-#include <functional>
+
 
 namespace openspace {
 namespace globebrowsing {

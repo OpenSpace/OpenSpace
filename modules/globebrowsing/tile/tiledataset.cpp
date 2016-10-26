@@ -681,7 +681,6 @@ namespace globebrowsing {
         PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
 
         ghoul_assert(io.read.region.isInside(gdalRegion), "write region of bounds!");
-
         ghoul_assert(io.write.region.start.x >= 0 && io.write.region.start.y >= 0, "Invalid write region");
 
         PixelCoordinate end = io.write.region.end();

@@ -37,8 +37,8 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/other/statscollector.h>
 
 namespace openspace {

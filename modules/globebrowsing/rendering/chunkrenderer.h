@@ -30,15 +30,11 @@
 
 // open space includes
 #include <openspace/rendering/renderable.h>
-
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-
 #include <modules/globebrowsing/meshes/grid.h>
-
-#include <modules/globebrowsing/layered_rendering/layeredtextureshaderprovider.h>
+#include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
-
 #include <modules/globebrowsing/chunk/chunknode.h>
 
 #include <ghoul/opengl/textureunit.h>
@@ -91,7 +87,7 @@ namespace globebrowsing {
 
 
         ProgramObject* getActivatedProgramWithTileData(
-            LayeredTextureShaderProvider* layeredTextureShaderProvider,
+            LayerShaderManager* layeredTextureShaderProvider,
             GPULayerManager * gpuLayerManager,
             const Chunk& chunk);
 
@@ -100,8 +96,8 @@ namespace globebrowsing {
         std::shared_ptr<LayerManager> _layerManager;
 
         // Two different shader programs. One for global and one for local rendering.
-        std::shared_ptr<LayeredTextureShaderProvider> _globalRenderingShaderProvider;
-        std::shared_ptr<LayeredTextureShaderProvider> _localRenderingShaderProvider;
+        std::shared_ptr<LayerShaderManager> _globalLayerShaderManager;
+        std::shared_ptr<LayerShaderManager> _localLayerShaderManager;
 
         // Layered texture uniforms are chached in the uniform ID handles.
         std::shared_ptr<GPULayerManager> _globalGpuLayerManager;

@@ -22,12 +22,13 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/gpustructs.h>
 #include <modules/globebrowsing/tile/tileIndex.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/layermanager.h>
+
+#include <modules/globebrowsing/rendering/gpulayermanager.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/assert.h>
@@ -39,7 +40,7 @@
 #include <memory>
 
 namespace {
-    const std::string _loggerCat = "GPUStructs";
+    const std::string _loggerCat = "GPULayerManager";
 }
 
 namespace openspace {

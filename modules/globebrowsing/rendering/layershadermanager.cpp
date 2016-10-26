@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/layered_rendering/layeredtextureshaderprovider.h>
-#include <modules/globebrowsing/tile/layermanager.h>
+#include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
 
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
@@ -33,19 +33,19 @@
 #include <string>
 
 namespace {
-    const std::string _loggerCat = "LayeredTextureShaderProvider";
+    const std::string _loggerCat = "LayerShaderManager";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
-    bool LayeredTextureInfo::operator==(const LayeredTextureInfo& other) const {
+    bool LayerGroupPreprocessingData::operator==(const LayerGroupPreprocessingData& other) const {
         return lastLayerIdx == other.lastLayerIdx &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
-    bool LayeredTexturePreprocessingData::operator==(
-        const LayeredTexturePreprocessingData& other) const
+    bool LayerShaderPreprocessingData::operator==(
+        const LayerShaderPreprocessingData& other) const
     {
         
         if (layeredTextureInfo.size() != other.layeredTextureInfo.size() ||
@@ -64,7 +64,7 @@ namespace globebrowsing {
         }
     }
 
-    LayeredTextureShaderProvider::LayeredTextureShaderProvider(
+    LayerShaderManager::LayerShaderManager(
         const std::string& shaderName,
         const std::string& vsPath,
         const std::string& fsPath)
@@ -72,10 +72,11 @@ namespace globebrowsing {
         , _vsPath(vsPath)
         , _fsPath(fsPath)
         , _updatedOnLastCall(false)
-    {}
-    
-    LayeredTextureShaderProvider::~LayeredTextureShaderProvider()
     {
+
+    }
+    
+    LayerShaderManager::~LayerShaderManager() {
         if (_programObject) {
             RenderEngine& renderEngine = OsEng.renderEngine();
             renderEngine.removeRenderProgram(_programObject);
@@ -83,8 +84,8 @@ namespace globebrowsing {
         }
     }
 
-    ProgramObject* LayeredTextureShaderProvider::getUpdatedShaderProgram(
-        LayeredTexturePreprocessingData preprocessingData)
+    ProgramObject* LayerShaderManager::programObject(
+        LayerShaderPreprocessingData preprocessingData)
     {
         _updatedOnLastCall = false;
         if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
@@ -94,8 +95,8 @@ namespace globebrowsing {
         return _programObject.get();
     }
 
-    void LayeredTextureShaderProvider::recompileShaderProgram(
-        LayeredTexturePreprocessingData preprocessingData)
+    void LayerShaderManager::recompileShaderProgram(
+        LayerShaderPreprocessingData preprocessingData)
     {
         _preprocessingData = preprocessingData;
         ghoul::Dictionary shaderDictionary;
@@ -133,7 +134,7 @@ namespace globebrowsing {
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     }
 
-    bool LayeredTextureShaderProvider::updatedOnLastCall() {
+    bool LayerShaderManager::updatedOnLastCall() {
         return _updatedOnLastCall;
     }
 

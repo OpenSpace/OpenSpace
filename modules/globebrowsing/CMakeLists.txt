@@ -31,7 +31,6 @@ set(HEADER_FILES
     
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.h
 
@@ -52,7 +51,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gpustructs.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
@@ -64,11 +62,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.h
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
@@ -85,7 +84,6 @@ set(SOURCE_FILES
     
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.cpp
 
@@ -105,8 +103,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/gpustructs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.cpp
@@ -117,11 +113,12 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileioresult.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
 
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/layered_rendering/layeredtextureshaderprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
