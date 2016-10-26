@@ -65,6 +65,7 @@ public:
     void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
     void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
     void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
+    bool cameraIsInside(const RenderData& data, glm::vec3& localPosition) override;
 
     std::string getBoundsVsPath() const override;
     std::string getBoundsFsPath() const override;
@@ -73,11 +74,13 @@ public:
 
     void setStepSize(float stepSize);
     void setGridType(VolumeGridType gridType);
+    void setModelTransform(const glm::mat4& transform);
 private:
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
     VolumeGridType _gridType;
+    glm::mat4 _modelTransform;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;

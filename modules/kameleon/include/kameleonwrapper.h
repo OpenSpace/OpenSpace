@@ -136,7 +136,6 @@ public:
 
     Model model();
     GridType gridType();
-    std::string getParent();
     std::string getFrame();
     std::vector<std::string> getVariables();
     std::vector<std::string> getLoadedVariables();

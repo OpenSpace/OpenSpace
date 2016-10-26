@@ -63,11 +63,13 @@ private:
 
     std::string cacheSuffix();
     void updateTextureFromVolume();
+    void updateRaycasterModelTransform();
 
     properties::UVec3Property _dimensions;
     properties::StringProperty _variable;
     properties::Vec3Property _lowerDomainBound;
     properties::Vec3Property _upperDomainBound;
+    properties::Vec3Property _domainScale;
     bool _autoDomainBounds;
 
     properties::FloatProperty _lowerValueBound;

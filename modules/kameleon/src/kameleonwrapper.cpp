@@ -1008,24 +1008,6 @@ glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEn
     return color;
 }
 
-std::string KameleonWrapper::getParent(){
-    if(    _type == KameleonWrapper::Model::BATSRUS ||
-        _type == KameleonWrapper::Model::OpenGGCM ||
-        _type == KameleonWrapper::Model::LFM)
-    {
-        return "Earth";
-    }else if(
-        _type == KameleonWrapper::Model::ENLIL ||
-        _type == KameleonWrapper::Model::MAS ||
-        _type == KameleonWrapper::Model::Adapt3D ||
-        _type == KameleonWrapper::Model::SWMF)
-    {
-        return "Sun";
-    }else{
-        return "";
-    }
-}
-
 std::string KameleonWrapper::getFrame(){
     if(    _type == KameleonWrapper::Model::BATSRUS ||
         _type == KameleonWrapper::Model::OpenGGCM ||
@@ -1050,8 +1032,6 @@ std::vector<std::string> KameleonWrapper::getVariables(){
     int numVariables = _model->getNumberOfVariables();
 
     for(int i=0; i<numVariables; i++){
-        // std::cout << _model->getVariableName(i) << " ";
-        // std::cout << _model->getVariableName(i) << std::endl;
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;

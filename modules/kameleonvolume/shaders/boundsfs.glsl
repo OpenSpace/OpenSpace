@@ -22,15 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec3 vPosition;
-in vec4 worldPosition;
+in vec4 positionLocalSpace;
+in vec4 positionCameraSpace;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 fragColor = vec4(vPosition+0.5, 1.0);
-    vec4 position = worldPosition;
+    vec4 fragColor = vec4(positionLocalSpace.xyz+0.5, 1.0);
+    vec4 position = positionCameraSpace;
     float depth = pscDepth(position);
 
     Fragment frag;

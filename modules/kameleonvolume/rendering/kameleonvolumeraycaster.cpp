@@ -60,9 +60,14 @@ void KameleonVolumeRaycaster::deinitialize() {
 }
     
 void KameleonVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
-    //program.setUniform("modelTransform", _modelTransform);
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
     
     // Cull back face
     glEnable(GL_CULL_FACE);
@@ -72,11 +77,15 @@ void KameleonVolumeRaycaster::renderEntryPoints(const RenderData& data, ghoul::o
     _boundingBox.render();
 }
     
-void KameleonVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {   
-    // Uniforms
-    //program.setUniform("modelTransform", _modelTransform);
-    program.setUniform("viewProjection", data.camera.viewProjectionMatrix());
-    Renderable::setPscUniforms(program, data.camera, data.position);
+void KameleonVolumeRaycaster::renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) {
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    program.setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+    program.setUniform("projectionTransform", data.camera.projectionMatrix());
 
     // Cull front face
     glEnable(GL_CULL_FACE);
@@ -113,6 +122,20 @@ void KameleonVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl
     _textureUnit = nullptr;
     _tfUnit = nullptr;
 }
+
+bool KameleonVolumeRaycaster::cameraIsInside(const RenderData & data, glm::vec3 & localPosition)
+{
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::dmat4(glm::scale(glm::dmat4(_modelTransform), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    glm::vec4 modelPos = glm::inverse(modelViewTransform) * glm::vec4(0.0, 0.0, 0.0, 1.0);
+
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
+    return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
+}
     
 std::string KameleonVolumeRaycaster::getBoundsVsPath() const {
     return GlslBoundsVsPath;
@@ -137,6 +160,10 @@ void KameleonVolumeRaycaster::setStepSize(float stepSize) {
 void KameleonVolumeRaycaster::setGridType(VolumeGridType gridType)
 {
     _gridType = gridType;
+}
+
+void KameleonVolumeRaycaster::setModelTransform(const glm::mat4 & transform) {
+    _modelTransform = transform;
 }
     
 }

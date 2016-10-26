@@ -53,6 +53,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _variable("variable", "Variable")
     , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound")
     , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
+    , _domainScale("domainScale", "Domain scale")
     , _autoDomainBounds(false)
     , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.0, 0.0, 1)
     , _upperValueBound("upperValueBound", "Upper Value Bound", 1, 0.01, 1)
@@ -109,6 +110,13 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
     else {
         _autoDomainBounds = true;
+    }
+
+    glm::vec3 domainScale;
+    if (dictionary.getValue("DomainScale", domainScale)) {
+        _domainScale = domainScale;
+    } else {
+        _domainScale = glm::vec3(1, 1, 1); // Assume meters if nothing else is specified.
     }
 
     float lowerValueBound;
@@ -168,6 +176,13 @@ bool RenderableKameleonVolume::initialize() {
         _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
     });
 
+    updateRaycasterModelTransform();
+    _lowerDomainBound.onChange([this] {
+        updateRaycasterModelTransform();
+    });
+    _upperDomainBound.onChange([this] {
+        updateRaycasterModelTransform();
+    });
 
 
     _raycaster->initialize();
@@ -193,6 +208,7 @@ bool RenderableKameleonVolume::initialize() {
     addProperty(_variable);
     addProperty(_lowerDomainBound);
     addProperty(_upperDomainBound);
+    addProperty(_domainScale);
     addProperty(_lowerValueBound);
     addProperty(_upperValueBound);
     addProperty(_gridType);
@@ -201,6 +217,19 @@ bool RenderableKameleonVolume::initialize() {
 
     return true;
 }
+
+void RenderableKameleonVolume::updateRaycasterModelTransform() {
+    glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
+    glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
+    
+    glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
+    glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
+
+    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
+    modelTransform = glm::scale(modelTransform, scale);
+    _raycaster->setModelTransform(modelTransform);
+}
+
 
 bool RenderableKameleonVolume::cachingEnabled() {
     return _cache;
@@ -331,6 +360,7 @@ bool RenderableKameleonVolume::isReady() const {
 }
     
 void RenderableKameleonVolume::update(const UpdateData& data) {
+    // forward this transformation! 
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
     }
