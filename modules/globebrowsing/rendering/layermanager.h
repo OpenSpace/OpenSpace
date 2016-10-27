@@ -58,7 +58,6 @@ namespace globebrowsing {
     */
     class Layer : public properties::PropertyOwner {
     public:
-
         Layer(const ghoul::Dictionary& layerDict);
         ~Layer();
 
@@ -69,7 +68,6 @@ namespace globebrowsing {
         const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 
     private:
-
         properties::BoolProperty _enabled;
         std::shared_ptr<TileProvider> _tileProvider;
         LayerRenderSettings _renderSettings;
@@ -79,7 +77,6 @@ namespace globebrowsing {
      * Convenience class for dealing with multiple <code>Layer</code>s.
      */
     struct LayerGroup : public properties::PropertyOwner {
-
         LayerGroup(std::string name);
         LayerGroup(std::string name, const ghoul::Dictionary& dict);
 
@@ -98,7 +95,6 @@ namespace globebrowsing {
         bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
 
     private:
-        
         std::vector<std::shared_ptr<Layer>> _layers;
         std::vector<std::shared_ptr<Layer>> _activeLayers;
 
@@ -110,7 +106,6 @@ namespace globebrowsing {
     */
     class LayerManager : public properties::PropertyOwner  {
     public:
-
         static const size_t NUM_LAYER_GROUPS = 7;
         static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS];
         static enum LayerGroupId{
@@ -126,8 +121,8 @@ namespace globebrowsing {
         LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
         ~LayerManager();
 
-        LayerGroup& layerGroup(size_t groupId);
-        LayerGroup& layerGroup(LayerGroupId);
+        const LayerGroup& layerGroup(size_t groupId);
+        const LayerGroup& layerGroup(LayerGroupId);
 
         bool hasAnyBlendingLayersEnabled() const;
 
@@ -137,9 +132,7 @@ namespace globebrowsing {
         void reset(bool includingDisabled = false);
 
     private:
-
         std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
-
     };
 
 } // namespace globebrowsing

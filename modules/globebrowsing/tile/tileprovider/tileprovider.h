@@ -147,14 +147,6 @@ namespace globebrowsing {
 
     typedef LRUCache<TileHashKey, Tile> TileCache;
 
-    struct TileProviderInitData {
-        int minimumPixelSize;
-        int threads;
-        int cacheSize;
-        int framesUntilRequestQueueFlush;
-        bool preprocessTiles = false;
-    };
-
 } // namespace globebrowsing
 } // namespace openspace
 

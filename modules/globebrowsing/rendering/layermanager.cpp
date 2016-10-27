@@ -60,8 +60,8 @@ namespace globebrowsing {
         layerDict.getValue("Name", layerName);
         setName(layerName);
         
-        
-        _tileProvider = std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(layerDict));
+        _tileProvider = std::shared_ptr<TileProvider>(
+            TileProvider::createFromDictionary(layerDict));
         
         // Something else went wrong and no exception was thrown
         if (_tileProvider == nullptr) {
@@ -80,11 +80,13 @@ namespace globebrowsing {
 
     }
 
-    ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const{
-        return std::move(TileSelector::getHighestResolutionTilePile(_tileProvider.get(), tileIndex, pileSize));
+    ChunkTilePile Layer::getChunkTilePile(
+        const TileIndex& tileIndex,
+        int pileSize) const {
+        return std::move(TileSelector::getHighestResolutionTilePile(
+            _tileProvider.get(), tileIndex, pileSize));
     }
 
-    
     //////////////////////////////////////////////////////////////////////////////////////
     //                               Layer Group                                        //
     //////////////////////////////////////////////////////////////////////////////////////
@@ -158,19 +160,18 @@ namespace globebrowsing {
 
         setName("Layers");
         
+        if (NUM_LAYER_GROUPS != layerGroupsDict.size()) {
+            throw ghoul::RuntimeError(
+                "Number of Layer Groups must be equal to " + NUM_LAYER_GROUPS);
+        }
         // Create all the categories of tile providers
         for (size_t i = 0; i < layerGroupsDict.size(); i++) {
             std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
-            ghoul::Dictionary layerGroupDict = layerGroupsDict.value<ghoul::Dictionary>(groupName);
+            ghoul::Dictionary layerGroupDict =
+                layerGroupsDict.value<ghoul::Dictionary>(groupName);
 
-            TileProviderInitData initData;
-            initData.minimumPixelSize = 512;
-            initData.threads = 1;
-            initData.cacheSize = 5000;
-            initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles = (i == LayerManager::HeightLayers); // Only preprocess height maps.
-            
-            _layerGroups.push_back(std::make_shared<LayerGroup>(groupName, layerGroupDict));
+            _layerGroups.push_back(
+                std::make_shared<LayerGroup>(groupName, layerGroupDict));
         }
         
         for(auto layerGroup : _layerGroups){
@@ -182,17 +183,18 @@ namespace globebrowsing {
         
     }
 
-    LayerGroup& LayerManager::layerGroup(size_t groupId) {
+    const LayerGroup& LayerManager::layerGroup(size_t groupId) {
         return *_layerGroups[groupId];
     }
 
-    LayerGroup& LayerManager::layerGroup(LayerGroupId groupId) {
+    const LayerGroup& LayerManager::layerGroup(LayerGroupId groupId) {
         return *_layerGroups[groupId];
     }
 
     bool LayerManager::hasAnyBlendingLayersEnabled() const {
         for (const auto& layerGroup : _layerGroups){
-            if (layerGroup->layerBlendingEnabled() && layerGroup->activeLayers().size() > 0){
+            if (layerGroup->layerBlendingEnabled() &&
+                layerGroup->activeLayers().size() > 0){
                 return true;
             }
         }
