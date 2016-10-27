@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "dione_textures", Destination = "textures", Version = 1 }
+    },
+}
