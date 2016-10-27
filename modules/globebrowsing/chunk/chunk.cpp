@@ -43,14 +43,15 @@ namespace globebrowsing {
 
     const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
-    Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool initVisible)
+    Chunk::Chunk(
+        const RenderableGlobe& owner,
+        const TileIndex& tileIndex,
+        bool initVisible)
         : _owner(owner)
         , _surfacePatch(tileIndex)
         , _tileIndex(tileIndex)
         , _isVisible(initVisible) 
-    {
-
-    }
+    { }
 
     const GeodeticPatch& Chunk::surfacePatch() const {
         return _surfacePatch;
@@ -68,15 +69,12 @@ namespace globebrowsing {
         return _isVisible;
     }
 
-    void Chunk::setIndex(const TileIndex& index) {
-        _tileIndex = index;
-        _surfacePatch = GeodeticPatch(index);
-    }
-
     Chunk::Status Chunk::update(const RenderData& data) {
         auto savedCamera = _owner.savedCamera();
-        const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
-        RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
+        const Camera& camRef =
+            savedCamera != nullptr ? *savedCamera : data.camera;
+        RenderData myRenderData =
+            { camRef, data.position, data.doPerformanceMeasurement };
 
 
         _isVisible = true;
@@ -102,13 +100,17 @@ namespace globebrowsing {
         // One must also handle how to sample pick one out of multiplte heightmaps
         auto layerManager = owner().chunkedLodGlobe()->layerManager();
         
-        
-        auto heightMapProviders = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
+        auto heightMapProviders =
+            layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
        
-        
+        // The raster of a height map is the first one. We assume that the height map is
+        // a single raster image. If it is not we will just use the first raster
+        // (that is channel 0).
         size_t HEIGHT_CHANNEL = 0;
-        const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
-        std::vector<ChunkTile> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
+        const LayerGroup& heightmaps =
+            layerManager->layerGroup(LayerManager::HeightLayers);
+        std::vector<ChunkTile> tiles =
+            TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
         for (auto tile : tiles) {
             bool goodTile = tile.tile.status == Tile::Status::OK;
@@ -119,8 +121,10 @@ namespace globebrowsing {
 
                 if (!boundingHeights.available) {
                     if (preprocessData->hasMissingData[HEIGHT_CHANNEL]) {
-                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
-                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                        boundingHeights.min = std::min(
+                            DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
+                        boundingHeights.max = std::max(
+                            DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
                     }
                     else {
                         boundingHeights.min = preprocessData->minValues[HEIGHT_CHANNEL];
@@ -129,8 +133,10 @@ namespace globebrowsing {
                     boundingHeights.available = true;
                 }
                 else {
-                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
-                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                    boundingHeights.min = std::min(
+                        boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
+                    boundingHeights.max = std::max(
+                        boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
                 }
                 lastHadMissingData = preprocessData->hasMissingData[HEIGHT_CHANNEL];
             }

@@ -33,7 +33,6 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/chunk/culling.h>
 
-
 namespace {
     const std::string _loggerCat = "ChunkNode";
 }
@@ -66,12 +65,7 @@ bool ChunkNode::isLeaf() const {
     return _children[0] == nullptr;
 }
 
-
-// Returns true or false wether this node can be merge or not
 bool ChunkNode::updateChunkTree(const RenderData& data) {
-    //Geodetic2 center = _chunk.surfacePatch.center();
-    //LDEBUG("x: " << patch.x << " y: " << patch.y << " level: " << patch.level << "  lat: " << center.lat << " lon: " << center.lon);
-
     if (isLeaf()) {
         Chunk::Status status = _chunk.update(data);
         if (status == Chunk::Status::WANT_SPLIT) {
@@ -127,7 +121,8 @@ void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) con
     }
 }
 
-void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const {
+void ChunkNode::reverseBreadthFirst(
+    const std::function<void(const ChunkNode&)>& f) const {
     std::stack<const ChunkNode*> S;
     std::queue<const ChunkNode*> Q;
 
@@ -175,17 +170,7 @@ const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
     return *node;
 }
 
-ChunkNode& ChunkNode::find(const Geodetic2& location) {
-    ChunkNode* node = this;
-    CHUNK_NODE_FIND(node, location);
-    return *node;
-}
-
 const ChunkNode& ChunkNode::getChild(Quad quad) const {
-    return *_children[quad];
-}
-
-ChunkNode& ChunkNode::getChild(Quad quad) {
     return *_children[quad];
 }
 
@@ -193,7 +178,7 @@ void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < 4; i++) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
-            _children[i] = std::unique_ptr<ChunkNode>(new ChunkNode(chunk, this));
+            _children[i] = std::make_unique<ChunkNode>(chunk, this);
         }
     }
 
@@ -214,7 +199,6 @@ void ChunkNode::merge() {
     
     ghoul_assert(isLeaf(), "ChunkNode must be leaf after merge");
 }
-
 
 const Chunk& ChunkNode::getChunk() const {
     return _chunk;

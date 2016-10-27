@@ -47,12 +47,29 @@ namespace globebrowsing {
     class ChunkCuller {
     public:
         virtual void update() { }
+
+        /**
+         * Determine if the Chunk is cullable. That is return true if removing the
+         * Chunk 'culling it' will not have any result on the final rendering. Culling
+         * it will make the rendering faster.
+        */
         virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
     };
 
+    /**
+     * Culls all chunks that are completely outside the view frustum.
+     *
+     * The frustum culling uses a 2D axis aligned bounding box for the Chunk in
+     * screen space. This is calculated from a bounding polyhedron bounding the
+     * Chunk. Hence the culling will not be 'perfect' but fast and good enough for
+     * culling chunks outside the frustum with some margin.
+    */
     class FrustumCuller : public ChunkCuller {
     public:
-
+        /**
+         * \param viewFrustum is the view space in screen space. Hence it is an axis
+         * aligned bounding box and not a real frustum.
+        */
         FrustumCuller(const AABB3 viewFrustum);
         ~FrustumCuller();
 
@@ -60,15 +77,14 @@ namespace globebrowsing {
 
     private:
         const AABB3 _viewFrustum;
-
     };
 
-    //In the current implementation of the horizon culling and the distance to the
-    //camera, the closer the ellipsoid is to a
-    //sphere, the better this will make the splitting. Using the minimum radius to
-    //be safe. This means that if the ellipsoid has high difference between radii,
-    //splitting might accur even though it is not needed.
-
+    /**
+     * In this implementation of the horizon culling, the closer the ellipsoid is to a
+     * sphere, the better this will make the culling. Using the minimum radius to
+     * be safe. This means that if the ellipsoid has high difference between radii,
+     * splitting might accur even though it may not be needed.
+    */
     class HorizonCuller : public ChunkCuller {
     public:
         HorizonCuller();

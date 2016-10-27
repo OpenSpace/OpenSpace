@@ -42,9 +42,12 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
     
-    int EvaluateChunkLevelByDistance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        // Calculations are done in the reference frame of the globe. Hence, the camera
-        // position needs to be transformed with the inverse model matrix
+    int EvaluateChunkLevelByDistance::getDesiredLevel(
+        const Chunk& chunk,
+        const RenderData& data) const {
+        // Calculations are done in the reference frame of the globe
+        // (model space). Hence, the camera position needs to be transformed
+        // with the inverse model matrix
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
         const RenderableGlobe& globe = chunk.owner();
         const Ellipsoid& ellipsoid = globe.ellipsoid();
@@ -69,21 +72,26 @@ namespace globebrowsing {
         Scalar distanceToPatch = glm::length(cameraToChunk);
         Scalar distance = distanceToPatch;
 
-        Scalar scaleFactor = globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
+        Scalar scaleFactor =
+            globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
         Scalar projectedScaleFactor = scaleFactor / distance;
         int desiredLevel = ceil(log2(projectedScaleFactor));
         return desiredLevel;
     }
 
-    int EvaluateChunkLevelByProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
-        // Calculations are done in the reference frame of the globe. Hence, the camera
-        // position needs to be transformed with the inverse model matrix
+    int EvaluateChunkLevelByProjectedArea::getDesiredLevel(
+        const Chunk& chunk,
+        const RenderData& data) const {
+        // Calculations are done in the reference frame of the globe
+        // (model space). Hence, the camera position needs to be transformed
+        // with the inverse model matrix
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
 
         const RenderableGlobe& globe = chunk.owner();
         const Ellipsoid& ellipsoid = globe.ellipsoid();
         glm::dvec4 cameraPositionModelSpace = glm::dvec4(data.camera.positionVec3(), 1);
-        Vec3 cameraPosition = glm::dvec3(inverseModelTransform * cameraPositionModelSpace);
+        Vec3 cameraPosition =
+            glm::dvec3(inverseModelTransform * cameraPositionModelSpace);
         Vec3 cameraToEllipsoidCenter = -cameraPosition;
 
         Geodetic2 cameraGeodeticPos = ellipsoid.cartesianToGeodetic2(cameraPosition);       
@@ -95,8 +103,8 @@ namespace globebrowsing {
         // full patch is very curved (e.g. stretches from latitude 0 to 90 deg).
         
         const Geodetic2 center = chunk.surfacePatch().center();
-        const Geodetic2 closestCorner = chunk.surfacePatch().closestCorner(cameraGeodeticPos);
-
+        const Geodetic2 closestCorner =
+            chunk.surfacePatch().closestCorner(cameraGeodeticPos);
 
         //  Camera
         //  |
@@ -112,8 +120,6 @@ namespace globebrowsing {
         //    |      center     |
         //    |                 |
         //    +-----------------+  <-- south east corner
-
-
         
         Chunk::BoundingHeights heights = chunk.getBoundingHeights();
         const Geodetic3 c = { center, heights.min };
@@ -154,32 +160,37 @@ namespace globebrowsing {
         //
 
         // If the geodetic patch is small (i.e. has small width), that means the patch in
-        // cartesian space will be almost flat, and in turn, the triangle ABC will roughly 
+        // cartesian space will be almost flat, and in turn, the triangle ABC will roughly
         // correspond to 1/8 of the full area
         const Vec3 AB = B - A;
         const Vec3 AC = C - A;
         double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
         double projectedChunkAreaApprox = 8 * areaABC;
 
-        double scaledArea = globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
+        double scaledArea =
+            globe.generalProperties().lodScaleFactor * projectedChunkAreaApprox;
         return chunk.tileIndex().level + round(scaledArea - 1);
     }
 
-    int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
+    int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(
+        const Chunk& chunk,
+        const RenderData& data) const {
         auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
-        auto heightLayers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
+        auto heightLayers =
+            layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
         int currLevel = chunk.tileIndex().level;
         
         for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
             for (auto& layer : layerManager->layerGroup(i).activeLayers()) {
-                Tile::Status tileStatus = layer->tileProvider()->getTileStatus(chunk.tileIndex());
+                Tile::Status tileStatus =
+                    layer->tileProvider()->getTileStatus(chunk.tileIndex());
                 if (tileStatus == Tile::Status::OK) {
                     return UNKNOWN_DESIRED_LEVEL;
                 }
             }
         }
 
-        return currLevel - 1;;
+        return currLevel - 1;
     }
 } // namespace globebrowsing
 } // namespace openspace

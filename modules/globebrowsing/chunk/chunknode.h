@@ -37,8 +37,6 @@
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
-
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -49,32 +47,42 @@ public:
     ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
     ~ChunkNode();
 
-
+    /**
+     * Recursively split the ChunkNode.
+     *
+     * \param depth defines how deep the recursion should go. If depth == 1 (default),
+     * the ChunkNode will only split once.
+    */
     void split(int depth = 1);
+
+    /**
+     * Deletes all children of the ChunkNode recursively.
+    */
     void merge();
 
     bool isRoot() const;
     bool isLeaf() const;
 
-    void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
-    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void depthFirst(            const std::function<void(const ChunkNode&)>& f) const;
+    void breadthFirst(          const std::function<void(const ChunkNode&)>& f) const;
+    void reverseBreadthFirst(   const std::function<void(const ChunkNode&)>& f) const;
 
     const ChunkNode& find(const Geodetic2& location) const;
-    ChunkNode& find(const Geodetic2& location);
-    
     const ChunkNode& getChild(Quad quad) const;
-    ChunkNode& getChild(Quad quad);
-
     const Chunk& getChunk() const;
 
+    /**
+     * Updates all children recursively. If this ChunkNode wants to split it will,
+     * otherwise check if the children wants to merge. If all children wants to merge
+     * and the Status of this Chunk is not Status::WANT_SPLIT it will merge.
+     *
+     * \returns true if the ChunkNode can merge and false if it can not merge.
+    */
     bool updateChunkTree(const RenderData& data);
 
     static int chunkNodeCount;
 
-
-private:
-    
+private:    
     ChunkNode* _parent;
     std::unique_ptr<ChunkNode> _children[4];    
 
@@ -83,7 +91,5 @@ private:
 
 } // namespace globebrowsing
 } // namespace openspace
-
-
 
 #endif // __QUADTREE_H__

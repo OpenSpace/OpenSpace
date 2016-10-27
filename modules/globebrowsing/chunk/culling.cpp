@@ -22,10 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
-
-
-
 #include <modules/globebrowsing/chunk/culling.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/chunk/chunk.h>
@@ -45,7 +41,7 @@ namespace openspace {
 namespace globebrowsing {
 
     //////////////////////////////////////////////////////////////////////////////////////
-    //                            FRUSTUM CULLER                                            //
+    //                            FRUSTUM CULLER                                        //
     //////////////////////////////////////////////////////////////////////////////////////
     FrustumCuller::FrustumCuller(const AABB3 viewFrustum)
     : _viewFrustum(viewFrustum){
@@ -65,7 +61,6 @@ namespace globebrowsing {
 
         const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
         
-
         // Create a bounding box that fits the patch corners
         AABB3 bounds; // in screen space
         std::vector<vec4> clippingSpaceCorners(8);
@@ -73,16 +68,16 @@ namespace globebrowsing {
             dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
             clippingSpaceCorners[i] = cornerClippingSpace;
 
-            dvec3 cornerScreenSpace = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+            dvec3 cornerScreenSpace =
+                (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
             bounds.expand(cornerScreenSpace);
         }
         
         return !_viewFrustum.intersects(bounds);
     }
 
-
     //////////////////////////////////////////////////////////////////////////////////////
-    //                            HORIZON CULLER                                            //
+    //                            HORIZON CULLER                                        //
     //////////////////////////////////////////////////////////////////////////////////////
     HorizonCuller::HorizonCuller() {
 
@@ -93,8 +88,6 @@ namespace globebrowsing {
     }
 
     bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
-        //return !isVisible(data, chunk.surfacePatch(), chunk.owner()->ellipsoid(), chunk.owner()->chunkHeight);
-        
         // Calculations are done in the reference frame of the globe. Hence, the camera
         // position needs to be transformed with the inverse model matrix
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
@@ -147,7 +140,8 @@ namespace globebrowsing {
         Scalar minimumGlobeRadius)
     {
         Scalar distanceToHorizon =
-            sqrt(pow(length(cameraPosition - globePosition), 2) - pow(minimumGlobeRadius, 2));
+            sqrt(pow(length(cameraPosition - globePosition), 2) -
+            pow(minimumGlobeRadius, 2));
         Scalar minimumAllowedDistanceToObjectFromHorizon = sqrt(
             pow(length(objectPosition - globePosition), 2) -
             pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
