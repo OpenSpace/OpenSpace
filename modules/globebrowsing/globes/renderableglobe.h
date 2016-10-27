@@ -49,16 +49,18 @@ namespace globebrowsing {
 class ChunkedLodGlobe;
 class LayerManager;
 
-
 /**
- A <code>RenderableGlobe</code> is a globe modeled as an ellipsoid using a chunked LOD
- algorithm for rendering.
+ * A <code>RenderableGlobe</code> is a globe modeled as an ellipsoid using a chunked LOD
+ * algorithm for rendering.
+
+ * The renderable uses a <code>DistanceSwitch</code> to determine if the renderable
+ * should be rendered. 
 */
 class RenderableGlobe : public Renderable {
 public:
     /**
-     These properties are specific for <code>ChunkedLodGlobe</code> and separated from
-     the general properties of <code>RenderableGlobe</code>.
+     * These properties are specific for <code>ChunkedLodGlobe</code> and separated from
+     * the general properties of <code>RenderableGlobe</code>.
     */
     struct DebugProperties {
         properties::BoolProperty saveOrThrowCamera;
@@ -110,11 +112,8 @@ public:
     void setSaveCamera(std::shared_ptr<Camera> camera);    
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
-    // <code>ChunkedLodGlobe</code> does not have to be rendered qt far distances.
-    // Currently we only have the <code>ChunkedLodGlobe</code> and a simple globe rendered
-    // as a point.
+    // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
-    //std::shared_ptr<PointGlobe> _pointGlobe;
 
     Ellipsoid _ellipsoid;
     std::shared_ptr<LayerManager> _layerManager;

@@ -62,11 +62,48 @@ namespace globebrowsing {
         void render(const RenderData& data) override;
         void update(const UpdateData& data) override;
 
+        /**
+         * Traverse the chunk tree and find the highest level chunk node.
+         *
+         * \param location is given in geodetic coordinates and must be in the range
+         * latitude [-90. 90] and longitude [-180, 180]. In other words, it must be a
+         * position defined on the globe in georeferenced coordinates.
+        */
         const ChunkNode& findChunkNode(const Geodetic2 location) const;
-        ChunkNode& findChunkNode(const Geodetic2 location);
 
+        /**
+         * Test if a specific chunk can saefely be culled without affecting the rendered
+         * image.
+         *
+         * Goes through all available <code>ChunkCuller</code>s and check if any of them
+         * allows culling of the <code>Chunk</code>s in question.
+        */
         bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
+
+        /**
+         * Gets the desired level which can be used to determine if a chunk should split
+         * or merge.
+         *
+         * Using <code>ChunkLevelEvaluator</code>s, the desired level can be higher or
+         * lower than the current level of the <code>Chunks</code>s
+         * <code>TileIndex</code>. If the desired level is higher than that of the
+         * <code>Chunk</code>, it wants to split. If it is lower, it wants to merge with
+         * its siblings. 
+        */
         int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
+        
+        /**
+         * Calculates the height from the surface of the reference ellipsoid to the
+         * heigh mapped surface.
+         *
+         * The height can be negative if the height map contains negative values.
+         *
+         * \param <code>position</code> is the position of a point that gets geodetically
+         * projected on the reference ellipsoid. <code>position</code> must be in
+         * cartesian model space.
+         * \returns the height from the reference ellipsoid to the globe surface.
+        */
+        float getHeight(glm::dvec3 position) const;
 
         const int minSplitDepth;
         const int maxSplitDepth;

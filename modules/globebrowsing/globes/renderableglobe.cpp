@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
+// globe browsing
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
@@ -54,7 +54,6 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-    
     
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : _generalProperties({
@@ -115,17 +114,13 @@ namespace globebrowsing {
         _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
             *this, patchSegments, _layerManager);
         
-        //_pointGlobe = std::make_shared<PointGlobe>(*this);
-
-        
         // This distance will be enough to render the globe as one pixel if the field of
         // view is 'fov' radians and the screen resolution is 'res' pixels.
         double fov = 2 * M_PI / 6; // 60 degrees
         int res = 2880;
         double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
-        //_distanceSwitch.addSwitchValue(_pointGlobe, 1e12);
-
+        
         _debugPropertyOwner.setName("Debug");
         _texturePropertyOwner.setName("Textures");
 
@@ -143,7 +138,8 @@ namespace globebrowsing {
         _debugPropertyOwner.addProperty(_debugProperties.showHeightIntensities);
         _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
         _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
-        _debugPropertyOwner.addProperty(_debugProperties.levelByProjectedAreaElseDistance);
+        _debugPropertyOwner.addProperty(
+            _debugProperties.levelByProjectedAreaElseDistance);
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
         _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
         
@@ -219,94 +215,12 @@ namespace globebrowsing {
     }
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
-        float height = 0;
-        
-        // Get the uv coordinates to sample from
-        Geodetic2 geodeticPosition = _ellipsoid.cartesianToGeodetic2(position);
-        int chunkLevel = _chunkedLodGlobe->findChunkNode(
-            geodeticPosition).getChunk().tileIndex().level;
-        
-        TileIndex tileIndex = TileIndex(geodeticPosition, chunkLevel);
-        GeodeticPatch patch = GeodeticPatch(tileIndex);
-
-        Geodetic2 geoDiffPatch =
-            patch.getCorner(Quad::NORTH_EAST) -
-            patch.getCorner(Quad::SOUTH_WEST);
-        Geodetic2 geoDiffPoint = geodeticPosition - patch.getCorner(Quad::SOUTH_WEST);
-        glm::vec2 patchUV = glm::vec2(
-            geoDiffPoint.lon / geoDiffPatch.lon, geoDiffPoint.lat / geoDiffPatch.lat);
-
-        // Get the tile providers for the height maps
-        const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
-        
-        for (const auto& layer : heightMapLayers) {
-            TileProvider* tileProvider = layer->tileProvider();
-            // Transform the uv coordinates to the current tile texture
-            ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
-            const auto& tile = chunkTile.tile;
-            const auto& uvTransform = chunkTile.uvTransform;
-            const auto& depthTransform = tileProvider->depthTransform();
-            if (tile.status != Tile::Status::OK) {
-                return 0;
-            }
-
-            glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
-                uvTransform,
-                patchUV,
-                glm::uvec2(tile.texture->dimensions()));
-
-            // Sample and do linear interpolation
-            // (could possibly be moved as a function in ghoul texture)
-            // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
-            // in range [0,1] and uses the set interpolation method and clamping.
-
-            glm::uvec3 dimensions = tile.texture->dimensions();
-            
-            glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
-            glm::uvec2 samplePos00 = samplePos;
-            samplePos00 = glm::clamp(
-                samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
-            glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
-
-            glm::uvec2 samplePos10 = glm::min(
-                samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
-            glm::uvec2 samplePos01 = glm::min(
-                samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
-            glm::uvec2 samplePos11 = glm::min(
-                samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
-
-            float sample00 = tile.texture->texelAsFloat(samplePos00).x;
-            float sample10 = tile.texture->texelAsFloat(samplePos10).x;
-            float sample01 = tile.texture->texelAsFloat(samplePos01).x;
-            float sample11 = tile.texture->texelAsFloat(samplePos11).x;
-
-            // In case the texture has NaN or no data values don't use this height map.
-            bool anySampleIsNaN =
-                isnan(sample00) ||
-                isnan(sample01) ||
-                isnan(sample10) ||
-                isnan(sample11);
-
-            bool anySampleIsNoData =
-                sample00 == tileProvider->noDataValueAsFloat() ||
-                sample01 == tileProvider->noDataValueAsFloat() ||
-                sample10 == tileProvider->noDataValueAsFloat() ||
-                sample11 == tileProvider->noDataValueAsFloat();
-        
-            if (anySampleIsNaN || anySampleIsNoData) {
-                continue;
-            }
-
-            float sample0 = sample00 * (1.0 - samplePosFract.x) + sample10 * samplePosFract.x;
-            float sample1 = sample01 * (1.0 - samplePosFract.x) + sample11 * samplePosFract.x;
-
-            float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
-
-            // Perform depth transform to get the value in meters
-            height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+        if (_chunkedLodGlobe) {
+            return _chunkedLodGlobe->getHeight(position);
         }
-        // Return the result
-        return height;
+        else {
+            return 0;
+        }
     }
 
     std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
