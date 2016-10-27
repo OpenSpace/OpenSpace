@@ -39,7 +39,6 @@
 
 #include <ghoul/opengl/textureunit.h>
 
-
 namespace ghoul {
 namespace opengl {
     class ProgramObject;
@@ -87,8 +86,8 @@ namespace globebrowsing {
 
 
         ProgramObject* getActivatedProgramWithTileData(
-            LayerShaderManager* layeredTextureShaderProvider,
-            GPULayerManager * gpuLayerManager,
+            std::shared_ptr<LayerShaderManager> layeredShaderManager,
+            std::shared_ptr<GPULayerManager> gpuLayerManager,
             const Chunk& chunk);
 
         // shared pointer to a grid which can be the same for all rendered chunks.

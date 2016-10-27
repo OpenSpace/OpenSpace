@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
 
-
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/openspaceengine.h> 
@@ -80,7 +79,7 @@ namespace globebrowsing {
     }
 
     void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
-        // A little arbitrary but it works
+        // A little arbitrary with 10 but it works
         if (chunk.tileIndex().level < 10) {
             renderChunkGlobally(chunk, data);
         }
@@ -94,8 +93,8 @@ namespace globebrowsing {
     }
 
     ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
-        LayerShaderManager* layeredTextureShaderProvider,
-        GPULayerManager * gpuLayerManager,
+        std::shared_ptr<LayerShaderManager> layeredShaderManager,
+        std::shared_ptr<GPULayerManager> gpuLayerManager,
         const Chunk& chunk)
     {
         const TileIndex& tileIndex = chunk.tileIndex();
@@ -115,22 +114,27 @@ namespace globebrowsing {
         const auto& debugProps = chunk.owner().debugProperties();
         auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
         
-        pairs.push_back(std::make_pair("useAtmosphere", std::to_string(generalProps.atmosphereEnabled)));
-        pairs.push_back(std::make_pair("performShading", std::to_string(generalProps.performShading)));
-        pairs.push_back(std::make_pair("showChunkEdges", std::to_string(debugProps.showChunkEdges)));
-        pairs.push_back(std::make_pair("showHeightResolution", std::to_string(debugProps.showHeightResolution)));
-        pairs.push_back(std::make_pair("showHeightIntensities", std::to_string(debugProps.showHeightIntensities)));
-        pairs.push_back(std::make_pair("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT)));
+        pairs.push_back(std::make_pair("useAtmosphere",
+            std::to_string(generalProps.atmosphereEnabled)));
+        pairs.push_back(std::make_pair("performShading",
+            std::to_string(generalProps.performShading)));
+        pairs.push_back(std::make_pair("showChunkEdges",
+            std::to_string(debugProps.showChunkEdges)));
+        pairs.push_back(std::make_pair("showHeightResolution",
+            std::to_string(debugProps.showHeightResolution)));
+        pairs.push_back(std::make_pair("showHeightIntensities",
+            std::to_string(debugProps.showHeightIntensities)));
+        pairs.push_back(std::make_pair("defaultHeight",
+            std::to_string(Chunk::DEFAULT_HEIGHT)));
 
         // Now the shader program can be accessed
         ProgramObject* programObject =
-            layeredTextureShaderProvider->programObject(
+            layeredShaderManager->programObject(
                 layeredTexturePreprocessingData);
         
-        if (layeredTextureShaderProvider->updatedOnLastCall()) {
+        if (layeredShaderManager->updatedOnLastCall()) {
             gpuLayerManager->updateUniformLocations(programObject, *_layerManager);
         }
-        
 
         // Activate the shader program
         programObject->activate();
@@ -138,11 +142,16 @@ namespace globebrowsing {
         gpuLayerManager->setValue(programObject, *_layerManager, tileIndex);
 
         // The length of the skirts is proportional to its size
-        programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
+        // TODO: Skirt length should probably be proportional to the size reffered to by
+        // the chunk's most high resolution height map.
+        programObject->setUniform("skirtLength",
+            min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000),
+                8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
         if (chunk.owner().debugProperties().showHeightResolution) {
-            programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
+            programObject->setUniform("vertexResolution",
+                glm::vec2(_grid->xSegments(), _grid->ySegments()));
         }       
         
         return programObject;
@@ -151,8 +160,8 @@ namespace globebrowsing {
     void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
 
         ProgramObject* programObject = getActivatedProgramWithTileData(
-            _globalLayerShaderManager.get(),
-            _globalGpuLayerManager.get(),
+            _globalLayerShaderManager,
+            _globalGpuLayerManager,
             chunk);
         if (programObject == nullptr) {
             return;
@@ -161,12 +170,13 @@ namespace globebrowsing {
         const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
 
         if (_layerManager->hasAnyBlendingLayersEnabled()) {
-            // Calculations are done in the reference frame of the globe. Hence, the camera
-            // position needs to be transformed with the inverse model matrix
+            // Calculations are done in the reference frame of the globe. Hence, the
+            // camera position needs to be transformed with the inverse model matrix
             glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
-            glm::dvec3 cameraPosition =
-                glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
+            glm::dvec3 cameraPosition = glm::dvec3(
+                inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
+            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
+                ellipsoid.minimumRadius();
             programObject->setUniform("cameraPosition", vec3(cameraPosition));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.tileIndex().level);
@@ -179,32 +189,37 @@ namespace globebrowsing {
         dmat4 modelTransform = chunk.owner().modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewTransform = mat4(viewTransform * modelTransform);
-        mat4 modelViewProjectionTransform = data.camera.projectionMatrix() * modelViewTransform;
+        mat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
+            modelViewTransform;
 
         // Upload the uniform variables
-        programObject->setUniform("modelViewProjectionTransform", modelViewProjectionTransform);
+        programObject->setUniform(
+            "modelViewProjectionTransform", modelViewProjectionTransform);
         programObject->setUniform("minLatLon", vec2(swCorner.toLonLatVec2()));
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_layerManager->layerGroup(LayerManager::NightLayers).activeLayers().size() > 0 ||
-            _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(
+                LayerManager::NightLayers).activeLayers().size() > 0 ||
+            _layerManager->layerGroup(
+                LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading) {
+            // This code temporary until real light sources can be implemented.
             glm::vec3 directionToSunWorldSpace =
                 glm::normalize(-data.modelTransform.translation);
             glm::vec3 directionToSunCameraSpace =
                 (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
             programObject->setUniform("modelViewTransform", modelViewTransform);
-            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
+            programObject->setUniform(
+                "lightDirectionCameraSpace", -directionToSunCameraSpace);
         }
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-        
 
         // render
         _grid->geometry().drawUsingActiveProgram();
@@ -216,13 +231,11 @@ namespace globebrowsing {
         
     }
 
-
-
     void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
         
         ProgramObject* programObject = getActivatedProgramWithTileData(
-            _localLayerShaderManager.get(),
-            _localGpuLayerManager.get(),
+            _localLayerShaderManager,
+            _localGpuLayerManager,
             chunk);
         if (programObject == nullptr) {
             return;
@@ -234,7 +247,8 @@ namespace globebrowsing {
 
 
         if (_layerManager->hasAnyBlendingLayersEnabled()) {
-            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor * chunk.owner().ellipsoid().minimumRadius();
+            float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
+                chunk.owner().ellipsoid().minimumRadius();
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.tileIndex().level);
         }
@@ -250,20 +264,27 @@ namespace globebrowsing {
             Quad q = (Quad)i;
             Geodetic2 corner = chunk.surfacePatch().getCorner(q);
             Vec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
-            Vec3 cornerCameraSpace = Vec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
+            Vec3 cornerCameraSpace =
+                Vec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
             cornersCameraSpace[i] = cornerCameraSpace;
             programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
         }
 
+        // TODO: Patch normal can be calculated for all corners and then linearly
+        // interpolated on the GPU to avoid cracks for high altitudes.
         vec3 patchNormalCameraSpace = normalize(
-            cross(cornersCameraSpace[Quad::SOUTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST],
-                cornersCameraSpace[Quad::NORTH_EAST] - cornersCameraSpace[Quad::SOUTH_WEST]));
+            cross(cornersCameraSpace[Quad::SOUTH_EAST] -
+                    cornersCameraSpace[Quad::SOUTH_WEST],
+                cornersCameraSpace[Quad::NORTH_EAST] -
+                    cornersCameraSpace[Quad::SOUTH_WEST]));
 
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
-        if (_layerManager->layerGroup(LayerManager::NightLayers).activeLayers().size() > 0 ||
-            _layerManager->layerGroup(LayerManager::WaterMasks).activeLayers().size() > 0 ||
+        if (_layerManager->layerGroup(
+                LayerManager::NightLayers).activeLayers().size() > 0 ||
+            _layerManager->layerGroup(
+                LayerManager::WaterMasks).activeLayers().size() > 0 ||
             chunk.owner().generalProperties().atmosphereEnabled ||
             chunk.owner().generalProperties().performShading)
         {
@@ -272,9 +293,9 @@ namespace globebrowsing {
             glm::vec3 directionToSunCameraSpace =
                 (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
             data.modelTransform.translation;
-            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
+            programObject->setUniform(
+                "lightDirectionCameraSpace", -directionToSunCameraSpace);
         }
-
 
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
@@ -288,8 +309,6 @@ namespace globebrowsing {
 
         // disable shader
         programObject->deactivate();
-        
-        
     }
 } // namespace globebrowsing
 } // namespace openspace

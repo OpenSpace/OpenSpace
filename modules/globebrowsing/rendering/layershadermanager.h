@@ -42,7 +42,7 @@ namespace globebrowsing {
     class LayerManager;
 
     /**
-    * Settings per texture category that contains shader preprocessing information.
+    * Settings per texture group that contains shader preprocessing information.
     */
     struct LayerGroupPreprocessingData {
         int lastLayerIdx;
@@ -56,12 +56,13 @@ namespace globebrowsing {
     *
     * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
     * be determined wheter or not a <code>LayerShaderManager</code> needs to
-    * recompile its shader program. For each <code>TextureCategory</code> there is
+    * recompile its shader program. For each <code>TextureGroup</code> there is
     * information about how many layers it has and whether or not to blend the texture
     * levels.
     */
     struct LayerShaderPreprocessingData {
-        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS> layeredTextureInfo;
+        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
+            layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayerShaderPreprocessingData& other) const;
     };
@@ -102,7 +103,6 @@ namespace globebrowsing {
 
         bool _updatedOnLastCall;
     };
-
 
 } // namespace globebrowsing
 } // namespace openspace

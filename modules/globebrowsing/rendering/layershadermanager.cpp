@@ -39,15 +39,14 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-    bool LayerGroupPreprocessingData::operator==(const LayerGroupPreprocessingData& other) const {
+    bool LayerGroupPreprocessingData::operator==(
+        const LayerGroupPreprocessingData& other) const {
         return lastLayerIdx == other.lastLayerIdx &&
             layerBlendingEnabled == other.layerBlendingEnabled;
     }
 
     bool LayerShaderPreprocessingData::operator==(
-        const LayerShaderPreprocessingData& other) const
-    {
-        
+        const LayerShaderPreprocessingData& other) const {
         if (layeredTextureInfo.size() != other.layeredTextureInfo.size() ||
             keyValuePairs.size() != other.keyValuePairs.size()) {
             return false;
@@ -71,10 +70,7 @@ namespace globebrowsing {
         : _shaderName(shaderName)
         , _vsPath(vsPath)
         , _fsPath(fsPath)
-        , _updatedOnLastCall(false)
-    {
-
-    }
+        , _updatedOnLastCall(false) { }
     
     LayerShaderManager::~LayerShaderManager() {
         if (_programObject) {
@@ -85,8 +81,7 @@ namespace globebrowsing {
     }
 
     ProgramObject* LayerShaderManager::programObject(
-        LayerShaderPreprocessingData preprocessingData)
-    {
+        LayerShaderPreprocessingData preprocessingData) {
         _updatedOnLastCall = false;
         if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
             recompileShaderProgram(preprocessingData);
@@ -96,22 +91,23 @@ namespace globebrowsing {
     }
 
     void LayerShaderManager::recompileShaderProgram(
-        LayerShaderPreprocessingData preprocessingData)
-    {
+        LayerShaderPreprocessingData preprocessingData) {
         _preprocessingData = preprocessingData;
         ghoul::Dictionary shaderDictionary;
-        
 
-        // Different texture types can be height maps or color texture for example.
+        // Different layer types can be height layers or color layers for example.
         // These are used differently within the shaders.
         auto textureTypes = _preprocessingData.layeredTextureInfo;
         for (size_t i = 0; i < textureTypes.size(); i++) {
             // lastLayerIndex must be at least 0 for the shader to compile,
             // the layer type is inactivated by setting use to false
             std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
-            shaderDictionary.setValue("lastLayerIndex" + groupName, glm::max(textureTypes[i].lastLayerIdx, 0));
-            shaderDictionary.setValue("use" + groupName, textureTypes[i].lastLayerIdx >= 0);
-            shaderDictionary.setValue("blend" + groupName, textureTypes[i].layerBlendingEnabled);
+            shaderDictionary.setValue(
+                "lastLayerIndex" + groupName, glm::max(textureTypes[i].lastLayerIdx, 0));
+            shaderDictionary.setValue(
+                "use" + groupName, textureTypes[i].lastLayerIdx >= 0);
+            shaderDictionary.setValue(
+                "blend" + groupName, textureTypes[i].layerBlendingEnabled);
         }
 
         // Other settings such as "useAtmosphere"

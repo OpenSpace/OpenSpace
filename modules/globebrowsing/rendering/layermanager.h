@@ -25,7 +25,6 @@
 #ifndef __LAYER_MANAGER_H__
 #define __LAYER_MANAGER_H__
 
-
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tileselector.h>
