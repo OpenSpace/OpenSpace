@@ -24,6 +24,7 @@
 
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -38,16 +39,61 @@ namespace {
     const std::string _loggerCat = "RenderableModelProjection";
     const std::string keySource = "Rotation.Source";
     const std::string keyDestination = "Rotation.Destination";
-    const std::string keyBody = "Body";
     const std::string keyGeometry = "Geometry";
+    const std::string keyProjection = "Projection";
     const std::string keyBoundingSphereRadius = "BoundingSphereRadius";
 
     const std::string keyTextureColor = "Textures.Color";
-    const std::string keyTextureProject = "Textures.Project";
-    const std::string keyTextureDefault = "Textures.Default";
+
+    const std::string _destination = "GALACTIC";
 }
 
 namespace openspace {
+
+Documentation RenderableModelProjection::Documentation() {
+    using namespace documentation;
+
+    return {
+        "Renderable Model Projection",
+        "newhorizons_renderable_modelprojection",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableModelProjection"),
+                "",
+                Optional::No
+            },
+            {
+                keyGeometry,
+                new ReferencingVerifier("base_geometry_model"),
+                "The geometry that is used for rendering this model.",
+                Optional::No
+            },
+            {
+                keyProjection,
+                new ReferencingVerifier("newhorizons_projectioncomponent"),
+                "Contains information about projecting onto this planet.",
+                Optional::No
+            },
+            {
+                keyTextureColor,
+                new StringVerifier,
+                "The base texture for the model that is shown before any projection "
+                "occurred.",
+                Optional::No
+            },
+            {
+                keyBoundingSphereRadius,
+                new DoubleVerifier,
+                "The radius of the bounding sphere of this object. This has to be a "
+                "radius that is larger than anything that is rendered by it. It has to "
+                "be at least as big as the convex hull of the object. The default value "
+                "is 10e9 meters.",
+                Optional::Yes
+            }
+        }
+    };
+}
 
 RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -59,44 +105,35 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableModelProjection"
+    );
+
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "Name was not passed to RenderableModelProjection");
 
-    ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(keyGeometry, geometryDictionary);
-    if (success) {
-        using modelgeometry::ModelGeometry;
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = std::unique_ptr<ModelGeometry>(
-            ModelGeometry::createFromDictionary(geometryDictionary)
-        );
-    }
+    using ghoul::Dictionary;
+    Dictionary geometryDictionary = dictionary.value<Dictionary>(keyGeometry);
+    using modelgeometry::ModelGeometry;
+    geometryDictionary.setValue(SceneGraphNode::KeyName, name);
+    _geometry = std::unique_ptr<ModelGeometry>(
+        ModelGeometry::createFromDictionary(geometryDictionary)
+    );
 
-    std::string texturePath = "";
-    success = dictionary.getValue(keyTextureColor, texturePath);
-    if (success)
-        _colorTexturePath = absPath(texturePath);
+    _colorTexturePath = absPath(dictionary.value<std::string>(keyTextureColor));
         
-    success = dictionary.getValue(keyTextureDefault, texturePath);
-    if (success)
-        _defaultProjImage = absPath(texturePath);
-
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModelProjection::loadTextures, this));
 
-    dictionary.getValue(keySource, _source);
-    dictionary.getValue(keyDestination, _destination);
-    dictionary.getValue(keyBody, _target);
-
-
-    bool completeSuccess = true;
-    completeSuccess &= _projectionComponent.initializeProjectionSettings(dictionary);
-    
-    openspace::SpiceManager::ref().addFrame(_target, _source);
+    _projectionComponent.initialize(
+        dictionary.value<ghoul::Dictionary>(keyProjection)
+    );
     
     float boundingSphereRadius = 1.0e9;
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
@@ -104,9 +141,6 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);
-
-    success = _projectionComponent.initializeParser(dictionary);
-    ghoul_assert(success, "");
 }
 
 bool RenderableModelProjection::isReady() const {
@@ -139,14 +173,11 @@ bool RenderableModelProjection::initialize() {
 
 
     completeSuccess &= loadTextures();
-    completeSuccess &= _projectionComponent.initialize();
+    completeSuccess &= _projectionComponent.initializeGL();
 
     auto bs = getBoundingSphere();
     completeSuccess &= _geometry->initialize(this);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
-
-    completeSuccess &= !_source.empty();
-    completeSuccess &= !_destination.empty();
 
     return completeSuccess;
 }
@@ -246,18 +277,12 @@ void RenderableModelProjection::update(const UpdateData& data) {
         }
     }
         
-    // set spice-orientation in accordance to timestamp
-    if (!_source.empty()) {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(
-            _source, _destination, _time
-        );
-    }
-
-    double lt;
+    _stateMatrix = data.modelTransform.rotation;
+    
     glm::dvec3 p =
-        openspace::SpiceManager::ref().targetPosition(
-            "SUN", _target, "GALACTIC", {}, _time, lt
-    );
+        OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+        data.modelTransform.translation;
+
     _sunPosition = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
 }
 
@@ -308,7 +333,6 @@ void RenderableModelProjection::imageProjectGPU(
 
 void RenderableModelProjection::attitudeParameters(double time) {
     try {
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_source, _destination, time);
         _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
     }
     catch (const SpiceManager::SpiceException& e) {

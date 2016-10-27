@@ -139,7 +139,9 @@ std::vector<Documentation> BaseModule::documentations() const {
         SpiceRotation::Documentation(),
         StaticScale::Documentation(),
         StaticTranslation::Documentation(),
-        SpiceTranslation::Documentation()
+        SpiceTranslation::Documentation(),
+        modelgeometry::ModelGeometry::Documentation(),
+        planetgeometry::PlanetGeometry::Documentation()
     };
 }
 

@@ -26,10 +26,11 @@
 #define __PLANETGEOMETRY_H__
 
 #include <openspace/properties/propertyowner.h>
-#include <modules/base/rendering/renderableplanet.h>
-#include <ghoul/misc/dictionary.h>
+
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
+class Renderable;
 
 namespace planetgeometry {
 
@@ -42,6 +43,8 @@ public:
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     virtual void render() = 0;
+
+    static openspace::Documentation Documentation();
 
 protected:
     Renderable* _parent;

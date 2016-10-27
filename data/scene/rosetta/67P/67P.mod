@@ -17,22 +17,14 @@ return {
 
         Renderable = {
             Type = "RenderableModelProjection",
-            Body = "CHURYUMOV-GERASIMENKO",
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "obj/67P_rotated_5_130.obj",
                 Magnification = 0,
             }, 
             Textures = {
-                Type = "simple",
                 Color = "textures/gray.jpg",
                 -- Color = "textures/may9_map.jpg",
-                Project = "textures/defaultProj.png",
-                Default = "textures/defaultProj.png"
-            },
-            Rotation = {
-                Source = "67P/C-G_CK",
-                Destination = "GALACTIC"
             },
             Projection = {
                 Sequence   = "rosettaimages",
@@ -41,43 +33,45 @@ return {
                 Target     = "CHURYUMOV-GERASIMENKO",
                 Aberration = "NONE",
                 TextureMap = true,
-                ShadowMap = true
-            },
-            DataInputTranslation = {
+                ShadowMap = true,
+
+                DataInputTranslation = {
+                    Instrument = {
+                        NAVCAM = {
+                            DetectorType  = "Camera",
+                            Spice  = {"ROS_NAVCAM-A"},
+                        },
+                    },
+                    Target = { 
+                        Read  = {
+                            "TARGET_NAME",
+                            "INSTRUMENT_HOST_NAME",
+                            "INSTRUMENT_ID", 
+                            "START_TIME", 
+                            "STOP_TIME", 
+                        },
+                        Convert = {
+                            CHURYUMOV               = {"CHURYUMOV-GERASIMENKO"},
+                            ROSETTA                             = {"ROSETTA"              },
+                            --NAVCAM                                = {"NAVCAM"},
+                            ["ROSETTA-ORBITER"]                        = {"ROSETTA"              },
+                            CHURYUMOVGERASIMENKO11969R1           = {"CHURYUMOV-GERASIMENKO"},
+                            CHURYUMOVGERASIMENKO           = {"CHURYUMOV-GERASIMENKO"},
+                            ["CHURYUMOV-GERASIMENKO1(1969R1)"] = {"CHURYUMOV-GERASIMENKO"},
+                            --NAVIGATIONCAMERA                  = {"NAVCAM"               },
+                        },
+                    },
+                },
+
                 Instrument = {
-                    NAVCAM = {
-                        DetectorType  = "Camera",
-                        Spice  = {"ROS_NAVCAM-A"},
-                    },  
-                },                  
-                Target = { 
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID", 
-                        "START_TIME", 
-                        "STOP_TIME", 
-                    },
-                    Convert = {
-                        CHURYUMOV               = {"CHURYUMOV-GERASIMENKO"},
-                        ROSETTA                             = {"ROSETTA"              },
-                        --NAVCAM                                = {"NAVCAM"},
-                        ["ROSETTA-ORBITER"]                        = {"ROSETTA"              },
-                        CHURYUMOVGERASIMENKO11969R1           = {"CHURYUMOV-GERASIMENKO"},
-                        CHURYUMOVGERASIMENKO           = {"CHURYUMOV-GERASIMENKO"},
-                        ["CHURYUMOV-GERASIMENKO1(1969R1)"] = {"CHURYUMOV-GERASIMENKO"},
-                        --NAVIGATIONCAMERA                  = {"NAVCAM"               },
-                    },
+                    Name       = "ROS_NAVCAM-A",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 5.00,
+                    Aspect     = 1
                 },
             },
 
-            Instrument = {                
-                Name       = "ROS_NAVCAM-A",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 5.00,
-                Aspect     = 1
-            },
             BoundingSphereRadius = 5000.0
         },
         Transform = {

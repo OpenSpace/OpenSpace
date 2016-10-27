@@ -437,6 +437,9 @@ return {
             },
             PotentialTargets = {
                 "CHURYUMOV-GERASIMENKO"
+            },
+            FrameConversions = {
+                ["CHURYUMOV-GERASIMENKO"] = "67P/C-G_CK"
             }
         },
     },

@@ -137,6 +137,9 @@ return {
             },
             PotentialTargets = {
                 BENNU_BODY -- Bennu
+            },
+            FrameConversions = {
+                [BENNU_BODY] = "IAU_BENNU"
             }
         },
     },

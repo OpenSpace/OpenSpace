@@ -38,53 +38,54 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "JUPITER",
                 Aberration = "NONE",
-                AspectRatio = 2
-            },
-            DataInputTranslation = {
-                Instrument = {
-                    LORRI = {
-                        DetectorType  = "Camera",
-                        Spice = {"NH_LORRI"},
-                    },        
-                },                    
-                Target ={ 
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID", 
-                        "START_TIME", 
-                        "STOP_TIME", 
-                        "DETECTOR_TYPE",
-                        --"SEQUENCE_ID",
-                    },
-                    Convert = { 
-                        JRINGS      = {"IMAGE-PLANE" },
-                        J1IO        = {"IO"          },
-                        J2EUROPA    = {"EUROPA"      },
-                        J6HIMALIA   = {"IMAGE-PLANE" },
-                        J7ELARA     = {"IMAGE-PLANE" },
-                        CALIBRATION = {"CALIBRATION" },
-                        JUPITER     = {"JUPITER"     },
-                        CALLISTO    = {"CALLISTO"    },
-                        GANYMEDE    = {"GANYMEDE"    },
-                        EARTH       = {"EARTH"       },
-                        NEWHORIZONS = {"NEW HORIZONS"},
-                        CCD         = {"CAMERA"      },
-                        FRAMECCD    = {"SCANNER"     },
+                AspectRatio = 2,
+
+                DataInputTranslation = {
+                    Instrument = {
+                        LORRI = {
+                            DetectorType  = "Camera",
+                            Spice = {"NH_LORRI"},
+                        },        
+                    },                    
+                    Target ={ 
+                        Read  = {
+                            "TARGET_NAME",
+                            "INSTRUMENT_HOST_NAME",
+                            "INSTRUMENT_ID", 
+                            "START_TIME", 
+                            "STOP_TIME", 
+                            "DETECTOR_TYPE",
+                            --"SEQUENCE_ID",
+                        },
+                        Convert = { 
+                            JRINGS      = {"IMAGE-PLANE" },
+                            J1IO        = {"IO"          },
+                            J2EUROPA    = {"EUROPA"      },
+                            J6HIMALIA   = {"IMAGE-PLANE" },
+                            J7ELARA     = {"IMAGE-PLANE" },
+                            CALIBRATION = {"CALIBRATION" },
+                            JUPITER     = {"JUPITER"     },
+                            CALLISTO    = {"CALLISTO"    },
+                            GANYMEDE    = {"GANYMEDE"    },
+                            EARTH       = {"EARTH"       },
+                            NEWHORIZONS = {"NEW HORIZONS"},
+                            CCD         = {"CAMERA"      },
+                            FRAMECCD    = {"SCANNER"     },
+                        },
                     },
                 },
-            },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
-            },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                Instrument = {                
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             }
         },
         Transform = {
