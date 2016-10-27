@@ -35,8 +35,6 @@
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/geometry/aabb.h>
 
-
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -95,7 +93,6 @@ namespace globebrowsing {
         bool isCullable(const Vec3& cameraPosition, const Vec3& globePosition,
             const Vec3& objectPosition, Scalar objectBoundingSphereRadius,
             Scalar minimumGlobeRadius);
-
     };
 
 } // namespace globebrowsing
