@@ -46,6 +46,17 @@ return {
             },
         },
     },
+    {
+        Name = "SaturnRings",
+        Parent = "Saturn",
+        Renderable = {
+            Type = "RenderableRings",
+            Frame = "IAU_SATURN",
+            Texture = "textures/saturn_rings.png",
+            Size = { 0.140220, 9.0 }
+        },
+
+    },
     -- SaturnTrail module
     {   
         Name = "SaturnTrail",
