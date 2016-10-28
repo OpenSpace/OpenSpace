@@ -1,13 +1,11 @@
 OpenSpace ecliptic frames:
-Mercury-centric Solar Ecliptic (MERCURYSE) frame
 Saturn-centric Solar Ecliptic (SATURNSE) frame
 
 These frames are only defined as helper frames for OpenSpace.
  
  +X is parallel to the geometric planet-sun position vector. 
  
- +Y axis is the normalized component of the geometric planet-sun velocity 
- vector orthogonal to the frame's +X axis. 
+ -Y axis is the normalized component of the planet's orbital vector
  
  +Z axis is parallel to the cross product of the frame's +X axis 
  and the frame's +Y axis. 
