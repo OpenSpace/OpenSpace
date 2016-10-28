@@ -3,6 +3,14 @@ return {
     {
         Name = "SaturnBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "SATURN BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        },
     },
 
     -- Saturn module
@@ -29,12 +37,6 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "SATURN BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_SATURN",
@@ -60,7 +62,7 @@ return {
     -- SaturnTrail module
     {   
         Name = "SaturnTrail",
-        Parent = "SaturnBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "SATURN BARYCENTER",

@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/modelgeometry.h>
+
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -35,59 +37,70 @@ namespace {
     const int8_t CurrentCacheVersion = 3;
     const std::string keyType = "Type";
     const std::string keyName = "Name";
-    const std::string keySize = "Magnification";
 }
 
 namespace openspace {
 namespace modelgeometry {
 
+Documentation ModelGeometry::Documentation() {
+    using namespace documentation;
+    return {
+        "Model Geometry",
+        "base_geometry_model",
+        {
+            {
+                keyType,
+                new StringVerifier,
+                "The type of the Model Geometry that should be generated",
+                Optional::No
+            },
+            {
+                keyGeomModelFile,
+                new StringVerifier,
+                "The file that should be loaded in this ModelGeometry. The file can "
+                "contain filesystem tokens or can be specified relatively to the "
+                "location of the .mod file.",
+                Optional::No
+            }
+        }
+    };
+}
+
+
 ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    std::string geometryType;
-    const bool success = dictionary.getValue(
-        keyType, geometryType);
-    if (!success) {
-        LERROR("ModelGeometry did not contain a correct value of the key '"
-            << keyType << "'");
-        return nullptr;
+    if (!dictionary.hasKeyAndValue<std::string>(keyType)) {
+        throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
-    ghoul::TemplateFactory<ModelGeometry>* factory
-        = FactoryManager::ref().factory<ModelGeometry>();
+
+    std::string geometryType = dictionary.value<std::string>(keyType);
+    auto factory = FactoryManager::ref().factory<ModelGeometry>();
 
     ModelGeometry* result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
-        LERROR("Failed to create a ModelGeometry object of type '" << geometryType
-                                                                    << "'");
-        return nullptr;
+        throw ghoul::RuntimeError(
+            "Failed to create a ModelGeometry object of type '" + geometryType + "'"
+        );
     }
     return result;
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : _parent(nullptr)
-    , _magnification("magnification", "Magnification", 1.f, 0.f, 10.f)
     , _mode(GL_TRIANGLES)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ModelGeometry"
+    );
+
     setName("ModelGeometry");
 
     std::string name;
     bool success = dictionary.getValue(keyName, name);
     ghoul_assert(success, "Name tag was not present");
 
-    if (dictionary.hasKeyAndValue<double>(keySize))
-        _magnification = static_cast<float>(dictionary.value<double>(keySize));
-
-    success = dictionary.getValue(keyGeomModelFile, _file);
-    if (!success) {
-        LERROR("Geometric Model file of '" << name << "' did not provide a key '"
-            << keyGeomModelFile << "'");
-    }
-    _file = FileSys.absolutePath(_file);
-
-    if (!FileSys.fileExists(_file, ghoul::filesystem::FileSystem::RawPath::Yes))
-        LERROR("Could not load the geometric model file '" << _file << "': File not found");
-    
-
-    addProperty(_magnification);
+    _file = absPath(dictionary.value<std::string>(keyGeomModelFile));
 }
 
 double ModelGeometry::boundingRadius() const {
@@ -273,7 +286,6 @@ bool ModelGeometry::getIndices(std::vector<int>* indexList) {
 }
 
 void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {
-    program.setUniform("_magnification", _magnification);
 }
 
 }  // namespace modelgeometry

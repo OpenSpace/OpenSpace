@@ -26,6 +26,7 @@
 
 #include <modules/base/rendering/planetgeometry.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -45,15 +46,63 @@
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
 
-    const std::string keyFrame = "Frame";
     const std::string keyGeometry = "Geometry";
+    const std::string keyProjection = "Projection";
+    const std::string keyColorTexture = "Textures.Color";
+    const std::string keyHeightTexture = "Textures.Height";
+
+
     const std::string keyRadius = "Geometry.Radius";
     const std::string keyShading = "PerformShading";
-    const std::string keyBody = "Body";
     const std::string _mainFrame = "GALACTIC";
 }
 
 namespace openspace {
+
+Documentation RenderablePlanetProjection::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Renderable Planet Projection",
+        "newhorizons_renderable_planetprojection",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderablePlanetProjection"),
+                "",
+                Optional::No
+            },
+            {
+                keyGeometry,
+                new ReferencingVerifier("base_geometry_planet"),
+                "The geometry that is used for rendering this planet.",
+                Optional::No
+            },
+            {
+                keyProjection,
+                new ReferencingVerifier("newhorizons_projectioncomponent"),
+                "Contains information about projecting onto this planet.",
+                Optional::No
+            },
+            {
+                keyColorTexture,
+                new StringVerifier,
+                "The path to the base color texture that is used on the planet prior to "
+                "any image projection. The path can use tokens of the form '${...}' or "
+                "be specified relative to the directory of the mod file.",
+                Optional::No
+            },
+            {
+                keyHeightTexture,
+                new StringVerifier,
+                "The path to the height map texture that is used on the planet. The path "
+                "can use tokens of the form '${...}' or be specified relative to the "
+                "directory of the mod file. If no height map is specified the planet "
+                "does not use a height field.",
+                Optional::Yes
+            }
+        }
+    };
+}
 
 RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -68,6 +117,12 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _heightMapTexture(nullptr)
     , _capture(false)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderablePlanetProject"
+    );
+
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success, "");
@@ -83,11 +138,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         );
     }
 
-    dictionary.getValue(keyFrame, _frame);
-    dictionary.getValue(keyBody, _body);
-
-    success = _projectionComponent.initializeProjectionSettings(dictionary);
-    ghoul_assert(success, "");
+    _projectionComponent.initialize(dictionary.value<ghoul::Dictionary>(keyProjection));
 
     // TODO: textures need to be replaced by a good system similar to the geometry as soon
     // as the requirements are fixed (ab)
@@ -117,9 +168,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_heightExaggeration);
     addProperty(_debugProjectionTextureRotation);
-
-    success = _projectionComponent.initializeParser(dictionary);
-    ghoul_assert(success, "");
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
@@ -138,7 +186,7 @@ bool RenderablePlanetProjection::initialize() {
     );
 
     completeSuccess &= loadTextures();
-    completeSuccess &= _projectionComponent.initialize();
+    completeSuccess &= _projectionComponent.initializeGL();
     completeSuccess &= _geometry->initialize(this);
 
     if (completeSuccess) {
@@ -233,7 +281,6 @@ void RenderablePlanetProjection::imageProjectGPU(
 
 void RenderablePlanetProjection::attitudeParameters(double time) {
     // precomputations for shader
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, _mainFrame, time);
     _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(), _mainFrame, time
     );
@@ -256,12 +303,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
         glm::vec3(0, 1, 0)
     );
 
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            _transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-    _transform = _transform * rot * roty * rotProp;
+    _transform = glm::mat4(_stateMatrix) * rot * roty * rotProp;
 
     glm::dvec3 bs;
     try {
@@ -411,6 +453,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
         }
     }
 
+    _stateMatrix = data.modelTransform.rotation;
 }
 
 bool RenderablePlanetProjection::loadTextures() {

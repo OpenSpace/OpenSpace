@@ -51,9 +51,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyPaths,
-            new TableVerifier({
-                { "*", new StringVerifier }
-            }),
+            new StringListVerifier,
             "A list of paths that are automatically registered with the file system. "
             "If a key X is used in the table, it is then useable by referencing ${X} "
             "in all other configuration files or scripts.",
@@ -61,9 +59,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyFonts,
-            new TableVerifier({
-                { "*", new StringVerifier, "Font paths loadable by FreeType" }
-            }),
+            new StringListVerifier("Font paths loadable by FreeType"),
             "A list of all fonts that will automatically be loaded on startup. Each "
             "key-value pair contained in the table will become the name and the file "
             "for a font.",
@@ -76,7 +72,7 @@ Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
-                        {"Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                        { "Debug", "Info", "Warning", "Error", "Fatal", "None" }
                     ),
                     "The severity of log messages that will be displayed. Only "
                     "messages of the selected level or higher will be displayed. All "
@@ -312,9 +308,7 @@ Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyDownloadRequestURL,
             new OrVerifier(
                 new StringVerifier,
-                new TableVerifier({
-                    { "*", new StringVerifier }
-                })
+                new StringListVerifier
             ),
             "The URL from which files will be downloaded by the Launcher. This can "
             "either be a single URL or a list of possible URLs from which the "

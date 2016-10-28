@@ -198,6 +198,14 @@ std::string TableVerifier::type() const {
     return "Table";
 }
 
+StringListVerifier::StringListVerifier(std::string elementDocumentation)
+    : TableVerifier({{ "*", new StringVerifier, std::move(elementDocumentation) }})
+{}
+
+std::string StringListVerifier::type() const {
+    return "List of strings";
+}
+
 ReferencingVerifier::ReferencingVerifier(std::string id)
     : identifier(std::move(id))
 {

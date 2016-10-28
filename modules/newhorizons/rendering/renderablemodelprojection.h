@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/newhorizons/util/projectioncomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 
@@ -59,6 +60,8 @@ public:
 
     ghoul::opengl::Texture& baseTexture() const;
 
+    static openspace::Documentation Documentation();
+
 private:
     bool loadTextures();
     void attitudeParameters(double time);
@@ -82,11 +85,6 @@ private:
 
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
-
-    std::string _defaultProjImage;
-    std::string _source;
-    std::string _destination;
-    std::string _target;
 
     // uniforms
     glm::vec2  _camScaling;

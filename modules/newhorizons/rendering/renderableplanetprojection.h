@@ -26,10 +26,11 @@
 #define __RENDERABLEPLANETPROJECTION_H__
 
 #include <openspace/rendering/renderable.h>
-#include <modules/newhorizons/util/projectioncomponent.h>
 
 #include <modules/newhorizons/util/imagesequencer.h>
+#include <modules/newhorizons/util/projectioncomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/util/updatestructures.h>
@@ -55,6 +56,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
+
+    static openspace::Documentation Documentation();
 
 protected:
     bool loadTextures();
@@ -95,7 +98,6 @@ private:
 
     std::vector<Image> _imageTimes;
 
-    std::string _body;
     std::string _frame;
 
     bool _capture;

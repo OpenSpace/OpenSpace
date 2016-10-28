@@ -199,6 +199,19 @@ struct TableVerifier : public TemplateVerifier<ghoul::Dictionary> {
     Exhaustive exhaustive;
 };
 
+/**
+ * A Verifier that checks whether all values contained in a Table are of type \c string.
+ */
+struct StringListVerifier : public TableVerifier {
+    /**
+     * Constructor for a StringListVerifier.
+     * \param elementDocumentation The documentation for each string in the list
+     */
+    StringListVerifier(std::string elementDocumentation = "");
+
+    std::string type() const override;
+};
+
 //----------------------------------------------------------------------------------------
 // Vector verifiers
 //----------------------------------------------------------------------------------------
