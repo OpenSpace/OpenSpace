@@ -30,7 +30,7 @@ uniform sampler2DMS mainDepthTexture;
 
 uniform bool insideRaycaster;
 uniform vec3 cameraPosInRaycaster;
-
+uniform vec2 windowSize;
 
 #include "blending.glsl"
 #include "rand.glsl"
@@ -56,8 +56,7 @@ uniform int nAaSamples;
 
 void main() {
 
-    vec2 texCoord = vec2(gl_FragCoord.x / #{rendererData.windowWidth},
-                         gl_FragCoord.y / #{rendererData.windowHeight});
+    vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
 
 
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);

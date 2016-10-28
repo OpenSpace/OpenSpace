@@ -401,6 +401,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
+            raycastProgram->setUniform("windowSize", glm::vec2(_resolution));
 
 
             glDisable(GL_DEPTH_TEST);
@@ -472,8 +473,6 @@ void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
-    dict.setValue("windowWidth", _resolution.x);
-    dict.setValue("windowHeight", _resolution.y);
 
     _rendererData = dict;
 
