@@ -133,7 +133,7 @@ namespace globebrowsing {
                 layeredTexturePreprocessingData);
         
         if (layeredShaderManager->updatedOnLastCall()) {
-            gpuLayerManager->updateUniformLocations(programObject, *_layerManager);
+            gpuLayerManager->bind(programObject, *_layerManager);
         }
 
         // Activate the shader program

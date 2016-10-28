@@ -38,29 +38,55 @@ namespace openspace {
 using namespace ghoul::opengl;
 
 
-
-class UpdatableUniformLocation {
+/**
+ * Very simple class maintaining a uniform location.
+ */
+class UniformLocation {
 public:
-    void updateUniformLocations(ProgramObject* program, const std::string& name);
+
+    /**
+    * Updates the uniform location of the uniform variable named <name> 
+    * in the provided shader program.
+    */
+    void bind(ProgramObject* program, const std::string& name);
     
 protected:
-    GLint _uniformLocation = -1;  
+    GLint _uniformLocation = -1;
 };
 
     
+/**
+ * Manages a GPU representation of the templated data type T.
+ * This class provides a simple interface setting the value of 
+ * the binded GLSL variable.
+ */
 template<typename T>
-class GPUData : public UpdatableUniformLocation{
+class GPUData : public UniformLocation{
 public:
     
+    /**
+     * Sets the value of T to its corresponding GPU value.
+     * OBS! Users must ensure bind has been called before using this method
+     */
     void setValue(ProgramObject* program, T val){
         program->setUniform(_uniformLocation, val);
     }
 
 };
 
-
-class GPUTexture : public UpdatableUniformLocation{
+/**
+ * Manages a Texture on the GPU.
+ * This class provides a simple interface binding texture to the 
+ * named uniform.
+ */
+class GPUTexture : public UniformLocation{
 public:
+
+    /**
+     * Sets and assignes a texture unit within the provided shader 
+     * program.
+     * OBS! Users must ensure bind has been called before using this method.
+     */
     void setValue(ProgramObject* program, std::shared_ptr<Texture> texture){
         _texUnit = std::make_unique<TextureUnit>();
         _texUnit->activate();

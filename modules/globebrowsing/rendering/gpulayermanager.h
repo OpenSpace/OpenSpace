@@ -46,63 +46,139 @@ namespace globebrowsing {
 
 using namespace ghoul::opengl;
 
+/**
+ * Manages a GPU representation of a <code>TileUvTransform</code>
+ */
 class GPUTileUvTransform {
 public:
-	void setValue(ProgramObject* programObject, const TileUvTransform& uvTransform);
-	void updateUniformLocations(
-        ProgramObject* programObject,
-        const std::string& nameBase);
-	
+    
+    /**
+     * Sets the value of <code>TileUvTransform</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    void setValue(ProgramObject* programObject, const TileUvTransform& uvTransform);
+
+    /** 
+     * Binds GLSL variables with identifiers starting with 
+     * nameBase within the provided shader program with this object. 
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase);
+
 private:
-	GPUData<glm::vec2> gpuUvOffset;
-	GPUData<glm::vec2> gpuUvScale;
+    GPUData<glm::vec2> gpuUvOffset;
+    GPUData<glm::vec2> gpuUvScale;
 };
 
+
+/**
+ * Manages a GPU representation of a <code>TileDepthTransform</code>
+ */
 class GPUTileDepthTransform {
 public:
+    /**
+     * Sets the value of <code>TileDepthTransform</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
     void setValue(ProgramObject* programObject, const TileDepthTransform& depthTransform);
-    void updateUniformLocations(
-        ProgramObject* programObject,
-        const std::string& nameBase);
+
+    /** 
+     * Binds GLSL variables with identifiers starting with 
+     * nameBase within the provided shader program with this object. 
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase);
     
 private:
     GPUData<float> gpuDepthOffset;
     GPUData<float> gpuDepthScale;
 };
 
+/**
+ * Manages a GPU representation of a <code>ChunkTile</code>
+ */
 class GPUChunkTile {
 public:
-	void setValue(ProgramObject* programObject, const ChunkTile& chunkTile);
-	void updateUniformLocations(
-        ProgramObject* programObject,
-        const std::string& nameBase);
+
+    /**
+     * Sets the value of <code>ChunkTile</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    void setValue(ProgramObject* programObject, const ChunkTile& chunkTile);
+
+    /** 
+     * Binds GLSL variables with identifiers starting with 
+     * nameBase within the provided shader program with this object. 
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase);
+
+    /**
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
+    */
     void deactivate();
 
 private:
-	GPUTexture gpuTexture;
-	GPUTileUvTransform gpuTileUvTransform;
+    GPUTexture gpuTexture;
+    GPUTileUvTransform gpuTileUvTransform;
 };
 
+/**
+ * Manages a GPU representation of a <code>ChunkTilePile</code>
+ */
 class GPUChunkTilePile{
-public:    
+public:
+
+    /**
+     * Sets the value of <code>ChunkTilePile</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
     void setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile);
-    void updateUniformLocations(
-        ProgramObject* programObject,
-        const std::string& nameBase,
-        int pileSize);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase, 
+              int pileSize);
+    /**
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
+    */
     void deactivate();
 
 private:
     std::vector<GPUChunkTile> gpuChunkTiles;
 };
 
+
 class LayerRenderSettings;
+
+/**
+ * Manages a GPU representation of a <code>LayerRenderSettings</code>
+ */
 class GPULayerRenderSettings{
 public:
+
+    /**
+     * Sets the value of <code>LayerRenderSettings</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
     void setValue(ProgramObject* programObject, const LayerRenderSettings& layerSettings);
-    void updateUniformLocations(
-        ProgramObject* programObject,
-        const std::string& nameBase);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase);
 
 private:
     GPUData<float> gpuOpacity;
@@ -110,69 +186,133 @@ private:
     GPUData<float> gpuMultiplier;
 };
 
+
 class Layer;
+
+/**
+ * Manages a GPU representation of a <code>Layer</code>
+ */
 class GPULayer {
 public:
-    virtual void setValue(
-        ProgramObject* programObject,
-        const Layer& layer,
-        const TileIndex& tileIndex,
-        int pileSize);
-    virtual void updateUniformLocations(
-        ProgramObject* programObject,
-        const Layer& layer,
-        const std::string& nameBase,
-        int pileSize);
+
+    /**
+     * Sets the value of <code>Layer</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    virtual void setValue(ProgramObject* programObject, const Layer& layer,
+                          const TileIndex& tileIndex, int pileSize);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    virtual void bind(ProgramObject* programObject, const Layer& layer,
+                      const std::string& nameBase, int pileSize);
+
+    /**
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
+    */
     virtual void deactivate();
+
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
 };
 
+
+/**
+ * Manages a GPU representation of a <code>Layer</code> representing
+ * a height map.
+ */
 class GPUHeightLayer : public GPULayer{
 public:
-    virtual void setValue(
-        ProgramObject* programObject,
-        const Layer& layer,
-        const TileIndex& tileIndex,
-        int pileSize);
-    virtual void updateUniformLocations(
-        ProgramObject* programObject,
-        const Layer& layer,
-        const std::string& nameBase,
-        int pileSize);
+
+    /**
+     * Sets the value of <code>Layer</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    virtual void setValue(ProgramObject* programObject, const Layer& layer,
+                          const TileIndex& tileIndex, int pileSize);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    virtual void bind(ProgramObject* programObject, const Layer& layer,
+                      const std::string& nameBase, int pileSize);
+
 private:
     GPUTileDepthTransform gpuDepthTransform;
 };
 
 class LayerGroup;
+
+/**
+ * Manages a GPU representation of a <code>LayerGroup</code>
+ */
 class GPULayerGroup{
 public:
-    virtual void setValue(
-        ProgramObject* programObject,
-        const LayerGroup& layerGroup,
-        const TileIndex& tileIndex);
-    virtual void updateUniformLocations(
-        ProgramObject* programObject,
-        const LayerGroup& layerGroup,
-        const std::string& nameBase,
-        int category);
+
+    /**
+     * Sets the value of <code>LayerGroup</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    virtual void setValue(ProgramObject* programObject, const LayerGroup& layerGroup,
+                          const TileIndex& tileIndex);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    virtual void bind(ProgramObject* programObject, const LayerGroup& layerGroup,
+                      const std::string& nameBase, int category);
+
+    /**
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
+    */
     virtual void deactivate();
+
 private:
     std::vector<std::unique_ptr<GPULayer>> gpuActiveLayers;
 };
 
 class LayerManager;
+
+/**
+ * Manages a GPU representation of a <code>LayerGroup</code>
+ */
 class GPULayerManager{
 public:    
-    virtual void setValue(
-        ProgramObject* programObject,
-        const LayerManager& layerManager,
-        const TileIndex& tileIndex);
-    virtual void updateUniformLocations(
-        ProgramObject* programObject,
-        const LayerManager& layerManager);
+
+    /**
+     * Sets the value of <code>LayerGroup</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    virtual void setValue(ProgramObject* programObject, const LayerManager& layerManager,
+                          const TileIndex& tileIndex);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    virtual void bind(ProgramObject* programObject, const LayerManager& layerManager);
+
+    /**
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
+    */
     virtual void deactivate();
+
 private:
     std::vector<std::unique_ptr<GPULayerGroup>> gpuLayerGroups;
 };
