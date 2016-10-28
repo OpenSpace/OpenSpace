@@ -69,7 +69,9 @@ Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     return result;
 }
 
-Rotation::Rotation() {}
+Rotation::Rotation() {
+    setName("Rotation");
+}
     
 Rotation::Rotation(const ghoul::Dictionary& dictionary) {}
     

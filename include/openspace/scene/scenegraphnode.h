@@ -101,13 +101,6 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
-    // @TODO Remove once the scalegraph is in effect ---abock
-    
-    void setEphemeris(Translation* eph) {
-        delete _translation;
-        _translation = eph;
-    }
-
     static documentation::Documentation Documentation();
 
 private:
@@ -129,9 +122,11 @@ private:
     PowerScaledScalar _boundingSphere;
 
     // Transformation defined by ephemeris, rotation and scale
-    Translation* _translation;
-    Rotation* _rotation;
-    Scale* _scale;
+    struct {
+        std::unique_ptr<Translation> translation;
+        std::unique_ptr<Rotation> rotation;
+        std::unique_ptr<Scale> scale;
+    } _transform;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached;

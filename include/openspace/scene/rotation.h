@@ -25,14 +25,16 @@
 #ifndef __ROTATION_H__
 #define __ROTATION_H__
 
-#include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class Rotation {
+class Rotation : public properties::PropertyOwner {
 public:
     static Rotation* createFromDictionary(const ghoul::Dictionary& dictionary);
 

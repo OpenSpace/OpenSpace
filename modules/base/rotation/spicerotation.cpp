@@ -110,6 +110,9 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
             SpiceManager::ref().loadKernel(kernel);
         }
     }
+
+    addProperty(_sourceFrame);
+    addProperty(_destinationFrame);
 }
     
 void SpiceRotation::update(const UpdateData& data) {

@@ -83,6 +83,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
         _rotationMatrix = dictionary.value<glm::dmat3>(KeyRotation);
     }
 
+    addProperty(_rotationMatrix);
     _rotationMatrix.onChange([this]() { _matrix = _rotationMatrix; });
 }
 
