@@ -42,7 +42,9 @@ struct PerformanceLayout {
         char name[LengthName];
         float renderTime[NumberValues];
         float updateRenderable[NumberValues];
-        float updateEphemeris[NumberValues];
+        float updateTranslation[NumberValues];
+        float updateRotation[NumberValues];
+        float updateScaling[NumberValues];
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
     int16_t nScaleGraphEntries;

@@ -211,7 +211,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeTranslation = (end - start).count();
         }
         else {
             _transform.translation->update(data);
@@ -227,7 +227,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeRotation = (end - start).count();
         }
         else {
             _transform.rotation->update(data);
@@ -243,7 +243,7 @@ void SceneGraphNode::update(const UpdateData& data) {
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeScaling = (end - start).count();
         }
         else {
             _transform.scale->update(data);
@@ -328,7 +328,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _worldRotationCached,
         _worldScaleCached};
 
-    _performanceRecord.renderTime = 0;
+    //_performanceRecord.renderTime = 0;
 
     bool visible = _renderableVisible &&
         _renderable->isVisible() &&
@@ -361,7 +361,7 @@ void SceneGraphNode::postRender(const RenderData& data) {
     const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
     RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, data.renderBinMask, _worldPositionCached};
 
-    _performanceRecord.renderTime = 0;
+    //_performanceRecord.renderTime = 0;
     if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
         _renderable->postRender(newData);
     }

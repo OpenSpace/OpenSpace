@@ -51,7 +51,9 @@ public:
     struct PerformanceRecord {
         long long renderTime;  // time in ns
         long long updateTimeRenderable;  // time in ns
-        long long updateTimeEphemeris;  // time in ns
+        long long updateTimeTranslation; // time in ns
+        long long updateTimeRotation;  // time in ns
+        long long updateTimeScaling;  // time in ns
     };
 
     static const std::string RootNodeName;
