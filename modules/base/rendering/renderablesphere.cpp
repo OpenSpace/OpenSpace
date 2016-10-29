@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/engine/openspaceengine.h>
@@ -122,7 +121,7 @@ bool RenderableSphere::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram("Sphere",
         "${MODULE_BASE}/shaders/sphere_vs.glsl",
-        "${MODULES}/base/shaders/sphere_fs.glsl");
+        "${MODULE_BASE}/shaders/sphere_fs.glsl");
     if (!_shader)
         return false;
 
