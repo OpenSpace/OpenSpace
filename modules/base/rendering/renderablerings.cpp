@@ -25,12 +25,9 @@
 #include <modules/base/rendering/renderablerings.h>
 
 #include <openspace/documentation/verifier.h>
-
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -39,13 +36,9 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableRings";
-    
     const std::string KeyTexture = "Texture";
     const std::string KeySize = "Size";
     const std::string KeyOffset = "Offset";
-    const std::string KeyNightFactor = "NightFactor";
-    const std::string KeyTransparency = "Transparency";
 }
 
 namespace openspace {
@@ -92,7 +85,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath("texture", "Texture")
     , _size("size", "Size", 1.f, 0.f, std::pow(1.f, 25.f))
-    , _offset("offset", "Texture Offset", glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _offset("offset", "Offset", glm::vec2(0, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor("nightFactor", "Night Factor", 0.33f, 0.f, 1.f)
     , _transparency("transparency", "Transparency", 0.15f, 0.f, 1.f)
     , _shader(nullptr)
@@ -111,22 +104,19 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         "RenderableRings"
     );
 
-    double size = dictionary.value<double>(KeySize);
-    _size = size;
-    setBoundingSphere(PowerScaledScalar::CreatePSS(size));
+    _size = dictionary.value<double>(KeySize);
+    setBoundingSphere(PowerScaledScalar::CreatePSS(_size));
+    addProperty(_size);
+    _size.onChange([&]() { _planeIsDirty = true; });
 
     _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
     _textureFile = std::make_unique<File>(_texturePath);
 
     if (dictionary.hasKeyAndValue<glm::vec2>(KeyOffset)) {
-        glm::vec2 off = dictionary.value<glm::vec2>(KeyOffset);
-        _offset = off;
+        _offset = dictionary.value<glm::vec2>(KeyOffset);
     }
-    
     addProperty(_offset);
     
-    addProperty(_size);
-    _size.onChange([&](){ _planeIsDirty = true; });
 
     addProperty(_texturePath);
     _texturePath.onChange([&](){ loadTexture(); });
@@ -148,18 +138,14 @@ bool RenderableRings::initialize() {
             "${MODULE_BASE}/shaders/rings_vs.glsl",
             "${MODULE_BASE}/shaders/rings_fs.glsl"
             );
-        if (!_shader)
-            return false;
-
         _shader->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes
         );
     }
 
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glGenVertexArrays(1, &_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
     createPlane();
-    
     loadTexture();
 
     return isReady();
@@ -175,8 +161,7 @@ bool RenderableRings::deinitialize() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    renderEngine.removeRenderProgram(_shader);
+    OsEng.renderEngine().removeRenderProgram(_shader);
     _shader = nullptr;
 
     return true;
@@ -246,7 +231,10 @@ void RenderableRings::loadTexture() {
             ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 
         if (texture) {
-            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+            LDEBUGC(
+                "RenderableRings",
+                "Loaded texture from '" << absPath(_texturePath) << "'"
+            );
             _texture = std::move(texture);
 
             _texture->uploadTexture();
@@ -262,8 +250,15 @@ void RenderableRings::loadTexture() {
 
 void RenderableRings::createPlane() {
     const GLfloat size = _size.value();
-    const GLfloat vertex_data[] = {
-        //      x      y     s     t
+
+    struct VertexData {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+    };
+    
+    VertexData data[] = {
         -size, -size, 0.f, 0.f,
         size, size, 1.f, 1.f,
         -size, size, 0.f, 1.f,
@@ -272,13 +267,27 @@ void RenderableRings::createPlane() {
         size, size, 1.f, 1.f,
     };
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(sizeof(GLfloat) * 2));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(offsetof(VertexData, s))
+    );
 }
 
 } // namespace openspace

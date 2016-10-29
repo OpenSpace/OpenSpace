@@ -339,8 +339,8 @@ void RenderEngine::updateSceneGraph() {
         glm::dmat3(1),
         1,
         Time::ref().j2000Seconds(),
-        Time::ref().timeJumped(),
         Time::ref().deltaTime(),
+        Time::ref().timeJumped(),
         _performanceManager != nullptr
     });
 
