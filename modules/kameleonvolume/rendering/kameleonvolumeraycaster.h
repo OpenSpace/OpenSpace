@@ -28,6 +28,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
@@ -36,6 +37,7 @@
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 #include <openspace/rendering/transferfunction.h>
+#include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <modules/volume/volumegridtype.h>
 
@@ -56,7 +58,8 @@ public:
 
     KameleonVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
-        std::shared_ptr<TransferFunction> transferFunction);
+        std::shared_ptr<TransferFunction> transferFunction, 
+        std::shared_ptr<VolumeClipPlanes> clipPlanes);
 
     virtual ~KameleonVolumeRaycaster();
     void initialize();
@@ -76,6 +79,7 @@ public:
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
 private:
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;

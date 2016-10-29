@@ -25,62 +25,29 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
 #define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vectorproperty.h>
 
 // Forward declare to minimize dependencies
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+    class Dictionary;
 }
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
+class VolumeClipPlane : public properties::PropertyOwner {
 public:
-    RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-    ~RenderableVolumeGL();
-    
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
-
+    VolumeClipPlane(const ghoul::Dictionary& dictionary);
+    virtual ~VolumeClipPlane() = default;
+    virtual void initialize();
+    glm::vec3 normal();
+    glm::vec2 offsets();
 private:
-    ghoul::Dictionary _hintsDictionary;
+    properties::Vec3Property _normal;
+    properties::Vec2Property _offsets;
 
-    std::string _filename;
-
-    std::string _transferFunctionName;
-    std::string _volumeName;
-
-    std::string _transferFunctionPath;
-    std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-    ghoul::opengl::Texture* _volume;
-    ghoul::opengl::Texture* _transferFunction;
-
-    GLuint _boxArray; 
-    GLuint _vertexPositionBuffer;
-    ghoul::opengl::ProgramObject* _boxProgram;
-    glm::vec3 _boxScaling;
-    psc _pscOffset;
-    float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
 };
 
-} // namespace openspace
+}  // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__

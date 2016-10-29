@@ -37,6 +37,8 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/kameleonvolume/rendering/kameleonvolumeraycaster.h>
 
+#include <modules/volume/rendering/volumeclipplanes.h>
+
 
 namespace openspace {
 
@@ -78,6 +80,8 @@ private:
 
     properties::OptionProperty _gridType;
     bool _autoGridType;
+
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
     properties::StringProperty _sourcePath;

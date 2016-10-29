@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2016                                                                    *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,59 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float maxStepSize#{id} = 0.02;
-uniform sampler3D volumeTexture_#{id};
-uniform sampler1D transferFunction_#{id};
-uniform int gridType_#{id} = 0;
+#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
 
-uniform int nClips_#{id};
-uniform vec3 clipNormals_#{id}[8];
-uniform vec2 clipOffsets_#{id}[8];
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 
+#include <modules/volume/rendering/volumeclipplane.h>
 
-void sample#{id}(vec3 samplePos,
-             vec3 dir,
-             inout vec3 accumulatedColor,
-             inout vec3 accumulatedAlpha,
-             inout float stepSize) {
+#include <vector>
+#include <memory>
 
-    vec3 transformedPos = samplePos;
-    if (gridType_#{id} == 1) {
-        transformedPos = kameleon_cartesianToSpherical(samplePos);
-    }
-
-
-    float clipAlpha = 1.0;
-    vec3 centerToPos = transformedPos - vec3(0.5);
-
-
-    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
-        vec3 clipNormal = clipNormals_#{id}[i];
-        float clipBegin = clipOffsets_#{id}[i].x;
-        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
-        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
-    }
-
-    if (clipAlpha > 0) {
-        float val = texture(volumeTexture_#{id}, transformedPos).r;
-        vec4 color = texture(transferFunction_#{id}, val);
-        vec3 backColor = color.rgb;
-        vec3 backAlpha = color.aaa;
-
-        backColor *= stepSize * clipAlpha;
-        backAlpha *= stepSize * clipAlpha;
-
-        backColor = clamp(backColor, 0.0, 1.0);
-        backAlpha = clamp(backAlpha, 0.0, 1.0);
-
-        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
-        accumulatedColor += oneMinusFrontAlpha * backColor;
-        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
-    }
-
-    stepSize = maxStepSize#{id};
+// Forward declare to minimize dependencies
+namespace ghoul {
+    class Dictionary;
 }
 
-float stepSize#{id}(vec3 samplePos, vec3 dir) {
-    return maxStepSize#{id};
-}
+namespace openspace {
+
+class VolumeClipPlanes : public properties::PropertyOwner {
+public:
+    VolumeClipPlanes(const ghoul::Dictionary& dictionary);
+    virtual ~VolumeClipPlanes() = default;
+    void initialize();
+    void deinitialize();
+    std::vector<glm::vec3> normals();
+    std::vector<glm::vec2> offsets();
+private:
+    properties::IntProperty _nClipPlanes;
+    std::vector<std::shared_ptr<VolumeClipPlane>> _clipPlanes;
+};
+
+}  // namespace openspace
+
+#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__

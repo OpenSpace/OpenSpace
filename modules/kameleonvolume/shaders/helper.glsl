@@ -1,9 +1,9 @@
 #define KAMELEON_PI      3.14159265358979323846  /* pi */
 #define KAMELEON_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
 
-vec3 kameleon_cartesianToSpherical(vec3 _cartesian) {
+vec3 kameleon_cartesianToSpherical(vec3 zeroToOneCoords) {
     // Put cartesian in [-1..1] range first
-    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + _cartesian * 2.0f;
+    vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
     float r = length(cartesian);
     float theta, phi;

@@ -45,9 +45,11 @@ namespace openspace {
 
 KameleonVolumeRaycaster::KameleonVolumeRaycaster(
     std::shared_ptr<ghoul::opengl::Texture> texture,
-    std::shared_ptr<TransferFunction> transferFunction)
+    std::shared_ptr<TransferFunction> transferFunction,
+    std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _volumeTexture(texture)
     , _transferFunction(transferFunction)
+    , _clipPlanes(clipPlanes)
     , _boundingBox(glm::vec3(1.0)) {}
     
 KameleonVolumeRaycaster::~KameleonVolumeRaycaster() {}
@@ -115,6 +117,14 @@ void KameleonVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     program.setUniform("volumeTexture_" + id, _textureUnit->unitNumber());
 
     program.setUniform("gridType_" + id, static_cast<int>(_gridType));
+
+    std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
+    std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
+    int nClips = clipNormals.size();
+
+    program.setUniform("nClips_" + id, nClips);
+    program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
+    program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
 }
     
 void KameleonVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {

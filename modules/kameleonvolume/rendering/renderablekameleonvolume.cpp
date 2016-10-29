@@ -60,6 +60,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _autoValueBounds(false)
     , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::DROPDOWN)
     , _autoGridType(false)
+    , _clipPlanes(nullptr)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
     , _sourcePath("sourcePath", "Source Path")
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
@@ -135,6 +136,10 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         _autoValueBounds = true;
     }
 
+    ghoul::Dictionary clipPlanesDictionary;
+    dictionary.getValue("ClipPlanes", clipPlanesDictionary);
+    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes->setName("clipPlanes");
 
     bool cache;
     if (dictionary.getValue("Cache", cache)) {
@@ -165,7 +170,7 @@ bool RenderableKameleonVolume::initialize() {
     _volumeTexture->uploadTexture();
     _transferFunction->update();
 
-    _raycaster = std::make_unique<KameleonVolumeRaycaster>(_volumeTexture, _transferFunction);
+    _raycaster = std::make_unique<KameleonVolumeRaycaster>(_volumeTexture, _transferFunction, _clipPlanes);
 
     _raycaster->setStepSize(_stepSize);
     _gridType.onChange([this] {
@@ -201,6 +206,8 @@ bool RenderableKameleonVolume::initialize() {
 
     onEnabledChange(onChange);
 
+    _clipPlanes->initialize();
+
     addProperty(_dimensions);
     addProperty(_stepSize);
     addProperty(_transferFunctionPath);
@@ -213,6 +220,8 @@ bool RenderableKameleonVolume::initialize() {
     addProperty(_upperValueBound);
     addProperty(_gridType);
     addProperty(_cache);
+    addPropertySubOwner(_clipPlanes.get());
+    
 
 
     return true;
