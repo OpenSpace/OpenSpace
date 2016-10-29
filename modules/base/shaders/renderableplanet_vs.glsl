@@ -48,7 +48,7 @@ void main() {
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
     
-    vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
+    vec4 position = vec4(tmp.xyz * pow(10, tmp.w), 1.0);
     position = modelViewProjectionTransform * position;
     
     vs_position = z_normalization(position);

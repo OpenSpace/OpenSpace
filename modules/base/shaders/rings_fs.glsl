@@ -37,9 +37,6 @@ uniform vec3 sunPosition;
 uniform float _nightFactor;
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
@@ -85,7 +82,7 @@ Fragment getFragment() {
 
     Fragment frag;
     frag.color = diffuse;
-    frag.depth = depth;
+    frag.depth = vs_position.w;
     return frag;
 
 }

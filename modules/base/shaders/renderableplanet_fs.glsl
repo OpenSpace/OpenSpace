@@ -44,8 +44,6 @@ in vec4 vs_position;
 
 //#include "PowerScaling/powerScaling_vs.hglsl"
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
     vec4 diffuse = texture(texture1, vs_st);
 
     Fragment frag;
