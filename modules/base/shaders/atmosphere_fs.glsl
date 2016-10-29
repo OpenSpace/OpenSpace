@@ -24,8 +24,6 @@
 
 #define EPSILON 0.0001f
 
-// Sun Irradiance
-const float ISun = 50.0;
 const uint numberOfShadows = 1;
 
 struct ShadowRenderingStruct {
@@ -236,11 +234,12 @@ vec4 texture4D(sampler3D table, float r, float mu, float muS, float nu)
 }
 
 vec3 analyticTransmittance(float r, float mu, float d) {
-    return exp(- betaR * opticalDepth(HR, r, mu, d) - betaMEx * opticalDepth(HM, r, mu, d));
+    return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
+               betaMieExtinction * opticalDepth(HM, r, mu, d));
 }
 
 vec3 getMie(vec4 rayMie) {
-    return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaR.r / betaR);
+    return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaRayleigh.r / betaRayleigh);
 }
 
 vec2 getTransmittanceUV(float r, float mu) {
@@ -353,7 +352,7 @@ vec3 inscatterLight(inout vec3 x, inout float t, vec3 v, vec3 s,
         // No intersection with earth
         result = vec3(0.0);
     }
-    return result * ISun;
+    return result * sunRadiance;
 }
 
 vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, vec3 attenuation)
@@ -381,14 +380,14 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, vec3 attenu
         
         vec4 clouds = vec4(0.85)*texture(cloudsTexture, vs_st);
         vec3 groundColor = (reflectance.rgb + clouds.rgb) * 
-        (max(muS, 0.0) * sunLight + groundSkyLight) * ISun / M_PI;
+        (max(muS, 0.0) * sunLight + groundSkyLight) * sunRadiance / M_PI;
         
         // Yellowish reflection from sun on oceans and rivers
         if (reflectance.w > 0.0) {
             vec3 h = normalize(s - v);
             float fresnel = 0.02 + 0.98 * pow(1.0 - dot(-v, h), 5.0);
             float waterBrdf = fresnel * pow(max(dot(h, n), 0.0), 150.0);
-            groundColor += reflectance.w * max(waterBrdf, 0.0) * sunLight * ISun;
+            groundColor += reflectance.w * max(waterBrdf, 0.0) * sunLight * sunRadiance;
         }
 
         result = attenuation * groundColor;
@@ -404,7 +403,7 @@ vec3 sunColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu) {
         return vec3(0.0);
     } else {
         vec3 transmittance = r <= Rt ? transmittanceWithShadow(r, mu) : vec3(1.0);
-        float isun = step(cos(M_PI / 180.0), dot(v, s)) * ISun; 
+        float isun = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
         return transmittance * isun;
     }
 }
@@ -456,10 +455,15 @@ Fragment getFragment() {
         vec4 viewport = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
         vec4 ndcPos;
         ndcPos.xy = ((2.0 * gl_FragCoord.xy) - (2.0 * viewport.xy)) / (viewport.zw) - 1;
-        ndcPos.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
+        //ndcPos.x = ((2.0f * gl_FragCoord.x) - (2.0f * viewport.x)) / viewport.z - 1.0f;
+        //ndcPos.y = 1.0f - (2.0f * gl_FragCoord.y) / viewport.w;
+        ndcPos.z = (2.0f * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
         (gl_DepthRange.far - gl_DepthRange.near);
-        ndcPos.w = 1.0;
+        ndcPos.w = 1.0f;
         vec4 clipPos = ndcPos / gl_FragCoord.w;
+        //vec4 clipPos = ndcPos;
+        //clipPos.z = -1.0;
+        //clipPos.w = 1.0;
         vec4 projCoords = projInverse * clipPos;
         vec4 viewDirection =  normalize(completeInverse * vec4(projCoords.xyz, 0.0));
         vec3 v = normalize(viewDirection.xyz);

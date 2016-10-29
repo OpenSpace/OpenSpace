@@ -25,13 +25,14 @@
 // Atmosphere Rendering Parameters 
 uniform float Rg;
 uniform float Rt;
-uniform float AVERAGE_GROUND_REFLECTANCE;
+uniform float AverageGroundReflectance;
 uniform float HR;
-uniform vec3 betaR;
+uniform vec3 betaRayleigh;
 uniform float HM;
-uniform vec3 betaMSca;
-uniform vec3 betaMEx;
+uniform vec3 betaMieScattering;
+uniform vec3 betaMieExtinction;
 uniform float mieG;
+uniform float sunRadiance;
 
 const float ATM_EPSILON = 1.0;
 // const float RL = Rt + 1.0;

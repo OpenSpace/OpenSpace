@@ -297,11 +297,11 @@ vec4 texture4D(sampler3D table, float r, float mu, float muS, float nu)
 }
 
 vec3 analyticTransmittance(float r, float mu, float d) {
-    return exp(- betaR * opticalDepth(HR, r, mu, d) - betaMEx * opticalDepth(HM, r, mu, d));
+    return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) - betaMieExtinction * opticalDepth(HM, r, mu, d));
 }
 
 vec3 getMie(vec4 rayMie) {
-	return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaR.r / betaR);
+	return rayMie.rgb * rayMie.a / max(rayMie.r, 1e-4) * (betaRayleigh.r / betaRayleigh);
 }
 
 vec2 getTransmittanceUV(float r, float mu) {
