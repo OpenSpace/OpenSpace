@@ -263,22 +263,22 @@ void RenderableRings::loadTexture() {
 void RenderableRings::createPlane() {
     const GLfloat size = _size.value();
     const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+        //      x      y     s     t
+        -size, -size, 0.f, 0.f,
+        size, size, 1.f, 1.f,
+        -size, size, 0.f, 1.f,
+        -size, -size, 0.f, 0.f,
+        size, -size, 1.f, 0.f,
+        size, size, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(sizeof(GLfloat) * 2));
 }
 
 } // namespace openspace
