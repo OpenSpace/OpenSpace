@@ -446,8 +446,8 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
             first = false;
             json << "{";
             json << "\"key\": \"" << std::to_string(p.first) << "\",";
-            json << "\"script\": \"" << p.second.first << "\"";
-            json << "\"remoteScripting\": \"" << (p.second.second ? "true" : "false") << "\"";
+            json << "\"script\": \"" << p.second.first << "\",";
+            json << "\"remoteScripting\": " << (p.second.second ? "true" : "false");
             json << "}";
         }
         json << "]";

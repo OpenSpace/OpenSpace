@@ -406,13 +406,13 @@ void GUI::deinitializeGL() {
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
-                     const glm::vec2& framebufferSize,
+                     const glm::vec2& dpiScaling,
                      const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
-    io.DisplayFramebufferScale = ImVec2(framebufferSize.x / windowSize.x, framebufferSize.y / windowSize.y);
+    io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
     io.DeltaTime = deltaTime;
 
     io.MousePos = ImVec2(mousePos.x, mousePos.y);

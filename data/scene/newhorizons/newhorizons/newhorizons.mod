@@ -90,7 +90,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/NewHorizonsCleanModel.obj",
-                Magnification = 4,
+                -- Magnification = 4,
             }, 
             Textures = {
                 Type = "simple",
@@ -114,6 +114,10 @@ return {
                 SourceFrame = "NH_SPACECRAFT",
                 DestinationFrame = "GALACTIC",
             },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1000
+            }
         },
     },
     --NewHorizonsTrail module
@@ -150,7 +154,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/Labels.obj",
-                Magnification = 4,
+                -- Magnification = 4,
             }, 
             Textures = {
                 Type = "simple",
@@ -166,7 +170,7 @@ return {
                 Fadeable = false,
                 Ghosting = false,
             },
-        },
+        }
     },
 
     {   

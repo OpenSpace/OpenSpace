@@ -455,8 +455,8 @@ bool RenderablePlanet::initialize() {
         // pscstandard
         _programObject = renderEngine.buildRenderProgram(
             "pscstandard",
-            "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
-            "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
+            "${MODULE_BASE}/shaders/renderableplanet_vs.glsl",
+            "${MODULE_BASE}/shaders/renderableplanet_fs.glsl");
         if (!_programObject)
             return false;
     }
@@ -603,24 +603,29 @@ void RenderablePlanet::render(const RenderData& data) {
     // activate shader
     _programObject->activate();
 
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+
     // scale the planet to appropriate size since the planet is a unit sphere
-    glm::mat4 transform = glm::mat4(1);
+    //glm::mat4 transform = glm::mat4(1);
     
     //earth needs to be rotated for that to work.
-    glm::mat4 rot = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(1, 0, 0));
-    glm::mat4 roty = glm::rotate(transform, static_cast<float>(M_PI_2), glm::vec3(0, -1, 0));
-    glm::mat4 rotProp = glm::rotate(transform, glm::radians(static_cast<float>(_rotation)), glm::vec3(0, 1, 0));
+    glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
+    glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
+    //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
+    modelTransform = modelTransform * rot /** roty*/ /** rotProp*/;
 
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
-            transform[i][j] = static_cast<float>(_stateMatrix[i][j]);
-        }
-    }
-    transform = transform * rot * roty * rotProp;  
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _programObject->setUniform("transparency", _alpha);
-    _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _programObject->setUniform("ModelTransform", transform);
+    _programObject->setUniform(
+        "modelViewProjectionTransform", 
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
+    //_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     // Normal Transformation
     glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
@@ -630,7 +635,7 @@ void RenderablePlanet::render(const RenderData& data) {
 
 
     glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
-        translateCamTrans * translateObjTrans * transform;
+        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
     if (_atmosphereEnabled)
         _programObject->setUniform("NormalTransform", 
             glm::transpose(glm::inverse(ModelViewTrans)));
@@ -762,7 +767,7 @@ void RenderablePlanet::render(const RenderData& data) {
         /*glm::mat4 M = data.camera.viewMatrix() * scaleCamTrans * glm::mat4(data.camera.viewRotationMatrix()) *
             translateCamTrans * obj2World * transform;
         */
-        glm::mat4 M = glm::mat4(data.camera.combinedViewMatrix()) * scaleCamTrans * obj2World * transform;
+        glm::mat4 M = glm::mat4(data.camera.combinedViewMatrix()) * scaleCamTrans * obj2World * glm::mat4(modelTransform);
 
         glm::mat4 completeInverse = glm::inverse(M);
 
@@ -770,7 +775,7 @@ void RenderablePlanet::render(const RenderData& data) {
         _programObject->setUniform("projInverse", glm::inverse(data.camera.projectionMatrix()));
 
         // This is camera position and planet position vector in object coordinates, in Km.
-        glm::mat4 world2Obj = glm::inverse(obj2World * transform);
+        glm::mat4 world2Obj = glm::inverse(obj2World * glm::mat4(modelTransform));
         glm::vec4 cameraPosObj = world2Obj * glm::vec4(data.camera.position().vec3() / 1000.0f, 1.0);
         glm::vec4 planetPositionObj = world2Obj * glm::vec4(data.position.vec3() / 1000.0f, 1.0);
         _programObject->setUniform("cameraPosObj", cameraPosObj);
@@ -840,7 +845,8 @@ void RenderablePlanet::render(const RenderData& data) {
 
 void RenderablePlanet::update(const UpdateData& data) {
     // set spice-orientation in accordance to timestamp
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+    _stateMatrix = data.modelTransform.rotation;
+    //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
     _time = data.time;
 }
 
@@ -849,6 +855,10 @@ void RenderablePlanet::loadTexture() {
     if (_colorTexturePath.value() != "") {
         _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
         if (_texture) {
+            if (_texture->numberOfChannels() == 1) {
+                _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
+            }
+
             LDEBUG("Loaded texture from '" << _colorTexturePath << "'");
             _texture->uploadTexture();
 

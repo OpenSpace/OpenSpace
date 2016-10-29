@@ -76,7 +76,7 @@ Fragment getFragment() {
 
     diffuse[3] = transparency;
     frag.color = diffuse;
-    frag.depth = depth;
+    frag.depth = vs_position.w;
 
     return frag;
 }

@@ -3,6 +3,14 @@ return {
     {
         Name = "SaturnBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "SATURN BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        },
     },
 
     -- Saturn module
@@ -29,16 +37,10 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "SATURN BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_SATURN",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC",
             },
             Scale = {
                 Type = "StaticScale",
@@ -46,10 +48,23 @@ return {
             },
         },
     },
+    {
+        Name = "SaturnRings",
+        Parent = "Saturn",
+        Renderable = {
+            Type = "RenderableRings",
+            Frame = "IAU_SATURN",
+            Texture = "textures/saturn_rings.png",
+            Size = { 0.140220, 9.0 },
+            Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
+
+        },
+
+    },
     -- SaturnTrail module
     {   
         Name = "SaturnTrail",
-        Parent = "SaturnBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "SATURN BARYCENTER",

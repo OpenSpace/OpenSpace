@@ -26,6 +26,8 @@
 #define __PROJECTIONCOMPONENT_H__
 
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/vectorproperty.h>
@@ -48,13 +50,11 @@ class ProjectionComponent : public properties::PropertyOwner {
 public:
     ProjectionComponent();
 
-    bool initialize();
+    void initialize(const ghoul::Dictionary& dictionary);
+    bool initializeGL();
     bool deinitialize();
 
     bool isReady() const;
-
-    bool initializeProjectionSettings(const ghoul::Dictionary& dictionary);
-    bool initializeParser(const ghoul::Dictionary& dictionary);
 
     ghoul::opengl::Texture& depthTexture();
     void imageProjectBegin();
@@ -100,6 +100,8 @@ public:
 
     float fieldOfViewY() const;
     float aspectRatio() const;
+
+    static openspace::Documentation Documentation();
 
 private:
     bool generateProjectionLayerTexture(const glm::ivec2& size);

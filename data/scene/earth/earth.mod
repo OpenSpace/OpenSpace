@@ -3,6 +3,14 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        }
     },
     -- Earth module
     {   
@@ -30,12 +38,6 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "EARTH",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
@@ -51,7 +53,7 @@ return {
     -- EarthTrail module
     {   
         Name = "EarthTrail",
-        Parent = "EarthBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "EARTH",

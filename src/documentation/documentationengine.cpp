@@ -83,6 +83,7 @@ std::string generateTextDocumentation(const Documentation& d, int& indentLevel) 
         result += indentMessage("Key", (p.key == "*") ? p.key : "\"" + p.key + "\"");
         result += indentMessage("Optional", (p.optional ? "true" : "false"));
         result += indentMessage("Type", p.verifier->type());
+        result += indentMessage("Documentation", p.documentation);
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -134,6 +135,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         result << "\"key\": \"" << p.key << "\",";
         result << "\"optional\": " << (p.optional ? "true" : "false") << ",";
         result << "\"type\": \"" << p.verifier->type() << "\",";
+        result << "\"documentation\": \"" << p.documentation << "\",";
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
         ReferencingVerifier* rv = dynamic_cast<ReferencingVerifier*>(p.verifier.get());
 
@@ -167,6 +169,7 @@ std::string generateJsonDocumentation(const Documentation& d) {
         if (&p != &d.entries.back()) {
             result << ", ";
         }
+
     }
 
     result << ']';
@@ -186,6 +189,7 @@ std::string generateHtmlDocumentation(const Documentation& d) {
              << "\t\t<td></td>\n"
              << "\t\t<td>" << p.key << "</td>\n"
              << "\t\t<td>" << (p.optional ? "Optional" : "Required") << "</td>\n"
+             << "\t\t<td>" << p.documentation << "</td>\n"
              << "\t\t<td>" << p.verifier->type() << "</td>\n";
 
         TableVerifier* tv = dynamic_cast<TableVerifier*>(p.verifier.get());
@@ -366,6 +370,13 @@ void DocumentationEngine::writeDocumentation(const std::string& f, const std::st
 }
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
+    for (const DocumentationEntry& e : doc.entries) {
+        ghoul_assert(
+            e.documentation.find('"') == std::string::npos,
+            "Documentation cannot contain \" character"
+        );
+    }
+
     if (doc.id.empty()) {
         _documentations.push_back(std::move(doc));
     }

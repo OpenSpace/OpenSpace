@@ -69,7 +69,9 @@ Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     return result;
 }
 
-Rotation::Rotation() {}
+Rotation::Rotation() {
+    setName("Rotation");
+}
     
 Rotation::Rotation(const ghoul::Dictionary& dictionary) {}
     
@@ -79,6 +81,10 @@ bool Rotation::initialize() {
     return true;
 }
     
+const glm::dmat3& Rotation::matrix() const {
+    return _matrix;
+}
+
 void Rotation::update(const UpdateData& data) {}
 
 } // namespace openspace

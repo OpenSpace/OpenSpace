@@ -22,20 +22,22 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "CALLISTO",
                 Aberration = "NONE",
-                AspectRatio = 2
+                AspectRatio = 2,
+
+                Instrument = {
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
-            },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
-            }            
         },
         Transform = {
             Translation = {
@@ -74,7 +76,7 @@ return {
                 Position = {0, -10000000, 0}
             },
         },
-    },    
+    },
     -- CallistoTrail module
     {   
         Name = "CallistoTrail",
@@ -93,7 +95,7 @@ return {
                 Type = "simple",
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
-            },  
+            },
         },
     }
 }

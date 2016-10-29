@@ -336,6 +336,63 @@ TEST_F(DocumentationTest, TableVerifierType) {
     EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 
+TEST_F(DocumentationTest, StringListVerifierType) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { { "StringList", new StringListVerifier } }
+    };
+
+    ghoul::Dictionary positive {
+        {
+            "StringList",
+            ghoul::Dictionary {
+                { "1", "a"s },
+                { "2", "b"s },
+                { "3", "c"s }
+            }
+        }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "StringList", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("StringList", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        {
+            "StringList",
+            ghoul::Dictionary {
+                { "1", "a"s },
+                { "2", "b"s },
+                { "3", 2.0 }
+            }
+        }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("StringList.3", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negativeExist {
+        { "StringList2", ghoul::Dictionary{} }
+    };
+    negativeRes = testSpecification(doc, negativeExist);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("StringList", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
+}
+
 TEST_F(DocumentationTest, MixedVerifiers) {
     using namespace openspace::documentation;
     using namespace std::string_literals;
@@ -2291,6 +2348,303 @@ TEST_F(DocumentationTest, DoubleVector4Verifier) {
 
     ghoul::Dictionary negative {
         { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" }, { "4", 1 } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix2x2Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix2x2Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat2x2(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary { { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix2x3Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix2x3Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat2x3(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix2x4Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix2x4Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat2x4(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix3x2Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix3x2Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat3x2(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix3x3Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix3x3Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat3x3(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix3x4Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix3x4Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat3x4(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix4x2Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix4x2Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat4x2(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix4x3Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix4x3Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat4x3(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        { "a", true }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("a", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, DoubleMatrix4x4Verifier) {
+    using namespace openspace::documentation;
+
+    Documentation doc {
+        { { "a", new DoubleMatrix4x4Verifier } }
+    };
+
+    ghoul::Dictionary positive {
+        { "a", glm::dmat4x4(1.0) }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative {
+        { "a", ghoul::Dictionary{ { "1", true },{ "2", 1.0 },{ "3", "s" } } }
     };
     TestResult negativeRes = testSpecification(doc, negative);
     EXPECT_FALSE(negativeRes.success);

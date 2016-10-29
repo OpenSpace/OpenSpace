@@ -102,7 +102,14 @@ void GuiPropertyComponent::render() {
     ImGui::Spacing();
 
     if (_function) {
-        const std::vector<properties::PropertyOwner*>& owners = _function();
+        std::vector<properties::PropertyOwner*> owners = _function();
+        std::sort(
+            owners.begin(),
+            owners.end(),
+            [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                return lhs->name() < rhs->name();
+            }
+        );
 
         for (properties::PropertyOwner* pOwner : owners) {
             if (pOwner->propertiesRecursive().empty())

@@ -33,11 +33,7 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EUROPA",
                 DestinationFrame = "IAU_JUPITER",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            }
         }
     },
     -- EuropaTrail module

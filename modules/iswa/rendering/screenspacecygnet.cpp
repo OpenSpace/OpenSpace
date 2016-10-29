@@ -59,7 +59,8 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
 
     _delete.onChange([this](){
         OsEng.scriptEngine().queueScript(
-            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");"
+            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     });
         // IswaManager::ref().deleteIswaCygnet(name());});

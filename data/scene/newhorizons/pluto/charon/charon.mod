@@ -22,38 +22,35 @@ return {
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
-            Frame = "IAU_CHARON", 
-            Body = "CHARON",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.035 , 5 },
                 Segments = 100
             },
             Textures = {
-                Type = "simple",
                 Color = ColorTexture,
                 Height = "textures/cpdem-Mcolor2-MLorriCA-lr-5_ZMfs-cyl.jpg",
-                Project = "textures/defaultProj.png",
-                Sequencing = "true",
             },
             Projection = {
                 Observer   = "NEW HORIZONS",
                 Target     = "CHARON",
                 Aberration = "NONE",
-                AspectRatio = 2
-            },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
-            },
-            PotentialTargets = {
-                "PLUTO",
-                "CHARON"
+                AspectRatio = 2,
+
+                Instrument = {
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+                
+                PotentialTargets = {
+                    "PLUTO",
+                    "CHARON"
+                }
             }
         },
         Transform = {
