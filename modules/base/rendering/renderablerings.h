@@ -77,9 +77,7 @@ private:
     glm::mat3 _orientation;
     glm::mat3 _state;
     
-    std::string _body;
     glm::vec3 _sunPosition;
-    bool _hasSunPosition;
 };
 
 } // namespace openspace

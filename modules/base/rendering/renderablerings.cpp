@@ -26,6 +26,8 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>
@@ -39,7 +41,6 @@ namespace {
     
     const std::string KeySize = "Size";
     const std::string KeyTexture = "Texture";
-    const std::string KeyBody = "Body";
     const std::string KeyFrame = "Frame";
     const std::string KeyOrientation = "Orientation";
     const std::string KeyOffset = "Offset";
@@ -63,16 +64,10 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _quad(0)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
-    , _hasSunPosition(false)
 {
     glm::vec2 size;
     dictionary.getValue(KeySize, size);
     _size = size;
-    
-    if (dictionary.hasKeyAndValue<std::string>(KeyBody)) {
-        _body = dictionary.value<std::string>(KeyBody);
-        _hasSunPosition = true;
-    }
     
     if (dictionary.hasKeyAndValue<std::string>(KeyFrame)) {
         _frame = dictionary.value<std::string>(KeyFrame);
@@ -176,11 +171,8 @@ void RenderableRings::render(const RenderData& data) {
     _shader->setUniform("textureOffset", _offset);
     _shader->setUniform("transparency", _transparency);
     
-    _shader->setUniform("hasSunPosition", _hasSunPosition);
-    if (_hasSunPosition) {
-        _shader->setUniform("_nightFactor", _nightFactor);
-        _shader->setUniform("sunPosition", _sunPosition);
-    }
+    _shader->setUniform("_nightFactor", _nightFactor);
+    _shader->setUniform("sunPosition", _sunPosition);
     
     setPscUniforms(*_shader.get(), data.camera, data.position);
 
@@ -217,17 +209,9 @@ void RenderableRings::update(const UpdateData& data) {
         _state = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
     }
     
-    if (!_body.empty()) {
-        double lt;
-        _sunPosition = SpiceManager::ref().targetPosition(
-            "SUN",
-            _body,
-            "GALACTIC",
-            {},
-            data.time,
-            lt
-        );
-    }
+    _sunPosition = 
+        OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+        data.modelTransform.translation;
 }
 
 void RenderableRings::loadTexture() {
