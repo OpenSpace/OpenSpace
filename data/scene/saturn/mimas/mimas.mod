@@ -25,7 +25,7 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MIMAS",
-                DestinationFrame = "IAU_JUPITER"
+                DestinationFrame = "GALACTIC"
             }
         }
     },

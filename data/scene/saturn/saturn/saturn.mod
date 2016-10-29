@@ -40,7 +40,7 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_SATURN",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC",
             },
             Scale = {
                 Type = "StaticScale",
