@@ -40,8 +40,9 @@ namespace {
 namespace openspace {
 
 void ModuleEngine::initialize() {
-    for (OpenSpaceModule* m : AllModules())
+    for (OpenSpaceModule* m : AllModules()) {
         registerModule(std::unique_ptr<OpenSpaceModule>(m));
+    }
 }
 
 void ModuleEngine::deinitialize() {
@@ -77,9 +78,23 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     std::vector<OpenSpaceModule*> result;
-    for (auto& m : _modules)
+    for (auto& m : _modules) {
         result.push_back(m.get());
+    }
     return result;
+}
+
+ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+ModuleEngine::requiredOpenGLVersion() const
+{
+    using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+    Version version = { 0,0 };
+
+    for (const auto& m : _modules) {
+        version = std::max(version, m->requiredOpenGLVersion());
+    }
+
+    return version;
 }
 
 scripting::LuaLibrary ModuleEngine::luaLibrary() {

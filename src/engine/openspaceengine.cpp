@@ -403,7 +403,17 @@ bool OpenSpaceEngine::initialize() {
             verbosity = verbosityMap[v];
     }
     SysCap.logCapabilities(verbosity);
-    
+
+    // Check the required OpenGL versions of the registered modules
+    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version version =
+        _engine->_moduleEngine->requiredOpenGLVersion();
+    LINFO("Required OpenGL version: " << version.toString());
+
+    if (OpenGLCap.openGLVersion() < version) {
+        LFATAL("Module required higher OpenGL version than is supported");
+        return false;
+    }
+
     std::string requestURL = "";
     bool success = configurationManager().getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
     if (success) {
