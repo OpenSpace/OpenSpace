@@ -739,14 +739,18 @@ void OpenSpaceEngine::loadFonts() {
             LERROR("Error registering font '" << font << "' with key '" << key << "'");
     }
     
-    bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-    if (!initSuccess)
-        LERROR("Error initializing default font renderer");
-    
-    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-        _renderEngine->fontResolution()
-    );
-    
+    try {
+        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
+        if (!initSuccess)
+            LERROR("Error initializing default font renderer");
+
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
+            _renderEngine->fontResolution()
+        );
+    }
+    catch (const ghoul::RuntimeError& err) {
+        LERRORC(err.component, err.message);
+    }
 }
     
 void OpenSpaceEngine::configureLogging() {
