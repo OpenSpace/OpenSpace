@@ -471,13 +471,13 @@ bool OpenSpaceEngine::initialize() {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-
-    //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
-    //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
-
     // Run start up scripts
-    runPreInitializationScripts(scenePath);
-
+    try {
+        runPreInitializationScripts(scenePath);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+    }
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
@@ -642,24 +642,6 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         scripts.getValue(key, scriptPath);
         std::string&& absoluteScriptPath = absPath(scriptPath);
         _engine->scriptEngine().runScriptFile(absoluteScriptPath);
-        
-        //@JK
-        //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
-        /*
-        std::ifstream scriptFile;
-        scriptFile.open(absoluteScriptPath.c_str());
-        std::string line;
-       
-        while(getline(scriptFile,line)){
-            //valid line and not a comment
-            if(line.size() > 0 && line.at(0) != '-'){
-                std::string lib, func;
-                if(_engine->scriptEngine().parseLibraryAndFunctionNames(lib, func, line) &&
-                   _engine->scriptEngine().shouldScriptBeSent(lib, func)){
-                    _engine->scriptEngine().cacheScript(lib, func, line);
-                }
-            }
-        }*/
     }
 }
 
@@ -902,9 +884,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Step the camera using the current mouse velocities which are synced
     //_interactionHandler->updateCamera();
     
-    
-
-
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();

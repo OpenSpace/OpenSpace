@@ -132,7 +132,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
         _program->setUniform("ModelTransform", transform);
 
         int frame = _frameCounter % 60;
-        float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 60));
+        float fadingFactor = static_cast<float>(sin((frame * 3.14159) / 60));
         float alpha = 0.6f + fadingFactor*0.4f;
 
         glLineWidth(2.f);
