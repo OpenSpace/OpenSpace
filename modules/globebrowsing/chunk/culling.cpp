@@ -68,9 +68,9 @@ namespace globebrowsing {
             dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
             clippingSpaceCorners[i] = cornerClippingSpace;
 
-            dvec3 cornerScreenSpace =
+            dvec3 cornerNDC =
                 (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
-            bounds.expand(cornerScreenSpace);
+            bounds.expand(cornerNDC);
         }
         
         return !_viewFrustum.intersects(bounds);

@@ -65,8 +65,8 @@ namespace globebrowsing {
     class FrustumCuller : public ChunkCuller {
     public:
         /**
-         * \param viewFrustum is the view space in screen space. Hence it is an axis
-         * aligned bounding box and not a real frustum.
+         * \param viewFrustum is the view space in normalized device coordinates space.
+         Hence it is an axis aligned bounding box and not a real frustum.
         */
         FrustumCuller(const AABB3 viewFrustum);
         ~FrustumCuller();
