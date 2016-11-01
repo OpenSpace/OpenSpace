@@ -49,7 +49,7 @@
 #include <math.h>
 
 //#define _ATMOSPHERE_DEBUG
-//#define _SAVE_ATMOSPHERE_TEXTURES
+#define _SAVE_ATMOSPHERE_TEXTURES
 
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
@@ -101,7 +101,6 @@ namespace openspace {
         , _heightMapTexture(nullptr)
         , _cloudsTexture(nullptr)
         , _geometry(nullptr)
-        , _atmosphereGeometry(nullptr)
         , _performShading("performShading", "Perform Shading", true)
         , _rotation("rotation", "Rotation", 0, 0, 360)
         , _saveDeferredFramebuffer("save deferred framebuffer to disk", "Save deferred framebuffer to disk", false)
@@ -150,13 +149,7 @@ namespace openspace {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
     ghoul_assert(success,
-            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
-
-    //std::string path;
-    //success = dictionary.getValue(constants::scenegraph::keyPathModule, path);
-    //ghoul_assert(success,
-    //        "RenderablePlanet need the '"<<constants::scenegraph::keyPathModule<<"' be specified");
-
+            "RenderablePlanet need the '" << SceneGraphNode::KeyName << "' be specified");
 
     //=======================================================
     //======== Reads Geometry Entries in mod file =============
@@ -423,6 +416,10 @@ namespace openspace {
         if (!errorReadingAtmosphereData) {
             _atmosphereEnabled = true;
 
+        //========================================================
+        //============== Atmosphere Properties ===================
+        //========================================================
+
         _atmosphereHeightP.set(_atmosphereRadius - _atmospherePlanetRadius);
         _atmosphereHeightP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
         addProperty(_atmosphereHeightP);
@@ -455,16 +452,6 @@ namespace openspace {
         _sunIntensityP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
         addProperty(_sunIntensityP);
 
-        ghoul::Dictionary atmosphereGeometryDictionary;
-        success = dictionary.getValue(keyGeometry, atmosphereGeometryDictionary);
-        if (success) {
-            atmosphereGeometryDictionary.setValue(SceneGraphNode::KeyName, "Atmosphere");
-            float atmR = (_atmosphereHeightP + _atmospherePlanetRadius)*1000.0;
-            atmosphereGeometryDictionary.setValue("radius", PowerScaledCoordinate::CreatePowerScaledCoordinate(
-                atmR, atmR, atmR));
-            _atmosphereGeometry = planetgeometry::PlanetGeometry::createFromDictionary(atmosphereGeometryDictionary);
-            addPropertySubOwner(_atmosphereGeometry);
-        }
 
 //#ifdef _ATMOSPHERE_DEBUG
             std::stringstream ss;
@@ -590,8 +577,6 @@ bool RenderablePlanet::initialize() {
     //======== Initialize the current geometry (SimpleSphereGeometry) ========
     //========================================================================
     _geometry->initialize(this);    
-
-    //_atmosphereGeometry->initialize(this);
 
     // Deactivate any previously activated shader program.
     _programObject->deactivate();
@@ -915,14 +900,14 @@ void RenderablePlanet::render(const RenderData& data) {
 
         _programObject->setUniform("Rg", _atmospherePlanetRadius);
         _programObject->setUniform("Rt", _atmosphereRadius);
-        _programObject->setUniform("AVERAGE_GROUND_REFLECTANCE", _planetAverageGroundReflectance);
+        _programObject->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
         _programObject->setUniform("HR", _rayleighHeightScale);
-        _programObject->setUniform("betaR", _rayleighScatteringCoeff);
+        _programObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
         _programObject->setUniform("HM", _mieHeightScale);
-        _programObject->setUniform("betaMSca", _mieScatteringCoeff);
-        _programObject->setUniform("betaMEx", _mieExtinctionCoeff);
+        _programObject->setUniform("betaMieScattering", _mieScatteringCoeff);
+        _programObject->setUniform("betaMieExtinction", _mieExtinctionCoeff);
         _programObject->setUniform("mieG", _miePhaseConstant);
-        _programObject->setUniform("ISun", _sunRadianceIntensity);
+        _programObject->setUniform("sunRadiance", _sunRadianceIntensity);
 
 
         ghoul::opengl::TextureUnit reflectanceUnit;
@@ -942,7 +927,6 @@ void RenderablePlanet::render(const RenderData& data) {
         // HDR
         _programObject->setUniform("exposure", 0.4f);
         
-        //_atmosphereGeometry->render();
     }
     
     // render
@@ -1168,13 +1152,14 @@ void RenderablePlanet::render(const RenderData& data) {
 
         _deferredAtmosphereProgramObject->setUniform("Rg", _atmospherePlanetRadius);
         _deferredAtmosphereProgramObject->setUniform("Rt", _atmosphereRadius);
-        _deferredAtmosphereProgramObject->setUniform("AVERAGE_GROUND_REFLECTANCE", _planetAverageGroundReflectance);
+        _deferredAtmosphereProgramObject->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
         _deferredAtmosphereProgramObject->setUniform("HR", _rayleighHeightScale);
-        _deferredAtmosphereProgramObject->setUniform("betaR", _rayleighScatteringCoeff);
+        _deferredAtmosphereProgramObject->setUniform("betaRayleigh", _rayleighScatteringCoeff);
         _deferredAtmosphereProgramObject->setUniform("HM", _mieHeightScale);
-        _deferredAtmosphereProgramObject->setUniform("betaMSca", _mieScatteringCoeff);
-        _deferredAtmosphereProgramObject->setUniform("betaMEx", _mieExtinctionCoeff);
+        _deferredAtmosphereProgramObject->setUniform("betaMieScattering", _mieScatteringCoeff);
+        _deferredAtmosphereProgramObject->setUniform("betaMieExtinction", _mieExtinctionCoeff);
         _deferredAtmosphereProgramObject->setUniform("mieG", _miePhaseConstant);
+        _deferredAtmosphereProgramObject->setUniform("sunRadiance", _sunRadianceIntensity);
 
 
         ghoul::opengl::TextureUnit reflectanceUnit;
@@ -1694,8 +1679,8 @@ void RenderablePlanet::loadComputationPrograms() {
         }
 
     }
-    //_cleanTextureProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_cleanTextureProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
+    _cleanTextureProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _cleanTextureProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
 
 }
@@ -1924,7 +1909,7 @@ void RenderablePlanet::updateAtmosphereParameters() {
     _planetAverageGroundReflectance = _groundAverageReflectanceP;
     _rayleighHeightScale = _rayleighHeightScaleP;
     _mieHeightScale = _mieHeightScaleP;
-    _mieScatteringCoeff = glm::vec3(_mieScatteringCoefficientP);
+    _mieScatteringCoeff = glm::vec3(_mieScatteringCoefficientP * 10e-03);
     _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f/static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
     _miePhaseConstant = _mieAsymmetricFactorGP;
     _sunRadianceIntensity = _sunIntensityP;
@@ -1936,14 +1921,14 @@ void RenderablePlanet::updateAtmosphereParameters() {
 void RenderablePlanet::loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg) {
     shaderProg->setUniform("Rg", _atmospherePlanetRadius);
     shaderProg->setUniform("Rt", _atmosphereRadius);
-    shaderProg->setUniform("AVERAGE_GROUND_REFLECTANCE", _planetAverageGroundReflectance);
+    shaderProg->setUniform("AverageGroundReflectance", _planetAverageGroundReflectance);
     shaderProg->setUniform("HR", _rayleighHeightScale);
-    shaderProg->setUniform("betaR", _rayleighScatteringCoeff);
+    shaderProg->setUniform("betaRayleigh", _rayleighScatteringCoeff);
     shaderProg->setUniform("HM", _mieHeightScale);
-    shaderProg->setUniform("betaMSca", _mieScatteringCoeff);
-    shaderProg->setUniform("betaMEx", _mieExtinctionCoeff);
+    shaderProg->setUniform("betaMieScattering", _mieScatteringCoeff);
+    shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
-    shaderProg->setUniform("ISun", _sunRadianceIntensity);
+    shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
 
 }
 

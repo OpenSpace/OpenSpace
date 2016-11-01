@@ -73,10 +73,10 @@ void main()
     vs_position = tmp;
 
     if (_hasHeightMap) {
-        float height = texture(heightTex, in_st).r;
-        vec3 displacementDirection = abs(normalize(in_normal.xyz));
-        float displacementFactor = height * _heightExaggeration;
-        position.xyz = position.xyz + displacementDirection * displacementFactor;
+      float height = texture(heightTex, in_st).r;
+      vec3 displacementDirection = abs(normalize(in_normal.xyz));
+      float displacementFactor = height * _heightExaggeration;
+      position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
     
     // Now the position is transformed from view coordinates to SGCT projection

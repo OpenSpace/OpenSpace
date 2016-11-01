@@ -139,7 +139,7 @@ void inscatter(float r, float mu, float mu_s, float nu, out vec3 raymie) {
         float dground = 0.0;
         vec3 gtransp = vec3(0.0);
         if (ctheta < cthetamin) { 
-            greflectance = AVERAGE_GROUND_REFLECTANCE / M_PI;
+            greflectance = AverageGroundReflectance / M_PI;
             dground = -r * ctheta - sqrt(r * r * (ctheta * ctheta - 1.0) + Rg * Rg);
             gtransp = transmittance(Rg, -(r * ctheta + dground) / Rg, dground);
         }
@@ -171,7 +171,7 @@ void inscatter(float r, float mu, float mu_s, float nu, out vec3 raymie) {
                 raymie1 += texture4D(deltaSRTexture, r, w.z, mu_s, nu1).rgb;
             }
 
-            raymie += raymie1 * (betaR * exp(-(r - Rg) / HR) * pr2 + betaMSca * exp(-(r - Rg) / HM) * pm2) * dw;
+            raymie += raymie1 * (betaRayleigh * exp(-(r - Rg) / HR) * pr2 + betaMieScattering * exp(-(r - Rg) / HM) * pm2) * dw;
         }
     }
 }
