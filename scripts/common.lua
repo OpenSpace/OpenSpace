@@ -12,9 +12,21 @@ helper.scheduledScript.reversible = {}
 -- Function that sets the most common key bindings that are common to most (all?)
 -- scenes
 helper.setCommonKeys = function()
-    openspace.bindKeyLocal("F1", "openspace.gui.toggle()")
-    openspace.bindKeyLocal("F2", "openspace.setPerformanceMeasurement(true)")
-    openspace.bindKeyLocal("F3", "openspace.setPerformanceMeasurement(false)")
+    openspace.bindKeyLocal(
+        "F1",
+        "openspace.gui.toggle()",
+        "Toggles the visibility of the on-screen GUI"
+    )
+    openspace.bindKeyLocal(
+        "F2",
+        "openspace.setPerformanceMeasurement(true)",
+        "Enables performance measurements"
+    )
+    openspace.bindKeyLocal(
+        "F3",
+        "openspace.setPerformanceMeasurement(false)",
+        "Disables performance measurements"
+    )
 
     openspace.bindKeyLocal("t", "openspace.toggleFrametimeType(1)")
     openspace.bindKeyLocal("Shift+t", "openspace.toggleFrametimeType(0)")
@@ -48,7 +60,11 @@ helper.setDeltaTimeKeys = function(t)
     end
 
     for i, v in ipairs(t) do
-        openspace.bindKey(Keys[i], 'openspace.time.setDeltaTime(' .. v .. ")")
+        openspace.bindKey(
+            Keys[i],
+            'openspace.time.setDeltaTime(' .. v .. ")",
+            'Setting the simulation speed to ' .. v .. ' seconds per realtime second'
+        )
     end
 end
 
