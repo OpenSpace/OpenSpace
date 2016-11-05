@@ -23,9 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/onscreengui/include/guiiswacomponent.h>
-
 #include <modules/iswa/util/iswamanager.h>
-
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
@@ -102,9 +100,18 @@ void GuiIswaComponent::render() {
                     std::string path  = cdfs[cdfOption].path;
                     std::string date  = cdfs[cdfOption].date;
                     groupName = cdfs[cdfOption].group;
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");");
-                    OsEng.scriptEngine().queueScript("openspace.time.setTime('"+date+"');");
-                    OsEng.scriptEngine().queueScript("openspace.time.setDeltaTime(0);");
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");",
+                        scripting::ScriptEngine::RemoteScripting::Yes
+                    );
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.time.setTime('"+date+"');",
+                        scripting::ScriptEngine::RemoteScripting::Yes
+                    );
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.time.setDeltaTime(0);",
+                        scripting::ScriptEngine::RemoteScripting::Yes
+                    );
                 }
             }
         }
@@ -138,10 +145,19 @@ void GuiIswaComponent::render() {
             std::string x = "openspace.iswa.addCygnet(-4, 2, 'Magnetosphere_Data');";
             std::string y = "openspace.iswa.addCygnet(-5, 2, 'Magnetosphere_Data');";
             std::string z = "openspace.iswa.addCygnet(-6, 2, 'Magnetosphere_Data');";
-            OsEng.scriptEngine().queueScript(x+y+z);
-            OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Magnetosphere_Data');");
+            OsEng.scriptEngine().queueScript(
+                x+y+z,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.clearGroupBuildData('Magnetosphere_Data');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Magnetosphere_Data');");
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.removeGroup('Magnetosphere_Data');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }
 
@@ -151,19 +167,34 @@ void GuiIswaComponent::render() {
             std::string x = "openspace.iswa.addCygnet(-4, 0, 'Magnetosphere_Image');";
             std::string y = "openspace.iswa.addCygnet(-5, 0, 'Magnetosphere_Image');";
             std::string z = "openspace.iswa.addCygnet(-6, 0, 'Magnetosphere_Image');";
-            OsEng.scriptEngine().queueScript(x+y+z);
+            OsEng.scriptEngine().queueScript(
+                x+y+z,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Magnetosphere_Image');");
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.removeGroup('Magnetosphere_Image');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }
 
     if(_ionData != oldIonDataValue){
         if(_ionData){
             // IswaManager::ResourceType::Json = 1
-            OsEng.scriptEngine().queueScript("openspace.iswa.addCygnet(-10, 1, 'Ionosphere');");
-            OsEng.scriptEngine().queueScript("openspace.iswa.clearGroupBuildData('Ionosphere');");
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.addCygnet(-10, 1, 'Ionosphere');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.clearGroupBuildData('Ionosphere');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }else{
-            OsEng.scriptEngine().queueScript("openspace.iswa.removeGroup('Ionosphere');");
+            OsEng.scriptEngine().queueScript(
+                "openspace.iswa.removeGroup('Ionosphere');",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }
 
@@ -188,17 +219,22 @@ void GuiIswaComponent::render() {
 
             if(selected != info->selected){
                 if(info->selected){
-                    OsEng.scriptEngine().queueScript("openspace.iswa.addScreenSpaceCygnet("
-                        "{CygnetId = "+std::to_string(id)+" });");
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.addScreenSpaceCygnet({CygnetId = "+std::to_string(id)+" });",
+                        scripting::ScriptEngine::RemoteScripting::Yes
+                    );
                 }else{
-                    OsEng.scriptEngine().queueScript("openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");");
+                    OsEng.scriptEngine().queueScript(
+                        "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(id)+");",
+                        scripting::ScriptEngine::RemoteScripting::Yes
+                    );
                 }
             }
 
         }
     }
 
-    renderProperties();
+    GuiPropertyComponent::render();
     
     ImGui::End();
 #endif

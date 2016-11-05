@@ -104,10 +104,6 @@ public:
 
     static scripting::LuaLibrary luaLibrary();
 
-    ghoul::Event<>& iswaEvent(){
-        return _iswaEvent;
-    }
-
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
     void unregisterGroup(std::string groupName);

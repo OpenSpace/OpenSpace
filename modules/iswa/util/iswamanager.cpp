@@ -172,9 +172,8 @@ std::string IswaManager::cygnetType(int i){
     return _cygnetType[static_cast<CygnetType>(i)];
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) const {
+std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, double timestamp) {
     return std::move(OsEng.downloadManager().fetchFile(
-
             iswaUrl(id, timestamp, "image"),
             [id](const DownloadManager::MemoryFile& file){
                 LDEBUG("Download to memory finished for image cygnet with id: " + std::to_string(id));
@@ -185,7 +184,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) {
     return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
@@ -197,7 +196,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, do
         ) );   
 }
 
-std::string IswaManager::iswaUrl(int id, double timestamp, std::string type) const{
+std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     std::string url;
     if(id < 0){
         url = baseUrl+type+"/" + std::to_string(-id) + "/";
@@ -489,7 +488,7 @@ void IswaManager::clearGroupBuildData(std::string name){
     }
 }
 
-scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
+scripting::LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {
@@ -498,63 +497,54 @@ scripting::ScriptEngine::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCygnet,
                 "int, string, string",
                 "Adds a IswaCygnet",
-                true
             },
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
                 "int, string, string",
                 "Adds a Screen Space Cygnets",
-                true
             },
             {
                 "addKameleonPlanes",
                 &luascriptfunctions::iswa_addKameleonPlanes,
                 "string, int",
                 "Adds KameleonPlanes from cdf file.",
-                true
             },
             {
                 "addCdfFiles",
                 &luascriptfunctions::iswa_addCdfFiles,
                 "string",
                 "Adds a cdf files to choose from.",
-                true
             },
             {
                 "removeCygnet",
                 &luascriptfunctions::iswa_removeCygnet,
                 "string",
                 "Remove a Cygnets",
-                true
             },
             {
                 "removeScreenSpaceCygnet",
                 &luascriptfunctions::iswa_removeScrenSpaceCygnet,
                 "int",
                 "Remove a Screen Space Cygnets",
-                true
             },
             {
                 "removeGroup",
                 &luascriptfunctions::iswa_removeGroup,
                 "int",
                 "Remove a group of Cygnets",
-                true
             },
             {
                 "setBaseUrl",
                 &luascriptfunctions::iswa_setBaseUrl,
                 "string",
                 "sets the base url",
-                true
             },
             {
                 "clearGroupBuildData",
                 &luascriptfunctions::iswa_clearGroupBuildData,
                 "string",
                 "Clear build data for a group",
-                true
             }
         }
     };

@@ -46,7 +46,7 @@ DataSphere::DataSphere(const ghoul::Dictionary& dictionary)
 {
     float radius;
     dictionary.getValue("Radius", radius);
-    _radius = radius;
+    _radius = radius*2.0f;
 
     _programName = "DataSphereProgram";
     _vsPath = "${MODULE_ISWA}/shaders/datasphere_vs.glsl";
