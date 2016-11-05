@@ -168,9 +168,15 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 LERROR("Specified common folder '" << fullCommonFolder << "' did not exist");
             else {
                 if (!commonFolder.empty()) {
-                    FileSys.registerPathToken(_commonModuleToken, commonFolder);
+                    FileSys.registerPathToken(
+                        _commonModuleToken, commonFolder,
+                        ghoul::filesystem::FileSystem::Override::Yes
+                    );
                     size_t nKeys = moduleDictionary.size();
-                    moduleDictionary.setValue(std::to_string(nKeys + 1), commonFolder);
+                    moduleDictionary.setValue(
+                        std::to_string(nKeys + 1),
+                        commonFolder
+                    );
                 }
             }
         }
@@ -304,6 +310,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
                 element.getValue(SceneGraphNode::KeyParentName, parentName);
                 
                 FileSys.setCurrentDirectory(modulePath);
+                LDEBUGC("Create from dictionary", "Node name: " << nodeName << "  Parent name:" << parentName << "  Path: " << modulePath);
                 SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
                 if (node == nullptr) {
                     LERROR("Error loading SceneGraphNode '" << nodeName << "' in module '" << moduleName << "'");
@@ -338,7 +345,17 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         };
 
         for (const ModuleInformation& i : moduleDictionaries) {
-            addModule(i);
+            try {
+                LINFO("Adding module: " << i.moduleName);
+                addModule(i);
+            }
+            catch (const documentation::SpecificationError& specError) {
+                LERROR("Error loading module: " << i.moduleName);
+                LERRORC(specError.component, specError.message);
+                for (const auto& offense : specError.result.offenses) {
+                    LERRORC(offense.offender, std::to_string(offense.reason));
+                }
+            }
         }
     }
 //    ghoul::lua::destroyLuaState(state);
@@ -493,7 +510,7 @@ bool SceneGraph::removeSceneGraphNode(SceneGraphNode* node) {
     }
 
     // Remove internal node from the list of nodes
-    SceneGraphNodeInternal* internalNode = *it;
+    //SceneGraphNodeInternal* internalNode = *it;
     _nodes.erase(it);
 
     if (OsEng.interactionHandler().focusNode() == node)

@@ -31,6 +31,8 @@
 #include <set>
 #include <mutex>
 
+#include <openspace/documentation/documentation.h>
+
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
@@ -100,7 +102,7 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-    std::vector<SceneGraphNode*> allSceneGraphNodes();
+    std::vector<SceneGraphNode*> allSceneGraphNodes() const;
 
     SceneGraph& sceneGraph();
 
@@ -115,12 +117,14 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      * scene graph
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
+
+    static documentation::Documentation Documentation();
 
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
 
-    void writePropertyDocumentation(const std::string& filename, const std::string& type);
+    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
 
     std::string _focus;
 

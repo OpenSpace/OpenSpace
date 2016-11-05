@@ -1,0 +1,18 @@
+<div class="documentation-item">
+  <div class="row">
+    <div class="col-lg-12">
+      <p>
+        <a href="#{{urlify name}}" name="{{urlify name}}">
+          <span class="documentation-key">{{name}}</span>
+        </a>
+      </p>
+      {{#each properties}}
+        {{> property}}
+      {{/each}}
+      {{#each propertyOwners}}
+        {{> propertyOwner}}
+      {{/each}}
+    </div>
+  </div>
+</div>
+

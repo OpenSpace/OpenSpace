@@ -24,7 +24,7 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-set(HEADER_FILES
+set(HEADER_FILES    
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablecrawlingline.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefov.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplaneprojection.h
@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/writeToTexture.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.h
@@ -42,6 +43,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/sequenceparser.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/targetdecoder.h
 )
+
+
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
@@ -53,6 +56,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodelprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/decoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/hongkangparser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumenttimesparser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/imagesequencer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/instrumentdecoder.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/labelparser.cpp

@@ -26,8 +26,6 @@
 
 #include <modules/debugging/rendering/renderabledebugplane.h>
 
-
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -65,6 +63,12 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
         dictionary.getValue("Name", _nodeName);
     }
 
+    if (dictionary.hasKey("Texture")) {
+        int t;
+        dictionary.getValue("Texture", t);
+        _texture = t;
+    }
+
     std::string origin;
     if (dictionary.getValue("Origin", origin)) {
         if (origin == "LowerLeft") {
@@ -90,6 +94,9 @@ RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
         _billboard = billboard;
     }
 
+    int texture;
+    if (dictionary.getValue("Texture", texture))
+        _texture = texture;
     addProperty(_texture);
 
     addProperty(_billboard);

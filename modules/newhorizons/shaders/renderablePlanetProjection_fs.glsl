@@ -27,7 +27,9 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 in vec4 vs_position;
-out vec4 color;
+
+layout (location = 0) out vec4 color; 
+layout (location = 1) out vec4 stencil;
 
 uniform sampler2D projectionTexture;
 
@@ -71,6 +73,8 @@ void main() {
     projected.x /= projected.w;
     projected.y /= projected.w;
 
+    projected = projected * 0.5 + vec4(0.5);
+
     vec3 normal = normalize((ModelTransform*vec4(vertex.xyz,0)).xyz);
 
     vec3 v_b = normalize(boresight);
@@ -81,9 +85,11 @@ void main() {
     {
     // The 1-x is in this texture call because of flipped textures
     // to be fixed soon ---abock
-        color = texture(projectionTexture, vec2(projected.x, 1-projected.y));
+        color = texture(projectionTexture, vec2(projected.x, projected.y));
+        stencil = vec4(1.0); 
     }
     else {
         color = vec4(0.0);
+        stencil = vec4(0.0);
     }
 }

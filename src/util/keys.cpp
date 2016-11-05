@@ -110,3 +110,39 @@ bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
 }
 
 } // namespace openspace
+
+namespace std {
+ 
+std::string to_string(openspace::Key key) {
+    for (const auto& p : openspace::KeyMapping) {
+        if (p.second == key)
+            return p.first;
+    }
+    ghoul_assert(false, "Missing key in KeyMapping");
+}
+
+std::string to_string(openspace::KeyModifier mod) {
+    using namespace openspace;
+    
+    if (mod == KeyModifier::NoModifier)
+        return "";
+    
+    std::string result;
+    for (const auto& p : KeyModifierMapping) {
+        if (hasKeyModifier(mod, p.second)) {
+            result += p.first + "+";
+        }
+    }
+    // The last addition has added an additional '+' that we
+    // should remove
+    return result.substr(0, result.size() - 1);
+}
+
+std::string to_string(openspace::KeyWithModifier key) {
+    if (key.modifier == openspace::KeyModifier::NoModifier)
+        return to_string(key.key);
+    else
+        return to_string(key.modifier) + "+" + to_string(key.key);
+}
+    
+} // namespace std

@@ -30,6 +30,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/rendering/raycastermanager.h>
 
@@ -124,8 +125,6 @@ void FramebufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
-
-
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -152,8 +151,6 @@ void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool att
 }
 
 void FramebufferRenderer::update() {
-    PerfMeasure("FramebufferRenderer::update");
-    
     if (_dirtyResolution) {
         updateResolution();
     }
@@ -205,14 +202,11 @@ void FramebufferRenderer::update() {
 }
 
 void FramebufferRenderer::updateResolution() {
-    int nSamples = _nAaSamples;
-    PerfMeasure("FramebufferRenderer::updateResolution");
-
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
 
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
-        nSamples,
+        _nAaSamples,
         GL_RGBA,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
@@ -221,7 +215,7 @@ void FramebufferRenderer::updateResolution() {
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
-        nSamples,
+        _nAaSamples,
         GL_DEPTH_COMPONENT32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
@@ -262,8 +256,6 @@ void FramebufferRenderer::updateResolution() {
 }
 
 void FramebufferRenderer::updateRaycastData() {
-    PerfMeasure("FramebufferRenderer::updateRaycastData");
-
     _raycastData.clear();
     _exitPrograms.clear();
     _raycastPrograms.clear();
@@ -318,7 +310,13 @@ void FramebufferRenderer::updateRaycastData() {
 }
 
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
-    PerfMeasure("FramebufferRenderer::render");
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (doPerformanceMeasurements) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "FramebufferRenderer::render",
+            OsEng.renderEngine().performanceManager()
+        );
+    }
     
     if (!_scene)
         return;
@@ -329,7 +327,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    RenderData data = { *_camera, psc(), doPerformanceMeasurements };
+    RenderData data = { *_camera, psc(), doPerformanceMeasurements, 0 };
     RendererTasks tasks;
 
     // Capture standard fbo
@@ -339,7 +337,13 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // bind new fbo A with color and depth buffer.
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Transparent);
+    _scene->render(data, tasks);
+    data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
     _scene->render(data, tasks);
 
     for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
@@ -394,6 +398,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             raycastProgram->setUniform("nAaSamples", _nAaSamples);
+            raycastProgram->setUniform("windowSize", glm::vec2(_resolution));
 
 
             glDisable(GL_DEPTH_TEST);
@@ -460,19 +465,13 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
 }
 
 void FramebufferRenderer::updateRendererData() {
-    PerfMeasure("FramebufferRenderer::updateRendererData");
-
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
-    dict.setValue("windowWidth", _resolution.x);
-    dict.setValue("windowHeight", _resolution.y);
 
     _rendererData = dict;
 
     OsEng.renderEngine().setRendererData(dict);
 }
 
-
 }
-

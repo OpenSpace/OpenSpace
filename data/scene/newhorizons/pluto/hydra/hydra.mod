@@ -27,19 +27,19 @@ return {
                 Color = "textures/gray.jpg",
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "Hydra",
-            Reference = "ECLIPJ2000",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = NewHorizonsKernels
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "HYDRA",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_PLUTO",
+                DestinationFrame = "ECLIPJ2000"
+            },
         },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_PLUTO",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Hydra"
     },
     {
         Name = "HydraText",
@@ -51,10 +51,12 @@ return {
             Billboard = true,
             Texture = "textures/Hydra-Text.png"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {1, 0, 1, 6}
-        }
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {1000000, 0, 1000000},
+            },
+        },
     },    
     -- HydraTrail module
     {   
@@ -76,7 +78,6 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/HydraTrail"
     }
     
 }

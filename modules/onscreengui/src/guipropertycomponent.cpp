@@ -108,7 +108,14 @@ void GuiPropertyComponent::render() {
 
 void GuiPropertyComponent::renderProperties(){
     if (_function) {
-        const std::vector<properties::PropertyOwner*>& owners = _function();
+        std::vector<properties::PropertyOwner*> owners = _function();
+        std::sort(
+            owners.begin(),
+            owners.end(),
+            [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                return lhs->name() < rhs->name();
+            }
+        );
 
         for (properties::PropertyOwner* pOwner : owners) {
             if (pOwner->propertiesRecursive().empty())
@@ -139,6 +146,9 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop, properties
     static std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
         { "IntProperty", &renderIntProperty },
+        { "IVec2Property", &renderIVec2Property },
+        { "IVec3Property", &renderIVec3Property },
+        { "IVec4Property", &renderIVec4Property },
         { "FloatProperty", &renderFloatProperty },
         { "Vec2Property", &renderVec2Property },
         { "Vec3Property", &renderVec3Property },

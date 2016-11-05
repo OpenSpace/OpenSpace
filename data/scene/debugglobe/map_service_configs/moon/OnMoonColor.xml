@@ -1,0 +1,65 @@
+<GDAL_WMS>
+    <Service name="TiledWMS">
+        <ServerUrl>http://onmoon.lmmp.nasa.gov/wms.cgi?</ServerUrl>
+        <TiledGroupName>LRO WAC Mosaic, LMMP</TiledGroupName>
+
+        <!--
+            Clementine LO Hybrid, LMMP
+            Clementine Mosaic, LMMP
+            LRO WAC Mosaic, LMMP
+            LOLA v2, LMMP
+            LOLA Shade v2, LMMP
+            LOLA ClrShade v2, LMMP
+            LOLA v4, LMMP
+            LOLA v4 Coverage, LMMP
+            LOLA v4 NoData Mask, LMMP
+            LOLA Shade v4, LMMP
+            LOLA ClrShade v4, LMMP
+            Apollo 15, LMMP
+            Apollo 15 DEM Grayscale, LMMP
+            Apollo 15 HillShade, LMMP
+            Apollo 15 Colorized HillShade, LMMP
+            Apollo 15 Colorized Confidence, LMMP
+            Apollo 16 image, LMMP
+            Apollo 16 DEM Grayscale, LMMP
+            Apollo 16 HillShade, LMMP
+            Apollo 16 Colorized HillShade, LMMP
+            Apollo 16 Colorized Confidence, LMMP
+            Apollo 17 image Old, LMMP
+            Apollo 17 image, LMMP
+            Apollo 17 DEM Grayscale, LMMP
+            Apollo 17 HillShade, LMMP
+            Apollo 17 Colorized HillShade, LMMP
+            Apollo 17 Colorized Confidence, LMMP
+            Apollo Zone image, LMMP
+            Apollo Zone image 3033, LMMP
+            Apollo Zone DEM Grayscale, LMMP
+            Apollo Zone HillShade, LMMP
+            Apollo Zone Colorized HillShade, LMMP
+            Apollo Zone Colorized Confidence, LMMP
+            LRO Diviner CF Filled, LMMP
+            LRO Diviner CF, LMMP
+            Clementine Color Ratio, LMMP
+            Clementine Optical Maturity, LMMP
+            Clementine FeO abundance, LMMP
+            Clementine TiO2 abundance, LMMP
+            LP Fe Abundance, colorized, LMMP
+            LP K Abundance, colorized, LMMP
+            LP Th Abundance, colorized, LMMP
+            LP H Abundance, colorized, LMMP
+        -->
+
+    </Service>
+    <DataWindow>
+        <UpperLeftX>-180.0</UpperLeftX>
+        <UpperLeftY>90</UpperLeftY>
+        <LowerRightX>180.0</LowerRightX>
+        <LowerRightY>-90</LowerRightY>
+        <TileLevel>20</TileLevel>
+        <TileCountX>2</TileCountX>
+        <TileCountY>1</TileCountY>
+        <YOrigin>top</YOrigin>
+    </DataWindow>
+    <BlockSizeX>512</BlockSizeX>
+    <BlockSizeY>512</BlockSizeY>
+</GDAL_WMS>

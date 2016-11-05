@@ -50,8 +50,8 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _downloadImage = true;
     _url = IswaManager::ref().iswaUrl(_cygnetId);
         
-    _openSpaceTime = Time::ref().currentTime();
-    _lastUpdateOpenSpaceTime = 0.0f;
+    _openSpaceTime = Time::ref().j2000Seconds();
+    _lastUpdateOpenSpaceTime = _openSpaceTime;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
@@ -74,7 +74,7 @@ void ScreenSpaceCygnet::update(){
     // the image is downloaded ahead of time, so we need to
     // know if we are going backwards or forwards in time
     double clockwiseSign = (Time::ref().deltaTime()<0) ? -1.0 : 1.0;
-    _openSpaceTime = Time::ref().currentTime();
+    _openSpaceTime = Time::ref().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
     bool timeToUpdate = (fabs(_openSpaceTime-_lastUpdateOpenSpaceTime) >= _updateInterval &&

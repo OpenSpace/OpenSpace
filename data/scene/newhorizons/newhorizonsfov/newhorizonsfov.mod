@@ -6,7 +6,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -24,7 +24,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_LORRI"
     },
     -- NewHorizonsFov module NH_RALPH_LEISA
     {   
@@ -33,7 +32,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -51,7 +50,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_LEISA"
     },
 
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN1
@@ -61,7 +59,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -79,7 +77,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_PAN1"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN2
     {   
@@ -88,7 +85,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -107,7 +104,6 @@ return {
             }
 
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_PAN2"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_RED
     {   
@@ -116,7 +112,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -135,7 +131,6 @@ return {
             }
 
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_RED"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_BLUE
     {   
@@ -144,7 +139,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -162,7 +157,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_BLUE"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_FT
     {   
@@ -171,7 +165,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -189,7 +183,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_FT"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_METHANE
     {   
@@ -198,7 +191,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -216,7 +209,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
     -- NewHorizonsFov module NH_RALPH_MVIC_NIR
     {   
@@ -225,7 +217,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -243,7 +235,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_RALPH_MVIC_METHANE"
     },
     -- NewHorizonsFov module NH_ALICE_AIRGLOW
     {   
@@ -252,7 +243,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -270,7 +261,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_ALICE_AIRGLOW"
     },
     -- NewHorizonsFov module NH_ALICE_SOC
     {   
@@ -279,7 +269,7 @@ return {
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
-            Frame = "GALACTIC",
+            Frame = "NH_SPACECRAFT",
             RGB   = { 0.8, 0.7, 0.7 },
             Textures = {
                 Type  = "simple",
@@ -297,7 +287,6 @@ return {
                 "Jupiter", "Io", "Europa", "Ganymede", "Callisto"
             }
         },
-        GuiName = "/Solar/NH_ALICE_SOC"
     },
     {
         Name = "NH_REX",

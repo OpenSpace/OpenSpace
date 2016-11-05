@@ -60,6 +60,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _shader(nullptr)
     , _textureIsDirty(false)
     , _texture(nullptr)
+    , _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
@@ -67,7 +68,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     dictionary.getValue("Size", size);
     _size = size;
 
-    if (dictionary.hasKey("Name")){
+    if (dictionary.hasKey("Name")) {
         dictionary.getValue("Name", _nodeName);
     }
 
@@ -102,6 +103,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     }
 
+    std::string blendMode;
+    if (dictionary.getValue("BlendMode", blendMode)) {
+        if (blendMode == "Additive") {
+            _blendMode = BlendMode::Additive;
+            setRenderBin(Renderable::RenderBin::Transparent);
+        }
+    }
 
     std::string texturePath = "";
     bool success = dictionary.getValue("Texture", texturePath);
@@ -185,10 +193,8 @@ bool RenderablePlane::deinitialize() {
 }
 
 void RenderablePlane::render(const RenderData& data) {
-    glm::mat4 transform = glm::mat4(1.0);
-    if (_billboard)
-        transform = glm::inverse(glm::mat4(data.camera.viewRotationMatrix()));
-
+    glm::mat4 scaleTransform = glm::mat4(1.0);
+    
     // Activate shader
     _shader->activate();
     if (_projectionListener){
@@ -200,21 +206,59 @@ void RenderablePlane::render(const RenderData& data) {
             float h = _texture->height();
             float w = _texture->width();
             float scale = h / w;
-            transform = glm::scale(transform, glm::vec3(1.f, scale, 1.f));
+            scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
         }
     }
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 rotationTransform;
+    if (_billboard)
+        rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
+    else
+        rotationTransform = glm::dmat4(data.modelTransform.rotation);
+
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        rotationTransform *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
+        glm::dmat4(scaleTransform);
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform("modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+    
+    //_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
+    //_shader->setUniform("ModelTransform", transform);
+    //setPscUniforms(*_shader.get(), data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
     _shader->setUniform("texture1", unit);
 
+    bool usingFramebufferRenderer =
+        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
+
+    bool usingABufferRenderer =
+        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
+
+    if (usingABufferRenderer) {
+        _shader->setUniform("additiveBlending", _blendMode == BlendMode::Additive);
+    }
+
+    bool additiveBlending = _blendMode == BlendMode::Additive && usingFramebufferRenderer;
+    if (additiveBlending) {
+        glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
+
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    if (additiveBlending) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(true);
+    }
 
     _shader->deactivate();
 }

@@ -37,13 +37,12 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/updatestructures.h>
 
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/statscollector.h>
 
 
@@ -77,16 +76,14 @@ namespace openspace {
         const ChunkNode& findChunkNode(const Geodetic2 location) const;
         ChunkNode& findChunkNode(const Geodetic2 location);
 
-        void setStateMatrix(const glm::dmat3& stateMatrix);
-
         bool testIfCullable(const Chunk& chunk, const RenderData& renderData) const;
         int getDesiredLevel(const Chunk& chunk, const RenderData& renderData) const;
 
         double minDistToCamera;
 
-        //Scalar globeRadius;
         const Ellipsoid& ellipsoid() const;
-        const glm::dmat3& stateMatrix();
+        const glm::dmat4& modelTransform();
+        const glm::dmat4& inverseModelTransform();
 
         const int minSplitDepth;
         const int maxSplitDepth;
@@ -109,11 +106,11 @@ namespace openspace {
             bool showChunkEdges = false;
             bool showChunkBounds = false;
             bool showChunkAABB = false;
+            bool showHeightResolution = false;
+            bool showHeightIntensities = false;
 
             bool doHorizonCulling = true;
             bool doFrustumCulling = true;
-
-            bool limitLevelByAvailableHeightData = true;
             bool levelByProjAreaElseDistance = true;
         } debugOptions;
 
@@ -144,12 +141,12 @@ namespace openspace {
         std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
 
         const Ellipsoid& _ellipsoid;
-        glm::dmat3 _stateMatrix;
+        glm::dmat4 _modelTransform;
+        glm::dmat4 _inverseModelTransform;
 
         std::shared_ptr<Camera> _savedCamera;
         
         std::shared_ptr<TileProviderManager> _tileProviderManager;
-
     };
 
 }  // namespace openspace

@@ -25,6 +25,7 @@
 #ifndef __SPICEMANAGER_H__
 #define __SPICEMANAGER_H__
 
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
 #include <ghoul/glm.h>
@@ -47,7 +48,6 @@ namespace openspace {
 
 class SpiceManager : public ghoul::Singleton<SpiceManager> {
     friend class ghoul::Singleton<SpiceManager>;
-
 public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
@@ -682,7 +682,7 @@ public:
      * \param destinationFrame The name of the destination reference frame
      * \param ephemerisTimeFrom The time for the source reference frame
      * \param ephemerisTimeTo The time for the destination reference frame
-     * \return Thetransformation matrix that maps between the \p sourceFrame at time
+     * \return The transformation matrix that maps between the \p sourceFrame at time
      * \p ephemerisTimeFrom to the \p destinationFrame at the time \p ephemerisTimeTo.
      * \throws SpiceException If there is no coverage available for the specified
      * \p sourceFrame and \p destinationFrame
@@ -809,6 +809,8 @@ public:
      */
     std::string frameFromBody(const std::string& body) const;
     
+    static scripting::LuaLibrary luaLibrary();
+
 private:
     /// Struct storing the information about all loaded kernels
     struct KernelInformation {

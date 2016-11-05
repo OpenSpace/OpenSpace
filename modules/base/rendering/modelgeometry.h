@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalarproperty.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
@@ -55,7 +56,11 @@ public:
     bool getVertices(std::vector<Vertex>* vertexList);
     bool getIndices(std::vector<int>* indexList);
 
+    double boundingRadius() const;
+
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
+
+    static openspace::Documentation Documentation();
 
 protected:
     Renderable* _parent;
@@ -63,7 +68,6 @@ protected:
     bool loadObj(const std::string& filename);
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
-    properties::FloatProperty _magnification;
 
     GLuint _vaoID;
     GLuint _vbo;

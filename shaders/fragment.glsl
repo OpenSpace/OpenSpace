@@ -25,8 +25,8 @@
 #ifndef _FRAGMENT_GLSL_
 #define _FRAGMENT_GLSL_
 
-#define BLEND_MODE_NORMAL 0
-#define BLEND_MODE_ADDITIVE 1
+#define BLEND_MODE_NORMAL 0u
+#define BLEND_MODE_ADDITIVE 1u
 
 struct Fragment {
     vec4 color;

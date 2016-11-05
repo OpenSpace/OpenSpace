@@ -43,7 +43,7 @@ namespace properties {
  * to the PropertyDelegate::defaultValue method, providing the template parameter
  * <code>T</code> as argument. When a new TemplateProperty is required, that method needs
  * to be specialized for the new type or a compile-time error will occur
- * (See http://openspace.itn.liu.se/trac/wiki/guides/properties).
+ * (See https://github.com/OpenSpace/OpenSpace/wiki/Concepts-Properties).
  * \tparam T The type of value that is stored in this TemplateProperty
  * \see Property
  * \see NumericalProperty

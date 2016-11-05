@@ -1,0 +1,12 @@
+<div class="documentation-item {{#if remoteScripting}}remote-scripting{{else}}local-scripting{{/if}}">
+  <div class="row">
+    <div class="col-lg-12">
+      <p>
+        <a href="#{{urlify key}}" name="{{urlify key}}">
+          <span class="documentation-key">{{key}}</span> <span class="documentation-type">{{#if remoteScripting}}Remote scripting{{else}}Local scripting{{/if}}</span>
+        </a>
+        <p>{{script}}</p>
+      </p>
+    </div>
+  </div>
+</div>

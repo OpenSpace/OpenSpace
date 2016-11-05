@@ -185,7 +185,7 @@ std::future<DownloadManager::MemoryFile> IswaManager::fetchImageCygnet(int id, d
         ) );   
 }
 
-std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp) const {
+std::future<DownloadManager::MemoryFile> IswaManager::fetchDataCygnet(int id, double timestamp){
     return std::move(OsEng.downloadManager().fetchFile(
             iswaUrl(id, timestamp, "data"),
             [id](const DownloadManager::MemoryFile& file){
@@ -267,22 +267,25 @@ std::shared_ptr<IswaBaseGroup> IswaManager::iswaGroup(std::string name){
     return nullptr;
 }
 
-std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation() {
-    return _cygnetInformation;
+std::map<int, std::shared_ptr<CygnetInfo>>& IswaManager::cygnetInformation(){
+        return _cygnetInformation;
 }
 
-std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups() {
+std::map<std::string, std::shared_ptr<IswaBaseGroup>>& IswaManager::groups(){
     return _groups;
 }
 
-std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation() {
+std::map<std::string, std::vector<CdfInfo>>& IswaManager::cdfInformation(){
     return _cdfInformation;
 }
 
 void IswaManager::createScreenSpace(int id){
     std::string script = "openspace.iswa.addScreenSpaceCygnet("
         "{CygnetId =" + std::to_string(id) + "});";
-    OsEng.scriptEngine().queueScript(script);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
@@ -343,7 +346,10 @@ void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
     //queue the add scene graph node script
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -379,7 +385,10 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
 
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }else{
         LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
@@ -391,7 +400,10 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath, std::st
     std::string luaTable = _luaConverter.toLuaTable(name, cdfPath, seedPath);
     if(!luaTable.empty()){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+			script,
+			scripting::ScriptEngine::RemoteScripting::Yes
+		);
     }
 }
 

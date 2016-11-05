@@ -22,20 +22,37 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "IO",
                 Aberration = "NONE",
+                AspectRatio = 2,
+
+                Instrument = {
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
-            },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
-            }            
         },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "IO",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_IO",
+                DestinationFrame = "ECLIPJ2000",
+            },
+        },
+        --[[
         Ephemeris = {
             Type = "Spice",
             Body = "IO",
@@ -50,7 +67,7 @@ return {
             Frame = "IAU_IO",
             Reference = "ECLIPJ2000"
         },
-        GuiName = "/Solar/Planets/Jupiter"
+        ]]
     },
     {
         Name = "IoText",
@@ -60,12 +77,15 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Io-Text.png"
+            Texture = "textures/Io-Text.png",
+            BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, -1, 0, 7}
-        }
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, -10000000, 0}
+            },
+        },
     },
     -- IoTrail module
     {   
@@ -87,6 +107,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/IoTrail"
     }
 }

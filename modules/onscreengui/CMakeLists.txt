@@ -33,7 +33,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guitimecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiiswacomponent.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/renderproperties.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/renderproperties.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 

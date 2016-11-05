@@ -31,6 +31,8 @@
 #include <ghoul/filesystem/file.h>
 
 
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+
 #include "gdal_priv.h"
 
 
@@ -46,6 +48,7 @@ namespace openspace {
     struct TilePreprocessData {
         std::vector<float> maxValues;
         std::vector<float> minValues;
+        std::vector<bool> hasMissingData;
 
         void serialize(std::ostream& s);
         static TilePreprocessData deserialize(std::istream& s);
@@ -59,7 +62,7 @@ namespace openspace {
     struct TileIOResult {
         TileIOResult();
 
-        void* imageData;
+        char* imageData;
         glm::uvec3 dimensions;
         std::shared_ptr<TilePreprocessData> preprocessData;
         ChunkIndex chunkIndex;
@@ -73,10 +76,7 @@ namespace openspace {
 
     };
 
-    struct TileDepthTransform {
-        float depthScale;
-        float depthOffset;
-    };
+
 
 
 } // namespace openspace

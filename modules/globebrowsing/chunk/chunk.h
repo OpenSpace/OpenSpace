@@ -45,6 +45,9 @@ namespace openspace {
 
     class Chunk {
     public:
+
+        const static float DEFAULT_HEIGHT;
+
         struct BoundingHeights {
             float min, max;
             bool available;

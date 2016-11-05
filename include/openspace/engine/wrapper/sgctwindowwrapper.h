@@ -36,21 +36,27 @@ namespace openspace {
  */
 class SGCTWindowWrapper : public WindowWrapper {
 public:
+    void terminate() override;
     void setBarrier(bool enabled) override;
+    void setSynchronization(bool enabled) override;
     void clearAllWindows(const glm::vec4& clearColor) override;
     bool windowHasResized() const override;
 
     double averageDeltaTime() const override;
+    double deltaTime() const override;
     glm::vec2 mousePosition() const override;
     uint32_t mouseButtons(int maxNumber) const override;
     glm::ivec2 currentWindowSize() const override;
     glm::ivec2 currentWindowResolution() const override;
     glm::ivec2 currentDrawBufferResolution() const override;
+    glm::vec2 dpiScaling() const override;
     int currentNumberOfAaSamples() const override;
 
     bool isRegularRendering() const override;
     bool hasGuiWindow() const override;
     bool isGuiWindow() const override;
+    bool isUsingSwapGroups() const override;
+    bool isSwapGroupMaster() const override;
     
     glm::mat4 viewProjectionMatrix() const override;
     glm::mat4 modelMatrix() const override;
@@ -64,7 +70,7 @@ public:
 
     bool isSimpleRendering() const override;
 
-    void takeScreenshot() const override;
+    void takeScreenshot(bool applyWarping = false) const override;
 };
 
 } // namespace openspace

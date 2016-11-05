@@ -31,6 +31,9 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/util/syncdata.h>
+
+
 #include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
@@ -49,6 +52,7 @@ namespace openspace {
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
+
 class Scene;
 class Renderer;
 class RaycasterManager;
@@ -68,8 +72,15 @@ public:
         Post
     };
 
+    enum class FrametimeType {
+        DtTimeAvg = 0,
+        FPS,
+        FPSAvg
+    };
+
     static const std::string KeyFontMono;
     static const std::string KeyFontLight;
+    static const std::vector<FrametimeType> FrametimeTypes;
 
     RenderEngine();
     ~RenderEngine();
@@ -87,26 +98,31 @@ public:
 
     // sgct wrapped functions
     bool initializeGL();
-    void postSynchronizationPreDraw();
-    void preSynchronization();
-    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix, bool showGui);
+    
+    void updateSceneGraph();
+    void updateShaderPrograms();
+    void updateFade();
+    void updateRenderer();
+    void updateScreenSpaceRenderables();
+    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+
+    void renderScreenLog();
+    void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
-    void takeScreenshot();
+    void takeScreenshot(bool applyWarping = false);
     void toggleInfoText(bool b);
+    void toggleFrametimeType(int t);
 
     // Performance measurements
     void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
 
-    void serialize(SyncBuffer* syncBuffer);
-    void deserialize(SyncBuffer* syncBuffer);
-
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
     void setNAaSamples(int nAaSamples);
-
+    void setShowFrameNumber(bool enabled);
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -130,6 +146,8 @@ public:
         std::string csPath,
         const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
         RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
+
+    std::string progressToStr(int size, double t);
 
     void removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program);
 
@@ -162,7 +180,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * rendering.
      */
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     // This is a temporary method to change the origin of the coordinate system ---abock
     void changeViewPoint(std::string origin);
@@ -171,19 +189,26 @@ public:
     void startFading(int direction, float fadeDuration);
 
     void sortScreenspaceRenderables();
+
+    glm::ivec2 renderingResolution() const;
+    glm::ivec2 fontResolution() const;
+
     // This is temporary until a proper screenspace solution is found ---abock
-    struct {
+    struct OnScreenInformation{
         glm::vec2 _position;
         unsigned int _size;
         int _node;
-    } _onScreenInformation;
+    };
+
+    SyncData<OnScreenInformation> _onScreenInformation;
+
+    std::vector<Syncable*> getSyncables();
     
 private:
     void setRenderer(std::unique_ptr<Renderer> renderer);
     RendererImplementation rendererFromString(const std::string& method);
 
     void renderInformation();
-    void renderScreenLog();
 
     Camera* _mainCamera;
     Scene* _sceneGraph;
@@ -197,19 +222,25 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
+    FrametimeType _frametimeType;
+
     bool _showInfo;
     bool _showLog;
     bool _takeScreenshot;
+    bool _applyWarping;
+    bool _showFrameNumber;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
     int _nAaSamples;
+    unsigned int _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
     
+    std::shared_ptr<ghoul::fontrendering::Font> _fontBig = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;

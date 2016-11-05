@@ -25,7 +25,14 @@
 #ifndef __OPENSPACEMODULE_H__
 #define __OPENSPACEMODULE_H__
 
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/documentation/documentation.h>
+
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+
 #include <string>
+#include <vector>
 
 namespace openspace {
 
@@ -34,7 +41,7 @@ namespace openspace {
  * into a useful granularity to be mostly used self-sufficiently. Each OpenSpaceModule
  * needs a unique, nonempty <code>name</code>.
  */
-class OpenSpaceModule {
+class OpenSpaceModule : public properties::PropertyOwner {
 public:
     /**
      * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the 
@@ -62,10 +69,18 @@ public:
     void deinitialize();
 
     /**
-     * Returns the name for this OpenSpaceModule.
-     * \return THe name for this OpenSpaceModule
+     * Returns a list of Documentation classes that are valid for this OpenSpaceModule.
+     * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
-    std::string name() const;
+    virtual std::vector<Documentation> documentations() const;
+
+    /**
+     * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
+     * overwritten, it returns an OpenGL version of <code>3.3</code>.
+     * \return The minimum required OpenGL version of this OpenSpaceModule
+     */
+    virtual ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+        requiredOpenGLVersion() const;
 
 protected:
     /**
@@ -85,9 +100,6 @@ protected:
      * path tokens.
      */
     std::string modulePath() const;
-
-    /// The name of this OpenSpaceModule
-    const std::string _name;
 };
 
 } // namespace openspace

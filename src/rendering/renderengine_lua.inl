@@ -33,10 +33,18 @@ namespace luascriptfunctions {
     */
 int takeScreenshot(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    OsEng.renderEngine().takeScreenshot();
-    return 0;
+    if (nArguments == 0) {
+        OsEng.renderEngine().takeScreenshot();
+        return 0;
+    }
+    else if (nArguments == 1) {
+        bool b = lua_toboolean(L, -1) != 0;
+        OsEng.renderEngine().takeScreenshot(b);
+        return 0;
+    }
+    else {
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 0, 1, nArguments);
+    }
 }
 
 /**
@@ -46,12 +54,14 @@ int takeScreenshot(lua_State* L) {
 */
 int setRenderer(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING)
+    if (type != LUA_TSTRING) {
         return luaL_error(L, "Expected argument of type 'string'");
+    }
     std::string r = lua_tostring(L, -1);
     OsEng.renderEngine().setRendererFromString(r);
     return 0;
@@ -64,8 +74,9 @@ int setRenderer(lua_State* L) {
 */
 int setNAaSamples(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     double t = luaL_checknumber(L, -1);
 
@@ -77,18 +88,38 @@ int setNAaSamples(lua_State* L) {
 /**
 * \ingroup LuaScripts
 * visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
+* Toggle heads-up info display on master node
 */
 int showRenderInformation(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    const int type = lua_type(L, -1);
+    if (type != LUA_TBOOLEAN) {
+        return luaL_error(L, "Expected argument of type 'bool'");
+    }
+    bool b = lua_toboolean(L, -1) != 0;
+    OsEng.renderEngine().toggleInfoText(b);
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* toggleFramerateType(bool):
+* Cycle through showing FPS or Average Frametime in heads up info
+*/
+int toggleFrametimeType(lua_State* L) {
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     const int type = lua_type(L, -1);
-    if (type != LUA_TBOOLEAN)
-        return luaL_error(L, "Expected argument of type 'bool'");
-    bool b = lua_toboolean(L, -1) != 0;
-    OsEng.renderEngine().toggleInfoText(b);
+    if (type != LUA_TNUMBER)
+        return luaL_error(L, "Expected argument of type 'number'");
+    int t = lua_tonumber(L, -1);
+    OsEng.renderEngine().toggleFrametimeType(t);
     return 0;
 }
 
@@ -99,11 +130,32 @@ int showRenderInformation(lua_State* L) {
 */
 int setPerformanceMeasurement(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     bool b = lua_toboolean(L, -1) != 0;
     OsEng.renderEngine().setPerformanceMeasurements(b);
+    return 0;
+}
+
+/**
+* \ingroup LuaScripts
+* toggleFade(float):
+* Toggle a global fade over (float) seconds
+*/
+int toggleFade(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    double t = luaL_checknumber(L, -1);
+    
+    float fadedIn = 1.0;
+    int direction = OsEng.renderEngine().globalBlackOutFactor() == fadedIn ? -1 : 1;
+
+    OsEng.renderEngine().startFading(direction, static_cast<float>(t));
     return 0;
 }
 
@@ -114,8 +166,9 @@ int setPerformanceMeasurement(lua_State* L) {
 */
 int fadeIn(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     double t = luaL_checknumber(L, -1);
             
@@ -129,8 +182,9 @@ int fadeIn(lua_State* L) {
 */
 int fadeOut(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     double t = luaL_checknumber(L, -1);
 
@@ -139,19 +193,19 @@ int fadeOut(lua_State* L) {
 }
 
 int registerScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "registerScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     ghoul::Dictionary d;
     try {
         ghoul::lua::luaDictionaryFromState(L, d);
     }
     catch (const ghoul::lua::LuaFormatException& e) {
-        LERROR(e.what());
+        LERRORC("registerScreenSpaceRenderable", e.what());
         return 0;
     }
 
@@ -162,18 +216,18 @@ int registerScreenSpaceRenderable(lua_State* L) {
 }
 
 int unregisterScreenSpaceRenderable(lua_State* L) {
-    static const std::string _loggerCat = "unregisterScreenSpaceRenderable";
     using ghoul::lua::errorLocation;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     std::string name = luaL_checkstring(L, -1);
 
     std::shared_ptr<ScreenSpaceRenderable> s = OsEng.renderEngine().screenSpaceRenderable(name);
     if (!s) {
-        LERROR(errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
+        LERRORC("unregisterScreenSpaceRenderable", errorLocation(L) << "Could not find ScreenSpaceRenderable '" << name << "'");
         return 0;
     }
 

@@ -16,22 +16,29 @@ return {
                 Type = "simple",
                 Color = "textures/callisto.jpg",
             },
-        },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CALLISTO",
-            Reference = "ECLIPJ2000",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_JUPITER",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Callisto"
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CALLISTO",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_CALLISTO",
+                DestinationFrame = "IAU_JUPITER",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        }
     },
     -- CallistoTrail module
     {   
@@ -51,7 +58,6 @@ return {
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
-        },
-        GuiName = "/Solar/CallistoTrail"
-    }    
+        }
+    }
 }

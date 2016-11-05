@@ -1,4 +1,4 @@
-UseAccurateNewHorizonsKernels = false
+UseAccurateNewHorizonsKernels = true
 -- TextureResolution = "low"
 TextureResolution = "med"
 -- TextureResolution = "high"
@@ -10,6 +10,9 @@ function preInitialization()
     which the scene should start and other settings that might determine initialization
     critical objects.
     ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     -- openspace.time.setTime("2007-02-28T11:40:00.000")
 
@@ -67,7 +70,6 @@ return {
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        "imageplane",
         "newhorizons/newhorizons",
         "newhorizons/newhorizonsfov",
     }

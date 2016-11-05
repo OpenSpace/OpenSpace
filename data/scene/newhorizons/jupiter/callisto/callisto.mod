@@ -6,7 +6,7 @@ return {
         Renderable = {
             Type = "RenderablePlanetProjection",
             Frame = "IAU_CALLISTO",
-            Body = "CALLISTO",            
+            Body = "CALLISTO",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 1.8213, 6 },
@@ -22,35 +22,36 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "CALLISTO",
                 Aberration = "NONE",
+                AspectRatio = 2,
+
+                Instrument = {
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
+        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CALLISTO",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
-            }            
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_CALLISTO",
+                DestinationFrame = "ECLIPJ2000",
+            },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CALLISTO",
-            Reference = "ECLIPJ2000",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_CALLISTO",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "CallistoText",
@@ -60,13 +61,22 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Callisto-Text.png"
+            Texture = "textures/Callisto-Text.png",
+            BlendMode = "Additive"
         },
+        --[[
         Ephemeris = {
             Type = "Static",
             Position = {0, -1, 0, 7}
         }
-    },    
+        ]]
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, -10000000, 0}
+            },
+        },
+    },
     -- CallistoTrail module
     {   
         Name = "CallistoTrail",
@@ -85,8 +95,7 @@ return {
                 Type = "simple",
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
-            },  
+            },
         },
-        GuiName = "/Solar/CallistoTrail"
     }
 }

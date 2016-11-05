@@ -3,11 +3,7 @@ return {
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Static"
-        }
     },
-
     -- Mars module
     {   
         Name = "Mars",
@@ -25,22 +21,29 @@ return {
                 Type = "simple",
                 Color = "textures/mars.jpg",
             },
-        },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "MARS BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_MARS",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Mars"
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MARS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_MARS",
+                DestinationFrame = "ECLIPJ2000",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        }
     },
     -- MarsTrail module
     {   
@@ -60,7 +63,6 @@ return {
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
-        },
-        GuiName = "/Solar/MarsTrail"
+        }
     }
 }

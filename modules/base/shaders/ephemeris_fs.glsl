@@ -22,24 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec4 vs_point_position;
-in vec4 vs_point_velocity;
-in float fade;
 uniform float forceFade;
-
 uniform vec3 color;
+
+in vec4 vs_positionScreenSpace;
+in float fade;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_point_position;
-    float depth = pscDepth(position);
-
-    vec4 c = vec4(color, fade*forceFade);
+    vec4 c = vec4(color * fade * forceFade, 1.0);
     Fragment frag;
     frag.color = c;
-    frag.depth = depth;
+    frag.depth = vs_positionScreenSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
     return frag;
 }

@@ -24,9 +24,11 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
-#include <modules/globebrowsing/other/threadpool.h>
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
+#include <ghoul/misc/threadpool.h>
 #include <modules/globebrowsing/tile/tileselector.h>
+
+#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 // open space includes
 #include <openspace/engine/openspaceengine.h>
@@ -36,6 +38,7 @@
 
 // ghoul includes
 #include <ghoul/misc/assert.h>
+
 
 namespace {
     const std::string _loggerCat = "RenderableGlobe";
@@ -58,11 +61,14 @@ namespace openspace {
 
 
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-        : _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        : _isEnabled(properties::BoolProperty("Enabled", "Enabled", true))
+        , _toggleEnabledEveryFrame(properties::BoolProperty("Toggle enabled every frame", "Toggle enabled every frame", false))
+        , _saveOrThrowCamera(properties::BoolProperty("saveOrThrowCamera", "saveOrThrowCamera"))
+        , _resetTileProviders(properties::BoolProperty("resetTileProviders", "resetTileProviders"))
         , _cameraMinHeight(properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f))
-        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 5.0f, 1.0f, 50.0f))
+        , lodScaleFactor(properties::FloatProperty("lodScaleFactor", "lodScaleFactor", 10.0f, 1.0f, 50.0f))
         , debugSelection(ReferencedBoolSelection("Debug", "Debug"))
-        , atmosphereEnabled(properties::BoolProperty(" Atmosphere", " Atmosphere", false))
+        , atmosphereEnabled(properties::BoolProperty("Atmosphere", "Atmosphere", false))
     {
         setName("RenderableGlobe");
         
@@ -97,30 +103,35 @@ namespace openspace {
             _ellipsoid, patchSegments, _tileProviderManager);
         _distanceSwitch.addSwitchValue(_chunkedLodGlobe, 1e12);
 
+        addProperty(_isEnabled);
+        addProperty(_toggleEnabledEveryFrame);
+
+
         // Add debug options - must be after chunkedLodGlobe has been created as it 
         // references its members
         addProperty(debugSelection);
         debugSelection.addOption("Show chunk edges", &_chunkedLodGlobe->debugOptions.showChunkEdges);
         debugSelection.addOption("Show chunk bounds", &_chunkedLodGlobe->debugOptions.showChunkBounds);
         debugSelection.addOption("Show chunk AABB", &_chunkedLodGlobe->debugOptions.showChunkAABB);
+        debugSelection.addOption("Show height resolution", &_chunkedLodGlobe->debugOptions.showHeightResolution);
+        debugSelection.addOption("Show height intensities", &_chunkedLodGlobe->debugOptions.showHeightIntensities);
 
         debugSelection.addOption("Culling: Frustum", &_chunkedLodGlobe->debugOptions.doFrustumCulling);
         debugSelection.addOption("Culling: Horizon", &_chunkedLodGlobe->debugOptions.doHorizonCulling);
 
         debugSelection.addOption("Level by proj area (else distance)", &_chunkedLodGlobe->debugOptions.levelByProjAreaElseDistance);
-        debugSelection.addOption("Level limited by available data", &_chunkedLodGlobe->debugOptions.limitLevelByAvailableHeightData);
 
         // Add all tile layers as being toggleable for each category
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES;  i++){
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory) i;
-            std::string categoryName = std::to_string(i+1) + ". " + LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
+            std::string categoryName = LayeredTextures::TEXTURE_CATEGORY_NAMES[i];
             auto selection = std::make_unique<ReferencedBoolSelection>(categoryName, categoryName);
             
-            auto& categoryProviders = _tileProviderManager->getLayerCategory(category);
-            for (auto& provider : categoryProviders) {
+            auto& categoryProviders = _tileProviderManager->getTileProviderGroup(category);
+            for (auto& provider : categoryProviders.tileProviders) {
                 selection->addOption(provider.name, &provider.isActive);
             }
-            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->levelBlendingEnabled[category]);
+            selection->addOption(" - Blend tile levels - ", &_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled);
 
             addProperty(selection.get());
             _categorySelections.push_back(std::move(selection));
@@ -128,6 +139,7 @@ namespace openspace {
 
         addProperty(atmosphereEnabled);
         addProperty(_saveOrThrowCamera);
+        addProperty(_resetTileProviders);
         addProperty(lodScaleFactor);
         addProperty(_cameraMinHeight);
     }
@@ -154,37 +166,39 @@ namespace openspace {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
-        if (_saveOrThrowCamera.value()) {
-            _saveOrThrowCamera.setValue(false);
-
-            if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
-                LDEBUG("Saving snapshot of camera!");
-                _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
-            }
-            else { // throw camera
-                LDEBUG("Throwing away saved camera!");
-                _chunkedLodGlobe->setSaveCamera(nullptr);
-            }
+        if (_toggleEnabledEveryFrame.value()) {
+            _isEnabled.setValue(!_isEnabled.value());
         }
+        if (_isEnabled.value()) {
+            if (_saveOrThrowCamera.value()) {
+                _saveOrThrowCamera.setValue(false);
 
-        _distanceSwitch.render(data);
+                if (_chunkedLodGlobe->getSavedCamera() == nullptr) { // save camera
+                    LDEBUG("Saving snapshot of camera!");
+                    _chunkedLodGlobe->setSaveCamera(std::make_shared<Camera>(data.camera));
+                }
+                else { // throw camera
+                    LDEBUG("Throwing away saved camera!");
+                    _chunkedLodGlobe->setSaveCamera(nullptr);
+                }
+            }
+            _distanceSwitch.render(data);
+        }
     }
 
     void RenderableGlobe::update(const UpdateData& data) {
-
-        // set spice-orientation in accordance to timestamp
-        //_chunkedLodGlobe->setStateMatrix(
-        //    SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time));
-        // We currently do not consider rotation anywhere in the rendering.
-        // @TODO Consider rotation everywhere in the rendering (culling, splitting, camera, etc)
-        _chunkedLodGlobe->setStateMatrix(glm::dmat3(1.0));
         _time = data.time;
         _distanceSwitch.update(data);
 
         _chunkedLodGlobe->lodScaleFactor = lodScaleFactor.value();
         _chunkedLodGlobe->atmosphereEnabled = atmosphereEnabled.value();
 
+        if (_resetTileProviders) {
+            _tileProviderManager->reset();
+            _resetTileProviders = false;
+        }
         _tileProviderManager->update();
+        _chunkedLodGlobe->update(data);
     }
 
     glm::dvec3 RenderableGlobe::projectOnEllipsoid(glm::dvec3 position) {
@@ -197,7 +211,7 @@ namespace openspace {
 
     float RenderableGlobe::getHeight(glm::dvec3 position) {
         // Get the tile provider for the height map
-        const auto& heightMapProviders = _tileProviderManager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
+        const auto& heightMapProviders = _tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
         if (heightMapProviders.size() == 0)
             return 0;
         const auto& tileProvider = heightMapProviders[0];
@@ -225,14 +239,14 @@ namespace openspace {
         // Sample and do linear interpolation (could possibly be moved as a function in ghoul texture)
         glm::uvec3 dimensions = tile.texture->dimensions();
         
-        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions.xy());
+        glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
-        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), dimensions.xy() - glm::uvec2(1));
+        samplePos00 = glm::clamp(samplePos00, glm::uvec2(0, 0), glm::uvec2(dimensions) - glm::uvec2(1));
         glm::vec2 samplePosFract = samplePos - glm::vec2(samplePos00);
 
-        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), dimensions.xy() - glm::uvec2(1));
-        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), dimensions.xy() - glm::uvec2(1));
+        glm::uvec2 samplePos10 = glm::min(samplePos00 + glm::uvec2(1, 0), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos01 = glm::min(samplePos00 + glm::uvec2(0, 1), glm::uvec2(dimensions) - glm::uvec2(1));
+        glm::uvec2 samplePos11 = glm::min(samplePos00 + glm::uvec2(1, 1), glm::uvec2(dimensions) - glm::uvec2(1));
 
         float sample00 = tile.texture->texelAsFloat(samplePos00).x;
         float sample10 = tile.texture->texelAsFloat(samplePos10).x;

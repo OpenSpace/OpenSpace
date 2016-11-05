@@ -23,16 +23,57 @@
  ****************************************************************************************/
 
 #include <openspace/engine/wrapper/windowwrapper.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/scripting/scriptengine.h>
+
 #include <ghoul/misc/exception.h>
 #include <string>
+
+namespace luascriptfunctions {
+
+int setSynchronization(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    bool b = lua_toboolean(L, -1) != 0;
+    OsEng.windowWrapper().setSynchronization(b);
+    return 0;
+}
+
+} // namespace luascriptfunctions
 
 namespace openspace {
 
 WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string& msg)
     : ghoul::RuntimeError(msg, "WindowWrapper")
 {}
+
+scripting::LuaLibrary WindowWrapper::luaLibrary() {
+    return {
+        "cluster",
+        {
+            {
+                "setSynchronization",
+                &luascriptfunctions::setSynchronization,
+                "bool",
+                "Enables or disables the frame synchronization of the cluster. If the "
+                "synchronization is enabled, the computers in the cluster will swap "
+                "their backbuffers at the same time, either supported by hardware or by "
+                "network signals."
+            }
+        }
+    };
+}
+
+void WindowWrapper::terminate() {}
     
 void WindowWrapper::setBarrier(bool) {}
+
+void WindowWrapper::setSynchronization(bool) {}
     
 void WindowWrapper::clearAllWindows(const glm::vec4& clearColor) {}
 
@@ -41,6 +82,10 @@ bool WindowWrapper::windowHasResized() const {
 }
     
 double WindowWrapper::averageDeltaTime() const {
+    return 0.0;
+}
+
+double WindowWrapper::deltaTime() const {
     return 0.0;
 }
     
@@ -63,6 +108,10 @@ glm::ivec2 WindowWrapper::currentWindowResolution() const {
 glm::ivec2 WindowWrapper::currentDrawBufferResolution() const {
     return currentWindowSize();
 }
+    
+glm::vec2 WindowWrapper::dpiScaling() const {
+    return glm::vec2(1.f);
+}
 
 int WindowWrapper::currentNumberOfAaSamples() const {
     return 1;
@@ -79,6 +128,15 @@ bool WindowWrapper::hasGuiWindow() const {
 bool WindowWrapper::isGuiWindow() const {
     return false;
 }
+
+bool WindowWrapper::isSwapGroupMaster() const {
+    return false;
+}
+
+bool WindowWrapper::isUsingSwapGroups() const {
+    return false;
+}
+
 
 glm::mat4 WindowWrapper::viewProjectionMatrix() const {
     return glm::mat4(1.f);
@@ -113,6 +171,6 @@ bool WindowWrapper::isSimpleRendering() const {
     return true;
 }
     
-void WindowWrapper::takeScreenshot() const {}
+void WindowWrapper::takeScreenshot(bool) const {}
     
 } // namespace openspace

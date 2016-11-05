@@ -24,18 +24,17 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 uniform vec4 objectVelocity;
-
-layout(location = 0) in vec4 in_point_position;
-
-out vec4 vs_point_position;
-
-out float fade;
 
 uniform uint nVertices;
 uniform float lineFade;
+
+layout(location = 0) in vec4 in_point_position;
+
+out vec4 vs_positionScreenSpace;
+out float fade;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -43,9 +42,10 @@ void main() {
     float id = float(gl_VertexID) / float(nVertices * lineFade);
     fade = 1.0 - id;
 
-    vec4 tmp = in_point_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_point_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    // Convert from psc to regular homogenous coordinates
+    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
+    vec4 positionClipSpace = projectionTransform * modelViewTransform * position;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    
+    gl_Position = vs_positionScreenSpace;
 }

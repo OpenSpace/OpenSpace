@@ -27,18 +27,43 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/optionproperty.h>
+
+#include <vector>
 
 namespace openspace {
+    
+class OpenSpaceModule;
 
 class SettingsEngine : public properties::PropertyOwner {
 public:
-  SettingsEngine();
+    SettingsEngine();
+
+    void initialize();
+    
+    void setModules(std::vector<OpenSpaceModule*> modules);
+
+    bool busyWaitForDecode();
+    bool logSGCTOutOfOrderErrors();
+    bool useDoubleBuffering();
 
 private:
-  properties::FloatProperty _eyeSeparation;
+    void initEyeSeparation();
+    void initSceneFiles();
+    void initShowFrameNumber();
+    void initBusyWaitForDecode();
+    void initLogSGCTOutOfOrderErrors();
+    void initUseDoubleBuffering();
+
+    properties::FloatProperty _eyeSeparation;
+    properties::OptionProperty _scenes;
+    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _busyWaitForDecode;
+    properties::BoolProperty _logSGCTOutOfOrderErrors;
+    properties::BoolProperty _useDoubleBuffering;
+
 };
 
 } // namespace openspace
-
 
 #endif //#ifndef __SETTINGSENGINE_H__

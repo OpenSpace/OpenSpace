@@ -52,7 +52,6 @@
 #include <libtorrent/bencode.hpp>
 #include <libtorrent/session.hpp>
 #include <libtorrent/alert_types.hpp>
-#include <openspace/engine/openspaceengine.h>
 
 #include <fstream>
 
@@ -131,8 +130,8 @@ SyncWidget::SyncWidget(QWidget* parent, Qt::WindowFlags f)
     setLayout(layout);
 
     ghoul::initialize();
-    //openspace::DownloadManager::initialize("http://openspace.itn.liu.se/data/request", DownloadApplicationVersion);
-
+    _downloadManager = std::make_unique<openspace::DownloadManager>(
+        "http://data.openspaceproject.com/request", DownloadApplicationVersion);
 
     libtorrent::error_code ec;
     _session->listen_on(std::make_pair(20280, 20290), ec);
@@ -205,7 +204,7 @@ SyncWidget::~SyncWidget() {
     f.write(size.data.data(), sizeof(uint32_t));
     f.write(buffer.data(), buffer.size());
 
-    //openspace::DownloadManager::deinitialize();
+    _downloadManager.reset();
     ghoul::deinitialize();
     delete _session;
 }
@@ -256,7 +255,7 @@ void SyncWidget::handleDirectFiles() {
     for (const DirectFile& f : _directFiles) {
         LDEBUG(f.url.toStdString() << " -> " << f.destination.toStdString());
 
-        std::shared_ptr<openspace::DownloadManager::FileFuture> future = OsEng.downloadManager().downloadFile(
+        std::shared_ptr<openspace::DownloadManager::FileFuture> future = _downloadManager->downloadFile(
             f.url.toStdString(),
             absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
             OverwriteFiles
@@ -285,12 +284,12 @@ void SyncWidget::handleFileRequest() {
         std::string path = absPath(f.destination.toStdString());
         int version = f.version;
 
-        OsEng.downloadManager().downloadRequestFilesAsync(
-                identifier,
-                path,
-                version,
-                OverwriteFiles,
-                std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
+        _downloadManager->downloadRequestFilesAsync(
+            identifier,
+            path,
+            version,
+            OverwriteFiles,
+            std::bind(&SyncWidget::handleFileFutureAddition, this, std::placeholders::_1)
         );
 
         FileSys.setCurrentDirectory(d);
@@ -370,13 +369,7 @@ void SyncWidget::syncButtonPressed() {
             LERROR("Could not find 'Modules'");
             return;
         }
-        
-        struct ModuleInformation {
-            QString moduleName;
-            QString moduleDatafile;
-            QString modulePath;
-        };
-        
+
         QDir sceneDir(scene);
         sceneDir.cdUp();
         QList<ModuleInformation> modulesList;
@@ -528,7 +521,7 @@ void SyncWidget::syncButtonPressed() {
     //// Make the lists unique
     {
         auto equal = [](const DirectFile& lhs, const DirectFile& rhs) -> bool {
-            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination;
+            return lhs.module == rhs.module && lhs.url == rhs.url && lhs.destination == rhs.destination && lhs.baseDir == rhs.baseDir;
         };
 
         QList<DirectFile> files;
@@ -553,6 +546,7 @@ void SyncWidget::syncButtonPressed() {
                 lhs.module == rhs.module &&
                 lhs.identifier == rhs.identifier &&
                 lhs.destination == rhs.destination &&
+                lhs.baseDir == rhs.baseDir &&
                 lhs.version == rhs.version;
         };
 
@@ -577,7 +571,8 @@ void SyncWidget::syncButtonPressed() {
             return
                 lhs.module == rhs.module &&
                 lhs.file == rhs.file &&
-                lhs.destination == rhs.destination;
+                lhs.destination == rhs.destination &&
+                lhs.baseDir == rhs.baseDir;
         };
 
         QList<TorrentFile> files;

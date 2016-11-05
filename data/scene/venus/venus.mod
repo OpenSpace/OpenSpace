@@ -3,11 +3,15 @@ return {
     {
         Name = "VenusBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Static"
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "VENUS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
         }
     },
-
     -- Venus module
     {   
         Name = "Venus",
@@ -25,30 +29,25 @@ return {
                 Type = "simple",
                 Color = "textures/venus.jpg",
             },
-        },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "VENUS",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
             }
         },
         Rotation = {
-            Type = "Spice",
+            Type = "SpiceRotation",
             Frame = "IAU_VENUS",
-            Reference = "ECLIPJ2000"
+            Reference = "GALACTIC"
         },
-        GuiName = "/Solar/Planets/VENUS"
     },
     -- VenusTrail module
     {   
         Name = "VenusTrail",
-        Parent = "VenusBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
-            Body = "VENUS",
+            Body = "VENUS BARYCENTER",
             Frame = "GALACTIC",
             Observer = "SUN",
             RGB = {1, 0.5, 0.2},
@@ -61,6 +60,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/VenusTrail"
     }
 }

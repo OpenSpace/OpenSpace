@@ -26,6 +26,7 @@
 #include <modules/globebrowsing/chunk/chunkrenderer.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
 // open space includes
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -94,7 +95,7 @@ namespace openspace {
     void ChunkRenderer::setDepthTransformUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         const TileDepthTransform& tileDepthTransform)
     {   
@@ -119,7 +120,7 @@ namespace openspace {
     void ChunkRenderer::activateTileAndSetTileUniforms(
         std::shared_ptr<LayeredTextureShaderUniformIdHandler> uniformIdHandler,
         LayeredTextures::TextureCategory textureCategory,
-        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix blendLayerSuffix,
+        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes blendLayerSuffix,
         size_t layerIndex,
         ghoul::opengl::TextureUnit& texUnit,
         const TileAndTransform& tileAndTransform)
@@ -166,12 +167,11 @@ namespace openspace {
         LayeredTexturePreprocessingData layeredTexturePreprocessingData;
 
         for (size_t category = 0; category < LayeredTextures::NUM_TEXTURE_CATEGORIES; category++) {
-            tileProviders[category] = _tileProviderManager->getActivatedLayerCategory(
-                LayeredTextures::TextureCategory(category));
+            tileProviders[category] = _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders();
 
             LayeredTextureInfo layeredTextureInfo;
             layeredTextureInfo.lastLayerIdx = tileProviders[category].size() - 1;
-            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->levelBlendingEnabled[category];
+            layeredTextureInfo.layerBlendingEnabled = _tileProviderManager->getTileProviderGroup(category).levelBlendingEnabled;
 
             layeredTexturePreprocessingData.layeredTextureInfo[category] = layeredTextureInfo;
         }
@@ -185,6 +185,24 @@ namespace openspace {
             std::pair<std::string, std::string>(
                 "showChunkEdges",
                 std::to_string(chunk.owner()->debugOptions.showChunkEdges)));
+
+
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "showHeightResolution",
+                std::to_string(chunk.owner()->debugOptions.showHeightResolution)));
+
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "showHeightIntensities",
+                std::to_string(chunk.owner()->debugOptions.showHeightIntensities)));
+
+        layeredTexturePreprocessingData.keyValuePairs.push_back(
+            std::pair<std::string, std::string>(
+                "defaultHeight",
+                std::to_string(Chunk::DEFAULT_HEIGHT)));
+        
+
 
 
         // Now the shader program can be accessed
@@ -217,16 +235,16 @@ namespace openspace {
 
                 // Get the texture that should be used for rendering
                 TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex);
-                if (tileAndTransform.tile.status == Tile::State::Unavailable) {
-                    // don't render if no tile was available
-                    programObject->deactivate();
-                    return nullptr;
+                if (tileAndTransform.tile.status == Tile::Status::Unavailable) {
+                    tileAndTransform.tile = tileProvider->getDefaultTile();
+                    tileAndTransform.uvTransform.uvOffset = { 0, 0 };
+                    tileAndTransform.uvTransform.uvScale = { 1, 1 };
                 }
 
                 activateTileAndSetTileUniforms(
                     programUniformHandler,
                     LayeredTextures::TextureCategory(category),
-                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                    LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                     i,
                     texUnits[category][i].blendTexture0,
                     tileAndTransform);
@@ -234,29 +252,39 @@ namespace openspace {
                 // If blending is enabled, two more textures are needed
                 if (layeredTexturePreprocessingData.layeredTextureInfo[category].layerBlendingEnabled) {
                     TileAndTransform tileAndTransformParent1 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 1);
-                    if (tileAndTransformParent1.tile.status == Tile::State::Unavailable) {
+                    if (tileAndTransformParent1.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent1 = tileAndTransform;
                     }
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent1,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent1,
                         i,
                         texUnits[category][i].blendTexture1,
                         tileAndTransformParent1);
 
                     TileAndTransform tileAndTransformParent2 = TileSelector::getHighestResolutionTile(tileProvider, chunkIndex, 2);
-                    if (tileAndTransformParent2.tile.status == Tile::State::Unavailable) {
+                    if (tileAndTransformParent2.tile.status == Tile::Status::Unavailable) {
                         tileAndTransformParent2 = tileAndTransformParent1;
                     }
                     activateTileAndSetTileUniforms(
                         programUniformHandler,
                         LayeredTextures::TextureCategory(category),
-                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::Parent2,
+                        LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::Parent2,
                         i,
                         texUnits[category][i].blendTexture2,
                         tileAndTransformParent2);
                 }
+
+                /*
+                if (category == LayeredTextures::HeightMaps && tileAndTransform.tile.preprocessData) {
+                    //auto preprocessingData = tileAndTransform.tile.preprocessData;
+                    //float noDataValue = preprocessingData->noDataValues[0];
+                    programObject->setUniform(
+                        "minimumValidHeight[" + std::to_string(i) + "]",
+                        -100000);
+                }
+                */
                 i++;
             }
         }
@@ -272,7 +300,7 @@ namespace openspace {
             setDepthTransformUniforms(
                 programUniformHandler,
                 LayeredTextures::TextureCategory::HeightMaps,
-                LayeredTextureShaderUniformIdHandler::BlendLayerSuffix::none,
+                LayeredTextureShaderUniformIdHandler::BlendLayerSuffixes::none,
                 i,
                 depthTransform);
             i++;
@@ -282,10 +310,10 @@ namespace openspace {
         programObject->setUniform("skirtLength", min(static_cast<float>(chunk.surfacePatch().halfSize().lat * 1000000), 8700.0f));
         programObject->setUniform("xSegments", _grid->xSegments());
 
-        if (tileProviders[LayeredTextures::ColorTextures].size() == 0) {
+        if (chunk.owner()->debugOptions.showHeightResolution) {
             programObject->setUniform("vertexResolution", glm::vec2(_grid->xSegments(), _grid->ySegments()));
         }       
-
+        
         return programObject;
     }
 
@@ -305,14 +333,19 @@ namespace openspace {
         
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if(_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0){
+            if(_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0){
                 performAnyBlending = true; 
                 break;
             }
         }
         if (performAnyBlending) {
+            // Calculations are done in the reference frame of the globe. Hence, the camera
+            // position needs to be transformed with the inverse model matrix
+            glm::dmat4 inverseModelTransform = chunk.owner()->inverseModelTransform();
+            glm::dvec3 cameraPosition =
+                glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
             float distanceScaleFactor = chunk.owner()->lodScaleFactor * ellipsoid.minimumRadius();
-            programObject->setUniform("cameraPosition", vec3(data.camera.positionVec3()));
+            programObject->setUniform("cameraPosition", vec3(cameraPosition));
             programObject->setUniform("distanceScaleFactor", distanceScaleFactor);
             programObject->setUniform("chunkLevel", chunk.index().level);
         }
@@ -321,9 +354,7 @@ namespace openspace {
         Geodetic2 swCorner = chunk.surfacePatch().getCorner(Quad::SOUTH_WEST);
         auto patchSize = chunk.surfacePatch().size();
         
-        // TODO : Model transform should be fetched as a matrix directly.
-        dmat4 modelTransform = dmat4(chunk.owner()->stateMatrix()); // Rotation
-        modelTransform = translate(dmat4(1), data.position.dvec3()) * modelTransform; // Translation
+        dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         mat4 modelViewTransform = mat4(viewTransform * modelTransform);
         mat4 modelViewProjectionTransform = data.camera.projectionMatrix() * modelViewTransform;
@@ -334,11 +365,19 @@ namespace openspace {
         programObject->setUniform("lonLatScalingFactor", vec2(patchSize.toLonLatVec2()));
         programObject->setUniform("radiiSquared", vec3(ellipsoid.radiiSquared()));
 
-        if (_tileProviderManager->getActivatedLayerCategory(LayeredTextures::NightTextures).size() > 0) {
+        if (_tileProviderManager->getTileProviderGroup(
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
+            glm::vec3 directionToSunWorldSpace =
+                glm::normalize(-data.modelTransform.translation);
+            glm::vec3 directionToSunCameraSpace =
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+            data.modelTransform.translation;
             programObject->setUniform("modelViewTransform", modelViewTransform);
+            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
         }
 
-        
         // OpenGL rendering settings
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
@@ -371,7 +410,7 @@ namespace openspace {
         bool performAnyBlending = false;
         for (int i = 0; i < LayeredTextures::NUM_TEXTURE_CATEGORIES; ++i) {
             LayeredTextures::TextureCategory category = (LayeredTextures::TextureCategory)i;
-            if (_tileProviderManager->levelBlendingEnabled[i] && _tileProviderManager->getActivatedLayerCategory(category).size() > 0) {
+            if (_tileProviderManager->getTileProviderGroup(i).levelBlendingEnabled && _tileProviderManager->getTileProviderGroup(category).getActiveTileProviders().size() > 0) {
                 performAnyBlending = true;
                 break;
             }
@@ -383,9 +422,7 @@ namespace openspace {
         }
 
         // Calculate other uniform variables needed for rendering
-
-        // TODO : Model transform should be fetched as a matrix directly.
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+        dmat4 modelTransform = chunk.owner()->modelTransform();
         dmat4 viewTransform = data.camera.combinedViewMatrix();
         dmat4 modelViewTransform = viewTransform * modelTransform;
 
@@ -406,6 +443,18 @@ namespace openspace {
 
         programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
         programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+        if (_tileProviderManager->getTileProviderGroup(
+                LayeredTextures::NightTextures).getActiveTileProviders().size() > 0 ||
+            _tileProviderManager->getTileProviderGroup(
+                LayeredTextures::WaterMasks).getActiveTileProviders().size() > 0) {
+            glm::vec3 directionToSunWorldSpace =
+                glm::normalize(-data.modelTransform.translation);
+            glm::vec3 directionToSunCameraSpace =
+                (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+            data.modelTransform.translation;
+            programObject->setUniform("lightDirectionCameraSpace", -directionToSunCameraSpace);
+        }
 
 
         // OpenGL rendering settings

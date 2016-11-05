@@ -42,17 +42,19 @@ namespace openspace {
 class IswaManagerTest : public testing::Test {
 protected:
 
-    IswaManagerTest() {
-        DownloadManager::initialize("", 0);
+    IswaManagerTest()
+        : _downloadManager("", 0)
+    {
         IswaManager::initialize();
     }
 
     ~IswaManagerTest() {
         IswaManager::deinitialize();
-        DownloadManager::deinitialize();
     }
 
     void reset() {}
+    
+    DownloadManager _downloadManager;
 };
 
 TEST_F(IswaManagerTest, initialize){

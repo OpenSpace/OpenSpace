@@ -36,10 +36,10 @@ namespace {
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name)
-    : _name(std::move(name))
-{
-    ghoul_assert(!_name.empty(), "Name must not be empty");
+OpenSpaceModule::OpenSpaceModule(std::string name) {
+    ghoul_assert(!name.empty(), "Name must not be empty");
+    
+    setName(name);
 }
 
 void OpenSpaceModule::initialize() {
@@ -63,8 +63,14 @@ void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
 }
 
-std::string OpenSpaceModule::name() const {
-    return _name;
+std::vector<Documentation> OpenSpaceModule::documentations() const {
+    return {};
+}
+
+ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+OpenSpaceModule::requiredOpenGLVersion() const
+{
+    return { 3, 3 };
 }
 
 std::string OpenSpaceModule::modulePath() const {

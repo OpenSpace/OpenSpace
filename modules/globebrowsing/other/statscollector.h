@@ -24,6 +24,7 @@
 #ifndef __STATS_TRACKER_H__
 #define __STATS_TRACKER_H__
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem>
 
@@ -143,7 +144,9 @@ namespace openspace {
 
         StatsCollector() = delete;
 
-        StatsCollector(const std::string& filename, int dumpEveryXRecord, const std::string& delimiter = ",", bool enabled = true)
+        using Enabled = ghoul::Boolean;
+
+        StatsCollector(const std::string& filename, int dumpEveryXRecord, Enabled enabled = Enabled::Yes, const std::string& delimiter = ",")
             : _filename(filename)
             , _dumpEveryXRecord(dumpEveryXRecord)
             , _recordsSinceLastDump(0)

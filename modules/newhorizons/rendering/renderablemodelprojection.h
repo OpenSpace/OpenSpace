@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/newhorizons/util/projectioncomponent.h>
 
+#include <openspace/documentation/documentation.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 
@@ -55,9 +56,11 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    virtual void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
+
+    static openspace::Documentation Documentation();
 
 private:
     bool loadTextures();
@@ -74,6 +77,7 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
 
@@ -81,11 +85,6 @@ private:
 
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
-
-    std::string _defaultProjImage;
-    std::string _source;
-    std::string _destination;
-    std::string _target;
 
     // uniforms
     glm::vec2  _camScaling;
@@ -100,7 +99,6 @@ private:
     bool _capture;
         
     psc _sunPosition;
-
     properties::BoolProperty _performShading;
 };
 

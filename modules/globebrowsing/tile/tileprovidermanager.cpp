@@ -22,8 +22,9 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+#include <openspace/util/factorymanager.h>
+
 #include <modules/globebrowsing/tile/tileprovidermanager.h>
-#include <modules/globebrowsing/tile/tileproviderfactory.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -37,7 +38,34 @@ namespace {
 
 namespace openspace {
 
-    ThreadPool TileProviderManager::tileRequestThreadPool(1);
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            Tile Provider Group                                   //
+    //////////////////////////////////////////////////////////////////////////////////////
+
+    void TileProviderGroup::update() {
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                tileProviderWithName.tileProvider->update();
+            }
+        }
+    }
+
+
+    const std::vector<std::shared_ptr<TileProvider>> TileProviderGroup::getActiveTileProviders() const {
+        std::vector<std::shared_ptr<TileProvider>> activeTileProviders;
+        for (auto tileProviderWithName : tileProviders) {
+            if (tileProviderWithName.isActive) {
+                activeTileProviders.push_back(tileProviderWithName.tileProvider);
+            }
+        }
+        return activeTileProviders;
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                           Tile Provider Manager                                  //
+    //////////////////////////////////////////////////////////////////////////////////////
+
 
     TileProviderManager::TileProviderManager(
         const ghoul::Dictionary& textureCategoriesDictionary,
@@ -71,17 +99,18 @@ namespace openspace {
             }
 
             initData.threads = 1;
-            initData.cacheSize = 500;
+            initData.cacheSize = 5000;
             initData.framesUntilRequestQueueFlush = 60;
-            initData.preprocessTiles = i == LayeredTextures::HeightMaps; // Only preprocess height maps.
+            // Only preprocess height maps.
+            initData.preprocessTiles = i == LayeredTextures::HeightMaps;
 
             initTexures(
-                _layerCategories[i],
+                _layerCategories[i].tileProviders,
                 texturesDict,
                 initData);
 
             // init level blending to be true
-            levelBlendingEnabled[i] = true;
+            _layerCategories[i].levelBlendingEnabled = true;
         }
     }
 
@@ -89,7 +118,7 @@ namespace openspace {
     {
     }
 
-    void TileProviderManager::initTexures(std::vector<TileProviderWithName>& dest,
+    void TileProviderManager::initTexures(std::vector<NamedTileProvider>& dest,
         const ghoul::Dictionary& texturesDict, const TileProviderInitData& initData)
     {
         // Create TileProviders for all textures within this category
@@ -104,76 +133,57 @@ namespace openspace {
             std::string type = "LRUCaching"; // if type is unspecified
             texDict.getValue("Type", type);
 
-            
-            std::shared_ptr<TileProvider> tileProvider = TileProviderFactory::ref()->create(type, path, initData);
+            TileProvider* tileProvider;
+            auto tileProviderFactory = FactoryManager::ref().factory<TileProvider>();
+            try {
+                tileProvider = tileProviderFactory->create(type, texDict);
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERROR(e.what());
+                continue;
+            }
+
+            // Something else went wrong and no exception was thrown
             if (tileProvider == nullptr) {
+                LERROR("Unable to create TileProvider '" << name << "' of type '"
+                    << type << "'");
                 continue;
             }
 
             bool enabled = false; // defaults to false if unspecified
             texDict.getValue("Enabled", enabled);
 
-            dest.push_back({ name, tileProvider, enabled });
+            dest.push_back({ name, std::shared_ptr<TileProvider>(tileProvider), enabled });
         }
     }
 
-
-    std::shared_ptr<TileProvider> TileProviderManager::initProvider(const std::string& file,
-        const TileProviderInitData& initData)
-    {
-        std::shared_ptr<TileProvider> tileProvider;
-
-        try
-        {   // First try reading normally
-            auto tileDataset = std::make_shared<TileDataset>(file, initData.minimumPixelSize, initData.preprocessTiles);
-            auto threadPool = std::make_shared<ThreadPool>(1);
-            auto tileReader = std::make_shared<AsyncTileDataProvider>(tileDataset, threadPool);
-            auto tileCache = std::make_shared<TileCache>(initData.cacheSize);
-            tileProvider = std::make_shared<CachingTileProvider>(tileReader, tileCache, initData.framesUntilRequestQueueFlush);
-
-            return tileProvider;
-        }
-        catch (const ghoul::RuntimeError& e)
-        {   // Then try to see if it is a temporal dataset.
-            CPLXMLNode * node = CPLParseXMLFile(file.c_str());
-            if (!node) {
-                throw ghoul::RuntimeError("Unable to parse file:\n" + file);
-            }
-            if (std::string(node->pszValue) == "OpenSpaceTemporalGDALDataset") {
-                tileProvider = std::make_shared<TemporalTileProvider>(file, initData);
-                return tileProvider;
-            }
-            // If still not able to read, throw the error.
-            throw ghoul::RuntimeError(e.message);
-        }
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(size_t groupId) {
+        return _layerCategories[groupId];
     }
 
-    TileProviderManager::LayerCategory& TileProviderManager::getLayerCategory(LayeredTextures::TextureCategory category)
-    {
+    TileProviderGroup& TileProviderManager::getTileProviderGroup(LayeredTextures::TextureCategory category) {
         return _layerCategories[category];
     }
 
     void TileProviderManager::update() {
+        for (auto tileProviderGroup : _layerCategories) {
+            tileProviderGroup.update();
+        }
+    }
+
+    void TileProviderManager::reset(bool includingInactive) {
         for (auto layerCategory : _layerCategories) {
-            for (auto tileProviderWithName : layerCategory) {
+            for (auto tileProviderWithName : layerCategory.tileProviders) {
                 if (tileProviderWithName.isActive) {
-                    tileProviderWithName.tileProvider->update();
+                    tileProviderWithName.tileProvider->reset();
+                }
+                else if (includingInactive) {
+                    tileProviderWithName.tileProvider->reset();
                 }
             }
         }
     }
 
-    const std::vector<std::shared_ptr<TileProvider> >
-        TileProviderManager::getActivatedLayerCategory(
-            LayeredTextures::TextureCategory textureCategory)
-    {
-        std::vector<std::shared_ptr<TileProvider> > tileProviders;
-        for (auto tileProviderWithName : _layerCategories[textureCategory]) {
-            if (tileProviderWithName.isActive) {
-                tileProviders.push_back(tileProviderWithName.tileProvider);
-            }
-        }
-        return tileProviders;
-    }
+   
 
 }  // namespace openspace

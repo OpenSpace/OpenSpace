@@ -1,0 +1,29 @@
+{{#each entries}}
+  <div class="documentation-item">
+    <div class="row">
+      <div class="col-lg-12">
+        <p>
+          <a href="#{{urlify key}}" name="{{urlify key}}">
+            <span class="documentation-type">{{type}}</span>
+            <span class="documentation-key">{{key}}</span>
+            {{#if optional}}
+            <span class="documentation-type">(Optional)</span>
+            {{/if}}
+          </a>
+        </p>
+        <p class="documentation-type">{{description}}</p>
+        <p class="documentation-description">{{documentation}}</p>
+        {{#with restrictions}}
+        {{>documentation}}
+        {{/with}}
+        {{#if reference}}
+          {{#if reference.found}}
+            <p class="documentation-description">An object of type '<a href="#{{reference.identifier}}">{{reference.name}}</a>'</p>
+          {{else}}
+            <p class="documentation-description">Missing reference</p>
+          {{/if}}
+        {{/if}}
+      </div>
+    </div>
+  </div>
+{{/each}}

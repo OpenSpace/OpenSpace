@@ -2,15 +2,14 @@ return {
     -- Jupiter barycenter module
     {
         Name = "JupiterBarycenter",
-        Parent = "SolarSystemBarycenter",     
-        Ephemeris = {
-            Type = "Spice",
-            Body = "JUPITER BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
-            }
+        Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "JUPITER BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
         },
     },
     -- JupiterProjection module
@@ -39,64 +38,63 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "JUPITER",
                 Aberration = "NONE",
-            },
-            DataInputTranslation = {
-                Instrument = {
-                    LORRI = {
-                        DetectorType  = "Camera",
-                        Spice = {"NH_LORRI"},
-                    },        
-                },                    
-                Target ={ 
-                    Read  = {
-                        "TARGET_NAME",
-                        "INSTRUMENT_HOST_NAME",
-                        "INSTRUMENT_ID", 
-                        "START_TIME", 
-                        "STOP_TIME", 
-                        "DETECTOR_TYPE",
-                        --"SEQUENCE_ID",
-                    },
-                    Convert = { 
-                        JRINGS      = {"IMAGE-PLANE" },
-                        J1IO        = {"IO"          },
-                        J2EUROPA    = {"EUROPA"      },
-                        J6HIMALIA   = {"IMAGE-PLANE" },
-                        J7ELARA     = {"IMAGE-PLANE" },
-                        CALIBRATION = {"CALIBRATION" },
-                        JUPITER     = {"JUPITER"     },
-                        CALLISTO    = {"CALLISTO"    },
-                        GANYMEDE    = {"GANYMEDE"    },
-                        EARTH       = {"EARTH"       },
-                        NEWHORIZONS = {"NEW HORIZONS"},
-                        CCD         = {"CAMERA"      },
-                        FRAMECCD    = {"SCANNER"     },
+                AspectRatio = 2,
+
+                DataInputTranslation = {
+                    Instrument = {
+                        LORRI = {
+                            DetectorType  = "Camera",
+                            Spice = {"NH_LORRI"},
+                        },        
+                    },                    
+                    Target ={ 
+                        Read  = {
+                            "TARGET_NAME",
+                            "INSTRUMENT_HOST_NAME",
+                            "INSTRUMENT_ID", 
+                            "START_TIME", 
+                            "STOP_TIME", 
+                            "DETECTOR_TYPE",
+                            --"SEQUENCE_ID",
+                        },
+                        Convert = { 
+                            JRINGS      = {"IMAGE-PLANE" },
+                            J1IO        = {"IO"          },
+                            J2EUROPA    = {"EUROPA"      },
+                            J6HIMALIA   = {"IMAGE-PLANE" },
+                            J7ELARA     = {"IMAGE-PLANE" },
+                            CALIBRATION = {"CALIBRATION" },
+                            JUPITER     = {"JUPITER"     },
+                            CALLISTO    = {"CALLISTO"    },
+                            GANYMEDE    = {"GANYMEDE"    },
+                            EARTH       = {"EARTH"       },
+                            NEWHORIZONS = {"NEW HORIZONS"},
+                            CCD         = {"CAMERA"      },
+                            FRAMECCD    = {"SCANNER"     },
+                        },
                     },
                 },
-            },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
-            },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                Instrument = {                
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             }
         },
-        Ephemeris = {
-            Type = "Static"
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_JUPITER",
+                DestinationFrame = "GALACTIC",
+            },
         },
-
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_JUPITER",
-            Reference = "GALACTIC"
-        },
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "JupiterText",
@@ -106,12 +104,15 @@ return {
             Size = {1.0, 7.5},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Jupiter-text.png"
+            Texture = "textures/Jupiter-text.png",
+            BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, -1, 0, 8}
-        }
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, -100000000, 0}
+            },
+        },
     },    
     -- JupiterTrail module
      {   
@@ -132,7 +133,6 @@ return {
                  -- need to add different texture
              },  
          },
-         GuiName = "/Solar/JupiterTrail"
      }
     
 }

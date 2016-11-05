@@ -1,0 +1,6 @@
+return {
+    FileRequest = {
+        { Identifier = "bennu_models", Destination = "models", Version = 1 },
+        { Identifier = "bennu_textures", Destination = "textures", Version = 1 }
+    },
+}

@@ -33,6 +33,7 @@
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
+//#include <ghoul/misc/threadpool.h>
 
 #include <ghoul/misc/assert.h>
 
@@ -75,6 +76,10 @@ namespace openspace {
 
 
         void enqueueJob(std::shared_ptr<Job<P>> job) {
+            //threadPool->queue([this, job]() {
+            //    job->execute();
+            //    _finishedJobs.push(job);
+            //});
             threadPool->enqueue([this, job]() {
                 job->execute();
                 _finishedJobs.push(job);
@@ -82,6 +87,7 @@ namespace openspace {
         }
 
         void clearEnqueuedJobs() {
+            //threadPool->clearRemainingTasks();
             threadPool->clearTasks();
         }
 
@@ -94,6 +100,10 @@ namespace openspace {
             return _finishedJobs.size();
         }
 
+        void reset() {
+            //threadPool->clearRemainingTasks();
+            threadPool->clearTasks();
+        }
 
     
     private:

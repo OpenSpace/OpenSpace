@@ -37,6 +37,8 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <openspace/util/time.h>
+
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
@@ -68,7 +70,7 @@ namespace openspace {
         , maxSplitDepth(22)
         , _savedCamera(nullptr)
         , _tileProviderManager(tileProviderManager)
-        , stats(StatsCollector(absPath("test_stats"), 1))
+        , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     {
 
         auto geometry = std::make_shared<SkirtedGrid>(
@@ -140,11 +142,10 @@ namespace openspace {
             desiredLevel = _chunkEvaluatorByDistance->getDesiredLevel(chunk, renderData);
         }
 
-        if (debugOptions.limitLevelByAvailableHeightData) {
-            int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
-            if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
-                desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
-            }
+
+        int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(chunk, renderData);
+        if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+            desiredLevel = min(desiredLevel, desiredLevelByAvailableData);
         }
 
         desiredLevel = glm::clamp(desiredLevel, minSplitDepth, maxSplitDepth);
@@ -154,18 +155,8 @@ namespace openspace {
     void ChunkedLodGlobe::render(const RenderData& data){
 
         stats.startNewRecord();
-
         
-        int j2000s = Time::now().unsyncedJ2000Seconds();
-        /*
-        int lastJ2000s = stats.i.previous("time");
-        if (j2000s == lastJ2000s) {
-            stats.disable();
-        }
-        else {
-            stats.enable();
-        }
-        */
+        int j2000s = Time::now().j2000Seconds();
 
         auto duration = std::chrono::system_clock::now().time_since_epoch();
         auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -177,10 +168,9 @@ namespace openspace {
         _rightRoot->updateChunkTree(data);
 
         // Calculate the MVP matrix
-        dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
         dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
         dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
-        dmat4 mvp = vp * modelTransform;
+        dmat4 mvp = vp * _modelTransform;
 
         // Render function
         std::function<void(const ChunkNode&)> renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
@@ -190,7 +180,7 @@ namespace openspace {
                 stats.i["chunks leafs"]++;
                 if (chunk.isVisible()) {
                     stats.i["rendered chunks"]++;
-                    double t0 = Time::now().unsyncedJ2000Seconds();
+                    double t0 = Time::now().j2000Seconds();
                     _renderer->renderChunk(chunkNode.getChunk(), data);
                     debugRenderChunk(chunk, mvp);
                 }
@@ -200,11 +190,9 @@ namespace openspace {
         _leftRoot->reverseBreadthFirst(renderJob);
         _rightRoot->reverseBreadthFirst(renderJob);
 
-
         if (_savedCamera != nullptr) {
-            DebugRenderer::ref()->renderCameraFrustum(data, *_savedCamera);
+            DebugRenderer::ref().renderCameraFrustum(data, *_savedCamera);
         }
-        
 
         //LDEBUG("min distnace to camera: " << minDistToCamera);
 
@@ -226,7 +214,7 @@ namespace openspace {
                 const vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
                 clippingSpaceCorners[i] = clippingSpaceCorner;
 
-                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner.xyz();
+                vec3 screenSpaceCorner = (1.0f / clippingSpaceCorner.w) * clippingSpaceCorner;
                 screenSpaceBounds.expand(screenSpaceCorner);
             }
 
@@ -234,28 +222,34 @@ namespace openspace {
             vec4 color = vec4(colorBits & 1, colorBits & 2, colorBits & 4, 0.3);
 
             if (debugOptions.showChunkBounds) {
-                DebugRenderer::ref()->renderNiceBox(clippingSpaceCorners, color);
+                DebugRenderer::ref().renderNiceBox(clippingSpaceCorners, color);
             }
 
             if (debugOptions.showChunkAABB) {
-                auto& screenSpacePoints = DebugRenderer::ref()->verticesFor(screenSpaceBounds);
-                DebugRenderer::ref()->renderNiceBox(screenSpacePoints, color);
+                auto& screenSpacePoints = DebugRenderer::ref().verticesFor(screenSpaceBounds);
+                DebugRenderer::ref().renderNiceBox(screenSpacePoints, color);
             }
         }
     }
 
     void ChunkedLodGlobe::update(const UpdateData& data) {
+        glm::dmat4 translation = glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
+        glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+        glm::dmat4 scaling = glm::scale(glm::dmat4(1.0),
+            glm::dvec3(data.modelTransform.scale, data.modelTransform.scale, data.modelTransform.scale));
+
+        _modelTransform = translation * rotation * scaling;
+        _inverseModelTransform = glm::inverse(_modelTransform);
+
         _renderer->update();
     }
 
-    void ChunkedLodGlobe::setStateMatrix(const glm::dmat3& stateMatrix)
-    {
-        _stateMatrix = stateMatrix;
+    const glm::dmat4& ChunkedLodGlobe::modelTransform() {
+        return _modelTransform;
     }
 
-    const glm::dmat3& ChunkedLodGlobe::stateMatrix()
-    {
-        return _stateMatrix;
+    const glm::dmat4& ChunkedLodGlobe::inverseModelTransform() {
+        return _inverseModelTransform;
     }
 
     const Ellipsoid& ChunkedLodGlobe::ellipsoid() const

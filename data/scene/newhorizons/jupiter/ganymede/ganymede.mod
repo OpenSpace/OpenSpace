@@ -22,35 +22,36 @@ return {
                 Observer   = "NEW HORIZONS",
                 Target     = "GANYMEDE",
                 Aberration = "NONE",
+                AspectRatio = 2,
+
+                Instrument = {
+                    Name       = "NH_LORRI",
+                    Method     = "ELLIPSOID",
+                    Aberration = "NONE",
+                    Fovy       = 0.2907,
+                    Aspect     = 1,
+                    Near       = 0.2,
+                    Far        = 10000,
+                },
+
+                PotentialTargets = {
+                    "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
+                }
             },
-            Instrument = {                
-                Name       = "NH_LORRI",
-                Method     = "ELLIPSOID",
-                Aberration = "NONE",
-                Fovy       = 0.2907,
-                Aspect     = 1,
-                Near       = 0.2,
-                Far        = 10000,
+        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "GANYMEDE",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
-            PotentialTargets = {
-                "JUPITER", "IO", "EUROPA", "GANYMEDE", "CALLISTO"
-            }            
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_GANYMEDE",
+                DestinationFrame = "ECLIPJ2000",
+            },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "GANYMEDE",
-            Reference = "ECLIPJ2000",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_GANYMEDE",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Jupiter"
     },
     {
         Name = "GanymedeText",
@@ -60,12 +61,15 @@ return {
             Size = {1.0, 7.4},
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/Ganymede-Text.png"
+            Texture = "textures/Ganymede-Text.png",
+            BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, -1, 0, 7}
-        }
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, -10000000, 0}
+            },
+        },
     },    
     -- GanymedeTrail module
     {   
@@ -87,6 +91,5 @@ return {
                 -- need to add different texture
             },  
         },
-        GuiName = "/Solar/GanymedeTrail"
     }
 }

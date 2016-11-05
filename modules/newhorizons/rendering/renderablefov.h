@@ -22,28 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RenderableFov_H__
-#define __RenderableFov_H__
+#ifndef __RENDERABLEFOV_H__
+#define __RENDERABLEFOV_H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/query/query.h>
-
-// ghoul includes
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-//#include <openspace/util/runtimedata.h>
-#include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
 
+#include <ghoul/glm.h>
+
+namespace ghoul {
+namespace opengl {
+    
+class ProgramObject;
+class Texture;
+    
+} // namespace opengl
+} // namespace ghoul
+
 namespace openspace {
-class RenderableFov : public Renderable{
+
+class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
-    ~RenderableFov();
-
+    
     bool initialize() override;
     bool deinitialize() override;
 
@@ -53,14 +55,6 @@ public:
     void update(const UpdateData& data) override;
 
  private:
-    // properties
-    properties::FloatProperty _lineWidth;
-    properties::BoolProperty _drawSolid;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    ghoul::opengl::Texture* _texture;
-    openspace::SceneGraphNode* _targetNode;
-
-    // class methods
     void loadTexture();
     void allocateData();
     void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
@@ -70,18 +64,23 @@ public:
     void sendToGPU();
 
 
-    // helper methods
     void computeColors();
     void computeIntercepts(const RenderData& data);
     psc orthogonalProjection(glm::dvec3 camvec);
     psc checkForIntercept(glm::dvec3 ray);
     psc pscInterpolate(psc p0, psc p1, float t);
     glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
-    glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2, double tolerance);
+    glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2);
+
+    // properties
+    properties::FloatProperty _lineWidth;
+    properties::BoolProperty _drawSolid;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    ghoul::opengl::Texture* _texture;
+
 
     // instance variables
     int _nrInserted = 0;
-    int _isteps;
     bool _rebuild = false;
     bool _interceptTag[8];
     bool _withinFOV;
@@ -106,7 +105,6 @@ public:
     std::vector<glm::dvec3> _bounds;
     std::vector<std::string> _potentialTargets;
     bool _drawFOV;
-    double _lt;
 
     // GPU 
     GLuint _fovBoundsVAO;
@@ -116,7 +114,6 @@ public:
     GLuint _fovPlaneVBO;
     unsigned int _vPlaneSize;
     GLenum _mode;
-    unsigned int _stride;
 
     // time
     double _time = 0;
@@ -129,7 +126,8 @@ public:
     glm::vec4 col_end;     // intersection end color
     glm::vec4 col_blue;    // withinFov color
     glm::vec4 col_gray;    // no intersection color
-
 };
-}
-#endif
+    
+} // namespace openspace
+
+#endif // __RENDERABLEFOV_H__

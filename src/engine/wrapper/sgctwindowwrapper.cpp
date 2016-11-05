@@ -36,10 +36,18 @@ namespace {
 
 namespace openspace {
     
+void SGCTWindowWrapper::terminate() {
+    sgct::Engine::instance()->terminate();
+}
+
 void SGCTWindowWrapper::setBarrier(bool enabled) {
     sgct::SGCTWindow::setBarrier(enabled);
 }
     
+void SGCTWindowWrapper::setSynchronization(bool enabled) {
+    sgct_core::ClusterManager::instance()->setUseIgnoreSync(enabled);
+}
+
 void SGCTWindowWrapper::clearAllWindows(const glm::vec4& clearColor) {
     size_t n = sgct::Engine::instance()->getNumberOfWindows();
     for (size_t i = 0; i < n; ++i) {
@@ -56,6 +64,10 @@ bool SGCTWindowWrapper::windowHasResized() const {
     
 double SGCTWindowWrapper::averageDeltaTime() const {
     return sgct::Engine::instance()->getAvgDt();
+}
+
+double SGCTWindowWrapper::deltaTime() const {
+    return sgct::Engine::instance()->getDt();
 }
     
 glm::vec2 SGCTWindowWrapper::mousePosition() const {
@@ -78,12 +90,28 @@ uint32_t SGCTWindowWrapper::mouseButtons(int maxNumber) const {
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
-    return glm::ivec2(sgct::Engine::instance()->getCurrentWindowPtr()->getXResolution(),
-                      sgct::Engine::instance()->getCurrentWindowPtr()->getYResolution());
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    switch (window->getStereoMode()) {
+        case sgct::SGCTWindow::Side_By_Side_Stereo:
+        case sgct::SGCTWindow::Side_By_Side_Inverted_Stereo:
+            return glm::ivec2(
+                window->getXResolution() / 2,
+                window->getYResolution());
+        case sgct::SGCTWindow::Top_Bottom_Stereo:
+        case sgct::SGCTWindow::Top_Bottom_Inverted_Stereo:
+            return glm::ivec2(
+                window->getXResolution(),
+                window->getYResolution() / 2);
+        default:
+            return glm::ivec2(
+                window->getXResolution(),
+                window->getYResolution());
+    }
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
-    int x,y;
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    int x, y;
     sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
@@ -100,11 +128,17 @@ glm::ivec2 SGCTWindowWrapper::currentDrawBufferResolution() const {
     }
     throw WindowWrapperException("No viewport available");
 }
+    
+glm::vec2 SGCTWindowWrapper::dpiScaling() const {
+    return glm::vec2(
+        sgct::Engine::instance()->getCurrentWindowPtr()->getXScale(),
+        sgct::Engine::instance()->getCurrentWindowPtr()->getYScale()
+    );
+}
 
 int SGCTWindowWrapper::currentNumberOfAaSamples() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getNumberOfAASamples();
-}
-
+} 
     
 bool SGCTWindowWrapper::isRegularRendering() const {
     // TODO: Needs to implement the nonlinear rendering check ---abock
@@ -128,6 +162,15 @@ bool SGCTWindowWrapper::hasGuiWindow() const {
 bool SGCTWindowWrapper::isGuiWindow() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
 }
+
+bool SGCTWindowWrapper::isSwapGroupMaster() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();
+}
+
+bool SGCTWindowWrapper::isUsingSwapGroups() const {
+    return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
+}
+
     
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
@@ -169,10 +212,10 @@ bool SGCTWindowWrapper::isSimpleRendering() const {
 
 }
     
-void SGCTWindowWrapper::takeScreenshot() const {
+void SGCTWindowWrapper::takeScreenshot(bool applyWarping) const {
+    sgct::SGCTSettings::instance()->setCaptureFromBackBuffer(applyWarping);
     sgct::Engine::instance()->takeScreenshot();
 }
-    
     
 //void forEachWindow(std::function<void (void)> function) {
 //    size_t n = sgct::Engine::instance()->getNumberOfWindows();

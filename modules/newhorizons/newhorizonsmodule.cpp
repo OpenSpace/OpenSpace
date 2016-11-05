@@ -51,7 +51,10 @@ NewHorizonsModule::NewHorizonsModule()
 void NewHorizonsModule::internalInitialize() {
     ImageSequencer::initialize();
 
-    FactoryManager::ref().addFactory(std::make_unique<ghoul::TemplateFactory<Decoder>>());
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Decoder>>(),
+        "Decoder"
+    );
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
@@ -66,6 +69,14 @@ void NewHorizonsModule::internalInitialize() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
+}
+
+std::vector<Documentation> NewHorizonsModule::documentations() const {
+    return {
+        RenderableModelProjection::Documentation(),
+        RenderablePlanetProjection::Documentation(),
+        ProjectionComponent::Documentation()
+    };
 }
 
 } // namespace openspace

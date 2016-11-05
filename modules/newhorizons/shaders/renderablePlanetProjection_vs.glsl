@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 layout(location = 0) in vec4 in_position;
 
 out vec4 vs_position;

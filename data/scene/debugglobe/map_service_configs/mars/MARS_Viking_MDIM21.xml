@@ -1,0 +1,18 @@
+<GDAL_WMS>
+    <Service name="TMS">
+        <ServerUrl>http://dzw9r5p966egh.cloudfront.net/catalog/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0//default/default028mm/${z}/${y}/${x}.jpg</ServerUrl>
+    </Service>
+    <DataWindow>
+        <UpperLeftX>-180.0</UpperLeftX>
+        <UpperLeftY>90</UpperLeftY>
+        <LowerRightX>180.0</LowerRightX>
+        <LowerRightY>-90</LowerRightY>
+        <TileLevel>8</TileLevel>
+        <TileCountX>2</TileCountX>
+        <TileCountY>1</TileCountY>
+        <YOrigin>top</YOrigin>
+    </DataWindow>
+    <BlockSizeX>256</BlockSizeX>
+    <BlockSizeY>256</BlockSizeY>
+    <BandsCount>3</BandsCount>
+</GDAL_WMS>

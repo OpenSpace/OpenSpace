@@ -24,8 +24,10 @@
 
 #include <openspace/scene/scene.h>
 
+#include <openspace/openspace.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -55,18 +57,26 @@
 #include <modules/onscreengui/include/gui.h>
 #endif
 
+#include "scene_doc.inl"
 #include "scene_lua.inl"
 
 namespace {
     const std::string _loggerCat = "Scene";
     const std::string _moduleExtension = ".mod";
-    const std::string _defaultCommonDirectory = "common";
     const std::string _commonModuleToken = "${COMMON_MODULE}";
 
     const std::string KeyCamera = "Camera";
     const std::string KeyFocusObject = "Focus";
     const std::string KeyPositionObject = "Position";
     const std::string KeyViewOffset = "Offset";
+
+    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
+    const std::string PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
+    const std::string PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
+    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const std::string JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {
@@ -87,13 +97,41 @@ bool Scene::deinitialize() {
     return true;
 }
 
-//bool ONCE = false;
-
 void Scene::update(const UpdateData& data) {
     if (!_sceneGraphToLoad.empty()) {
         OsEng.renderEngine().scene()->clearSceneGraph();
-        try {
+        try {          
             loadSceneInternal(_sceneGraphToLoad);
+
+            // Reset the InteractionManager to Orbital/default mode
+            // TODO: Decide if it belongs in the scene and/or how it gets reloaded
+            OsEng.interactionHandler().setInteractionMode("Orbital");
+
+            // After loading the scene, the keyboard bindings have been set
+            const std::string KeyboardShortcutsType =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartType;
+
+            const std::string KeyboardShortcutsFile =
+                ConfigurationManager::KeyKeyboardShortcuts + "." +
+                ConfigurationManager::PartFile;
+
+
+            std::string type;
+            std::string file;
+            bool hasType = OsEng.configurationManager().getValue(
+                KeyboardShortcutsType, type
+            );
+            
+            bool hasFile = OsEng.configurationManager().getValue(
+                KeyboardShortcutsFile, file
+            );
+            
+            if (hasType && hasFile) {
+                OsEng.interactionHandler().writeKeyboardDocumentation(type, file);
+            }
+
+            LINFO("Loaded " << _sceneGraphToLoad);
             _sceneGraphToLoad = "";
         }
         catch (const ghoul::RuntimeError& e) {
@@ -136,6 +174,7 @@ void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
 }
 
 void Scene::clearSceneGraph() {
+    LINFO("Clearing current scene graph");
     // deallocate the scene graph. Recursive deallocation will occur
     _graph.clear();
     //if (_root) {
@@ -153,11 +192,15 @@ void Scene::clearSceneGraph() {
 bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     ghoul::Dictionary dictionary;
     
+    OsEng.windowWrapper().setSynchronization(false);
+    OnExit(
+        [](){ OsEng.windowWrapper().setSynchronization(true); }
+    );
     
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
            // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
+           [state](){ ghoul::lua::destroyLuaState(state); }
            );
     
     OsEng.scriptEngine().initializeLuaState(state);
@@ -167,6 +210,14 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
         dictionary,
         state
     );
+
+    // Perform testing against the documentation/specification
+    openspace::documentation::testSpecificationAndThrow(
+        Scene::Documentation(),
+        dictionary,
+        "Scene"
+    );
+
 
     _graph.loadFromFile(sceneDescriptionFilePath);
 
@@ -188,7 +239,11 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     // TODO need to check this; unnecessary? (ab)
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
-            node->update({ Time::ref().currentTime() });
+            node->update({
+                glm::dvec3(0),
+                glm::dmat3(1),
+                1,
+                Time::ref().j2000Seconds() });
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -205,16 +260,24 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
     }
 
     // If a PropertyDocumentationFile was specified, generate it now
-    const bool hasType = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentationFile);
+    const std::string KeyPropertyDocumentationType =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartType;
+
+    const std::string KeyPropertyDocumentationFile =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartFile;
+
+    const bool hasType = OsEng.configurationManager().hasKey(KeyPropertyDocumentationType);
+    const bool hasFile = OsEng.configurationManager().hasKey(KeyPropertyDocumentationFile);
     if (hasType && hasFile) {
         std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationType, propertyDocumentationType);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
         std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(ConfigurationManager::KeyPropertyDocumentationFile, propertyDocumentationFile);
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
 
         propertyDocumentationFile = absPath(propertyDocumentationFile);
-        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType);
+        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, sceneDescriptionFilePath);
     }
 
 
@@ -380,7 +443,7 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
     return _graph.sceneGraphNode(name);
 }
 
-std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() {
+std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() const {
     return _graph.nodes();
 }
 
@@ -388,14 +451,12 @@ SceneGraph& Scene::sceneGraph() {
     return _graph;
 }
 
-void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type) {
+void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename) {
+    LDEBUG("Writing documentation for properties");
     if (type == "text") {
-        LDEBUG("Writing documentation for properties");
-        std::ofstream file(filename);
-        if (!file.good()) {
-            LERROR("Could not open file '" << filename << "' for writing property documentation");
-            return;
-        }
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
 
         using properties::Property;
         for (SceneGraphNode* node : _graph.nodes()) {
@@ -404,18 +465,183 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
                 file << node->name() << std::endl;
 
                 for (Property* p : properties) {
-                    file << p->fullyQualifiedIdentifier() << ":   " << p->guiName() << std::endl;
+                    file << p->fullyQualifiedIdentifier() << ":   " <<
+                        p->guiName() << std::endl;
                 }
 
                 file << std::endl;
             }
         }
     }
+    else if (type == "html") {
+        std::ofstream file;
+        file.exceptions(~std::ofstream::goodbit);
+        file.open(filename);
+
+
+        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+        std::ifstream jsInput(absPath(JsFilename));
+
+        std::string jsContent;
+        std::back_insert_iterator<std::string> jsInserter(jsContent);
+
+        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+
+        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+        std::ifstream cssInput(absPath(CssFilename));
+
+        std::string cssContent;
+        std::back_insert_iterator<std::string> cssInserter(cssContent);
+
+        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+
+        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyOwnerTemplateInput(absPath(PropertyOwnerTemplateFilename));
+        std::string propertyOwnerTemplateContent{ std::istreambuf_iterator<char>{propertyOwnerTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        std::ifstream propertyTemplateInput(absPath(PropertyTemplateFilename));
+        std::string propertyTemplateContent{ std::istreambuf_iterator<char>{propertyTemplateInput},
+            std::istreambuf_iterator<char>{} };
+
+        // Create JSON
+        std::function<std::string(properties::PropertyOwner*)> createJson =
+            [&createJson](properties::PropertyOwner* owner) -> std::string 
+        {
+            std::stringstream json;
+            json << "{";
+            json << "\"name\": \"" << owner->name() << "\",";
+
+            json << "\"properties\": [";
+            auto properties = owner->properties();
+            for (properties::Property* p : properties) {
+                json << "{";
+                json << "\"id\": \"" << p->identifier() << "\",";
+                json << "\"type\": \"" << p->className() << "\",";
+                json << "\"fullyQualifiedId\": \"" << p->fullyQualifiedIdentifier() << "\",";
+                json << "\"guiName\": \"" << p->guiName() << "\"";
+                json << "}";
+                if (p != properties.back()) {
+                    json << ",";
+                }
+            }
+            json << "],";
+
+            json << "\"propertyOwners\": [";
+            auto propertyOwners = owner->propertySubOwners();
+            for (properties::PropertyOwner* o : propertyOwners) {
+                json << createJson(o);
+                if (o != propertyOwners.back()) {
+                    json << ",";
+                }
+            }
+            json << "]";
+            json << "}";
+
+            return json.str();
+        };
+
+
+        std::stringstream json;
+        json << "[";
+        auto nodes = _graph.nodes();
+        for (SceneGraphNode* node : nodes) {
+            json << createJson(node);
+            if (node != nodes.back()) {
+                json << ",";
+            }
+        }
+
+        json << "]";
+
+        std::string jsonString = "";
+        for (const char& c : json.str()) {
+            if (c == '\'') {
+                jsonString += "\\'";
+            } else {
+                jsonString += c;
+            }
+        }
+
+        std::stringstream html;
+        html << "<!DOCTYPE html>\n"
+            << "<html>\n"
+            << "\t<head>\n"
+            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+            << mainTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyOwnerTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyOwnerTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t\t<script id=\"propertyTemplate\" type=\"text/x-handlebars-template\">\n"
+            << propertyTemplateContent << "\n"
+            << "\t\t</script>\n"
+            << "\t<script>\n"
+            << "var propertyOwners = JSON.parse('" << jsonString << "');\n"
+            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+            << "var sceneFilename = '" << sceneFilename << "';\n"
+            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << jsContent << "\n"
+            << "\t</script>\n"
+            << "\t<style type=\"text/css\">\n"
+            << cssContent << "\n"
+            << "\t</style>\n"
+            << "\t\t<title>Documentation</title>\n"
+            << "\t</head>\n"
+            << "\t<body>\n"
+            << "\t<body>\n"
+            << "</html>\n";
+
+        /*
+
+        html << "<html>\n"
+             << "\t<head>\n"
+             << "\t\t<title>Properties</title>\n"
+             << "\t</head>\n"
+             << "<body>\n"
+             << "<table cellpadding=3 cellspacing=0 border=1>\n"
+             << "\t<caption>Properties</caption>\n\n"
+             << "\t<thead>\n"
+             << "\t\t<tr>\n"
+             << "\t\t\t<th>ID</th>\n"
+             << "\t\t\t<th>Type</th>\n"
+             << "\t\t\t<th>Description</th>\n"
+             << "\t\t</tr>\n"
+             << "\t</thead>\n"
+             << "\t<tbody>\n";
+
+        for (SceneGraphNode* node : _graph.nodes()) {
+            for (properties::Property* p : node->propertiesRecursive()) {
+                html << "\t\t<tr>\n"
+                     << "\t\t\t<td>" << p->fullyQualifiedIdentifier() << "</td>\n"
+                     << "\t\t\t<td>" << p->className() << "</td>\n"
+                     << "\t\t\t<td>" << p->guiName() << "</td>\n"
+                     << "\t\t</tr>\n";
+            }
+
+            if (!node->propertiesRecursive().empty()) {
+                html << "\t<tr><td style=\"line-height: 10px;\" colspan=3></td></tr>\n";
+            }
+
+        }
+
+        html << "\t</tbody>\n"
+             << "</table>\n"
+             << "</html>;";
+
+        */
+        file << html.str();
+    }
     else
         LERROR("Undefined type '" << type << "' for Property documentation");
 }
 
-scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
+scripting::LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {
@@ -423,10 +649,26 @@ scripting::ScriptEngine::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 "string, *",
+                "Sets all properties identified by the URI (with potential wildcards) in "
+                "the first argument. The second argument can be any type, but it has to "
+                "match the type that the property (or properties) expect."
+            },
+            {
+                "setPropertyValueRegex",
+                &luascriptfunctions::property_setValueRegex,
+                "string, *",
+                "Sets all properties that pass the regular expression in the first "
+                "argument. The second argument can be any type, but it has to match the "
+                "type of the properties that matched the regular expression. The regular "
+                "expression has to be of the ECMAScript grammar."
+            },
+            {
+                "setPropertyValueSingle",
+                &luascriptfunctions::property_setValueSingle,
+                "string, *",
                 "Sets a property identified by the URI in "
                 "the first argument. The second argument can be any type, but it has to "
-                " agree with the type that the property expects",
-                true
+                "match the type that the property expects.",
             },
             {
                 "getPropertyValue",

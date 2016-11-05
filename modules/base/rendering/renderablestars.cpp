@@ -205,6 +205,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
+    _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
     
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform("scaling", scaling);
@@ -552,14 +553,16 @@ void RenderableStars::createDataSlice(ColorOption option) {
                     position[0], position[1], position[2], position[3]
                 } };
                     
-                layout.value.bvColor = _fullData[i + 3];
-                layout.value.luminance = _fullData[i + 4];
-                layout.value.absoluteMagnitude = _fullData[i + 5];
+
 
 #ifdef USING_STELLAR_TEST_GRID
                 layout.value.bvColor = _fullData[i + 3];
                 layout.value.luminance = _fullData[i + 3];
                 layout.value.absoluteMagnitude = _fullData[i + 3];
+#else
+                layout.value.bvColor = _fullData[i + 3];
+                layout.value.luminance = _fullData[i + 4];
+                layout.value.absoluteMagnitude = _fullData[i + 5];
 #endif
 
                 _slicedData.insert(_slicedData.end(),

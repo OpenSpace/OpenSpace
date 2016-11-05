@@ -98,7 +98,7 @@ namespace openspace {
                 //       |  /  |
                 // x    v00---v10   x ..
                 //
-                // x	x     x     x ..
+                // x    x     x     x ..
                 // :    :     :     :
 
                 GLuint v00 = (y + 0) * (xSegments + 2 + 1) + x + 0;

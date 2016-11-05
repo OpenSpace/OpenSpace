@@ -33,10 +33,10 @@ namespace properties {
 
 namespace {
     const std::string _loggerCat = "Property";
-    const std::string _metaDataKeyGuiName = "guiName";
-    const std::string _metaDataKeyGroup = "Group";
-    const std::string _metaDataKeyVisible = "isVisible";
-    const std::string _metaDataKeyReadOnly = "isReadOnly";
+    const std::string MetaDataKeyGuiName = "guiName";
+    const std::string MetaDataKeyGroup = "Group";
+    const std::string MetaDataKeyVisible = "isVisible";
+    const std::string MetaDataKeyReadOnly = "isReadOnly";
 
     const std::string _metaDataKeyViewPrefix = "view.";
 }
@@ -55,13 +55,11 @@ Property::Property(std::string identifier, std::string guiName)
     : _owner(nullptr)
     , _identifier(std::move(identifier))
 {
-    if (_identifier.empty())
-        LWARNING("Property identifier is empty");
-    if (guiName.empty())
-        LWARNING("Property GUI name is empty");
+    ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
+    ghoul_assert(!guiName.empty(), "guiName must not be empty");
 
     setVisible(true);
-    _metaData.setValue(_metaDataKeyGuiName, std::move(guiName));
+    _metaData.setValue(MetaDataKeyGuiName, std::move(guiName));
 }
 
 Property::~Property() {}
@@ -75,8 +73,9 @@ std::string Property::fullyQualifiedIdentifier() const {
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
         std::string ownerId = currentOwner->name();
-        if (!ownerId.empty())
+        if (!ownerId.empty()) {
             identifier = ownerId + "." + identifier;
+        }
         currentOwner = currentOwner->owner();
     }
     return identifier;
@@ -114,7 +113,7 @@ bool Property::setStringValue(std::string value) {
 
 std::string Property::guiName() const {
     std::string result;
-    _metaData.getValue(_metaDataKeyGuiName, result);
+    _metaData.getValue(MetaDataKeyGuiName, result);
     return result;
 }
 
@@ -123,27 +122,27 @@ std::string Property::description() const {
 }
 
 void Property::setGroupIdentifier(std::string groupId) {
-    _metaData.setValue(_metaDataKeyGroup, std::move(groupId));
+    _metaData.setValue(MetaDataKeyGroup, std::move(groupId));
 }
 
 std::string Property::groupIdentifier() const {
     std::string result;
-    _metaData.getValue(_metaDataKeyGroup, result);
+    _metaData.getValue(MetaDataKeyGroup, result);
     return result;
 }
 
 void Property::setVisible(bool state) {
-    _metaData.setValue(_metaDataKeyVisible, state);
+    _metaData.setValue(MetaDataKeyVisible, state);
 }
 
 bool Property::isVisible() const {
     bool visible = true;
-    _metaData.getValue(_metaDataKeyVisible, visible);
+    _metaData.getValue(MetaDataKeyVisible, visible);
     return visible;
 }
 
 void Property::setReadOnly(bool state) {
-    _metaData.setValue(_metaDataKeyReadOnly, state);
+    _metaData.setValue(MetaDataKeyReadOnly, state);
 }
 
 void Property::setViewOption(std::string option, bool value) {
@@ -162,19 +161,18 @@ void Property::onChange(std::function<void()> callback) {
     _onChangeCallback = std::move(callback);
 }
 
-PropertyOwner* Property::owner() const
-{
+PropertyOwner* Property::owner() const {
     return _owner;
 }
 
-void Property::setPropertyOwner(PropertyOwner* owner)
-{
+void Property::setPropertyOwner(PropertyOwner* owner) {
     _owner = owner;
 }
 
 void Property::notifyListener() {
-    if (_onChangeCallback)
+    if (_onChangeCallback) {
         _onChangeCallback();
+    }
 }
 
 std::string Property::generateBaseDescription() const {
@@ -188,14 +186,14 @@ std::string Property::generateBaseDescription() const {
 
 std::string Property::generateMetaDataDescription() const {
     bool isVisible, isReadOnly;
-    _metaData.getValue(_metaDataKeyVisible, isVisible);
-    _metaData.getValue(_metaDataKeyReadOnly, isReadOnly);
+    _metaData.getValue(MetaDataKeyVisible, isVisible);
+    _metaData.getValue(MetaDataKeyReadOnly, isReadOnly);
 
     return
         MetaDataKey + " = {" +
-            _metaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
-            _metaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
-            _metaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+            MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
+            MetaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
+            MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
 }
 
 std::string Property::generateAdditionalDescription() const {

@@ -32,7 +32,6 @@ namespace luascriptfunctions {
  */
 int setOrigin(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setOrigin";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -46,7 +45,10 @@ int setOrigin(lua_State* L) {
 
     SceneGraphNode* node = sceneGraphNode(s);
     if (!node) {
-        LWARNING("Could not find a node in scenegraph called '" << s <<"'");
+        LWARNINGC(
+            "lua.setOrigin",
+            "Could not find a node in scenegraph called '" << s << "'"
+        );
         return 0;
     }
 
@@ -58,11 +60,12 @@ int setOrigin(lua_State* L) {
 /**
 * \ingroup LuaScripts
 * bindKey():
-* Binds a key to Lua command
+* Binds a key to Lua command to both execute locally
+* and broadcast to all clients if this node is hosting
+* a parallel connection.
 */
 int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.bindKey";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 2)
@@ -78,7 +81,7 @@ int bindKey(lua_State* L) {
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
     if (iKey.key == openspace::Key::Unknown) {
-        LERROR("Could not find key '"<< key <<"'");
+        LERRORC("lua.bindKey", "Could not find key '"<< key << "'");
         return 0;
     }
 
@@ -94,12 +97,47 @@ int bindKey(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
+* bindKey():
+* Binds a key to Lua command to execute only locally
+*/
+int bindKeyLocal(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+
+
+    std::string key = luaL_checkstring(L, -2);
+    std::string command = luaL_checkstring(L, -1);
+
+    if (command.empty())
+        return luaL_error(L, "Command string is empty");
+
+    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
+
+    if (iKey.key == openspace::Key::Unknown) {
+        LERRORC("lua.bindKey", "Could not find key '" << key << "'");
+        return 0;
+    }
+
+    OsEng.interactionHandler().bindKeyLocal(
+        iKey.key,
+        iKey.modifier,
+        command
+        );
+
+    return 0;
+}
+
+
+/**
+* \ingroup LuaScripts
 * clearKeys():
 * Clears all key bindings
 */
 int clearKeys(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.clearKeys";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 0)
@@ -117,31 +155,18 @@ int clearKeys(lua_State* L) {
 */
 int setInteractionMode(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setInteractionMode";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
 
-    std::string interactionModeName = luaL_checkstring(L, -1);
+    std::string interactionModeKey = luaL_checkstring(L, -1);
     
-    if (interactionModeName.empty())
+    if (interactionModeKey.empty())
         return luaL_error(L, "interactionmode name string is empty");
 
-    if (interactionModeName == "OrbitalInteractionMode") {
-        OsEng.interactionHandler().setInteractionModeToOrbital();
-    }
-    else if (interactionModeName == "GlobeBrowsingInteractionMode") {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        OsEng.interactionHandler().setInteractionModeToGlobeBrowsing();
-#else
-        return luaL_error(L, "OpenSpace compiled without support for GlobeBrowsing");
-#endif
-    }
-    else { // Default
-        return luaL_error(L, "Unknown interaction mode. default is 'OrbitalInteractionMode'");
-    }
+    OsEng.interactionHandler().setInteractionMode(interactionModeKey);
     return 0;
 }
 
@@ -189,120 +214,7 @@ int resetCameraDirection(lua_State* L) {
     OsEng.interactionHandler().resetCameraDirection();
 }
 
-#ifdef USE_OLD_INTERACTIONHANDLER
 
-/**
-* \ingroup LuaScripts
-* dt(bool):
-* Get current frame time
-*/
-int dt(lua_State* L) {
-    /*
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    lua_pushnumber(L,OsEng.interactionHandler().deltaTime());
-    */return 1;
-}
-
-/**
-* \ingroup LuaScripts
-* distance(double, double):
-* Change distance to origin
-*/
-int distance(lua_State* L) {
-    /*
-    int nArguments = lua_gettop(L);
-    if (nArguments != 2)
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
-
-    double d1 = luaL_checknumber(L, -2);
-    double d2 = luaL_checknumber(L, -1);
-    PowerScaledScalar dist(static_cast<float>(d1), static_cast<float>(d2));
-    OsEng.interactionHandler().distanceDelta(dist);
-    */
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * setInteractionSensitivity(double):
- * Changes the global interaction sensitivity to the passed value
- */
-int setInteractionSensitivity(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    float sensitivity = static_cast<float>(luaL_checknumber(L, -1));
-    //OsEng.interactionHandler().setInteractionSensitivity(sensitivity);
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * interactionSensitivity():
- * Returns the current, global interaction sensitivity
- */
-int interactionSensitivity(lua_State* L) {
-    //float sensitivity = OsEng.interactionHandler().interactionSensitivity();
-    //lua_pushnumber(L, sensitivity);
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * setInvertRoll(bool):
- * Determines if the roll movement is inverted
- */
-int setInvertRoll(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    bool invert = lua_toboolean(L, -1) == 1;
-    //OsEng.interactionHandler().setInvertRoll(invert);
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * invertRoll():
- * Returns the current setting for inversion of roll movement
- */
-int invertRoll(lua_State* L) {
-    //bool invert = OsEng.interactionHandler().invertRoll();
-    //lua_pushboolean(L, invert);
-    return 1;
-}
-
-/**
- * \ingroup LuaScripts
- * setInvertRotation(bool):
- * Determines if the rotation movement is inverted
- */
-int setInvertRotation(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-    bool invert = lua_toboolean(L, -1) == 1;
-    //OsEng.interactionHandler().setInvertRotation(invert);
-    return 0;
-}
-
-/**
- * \ingroup LuaScripts
- * invertRotation():
- * Returns the current setting for inversion of rotation movement
- */
-int invertRotation(lua_State* L) {
-    //bool invert = OsEng.interactionHandler().invertRotation();
-    //lua_pushboolean(L, invert);
-    return 1;
-}
-#endif USE_OLD_INTERACTIONHANDLER
 } // namespace luascriptfunctions
 
 } // namespace openspace

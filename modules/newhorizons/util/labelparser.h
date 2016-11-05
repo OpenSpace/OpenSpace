@@ -37,13 +37,13 @@ class LabelParser : public SequenceParser{
 public:
     LabelParser();
     LabelParser(std::string name,
-                const std::string& fileName,
-                ghoul::Dictionary translationDictionary);
+                std::string fileName,
+                const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 
     // temporary need to figure this out
-    std::map<std::string, Decoder*> getTranslation(){ return _fileTranslation; };
+    //std::map<std::string, Decoder*> getTranslation() { return _fileTranslation; };
 
 private:
     void createImage(Image& image,
@@ -64,7 +64,6 @@ private:
     std::string _name;
     std::string _fileName;
     std::string _spacecraft;
-    std::map<std::string, Decoder*> _fileTranslation;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;
@@ -72,8 +71,6 @@ private:
     std::string _instrumentHostID;
     std::string _detectorType;
     std::string _sequenceID;
-    double _startTime;
-    double _stopTime;
     bool _badDecoding;
 };
 }

@@ -25,10 +25,11 @@
 #ifndef __TILE_SELECTOR_H__
 #define __TILE_SELECTOR_H__
 
-#include "gdal_priv.h"
 
 #include <modules/globebrowsing/chunk/chunkindex.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovidermanager.h>
+
+#include <vector>
 
 
 
@@ -48,8 +49,19 @@ namespace openspace {
     class TileSelector {
     public:
         static TileAndTransform getHighestResolutionTile(TileProvider* tileProvider, ChunkIndex chunkIndex, int parents = 0);
+        static TileAndTransform getHighestResolutionTile(const TileProviderGroup& tileProviderGroup, ChunkIndex chunkIndex);
+        static std::vector<TileAndTransform> getTilesSortedByHighestResolution(const TileProviderGroup&, const ChunkIndex& chunkIndex);
+
+
+        struct CompareResolution {
+            bool operator() (const TileAndTransform& a, const TileAndTransform& b);
+        };
+
+        static const CompareResolution HIGHEST_RES;
+
     private:
         static void ascendToParent(ChunkIndex& chunkIndex, TileUvTransform& uv);
+
     };
 
     

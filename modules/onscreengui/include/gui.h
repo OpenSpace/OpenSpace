@@ -56,12 +56,12 @@ public:
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
     void render();
 
-    static openspace::scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static openspace::scripting::LuaLibrary luaLibrary();
 
 //protected:
     GuiHelpComponent _help;

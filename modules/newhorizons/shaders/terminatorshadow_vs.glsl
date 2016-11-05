@@ -24,16 +24,17 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+//uniform mat4 ViewProjection;
+//uniform mat4 ModelTransform;
+
+uniform mat4 modelViewProjectionTransform;
 uniform vec4 objectVelocity;
-
-
 
 layout(location = 0) in vec4 in_point_position;
 
-out vec4 vs_point_position;
+//out vec4 vs_point_position;
 out vec4 vs_color;
+out vec4 vs_positionScreenSpace;
 //out float fade;
 
 uniform uint nVertices;
@@ -52,10 +53,9 @@ void main() {
         vs_color = vec4(0);
     }
     
-    vec4 tmp = in_point_position;
-    //tmp = psc_to_meter(tmp, vec2(1,0.f));
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_point_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    // Transform the damn psc to homogenous coordinate
+    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
+    vec4 positionClipSpace = modelViewProjectionTransform * position;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
 }

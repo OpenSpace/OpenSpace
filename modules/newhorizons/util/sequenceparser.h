@@ -26,39 +26,24 @@
 #define __SEQUENCEPARSER_H__
 
 #include <openspace/network/networkengine.h>
+#include <openspace/util/timerange.h>
+
+#include <modules/newhorizons/util/decoder.h>
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace openspace {
 
-class Decoder;
-
 struct Image {
-    double startTime = 0.0;
-    double stopTime = 0.0;
+    TimeRange timeRange;
     std::string path;
     std::vector<std::string> activeInstruments;
     std::string target;
     bool isPlaceholder = false;
     bool projected = false;
-};
-
-struct TimeRange {
-    TimeRange() : _min(-1), _max(-1){};
-    void setRange(double val){
-        if (_min > val) _min = val;
-        if (_max < val) _max = val;
-    };
-    bool inRange(double min, double max){
-        return (min >= _min && max <= _max);
-    }
-    bool inRange(double val) const {
-        return (val >= _min && val <= _max);
-    }
-    double _min;
-    double _max;
 };
 
 struct ImageSubset {
@@ -70,9 +55,9 @@ class SequenceParser {
 public:
     virtual bool create() = 0;
     virtual std::map<std::string, ImageSubset> getSubsetMap() final;
-    virtual std::vector<std::pair<std::string, TimeRange>> getIstrumentTimes() final;
+    virtual std::vector<std::pair<std::string, TimeRange>> getInstrumentTimes() final;
     virtual std::vector<std::pair<double, std::string>> getTargetTimes() final;
-    virtual std::map<std::string, Decoder*> getTranslation() = 0;
+    std::map<std::string, std::unique_ptr<Decoder>>& getTranslation();
     virtual std::vector<double> getCaptureProgression() final;
 
 protected:
@@ -82,6 +67,8 @@ protected:
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
     std::vector<std::pair<double, std::string>> _targetTimes;
     std::vector<double> _captureProgression;
+
+    std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     NetworkEngine::MessageIdentifier _messageIdentifier;
 };

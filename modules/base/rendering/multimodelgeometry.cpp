@@ -74,9 +74,9 @@ namespace openspace {
                     );
 
                     Vertex vv;
-                    //memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-                    memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
-                    //vv.location[3] = 1.0;
+                    memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
+                    vv.location[3] = 1.0;
+                    //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
                     memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
                     memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
                     _vertices.push_back(vv);

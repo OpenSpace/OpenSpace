@@ -90,15 +90,11 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/NewHorizonsCleanModel.obj",
-                Magnification = 4,
+                -- Magnification = 4,
             }, 
             Textures = {
                 Type = "simple",
                 Color =  "textures/NHTexture.jpg",
-            },
-            Rotation = {
-                Source = "NH_SPACECRAFT",
-                Destination = "GALACTIC"
             },
             Shading = {
                 PerformShading = true,
@@ -106,17 +102,23 @@ return {
                 Ghosting = false,
             },
         },
-        Ephemeris = {
-                Type = "Spice",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
                 Body = "NEW HORIZONS",
-                -- Reference = "ECLIPJ2000",
-                Reference = "GALACTIC",
-                -- Observer = "PLUTO BARYCENTER",
                 Observer = "SUN",
-                -- Observer = "JUPITER BARYCENTER",
                 Kernels = NewHorizonsKernels
             },
-        GuiName = "/Solar/NewHorizons"
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NH_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1000
+            }
+        },
     },
     --NewHorizonsTrail module
     --[[{   
@@ -152,7 +154,7 @@ return {
             Geometry = {
                 Type = "MultiModelGeometry",
                 GeometryFile = "models/Labels.obj",
-                Magnification = 4,
+                -- Magnification = 4,
             }, 
             Textures = {
                 Type = "simple",
@@ -168,13 +170,36 @@ return {
                 Fadeable = false,
                 Ghosting = false,
             },
-        },
-        Ephemeris = {
-                Type = "Static",
-            },
-        GuiName = "/Solar/NewHorizons"
+        }
     },
 
+    {   
+        Name = "NewHorizonsTrailPluto",
+        Parent = "PlutoBarycenter",
+        Renderable = {
+            Type = "RenderableTrailNew",
+            -- Spice
+            Body = "NEW HORIZONS",
+            Frame = "GALACTIC",
+            Observer = "PLUTO BARYCENTER",
+            -- Optional rendering properties
+            LineColor = { 1.0, 0.8, 0.4 },
+            PointColor = { 1.0, 0.8, 0.4 },
+            LineFade = 0.0, -- [0,1]
+            RenderPart = 1,
+            LineWidth = 2,
+            ShowTimeStamps = true,
+            RenderFullTrail = true,
+            -- Time interval
+            TimeRange = {
+                Start = "2015 JUL 07 12:00:00",
+                End = "2015 JUL 17 12:00:00"
+            },
+            SampleDeltaTime = 3600, -- Seconds between each point
+            SubSamples = 3, 
+        },
+    },
+    --[[
     -- NewHorizonsPath module
     {   
         Name = "NewHorizonsPathPluto",
@@ -221,5 +246,6 @@ return {
             EndTime = "2007 MAR 15 12:00:00"
         },
         GuiName = "/Solar/NewHorizonsPathJupiter"
-    }, 
+    },
+    ]]
 }

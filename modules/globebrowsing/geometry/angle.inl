@@ -61,10 +61,10 @@ const Angle<T> Angle<T>::FULL = Angle::fromRadians(2*PI);
 //////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T> Angle<T>::Angle(const Angle<T>& other)
-	: _radians(other._radians) { }
+    : _radians(other._radians) { }
 
 template <typename T> Angle<T>::Angle(T radians)
-	: _radians(radians) { }
+    : _radians(radians) { }
 
 
 
@@ -75,17 +75,17 @@ template <typename T> Angle<T>::Angle(T radians)
 
 template <typename T>
 Angle<T> Angle<T>::fromRadians(T rads) {
-	return Angle<T>(rads);
+    return Angle<T>(rads);
 }
 
 template <typename T>
 Angle<T> Angle<T>::fromDegrees(T degrees) {
-	return Angle<T>(degrees * PI / 180.0);
+    return Angle<T>(degrees * PI / 180.0);
 }
 
 template <typename T>
 Angle<T> Angle<T>::fromRevolutions(T revs) {
-	return Angle<T>(revs * 2 * PI);
+    return Angle<T>(revs * 2 * PI);
 }
 
 
@@ -96,17 +96,17 @@ Angle<T> Angle<T>::fromRevolutions(T revs) {
 
 template <typename T>
 T Angle<T>::asRadians() const {
-	return _radians;
+    return _radians;
 }
 
 template <typename T>
 T Angle<T>::asDegrees() const {
-	return _radians * 180.0 / PI;
+    return _radians * 180.0 / PI;
 }
 
 template <typename T>
 T Angle<T>::asRevolutions() const {
-	return _radians / (2 * PI);
+    return _radians / (2 * PI);
 }
 
 
@@ -117,49 +117,49 @@ T Angle<T>::asRevolutions() const {
 
 template <typename T>
 Angle<T> Angle<T>::operator+(const Angle<T>& rhs) const{
-	return Angle<T>(_radians + rhs._radians);
+    return Angle<T>(_radians + rhs._radians);
 }
 
 template <typename T>
 Angle<T> Angle<T>::operator-(const Angle<T>& rhs) const{
-	return Angle<T>(_radians - rhs._radians);
+    return Angle<T>(_radians - rhs._radians);
 }
 
 template <typename T>
 Angle<T> Angle<T>::operator*(T multiplier) const{
-	return Angle<T>(_radians * multiplier);
+    return Angle<T>(_radians * multiplier);
 }
 
 template <typename T>
 Angle<T> Angle<T>::operator/(T divisor) const{
-	return Angle<T>(_radians / divisor);
+    return Angle<T>(_radians / divisor);
 }
 
 
 template <typename T>
 Angle<T> Angle<T>::operator-() const {
-	return Angle<T>(-_radians);
+    return Angle<T>(-_radians);
 }
 
 
 template <typename T>
 void Angle<T>::operator+=(const Angle<T>& rhs){
-	_radians += rhs._radians;
+    _radians += rhs._radians;
 }
 
 template <typename T>
 void Angle<T>::operator-=(const Angle<T>& rhs){
-	_radians -= rhs._radians;
+    _radians -= rhs._radians;
 }
 
 template <typename T>
 void Angle<T>::operator*=(T multiplier){
-	_radians *= multiplier;
+    _radians *= multiplier;
 }
 
 template <typename T>
 void Angle<T>::operator/=(T divisor){
-	_radians /= divisor;
+    _radians /= divisor;
 }
 
 
@@ -167,32 +167,32 @@ void Angle<T>::operator/=(T divisor){
 
 template <typename T>
 bool Angle<T>::operator<(const Angle<T>& rhs) const{
-	return _radians < rhs._radians;
+    return _radians < rhs._radians;
 }
 
 template <typename T>
 bool Angle<T>::operator<=(const Angle<T>& rhs) const{
-	return _radians <= rhs._radians;
+    return _radians <= rhs._radians;
 }
 
 template <typename T>
 bool Angle<T>::operator>(const Angle<T>& rhs) const{
-	return _radians > rhs._radians;
+    return _radians > rhs._radians;
 }
 
 template <typename T>
 bool Angle<T>::operator>=(const Angle<T>& rhs) const{
-	return _radians >= rhs._radians;
+    return _radians >= rhs._radians;
 }
 
 template <typename T>
 bool Angle<T>::operator==(const Angle<T>& rhs) const{
-	return _radians == rhs._radians;
+    return _radians == rhs._radians;
 }
 
 template <typename T>
 bool Angle<T>::operator!=(const Angle<T>& rhs) const{
-	return _radians != rhs._radians;
+    return _radians != rhs._radians;
 }
 
 
@@ -203,38 +203,38 @@ bool Angle<T>::operator!=(const Angle<T>& rhs) const{
 
 template <typename T>
 Angle<T>& Angle<T>::normalize() {
-	// this will cause _radians to be in value range ]-2pi, 2pi[
-	_radians = fmod(_radians, 2*PI);
+    // this will cause _radians to be in value range ]-2pi, 2pi[
+    _radians = fmod(_radians, 2*PI);
 
-	// ensure _radians are positive, ie in value range [0, 2pi[
-	if (_radians < 0.0){
-		_radians += 2 * PI;
-	}
+    // ensure _radians are positive, ie in value range [0, 2pi[
+    if (_radians < 0.0){
+        _radians += 2 * PI;
+    }
 
-	return *this;
+    return *this;
 }
 
 template <typename T>
 Angle<T>& Angle<T>::normalizeAround(const Angle<T>& center) {
-	_radians -= center._radians + PI;
-	normalize();
-	_radians += center._radians - PI;
-	return *this;
+    _radians -= center._radians + PI;
+    normalize();
+    _radians += center._radians - PI;
+    return *this;
 }
 
 template <typename T>
 Angle<T>& Angle<T>::clamp(const Angle<T>& min, const Angle<T>& max) {
-	_radians = _radians < min._radians ? min._radians
-		: _radians > max._radians ? max._radians
-		: _radians;
-	return *this;
+    _radians = _radians < min._radians ? min._radians
+        : _radians > max._radians ? max._radians
+        : _radians;
+    return *this;
 }
 
 
 template <typename T>
 Angle<T>& Angle<T>::abs(){
-	_radians = glm::abs(_radians);
-	return *this;
+    _radians = glm::abs(_radians);
+    return *this;
 }
 
 
@@ -245,24 +245,24 @@ Angle<T>& Angle<T>::abs(){
 
 template <typename T>
 Angle<T> Angle<T>::getNormalized() const {
-	return Angle<T>(*this).normalize();
+    return Angle<T>(*this).normalize();
 }
 
 template <typename T>
 Angle<T> Angle<T>::getNormalizedAround(const Angle<T>& center) const {
-	return Angle<T>(*this).normalizeAround(center);
+    return Angle<T>(*this).normalizeAround(center);
 }
 
 template <typename T>
 Angle<T> Angle<T>::getClamped(const Angle<T>& min, const Angle<T>& max) const {
-	return Angle<T>(*this).clamp(min, max);
+    return Angle<T>(*this).clamp(min, max);
 }
 
 
 
 template <typename T>
 Angle<T> Angle<T>::getAbs() const {
-	return Angle<T>(*this).abs();
+    return Angle<T>(*this).abs();
 }
 
 } // namespace openspace

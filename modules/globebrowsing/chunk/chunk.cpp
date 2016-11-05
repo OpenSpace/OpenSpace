@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/chunk/chunkedlodglobe.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
+#include <modules/globebrowsing/tile/tileioresult.h>
 
 #include <algorithm>
 
@@ -38,6 +39,8 @@ namespace {
 }
 
 namespace openspace {
+
+    const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
     Chunk::Chunk(ChunkedLodGlobe* owner, const ChunkIndex& chunkIndex, bool initVisible)
         : _owner(owner)
@@ -73,7 +76,7 @@ namespace openspace {
         _owner = newOwner;
     }
 
-    Chunk::State Chunk::update(const RenderData& data) {
+    Chunk::Status Chunk::update(const RenderData& data) {
         auto savedCamera = _owner->getSavedCamera();
         const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
         RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
@@ -82,14 +85,14 @@ namespace openspace {
         _isVisible = true;
         if (_owner->testIfCullable(*this, myRenderData)) {
             _isVisible = false;
-            return State::WANT_MERGE;
+            return Status::WANT_MERGE;
         }
 
         int desiredLevel = _owner->getDesiredLevel(*this, myRenderData);
 
-        if (desiredLevel < _index.level) return State::WANT_MERGE;
-        else if (_index.level < desiredLevel) return State::WANT_SPLIT;
-        else return State::DO_NOTHING;
+        if (desiredLevel < _index.level) return Status::WANT_MERGE;
+        else if (_index.level < desiredLevel) return Status::WANT_SPLIT;
+        else return Status::DO_NOTHING;
     }
 
     Chunk::BoundingHeights Chunk::getBoundingHeights() const {
@@ -100,20 +103,47 @@ namespace openspace {
 
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
-        auto tileProvidermanager = owner()->getTileProviderManager();
-        auto heightMapProviders = tileProvidermanager->getActivatedLayerCategory(LayeredTextures::HeightMaps);
-        if (heightMapProviders.size() > 0) {
-            TileAndTransform tileAndTransform = TileSelector::getHighestResolutionTile(heightMapProviders[0].get(), _index);
-            if (tileAndTransform.tile.status == Tile::State::OK) {
-                std::shared_ptr<TilePreprocessData> preprocessData = tileAndTransform.tile.preprocessData;
-                if ((preprocessData != nullptr) && preprocessData->maxValues.size() > 0) {
-                    boundingHeights.max = preprocessData->maxValues[0];
-                    boundingHeights.min = preprocessData->minValues[0];
+        auto tileProviderManager = owner()->getTileProviderManager();
+        
+        
+        auto heightMapProviders = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps).getActiveTileProviders();
+       
+        
+        size_t HEIGHT_CHANNEL = 0;
+        const TileProviderGroup& heightmaps = tileProviderManager->getTileProviderGroup(LayeredTextures::HeightMaps);
+        std::vector<TileAndTransform> tiles = TileSelector::getTilesSortedByHighestResolution(heightmaps, _index);
+        bool lastHadMissingData = true;
+        for (auto tile : tiles) {
+            bool goodTile = tile.tile.status == Tile::Status::OK;
+            bool hasPreprocessData = tile.tile.preprocessData != nullptr;
+
+            if (goodTile && hasPreprocessData) {
+                auto preprocessData = tile.tile.preprocessData;
+
+                if (!boundingHeights.available) {
+                    if (preprocessData->hasMissingData[HEIGHT_CHANNEL]) {
+                        boundingHeights.min = std::min(DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
+                        boundingHeights.max = std::max(DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                    }
+                    else {
+                        boundingHeights.min = preprocessData->minValues[HEIGHT_CHANNEL];
+                        boundingHeights.max = preprocessData->maxValues[HEIGHT_CHANNEL];
+                    }
                     boundingHeights.available = true;
                 }
+                else {
+                    boundingHeights.min = std::min(boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
+                    boundingHeights.max = std::max(boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                }
+                lastHadMissingData = preprocessData->hasMissingData[HEIGHT_CHANNEL];
+            }
+
+            // Allow for early termination
+            if (!lastHadMissingData) {
+                break;
             }
         }
-
+        
         return boundingHeights;
     }
 

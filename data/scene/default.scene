@@ -6,10 +6,12 @@ function preInitialization()
     critical objects.
     ]]--
 
-    --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.time.setTime('2015-03-15T11:00:00.00')
-    openspace.time.setDeltaTime(0)
+    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+
 end
 
 function postInitialization()
@@ -34,7 +36,7 @@ function postInitialization()
 
     if openspace.modules.isLoaded("ISWA") then
     
-        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/iswa/cdflist.json");
+        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
 
         --openspace.iswa.addCygnet(7);
 
@@ -52,23 +54,22 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",    
-        --Position = {-6495542956.323095,-74757244129.089355,128449973103.825272, 0.000001},
-        Position = {41717685.600207, -0.000000, -0.000000},
-        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
+        Focus = "Earth",
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
-        --"mercury",
-        --"venus",
+        "mercury",
+        "venus",
         "earth",
-        --"mars",
-        --"jupiter",
-        --"saturn",
-        --"uranus",
-        --"neptune",
+        "mars",
+        "jupiter",
+        "saturn",
+        "uranus",
+        "neptune",
         "stars",
-        --"stars-denver",
+        -- "stars-denver",
         "milkyway",
         --"milkyway-eso",
         "constellationbounds",

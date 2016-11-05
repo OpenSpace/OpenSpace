@@ -1,0 +1,8 @@
+return {
+    FileRequest = {
+        { Identifier = "saturn_textures", Destination = "textures", Version = 2 }
+    },
+    TorrentFiles = {
+        { File = "sat375.bsp.torrent", Destination = "${SPICE}" },
+    }
+}

@@ -30,38 +30,41 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
+
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
 
 namespace openspace {
 
-	GlobeBrowsingModule::GlobeBrowsingModule()
-	: OpenSpaceModule("GlobeBrowsing")
+    GlobeBrowsingModule::GlobeBrowsingModule()
+    : OpenSpaceModule("GlobeBrowsing")
 {}
 
 void GlobeBrowsingModule::internalInitialize() {
-	/*
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
 
-	fRenderable->registerClass<Planet>("Planet");
-	fRenderable->registerClass<RenderableTestPlanet>("RenderableTestPlanet");
-	//fRenderable->registerClass<planettestgeometry::PlanetTestGeometry>("PlanetTestGeometry");
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "Renderable factory was not created");
+    fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 
-	auto fPlanetGeometry = FactoryManager::ref().factory<planettestgeometry::PlanetTestGeometry>();
-	ghoul_assert(fPlanetGeometry, "Planet test geometry factory was not created");
-	fPlanetGeometry->registerClass<planettestgeometry::SimpleSphereTestGeometry>("SimpleSphereTest");
+    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory);
+    
+    // add Tile Provider factory
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<TileProvider>>());
 
-	*/
-
-
-
-
-
-	auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	ghoul_assert(fRenderable, "Renderable factory was not created");
-
-	fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
+    auto fTileProvider = FactoryManager::ref().factory<TileProvider>();
+    fTileProvider->registerClass<CachingTileProvider>("LRUCaching");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImage");
+    fTileProvider->registerClass<TemporalTileProvider>("Temporal");
+    fTileProvider->registerClass<ChunkIndexTileProvider>("ChunkIndex");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReference");
+    
 }
 
 } // namespace openspace

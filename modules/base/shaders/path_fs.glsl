@@ -22,23 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec4 vs_point_position;
-flat in int isHour;
-in vec4 vs_point_color;
-
-uniform vec3 color;
-
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
-Fragment getFragment() {
-    vec4 position = vs_point_position;
-    float depth = pscDepth(position);
-    
-    vec4 diffuse = vs_point_color;
+in vec4 vs_positionScreenSpace;
+in vec4 vs_pointColor;
 
+Fragment getFragment() {
+
+	if (vs_pointColor.a < 0.01)
+		discard;
     Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
+    frag.color = vs_pointColor;
+    frag.depth = vs_positionScreenSpace.w;
     return frag;
 }

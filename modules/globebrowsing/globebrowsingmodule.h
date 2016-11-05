@@ -31,7 +31,7 @@ namespace openspace {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
-	GlobeBrowsingModule();
+    GlobeBrowsingModule();
     
 protected:
     void internalInitialize() override;

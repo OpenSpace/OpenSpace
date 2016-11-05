@@ -22,9 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
-
-#include <glm/glm.hpp>
 #include <memory>
 #include <ostream>
 #include <thread>

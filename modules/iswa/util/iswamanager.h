@@ -91,9 +91,9 @@ public:
     void addKameleonCdf(std::string group, int pos);
     void createFieldline(std::string name, std::string cdfPath, std::string seedPath) const ;
 
-    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp) const;
-    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp) const;
-    std::string iswaUrl(int id, double timestamp = Time::ref().currentTime(), std::string type = "image") const;
+    std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
+    std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
+    std::string iswaUrl(int id, double timestamp = Time::ref().j2000Seconds(), std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     
@@ -102,7 +102,11 @@ public:
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
     std::string cygnetType(int i);
 
-    static scripting::ScriptEngine::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
+
+    ghoul::Event<>& iswaEvent(){
+        return _iswaEvent;
+    }
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
@@ -119,7 +123,7 @@ private:
     void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);
     void fillCygnetInfo(std::string jsonString);
-    
+
     std::map<std::string, std::string> _month;
     std::map<int, std::string> _resourceType;
     std::map<int, std::string> _geometryType;

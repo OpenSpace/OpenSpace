@@ -114,4 +114,5 @@ private:
 };
 
 } // namespace openspace
+
 #endif //__DATAPROCESSOR_H__

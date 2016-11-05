@@ -26,12 +26,8 @@
 #define __TILE_PROVIDER_MANAGER_H__
 
 
-#include <modules/globebrowsing/tile/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider.h>
-
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/layeredtextures.h>
-
-#include <modules/globebrowsing/other/threadpool.h>
 
 #include <ghoul/misc/dictionary.h>
 
@@ -42,41 +38,51 @@
 
 namespace openspace {
 
+    
+    struct NamedTileProvider {
+        std::string name;
+        std::shared_ptr<TileProvider> tileProvider;
+        bool isActive;
+    };
+
+
+
+    struct TileProviderGroup {
+
+        void update();
+        const std::vector<std::shared_ptr<TileProvider>> getActiveTileProviders() const;
+
+
+        std::vector<NamedTileProvider> tileProviders;
+        bool levelBlendingEnabled;
+
+    };
+
+
+
     class TileProviderManager {
     public:
-
-        struct TileProviderWithName {
-            std::string name;
-            std::shared_ptr<TileProvider> tileProvider;
-            bool isActive;
-        };
-
-        typedef std::vector<TileProviderWithName> LayerCategory;
 
         TileProviderManager(
             const ghoul::Dictionary& textureCategoriesDictionary,
             const ghoul::Dictionary& textureInitDictionary);
         ~TileProviderManager();
 
-        static ThreadPool tileRequestThreadPool;
 
-        LayerCategory& getLayerCategory(LayeredTextures::TextureCategory);
-        const std::vector<std::shared_ptr<TileProvider> >
-            getActivatedLayerCategory(LayeredTextures::TextureCategory);
+        TileProviderGroup& getTileProviderGroup(size_t groupId);
+        TileProviderGroup& getTileProviderGroup(LayeredTextures::TextureCategory);
 
         void update();
-
-        std::array<bool, LayeredTextures::NUM_TEXTURE_CATEGORIES> levelBlendingEnabled;
+        void reset(bool includingInactive = false);
 
 
     private:
-        static void initTexures(std::vector<TileProviderWithName>& destination,
-            const ghoul::Dictionary& dict, const TileProviderInitData& initData);
-
-        static std::shared_ptr<TileProvider> initProvider(const std::string& file, 
+        static void initTexures(
+            std::vector<NamedTileProvider>& destination, 
+            const ghoul::Dictionary& dict, 
             const TileProviderInitData& initData);
 
-        std::array<LayerCategory, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
+        std::array<TileProviderGroup, LayeredTextures::NUM_TEXTURE_CATEGORIES> _layerCategories;
     };
 
 } // namespace openspace

@@ -4,10 +4,6 @@ return {
     {   
         Name = "Volumetric Milky Way",
         Parent = "Root",
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 0}
-        },
         Renderable = {
              Type = "RenderableGalaxy",
              Translation = {0, 0, 0},
@@ -21,6 +17,5 @@ return {
                   Scaling = {kiloparsec, kiloparsec, kiloparsec}
              }
         },
-        GuiName = "/VolumetricMilkyWay"
     }
 }

@@ -22,8 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec4 vs_point_position;
+//in vec4 vs_point_position;
+in vec4 vs_positionScreenSpace;
 in vec4 vs_point_velocity;
+
 //in float fade;
 //uniform float forceFade;
 
@@ -35,12 +37,9 @@ in vec4 vs_color;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_point_position;
-    float depth = pscDepth(position);
-    
     Fragment frag;
     frag.color = vs_color;
-    frag.depth = depth;
+    frag.depth = vs_positionScreenSpace.w;
 
     return frag;
 }

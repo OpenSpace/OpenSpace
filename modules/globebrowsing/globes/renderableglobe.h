@@ -38,14 +38,13 @@
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
-#include <modules/globebrowsing/chunk/chunkedlodglobe.h>
-
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
-#include <modules/globebrowsing/tile/tileprovidermanager.h>
 
-#include <modules/globebrowsing/other/threadpool.h>
+#include <ghoul/misc/threadpool.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
+
+#include <unordered_map>
 
 namespace ghoul {
 namespace opengl {
@@ -55,6 +54,9 @@ namespace opengl {
 
 
 namespace openspace {
+
+class ChunkedLodGlobe;
+class TileProviderManager;
 
 struct ReferencedBoolSelection : public properties::SelectionProperty {
     ReferencedBoolSelection(const std::string& identifier, const std::string& guiName)
@@ -117,17 +119,16 @@ public:
     double interactionDepthBelowEllipsoid();
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe();
 
-    
     // Properties 
+    properties::BoolProperty _isEnabled;
+    properties::BoolProperty _toggleEnabledEveryFrame;
     properties::FloatProperty lodScaleFactor;
     std::vector<std::unique_ptr<ReferencedBoolSelection>> _categorySelections;
     properties::BoolProperty atmosphereEnabled;
     ReferencedBoolSelection debugSelection;
     properties::BoolProperty _saveOrThrowCamera;
-
+    properties::BoolProperty _resetTileProviders;
     
-
-
 private:
     double _interactionDepthBelowEllipsoid;
 
@@ -139,7 +140,6 @@ private:
     std::shared_ptr<TileProviderManager> _tileProviderManager;
     std::shared_ptr<ChunkedLodGlobe> _chunkedLodGlobe;
     
-
     DistanceSwitch _distanceSwitch;
 
     properties::FloatProperty _cameraMinHeight;

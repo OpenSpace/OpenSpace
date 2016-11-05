@@ -96,4 +96,31 @@ properties::Property* property(const std::string& uri) {
     }
 }
 
+std::vector<properties::Property*> allProperties() {
+    std::vector<properties::Property*> properties;
+
+    auto p = OsEng.globalPropertyOwner().propertiesRecursive();
+
+    properties.insert(
+        properties.end(),
+        p.begin(),
+        p.end()
+    );
+
+    const Scene* graph = sceneGraph();
+    std::vector<SceneGraphNode*> nodes = graph->allSceneGraphNodes();
+
+    for (SceneGraphNode* n : nodes) {
+        auto p = n->propertiesRecursive();
+        properties.insert(
+            properties.end(),
+            p.begin(),
+            p.end()
+        );
+    }
+
+    return properties;
+}
+
+
 }  // namespace

@@ -3,10 +3,6 @@ return {
     {   
         Name = "Flare",
         Parent = "Root",
-        Ephemeris = {
-            Type = "Static",
-            Position = { 0, 0, 0, 0}
-        },
         Renderable = {
             Type = "RenderableFlare",
             Source = "${OPENSPACE_DATA}/enlil_64_32_8.tsp",
@@ -23,7 +19,6 @@ return {
 
             tsp_traveral_stepsize = 0.02,
             raycaster_stepsize = 0.005,
-        },
-        GuiName = "/Volumes/Flare"
+        }
     }
 }

@@ -16,28 +16,34 @@ return {
                 Type = "simple",
                 Color = "textures/io.jpg",
             },
-        },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "IO",
-            Reference = "ECLIPJ2000",
-            Observer = "JUPITER BARYCENTER",
-            Kernels = {
-                --"${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-                "${SPICE}/jup260.bsp",
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_JUPITER",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Jupiter"
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "IO",
+                Observer = "JUPITER BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_IO",
+                DestinationFrame = "IAU_JUPITER",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        }
     },
     -- IoTrail module
     {   
         Name = "IoTrail",
-        Parent = "Io",
+        Parent = "JupiterBarycenter",
         Renderable = {
             Type = "RenderableTrail",
             Body = "IO",
@@ -52,7 +58,6 @@ return {
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
-        },
-        GuiName = "/Solar/IoTrail"
+        }
     }
 }

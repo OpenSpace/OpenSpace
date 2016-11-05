@@ -3,14 +3,13 @@ return {
     {
         Name = "JupiterBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Spice",
-            Body = "JUPITER BARYCENTER",
-            Reference = "ECLIPJ2000",
-            Observer = "SUN",
-            Kernels = {
-                "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            }
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "JUPITER BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
         },
     },
     -- Jupiter module
@@ -30,16 +29,27 @@ return {
                 Type = "simple",
                 Color = "textures/jupiter.jpg",
             },
+            Atmosphere = {
+                Type = "Nishita", -- for example, values missing etc etc
+                MieFactor = 1.0,
+                MieColor = {1.0, 1.0, 1.0}
+            }
         },
-        Ephemeris = {
-            Type = "Static" -- jupiter is at its barycenter
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_JUPITER",
-            Reference = "ECLIPJ2000"
-        },
-        GuiName = "/Solar/Planets/Jupiter"
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, 0, 0}, -- jupiter is at its barycenter
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_JUPITER",
+                DestinationFrame = "ECLIPJ2000",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
+        }
     },
     -- JupiterTrail module
     {   
@@ -59,7 +69,6 @@ return {
                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
                 -- need to add different texture
             },  
-        },
-        GuiName = "/Solar/JupiterTrail"
+        }
     }
 }

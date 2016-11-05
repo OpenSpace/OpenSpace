@@ -24,12 +24,10 @@
 
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
 
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <modules/newhorizons/util/imagesequencer.h>
-//#include <imgui.h>
 
 namespace {
     const std::string _loggerCat = "RenderableCrawlingLine";
@@ -52,6 +50,8 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     , _imageSequenceTime(-1.f)
     , _vao(0)
     , _vbo(0)
+    , _frameCounter(0)
+    , _drawLine(false)
 {
     dictionary.getValue(KeySource, _source);
     dictionary.getValue(KeyTarget, _target);
@@ -75,7 +75,6 @@ bool RenderableCrawlingLine::isReady() const {
 }
 
 bool RenderableCrawlingLine::initialize() {
-    _frameCounter = 0;
     bool completeSuccess = true;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -133,7 +132,7 @@ void RenderableCrawlingLine::render(const RenderData& data) {
         _program->setUniform("ModelTransform", transform);
 
         int frame = _frameCounter % 60;
-        float fadingFactor = static_cast<float>(sin((frame * pi_c()) / 60));
+        float fadingFactor = static_cast<float>(sin((frame * 3.14159) / 60));
         float alpha = 0.6f + fadingFactor*0.4f;
 
         glLineWidth(2.f);

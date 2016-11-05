@@ -73,6 +73,7 @@ void DataProcessor::clear(){
     _unNormalizedhistograms.clear();
 }
 
+
 float DataProcessor::processDataPoint(float value, int option){
     if(_numValues.empty()) return 0.0f;
     std::shared_ptr<Histogram> histogram = _histograms[option];

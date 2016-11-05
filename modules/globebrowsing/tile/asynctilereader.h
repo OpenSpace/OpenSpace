@@ -34,6 +34,7 @@
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/other/threadpool.h>
+//#include <ghoul/misc/threadpool.h>
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 
@@ -123,11 +124,10 @@ namespace openspace {
         ~AsyncTileDataProvider();
 
 
-
-        bool enqueueTextureData(const ChunkIndex& chunkIndex);
-        bool hasLoadedTextureData() const;
-        std::shared_ptr<TileIOResult> nextTileIOResult();
+        bool enqueueTileIO(const ChunkIndex& chunkIndex);        
+        std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
         
+        void reset();
         void clearRequestQueue();
 
         std::shared_ptr<TileDataset> getTextureDataProvider() const;
@@ -137,10 +137,13 @@ namespace openspace {
         virtual bool satisfiesEnqueueCriteria(const ChunkIndex&) const;
 
     private:
+        
+
 
         std::shared_ptr<TileDataset> _tileDataset;
         ConcurrentJobManager<TileIOResult> _concurrentJobManager;
         std::unordered_map<ChunkHashKey, ChunkIndex> _enqueuedTileRequests;
+
 
     };
 
