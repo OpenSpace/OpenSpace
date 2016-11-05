@@ -117,6 +117,7 @@ RenderEngine::RenderEngine()
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
+    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _performanceManager(nullptr)
     , _log(nullptr)
     , _showInfo(true)
@@ -129,13 +130,23 @@ RenderEngine::RenderEngine()
     , _fadeDirection(0)
     , _frameNumber(0)
     , _frametimeType(FrametimeType::DtTimeAvg)
-    //    , _sgctRenderStatisticsVisible(false)
 {
-    _onScreenInformation = {
-        glm::vec2(0.f),
-        12,
-        -1
-    };
+    setName("RenderEngine");
+
+    _performanceMeasurements.onChange([this](){
+        if (_performanceMeasurements) {
+            if (!_performanceManager) {
+                _performanceManager = std::make_unique<performance::PerformanceManager>();
+            }
+        }
+        else {
+            _performanceManager = nullptr;
+        }
+
+    }
+    );
+
+    addProperty(_performanceMeasurements);
 }
 
 RenderEngine::~RenderEngine() {
@@ -767,12 +778,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "Toggle showing FPS or Average Frametime in heads up info"
             },
             {
-                "setPerformanceMeasurement",
-                &luascriptfunctions::setPerformanceMeasurement,
-                "bool",
-                "Sets the performance measurements"
-            },
-            {
                 "toggleFade",
                 &luascriptfunctions::toggleFade,
                 "number",
@@ -805,17 +810,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             },
         },
     };
-}
-
-void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
-    if (performanceMeasurements) {
-        if (!_performanceManager) {
-            _performanceManager = std::make_unique<performance::PerformanceManager>();
-        }
-    }
-    else {
-        _performanceManager = nullptr;
-    }
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {
@@ -1755,9 +1749,7 @@ void RenderEngine::renderScreenLog() {
 }
 
 std::vector<Syncable*> RenderEngine::getSyncables(){
-    std::vector<Syncable*> syncables = _mainCamera->getSyncables();
-    syncables.push_back(&_onScreenInformation);
-    return syncables;
+    return _mainCamera->getSyncables();
 }
 
 void RenderEngine::sortScreenspaceRenderables() {

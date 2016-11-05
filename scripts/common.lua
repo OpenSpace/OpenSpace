@@ -19,13 +19,8 @@ helper.setCommonKeys = function()
     )
     openspace.bindKeyLocal(
         "F2",
-        "openspace.setPerformanceMeasurement(true)",
-        "Enables performance measurements"
-    )
-    openspace.bindKeyLocal(
-        "F3",
-        "openspace.setPerformanceMeasurement(false)",
-        "Disables performance measurements"
+        helper.property.invert("RenderEngine.performanceMeasurements"),
+        "Toogles performance measurements that shows rendering time informations"
     )
 
     openspace.bindKeyLocal("t", "openspace.toggleFrametimeType(1)")

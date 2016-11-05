@@ -125,22 +125,6 @@ int toggleFrametimeType(lua_State* L) {
 
 /**
 * \ingroup LuaScripts
-* visualizeABuffer(bool):
-* Toggle the visualization of the ABuffer
-*/
-int setPerformanceMeasurement(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-    }
-
-    bool b = lua_toboolean(L, -1) != 0;
-    OsEng.renderEngine().setPerformanceMeasurements(b);
-    return 0;
-}
-
-/**
-* \ingroup LuaScripts
 * toggleFade(float):
 * Toggle a global fade over (float) seconds
 */

@@ -44,6 +44,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/translation.h>
@@ -156,10 +157,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdownWait(0.f)
     , _isFirstRenderingFirstFrame(true)
 {
-
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -486,7 +487,8 @@ bool OpenSpaceEngine::initialize() {
             [&]() {
             std::vector<properties::PropertyOwner*> res = {
                 _settingsEngine.get(),
-                _interactionHandler.get()
+                _interactionHandler.get(),
+                _renderEngine.get()
             };
             return res;
         }

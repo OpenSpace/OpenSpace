@@ -27,14 +27,10 @@
 
 #include <openspace/scripting/scriptengine.h>
 
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 
 #include <openspace/util/syncdata.h>
-
-
-#include <openspace/performance/performancemanager.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -49,6 +45,10 @@ class SharedMemory;
 
 namespace openspace {
 
+namespace performance {
+class PerformanceManager;
+}
+
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
@@ -59,7 +59,7 @@ class RaycasterManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 
-class RenderEngine {
+class RenderEngine : public properties::PropertyOwner {
 public:
     enum class RendererImplementation {
         Framebuffer = 0,
@@ -115,7 +115,6 @@ public:
     void toggleFrametimeType(int t);
 
     // Performance measurements
-    void setPerformanceMeasurements(bool performanceMeasurements);
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
 
@@ -193,15 +192,6 @@ public:
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
-    // This is temporary until a proper screenspace solution is found ---abock
-    struct OnScreenInformation{
-        glm::vec2 _position;
-        unsigned int _size;
-        int _node;
-    };
-
-    SyncData<OnScreenInformation> _onScreenInformation;
-
     std::vector<Syncable*> getSyncables();
     
 private:
@@ -214,6 +204,7 @@ private:
     Scene* _sceneGraph;
     RaycasterManager* _raycasterManager;
 
+    properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;
 
     std::unique_ptr<Renderer> _renderer;

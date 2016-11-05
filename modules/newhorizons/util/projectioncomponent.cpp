@@ -36,6 +36,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {

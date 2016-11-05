@@ -27,6 +27,8 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
+#include <ghoul/misc/sharedmemory.h>
+
 #include <memory>
 
 namespace ghoul {
