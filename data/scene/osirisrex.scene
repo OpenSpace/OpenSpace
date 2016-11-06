@@ -210,11 +210,11 @@ return {
     },
     Modules = {
         "sun",
-        "lodmercury",
+        "mercury",
         "venus",
         "lodearth",
-        "lodmoon",
-        "lodmars",
+        "moon",
+        "mars",
         "jupiter",
         "saturn",
         "uranus",
@@ -223,7 +223,6 @@ return {
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        --"imageplane",
         "osirisrex",
     }
 }

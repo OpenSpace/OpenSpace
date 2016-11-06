@@ -18,8 +18,6 @@ function preInitialization()
       1, 5, 10, 20, 40, 90, 360, 720, 2880, 14400,
         28800, 57600, 115200, 230400, 460800, 921600, 1843200, 3686400, 7372800, 14745600
     })
-
-    openspace.bindKey("F6", "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');");
 end
 
 function postInitialization()

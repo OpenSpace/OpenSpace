@@ -15,27 +15,58 @@ helper.setCommonKeys = function()
     openspace.bindKeyLocal(
         "F1",
         "openspace.gui.toggle()",
-        "Toggles the visibility of the on-screen GUI"
+        "Toggles the visibility of the on-screen GUI."
     )
     openspace.bindKeyLocal(
         "F2",
         helper.property.invert("RenderEngine.performanceMeasurements"),
-        "Toogles performance measurements that shows rendering time informations"
+        "Toogles performance measurements that shows rendering time informations."
     )
 
-    openspace.bindKeyLocal("ESC", "openspace.toggleShutdown()")
+    openspace.bindKeyLocal(
+        "ESC",
+        "openspace.toggleShutdown()",
+        "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period."
+    )
 
-    openspace.bindKeyLocal("PRINT_SCREEN", "openspace.takeScreenshot()")
-    openspace.bindKey("SPACE", "openspace.time.togglePause()")
+    openspace.bindKeyLocal(
+        "PRINT_SCREEN",
+        "openspace.takeScreenshot()",
+        "Saves the contents of the screen to a file in the working directory."
+    )
+    openspace.bindKey(
+        "SPACE",
+        "openspace.time.togglePause()",
+        "Starts and stops the simulation time."
+    )
 
-    openspace.bindKey("COMMA", "openspace.setRenderer('Framebuffer');")
-    openspace.bindKey("PERIOD", "openspace.setRenderer('ABuffer');")
+    openspace.bindKey(
+        "COMMA",
+        "openspace.setRenderer('Framebuffer');",
+        "Changes the currently used renderer to use the 'Framebuffer' implementation."
+    )
+    openspace.bindKey(
+        "PERIOD",
+        "openspace.setRenderer('ABuffer');",
+        "Changes the currently used renderer to use the 'ABuffer' implementation."
+    )
 
+    openspace.bindKeyLocal(
+        "f",
+        helper.property.invert('Interaction.rotationalFriction'),
+        "Toggles the rotational friction on the camera. If it is disabled, the camera rotates around the focus object indefinitely."
+    )
+    openspace.bindKeyLocal(
+        "Shift+f",
+        helper.property.invert('Interaction.zoomFriction'),
+        "Toggles the zoom friction on the camera."
+    )
 
-    openspace.bindKeyLocal("f", helper.property.invert('Interaction.rotationalFriction'))
-    openspace.bindKeyLocal("Shift+f", helper.property.invert('Interaction.zoomFriction'))
-
-    openspace.bindKey("w", "openspace.toggleFade(3)")
+    openspace.bindKey(
+        "w",
+        "openspace.toggleFade(3)",
+        "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds."
+    )
 end
 
 helper.setDeltaTimeKeys = function(t)
@@ -76,12 +107,6 @@ end
 -- Function that returns the string that decrements the 'property' by the 'value'
 helper.property.decrement = function(property, value)
     return helper.property.increment(property, -value)
-end
-
--- Function that sets a property to a specify value
-helper.property.set = function(property, value)
-    local escaped_property = "'" .. property .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property .. ", " .. value .. ");"
 end
 
 -- Function that returns the string that enables/disables the renderable 'renderable'
