@@ -27,6 +27,7 @@
 
 #include <openspace/scripting/scriptengine.h>
 
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 
@@ -112,7 +113,6 @@ public:
 
     void takeScreenshot(bool applyWarping = false);
     void toggleInfoText(bool b);
-    void toggleFrametimeType(int t);
 
     // Performance measurements
     bool doesPerformanceMeasurements() const;
@@ -213,7 +213,9 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log;
 
-    FrametimeType _frametimeType;
+    properties::OptionProperty _frametimeType;
+
+    //FrametimeType _frametimeType;
 
     bool _showInfo;
     bool _showLog;

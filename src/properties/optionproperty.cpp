@@ -35,7 +35,7 @@ const std::string OptionProperty::OptionsKey = "Options";
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName)
     : IntProperty(std::move(identifier), std::move(guiName))
-    , _displayType(DisplayType::RADIO)
+    , _displayType(DisplayType::Radio)
 {}
 
 OptionProperty::OptionProperty(std::string identifier, std::string guiName, DisplayType displayType) 
@@ -61,7 +61,7 @@ void OptionProperty::addOption(int value, std::string desc) {
     option.value = value;
     option.description = desc;
 
-    for (auto o : _options) {
+    for (const auto& o : _options) {
         if (o.value == option.value) {
             LWARNING("The value of option {" << o.value << " -> " << o.description <<
                 "} was already registered when trying to add option {" << option.value <<

@@ -114,10 +114,15 @@ const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
+    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
+    , _frametimeType(
+        "frametimeType",
+        "Type of the frametime display",
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
-    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _performanceManager(nullptr)
     , _log(nullptr)
     , _showInfo(true)
@@ -129,7 +134,7 @@ RenderEngine::RenderEngine()
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _frameNumber(0)
-    , _frametimeType(FrametimeType::DtTimeAvg)
+    //, _frametimeType(FrametimeType::DtTimeAvg)
 {
     setName("RenderEngine");
 
@@ -143,10 +148,22 @@ RenderEngine::RenderEngine()
             _performanceManager = nullptr;
         }
 
-    }
-    );
-
+    });
     addProperty(_performanceMeasurements);
+
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::DtTimeAvg),
+        "Average Deltatime"
+    );
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::FPS),
+        "Frames per second"
+    );
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::FPSAvg),
+        "Average frames per second"
+    );
+    addProperty(_frametimeType);
 }
 
 RenderEngine::~RenderEngine() {
@@ -527,21 +544,6 @@ void RenderEngine::toggleInfoText(bool b) {
     _showInfo = b;
 }
 
-void RenderEngine::toggleFrametimeType(int t) {
-    std::vector<FrametimeType>::const_iterator it = std::find(
-        FrametimeTypes.begin(), FrametimeTypes.end(), _frametimeType);
-    
-    if (!t && it == FrametimeTypes.begin())
-        it = FrametimeTypes.end();
-    
-    t > 0 ? ++it : --it;
-
-    if (t && it == FrametimeTypes.end())
-        it = FrametimeTypes.begin();
-
-    _frametimeType = *it;
-}
-
 Scene* RenderEngine::scene() {
     ghoul_assert(_sceneGraph, "Scenegraph not initialized");
     return _sceneGraph;
@@ -770,12 +772,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 &luascriptfunctions::showRenderInformation,
                 "bool",
                 "Toggles the showing of render information on-screen text"
-            },
-            {
-                "toggleFrametimeType",
-                &luascriptfunctions::toggleFrametimeType,
-                "int",
-                "Toggle showing FPS or Average Frametime in heads up info"
             },
             {
                 "toggleFade",
@@ -1313,7 +1309,8 @@ void RenderEngine::renderInformation() {
                          Time::ref().deltaTime()
             );
 
-            switch (_frametimeType) {
+            FrametimeType frametimeType = FrametimeType(_frametimeType.value());
+            switch (frametimeType) {
                 case FrametimeType::DtTimeAvg:
                     RenderFontCr(*_fontInfo,
                                  penPosition,

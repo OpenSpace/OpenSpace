@@ -23,9 +23,6 @@ helper.setCommonKeys = function()
         "Toogles performance measurements that shows rendering time informations"
     )
 
-    openspace.bindKeyLocal("t", "openspace.toggleFrametimeType(1)")
-    openspace.bindKeyLocal("Shift+t", "openspace.toggleFrametimeType(0)")
-
     openspace.bindKeyLocal("ESC", "openspace.toggleShutdown()")
 
     openspace.bindKeyLocal("PRINT_SCREEN", "openspace.takeScreenshot()")
@@ -73,12 +70,18 @@ end
 helper.property.increment = function(property, value)
     local v = value or 1
     local escaped_property = "'" .. property .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ")"
+    return "openspace.setPropertyValue(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
 end
 
 -- Function that returns the string that decrements the 'property' by the 'value'
 helper.property.decrement = function(property, value)
     return helper.property.increment(property, -value)
+end
+
+-- Function that sets a property to a specify value
+helper.property.set = function(property, value)
+    local escaped_property = "'" .. property .. "'"
+    return "openspace.setPropertyValue(" .. escaped_property .. ", " .. value .. ");"
 end
 
 -- Function that returns the string that enables/disables the renderable 'renderable'
