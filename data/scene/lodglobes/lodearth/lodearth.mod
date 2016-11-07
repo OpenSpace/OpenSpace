@@ -69,6 +69,7 @@ return {
                     {
                         Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
                         FilePath = "map_service_configs/GIBS/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
+                        Enabled = true,
                     },
                     {
                         Type = "SingleImage",
