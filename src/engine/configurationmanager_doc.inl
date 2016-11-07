@@ -199,8 +199,8 @@ Documentation ConfigurationManager::Documentation() {
                     new StringInListVerifier(
                         // List taken from ScriptEngine::writeLog
                         { "text" }
-                    ),
-                    "The type of logfile that will be created."
+                        ),
+                        "The type of logfile that will be created."
                 },
                 {
                     ConfigurationManager::PartFile,
@@ -211,8 +211,8 @@ Documentation ConfigurationManager::Documentation() {
                 }
             }),
             "Contains a log of all Lua scripts that were executed in the last "
-            "session.",
-            Optional::Yes
+                            "session.",
+                            Optional::Yes
         },
         {
             ConfigurationManager::KeyKeyboardShortcuts,
@@ -290,6 +290,15 @@ Documentation ConfigurationManager::Documentation() {
             "The countdown that the application will wait between pressing ESC and "
             "actually shutting down. If ESC is pressed again in this time, the "
             "shutdown is aborted.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyPerSceneCache,
+            new BoolVerifier,
+            "If this is set to 'true', the name of the scene will be appended to the "
+            "cache directory, thus not reusing the same directory. This is useful in "
+            "cases where the same instance of OpenSpace is run with multiple scenes, but "
+            "the caches should be retained. This value defaults to 'false'.",
             Optional::Yes
         },
         {
