@@ -62,7 +62,7 @@ return {
         -- "milkyway-eso",
         "missions/newhorizons/pluto",
         "missions/newhorizons/jupiter",
-        "missions/newhorizons",
+        "missions/newhorizons/newhorizons",
         "missions/newhorizons/newhorizonsfov"
     }
 }
