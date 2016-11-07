@@ -33,7 +33,7 @@ return {
             },
             Projection = {
                 --Sequence   = "F:/JupiterFullSequence",
-                Sequence   = "${OPENSPACE_DATA}/scene/newhorizons/jupiter/jupiter/ProjectionsOfInterest",
+                Sequence   = "${OPENSPACE_DATA}/scene/missions/newhorizons/jupiter/jupiter/ProjectionsOfInterest",
                 SequenceType = "image-sequence",
                 Observer   = "NEW HORIZONS",
                 Target     = "JUPITER",

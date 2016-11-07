@@ -51,8 +51,8 @@ public:
     };
 
     enum class DisplayType {
-        RADIO,
-        DROPDOWN
+        Radio,
+        Dropdown
     };
 
     /**

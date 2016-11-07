@@ -10,43 +10,42 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015 NOV 24 00:00:00")
-
     openspace.time.setTime(openspace.time.currentWallTime())
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
-
-    -- Toggle trails
-    openspace.bindKey("t",
-        helper.property.invert('EarthTrail.renderable.enabled') ..
-        helper.property.invert('MarsTrail.renderable.enabled') ..
-        helper.property.invert('MoonTrail.renderable.enabled')
-    )
 
     -- Toggle night texture, shading, atmosphere and water
     openspace.bindKey("s",
         helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.enabled') ..
         helper.property.invert('Earth.RenderableGlobe.performShading') ..
         helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
-        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled')
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled'),
+        "ssdasd"
     )
 
     -- Toggle background
     openspace.bindKey("b",
         helper.property.invert('MilkyWay.renderable.enabled') ..
-        helper.property.invert('Sun.renderable.enabled') ..
-        helper.property.invert('Moon.RenderableGlobe.enabled') ..
-        helper.property.invert('Mars.RenderableGlobe.enabled') ..
-        helper.property.invert('Stars.renderable.enabled')
+        helper.property.invert('Stars.renderable.enabled'),
+        "asdasd"
     )
 
+    --[[
+    -- Toggle trails
+    openspace.bindKey("o",
+        'openspace.setPropertyValue("*Trail.renderable.enabled", false)'
+    )
+    openspace.bindKey("p",
+        'openspace.setPropertyValue("*Trail.renderable.enabled", true)'
+    )
+    
+]]
 end
 
 function postInitialization()
     openspace.printInfo("Setting default values")
 
     openspace.setInteractionMode('GlobeBrowsing')
-    --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
@@ -60,7 +59,6 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.multiplier", 10)
 
     openspace.resetCameraDirection()
-    openspace.time.setDeltaTime(0)
 
     openspace.printInfo("Done setting default values")
 end

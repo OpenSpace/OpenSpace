@@ -16,7 +16,7 @@ return {
         },
     },
     {   
-        Name = "Bennu2",
+        Name = "Bennu",
         Parent = "BennuBarycenter",
 
         Renderable = {

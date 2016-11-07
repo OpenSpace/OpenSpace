@@ -53,9 +53,8 @@ return {
         Parent = "Saturn",
         Renderable = {
             Type = "RenderableRings",
-            Frame = "IAU_SATURN",
             Texture = "textures/saturn_rings.png",
-            Size = { 0.140220, 9.0 },
+            Size = 140220000,
             Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
 
         },

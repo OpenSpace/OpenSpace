@@ -172,8 +172,7 @@ return {
             },
         }
     },
-
-    {   
+    {
         Name = "NewHorizonsTrailPluto",
         Parent = "PlutoBarycenter",
         Renderable = {

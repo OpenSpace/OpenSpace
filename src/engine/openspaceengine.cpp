@@ -44,6 +44,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/translation.h>
@@ -156,10 +157,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdownWait(0.f)
     , _isFirstRenderingFirstFrame(true)
 {
-
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -288,10 +289,32 @@ bool OpenSpaceEngine::create(int argc, char** argv,
         return false;
     }
 
-    if (!commandlineArgumentPlaceholders.cacheFolder.empty()) {
+    bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
+    bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+        ConfigurationManager::KeyPerSceneCache
+    );
+    std::string cacheFolder = absPath("${CACHE}");
+    if (hasCacheCommandline) {
+        cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
+        //FileSys.registerPathToken(
+        //    "${CACHE}",
+        //    commandlineArgumentPlaceholders.cacheFolder,
+        //    ghoul::filesystem::FileSystem::Override::Yes
+        //);
+    }
+    if (hasCacheConfiguration) {
+        std::string scene = _engine->configurationManager().value<std::string>(
+            ConfigurationManager::KeyConfigScene
+        );
+        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+    }
+
+    if (hasCacheCommandline || hasCacheConfiguration) {
+        LINFO("Old cache: " << absPath("${CACHE}"));
+        LINFO("New cache: " << cacheFolder);
         FileSys.registerPathToken(
             "${CACHE}",
-            commandlineArgumentPlaceholders.cacheFolder,
+            cacheFolder,
             ghoul::filesystem::FileSystem::Override::Yes
         );
     }
@@ -403,7 +426,17 @@ bool OpenSpaceEngine::initialize() {
             verbosity = verbosityMap[v];
     }
     SysCap.logCapabilities(verbosity);
-    
+
+    // Check the required OpenGL versions of the registered modules
+    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version version =
+        _engine->_moduleEngine->requiredOpenGLVersion();
+    LINFO("Required OpenGL version: " << version.toString());
+
+    if (OpenGLCap.openGLVersion() < version) {
+        LFATAL("Module required higher OpenGL version than is supported");
+        return false;
+    }
+
     std::string requestURL = "";
     bool success = configurationManager().getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
     if (success) {
@@ -461,13 +494,13 @@ bool OpenSpaceEngine::initialize() {
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-
-    //_interactionHandler->setKeyboardController(new interaction::KeyboardControllerFixed);
-    //_interactionHandler->setMouseController(new interaction::OrbitalMouseController);
-
     // Run start up scripts
-    runPreInitializationScripts(scenePath);
-
+    try {
+        runPreInitializationScripts(scenePath);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LFATALC(e.component, e.message);
+    }
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
@@ -476,7 +509,8 @@ bool OpenSpaceEngine::initialize() {
             [&]() {
             std::vector<properties::PropertyOwner*> res = {
                 _settingsEngine.get(),
-                _interactionHandler.get()
+                _interactionHandler.get(),
+                _renderEngine.get()
             };
             return res;
         }
@@ -632,24 +666,6 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
         scripts.getValue(key, scriptPath);
         std::string&& absoluteScriptPath = absPath(scriptPath);
         _engine->scriptEngine().runScriptFile(absoluteScriptPath);
-        
-        //@JK
-        //temporary solution to ensure that startup scripts may be syncrhonized over parallel connection
-        /*
-        std::ifstream scriptFile;
-        scriptFile.open(absoluteScriptPath.c_str());
-        std::string line;
-       
-        while(getline(scriptFile,line)){
-            //valid line and not a comment
-            if(line.size() > 0 && line.at(0) != '-'){
-                std::string lib, func;
-                if(_engine->scriptEngine().parseLibraryAndFunctionNames(lib, func, line) &&
-                   _engine->scriptEngine().shouldScriptBeSent(lib, func)){
-                    _engine->scriptEngine().cacheScript(lib, func, line);
-                }
-            }
-        }*/
     }
 }
 
@@ -739,14 +755,18 @@ void OpenSpaceEngine::loadFonts() {
             LERROR("Error registering font '" << font << "' with key '" << key << "'");
     }
     
-    bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-    if (!initSuccess)
-        LERROR("Error initializing default font renderer");
-    
-    ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
-        _renderEngine->fontResolution()
-    );
-    
+    try {
+        bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
+        if (!initSuccess)
+            LERROR("Error initializing default font renderer");
+
+        ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
+            _renderEngine->fontResolution()
+        );
+    }
+    catch (const ghoul::RuntimeError& err) {
+        LERRORC(err.component, err.message);
+    }
 }
     
 void OpenSpaceEngine::configureLogging() {
@@ -888,9 +908,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Step the camera using the current mouse velocities which are synced
     //_interactionHandler->updateCamera();
     
-    
-
-
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();

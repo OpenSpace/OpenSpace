@@ -45,8 +45,6 @@ in vec4 test;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
     vec4 diffuse = texture(texture1, vs_st);
     vec4 diffuse2 = texture(nightTex, vs_st);
 

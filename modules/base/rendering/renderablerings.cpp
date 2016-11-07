@@ -24,11 +24,10 @@
 
 #include <modules/base/rendering/renderablerings.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/spicemanager.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -37,24 +36,56 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableRings";
-    
-    const std::string KeySize = "Size";
     const std::string KeyTexture = "Texture";
-    const std::string KeyFrame = "Frame";
-    const std::string KeyOrientation = "Orientation";
+    const std::string KeySize = "Size";
     const std::string KeyOffset = "Offset";
-    const std::string KeyNightFactor = "NightFactor";
-    const std::string KeyTransparency = "Transparency";
 }
 
 namespace openspace {
 
+Documentation RenderableRings::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Rings",
+        "base_renderable_rings",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableRings"),
+                "",
+                Optional::No
+            },
+            {
+                KeyTexture,
+                new StringVerifier,
+                "The one dimensional texture that is used for both sides of the ring.",
+                Optional::No
+            },
+            {
+                KeySize,
+                new DoubleVerifier,
+                "The radius of the rings in meters.",
+                Optional::No
+            },
+            {
+                KeyOffset,
+                new DoubleVector2Verifier,
+                "The offset that is used to limit the width of the rings. Each of the "
+                "two values is a value between 0 and 1, where 0 is the center of the "
+                "ring and 1 is the maximum extent at the radius. If this value is, for "
+                "example {0.5, 1.0}, the ring is only shown between radius/2 and radius. "
+                "It defaults to {0.0, 1.0}.",
+                Optional::Yes
+            }
+        }
+    };
+}
+
 RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath("texture", "Texture")
-    , _size("size", "Size", glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f, 25.f))
-    , _offset("offset", "Texture Offset", glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _size("size", "Size", 1.f, 0.f, std::pow(1.f, 25.f))
+    , _offset("offset", "Offset", glm::vec2(0, 1.f), glm::vec2(0.f), glm::vec2(1.f))
     , _nightFactor("nightFactor", "Night Factor", 0.33f, 0.f, 1.f)
     , _transparency("transparency", "Transparency", 0.15f, 0.f, 1.f)
     , _shader(nullptr)
@@ -65,55 +96,35 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     , _vertexPositionBuffer(0)
     , _planeIsDirty(false)
 {
-    glm::vec2 size;
-    dictionary.getValue(KeySize, size);
-    _size = size;
-    
-    if (dictionary.hasKeyAndValue<std::string>(KeyFrame)) {
-        _frame = dictionary.value<std::string>(KeyFrame);
-    }
-    
-    if (dictionary.hasKeyAndValue<glm::mat3>(KeyOrientation)) {
-        _orientation = dictionary.value<glm::mat3>(KeyOrientation);
-    }
+    using ghoul::filesystem::File;
 
-    if (dictionary.hasKeyAndValue<std::string>(KeyTexture)) {
-        _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
-    }
-    
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableRings"
+    );
+
+    _size = dictionary.value<double>(KeySize);
+    setBoundingSphere(PowerScaledScalar::CreatePSS(_size));
+    addProperty(_size);
+    _size.onChange([&]() { _planeIsDirty = true; });
+
+    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _textureFile = std::make_unique<File>(_texturePath);
+
     if (dictionary.hasKeyAndValue<glm::vec2>(KeyOffset)) {
-        glm::vec2 off = dictionary.value<glm::vec2>(KeyOffset);
-        _offset = off;
+        _offset = dictionary.value<glm::vec2>(KeyOffset);
     }
-    
-    if (dictionary.hasKeyAndValue<float>(KeyNightFactor)) {
-        float v = dictionary.value<float>(KeyNightFactor);
-        _nightFactor = v;
-    }
-    
-    if (dictionary.hasKeyAndValue<float>(KeyTransparency)) {
-        float v = dictionary.value<float>(KeyTransparency);
-        _transparency = v;
-    }
-    
     addProperty(_offset);
     
-    addProperty(_size);
-    _size.onChange([&](){ _planeIsDirty = true; });
 
     addProperty(_texturePath);
     _texturePath.onChange([&](){ loadTexture(); });
 
-    _textureFile->setCallback(
-        [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
-    );
+    _textureFile->setCallback([&](const File&) { _textureIsDirty = true; });
     
     addProperty(_nightFactor);
-    
     addProperty(_transparency);
-
-    setBoundingSphere(_size.value());
 }
 
 bool RenderableRings::isReady() const {
@@ -127,18 +138,14 @@ bool RenderableRings::initialize() {
             "${MODULE_BASE}/shaders/rings_vs.glsl",
             "${MODULE_BASE}/shaders/rings_fs.glsl"
             );
-        if (!_shader)
-            return false;
-
         _shader->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes
         );
     }
 
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glGenVertexArrays(1, &_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
     createPlane();
-    
     loadTexture();
 
     return isReady();
@@ -154,11 +161,8 @@ bool RenderableRings::deinitialize() {
     _textureFile = nullptr;
     _texture = nullptr;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
-    }
+    OsEng.renderEngine().removeRenderProgram(_shader);
+    _shader = nullptr;
 
     return true;
 }
@@ -166,15 +170,27 @@ bool RenderableRings::deinitialize() {
 void RenderableRings::render(const RenderData& data) {
     _shader->activate();
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", glm::mat4(_orientation * _state));
+    glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    
+    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _shader->setUniform(
+        "modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
     _shader->setUniform("textureOffset", _offset);
     _shader->setUniform("transparency", _transparency);
     
     _shader->setUniform("_nightFactor", _nightFactor);
-    _shader->setUniform("sunPosition", _sunPosition);
+    _shader->setUniform(
+        "sunPosition",
+        _sunPosition
+    );
     
-    setPscUniforms(*_shader.get(), data.camera, data.position);
+    setPscUniforms(*_shader, data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
@@ -204,29 +220,26 @@ void RenderableRings::update(const UpdateData& data) {
         loadTexture();
         _textureIsDirty = false;
     }
-    
-    if (!_frame.empty()) {
-        _state = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-    }
-    
-    _sunPosition = 
-        OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
+
+    _sunPosition = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition() -
         data.modelTransform.translation;
 }
 
 void RenderableRings::loadTexture() {
     if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture =
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+
         if (texture) {
-            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+            LDEBUGC(
+                "RenderableRings",
+                "Loaded texture from '" << absPath(_texturePath) << "'"
+            );
             _texture = std::move(texture);
 
-            // Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-//            _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
             _texture->uploadTexture();
             _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            
             _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback(
                 [&](const ghoul::filesystem::File&) { _textureIsDirty = true; }
@@ -236,28 +249,45 @@ void RenderableRings::loadTexture() {
 }
 
 void RenderableRings::createPlane() {
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    const GLfloat size = _size.value()[0];
-    const GLfloat w = _size.value()[1];
-    const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
-        -size, size, 0.f, w, 0.f, 1.f,
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, -size, 0.f, w, 1.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
+    const GLfloat size = _size.value();
+
+    struct VertexData {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+    };
+    
+    VertexData data[] = {
+        -size, -size, 0.f, 0.f,
+        size, size, 1.f, 1.f,
+        -size, size, 0.f, 1.f,
+        -size, -size, 0.f, 0.f,
+        size, -size, 1.f, 0.f,
+        size, size, 1.f, 1.f,
     };
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexData),
+        reinterpret_cast<void*>(offsetof(VertexData, s))
+    );
 }
 
 } // namespace openspace

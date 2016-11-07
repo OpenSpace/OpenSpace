@@ -72,16 +72,16 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
     int value = *p;
     std::vector<OptionProperty::Option> options = p->options();
     switch (p->displayType()) {
-    case OptionProperty::DisplayType::RADIO: {
+    case OptionProperty::DisplayType::Radio: {
+        ImGui::Text(name.c_str());
+        ImGui::Separator();
         for (const OptionProperty::Option& o : options) {
-            ImGui::RadioButton(name.c_str(), &value, o.value);
-            ImGui::SameLine();
-            ImGui::Text(o.description.c_str());
+            ImGui::RadioButton(o.description.c_str(), &value, o.value);
             renderTooltip(prop);
         }
         break;
     }
-    case OptionProperty::DisplayType::DROPDOWN: {
+    case OptionProperty::DisplayType::Dropdown: {
         std::string nodeNames = "";
         for (const OptionProperty::Option& o : options) {
             nodeNames += o.description + '\0';

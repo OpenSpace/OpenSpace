@@ -124,6 +124,7 @@ function (add_external_dependencies)
     set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
     set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
     set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
+    set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
     
     add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)

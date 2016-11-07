@@ -46,8 +46,8 @@ return {
                 Height = "textures/pluto_shenk_heightmap.jpg",
             },
             Projection = {
-                Sequence       = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/images",
-                EventFile      = "${OPENSPACE_DATA}/scene/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
+                Sequence       = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/images",
+                EventFile      = "${OPENSPACE_DATA}/scene/missions/newhorizons/pluto/pluto/assets/core_v9h_obs_getmets_v8_time_fix_nofrcd_mld.txt",
                 SequenceType   = "hybrid",
                 Observer       = "NEW HORIZONS",
                 Target         = "PLUTO",
