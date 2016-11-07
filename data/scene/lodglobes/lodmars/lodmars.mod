@@ -1,6 +1,6 @@
 local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
 return {
-    -- Mars barycenter module
+    -- Barycenter module
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
@@ -39,7 +39,7 @@ return {
                     {
                         Type = "SingleImage",
                         Name = "Debug Tiles",
-                        FilePath = "../debugglobe/textures/test_tile.png",
+                        FilePath = "../../debugglobe/textures/test_tile.png",
                     },
                     {
                         Name = "MARS_Viking",
@@ -58,7 +58,11 @@ return {
                     
                 },
                 GrayScaleColorOverlays = {
-                --[[
+                    {
+                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
+                    },
+                    --[[
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
@@ -70,10 +74,6 @@ return {
                         --Enabled = true,
                     },
                     {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
-                    },
-                    {
                         Name = "MER_Meridianni_Endeavor_Basemap_25cm",
                         FilePath = "map_datasets/Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
                     },
@@ -83,12 +83,8 @@ return {
                     },
                     ]]
                 },
-                NightLayers = {
-
-                },
-                WaterMasks = {
-
-                },
+                NightLayers = { },
+                WaterMasks = { },
                 ColorOverlays = {
                     {
                         Type = "TileIndex",
@@ -98,10 +94,16 @@ return {
                         Type = "SizeReference",
                         Name = "Size Reference",
                         Radii = marsEllipsoid,
-                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
+                        BackgroundImagePath = "../../debugglobe/textures/arrows.png",
                     },
                 },
                 HeightLayers = {
+                    {
+                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
+                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
+                    },
                     --[[
                     {
                         Name = "Mola Elevation",
@@ -126,12 +128,6 @@ return {
                         DoPreProcessing = true,
                     },
                     {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
-                        MinimumPixelSize = 90,
-                        DoPreProcessing = true,
-                    },
-                    {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
                     },
@@ -140,7 +136,7 @@ return {
             },
         }
     },
-    -- MarsTrail module
+    -- Trail module
     {   
         Name = "MarsTrail",
         Parent = "Sun",

@@ -70,16 +70,13 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Mars",
+        Focus = "Earth",
         Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
         Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
     },
 
     Modules = {
-        "lodearth",
-        "lodmoon",
-        "lodmars",
-        --"lodmercury",
+        "lodglobes",
         "sun",
         "stars",
         "milkyway",

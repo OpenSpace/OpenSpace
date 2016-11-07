@@ -13,12 +13,10 @@
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>3</BandsCount>
     <MaxConnections>5</MaxConnections>
-    <!--
     <Cache>
-        <Path>./gdalwmscache</Path>
-        <Depth>2</Depth>
+        <Path>./GDAL_Cache_ESRI_Imagery_World_2d</Path>
+        <Depth>10</Depth>
         <Extension>.jpg</Extension>
     </Cache>
-    <OfflineMode>true</OfflineMode>
-    -->
+    <OfflineMode>false</OfflineMode>
 </GDAL_WMS>

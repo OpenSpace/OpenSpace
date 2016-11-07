@@ -1,52 +1,51 @@
 return {
-    -- Mercury barycenter module
+    -- Barycenter module
     {
-        Name = "MercuryBarycenter",
+        Name = "VenusBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "MERCURY",
+                Body = "VENUS BARYCENTER",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
-
     -- RenderableGlobe module
     {   
-        Name = "Mercury",
-        Parent = "MercuryBarycenter",
+        Name = "Venus",
+        Parent = "VenusBarycenter",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
-                SourceFrame = "IAU_MERCURY",
+                SourceFrame = "IAU_VENUS",
                 DestinationFrame = "GALACTIC",
             },
             Scale = {
                 Type = "StaticScale",
                 Scale = 1,
             },
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "VENUS",
+                Observer = "VENUS BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {2439700, 2439700.0, 2439700.0},
-            Frame = "IAU_MERCURY",
-            Body = "MERCURY",
-            
+            Radii = {3760000, 3760000, 3760000},
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "On Mercury Color",
-                        FilePath = "map_service_configs/OnMercuryColor.xml",
+                        Name = "Venus Texture",
+                        FilePath = "textures/venus.jpg",
                         Enabled = true,
-                    },
-                    {
-                        Name = "On Mercury Image",
-                        FilePath = "map_service_configs/OnMercuryImage.xml",
+                        MinimumPixelSize = 256,
                     },
                 },
                 GrayScaleLayers = { },
@@ -54,30 +53,23 @@ return {
                 NightLayers = { },
                 WaterMasks = { },
                 ColorOverlays = { },
-                HeightLayers = {
-                    {
-                        Name = "On Mercury Height",
-                        FilePath = "map_service_configs/OnMercuryElevationGaskell.xml",
-                        Enabled = true,
-                    },
-                },
+                HeightLayers = { },
             },
         },
     },
-
-    -- MercuryTrail module
+    -- Trail module
     {   
-        Name = "MercuryTrail",
+        Name = "VenusTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
-            Body = "MERCURY",
+            Body = "VENUS",
             Frame = "GALACTIC",
             Observer = "SUN",
-            RGB = {0.6, 0.5, 0.5 },
-            TropicalOrbitPeriod = 87.968 ,
-            EarthOrbitRatio = 0.241,
-            DayLength = 4222.6,
+            RGB = {1, 0.5, 0.2},
+            TropicalOrbitPeriod = 224.695 ,
+            EarthOrbitRatio = 0.615,
+            DayLength = 2802.0,
         },
     }
 }

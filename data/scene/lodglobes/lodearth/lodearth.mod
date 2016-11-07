@@ -63,8 +63,8 @@ return {
                     },
                     {
                         Type = "Temporal",
-                        Name = "Temporal MODIS Aqua CorrectedRecflectance TrueColor",
-                        FilePath = "map_service_configs/GIBS/Temporal_MODIS_Aqua_CorrectedReflectance_TrueColor.xml",
+                        Name = "Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature",
+                        FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
                     },
                     {
                         Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
@@ -76,12 +76,8 @@ return {
                         FilePath = "textures/test_tile.png",
                     },
                 },
-                GrayScaleLayers = {
-
-                },
-                GrayScaleColorOverlays = {
-                   
-                },
+                GrayScaleLayers = { },
+                GrayScaleColorOverlays = { },
                 NightLayers = {
                     {
                         Name = "Earth at Night 2012",
@@ -113,7 +109,7 @@ return {
                         Type = "SizeReference",
                         Name = "Size Reference",
                         Radii = earthEllipsoid,
-                        BackgroundImagePath = "../debugglobe/textures/arrows.png",
+                        BackgroundImagePath = "../../debugglobe/textures/arrows.png",
                     },
                 },
                 HeightLayers = {

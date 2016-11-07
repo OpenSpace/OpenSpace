@@ -12,4 +12,10 @@
     <BlockSizeX>256</BlockSizeX>
     <BlockSizeY>256</BlockSizeY>
   </DataWindow>
+  <Cache>
+    <Path>./GDAL_CTX_cache</Path>
+    <Depth>10</Depth>
+    <Extension>.png</Extension>
+  </Cache>
+  <OfflineMode>true</OfflineMode>
 </GDAL_WMS>
