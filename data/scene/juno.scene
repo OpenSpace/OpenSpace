@@ -57,7 +57,7 @@ return {
         "neptune",
         "stars",
         "milkyway",
-        "juno"
+        "missions/juno"
     }
 }
 

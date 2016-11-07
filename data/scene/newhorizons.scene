@@ -56,14 +56,14 @@ return {
         "saturn/saturn",
         "uranus",
         "neptune",
-        "newhorizons/pluto",
-        "newhorizons/jupiter",
         "stars",
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        "newhorizons/newhorizons",
-        "newhorizons/newhorizonsfov",
+        "missions/newhorizons/pluto",
+        "missions/newhorizons/jupiter",
+        "missions/newhorizons",
+        "missions/newhorizons/newhorizonsfov"
     }
 }
 

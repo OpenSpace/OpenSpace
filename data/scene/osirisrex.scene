@@ -15,9 +15,9 @@ function preInitialization()
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_osirisrex.lua'))
 
     --local startTime = "2019 APR 16 12:03:00.00"
-    openspace.time.setTime("2016 SEP 8 23:05:00.500")
+    openspace.time.setTime("2016 SEP 8 23:00:00.500")
 
-    openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/osirisrex/scheduled_scripts.lua")
+    openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/missions/osirisrex/scheduled_scripts.lua")
 
 end
 
@@ -44,7 +44,7 @@ function postInitialization()
     openspace.setPropertyValue("Earth.RenderableGlobe.Atmosphere", true);
 
     openspace.printInfo("Done setting default values")
-    openspace.loadMission("${OPENSPACE_DATA}/scene/osirisrex/osirisrex/osirisrex.mission")
+    openspace.loadMission("${OPENSPACE_DATA}/scene/missions/osirisrex/osirisrex/osirisrex.mission")
 
     openspace.resetCameraDirection()
 end
@@ -72,7 +72,7 @@ return {
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        "osirisrex",
+        "missions/osirisrex",
     }
 }
 

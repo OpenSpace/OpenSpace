@@ -60,7 +60,7 @@ return {
         "neptune",
         "stars",
         "milkyway",
-        "rosetta",
+        "missions/rosetta",
     }
 }
 
