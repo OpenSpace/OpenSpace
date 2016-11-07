@@ -31,7 +31,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/other/threadpool.h>
 //#include <ghoul/misc/threadpool.h>
@@ -46,9 +46,9 @@
 namespace openspace {
 namespace globebrowsing {
 
-    struct LoadJob : public Job<TileIOResult> {
+    struct LoadJob : public Job<RawTile> {
         virtual void execute() = 0;
-        virtual std::shared_ptr<TileIOResult> product() = 0;
+        virtual std::shared_ptr<RawTile> product() = 0;
     };
 
     struct TileLoadJob : LoadJob {
@@ -62,14 +62,14 @@ namespace globebrowsing {
 
         virtual void execute();
 
-        virtual std::shared_ptr<TileIOResult> product() {
-            return _tileIOResult;
+        virtual std::shared_ptr<RawTile> product() {
+            return _rawTile;
         }
 
     protected:
         TileIndex _chunkIndex;
         std::shared_ptr<TileDataset> _tileDataset;
-        std::shared_ptr<TileIOResult> _tileIOResult;
+        std::shared_ptr<RawTile> _rawTile;
     };
 
     class TileDiskCache;
@@ -107,7 +107,7 @@ namespace globebrowsing {
         ~AsyncTileDataProvider();
 
         bool enqueueTileIO(const TileIndex& tileIndex);        
-        std::vector<std::shared_ptr<TileIOResult>> getTileIOResults();
+        std::vector<std::shared_ptr<RawTile>> getRawTiles();
         
         void reset();
         void clearRequestQueue();
@@ -120,7 +120,7 @@ namespace globebrowsing {
 
     private:
         std::shared_ptr<TileDataset> _tileDataset;
-        ConcurrentJobManager<TileIOResult> _concurrentJobManager;
+        ConcurrentJobManager<RawTile> _concurrentJobManager;
         std::unordered_map<TileHashKey, TileIndex> _enqueuedTileRequests;
     };
 

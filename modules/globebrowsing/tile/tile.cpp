@@ -22,7 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledataset.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -32,6 +32,93 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+
+
+
+    void TileMetaData::serialize(std::ostream& os) {
+        os << maxValues.size() << std::endl;
+        for (float f : maxValues) {
+            os << f << " ";
+        }
+        os << std::endl;
+        for (float f : minValues) {
+            os << f << " ";
+        }
+        os << std::endl;
+    }
+
+    TileMetaData TileMetaData::deserialize(std::istream& is) {
+        TileMetaData res;
+        int n; is >> n;
+        res.maxValues.resize(n);
+        for (int i = 0; i < n; i++) {
+            is >> res.maxValues[i];
+        }
+        res.minValues.resize(n);
+        for (int i = 0; i < n; i++) {
+            is >> res.minValues[i];
+        }
+
+        return std::move(res);
+    }
+
+    RawTile::RawTile()
+        : imageData(nullptr)
+        , dimensions(0, 0, 0)
+        , tileMetaData(nullptr)
+        , tileIndex(0, 0, 0)
+        , error(CE_None)
+        , nBytesImageData(0)
+    {}
+        
+    RawTile RawTile::createDefaultRes() {
+        RawTile defaultRes;
+        int w = 8;
+        int h = 8;
+        defaultRes.dimensions = glm::uvec3(w, h, 1);
+        defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
+        defaultRes.imageData = new char[defaultRes.nBytesImageData];
+        std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
+        return std::move(defaultRes);
+    }
+
+    void RawTile::serializeMetaData(std::ostream& os) {
+        os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
+        os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
+        os << error << std::endl;
+
+        // preprocess data
+        os << (tileMetaData != nullptr) << std::endl;
+        if (tileMetaData != nullptr) {    
+            tileMetaData->serialize(os);
+        }
+        
+        os << nBytesImageData << std::endl;
+    }
+
+    RawTile RawTile::deserializeMetaData(std::istream& is) {
+        RawTile res;
+        is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
+        is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
+        int err; is >> err; res.error = (CPLErr) err;
+        
+        res.tileMetaData = nullptr;
+        bool hastileMetaData; 
+        is >> hastileMetaData;
+        if (hastileMetaData) {
+            TileMetaData tileMetaData = TileMetaData::deserialize(is);
+            res.tileMetaData = std::make_shared<TileMetaData>(tileMetaData);
+        }
+        
+        is >> res.nBytesImageData;
+
+        char binaryDataSeparator;
+        is >> binaryDataSeparator; // not used
+        
+        char* buffer = new char[res.nBytesImageData]();
+        return std::move(res);
+    }
+
 
     const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
     
@@ -60,7 +147,7 @@ namespace globebrowsing {
         // Create tile
         Tile tile;
         tile.status = Tile::Status::OK;
-        tile.preprocessData = nullptr;
+        tile.metaData = nullptr;
         tile.texture = texture;
 
         return tile;

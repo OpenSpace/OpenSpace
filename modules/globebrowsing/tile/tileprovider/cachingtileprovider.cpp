@@ -162,10 +162,10 @@ namespace globebrowsing {
     }
 
     void CachingTileProvider::initTexturesFromLoadedData() {
-        auto readyTileIOResults = _asyncTextureDataProvider->getTileIOResults();
-        for(auto tileIOResult : readyTileIOResults){
-            TileHashKey key = tileIOResult->tileIndex.hashKey();
-            Tile tile = createTile(tileIOResult);
+        auto rawTiles = _asyncTextureDataProvider->getRawTiles();
+        for(auto rawTile : rawTiles){
+            TileHashKey key = rawTile->tileIndex.hashKey();
+            Tile tile = createTile(rawTile);
             _tileCache->put(key, tile);
         }
     }
@@ -194,19 +194,19 @@ namespace globebrowsing {
         return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
     }
 
-    Tile CachingTileProvider::createTile(std::shared_ptr<TileIOResult> tileIOResult) {
-        if (tileIOResult->error != CE_None) {
+    Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
+        if (rawTile->error != CE_None) {
             return{ nullptr, nullptr, Tile::Status::IOError };
         }
 
-        TileHashKey key = tileIOResult->tileIndex.hashKey();
+        TileHashKey key = rawTile->tileIndex.hashKey();
         TileDataLayout dataLayout =
             _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
         // The texture should take ownership of the data
         std::shared_ptr<Texture> texture = std::make_shared<Texture>(
-            tileIOResult->imageData,
-            tileIOResult->dimensions,
+            rawTile->imageData,
+            rawTile->dimensions,
             dataLayout.textureFormat.ghoulFormat,
             dataLayout.textureFormat.glFormat,
             dataLayout.glType,
@@ -220,7 +220,7 @@ namespace globebrowsing {
 
         Tile tile = {
             texture,
-            tileIOResult->preprocessData,
+            rawTile->tileMetaData,
             Tile::Status::OK
         };
 

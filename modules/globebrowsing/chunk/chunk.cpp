@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/tile/tileioresult.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 #include <algorithm>
 
@@ -109,36 +109,36 @@ namespace globebrowsing {
         size_t HEIGHT_CHANNEL = 0;
         const LayerGroup& heightmaps =
             layerManager->layerGroup(LayerManager::HeightLayers);
-        std::vector<ChunkTile> tiles =
+        std::vector<ChunkTile> chunkTiles =
             TileSelector::getTilesSortedByHighestResolution(heightmaps, _tileIndex);
         bool lastHadMissingData = true;
-        for (auto tile : tiles) {
-            bool goodTile = tile.tile.status == Tile::Status::OK;
-            bool hasPreprocessData = tile.tile.preprocessData != nullptr;
+        for (auto chunkTile : chunkTiles) {
+            bool goodTile = chunkTile.tile.status == Tile::Status::OK;
+            bool hastileMetaData = chunkTile.tile.metaData != nullptr;
 
-            if (goodTile && hasPreprocessData) {
-                auto preprocessData = tile.tile.preprocessData;
+            if (goodTile && hastileMetaData) {
+                auto tileMetaData = chunkTile.tile.metaData;
 
                 if (!boundingHeights.available) {
-                    if (preprocessData->hasMissingData[HEIGHT_CHANNEL]) {
+                    if (tileMetaData->hasMissingData[HEIGHT_CHANNEL]) {
                         boundingHeights.min = std::min(
-                            DEFAULT_HEIGHT, preprocessData->minValues[HEIGHT_CHANNEL]);
+                            DEFAULT_HEIGHT, tileMetaData->minValues[HEIGHT_CHANNEL]);
                         boundingHeights.max = std::max(
-                            DEFAULT_HEIGHT, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                            DEFAULT_HEIGHT, tileMetaData->maxValues[HEIGHT_CHANNEL]);
                     }
                     else {
-                        boundingHeights.min = preprocessData->minValues[HEIGHT_CHANNEL];
-                        boundingHeights.max = preprocessData->maxValues[HEIGHT_CHANNEL];
+                        boundingHeights.min = tileMetaData->minValues[HEIGHT_CHANNEL];
+                        boundingHeights.max = tileMetaData->maxValues[HEIGHT_CHANNEL];
                     }
                     boundingHeights.available = true;
                 }
                 else {
                     boundingHeights.min = std::min(
-                        boundingHeights.min, preprocessData->minValues[HEIGHT_CHANNEL]);
+                        boundingHeights.min, tileMetaData->minValues[HEIGHT_CHANNEL]);
                     boundingHeights.max = std::max(
-                        boundingHeights.max, preprocessData->maxValues[HEIGHT_CHANNEL]);
+                        boundingHeights.max, tileMetaData->maxValues[HEIGHT_CHANNEL]);
                 }
-                lastHadMissingData = preprocessData->hasMissingData[HEIGHT_CHANNEL];
+                lastHadMissingData = tileMetaData->hasMissingData[HEIGHT_CHANNEL];
             }
 
             // Allow for early termination

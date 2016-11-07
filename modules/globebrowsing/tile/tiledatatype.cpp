@@ -40,7 +40,7 @@
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "TileIOResult";
+    const std::string _loggerCat = "RawTile";
 }
 
 namespace openspace {

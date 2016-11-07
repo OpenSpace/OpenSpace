@@ -26,10 +26,9 @@
 #define __TILE_IO_RESULT_H__
 
 #include <ghoul/opengl/texture.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
 #include <ghoul/filesystem/file.h>
 
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 #include "gdal_priv.h"
@@ -39,39 +38,7 @@
 
 namespace openspace {
 namespace globebrowsing {
-    using namespace ghoul::opengl;
-    using namespace ghoul::filesystem;
-
-    struct TilePreprocessData {
-        std::vector<float> maxValues;
-        std::vector<float> minValues;
-        std::vector<bool> hasMissingData;
-
-        void serialize(std::ostream& s);
-        static TilePreprocessData deserialize(std::istream& s);
-    };
-
-    struct TextureFormat {
-        Texture::Format ghoulFormat;
-        GLuint glFormat;
-    };
-
-    struct TileIOResult {
-        TileIOResult();
-
-        char* imageData;
-        glm::uvec3 dimensions;
-        std::shared_ptr<TilePreprocessData> preprocessData;
-        TileIndex tileIndex;
-        CPLErr error;
-        size_t nBytesImageData;
-
-        void serializeMetaData(std::ostream& s);
-        static TileIOResult deserializeMetaData(std::istream& s);
-   
-        static TileIOResult createDefaultRes();
-
-    };
+    
 
 } // namespace globebrowsing
 } // namespace openspace

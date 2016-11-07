@@ -33,7 +33,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-struct TileIOResult;
+struct RawTile;
 
     using namespace ghoul::filesystem;
 
@@ -41,9 +41,9 @@ struct TileIOResult;
     public:
         TileDiskCache(const std::string& name);
         
-        std::shared_ptr<TileIOResult> get(const TileIndex& tileIndex);
+        std::shared_ptr<RawTile> get(const TileIndex& tileIndex);
         bool has(const TileIndex& tileIndex) const;
-        bool put(const TileIndex& tileIndex, std::shared_ptr<TileIOResult> tileIOResult);
+        bool put(const TileIndex& tileIndex, std::shared_ptr<RawTile> rawTile);
         
         static const std::string CACHE_ROOT;
     

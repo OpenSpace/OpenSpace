@@ -23,8 +23,7 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tilediskcache.h>
-
-#include <modules/globebrowsing/tile/tileioresult.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -61,14 +60,14 @@ namespace globebrowsing {
         return FileSys.fileExists(metaFile);
     }
 
-    std::shared_ptr<TileIOResult> TileDiskCache::get(const TileIndex& tileIndex) {
+    std::shared_ptr<RawTile> TileDiskCache::get(const TileIndex& tileIndex) {
         File metaDataFile = getMetaDataFile(tileIndex);
         File dataFile = getDataFile(tileIndex);
         if (FileSys.fileExists(metaDataFile) && FileSys.fileExists(dataFile)) {
             // read meta
             std::ifstream ifsMeta;
             ifsMeta.open(metaDataFile.path(), std::ifstream::in);
-            TileIOResult res = TileIOResult::deserializeMetaData(ifsMeta);
+            RawTile res = RawTile::deserializeMetaData(ifsMeta);
             ifsMeta.close();
 
             // read data
@@ -78,24 +77,24 @@ namespace globebrowsing {
             ifsData.read(buffer, res.nBytesImageData);
             res.imageData = buffer;
 
-            return std::make_shared<TileIOResult>(res);
+            return std::make_shared<RawTile>(res);
         }
         return nullptr;
     }
 
-    bool TileDiskCache::put(const TileIndex& tileIndex, std::shared_ptr<TileIOResult> tileIOResult) {
+    bool TileDiskCache::put(const TileIndex& tileIndex, std::shared_ptr<RawTile> rawTile) {
         File metaDataFile = getMetaDataFile(tileIndex);
         if (!FileSys.fileExists(metaDataFile)) {
             std::ofstream ofsMeta;
             ofsMeta.open(metaDataFile.path());
-            tileIOResult->serializeMetaData(ofsMeta);
+            rawTile->serializeMetaData(ofsMeta);
             ofsMeta.close();
 
             std::ofstream ofsData;
             File dataFile = getDataFile(tileIndex);
             ofsData.open(dataFile.path(), std::ofstream::binary);
-            char * data = (char*)tileIOResult->imageData;
-            ofsData.write(data, tileIOResult->nBytesImageData);
+            char * data = (char*)rawTile->imageData;
+            ofsData.write(data, rawTile->nBytesImageData);
             ofsData.close();
             return true;
         }

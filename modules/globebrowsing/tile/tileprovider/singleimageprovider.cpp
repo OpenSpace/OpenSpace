@@ -83,7 +83,7 @@ namespace globebrowsing {
         _tile = Tile();
         _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(_imagePath).release());
         _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
-        _tile.preprocessData = nullptr;
+        _tile.metaData = nullptr;
 
         _tile.texture->uploadTexture();
         _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);

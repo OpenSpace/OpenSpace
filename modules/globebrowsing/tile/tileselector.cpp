@@ -102,9 +102,9 @@ namespace globebrowsing {
         for (const auto& layer : layerGroup.activeLayers()) {
             ChunkTile chunkTile = getHighestResolutionTile(layer->tileProvider(), tileIndex);
             bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
-            bool tileHasPreprocessData = chunkTile.tile.preprocessData != nullptr;
+            bool tileHasMetaData = chunkTile.tile.metaData != nullptr;
             bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
-            if (tileIsOk && tileHasPreprocessData && tileIsHigherResolution) {
+            if (tileIsOk && tileHasMetaData && tileIsHigherResolution) {
                 mostHighResolution = chunkTile;
             }
         }

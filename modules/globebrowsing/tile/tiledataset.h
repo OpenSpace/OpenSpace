@@ -35,7 +35,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/threadpool.h>
 
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledatatype.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
@@ -101,8 +103,8 @@ namespace globebrowsing {
         //////////////////////////////////////////////////////////////////////////////////
         //                              Public interface                                //
         //////////////////////////////////////////////////////////////////////////////////
-        std::shared_ptr<TileIOResult> readTileData(TileIndex tileIndex);
-        std::shared_ptr<TileIOResult> defaultTileData();
+        std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
+        std::shared_ptr<RawTile> defaultTileData();
         int maxChunkLevel();
         TileDepthTransform getDepthTransform();
         const TileDataLayout& getDataLayout();
@@ -162,8 +164,8 @@ namespace globebrowsing {
         char* readImageData(IODescription& io, CPLErr& worstError) const;
         CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
         CPLErr repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;
-        std::shared_ptr<TilePreprocessData> preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const;
-        CPLErr postProcessErrorCheck(std::shared_ptr<const TileIOResult> ioResult, const IODescription& io) const;
+        std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> result, const PixelRegion& region) const;
+        CPLErr postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult, const IODescription& io) const;
 
 
 

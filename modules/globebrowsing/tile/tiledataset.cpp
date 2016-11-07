@@ -31,14 +31,14 @@
 #include <ghoul/filesystem/filesystem.h> // abspath
 #include <ghoul/misc/assert.h>
 
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tileioresult.h>
+
 
 #include <modules/globebrowsing/geometry/angle.h>
 
 #include <float.h>
-
 #include <sstream>
 #include <algorithm>
 
@@ -266,47 +266,47 @@ namespace globebrowsing {
     //                              Public interface                                //
     //////////////////////////////////////////////////////////////////////////////////
 
-    std::shared_ptr<TileIOResult> TileDataset::readTileData(TileIndex tileIndex) {
+    std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
         ensureInitialized();
         IODescription io = getIODescription(tileIndex);
         CPLErr worstError = CPLErr::CE_None;
 
-        // Build the Tile IO Result from the data we queride
-        std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
-        result->imageData = readImageData(io, worstError);
-        result->error = worstError;
-        result->tileIndex = tileIndex;
-        result->dimensions = glm::uvec3(io.write.region.numPixels, 1);
-        result->nBytesImageData = io.write.totalNumBytes;
+        // Build the RawTile from the data we querred
+        std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
+        rawTile->imageData = readImageData(io, worstError);
+        rawTile->error = worstError;
+        rawTile->tileIndex = tileIndex;
+        rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
+        rawTile->nBytesImageData = io.write.totalNumBytes;
         
         if (_config.doPreProcessing) {
-            result->preprocessData = preprocess(result, io.write.region);
-            result->error = std::max(result->error, postProcessErrorCheck(result, io));
+            rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
+            rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
         }
 
-        return result;
+        return rawTile;
     }
 
 
-    std::shared_ptr<TileIOResult> TileDataset::defaultTileData() {
+    std::shared_ptr<RawTile> TileDataset::defaultTileData() {
         ensureInitialized();
         PixelRegion pixelRegion = { PixelCoordinate(0, 0), PixelRange(16, 16) };
-        std::shared_ptr<TileIOResult> result = std::make_shared<TileIOResult>();
-        result->tileIndex = { 0, 0, 0 };
-        result->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
-        result->nBytesImageData = result->dimensions.x * result->dimensions.y * _dataLayout.bytesPerPixel;
-        result->imageData = new char[result->nBytesImageData];
-        for (size_t i = 0; i < result->nBytesImageData; ++i) {
-            result->imageData[i] = 0;
+        std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
+        rawTile->tileIndex = { 0, 0, 0 };
+        rawTile->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
+        rawTile->nBytesImageData = rawTile->dimensions.x * rawTile->dimensions.y * _dataLayout.bytesPerPixel;
+        rawTile->imageData = new char[rawTile->nBytesImageData];
+        for (size_t i = 0; i < rawTile->nBytesImageData; ++i) {
+            rawTile->imageData[i] = 0;
         }
-        result->error = CPLErr::CE_None;
+        rawTile->error = CPLErr::CE_None;
         
         if (_config.doPreProcessing) {
-            result->preprocessData = preprocess(result, pixelRegion);
-            //result->error = std::max(result->error, postProcessErrorCheck(result, io));
+            rawTile->tileMetaData = getTileMetaData(rawTile, pixelRegion);
+            //rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
         }
 
-        return result;
+        return rawTile;
     }
 
     int TileDataset::maxChunkLevel() {
@@ -726,11 +726,11 @@ namespace globebrowsing {
             -io.write.bytesPerLine);            // Line spacing
     }
 
-    std::shared_ptr<TilePreprocessData> TileDataset::preprocess(std::shared_ptr<TileIOResult> result, const PixelRegion& region) const {
+    std::shared_ptr<TileMetaData> TileDataset::getTileMetaData(std::shared_ptr<RawTile> rawTile, const PixelRegion& region) const {
         size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
         size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
-        TilePreprocessData* preprocessData = new TilePreprocessData();
+        TileMetaData* preprocessData = new TileMetaData();
         preprocessData->maxValues.resize(_dataLayout.numRasters);
         preprocessData->minValues.resize(_dataLayout.numRasters);
         preprocessData->hasMissingData.resize(_dataLayout.numRasters);
@@ -752,7 +752,7 @@ namespace globebrowsing {
                 
                 for (size_t c = 0; c < _dataLayout.numRasters; c++) {
                     float noDataValue = _dataset->GetRasterBand(c + 1)->GetNoDataValue();
-                    float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(result->imageData[yi + i]));
+                    float val = TileDataType::interpretFloat(_dataLayout.gdalType, &(rawTile->imageData[yi + i]));
                     if (val != noDataValue) {
                         preprocessData->maxValues[c] = std::max(val, preprocessData->maxValues[c]);
                         preprocessData->minValues[c] = std::min(val, preprocessData->minValues[c]);
@@ -771,10 +771,10 @@ namespace globebrowsing {
             }
         }
 
-        return std::shared_ptr<TilePreprocessData>(preprocessData);
+        return std::shared_ptr<TileMetaData>(preprocessData);
     }
 
-    CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const TileIOResult> result, const IODescription& io) const{
+    CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile, const IODescription& io) const{
         int success;
 
         double missingDataValue = gdalRasterBand(io.read.overview)->GetNoDataValue(&success);
@@ -785,18 +785,18 @@ namespace globebrowsing {
         bool hasMissingData = false;
         
         for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-            hasMissingData |= result->preprocessData->maxValues[c] == missingDataValue;
+            hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
         }
         
-        bool onHighLevel = result->tileIndex.level > 6;
+        bool onHighLevel = rawTile->tileIndex.level > 6;
         if (hasMissingData && onHighLevel) {
             return CE_Fatal;
         }
         // ugly test for heightmap overlay
         if (_dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
             // check the alpha
-            if (result->preprocessData->maxValues[1] == 0.0
-                && result->preprocessData->minValues[1] == 0.0) 
+            if (rawTile->tileMetaData->maxValues[1] == 0.0
+                && rawTile->tileMetaData->minValues[1] == 0.0)
             {
                 //return CE_Warning;
             }
