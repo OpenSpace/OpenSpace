@@ -1,11 +1,10 @@
---[[  OpenSpace keybinding script ]]--
+--[[  OpenSpace keybinding script loaded from the newhorizons.scene file ]]--
 
 -- Load the common helper functions
 dofile(openspace.absPath('${SCRIPTS}/common.lua'))
 
 openspace.clearKeys()
 helper.setCommonKeys()
-
 helper.setDeltaTimeKeys({
     1, 5, 10, 20, 40, 60, 120, 360, 540, 1080,
     2160, 4320, 8640

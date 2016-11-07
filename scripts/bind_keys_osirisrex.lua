@@ -1,19 +1,17 @@
---[[  OpenSpace keybinding script ]]--
+--[[  OpenSpace keybinding script loaded from the osirisrex.scene file ]]--
 
 -- Load the common helper functions
 dofile(openspace.absPath('${SCRIPTS}/common.lua'))
-
---openspace.clearKeys()
---helper.setCommonKeys()
+dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
 -- Set focuses
 openspace.bindKey(
-    "o",
+    "a",
     "openspace.setPropertyValue('Interaction.origin', 'OsirisRex')",
     "Sets the focus of the camera on 'Osiris Rex'."
 )
 openspace.bindKey(
-    "b",
+    "s",
     "openspace.setPropertyValue('Interaction.origin', 'BennuBarycenter')",
     "Sets the focus of the camera on 'Bennu'."
 )

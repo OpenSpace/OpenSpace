@@ -10,7 +10,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime("2011 AUG 06 00:00:00")
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
 function postInitialization()

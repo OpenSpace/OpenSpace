@@ -9,7 +9,6 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime("2016-07-05T10:05:00.00")
-    openspace.time.setDeltaTime(0)
 
     dofile(openspace.absPath('${SCRIPTS}/common.lua'))
     openspace.clearKeys()
@@ -53,7 +52,7 @@ return {
         "earth",
         "mars",
         "jupiter",
-        "saturn",
+        "saturn/saturn",
         "uranus",
         "neptune",
         "stars",

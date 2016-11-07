@@ -1,4 +1,4 @@
---[[  OpenSpace keybinding script ]]--
+--[[  OpenSpace keybinding script loaded from the rosetta.scene file ]]--
 -- This script sets the default keybindings and is executed at startup
 
 -- Load the common helper functions

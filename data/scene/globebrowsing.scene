@@ -10,17 +10,16 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015 NOV 24 00:00:00")
+    openspace.time.setTime(openspace.time.currentWallTime())
 
     openspace.time.setTime(openspace.time.currentWallTime())
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
 function postInitialization()
     openspace.printInfo("Setting default values")
 
     openspace.setInteractionMode('GlobeBrowsing')
-    --openspace.restoreCameraStateFromFile("camera_lookat_planet.lua")
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
@@ -28,10 +27,8 @@ function postInitialization()
     openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    
 
     openspace.resetCameraDirection()
-    openspace.time.setDeltaTime(0)
 
     openspace.printInfo("Done setting default values")
 end
@@ -53,7 +50,7 @@ return {
         "lodmercury",
         "sun",
         "stars",
-        "milkyway",    
+        "milkyway",
     }
 }
 
