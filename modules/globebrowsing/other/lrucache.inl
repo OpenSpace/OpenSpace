@@ -38,7 +38,7 @@ namespace globebrowsing {
         : _cacheSize(size) { }
 
     template<typename KeyType, typename ValueType>
-    LRUCache<KeyType, ValueType>::~LRUCache() {    
+    LRUCache<KeyType, ValueType>::~LRUCache() {
         // Clean up list and map!
     }
 

@@ -79,7 +79,7 @@ namespace globebrowsing {
         //////////////////////////////////////////////////////////////////////////////////
 
         /**
-        * Collects all asynchronously downloaded <code>TileIOResult</code>
+        * Collects all asynchronously downloaded <code>RawTile</code>
         * and uses <code>createTile</code> to create <code>Tile</code>s, 
         * which are put in the LRU cache - potentially pushing out outdated
         * Tiles.
@@ -90,7 +90,7 @@ namespace globebrowsing {
         * \returns A tile with <code>Tile::Status::OK</code> if no errors
         * occured, a tile with <code>Tile::Status::IOError</code> otherwise
         */
-        Tile createTile(std::shared_ptr<TileIOResult> res);
+        Tile createTile(std::shared_ptr<RawTile> res);
 
         /**
         * Deletes all enqueued, but not yet started async downloads of textures.

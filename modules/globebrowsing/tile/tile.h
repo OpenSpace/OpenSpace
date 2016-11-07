@@ -27,24 +27,60 @@
 
 #include <ghoul/opengl/texture.h> // Texture
 
-#include <modules/globebrowsing/tile/asynctilereader.h> // TilePreprocessData
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <gdal_priv.h>
 
 namespace openspace {
 namespace globebrowsing {
+    
+
+    struct TileMetaData {
+        std::vector<float> maxValues;
+        std::vector<float> minValues;
+        std::vector<bool> hasMissingData;
+
+        void serialize(std::ostream& s);
+        static TileMetaData deserialize(std::istream& s);
+    };
+
+    struct TextureFormat {
+        ghoul::opengl::Texture::Format ghoulFormat;
+        GLuint glFormat;
+    };
+    
+    using namespace ghoul::opengl;
+    
+    struct RawTile {
+        RawTile();
+
+        char* imageData;
+        glm::uvec3 dimensions;
+        std::shared_ptr<TileMetaData> tileMetaData;
+        TileIndex tileIndex;
+        CPLErr error;
+        size_t nBytesImageData;
+
+        void serializeMetaData(std::ostream& s);
+        static RawTile deserializeMetaData(std::istream& s);
+   
+        static RawTile createDefaultRes();
+
+    };
+
+
 
     struct TileUvTransform {
         glm::vec2 uvOffset;
         glm::vec2 uvScale;
     };
 
-    using namespace ghoul::opengl;
 
     /**
-    * Defines a status and may have a Texture and PreprocessData
+    * Defines a status and may have a Texture and TileMetaData
     */
     struct Tile {
         std::shared_ptr<Texture> texture;
-        std::shared_ptr<TilePreprocessData> preprocessData;
+        std::shared_ptr<TileMetaData> metaData;
 
         /**
         * Describe if this Tile is good for usage (OK) or otherwise
@@ -53,7 +89,7 @@ namespace globebrowsing {
         enum class Status { 
             /** 
             * E.g when texture data is not currently in memory. 
-            * texture and preprocessData are both null
+            * texture and tileMetaData are both null
             */
             Unavailable, 
 
@@ -61,19 +97,19 @@ namespace globebrowsing {
             * Can be set by <code>TileProvider</code>s if the requested 
             * <code>TileIndex</code> is undefined for that particular 
             * provider. 
-            * texture and preprocessData are both null
+            * texture and metaData are both null
             */
             OutOfRange, 
 
             /**
             * An IO Error happend
-            * texture and preprocessData are both null
+            * texture and metaData are both null
             */
             IOError, 
 
             /**
             * The Texture is uploaded to the GPU and good for usage.
-            * texture is defined. preprocessData may be defined.
+            * texture is defined. metaData may be defined.
             */
             OK 
         } status;

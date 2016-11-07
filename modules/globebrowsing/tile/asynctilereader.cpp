@@ -40,7 +40,7 @@ namespace openspace {
 namespace globebrowsing {
 
     void TileLoadJob::execute() {
-        _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+        _rawTile = _tileDataset->readTileData(_chunkIndex);
     }
 
     DiskCachedTileLoadJob::DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
@@ -65,39 +65,39 @@ namespace globebrowsing {
     }
 
     void DiskCachedTileLoadJob::execute() {
-        _tileIOResult = nullptr;
+        _rawTile = nullptr;
 
         switch (_mode) {
         case CacheMode::Disabled: 
-            _tileIOResult = _tileDataset->readTileData(_chunkIndex); 
+            _rawTile = _tileDataset->readTileData(_chunkIndex); 
             break;
 
         case CacheMode::ReadOnly:
-            _tileIOResult = _tileDiskCache->get(_chunkIndex);
-            if (_tileIOResult == nullptr) {
-                _tileIOResult = _tileDataset->readTileData(_chunkIndex);
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                _rawTile = _tileDataset->readTileData(_chunkIndex);
             }
             break;
 
         case CacheMode::ReadAndWrite:
-            _tileIOResult = _tileDiskCache->get(_chunkIndex);
-            if (_tileIOResult == nullptr) {
-                _tileIOResult = _tileDataset->readTileData(_chunkIndex);
-                _tileDiskCache->put(_chunkIndex, _tileIOResult);
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                _rawTile = _tileDataset->readTileData(_chunkIndex);
+                _tileDiskCache->put(_chunkIndex, _rawTile);
             }
             break;
 
         case CacheMode::WriteOnly:
-            _tileIOResult = _tileDataset->readTileData(_chunkIndex);
-            _tileDiskCache->put(_chunkIndex, _tileIOResult);
+            _rawTile = _tileDataset->readTileData(_chunkIndex);
+            _tileDiskCache->put(_chunkIndex, _rawTile);
             break;
 
         case CacheMode::CacheHitsOnly:
-            _tileIOResult = _tileDiskCache->get(_chunkIndex);
-            if (_tileIOResult == nullptr) {
-                TileIOResult res = TileIOResult::createDefaultRes();
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                RawTile res = RawTile::createDefaultRes();
                 res.tileIndex = _chunkIndex;
-                _tileIOResult = std::make_shared<TileIOResult>(res);
+                _rawTile = std::make_shared<RawTile>(res);
             }
             break;
         }
@@ -129,8 +129,8 @@ namespace globebrowsing {
         return false;
     }
 
-    std::vector<std::shared_ptr<TileIOResult>> AsyncTileDataProvider::getTileIOResults() {
-        std::vector<std::shared_ptr<TileIOResult>> readyResults;
+    std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
+        std::vector<std::shared_ptr<RawTile>> readyResults;
         while (_concurrentJobManager.numFinishedJobs() > 0) {
             readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
         }

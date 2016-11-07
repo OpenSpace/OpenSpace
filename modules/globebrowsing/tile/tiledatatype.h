@@ -28,7 +28,7 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/tile/tileioresult.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 #include "gdal_priv.h"
 
