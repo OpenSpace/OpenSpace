@@ -30,7 +30,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {58232000, 58232000, 58232000},
+            Radii = {60268000, 60268000, 54364000},
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
@@ -50,6 +50,16 @@ return {
                 ColorOverlays = { },
                 HeightLayers = { },
             },
+        },
+    },
+    {
+        Name = "SaturnRings",
+        Parent = "Saturn",
+        Renderable = {
+            Type = "RenderableRings",
+            Texture = "textures/saturn_rings.png",
+            Size = 140220000,
+            Offset = { 74500 / 140445.100671159, 1.0 } -- min / max extend
         },
     },
     -- Trail module

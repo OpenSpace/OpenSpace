@@ -20,14 +20,14 @@ function preInitialization()
         helper.property.invert('Earth.RenderableGlobe.performShading') ..
         helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
         helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled'),
-        "ssdasd"
+        "Toggle night texture, shading, atmosphere, and water for Earth."
     )
 
     -- Toggle background
     openspace.bindKey("b",
         helper.property.invert('MilkyWay.renderable.enabled') ..
         helper.property.invert('Stars.renderable.enabled'),
-        "asdasd"
+        "Toggle background (Stars and Milkyway)."
     )
 
     --[[

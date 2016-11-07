@@ -18,7 +18,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {1737000, 1737000, 1737000}, -- Moons's radius
+            Radii = {1738140, 1738140, 1735970}, -- Moons's radius
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 5000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,

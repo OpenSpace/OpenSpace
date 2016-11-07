@@ -30,7 +30,7 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {25362000, 25362000, 25362000},
+            Radii = {25559000, 25559000, 24973000},
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
