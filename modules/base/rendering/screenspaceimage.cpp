@@ -107,7 +107,7 @@ void ScreenSpaceImage::render() {
 
 void ScreenSpaceImage::update() {
     bool download = _downloadImage ? (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) : true;
-    if (download) {
+    if (download && _textureDirty) {
         loadTexture();
         _textureDirty = false;
     }
@@ -180,7 +180,7 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImage::downloadImageToMemory
             LDEBUG("Download to memory finished for screen space image");
         },
         [url](const std::string& err) {
-            LDEBUG("Download to memory failer for screen space image: " +err);
+            LDEBUG("Download to memory failed for screen space image: " +err);
         }
     ));
 }

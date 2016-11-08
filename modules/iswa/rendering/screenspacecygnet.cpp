@@ -51,7 +51,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _url = IswaManager::ref().iswaUrl(_cygnetId);
         
     _openSpaceTime = Time::ref().j2000Seconds();
-    _lastUpdateOpenSpaceTime = _openSpaceTime;
+    _lastUpdateOpenSpaceTime = 0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;

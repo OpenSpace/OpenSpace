@@ -83,7 +83,7 @@ IswaManager::IswaManager()
     _geometryType[GeometryType::Sphere] = "Sphere";
 
     OsEng.downloadManager().fetchFile(
-        "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
+        "http://iswa.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
         },
@@ -201,7 +201,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     if(id < 0){
         url = baseUrl+type+"/" + std::to_string(-id) + "/";
     } else{
-        url = "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
+        url = "http://iswa.ccmc.gsfc.nasa.gov/IswaSystemWebApp/iSWACygnetStreamer?window=-1&cygnetId="+ std::to_string(id) +"&timestamp=";
     }        
 
     std::string t = SpiceManager::ref().dateFromEphemerisTime(timestamp);
@@ -429,6 +429,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString){
                     jCygnet["cygnetUpdateInterval"],
                     false
                 };
+
                 _cygnetInformation[jCygnet["cygnetID"]] = std::make_shared<CygnetInfo>(info);
             }
         }        

@@ -75,11 +75,11 @@ Documentation ScreenSpaceRenderable::Documentation() {
 ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
     const ghoul::Dictionary& dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceRenderable"
-    );
+    // documentation::testSpecificationAndThrow(
+    //     Documentation(),
+    //     dictionary,
+    //     "ScreenSpaceRenderable"
+    // );
 
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
