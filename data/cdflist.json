@@ -1,0 +1,12 @@
+[{"group":"CCMC­3D­CDF",
+"fieldlinefile":"${OPENSPACE_DATA}/fieldlines.json",
+	"cdfs":[
+		{
+		"name":"CCMC­00:00:00",
+		"path":"${OPENSPACE_DATA}/../../GM_CDF/3d__var_1_e20000101-000000-000.out.cdf",
+		"date":"2000-01-01T00:00:00.00"
+		}
+	]
+}]
+
+
