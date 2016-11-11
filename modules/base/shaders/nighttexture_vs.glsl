@@ -36,27 +36,23 @@ out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 
-uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
+uniform mat4 modelViewProjectionTransform;
 
 uniform sampler2D heightTex;
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
 
-
-void main()
-{
+void main() {
     // set variables
     vs_st = in_st;
-    vs_position = in_position;
     vec4 tmp = in_position;
 
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
     
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
+    vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
 
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
@@ -64,8 +60,9 @@ void main()
         float displacementFactor = height * _heightExaggeration;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
-// 
-    position = ViewProjection * position;
+    
+    position = modelViewProjectionTransform * position;
+    vs_position = z_normalization(position);
 
-    gl_Position =  z_normalization(position);
+    gl_Position =  vs_position;
 }

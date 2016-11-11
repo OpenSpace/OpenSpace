@@ -54,23 +54,23 @@
 namespace {
     const std::string _loggerCat = "RenderablePlanetAtmosphere";
 
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyRadius = "Radius";
-    const std::string keyShading = "PerformShading";
-    const std::string keyShadowGroup = "Shadow_Group";
-    const std::string keyShadowSource = "Source";
-    const std::string keyShadowCaster = "Caster";
-    const std::string keyAtmosphere = "Atmosphere";
-    const std::string keyAtmosphereRadius = "AtmoshereRadius";
-    const std::string keyPlanetRadius = "PlanetRadius";
+    const std::string keyFrame                    = "Frame";
+    const std::string keyGeometry                 = "Geometry";
+    const std::string keyRadius                   = "Radius";
+    const std::string keyShading                  = "PerformShading";
+    const std::string keyShadowGroup              = "Shadow_Group";
+    const std::string keyShadowSource             = "Source";
+    const std::string keyShadowCaster             = "Caster";
+    const std::string keyAtmosphere               = "Atmosphere";
+    const std::string keyAtmosphereRadius         = "AtmoshereRadius";
+    const std::string keyPlanetRadius             = "PlanetRadius";
     const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    const std::string keyRayleigh = "Rayleigh";
-    const std::string keyRayleighHeightScale = "H_R";
-    const std::string keyMie = "Mie";
-    const std::string keyMieHeightScale = "H_M";
-    const std::string keyMiePhaseConstant = "G";
-    const std::string keyBody = "Body";
+    const std::string keyRayleigh                 = "Rayleigh";
+    const std::string keyRayleighHeightScale      = "H_R";
+    const std::string keyMie                      = "Mie";
+    const std::string keyMieHeightScale           = "H_M";
+    const std::string keyMiePhaseConstant         = "G";
+    const std::string keyBody                     = "Body";
 }
 
 namespace openspace {
@@ -501,8 +501,8 @@ namespace openspace {
             // shadow program
             _programObject = renderEngine.buildRenderProgram(
                 "atmosphereAndShadowProgram",
-                "${MODULE_BASE}/shaders/atmosphere_vs.glsl",
-                "${MODULE_BASE}/shaders/atmosphere_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/atmosphere_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/atmosphere_fs.glsl");
             if (!_programObject)
                 return false;
         }
@@ -510,8 +510,8 @@ namespace openspace {
             // shadow program
             _programObject = renderEngine.buildRenderProgram(
                 "shadowNightProgram",
-                "${MODULE_BASE}/shaders/shadow_nighttexture_vs.glsl",
-                "${MODULE_BASE}/shaders/shadow_nighttexture_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_fs.glsl");
             if (!_programObject)
                 return false;
         }
@@ -519,8 +519,8 @@ namespace openspace {
             // shadow program
             _programObject = renderEngine.buildRenderProgram(
                 "shadowProgram",
-                "${MODULE_BASE}/shaders/shadow_vs.glsl",
-                "${MODULE_BASE}/shaders/shadow_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/shadow_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/shadow_fs.glsl");
             if (!_programObject)
                 return false;
         }
@@ -528,8 +528,8 @@ namespace openspace {
             // Night texture program
             _programObject = renderEngine.buildRenderProgram(
                 "nightTextureProgram",
-                "${MODULE_BASE}/shaders/nighttexture_vs.glsl",
-                "${MODULE_BASE}/shaders/nighttexture_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/nighttexture_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/nighttexture_fs.glsl");
             if (!_programObject)
                 return false;
         }
@@ -537,8 +537,8 @@ namespace openspace {
             // pscstandard
             _programObject = renderEngine.buildRenderProgram(
                 "pscstandard",
-                "${MODULE_BASE}/shaders/pscstandard_vs.glsl",
-                "${MODULE_BASE}/shaders/pscstandard_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/pscstandard_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/pscstandard_fs.glsl");
             if (!_programObject)
                 return false;
         }
@@ -551,8 +551,8 @@ namespace openspace {
         // DEBUG: Deferred rendering of the Atmosphere
         _deferredAtmosphereProgramObject = renderEngine.buildRenderProgram(
             "atmosphereDeferredProgram",
-            "${MODULE_BASE}/shaders/atmosphere_deferred_vs.glsl",
-            "${MODULE_BASE}/shaders/atmosphere_deferred_fs.glsl");
+            "${MODULE_ATMOSPHERE}/shaders/atmosphere_deferred_vs.glsl",
+            "${MODULE_ATMOSPHERE}/shaders/atmosphere_deferred_fs.glsl");
         _deferredAtmosphereProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
         _deferredAtmosphereProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
         if (!_deferredAtmosphereProgramObject)
@@ -1326,8 +1326,8 @@ namespace openspace {
         if (_transmittanceProgramObject == nullptr) {
             _transmittanceProgramObject = ghoul::opengl::ProgramObject::Build(
                 "transmittanceCalcProgram",
-                "${MODULE_BASE}/shaders/transmittance_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/transmittance_calc_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/transmittance_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl");
             if (!_transmittanceProgramObject) {
                 return;
             }
@@ -1340,8 +1340,8 @@ namespace openspace {
         if (_irradianceProgramObject == nullptr) {
             _irradianceProgramObject = ghoul::opengl::ProgramObject::Build(
                 "irradianceCalcProgram",
-                "${MODULE_BASE}/shaders/irradiance_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/irradiance_calc_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_calc_fs.glsl");
             if (!_irradianceProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1357,8 +1357,8 @@ namespace openspace {
         if (_irradianceSupTermsProgramObject == nullptr) {
             _irradianceSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
                 "irradianceSupTermsCalcProgram",
-                "${MODULE_BASE}/shaders/irradiance_sup_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/irradiance_sup_calc_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_sup_calc_fs.glsl");
             if (!_irradianceSupTermsProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1380,9 +1380,9 @@ namespace openspace {
         if (_inScatteringProgramObject == nullptr) {
             _inScatteringProgramObject = ghoul::opengl::ProgramObject::Build(
                 "inScatteringCalcProgram",
-                "${MODULE_BASE}/shaders/inScattering_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/inScattering_calc_fs.glsl",
-                "${MODULE_BASE}/shaders/inScattering_calc_gs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_calc_gs.glsl");
             if (!_inScatteringProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1408,9 +1408,9 @@ namespace openspace {
         if (_inScatteringSupTermsProgramObject == nullptr) {
             _inScatteringSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
                 "inScatteringSupTermsCalcProgram",
-                "${MODULE_BASE}/shaders/inScattering_sup_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/inScattering_sup_calc_fs.glsl",
-                "${MODULE_BASE}/shaders/inScattering_sup_calc_gs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_fs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_gs.glsl");
             if (!_inScatteringSupTermsProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1442,8 +1442,8 @@ namespace openspace {
         if (_deltaEProgramObject == nullptr) {
             _deltaEProgramObject = ghoul::opengl::ProgramObject::Build(
                 "deltaECalcProgram",
-                "${MODULE_BASE}/shaders/deltaE_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/deltaE_calc_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/deltaE_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl");
             if (!_deltaEProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1480,9 +1480,9 @@ namespace openspace {
         if (_deltaSProgramObject == nullptr) {
             _deltaSProgramObject = ghoul::opengl::ProgramObject::Build(
                 "deltaSCalcProgram",
-                "${MODULE_BASE}/shaders/deltaS_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/deltaS_calc_fs.glsl",
-                "${MODULE_BASE}/shaders/deltaS_calc_gs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_fs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_calc_gs.glsl");
             if (!_deltaSProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1523,9 +1523,9 @@ namespace openspace {
         if (_deltaSSupTermsProgramObject == nullptr) {
             _deltaSSupTermsProgramObject = ghoul::opengl::ProgramObject::Build(
                 "deltaSSUPTermsCalcProgram",
-                "${MODULE_BASE}/shaders/deltaS_sup_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/deltaS_sup_calc_fs.glsl",
-                "${MODULE_BASE}/shaders/deltaS_sup_calc_gs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_fs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_gs.glsl");
             if (!_deltaSSupTermsProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1572,9 +1572,9 @@ namespace openspace {
         if (_deltaJProgramObject == nullptr) {
             _deltaJProgramObject = ghoul::opengl::ProgramObject::Build(
                 "deltaJCalcProgram",
-                "${MODULE_BASE}/shaders/deltaJ_calc_vs.glsl",
-                "${MODULE_BASE}/shaders/deltaJ_calc_fs.glsl",
-                "${MODULE_BASE}/shaders/deltaJ_calc_gs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_fs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_gs.glsl");
             if (!_deltaJProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();
@@ -1628,8 +1628,8 @@ namespace openspace {
             // shadow program
             _cleanTextureProgramObject = ghoul::opengl::ProgramObject::Build(
                 "cleanTextureProgram",
-                "${MODULE_BASE}/shaders/texture_clean_vs.glsl",
-                "${MODULE_BASE}/shaders/texture_clean_fs.glsl");
+                "${MODULE_ATMOSPHERE}/shaders/texture_clean_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/texture_clean_fs.glsl");
             if (!_cleanTextureProgramObject) {
                 if (_transmittanceProgramObject) {
                     _transmittanceProgramObject.reset();

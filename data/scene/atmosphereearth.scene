@@ -35,7 +35,7 @@ function preInitialization()
 
 
 
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
 function postInitialization()

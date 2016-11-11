@@ -53,13 +53,20 @@ const ImVec2 size = ImVec2(350, 500);
 size_t vboMaxSize = 0;
 GLuint vao = 0;
 GLuint vbo = 0;
+GLuint vboElements = 0;
 std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 std::unique_ptr<ghoul::opengl::Texture> _fontTexture;
 char* iniFileBuffer = nullptr;
 
-static void RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) {
-    if (nCommandLists == 0)
+static void RenderDrawLists(ImDrawData* drawData) {
+    // Avoid rendering when minimized, scale coordinates for retina displays
+    // (screen coordinates != framebuffer coordinates)
+    ImGuiIO& io = ImGui::GetIO();
+    int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int fb_height = (int)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    if (fb_width == 0 || fb_height == 0)
         return;
+    drawData->ScaleClipRects(io.DisplayFramebufferScale);
 
     // Setup render state:
     // alpha-blending enabled, no face culling, no depth testing, scissor enabled
@@ -77,6 +84,7 @@ static void RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
+    glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
     const glm::mat4 ortho(
         2.f / width, 0.0f, 0.0f, 0.f,
         0.0f, 2.0f / -height, 0.0f, 0.f,
@@ -88,58 +96,104 @@ static void RenderDrawLists(ImDrawList** const commandLists, int nCommandLists) 
     _program->setUniform("tex", unit);
     _program->setUniform("ortho", ortho);
 
-    // Grow our buffer according to what we need
-    size_t totalVertexCount = 0;
-    for (int i = 0; i < nCommandLists; ++i)
-        totalVertexCount += commandLists[i]->vtx_buffer.size();
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    size_t neededBufferSize = totalVertexCount * sizeof(ImDrawVert);
-    if (neededBufferSize > vboMaxSize) {
-        // Grow buffer
-        vboMaxSize = neededBufferSize * 1.25f;
-        glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_STREAM_DRAW);
-    }
-
-    // Copy and convert all vertices into a single contiguous buffer
-    unsigned char* bufferData = reinterpret_cast<unsigned char*>(
-        glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY)
-        );
-
-    if (!bufferData) {
-        LFATAL("Error mapping ImGui buffer");
-        return;
-    }
-
-    for (int i = 0; i < nCommandLists; ++i) {
-        const ImDrawList* cmd_list = commandLists[i];
-        memcpy(
-            bufferData,
-            &cmd_list->vtx_buffer[0],
-            cmd_list->vtx_buffer.size() * sizeof(ImDrawVert)
-        );
-        bufferData += (cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
-    }
-    glUnmapBuffer(GL_ARRAY_BUFFER);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(vao);
 
-    int cmdOffset = 0;
-    for (int i = 0; i < nCommandLists; ++i) {
-        const ImDrawList* cmd_list = commandLists[i];
-        int vtxOffset = cmdOffset;
-        for (const auto& pcmd : cmd_list->commands) {
-            glScissor(
-                static_cast<int>(pcmd.clip_rect.x),
-                static_cast<int>(height - pcmd.clip_rect.w),
-                static_cast<int>(pcmd.clip_rect.z - pcmd.clip_rect.x),
-                static_cast<int>(pcmd.clip_rect.w - pcmd.clip_rect.y)
-            );
-            glDrawArrays(GL_TRIANGLES, vtxOffset, pcmd.vtx_count);
-            vtxOffset += pcmd.vtx_count;
+    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+        const ImDrawList* cmdList = drawData->CmdLists[i];
+        const ImDrawIdx* indexBufferOffset = 0;
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            (GLsizeiptr)cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
+            (GLvoid*)&cmdList->VtxBuffer.front(),
+            GL_STREAM_DRAW
+        );
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            (GLsizeiptr)cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
+            (GLvoid*)&cmdList->IdxBuffer.front(),
+            GL_STREAM_DRAW
+        );
+
+        for (const ImDrawCmd* pcmd = cmdList->CmdBuffer.begin(); pcmd != cmdList->CmdBuffer.end(); pcmd++) {
+            if (pcmd->UserCallback) {
+                pcmd->UserCallback(cmdList, pcmd);
+            }
+            else {
+                glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
+                glScissor(
+                    (int)pcmd->ClipRect.x,
+                    (int)(fb_height - pcmd->ClipRect.w),
+                    (int)(pcmd->ClipRect.z - pcmd->ClipRect.x),
+                    (int)(pcmd->ClipRect.w - pcmd->ClipRect.y)
+                );
+                glDrawElements(
+                    GL_TRIANGLES,
+                    (GLsizei)pcmd->ElemCount,
+                    sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+                    indexBufferOffset
+                );
+            }
+            indexBufferOffset += pcmd->ElemCount;
         }
-        cmdOffset = vtxOffset;
     }
+
+
+    //// Grow our buffer according to what we need
+    //size_t totalVertexCount = 0;
+    //for (int i = 0; i < nCommandLists; ++i)
+    //    totalVertexCount += commandLists[i]->vtx_buffer.size();
+
+    //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    //size_t neededBufferSize = totalVertexCount * sizeof(ImDrawVert);
+    //if (neededBufferSize > vboMaxSize) {
+    //    // Grow buffer
+    //    vboMaxSize = neededBufferSize * 1.25f;
+    //    glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_STREAM_DRAW);
+    //}
+
+    //// Copy and convert all vertices into a single contiguous buffer
+    //unsigned char* bufferData = reinterpret_cast<unsigned char*>(
+    //    glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY)
+    //    );
+
+    //if (!bufferData) {
+    //    LFATAL("Error mapping ImGui buffer");
+    //    return;
+    //}
+
+    //for (int i = 0; i < nCommandLists; ++i) {
+    //    const ImDrawList* cmd_list = commandLists[i];
+    //    memcpy(
+    //        bufferData,
+    //        &cmd_list->vtx_buffer[0],
+    //        cmd_list->vtx_buffer.size() * sizeof(ImDrawVert)
+    //    );
+    //    bufferData += (cmd_list->vtx_buffer.size() * sizeof(ImDrawVert));
+    //}
+    //glUnmapBuffer(GL_ARRAY_BUFFER);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindVertexArray(vao);
+
+    //int cmdOffset = 0;
+    //for (int i = 0; i < nCommandLists; ++i) {
+    //    const ImDrawList* cmd_list = commandLists[i];
+    //    int vtxOffset = cmdOffset;
+    //    for (const auto& pcmd : cmd_list->commands) {
+    //        glScissor(
+    //            static_cast<int>(pcmd.clip_rect.x),
+    //            static_cast<int>(height - pcmd.clip_rect.w),
+    //            static_cast<int>(pcmd.clip_rect.z - pcmd.clip_rect.x),
+    //            static_cast<int>(pcmd.clip_rect.w - pcmd.clip_rect.y)
+    //        );
+    //        glDrawArrays(GL_TRIANGLES, vtxOffset, pcmd.vtx_count);
+    //        vtxOffset += pcmd.vtx_count;
+    //    }
+    //    cmdOffset = vtxOffset;
+    //}
 
     glBindVertexArray(0);
     _program->deactivate();
@@ -218,7 +272,7 @@ void GUI::initialize() {
     style.WindowRounding = 0.f;
     style.FramePadding = { 3.f, 3.f };
     style.FrameRounding = 0.f;
-    style.ScrollbarWidth = 15.f;
+    style.ScrollbarSize = 15.f;
     style.ScrollbarRounding = 0.f;
     style.IndentSpacing = 25;
     style.ItemSpacing = { 4.f, 2.f };
@@ -284,10 +338,14 @@ void GUI::initializeGL() {
     _fontTexture->setName("Gui Text");
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _fontTexture->uploadTexture();
+    GLuint id = *_fontTexture;
+    ImGui::GetIO().Fonts->TexID = (void*)(intptr_t)id;
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vboMaxSize, NULL, GL_DYNAMIC_DRAW);
+    
+    glGenBuffers(1, &vboElements);
     
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -337,6 +395,7 @@ void GUI::deinitializeGL() {
 
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &vboElements);
 
     _iswa.deinitializeGL();
     _help.deinitializeGL();
@@ -347,18 +406,16 @@ void GUI::deinitializeGL() {
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
-                     const glm::vec2& mousePosCorrectionFactor,
+                     const glm::vec2& dpiScaling,
                      const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(windowSize.x, windowSize.y);
+    io.DisplayFramebufferScale = ImVec2(dpiScaling.x, dpiScaling.y);
     io.DeltaTime = deltaTime;
 
-    io.MousePos = ImVec2(
-        mousePos.x * mousePosCorrectionFactor.x,
-        mousePos.y * mousePosCorrectionFactor.y
-    );
+    io.MousePos = ImVec2(mousePos.x, mousePos.y);
 
     io.MouseDown[0] = mouseButtonsPressed & (1 << 0);
     io.MouseDown[1] = mouseButtonsPressed & (1 << 1);
@@ -367,6 +424,10 @@ void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 void GUI::endFrame() {
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+    }
+
     render();
 
     if (_globalProperty.isEnabled())

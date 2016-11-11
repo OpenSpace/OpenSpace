@@ -3,8 +3,15 @@ return {
     {
         Name = "VenusBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "VENUS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
-
     -- Venus module
     {   
         Name = "Venus",
@@ -28,25 +35,19 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "VENUS",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
         Rotation = {
-            Type = "Spice",
+            Type = "SpiceRotation",
             Frame = "IAU_VENUS",
-            Reference = "ECLIPJ2000"
+            Reference = "GALACTIC"
         },
     },
     -- VenusTrail module
     {   
         Name = "VenusTrail",
-        Parent = "VenusBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrail",
-            Body = "VENUS",
+            Body = "VENUS BARYCENTER",
             Frame = "GALACTIC",
             Observer = "SUN",
             RGB = {1, 0.5, 0.2},

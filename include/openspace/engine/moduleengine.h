@@ -76,6 +76,14 @@ public:
     std::vector<OpenSpaceModule*> modules() const;
 
     /**
+     * Returns the combined minimum OpenGL version. The return value is the maximum
+     * version of all registered modules' OpenGL versions.
+     * \return The combined minimum OpenGL version
+     */
+    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+        requiredOpenGLVersion() const;
+
+    /**
     * Returns the Lua library that contains all Lua functions available to affect the
     * modules.
     */

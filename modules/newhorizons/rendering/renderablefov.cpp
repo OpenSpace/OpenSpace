@@ -46,6 +46,7 @@ namespace {
     const std::string keyInstrumentMethod     = "Instrument.Method";
     const std::string keyInstrumentAberration = "Instrument.Aberration";
     const std::string keyPotentialTargets     = "PotentialTargets";
+    const std::string keyFrameConversions     = "FrameConversions";
 
     const int InterpolationSteps = 10;
     const int Stride = 8;
@@ -92,6 +93,17 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
         std::string target;
         potentialTargets.getValue(std::to_string(i + 1), target);
         _potentialTargets[i] = target;
+    }
+
+    ghoul::Dictionary frameConversions;
+    success = dictionary.getValue(keyFrameConversions, frameConversions);
+    if (success) {
+        for (const std::string& key : frameConversions.keys()) {
+            openspace::SpiceManager::ref().addFrame(
+                key,
+                frameConversions.value<std::string>(key)
+            );
+        }
     }
 
     addProperty(_lineWidth);
@@ -253,7 +265,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     
     ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
     _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-    _interceptVector[3] += 3;
+    //_interceptVector[3] += 3;
 
     return _interceptVector;
 }
@@ -507,7 +519,7 @@ void RenderableFov::computeIntercepts(const RenderData& data) {
 
         if (_interceptTag[r]) {
             _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-            _interceptVector[3] += 3;
+            //_interceptVector[3] += 3;
             // INTERCEPTIONS
             insertPoint(_fovBounds, fovOrigin, col_start);
             insertPoint(_fovBounds, _interceptVector.vec4(), col_end);

@@ -130,6 +130,9 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
             }
         }
     }
+
+    addProperty(_target);
+    addProperty(_origin);
 }
     
 glm::dvec3 SpiceTranslation::position() const {

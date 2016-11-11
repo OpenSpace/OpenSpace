@@ -14,16 +14,8 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    -- openspace.time.setTime("2007-02-28T11:40:00.000")
-
-    -- openspace.time.setTime("2015-07-08T15:57:45.00")
-    -- openspace.time.setTime("2015-07-12T07:41:00.00")
-    -- openspace.time.setTime("2015-07-12T15:43:00.00")
-    -- openspace.time.setTime("2015-07-12T22:19:20.00")
-    -- openspace.time.setTime("2015-07-13T20:59:00.00")
-    -- openspace.time.setTime("2015-07-14T02:41:55.00")
     openspace.time.setTime("2015-07-14T10:05:00.00")
-    openspace.time.setDeltaTime(0)
+
     dofile(openspace.absPath('${SCRIPTS}/bind_keys_newhorizons.lua'))
 end
 
@@ -61,17 +53,17 @@ return {
         "venus",
         "earth",
         "mars",
-        "saturn",
+        "saturn/saturn",
         "uranus",
         "neptune",
-        "newhorizons/pluto",
-        "newhorizons/jupiter",
         "stars",
         -- "stars-denver",
         "milkyway",
         -- "milkyway-eso",
-        "newhorizons/newhorizons",
-        "newhorizons/newhorizonsfov",
+        "missions/newhorizons/pluto",
+        "missions/newhorizons/jupiter",
+        "missions/newhorizons/newhorizons",
+        "missions/newhorizons/newhorizonsfov"
     }
 }
 

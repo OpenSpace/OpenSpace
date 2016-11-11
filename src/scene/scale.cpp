@@ -64,6 +64,7 @@ Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
 
     auto factory = FactoryManager::ref().factory<Scale>();
     Scale* result = factory->create(scaleType, dictionary);
+    result->setName("Scale");
     if (result == nullptr) {
         LERROR("Failed creating Scale object of type '" << scaleType << "'");
         return nullptr;

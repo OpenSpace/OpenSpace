@@ -561,8 +561,6 @@ void ABufferRenderer::updateRendererData() {
     PerfMeasure("ABufferRenderer::updateRendererData");
 
     ghoul::Dictionary dict;
-    dict.setValue("windowWidth", _resolution.x);
-    dict.setValue("windowHeight", _resolution.y);
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
     dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
     dict.setValue("maxLayers", MaxLayers);

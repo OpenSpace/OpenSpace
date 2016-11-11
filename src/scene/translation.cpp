@@ -39,7 +39,7 @@ namespace openspace {
 Documentation Translation::Documentation() {
     using namespace openspace::documentation;
 
-    return{
+    return {
         "Transformation Translation",
         "core_transform_translation",
         {
@@ -68,6 +68,7 @@ Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictiona
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
     Translation* result = factory->create(translationType, dictionary);
+    result->setName("Translation");
     if (result == nullptr) {
         LERROR("Failed creating Translation object of type '" << translationType << "'");
         return nullptr;

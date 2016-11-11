@@ -25,6 +25,8 @@
 #include <modules/base/rendering/planetgeometry.h>
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
     const std::string _loggerCat = "PlanetGeometry";
     const std::string KeyType = "Type";
@@ -33,22 +35,38 @@ namespace {
 namespace openspace {
 namespace planetgeometry {
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    std::string geometryType;
-    const bool success = dictionary.getValue(KeyType, geometryType);
-    if (!success) {
-        LERROR("PlanetGeometry did not contain a correct value of the key '"
-            << KeyType << "'");
-        return nullptr;
-    }
-    ghoul::TemplateFactory<PlanetGeometry>* factory
-          = FactoryManager::ref().factory<PlanetGeometry>();
+Documentation PlanetGeometry::Documentation() {
+    using namespace documentation;
+    return {
+        "Planet Geometry",
+        "base_geometry_planet",
+        {
+            {
+                KeyType,
+                new StringVerifier,
+                "The type of the PlanetGeometry that will can be constructed.",
+                Optional::No
+            }
+        }
+    };
+}
+
+PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "PlanetGeometry"
+    );
+
+    std::string geometryType = dictionary.value<std::string>(KeyType);
+    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
     PlanetGeometry* result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
-        LERROR("Failed to create a PlanetGeometry object of type '" << geometryType
-                                                                    << "'");
-        return nullptr;
+        throw ghoul::RuntimeError(
+            "Failed to create a PlanetGeometry object of type '" + geometryType + "'"
+        );
     }
     return result;
 }
