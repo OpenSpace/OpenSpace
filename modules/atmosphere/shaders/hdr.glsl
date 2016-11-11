@@ -21,23 +21,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+uniform float exposure;
 
-#include <modules/atmosphere/atmospheremodule.h>
-
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
-
-namespace openspace {
-
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+vec4 HDR(vec4 color) {
+    color *= exposure;
+    
+    color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.r);
+    color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.g);
+    color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.b);
+    
+    return color;
 }
-
-} // namespace openspace

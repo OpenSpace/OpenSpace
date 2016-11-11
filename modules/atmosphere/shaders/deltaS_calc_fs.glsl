@@ -21,23 +21,25 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version 330
 
-#include <modules/atmosphere/atmospheremodule.h>
+#include "atmosphere_common.glsl"
 
-#include <openspace/util/factorymanager.h>
+out vec4 renderTarget1;
 
-#include <ghoul/misc/assert.h>
+uniform int layer;
 
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
+uniform sampler3D deltaSRTexture;
+uniform sampler3D deltaSMTexture;
 
-namespace openspace {
+void main(void) {
+    vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
+    vec4 ray = texture(deltaSRTexture, uvw);
+    vec4 mie = texture(deltaSMTexture, uvw);
 
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+    // We are using only the red component of the Mie scattering
+    // See the Precomputed Atmosphere Scattering paper for details about
+    // the angular precision. 
+    renderTarget1 = vec4(ray.rgb, mie.r); 
 }
-
-} // namespace openspace

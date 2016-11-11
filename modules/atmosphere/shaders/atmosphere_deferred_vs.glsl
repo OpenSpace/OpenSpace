@@ -22,22 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/atmosphere/atmospheremodule.h>
+#version __CONTEXT__
 
-#include <openspace/util/factorymanager.h>
+layout(location = 0) in vec4 in_position;
 
-#include <ghoul/misc/assert.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
+uniform dmat4 completeInverse;
+uniform dmat4 projInverse;
+uniform dvec4 cameraPosObj;
 
-namespace openspace {
+out vec3 viewDirectionVS;
+out vec4 vertexPosObjVS;
 
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
+void main()
+{
+    //viewDirectionVS = normalize( (completeInverse * vec4((projInverse * in_position).xyz, 0.0)).xyz - cameraPosObj.xyz);
 
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+    //viewDirectionVS = normalize( (completeInverse * vec4(projInverse * in_position) ).xyz );
+
+    //viewDirectionVS = (completeInverse * projInverse * in_position).xyz;
+
+    vertexPosObjVS = in_position;
+    gl_Position = in_position;
 }
-
-} // namespace openspace

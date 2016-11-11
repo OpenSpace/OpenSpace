@@ -21,23 +21,21 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#include <modules/atmosphere/atmospheremodule.h>
+uniform int layer;
 
-#include <openspace/util/factorymanager.h>
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
 
-#include <ghoul/misc/assert.h>
-
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
-
-namespace openspace {
-
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+void main()
+{
+    int n;
+    for (n = 0; n < gl_in.length(); ++n) {
+        gl_Position = gl_in[n].gl_Position;
+        gl_Layer    = layer;
+        EmitVertex();
+    }
+    EndPrimitive();
 }
-
-} // namespace openspace

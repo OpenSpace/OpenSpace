@@ -22,22 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/atmosphere/atmospheremodule.h>
+#version __CONTEXT__
 
-#include <openspace/util/factorymanager.h>
+layout(location = 0) in vec3 in_position;
 
-#include <ghoul/misc/assert.h>
-
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
-
-namespace openspace {
-
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+void main() {
+    gl_Position = vec4(in_position, 1.0);
 }
-
-} // namespace openspace

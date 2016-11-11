@@ -21,23 +21,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+  
+#version 330
 
-#include <modules/atmosphere/atmospheremodule.h>
+#include "atmosphere_common.glsl"
 
-#include <openspace/util/factorymanager.h>
+out vec4 renderTarget1;
 
-#include <ghoul/misc/assert.h>
+uniform int layer;
 
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
+uniform sampler3D deltaSTexture;
 
-namespace openspace {
-
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+// Rayleigh phase
+float phaseFunctionR(const float mu) {
+    return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
 }
 
-} // namespace openspace
+void main(void) {
+    float x = gl_FragCoord.x - 0.5;
+    float y = gl_FragCoord.y - 0.5;
+
+    float nu = -1.0 + floor(x / float(RES_MU_S)) / (float(RES_NU) - 1.0) * 2.0;
+    vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
+
+    renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / phaseFunctionR(nu), 1.0);
+ }

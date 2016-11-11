@@ -21,23 +21,21 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version 330
 
-#include <modules/atmosphere/atmospheremodule.h>
+#include "atmosphere_common.glsl"
 
-#include <openspace/util/factorymanager.h>
+out vec4 renderTableColor;
 
-#include <ghoul/misc/assert.h>
+// See paper algorithm
+uniform int line; 
+uniform sampler2D deltaETexture;
 
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
-
-namespace openspace {
-
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
-
-void AtmosphereModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+void main(void) {   
+    if (line == 4)
+        renderTableColor = vec4(0.0);
+    else if (line == 10) {
+        vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H); 
+        renderTableColor = texture(deltaETexture, uv); 
+    }
 }
-
-} // namespace openspace
