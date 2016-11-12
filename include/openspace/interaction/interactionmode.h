@@ -31,10 +31,6 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#endif
 
 #include <list>
 
@@ -42,7 +38,10 @@ namespace openspace {
 
 class Camera;
 class SceneGraphNode;
-class RenderableGlobe;
+
+namespace globebrowsing {
+    class RenderableGlobe;
+}
 
 namespace interaction {
 

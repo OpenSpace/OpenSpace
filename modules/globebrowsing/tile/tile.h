@@ -28,6 +28,9 @@
 #include <ghoul/opengl/texture.h> // Texture
 
 #include <modules/globebrowsing/tile/tileindex.h>
+
+#include <memory>
+
 #include <gdal_priv.h>
 
 namespace openspace {

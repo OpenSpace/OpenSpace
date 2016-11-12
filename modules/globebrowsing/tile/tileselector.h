@@ -25,25 +25,29 @@
 #ifndef __TILE_SELECTOR_H__
 #define __TILE_SELECTOR_H__
 
+#include <modules/globebrowsing/rendering/layermanager.h>
 
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+
 
 #include <vector>
 
 namespace openspace {
 namespace globebrowsing {
     
-    class LayerGroup;
+    //struct LayerGroup;
+    class TileProvider;
 
     class TileSelector {
     public:
         static ChunkTile getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
-        static ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex);
+        static ChunkTile getHighestResolutionTile(
+            const LayerGroup& layerGroup,
+            TileIndex tileIndex
+        );
         static ChunkTilePile getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex, int pileSize);
-        static std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup&, const TileIndex& tileIndex);
+        static std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
         struct CompareResolution {
             bool operator() (const ChunkTile& a, const ChunkTile& b);

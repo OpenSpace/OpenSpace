@@ -506,37 +506,6 @@ void GUI::render() {
     _origin.render();
     _time.render();
 
-    // These are temporary until the scalegraph is in effect ---abock
-    bool toSun = ImGui::Button("Coordinate System to Sun");
-    bool toPluto = ImGui::Button("Coordinate System to Pluto");
-    bool toJupiter = ImGui::Button("Coordinate System to Jupiter");
-    bool to67P = ImGui::Button("Coordinate System to 67P");
-
-    if (toSun) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Sun');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    if (toPluto) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Pluto');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-         );
-    }
-    if (toJupiter) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', 'Jupiter');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-    if (to67P) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.setPropertyValue('Interaction.coordinateSystem', '67P');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
-
     ImGui::Checkbox("Help", &_help._isEnabled);
 
     static const int addImageBufferSize = 256;

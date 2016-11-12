@@ -35,10 +35,8 @@
 #include <openspace/properties/selectionproperty.h>
 #include <openspace/util/updatestructures.h>
 
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/globes/pointglobe.h>
-#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <modules/globebrowsing/meshes/trianglesoup.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <unordered_map>

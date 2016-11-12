@@ -22,8 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
+
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/chunk/culling.h>
@@ -41,6 +43,18 @@
 
 // ghoul includes
 #include <ghoul/misc/assert.h>
+
+#include <ghoul/logging/logmanager.h>
+
+// open space includes
+#include <openspace/rendering/renderengine.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/updatestructures.h>
+
+#include <modules/globebrowsing/chunk/chunknode.h>
+#include <modules/globebrowsing/rendering/chunkrenderer.h>
+
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>

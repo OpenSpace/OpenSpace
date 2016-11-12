@@ -25,26 +25,23 @@
 #ifndef __CHUNKED_LOD_GLOBE__
 #define __CHUNKED_LOD_GLOBE__
 
-#include <memory>
-
-#include <ghoul/logging/logmanager.h>
-
-// open space includes
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
-#include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/rendering/chunkrenderer.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/other/statscollector.h>
+
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 
+    class Chunk;
+    class ChunkCuller;
     class ChunkLevelEvaluator;
+    class ChunkNode;
+    class ChunkRenderer;
+    class LayerManager;
     class RenderableGlobe;
 
     class ChunkedLodGlobe : public Renderable {
