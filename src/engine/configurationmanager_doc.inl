@@ -211,8 +211,8 @@ Documentation ConfigurationManager::Documentation() {
                 }
             }),
             "Contains a log of all Lua scripts that were executed in the last "
-                            "session.",
-                            Optional::Yes
+            "session.",
+            Optional::Yes
         },
         {
             ConfigurationManager::KeyKeyboardShortcuts,
@@ -282,7 +282,8 @@ Documentation ConfigurationManager::Documentation() {
             }),
             "This defines the location and type of the factory documentation file, which "
             "shows the different types of objects that can be created in the current "
-            "application configuration."
+            "application configuration.",
+            Optional::Yes
         },
         {
             ConfigurationManager::KeyShutdownCountdown,

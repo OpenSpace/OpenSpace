@@ -27,6 +27,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <array>
 #include <chrono>
 #include <thread>
