@@ -388,6 +388,8 @@ void OpenSpaceEngine::destroy() {
     Time::deinitialize();
     SpiceManager::deinitialize();
 
+    ghoul::fontrendering::FontRenderer::deinitialize();
+
     LogManager::deinitialize();
 
     ghoul::deinitialize();
