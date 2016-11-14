@@ -206,8 +206,12 @@ void addScreenSpaceRenderable(std::string texturePath) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
+
+    texturePath = absPath(texturePath);
+    texturePath = FileSys.convertPathSeparator(texturePath, '/');
+
     std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '" + absPath(texturePath) + "' }";
+        "{Type = 'ScreenSpaceImage', TexturePath = '" + texturePath + "' }";
     std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
