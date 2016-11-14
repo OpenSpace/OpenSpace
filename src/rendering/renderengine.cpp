@@ -61,6 +61,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/font.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
