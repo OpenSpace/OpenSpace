@@ -104,10 +104,10 @@ void GuiIswaComponent::render() {
                         "openspace.iswa.addKameleonPlanes('"+groupName+"',"+std::to_string(cdfOption)+");",
                         scripting::ScriptEngine::RemoteScripting::Yes
                     );
-                    OsEng.scriptEngine().queueScript(
-                        "openspace.time.setTime('"+date+"');",
-                        scripting::ScriptEngine::RemoteScripting::Yes
-                    );
+                    // OsEng.scriptEngine().queueScript(
+                    //     "openspace.time.setTime('"+date+"');",
+                    //     scripting::ScriptEngine::RemoteScripting::Yes
+                    // );
                     OsEng.scriptEngine().queueScript(
                         "openspace.time.setDeltaTime(0);",
                         scripting::ScriptEngine::RemoteScripting::Yes

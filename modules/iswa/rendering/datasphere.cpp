@@ -57,7 +57,6 @@ DataSphere::~DataSphere(){}
 
 bool DataSphere::initialize(){
     IswaCygnet::initialize();
-    setPropertyCallbacks();
     //rotate 90 degrees because of the texture coordinates in PowerScaledSphere
     _rotation = glm::rotate(_rotation, (float)M_PI_2, glm::vec3(1.0, 0.0, 0.0));
 
@@ -83,6 +82,8 @@ bool DataSphere::initialize(){
     }
 
     readTransferFunctions(_transferFunctionsFile.value());
+
+    setPropertyCallbacks();
 
     return true;
 }

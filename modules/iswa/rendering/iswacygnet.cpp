@@ -22,6 +22,7 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/iswa/rendering/iswacygnet.h>
+// #include <modules/iswa/util/iswamanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
@@ -51,12 +52,16 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 
     // dict.getValue can only set strings in _data directly
     float renderableId;
+    float resourceType;
+    float cygnetType;
     float updateTime;
     float xOffset;
     glm::vec3 min, max;
     glm::vec4 spatialScale;
 
     dictionary.getValue("Id", renderableId);
+    dictionary.getValue("ResourceType", resourceType);
+    dictionary.getValue("CygnetType", cygnetType);
     dictionary.getValue("UpdateTime", updateTime);
     dictionary.getValue("SpatialScale", spatialScale);
     dictionary.getValue("GridMin", min);
@@ -66,6 +71,8 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
     dictionary.getValue("XOffset", xOffset);
     
     _data->id = (int) renderableId;
+    _data->resourceType = (int) resourceType;
+    _data->cygnetType = (int) cygnetType;
     _data->updateTime = (int) updateTime;
     _data->spatialScale = spatialScale;
     _data->gridMin = min;
@@ -99,6 +106,7 @@ IswaCygnet::IswaCygnet(const ghoul::Dictionary& dictionary)
 }
 
 IswaCygnet::~IswaCygnet(){}
+
 bool IswaCygnet::initialize(){
     _textures.push_back(nullptr);
     
@@ -174,7 +182,6 @@ void IswaCygnet::render(const RenderData& data){
 }
 
 void IswaCygnet::update(const UpdateData& data){
-
     if (!_enabled)
         return;
 
@@ -249,6 +256,14 @@ bool IswaCygnet::createShader(){
 
 void IswaCygnet::initializeGroup(){
     _group = IswaManager::ref().iswaGroup(_data->groupName);
+
+    if(!_group){
+        _group = IswaManager::ref().registerGroup(
+            _data->groupName, 
+            static_cast<IswaManager::CygnetType>(_data->cygnetType), 
+            static_cast<IswaManager::ResourceType>(_data->resourceType)
+        );
+    }
     _group->addCygnet(this);
     getGroupPropertyValues();
 

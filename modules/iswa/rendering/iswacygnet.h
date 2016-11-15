@@ -44,6 +44,8 @@ class IswaBaseGroup;
 struct Metadata {
     int id;
     int updateTime;
+    int resourceType;
+    int cygnetType;
     std::string groupName;
     std::string path;
     std::string parent;

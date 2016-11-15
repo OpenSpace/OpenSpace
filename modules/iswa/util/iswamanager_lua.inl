@@ -42,7 +42,8 @@ int iswa_addCygnet(lua_State* L) {
     if(nArguments > 2)
         group = luaL_checkstring(L, 3);
     
-    IswaManager::ref().addIswaCygnet(id, static_cast<IswaManager::ResourceType>(resourceType), group);
+    if(OsEng.ref().isMaster())
+        IswaManager::ref().addIswaCygnet(id, static_cast<IswaManager::ResourceType>(resourceType), group);
 
     return 0;
 }

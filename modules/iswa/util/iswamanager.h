@@ -106,6 +106,7 @@ public:
 
     void addCdfFiles(std::string path);
     void setBaseUrl(std::string bUrl);
+    std::shared_ptr<IswaBaseGroup> registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType);
     void unregisterGroup(std::string groupName);
     void clearGroupBuildData(std::string name);
 
@@ -114,7 +115,6 @@ public:
 
 private:
     
-    void registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType);
     void createScreenSpace(int id);
     void createIswaCygnet(std::shared_ptr<MetadataFuture> metadata);
     void createKameleonPlane(CdfInfo info, std::string cut);

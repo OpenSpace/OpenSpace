@@ -35,6 +35,10 @@
 #include <fstream>
 #include <memory> // for shared_pointer
 
+#include <thread>
+#include <random>
+#include <chrono>
+
 #include <ghoul/filesystem/filesystem>
 #include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
@@ -104,7 +108,6 @@ void IswaManager::addIswaCygnet(int id, ResourceType resourceType, std::string g
         createScreenSpace(id);
 
     }else if(id < 0){
-
         // create metadata object and assign group, id and resourceType
         std::shared_ptr<MetadataFuture> meta = std::make_shared<MetadataFuture>();
         meta->id = id;
@@ -119,7 +122,11 @@ void IswaManager::addIswaCygnet(int id, ResourceType resourceType, std::string g
             LDEBUG("Download to memory finished");
         };
 
-        // Download metadata
+        std::mt19937_64 eng{std::random_device{}()};
+        std::uniform_int_distribution<> dist{10, 100};
+        std::this_thread::sleep_for(std::chrono::milliseconds{dist(eng)});
+
+        // Download metadataCallback
         OsEng.downloadManager().fetchFile(
             baseUrl + std::to_string(-id),
             metadataCallback,
@@ -222,7 +229,7 @@ std::string IswaManager::iswaUrl(int id, double timestamp, std::string type){
     return url;
 }
 
-void IswaManager::registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType){
+std::shared_ptr<IswaBaseGroup> IswaManager::registerGroup(std::string groupName, CygnetType cygnetType, ResourceType resourceType){
     if(_groups.find(groupName) == _groups.end()){
 
         // choose the right dataprocessor depending on resourcetype
@@ -245,8 +252,11 @@ void IswaManager::registerGroup(std::string groupName, CygnetType cygnetType, Re
            std::shared_ptr<IswaBaseGroup> group = std::make_shared<IswaDataGroup>(groupName, cygnetType, dataProcessor);
             _groups.insert( std::pair<std::string, std::shared_ptr<IswaBaseGroup> >(groupName, group));
         }
+
+        return _groups[groupName];
     } else {
         LWARNING("Trying to add Group with name: '" + groupName + "' but it already exist.");
+        return nullptr;
     }
 }
 
@@ -289,8 +299,13 @@ void IswaManager::createScreenSpace(int id){
 
 void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
     //convert metadata to json
-    json jsondata = json::parse(metadata->json);
-
+    json jsondata;
+    try{
+        jsondata = json::parse(metadata->json);
+    }catch(std::invalid_argument e){
+        LERROR("Could not parse json metadata.");
+        return;
+    }
     // set geometry type
     std::string geometryType;
     if(jsondata["Coordinate Type"].is_null()){
@@ -303,7 +318,6 @@ void IswaManager::createIswaCygnet(std::shared_ptr<MetadataFuture> metadata){
     }
 
     ResourceType resourceType = static_cast<ResourceType>(metadata->resourceType);
-
     std::string resource;
     if(resourceType == ResourceType::Text || resourceType == ResourceType::Json){
         resource = "Data";
