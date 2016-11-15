@@ -33,10 +33,6 @@
 
 #include "imgui.h"
 
-namespace {
-    const std::string _loggerCat = "GuiOriginComponent";
-}
-
 namespace openspace {
 namespace gui {
 
@@ -54,8 +50,9 @@ void GuiOriginComponent::render() {
         }
     );
     std::string nodeNames = "";
-    for (SceneGraphNode* n : nodes) 
+    for (SceneGraphNode* n : nodes) {
         nodeNames += n->name() + '\0';
+    }
 
     auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
     ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
