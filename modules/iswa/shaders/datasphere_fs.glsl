@@ -39,7 +39,7 @@ in vec4 vs_position;
 
 Fragment getFragment() {
     vec4 position = vs_position;
-    float depth = pscDepth(position);
+    float depth = vs_position.w;
     vec4 transparent = vec4(0.0f);
     vec4 diffuse = transparent;
     float v = 0;
