@@ -178,7 +178,7 @@ std::string LuaCygnetConverter::kameleonToLuaTable(CdfInfo info, std::string cut
 
 std::string LuaCygnetConverter::sphereToLuaTable(std::shared_ptr<MetadataFuture> data) const {
     if(data->json == ""){
-        LWARNING("SphereToLuaTable: no content in metadata json");
+        // LWARNING("SphereToLuaTable: no content in metadata json");
         return "";
     }
 
@@ -253,7 +253,7 @@ std::string LuaCygnetConverter::fieldlineToLuaTable(std::string name, std::strin
             "}"
         "}";
     } else {
-        LWARNING( cdfPath + " is not a cdf file or can't be found.");
+        // LWARNING( cdfPath + " is not a cdf file or can't be found.");
     }
     return table;
 }

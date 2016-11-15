@@ -199,8 +199,8 @@ Documentation ConfigurationManager::Documentation() {
                     new StringInListVerifier(
                         // List taken from ScriptEngine::writeLog
                         { "text" }
-                    ),
-                    "The type of logfile that will be created."
+                        ),
+                        "The type of logfile that will be created."
                 },
                 {
                     ConfigurationManager::PartFile,
@@ -282,7 +282,8 @@ Documentation ConfigurationManager::Documentation() {
             }),
             "This defines the location and type of the factory documentation file, which "
             "shows the different types of objects that can be created in the current "
-            "application configuration."
+            "application configuration.",
+            Optional::Yes
         },
         {
             ConfigurationManager::KeyShutdownCountdown,
@@ -290,6 +291,15 @@ Documentation ConfigurationManager::Documentation() {
             "The countdown that the application will wait between pressing ESC and "
             "actually shutting down. If ESC is pressed again in this time, the "
             "shutdown is aborted.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyPerSceneCache,
+            new BoolVerifier,
+            "If this is set to 'true', the name of the scene will be appended to the "
+            "cache directory, thus not reusing the same directory. This is useful in "
+            "cases where the same instance of OpenSpace is run with multiple scenes, but "
+            "the caches should be retained. This value defaults to 'false'.",
             Optional::Yes
         },
         {

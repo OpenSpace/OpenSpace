@@ -48,7 +48,7 @@ namespace openspace {
 
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
-    , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::DROPDOWN)
+    , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
     , _showFrameNumber("showFrameNumber", "Show frame number", false)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)

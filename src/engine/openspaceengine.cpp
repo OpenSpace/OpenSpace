@@ -45,6 +45,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/translation.h>
@@ -158,10 +159,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdownWait(0.f)
     , _isFirstRenderingFirstFrame(true)
 {
-
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -174,7 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
     SpiceManager::initialize();
     Time::initialize();
-    ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
 }
 
@@ -290,10 +290,32 @@ bool OpenSpaceEngine::create(int argc, char** argv,
         return false;
     }
 
-    if (!commandlineArgumentPlaceholders.cacheFolder.empty()) {
+    bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
+    bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+        ConfigurationManager::KeyPerSceneCache
+    );
+    std::string cacheFolder = absPath("${CACHE}");
+    if (hasCacheCommandline) {
+        cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
+        //FileSys.registerPathToken(
+        //    "${CACHE}",
+        //    commandlineArgumentPlaceholders.cacheFolder,
+        //    ghoul::filesystem::FileSystem::Override::Yes
+        //);
+    }
+    if (hasCacheConfiguration) {
+        std::string scene = _engine->configurationManager().value<std::string>(
+            ConfigurationManager::KeyConfigScene
+        );
+        cacheFolder += "-" + ghoul::filesystem::File(scene).baseName();
+    }
+
+    if (hasCacheCommandline || hasCacheConfiguration) {
+        LINFO("Old cache: " << absPath("${CACHE}"));
+        LINFO("New cache: " << cacheFolder);
         FileSys.registerPathToken(
             "${CACHE}",
-            commandlineArgumentPlaceholders.cacheFolder,
+            cacheFolder,
             ghoul::filesystem::FileSystem::Override::Yes
         );
     }
@@ -364,10 +386,11 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_scriptEngine->deinitialize();
     delete _engine;
-    ghoul::systemcapabilities::SystemCapabilities::deinitialize();
     FactoryManager::deinitialize();
     Time::deinitialize();
     SpiceManager::deinitialize();
+
+    ghoul::fontrendering::FontRenderer::deinitialize();
 
     LogManager::deinitialize();
 
@@ -488,7 +511,8 @@ bool OpenSpaceEngine::initialize() {
             [&]() {
             std::vector<properties::PropertyOwner*> res = {
                 _settingsEngine.get(),
-                _interactionHandler.get()
+                _interactionHandler.get(),
+                _renderEngine.get()
             };
             return res;
         }

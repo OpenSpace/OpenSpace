@@ -61,6 +61,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/font.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -114,6 +115,12 @@ const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
+    , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
+    , _frametimeType(
+        "frametimeType",
+        "Type of the frametime display",
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
@@ -128,14 +135,36 @@ RenderEngine::RenderEngine()
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _frameNumber(0)
-    , _frametimeType(FrametimeType::DtTimeAvg)
-    //    , _sgctRenderStatisticsVisible(false)
+    //, _frametimeType(FrametimeType::DtTimeAvg)
 {
-    _onScreenInformation = {
-        glm::vec2(0.f),
-        12,
-        -1
-    };
+    setName("RenderEngine");
+
+    _performanceMeasurements.onChange([this](){
+        if (_performanceMeasurements) {
+            if (!_performanceManager) {
+                _performanceManager = std::make_unique<performance::PerformanceManager>();
+            }
+        }
+        else {
+            _performanceManager = nullptr;
+        }
+
+    });
+    addProperty(_performanceMeasurements);
+
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::DtTimeAvg),
+        "Average Deltatime"
+    );
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::FPS),
+        "Frames per second"
+    );
+    _frametimeType.addOption(
+        static_cast<int>(FrametimeType::FPSAvg),
+        "Average frames per second"
+    );
+    addProperty(_frametimeType);
 }
 
 RenderEngine::~RenderEngine() {
@@ -516,21 +545,6 @@ void RenderEngine::toggleInfoText(bool b) {
     _showInfo = b;
 }
 
-void RenderEngine::toggleFrametimeType(int t) {
-    std::vector<FrametimeType>::const_iterator it = std::find(
-        FrametimeTypes.begin(), FrametimeTypes.end(), _frametimeType);
-    
-    if (!t && it == FrametimeTypes.begin())
-        it = FrametimeTypes.end();
-    
-    t > 0 ? ++it : --it;
-
-    if (t && it == FrametimeTypes.end())
-        it = FrametimeTypes.begin();
-
-    _frametimeType = *it;
-}
-
 Scene* RenderEngine::scene() {
     ghoul_assert(_sceneGraph, "Scenegraph not initialized");
     return _sceneGraph;
@@ -761,18 +775,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
                 "Toggles the showing of render information on-screen text"
             },
             {
-                "toggleFrametimeType",
-                &luascriptfunctions::toggleFrametimeType,
-                "int",
-                "Toggle showing FPS or Average Frametime in heads up info"
-            },
-            {
-                "setPerformanceMeasurement",
-                &luascriptfunctions::setPerformanceMeasurement,
-                "bool",
-                "Sets the performance measurements"
-            },
-            {
                 "toggleFade",
                 &luascriptfunctions::toggleFade,
                 "number",
@@ -805,17 +807,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             },
         },
     };
-}
-
-void RenderEngine::setPerformanceMeasurements(bool performanceMeasurements) {
-    if (performanceMeasurements) {
-        if (!_performanceManager) {
-            _performanceManager = std::make_unique<performance::PerformanceManager>();
-        }
-    }
-    else {
-        _performanceManager = nullptr;
-    }
 }
 
 bool RenderEngine::doesPerformanceMeasurements() const {
@@ -1319,7 +1310,8 @@ void RenderEngine::renderInformation() {
                          Time::ref().deltaTime()
             );
 
-            switch (_frametimeType) {
+            FrametimeType frametimeType = FrametimeType(_frametimeType.value());
+            switch (frametimeType) {
                 case FrametimeType::DtTimeAvg:
                     RenderFontCr(*_fontInfo,
                                  penPosition,
@@ -1755,9 +1747,7 @@ void RenderEngine::renderScreenLog() {
 }
 
 std::vector<Syncable*> RenderEngine::getSyncables(){
-    std::vector<Syncable*> syncables = _mainCamera->getSyncables();
-    syncables.push_back(&_onScreenInformation);
-    return syncables;
+    return _mainCamera->getSyncables();
 }
 
 void RenderEngine::sortScreenspaceRenderables() {

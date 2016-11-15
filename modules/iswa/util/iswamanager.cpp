@@ -45,6 +45,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 #include "iswamanager_lua.inl";
 
@@ -122,9 +123,9 @@ void IswaManager::addIswaCygnet(int id, ResourceType resourceType, std::string g
             LDEBUG("Download to memory finished");
         };
 
-        std::mt19937_64 eng{std::random_device{}()};
-        std::uniform_int_distribution<> dist{10, 100};
-        std::this_thread::sleep_for(std::chrono::milliseconds{dist(eng)});
+        // std::mt19937_64 eng{std::random_device{}()};
+        // std::uniform_int_distribution<> dist{10, 100};
+        // std::this_thread::sleep_for(std::chrono::milliseconds{dist(eng)});
 
         // Download metadataCallback
         OsEng.downloadManager().fetchFile(

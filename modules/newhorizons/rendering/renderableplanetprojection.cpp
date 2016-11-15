@@ -462,7 +462,7 @@ bool RenderablePlanetProjection::loadTextures() {
     if (_colorTexturePath.value() != "") {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
         if (_baseTexture) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_baseTexture);
+            ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
             _baseTexture->setFilter(Texture::FilterMode::Linear);
         }
@@ -472,7 +472,7 @@ bool RenderablePlanetProjection::loadTextures() {
     if (_heightMapTexturePath.value() != "") {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
         if (_heightMapTexture) {
-            ghoul::opengl::convertTextureFormat(Texture::Format::RGB, *_heightMapTexture);
+            ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);
             _heightMapTexture->uploadTexture();
             _heightMapTexture->setFilter(Texture::FilterMode::Linear);
         }
