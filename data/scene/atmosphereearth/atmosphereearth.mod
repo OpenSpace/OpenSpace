@@ -18,7 +18,7 @@ return {
         Name = "Earth",
         Parent = "EarthBarycenter",
         Renderable = {
-            Type = "RenderablePlanet",
+            Type = "RenderablePlanetAtmosphere",
             Frame = "IAU_EARTH",
 			Body = "EARTH",
             Geometry = {
