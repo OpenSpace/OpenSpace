@@ -39,17 +39,13 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
 
 #include <memory>
 #include <fstream>
-#include <ostream>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define _ATMOSPHERE_DEBUG
-#define _SAVE_ATMOSPHERE_TEXTURES
 
 namespace {
     const std::string _loggerCat = "RenderablePlanet";
@@ -162,6 +158,9 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     // Mainly for debugging purposes @AA
     addProperty(_rotation);
 
+    //================================================================
+    //======== Reads Shadow (Eclipses) Entries in mod file ===========
+    //================================================================
     ghoul::Dictionary shadowDictionary;
     success = dictionary.getValue(keyShadowGroup, shadowDictionary);
     bool disableShadows = false;
@@ -249,6 +248,9 @@ bool RenderablePlanet::initialize() {
         LERROR("Checking System State before initialization. OpenGL error: " << errString);
     }
 
+    //===================================================================
+    //=========== Defines the shading program to be executed ============
+    //===================================================================
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
@@ -367,14 +369,6 @@ void RenderablePlanet::render(const RenderData& data) {
     modelTransform = modelTransform * rot /** roty*/ /** rotProp*/;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
-    glm::dvec3 planetPosFromSun = 
-        SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, _time, lt);
-    psc planetPosFronSunPSC = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-        planetPosFromSun.x, planetPosFromSun.y, planetPosFromSun.z);
-    
-    // Camera direction (vector)
-    glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - planetPosFronSunPSC.vec3());
     
     _programObject->setUniform("transparency", _alpha);
     _programObject->setUniform(
@@ -384,11 +378,10 @@ void RenderablePlanet::render(const RenderData& data) {
     _programObject->setUniform("ModelTransform", glm::mat4(modelTransform));
 
     // Normal Transformation
-    glm::mat4 translateObjTransf = glm::translate(glm::mat4(1.0), data.position.vec3());
-    glm::mat4 translateCamTransf = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
-    // The following scale comes from PSC transformations.
+    glm::mat4 translateObjTrans = glm::translate(glm::mat4(1.0), data.position.vec3());
+    glm::mat4 translateCamTrans = glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
     float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-    glm::mat4 scaleCamTransf = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
+    glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
     glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
         translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
@@ -428,6 +421,7 @@ void RenderablePlanet::render(const RenderData& data) {
     //============= Eclipse Shadow Calculations and Uniforms Loading ==============
     //=============================================================================
     // TODO: Move Calculations to VIEW SPACE (let's avoid precision problems...)
+    double lt;
     if (!_shadowConfArray.empty()) {
         std::vector<ShadowRenderingStruct> shadowDataArray;
         shadowDataArray.reserve(_shadowConfArray.size());
