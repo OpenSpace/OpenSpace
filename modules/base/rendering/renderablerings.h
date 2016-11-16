@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/updatestructures.h>
@@ -54,12 +55,14 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static openspace::Documentation Documentation();
+
 private:
     void loadTexture();
     void createPlane();
 
     properties::StringProperty _texturePath;
-    properties::Vec2Property _size;
+    properties::FloatProperty _size;
     properties::Vec2Property _offset;
     properties::FloatProperty _nightFactor;
     properties::FloatProperty _transparency;
@@ -72,14 +75,8 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
     bool _planeIsDirty;
-    
-    std::string _frame;
-    glm::mat3 _orientation;
-    glm::mat3 _state;
-    
-    std::string _body;
+
     glm::vec3 _sunPosition;
-    bool _hasSunPosition;
 };
 
 } // namespace openspace

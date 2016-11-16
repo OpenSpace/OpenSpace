@@ -67,6 +67,12 @@ std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
 
+ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+OpenSpaceModule::requiredOpenGLVersion() const
+{
+    return { 3, 3 };
+}
+
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);

@@ -68,15 +68,20 @@ int bindKey(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 2)
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    if (nArguments != 2 && nArguments != 3) {
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 2, 3, nArguments);
+    }
 
+    int KeyLocation = nArguments == 3 ? -3 : -2;
+    int CommandLocation = nArguments == 3 ? -2 : -1;
+    int DocumentationLocation = -1;
 
-    std::string key = luaL_checkstring(L, -2);
-    std::string command = luaL_checkstring(L, -1);
+    std::string key = luaL_checkstring(L, KeyLocation);
+    std::string command = luaL_checkstring(L, CommandLocation);
 
-    if (command.empty())
+    if (command.empty()) {
         return luaL_error(L, "Command string is empty");
+    }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
 
@@ -85,11 +90,16 @@ int bindKey(lua_State* L) {
         return 0;
     }
 
+    std::string documentation;
+    if (nArguments == 3) {
+        documentation = luaL_checkstring(L, DocumentationLocation);
+    }
 
     OsEng.interactionHandler().bindKey(
         iKey.key,
         iKey.modifier,
-        command
+        std::move(command),
+        std::move(documentation)
     );
         
     return 0;
@@ -104,12 +114,17 @@ int bindKeyLocal(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 2)
-        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    if (nArguments != 2 && nArguments != 3) {
+        return luaL_error(L, "Expected %i or %i arguments, got %i", 2, 3, nArguments);
+    }
 
+    int KeyLocation = nArguments == 3 ? -3 : -2;
+    int CommandLocation = nArguments == 3 ? -2 : -1;
+    int DocumentationLocation = -1;
 
-    std::string key = luaL_checkstring(L, -2);
-    std::string command = luaL_checkstring(L, -1);
+    std::string key = luaL_checkstring(L, KeyLocation);
+    std::string command = luaL_checkstring(L, CommandLocation);
+
 
     if (command.empty())
         return luaL_error(L, "Command string is empty");
@@ -121,10 +136,16 @@ int bindKeyLocal(lua_State* L) {
         return 0;
     }
 
+    std::string documentation;
+    if (nArguments == 3) {
+        documentation = luaL_checkstring(L, DocumentationLocation);
+    }
+
     OsEng.interactionHandler().bindKeyLocal(
         iKey.key,
         iKey.modifier,
-        command
+        std::move(command),
+        std::move(documentation)
         );
 
     return 0;

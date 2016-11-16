@@ -33,6 +33,8 @@ class NewHorizonsModule : public OpenSpaceModule {
 public:
     NewHorizonsModule();
     
+    std::vector<Documentation> documentations() const override;
+
 protected:
     void internalInitialize() override;
 };

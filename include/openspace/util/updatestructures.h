@@ -45,8 +45,8 @@ struct TransformData {
 struct UpdateData {
     TransformData modelTransform;
     double time;
-    bool isTimeJump;
     double delta;
+    bool isTimeJump;
     bool doPerformanceMeasurement;
 };
 

@@ -97,6 +97,9 @@ public:
     /// The key that stores the time (in seconds) that the application will wait before
     /// shutting down after the shutdown call is made
     static const std::string KeyShutdownCountdown;
+    /// The key that stores whether the onscreen text should be scaled to the window size
+    /// or the window resolution
+    static const std::string KeyOnScreenTextScaling;
     /// The key that stores whether the master node should perform rendering just function
     /// as a pure manager
     static const std::string KeyDisableMasterRendering;
@@ -106,18 +109,20 @@ public:
     /// The key that stores the switch for enabling/disabling the rendering on a master
     /// computer
     static const std::string KeyRenderingMethod;
+    /// The key that determines whether a new cache folder is used for each scene file
+    static const std::string KeyPerSceneCache;
     /// The key that stores the http proxy settings for the downloadmanager
     static const std::string KeyHttpProxy;
     /// The key that stores the address of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyAddress;
+    static const std::string PartHttpProxyAddress;
     /// The key that stores the port of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyPort;
+    static const std::string PartHttpProxyPort;
     /// The key that stores the authentication method of the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyAuthentication;
+    static const std::string PartHttpProxyAuthentication;
     /// The key that stores the username to use for authentication to access the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyUser;
+    static const std::string PartHttpProxyUser;
     /// The key that stores the password to use for authentication to access the http proxy
-    static const std::string ConfigurationManager::PartHttpProxyPassword;
+    static const std::string PartHttpProxyPassword;
 
 
     /**

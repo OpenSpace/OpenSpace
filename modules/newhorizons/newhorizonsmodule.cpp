@@ -71,4 +71,12 @@ void NewHorizonsModule::internalInitialize() {
     fDecoder->registerClass<TargetDecoder>("Target");
 }
 
+std::vector<Documentation> NewHorizonsModule::documentations() const {
+    return {
+        RenderableModelProjection::Documentation(),
+        RenderablePlanetProjection::Documentation(),
+        ProjectionComponent::Documentation()
+    };
+}
+
 } // namespace openspace

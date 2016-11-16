@@ -53,6 +53,7 @@ uniform mat4 projection;
 
 uniform float scaleFactor;
 uniform float minBillboardSize;
+uniform vec2 screenSize;
 
 void main() {
     if ((psc_position[0].x == 0.0) && (psc_position[0].y == 0.0) && (psc_position[0].z == 0.0))
@@ -75,7 +76,6 @@ void main() {
 
     // Calculate the positions of the lower left and upper right corners of the
     // billboard in screen-space
-    const vec2 screenSize = vec2(#{rendererData.windowWidth}, #{rendererData.windowHeight});
     vec2 ll = (((projPos[1].xy / projPos[1].w) + 1) / 2) * screenSize;
     vec2 ur = (((projPos[2].xy / projPos[2].w) + 1) / 2) * screenSize;
 

@@ -37,9 +37,6 @@ uniform vec3 sunPosition;
 uniform float _nightFactor;
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    float depth = pscDepth(position);
-
     // Moving the origin to the center
     vec2 st = (vs_st - vec2(0.5)) * 2.0;
 
@@ -66,28 +63,26 @@ Fragment getFragment() {
         diffuse.a = pow(colorValue / (3*transparency), 1);
     }
 
-    if (hasSunPosition) {
-        // The normal for the one plane depends on whether we are dealing
-        // with a front facing or back facing fragment
-        vec3 normal;
-        // The plane is oriented on the xz plane
-        // WARNING: This might not be the case for Uranus
-        if (gl_FrontFacing) {
-            normal = vec3(-1.0, 0.0, 0.0);
-        }
-        else {
-            normal = vec3(1.0, 0.0, 0.0);
-        }
-
-        // Reduce the color of the fragment by the user factor
-        // if we are facing away from the Sun
-        if (dot(sunPosition, normal) < 0)
-            diffuse.xyz *= _nightFactor;
+    // The normal for the one plane depends on whether we are dealing
+    // with a front facing or back facing fragment
+    vec3 normal;
+    // The plane is oriented on the xz plane
+    // WARNING: This might not be the case for Uranus
+    if (gl_FrontFacing) {
+        normal = vec3(-1.0, 0.0, 0.0);
     }
+    else {
+        normal = vec3(1.0, 0.0, 0.0);
+    }
+
+    // Reduce the color of the fragment by the user factor
+    // if we are facing away from the Sun
+    if (dot(sunPosition, normal) < 0)
+        diffuse.xyz *= _nightFactor;
 
     Fragment frag;
     frag.color = diffuse;
-    frag.depth = depth;
+    frag.depth = vs_position.w;
     return frag;
 
 }

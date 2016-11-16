@@ -41,6 +41,16 @@ template struct Vector4Verifier<bool>;
 template struct Vector4Verifier<int>;
 template struct Vector4Verifier<double>;
 
+template struct Matrix2x2Verifier<double>;
+template struct Matrix2x3Verifier<double>;
+template struct Matrix2x4Verifier<double>;
+template struct Matrix3x2Verifier<double>;
+template struct Matrix3x3Verifier<double>;
+template struct Matrix3x4Verifier<double>;
+template struct Matrix4x2Verifier<double>;
+template struct Matrix4x3Verifier<double>;
+template struct Matrix4x4Verifier<double>;
+
 template struct LessVerifier<IntVerifier>;
 template struct LessVerifier<DoubleVerifier>;
 template struct LessEqualVerifier<IntVerifier>;
@@ -186,6 +196,14 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
 
 std::string TableVerifier::type() const {
     return "Table";
+}
+
+StringListVerifier::StringListVerifier(std::string elementDocumentation)
+    : TableVerifier({{ "*", new StringVerifier, std::move(elementDocumentation) }})
+{}
+
+std::string StringListVerifier::type() const {
+    return "List of strings";
 }
 
 ReferencingVerifier::ReferencingVerifier(std::string id)

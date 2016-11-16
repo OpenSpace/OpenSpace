@@ -26,22 +26,30 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-layout(location = 0) in vec4 in_position;
+layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
 out vec4 vs_position;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 modelViewProjectionTransform;
 
 void main() {
-    vec4 tmp = in_position;
-    vec4 position = pscTransform(tmp, ModelTransform);
-
-    vs_position = tmp;
     vs_st = in_st;
+
+    vs_position = z_normalization(
+        modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
+    );
+    gl_Position = vs_position;
+
+    // vec4 tmp = in_position;
+
+
+    // vec4 tmp = in_position;
+    // vec4 position = pscTransform(tmp, ModelTransform);
+
+    // vs_position = tmp;
     
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    // position = ViewProjection * position;
+    // gl_Position =  z_normalization(position);
 }

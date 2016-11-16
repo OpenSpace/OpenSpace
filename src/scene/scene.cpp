@@ -47,11 +47,12 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <chrono>
 #include <iostream>
 #include <iterator>
+#include <numeric>
 #include <fstream>
 #include <string>
-#include <chrono>
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
 #include <modules/onscreengui/include/gui.h>
@@ -549,12 +550,16 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
 
         std::stringstream json;
         json << "[";
-        auto nodes = _graph.nodes();
-        for (SceneGraphNode* node : nodes) {
-            json << createJson(node);
-            if (node != nodes.back()) {
-                json << ",";
-            }
+        std::vector<SceneGraphNode*> nodes = _graph.nodes();
+        if (!nodes.empty()) {
+            json << std::accumulate(
+                std::next(nodes.begin()),
+                nodes.end(),
+                createJson(*nodes.begin()),
+                [createJson](std::string a, SceneGraphNode* n) {
+                    return a + "," + createJson(n);
+                }
+            );
         }
 
         json << "]";

@@ -27,6 +27,7 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 
 #include <list>
 
@@ -70,7 +71,10 @@ const string ConfigurationManager::KeyCapabilitiesVerbosity =
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
+const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
+
+const string ConfigurationManager::KeyOnScreenTextScaling = "OnScreenTextScaling";
 
 const string ConfigurationManager::KeyHttpProxy = "HttpProxy";
 const string ConfigurationManager::PartHttpProxyAddress = "Address";

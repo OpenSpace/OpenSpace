@@ -12,26 +12,61 @@ helper.scheduledScript.reversible = {}
 -- Function that sets the most common key bindings that are common to most (all?)
 -- scenes
 helper.setCommonKeys = function()
-    openspace.bindKeyLocal("F1", "openspace.gui.toggle()")
-    openspace.bindKeyLocal("F2", "openspace.setPerformanceMeasurement(true)")
-    openspace.bindKeyLocal("F3", "openspace.setPerformanceMeasurement(false)")
+    openspace.bindKeyLocal(
+        "F1",
+        "openspace.gui.toggle()",
+        "Toggles the visibility of the on-screen GUI."
+    )
+    openspace.bindKeyLocal(
+        "F2",
+        helper.property.invert("RenderEngine.performanceMeasurements"),
+        "Toogles performance measurements that shows rendering time informations."
+    )
 
-    openspace.bindKeyLocal("t", "openspace.toggleFrametimeType(1)")
-    openspace.bindKeyLocal("Shift+t", "openspace.toggleFrametimeType(0)")
+    openspace.bindKeyLocal(
+        "ESC",
+        "openspace.toggleShutdown()",
+        "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period."
+    )
 
-    openspace.bindKeyLocal("ESC", "openspace.toggleShutdown()")
+    openspace.bindKeyLocal(
+        "PRINT_SCREEN",
+        "openspace.takeScreenshot()",
+        "Saves the contents of the screen to a file in the working directory."
+    )
+    openspace.bindKey(
+        "SPACE",
+        "openspace.time.togglePause()",
+        "Starts and stops the simulation time."
+    )
 
-    openspace.bindKeyLocal("PRINT_SCREEN", "openspace.takeScreenshot()")
-    openspace.bindKey("SPACE", "openspace.time.togglePause()")
+    openspace.bindKey(
+        "COMMA",
+        "openspace.setRenderer('Framebuffer');",
+        "Changes the currently used renderer to use the 'Framebuffer' implementation."
+    )
+    openspace.bindKey(
+        "PERIOD",
+        "openspace.setRenderer('ABuffer');",
+        "Changes the currently used renderer to use the 'ABuffer' implementation."
+    )
 
-    openspace.bindKey("COMMA", "openspace.setRenderer('Framebuffer');")
-    openspace.bindKey("PERIOD", "openspace.setRenderer('ABuffer');")
+    openspace.bindKeyLocal(
+        "f",
+        helper.property.invert('Interaction.rotationalFriction'),
+        "Toggles the rotational friction on the camera. If it is disabled, the camera rotates around the focus object indefinitely."
+    )
+    openspace.bindKeyLocal(
+        "Shift+f",
+        helper.property.invert('Interaction.zoomFriction'),
+        "Toggles the zoom friction on the camera."
+    )
 
-
-    openspace.bindKeyLocal("f", helper.property.invert('Interaction.rotationalFriction'))
-    openspace.bindKeyLocal("Shift+f", helper.property.invert('Interaction.zoomFriction'))
-
-    openspace.bindKey("w", "openspace.toggleFade(3)")
+    openspace.bindKey(
+        "w",
+        "openspace.toggleFade(3)",
+        "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds."
+    )
 end
 
 helper.setDeltaTimeKeys = function(t)
@@ -48,7 +83,11 @@ helper.setDeltaTimeKeys = function(t)
     end
 
     for i, v in ipairs(t) do
-        openspace.bindKey(Keys[i], 'openspace.time.setDeltaTime(' .. v .. ")")
+        openspace.bindKey(
+            Keys[i],
+            'openspace.time.setDeltaTime(' .. v .. ")",
+            'Setting the simulation speed to ' .. v .. ' seconds per realtime second'
+        )
     end
 end
 
@@ -62,7 +101,7 @@ end
 helper.property.increment = function(property, value)
     local v = value or 1
     local escaped_property = "'" .. property .. "'"
-    return "openspace.setPropertyValue(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ")"
+    return "openspace.setPropertyValue(" .. escaped_property .. ", openspace.getPropertyValue(" .. escaped_property .. ") + " .. v .. ");"
 end
 
 -- Function that returns the string that decrements the 'property' by the 'value'

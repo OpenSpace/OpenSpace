@@ -18,6 +18,10 @@ window.onload = function () {
     return identifier;
   });
 
+  keybindings.sort(function (a, b) {
+    return a.key < b.key ? -1 : (a.key > b.key ? 1 : 0);
+  });
+
   var data = {
     keybindings: keybindings,
     version: version,

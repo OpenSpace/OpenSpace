@@ -288,10 +288,11 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
         // iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
         for (auto it = ret.first; it != ret.second; ++it) {
-            OsEng.scriptEngine().queueScript(it->second.first,
-                it->second.second ?
+            auto remote = it->second.synchronization ?
                 scripting::ScriptEngine::RemoteScripting::Yes :
-                scripting::ScriptEngine::RemoteScripting::No);
+                scripting::ScriptEngine::RemoteScripting::No;
+
+            OsEng.scriptEngine().queueScript(it->second.command, remote);
         }
     }
 }
@@ -395,22 +396,27 @@ void InteractionHandler::resetKeyBindings() {
     _keyLua.clear();
 }
 
-void InteractionHandler::bindKeyLocal(Key key, KeyModifier modifier, std::string lua) {
+void InteractionHandler::bindKeyLocal(Key key, KeyModifier modifier,
+                                      std::string luaCommand, std::string documentation)
+{
     _keyLua.insert({
         { key, modifier },
-        std::make_pair(lua, false)
+        { std::move(luaCommand), Synchronized::No, std::move(documentation) }
     });
 }
 
-void InteractionHandler::bindKey(Key key, KeyModifier modifier, std::string lua) {
+void InteractionHandler::bindKey(Key key, KeyModifier modifier,
+                                 std::string luaCommand, std::string documentation)
+{
     _keyLua.insert({
         { key, modifier },
-        std::make_pair(lua, true)
+        { std::move(luaCommand), Synchronized::Yes, std::move(documentation) }
     });
 }
 
     
-void InteractionHandler::writeKeyboardDocumentation(const std::string& type, const std::string& file)
+void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
+                                                    const std::string& file)
 {
     if (type == "text") {
         std::ofstream f;
@@ -419,13 +425,14 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
         
         for (const auto& p : _keyLua) {
             std::string remoteScriptingInfo;
-            bool remoteScripting = p.second.second;
+            bool remoteScripting = p.second.synchronization;
 
             if (!remoteScripting) {
                 remoteScriptingInfo = " (LOCAL)";
             }
-            f << std::to_string(p.first) << ": " <<
-                p.second.first << remoteScriptingInfo << std::endl;
+            f << std::to_string(p.first) << ": "
+              << p.second.command << remoteScriptingInfo << '\n'
+              << p.second.documentation << '\n';
         }
     }
     else if (type == "html") {
@@ -469,8 +476,9 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type, con
             first = false;
             json << "{";
             json << "\"key\": \"" << std::to_string(p.first) << "\",";
-            json << "\"script\": \"" << p.second.first << "\"";
-            json << "\"remoteScripting\": \"" << (p.second.second ? "true" : "false") << "\"";
+            json << "\"script\": \"" << p.second.command << "\",";
+            json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
+            json << "\"documentation\": \"" << p.second.documentation << "\"";
             json << "}";
         }
         json << "]";
@@ -543,15 +551,21 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
-                "string, string",
+                "string, string [,string]",
                 "Binds a key by name to a lua string command to execute both locally "
-                "and to broadcast to clients if this is the host of a parallel session"
+                "and to broadcast to clients if this is the host of a parallel session. "
+                "The first argument is the key, the second argument is the Lua command "
+                "that is to be executed, and the optional third argument is a human "
+                "readable description of the command for documentation purposes."
             },
             {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
-                "string, string",
-                "Binds a key by name to a lua string command to execute only locally"
+                "string, string [,string]",
+                "Binds a key by name to a lua string command to execute only locally. "
+                "The first argument is the key, the second argument is the Lua command "
+                "that is to be executed, and the optional third argument is a human "
+                "readable description of the command for documentation purposes."
             },
             {
                 "setInteractionMode",

@@ -47,6 +47,10 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
 }
 
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
+    if (owner->propertiesRecursive().empty()) {
+        return;
+    }
+
     ImGui::PushID(owner->name().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
@@ -102,7 +106,14 @@ void GuiPropertyComponent::render() {
     ImGui::Spacing();
 
     if (_function) {
-        const std::vector<properties::PropertyOwner*>& owners = _function();
+        std::vector<properties::PropertyOwner*> owners = _function();
+        std::sort(
+            owners.begin(),
+            owners.end(),
+            [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                return lhs->name() < rhs->name();
+            }
+        );
 
         for (properties::PropertyOwner* pOwner : owners) {
             if (pOwner->propertiesRecursive().empty())

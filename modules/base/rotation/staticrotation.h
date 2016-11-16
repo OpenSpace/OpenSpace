@@ -27,17 +27,20 @@
 
 #include <openspace/scene/rotation.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/matrixproperty.h>
+
 namespace openspace {
     
-class StaticRotation: public Rotation {
+class StaticRotation : public Rotation {
 public:
-    StaticRotation(const ghoul::Dictionary& dictionary
-                                = ghoul::Dictionary());
-    virtual ~StaticRotation();
-    virtual const glm::dmat3& matrix() const;
-    virtual void update(const UpdateData& data) override;
+    StaticRotation();
+    StaticRotation(const ghoul::Dictionary& dictionary);
+
+    static openspace::Documentation Documentation();
+
 private:
-    glm::dmat3 _rotationMatrix;
+    properties::DMat3Property _rotationMatrix;
 };
     
 } // namespace openspace
