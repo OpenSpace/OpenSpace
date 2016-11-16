@@ -85,32 +85,16 @@ private:
     properties::StringProperty _heightMapTexturePath;
     
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-
+    
     properties::FloatProperty _heightExaggeration;
 
     planetgeometry::PlanetGeometry* _geometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
-
-    
-    // ATMOSPHERE PROPERTIES
-    properties::FloatProperty _atmosphereHeightP;
-    properties::FloatProperty _groundAverageReflectanceP;
-    properties::FloatProperty _rayleighHeightScaleP;
-    properties::FloatProperty _mieHeightScaleP;
-    properties::FloatProperty _mieScatteringCoefficientP;
-    properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
-    properties::FloatProperty _mieAsymmetricFactorGP;
-    properties::FloatProperty _sunIntensityP;
-
-    
-    // DEBUG Properties:
-    properties::BoolProperty _saveDeferredFramebuffer;
-
-
     float _alpha;
     std::vector< ShadowConf > _shadowConfArray;
     float _planetRadius;

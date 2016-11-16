@@ -10,7 +10,6 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime(openspace.time.currentWallTime())
-<<<<<<< HEAD
 
      --YYYY-MM-DDTHH:MN:SS
      --openspace.time.setTime(openspace.time.currentWallTime())
@@ -34,12 +33,7 @@ function preInitialization()
     -- Pacific, Atlantic, Indian Ocean, Arctic, Antarctica.
     --openspace.time.setTime("2018-01-31T10:30:00")
 
-
-
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
-=======
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
->>>>>>> develop
 end
 
 function postInitialization()
