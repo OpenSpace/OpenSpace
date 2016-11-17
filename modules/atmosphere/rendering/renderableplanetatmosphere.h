@@ -120,7 +120,7 @@ namespace openspace {
         void deleteUnusedComputationTextures();
         void updateAtmosphereParameters();
         void loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg);
-        void executeCalculations(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
+        void executeCalculations(const GLuint quadCalcVAO, const GLenum drawBuffers[1], const GLsizei vertexSize);
         void preCalculateAtmosphereParam();
         void resetAtmosphereTextures(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
         void createAtmosphereFBO();

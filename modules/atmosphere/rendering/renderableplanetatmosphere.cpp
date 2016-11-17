@@ -1896,7 +1896,7 @@ namespace openspace {
     }
 
 
-    void RenderablePlanetAtmosphere::executeCalculations(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize) {
+    void RenderablePlanetAtmosphere::executeCalculations(const GLuint quadCalcVAO, const GLenum drawBuffers[1], const GLsizei vertexSize) {
 
         ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
         ghoul::opengl::TextureUnit irradianceTableTextureUnit;
@@ -1905,6 +1905,11 @@ namespace openspace {
         ghoul::opengl::TextureUnit deltaSRayleighTableTextureUnit;
         ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
         ghoul::opengl::TextureUnit deltaJTableTextureUnit;
+
+        bool blendEnabled = glIsEnabled(GL_BLEND);
+
+        if (blendEnabled)
+            glDisable(GL_BLEND);
 
         // ===========================================================
         // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
@@ -1917,7 +1922,7 @@ namespace openspace {
         //glClear(GL_COLOR_BUFFER_BIT);
         static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
         glClearBufferfv(GL_COLOR, 0, black);
-        renderQuadForCalc(vao, vertexSize);
+        renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("transmittance_texture.ppm"),
             TRANSMITTANCE_TABLE_WIDTH, TRANSMITTANCE_TABLE_HEIGHT);
@@ -1939,7 +1944,7 @@ namespace openspace {
         _irradianceProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_irradianceProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
-        renderQuadForCalc(vao, vertexSize);
+        renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("deltaE_table_texture.ppm"),
             DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
@@ -1965,7 +1970,7 @@ namespace openspace {
         glClear(GL_COLOR_BUFFER_BIT);        
         for (int layer = 0; layer < R_SAMPLES; ++layer) {
             step3DTexture(_inScatteringProgramObject, layer);
-            renderQuadForCalc(vao, vertexSize);
+            renderQuadForCalc(quadCalcVAO, vertexSize);
         }
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("deltaS_rayleigh_texture.ppm"),
@@ -1995,7 +2000,7 @@ namespace openspace {
         _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
-        renderQuadForCalc(vao, vertexSize);
+        renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("irradiance_texture.ppm"),
             DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
@@ -2021,7 +2026,7 @@ namespace openspace {
         glClear(GL_COLOR_BUFFER_BIT);        
         for (int layer = 0; layer < R_SAMPLES; ++layer) {
             step3DTexture(_deltaSProgramObject, layer, false);
-            renderQuadForCalc(vao, vertexSize);
+            renderQuadForCalc(quadCalcVAO, vertexSize);
         }
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("S_texture.ppm"),
@@ -2060,7 +2065,7 @@ namespace openspace {
             loadAtmosphereDataIntoShaderProgram(_deltaJProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_deltaJProgramObject, layer);
-                renderQuadForCalc(vao, vertexSize);
+                renderQuadForCalc(quadCalcVAO, vertexSize);
             }
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             std::stringstream sst;
@@ -2093,7 +2098,7 @@ namespace openspace {
             _irradianceSupTermsProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
             _irradianceSupTermsProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);            
-            renderQuadForCalc(vao, vertexSize);
+            renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             sst.str(std::string());
             sst << "deltaE_texture-scattering_order-" << scatteringOrder << ".ppm";
@@ -2124,7 +2129,7 @@ namespace openspace {
             loadAtmosphereDataIntoShaderProgram(_inScatteringSupTermsProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_inScatteringSupTermsProgramObject, layer);
-                renderQuadForCalc(vao, vertexSize);
+                renderQuadForCalc(quadCalcVAO, vertexSize);
             }
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             sst.str(std::string());
@@ -2152,7 +2157,7 @@ namespace openspace {
             glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
             _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);            
-            renderQuadForCalc(vao, vertexSize);
+            renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             sst.str(std::string());
             sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
@@ -2176,7 +2181,7 @@ namespace openspace {
             loadAtmosphereDataIntoShaderProgram(_deltaSSupTermsProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_deltaSSupTermsProgramObject, layer, false);
-                renderQuadForCalc(vao, vertexSize);
+                renderQuadForCalc(quadCalcVAO, vertexSize);
             }
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             sst.str(std::string());
@@ -2192,6 +2197,9 @@ namespace openspace {
 
             glDisable(GL_BLEND);            
         }
+
+        if (blendEnabled)
+            glEnable(GL_BLEND);
 
     }
 
@@ -2256,9 +2264,9 @@ namespace openspace {
         }
 
         // Prepare for rendering/calculations
-        GLuint calcVAO;
-        GLuint calcVBO;
-        createRenderQuad(&calcVAO, &calcVBO, 1.0f);
+        GLuint quadCalcVAO;
+        GLuint quadCalcVBO;
+        createRenderQuad(&quadCalcVAO, &quadCalcVBO, 1.0f);
 
 
         /*if (_atmosphereCalculated) {
@@ -2272,7 +2280,7 @@ namespace openspace {
         //==========================================================
         //=================== Execute Calculations =================
         //==========================================================
-        executeCalculations(calcVAO, drawBuffers, 6);
+        executeCalculations(quadCalcVAO, drawBuffers, 6);
 
         deleteUnusedComputationTextures();
 
@@ -2280,8 +2288,8 @@ namespace openspace {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
         glViewport(m_viewport[0], m_viewport[1],
             m_viewport[2], m_viewport[3]);
-        glDeleteBuffers(1, &calcVBO);
-        glDeleteVertexArrays(1, &calcVAO);
+        glDeleteBuffers(1, &quadCalcVBO);
+        glDeleteVertexArrays(1, &quadCalcVAO);
         glDeleteFramebuffers(1, &calcFBO);
 
         LDEBUG("Ended precalculations for Atmosphere effects...");
@@ -2412,8 +2420,10 @@ namespace openspace {
         };
 
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<void*>(0));
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4, reinterpret_cast<GLvoid*>(0));
         glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
 
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR) {

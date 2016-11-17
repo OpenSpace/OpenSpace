@@ -109,5 +109,5 @@ void main(void) {
   vec3 opDepth = betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
   
-  renderTableColor = vec4( exp( -opDepth ), 0.0f ); 
+  renderTableColor = vec4( exp( -opDepth ), 1.0f );
 }

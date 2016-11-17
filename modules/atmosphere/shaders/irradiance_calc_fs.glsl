@@ -55,5 +55,5 @@ void main(void) {
   // considering only single scattering here, the
   // dot product dot(w,n) is equal to dot(s,n) that is equal to
   // dot(s, r/||r||) = muSun.
-  renderTableColor = vec4(transmittanceLUT(r, muSun) * clamp(muSun, 0.0, 1.0), 0.0);     
+  renderTableColor = vec4(transmittanceLUT(r, muSun) * clamp(muSun, 0.0, 1.0), 1.0);     
 }

@@ -92,5 +92,5 @@ void main(void) {
         }
     }
 
-    renderTableColor = vec4(result, 0.0);    
+    renderTableColor = vec4(result, 1.0);    
 }
