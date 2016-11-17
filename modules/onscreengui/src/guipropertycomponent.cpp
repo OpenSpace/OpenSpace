@@ -47,6 +47,10 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
 }
 
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
+    if (owner->propertiesRecursive().empty()) {
+        return;
+    }
+
     ImGui::PushID(owner->name().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {

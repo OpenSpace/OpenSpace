@@ -173,7 +173,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
     SpiceManager::initialize();
     Time::initialize();
-    ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
 }
 
@@ -385,10 +384,11 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_scriptEngine->deinitialize();
     delete _engine;
-    ghoul::systemcapabilities::SystemCapabilities::deinitialize();
     FactoryManager::deinitialize();
     Time::deinitialize();
     SpiceManager::deinitialize();
+
+    ghoul::fontrendering::FontRenderer::deinitialize();
 
     LogManager::deinitialize();
 

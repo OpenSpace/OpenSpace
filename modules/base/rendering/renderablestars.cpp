@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderablestars.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -31,6 +32,8 @@
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 #include <array>
@@ -43,9 +46,6 @@ namespace {
     const std::string KeyFile = "File";
     const std::string KeyTexture = "Texture";
     const std::string KeyColorMap = "ColorMap";
-
-    ghoul::filesystem::File* _psfTextureFile;
-    ghoul::filesystem::File* _colorTextureFile;
 
     const int8_t CurrentCacheVersion = 1;
 
@@ -82,6 +82,46 @@ namespace {
 
 namespace openspace {
 
+openspace::Documentation RenderableStars::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableStars",
+        "base_renderablestars",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("RenderableStars"),
+                "",
+                Optional::No
+            },
+            {
+                KeyFile,
+                new StringVerifier,
+                "The path to the SPECK file that contains information about the stars "
+                "being rendered.",
+                Optional::No
+            },
+            {
+                KeyTexture,
+                new StringVerifier,
+                "The path to the texture that should be used as a point spread function "
+                "for the stars. The path is relative to the location of the .mod file "
+                "and can contain file system token.",
+                Optional::No
+            },
+            {
+                KeyColorMap,
+                new StringVerifier,
+                "The path to the texture that is used to convert from the B-V value of "
+                "the star to its color. The texture is used as a one dimensional lookup "
+                "function.",
+                Optional::No
+            }
+        }
+    };
+}
+
+
 RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _pointSpreadFunctionTexturePath("psfTexture", "Point Spread Function Texture")
@@ -101,47 +141,54 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _vao(0)
     , _vbo(0)
 {
-    using ghoul::filesystem::File;
+    using File = ghoul::filesystem::File;
 
-    std::string texturePath = "";
-    dictionary.getValue(KeyTexture, texturePath);
-    _pointSpreadFunctionTexturePath = absPath(texturePath);
-    _psfTextureFile = new File(_pointSpreadFunctionTexturePath);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableStars"
+    );
 
-    dictionary.getValue(KeyColorMap, texturePath);
-    _colorTexturePath = absPath(texturePath);
-    _colorTextureFile = new File(_colorTexturePath);
+    _pointSpreadFunctionTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _pointSpreadFunctionFile = std::make_unique<File>(_pointSpreadFunctionTexturePath);
 
-    bool success = dictionary.getValue(KeyFile, _speckFile);
-    if (!success) {
-        LERROR("SpeckDataSource did not contain key '" << KeyFile << "'");
-        return;
-    }
-    _speckFile = absPath(_speckFile);
+    _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorMap));
+    _colorTextureFile = std::make_unique<File>(_colorTexturePath);
 
+    _speckFile = absPath(dictionary.value<std::string>(KeyFile));
+
+    //_colorOption.addOptions({
+    //    { ColorOption::Color, "Color" },
+    //    { ColorOption::Velocity, "Velocity" },
+    //    { ColorOption::Speed, "Speed" }
+    //});
     _colorOption.addOption(ColorOption::Color, "Color");
     _colorOption.addOption(ColorOption::Velocity, "Velocity");
     _colorOption.addOption(ColorOption::Speed, "Speed");
     addProperty(_colorOption);
+    
     _colorOption.onChange([&]{ _dataIsDirty = true;});
 
     addProperty(_pointSpreadFunctionTexturePath);
-    _pointSpreadFunctionTexturePath.onChange([&]{ _pointSpreadFunctionTextureIsDirty = true; });
-    _psfTextureFile->setCallback([&](const File&) { _pointSpreadFunctionTextureIsDirty = true; });
+    _pointSpreadFunctionTexturePath.onChange(
+        [&]{ _pointSpreadFunctionTextureIsDirty = true; }
+    );
+    _pointSpreadFunctionFile->setCallback(
+        [&](const File&) { _pointSpreadFunctionTextureIsDirty = true; }
+    );
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange([&]{ _colorTextureIsDirty = true; });
-    _colorTextureFile->setCallback([&](const File&) { _colorTextureIsDirty = true; });
+    _colorTextureFile->setCallback(
+        [&](const File&) { _colorTextureIsDirty = true; }
+    );
 
     addProperty(_alphaValue);
     addProperty(_scaleFactor);
     addProperty(_minBillboardSize);
 }
 
-RenderableStars::~RenderableStars() {
-    delete _psfTextureFile;
-    delete _colorTextureFile;
-}
+RenderableStars::~RenderableStars() {}
 
 bool RenderableStars::isReady() const {
     return (_program != nullptr) && (!_fullData.empty());
@@ -156,8 +203,9 @@ bool RenderableStars::initialize() {
         "${MODULE_BASE}/shaders/star_fs.glsl",
         "${MODULE_BASE}/shaders/star_ge.glsl");
 
-    if (!_program)
+    if (!_program) {
         return false;
+    }
     completeSuccess &= loadData();
     completeSuccess &= (_pointSpreadFunctionTexture != nullptr);
 
@@ -212,14 +260,12 @@ void RenderableStars::render(const RenderData& data) {
 
     ghoul::opengl::TextureUnit psfUnit;
     psfUnit.activate();
-    if (_pointSpreadFunctionTexture)
-        _pointSpreadFunctionTexture->bind();
+    _pointSpreadFunctionTexture->bind();
     _program->setUniform("psfTexture", psfUnit);
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
-    if (_colorTexture)
-        _colorTexture->bind();
+    _colorTexture->bind();
     _program->setUniform("colorTexture", colorUnit);
 
     glBindVertexArray(_vao);
@@ -253,10 +299,12 @@ void RenderableStars::update(const UpdateData& data) {
         }
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER,
-            size*sizeof(GLfloat),
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            size * sizeof(GLfloat),
             &_slicedData[0],
-            GL_STATIC_DRAW);
+            GL_STATIC_DRAW
+        );
 
         GLint positionAttrib = _program->attributeLocation("in_position");
         GLint brightnessDataAttrib = _program->attributeLocation("in_brightness");
@@ -316,17 +364,27 @@ void RenderableStars::update(const UpdateData& data) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
         if (_pointSpreadFunctionTexturePath.value() != "") {
-            _pointSpreadFunctionTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_pointSpreadFunctionTexturePath)));
+            _pointSpreadFunctionTexture = std::move(
+                ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_pointSpreadFunctionTexturePath)
+                )
+            );
             
             if (_pointSpreadFunctionTexture) {
-                LDEBUG("Loaded texture from '" << absPath(_pointSpreadFunctionTexturePath) << "'");
+                LDEBUG("Loaded texture from '" <<
+                       absPath(_pointSpreadFunctionTexturePath) << "'");
                 _pointSpreadFunctionTexture->uploadTexture();
             }
             _pointSpreadFunctionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            delete _psfTextureFile;
-            _psfTextureFile = new ghoul::filesystem::File(_pointSpreadFunctionTexturePath);
-            _psfTextureFile->setCallback([&](const ghoul::filesystem::File&) { _pointSpreadFunctionTextureIsDirty = true; });
+            _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
+                _pointSpreadFunctionTexturePath
+            );
+            _pointSpreadFunctionFile->setCallback(
+                [&](const ghoul::filesystem::File&) {
+                    _pointSpreadFunctionTextureIsDirty = true;
+                }
+            );
         }
         _pointSpreadFunctionTextureIsDirty = false;
     }
@@ -341,9 +399,12 @@ void RenderableStars::update(const UpdateData& data) {
                 _colorTexture->uploadTexture();
             }
 
-            delete _colorTextureFile;
-            _colorTextureFile = new ghoul::filesystem::File(_colorTexturePath);
-            _colorTextureFile->setCallback([&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; });
+            _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
+                _colorTexturePath
+            );
+            _colorTextureFile->setCallback(
+                [&](const ghoul::filesystem::File&) { _colorTextureIsDirty = true; }
+            );
         }
         _colorTextureIsDirty = false;
     }
@@ -361,12 +422,14 @@ bool RenderableStars::loadData() {
         LINFO("Cached file '" << cachedFile << "' used for Speck file '" << _file << "'");
 
         bool success = loadCachedFile(cachedFile);
-        if (success)
+        if (success) {
             return true;
-        else
+        }
+        else {
             FileSys.cacheManager()->removeCacheFile(_file);
             // Intentional fall-through to the 'else' computation to generate the cache
             // file for the next run
+        }
     }
     else {
         LINFO("Cache for Speck file '" << _file << "' not found");
@@ -374,8 +437,9 @@ bool RenderableStars::loadData() {
     LINFO("Loading Speck file '" << _file << "'");
 
     bool success = readSpeckFile();
-    if (!success)
+    if (!success) {
         return false;
+    }
 
     LINFO("Saving cache");
     success = saveCachedFile(cachedFile);
@@ -401,8 +465,9 @@ bool RenderableStars::readSpeckFile() {
         std::ifstream::streampos position = file.tellg();
         std::getline(file, line);
 
-        if (line[0] == '#' || line.empty())
+        if (line[0] == '#' || line.empty()) {
             continue;
+        }
 
         if (line.substr(0, 7) != "datavar" &&
             line.substr(0, 10) != "texturevar" &&
@@ -437,8 +502,9 @@ bool RenderableStars::readSpeckFile() {
         std::getline(file, line);
         std::stringstream str(line);
 
-        for (int i = 0; i < _nValuesPerStar; ++i)
+        for (int i = 0; i < _nValuesPerStar; ++i) {
             str >> values[i];
+        }
 
         _fullData.insert(_fullData.end(), values.begin(), values.end());
     } while (!file.eof());

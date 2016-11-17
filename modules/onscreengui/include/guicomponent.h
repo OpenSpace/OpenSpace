@@ -35,8 +35,6 @@ class GUI;
  */
 class GuiComponent {
 public:
-    friend class GUI;
-
     /**
      * Returns if this component is enabled, that is, if it is currently active and
      * visible on the screen.

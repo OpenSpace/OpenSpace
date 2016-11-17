@@ -59,8 +59,9 @@ void renderBoolProperty(Property* prop, const std::string& ownerName) {
     ImGui::Checkbox(name.c_str(), &value);
     renderTooltip(prop);
 
-    if (value != p->value())
+    if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
+    }
     ImGui::PopID();
 }
 
@@ -90,8 +91,9 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
         break;
     }
     }
-    if (value != p->value())
+    if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    }
     ImGui::PopID();
 }
 
@@ -115,14 +117,16 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
             ImGui::Checkbox(description.c_str(), &selected);
             renderTooltip(prop);
 
-            if (selected)
+            if (selected) {
                 newSelectedIndices.push_back(i);
+            }
         }
 
         if (newSelectedIndices != p->value()) {
             std::string parameters = "{";
-            for (int i : newSelectedIndices)
+            for (int i : newSelectedIndices) {
                 parameters += std::to_string(i) + ",";
+            }
             parameters += "}";
             executeScript(p->fullyQualifiedIdentifier(), parameters);
         }
@@ -148,8 +152,9 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
 
     std::string newValue(buffer);
 
-    if (newValue != p->value())
+    if (newValue != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
+    }
 
     ImGui::PopID();
 }
@@ -166,8 +171,9 @@ void renderIntProperty(Property* prop, const std::string& ownerName) {
     ImGui::SliderInt(name.c_str(), &value, min, max);
     renderTooltip(prop);
 
-    if (value != p->value())
+    if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    }
 
     ImGui::PopID();
 }
@@ -181,17 +187,18 @@ void renderIVec2Property(Property* prop, const std::string& ownerName) {
     float min = std::min(p->minValue().x, p->minValue().y);
     float max = std::max(p->maxValue().x, p->maxValue().y);
     ImGui::SliderInt2(
-                        name.c_str(),
-                        &value.x,
-                        min,
-                        max
-                        );
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
     renderTooltip(prop);
     
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
-                      );
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+        );
     }
     
     ImGui::PopID();
@@ -207,19 +214,20 @@ void renderIVec3Property(Property* prop, const std::string& ownerName) {
     float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
     
     ImGui::SliderInt3(
-                        name.c_str(),
-                        &value.x,
-                        min,
-                        max
-                        );
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
     renderTooltip(prop);
     
-    if (value != p->value())
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," +
-                      std::to_string(value.y) + "," +
-                      std::to_string(value.z) + "}");
-    
+    if (value != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "," +
+            std::to_string(value.z) + "}"
+        );
+    }
     ImGui::PopID();
 }
 
@@ -230,29 +238,32 @@ void renderIVec4Property(Property* prop, const std::string& ownerName) {
     
     IVec4Property::ValueType value = *p;
     float min = std::min(std::min(std::min(
-                                           p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
+        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
+    );
     float max = std::max(std::max(std::max(
-                                           p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
+    );
     
     ImGui::SliderInt4(
-                        name.c_str(),
-                        &value.x,
-                        min,
-                        max
-                        );
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
     renderTooltip(prop);
     
-    if (value != p->value())
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," +
-                      std::to_string(value.y) + "," +
-                      std::to_string(value.z) + "," +
-                      std::to_string(value.w) + "}");
-    
+    if (value != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "," +
+            std::to_string(value.w) + "}"
+        );
+    }
     ImGui::PopID();
 }
-    
-    
+
 void renderFloatProperty(Property* prop, const std::string& ownerName) {
     FloatProperty* p = static_cast<FloatProperty*>(prop);
     std::string name = p->guiName();
@@ -264,8 +275,9 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     ImGui::SliderFloat(name.c_str(), &value, min, max);
     renderTooltip(prop);
 
-    if (value != p->value())
+    if (value != p->value()) {
         executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+    }
 
     ImGui::PopID();
 }
@@ -287,8 +299,9 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
         );
     }
 
@@ -312,11 +325,14 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
     );
     renderTooltip(prop);
 
-    if (value != p->value())
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," +
-                      std::to_string(value.y) + "," +
-                      std::to_string(value.z) + "}");
+    if (value != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "}"
+        );
+    }
 
     ImGui::PopID();
 }
@@ -340,12 +356,15 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
     );
     renderTooltip(prop);
 
-    if (value != p->value())
-        executeScript(p->fullyQualifiedIdentifier(),
-                      "{" + std::to_string(value.x) + "," +
-                      std::to_string(value.y) + "," +
-                      std::to_string(value.z) + "," +
-                      std::to_string(value.w) + "}");
+    if (value != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "," +
+            std::to_string(value.w) + "}"
+        );
+    }
 
     ImGui::PopID();
 }
@@ -355,8 +374,9 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     bool pressed = ImGui::Button(name.c_str());
-    if (pressed)
+    if (pressed) {
         executeScript(prop->fullyQualifiedIdentifier(), "nil");
+    }
     renderTooltip(prop);
 
     ImGui::PopID();
