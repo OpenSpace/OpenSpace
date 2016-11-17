@@ -33,8 +33,6 @@ function preInitialization()
     -- Pacific, Atlantic, Indian Ocean, Arctic, Antarctica.
     --openspace.time.setTime("2018-01-31T10:30:00")
 
-
-
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
@@ -68,8 +66,11 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
-        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
+        --Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
+        --Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
+
+        Position = {-21235144233.239857, -75199922195.855988, 126294682757.316757},
+        Rotation = {-0.118052, 0.976162, -0.084946, 0.161107},
     },
     Modules = {
         "sun",

@@ -835,18 +835,21 @@ namespace openspace {
                 SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
             glm::vec4 sunPosObj = world2Obj * glm::vec4(sunPosWorld.x, sunPosWorld.y, sunPosWorld.z, 1.0);
             _programObject->setUniform("sunPositionObj", glm::vec3(sunPosObj));
-
-            _transmittanceTableTextureUnit.activate();
+            
+            ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
+            transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-            _programObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
+            _programObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
 
-            _irradianceTableTextureUnit.activate();
+            ghoul::opengl::TextureUnit irradianceTableTextureUnit;
+            irradianceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-            _programObject->setUniform("irradianceTexture", _irradianceTableTextureUnit);
+            _programObject->setUniform("irradianceTexture", irradianceTableTextureUnit);
 
-            _inScatteringTableTextureUnit.activate();
+            ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
+            inScatteringTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-            _programObject->setUniform("inscatterTexture", _inScatteringTableTextureUnit);
+            _programObject->setUniform("inscatterTexture", inScatteringTableTextureUnit);
 
             GLint m_viewport[4];
             glGetIntegerv(GL_VIEWPORT, m_viewport);
@@ -1710,7 +1713,8 @@ namespace openspace {
               
         if (!_atmosphereCalculated) {
             //============== Transmittance =================
-            _transmittanceTableTextureUnit.activate();
+            ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
+            transmittanceTableTextureUnit.activate();
             glGenTextures(1, &_transmittanceTableTexture);
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1728,7 +1732,8 @@ namespace openspace {
             //glBindTexture(GL_TEXTURE_2D, 0);
 
             //============== Irradiance =================
-            _irradianceTableTextureUnit.activate();
+            ghoul::opengl::TextureUnit irradianceTableTextureUnit;
+            irradianceTableTextureUnit.activate();
             glGenTextures(1, &_irradianceTableTexture);            
             glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1746,7 +1751,8 @@ namespace openspace {
             //glBindTexture(GL_TEXTURE_2D, 0);
 
             //============== InScattering =================
-            _inScatteringTableTextureUnit.activate();
+            ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
+            inScatteringTableTextureUnit.activate();
             glGenTextures(1, &_inScatteringTableTexture);            
             glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
             glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1766,7 +1772,8 @@ namespace openspace {
         }               
 
         //============== Delta E =================
-        _deltaETableTextureUnit.activate();
+        ghoul::opengl::TextureUnit deltaETableTextureUnit;
+        deltaETableTextureUnit.activate();
         glGenTextures(1, &_deltaETableTexture);
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1781,10 +1788,11 @@ namespace openspace {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error creating Irradiance Delta E texture for Atmosphere computation. OpenGL error: " << errString);
         }
-        glBindTexture(GL_TEXTURE_2D, 0);
+        //glBindTexture(GL_TEXTURE_2D, 0);
 
         //============== Delta S =================
-        _deltaSRayleighTableTextureUnit.activate();
+        ghoul::opengl::TextureUnit deltaSRayleighTableTextureUnit;
+        deltaSRayleighTableTextureUnit.activate();
         glGenTextures(1, &_deltaSRayleighTableTexture);
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1800,9 +1808,10 @@ namespace openspace {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error creating Rayleigh InScattering Delta S exture for Atmosphere computation. OpenGL error: " << errString);
         }
-        glBindTexture(GL_TEXTURE_3D, 0);
+        //glBindTexture(GL_TEXTURE_3D, 0);
 
-        _deltaSMieTableTextureUnit.activate();
+        ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
+        deltaSMieTableTextureUnit.activate();
         glGenTextures(1, &_deltaSMieTableTexture);
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1818,10 +1827,11 @@ namespace openspace {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error creating Mie InScattering Delta S texture for Atmosphere computation. OpenGL error: " << errString);
         }
-        glBindTexture(GL_TEXTURE_3D, 0);
+        //glBindTexture(GL_TEXTURE_3D, 0);
 
         //============== Delta J (Radiance Scattered) =================
-        _deltaJTableTextureUnit.activate();
+        ghoul::opengl::TextureUnit deltaJTableTextureUnit;
+        deltaJTableTextureUnit.activate();
         glGenTextures(1, &_deltaJTableTexture);
         glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1837,7 +1847,7 @@ namespace openspace {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error creating Inscattering Irradiance Delta J texture for Atmosphere computation. OpenGL error: " << errString);
         }
-        glBindTexture(GL_TEXTURE_3D, 0);
+        //glBindTexture(GL_TEXTURE_3D, 0);
     }
 
     void RenderablePlanetAtmosphere::deleteComputationTextures() {
@@ -1883,25 +1893,36 @@ namespace openspace {
         shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
         shaderProg->setUniform("mieG", _miePhaseConstant);
         shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
-
     }
 
 
     void RenderablePlanetAtmosphere::executeCalculations(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize) {
+
+        ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
+        ghoul::opengl::TextureUnit irradianceTableTextureUnit;
+        ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
+        ghoul::opengl::TextureUnit deltaETableTextureUnit;
+        ghoul::opengl::TextureUnit deltaSRayleighTableTextureUnit;
+        ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
+        ghoul::opengl::TextureUnit deltaJTableTextureUnit;
+
         // ===========================================================
         // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
-        // ===========================================================    
+        // ===========================================================
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _transmittanceTableTexture, 0);
         checkFrameBufferState("_transmittanceTableTexture");
         glViewport(0, 0, TRANSMITTANCE_TABLE_WIDTH, TRANSMITTANCE_TABLE_HEIGHT);
         _transmittanceProgramObject->activate();
         loadAtmosphereDataIntoShaderProgram(_transmittanceProgramObject);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        static const float black[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glClearBufferfv(GL_COLOR, 0, black);
         renderQuadForCalc(vao, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("transmittance_texture.ppm"),
             TRANSMITTANCE_TABLE_WIDTH, TRANSMITTANCE_TABLE_HEIGHT);
 #endif
+        _transmittanceProgramObject->deactivate();
         GLenum err;
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
@@ -1913,9 +1934,9 @@ namespace openspace {
         checkFrameBufferState("_deltaETableTexture");
         glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
         _irradianceProgramObject->activate();
-        _transmittanceTableTextureUnit.activate();
+        transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-        _irradianceProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
+        _irradianceProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_irradianceProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
         renderQuadForCalc(vao, vertexSize);
@@ -1923,12 +1944,12 @@ namespace openspace {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("deltaE_table_texture.ppm"),
             DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
 #endif
+        _irradianceProgramObject->deactivate();
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error computing Irradiance Delta E Table. OpenGL error: " << errString);
         }
-        //glBindTexture(GL_TEXTURE_2D, 0);
-
+        
         // line 3 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaSRayleighTableTexture, 0);
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _deltaSMieTableTexture, 0);
@@ -1937,9 +1958,9 @@ namespace openspace {
         checkFrameBufferState("_deltaSRay and _deltaSMie TableTexture");
         glViewport(0, 0, MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
         _inScatteringProgramObject->activate();
-        _transmittanceTableTextureUnit.activate();
+        transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-        _inScatteringProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
+        _inScatteringProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_inScatteringProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
         for (int layer = 0; layer < R_SAMPLES; ++layer) {
@@ -1955,24 +1976,23 @@ namespace openspace {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
         glDrawBuffers(1, drawBuffers);
 
+        _inScatteringProgramObject->deactivate();
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error computing InScattering Rayleigh and Mie Delta Tables. OpenGL error: " << errString);
         }
-        //glBindTexture(GL_TEXTURE_2D, 0);
-
+        
         // line 4 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _irradianceTableTexture, 0);
         checkFrameBufferState("_irradianceTableTexture");
-        //glDrawBuffers(1, drawBuffers);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
         glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
         _deltaEProgramObject->activate();
         _deltaEProgramObject->setUniform("line", 4);
-        _deltaETableTextureUnit.activate();
+        deltaETableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-        _deltaEProgramObject->setUniform("deltaETexture", _deltaETableTextureUnit);
+        _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
         renderQuadForCalc(vao, vertexSize);
@@ -1980,23 +2000,23 @@ namespace openspace {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("irradiance_texture.ppm"),
             DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
 #endif
+        _deltaEProgramObject->deactivate();
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error computing Irradiance E Table. OpenGL error: " << errString);
         }
-        //glBindTexture(GL_TEXTURE_2D, 0);
-
+        
         // line 5 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _inScatteringTableTexture, 0);
         checkFrameBufferState("_inScatteringTableTexture");
         glViewport(0, 0, MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
         _deltaSProgramObject->activate();
-        _deltaSRayleighTableTextureUnit.activate();
+        deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
-        _deltaSMieTableTextureUnit.activate();
+        deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-        _deltaSProgramObject->setUniform("deltaSRTexture", _deltaSRayleighTableTextureUnit);
-        _deltaSProgramObject->setUniform("deltaSMTexture", _deltaSMieTableTextureUnit);
+        _deltaSProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
+        _deltaSProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaSProgramObject);
         glClear(GL_COLOR_BUFFER_BIT);        
         for (int layer = 0; layer < R_SAMPLES; ++layer) {
@@ -2007,12 +2027,12 @@ namespace openspace {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, std::string("S_texture.ppm"),
             MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
 #endif
+        _deltaSProgramObject->deactivate();
         while ((err = glGetError()) != GL_NO_ERROR) {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error computing InScattering S Table. OpenGL error: " << errString);
         }
-        //glBindTexture(GL_TEXTURE_3D, 0);
-
+        
         // loop in line 6 in algorithm 4.1
         for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
 
@@ -2025,18 +2045,18 @@ namespace openspace {
                 _deltaJProgramObject->setUniform("first", 1.0f);
             else
                 _deltaJProgramObject->setUniform("first", 0.0f);
-            _transmittanceTableTextureUnit.activate();
+            transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-            _deltaETableTextureUnit.activate();
+            deltaETableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-            _deltaSRayleighTableTextureUnit.activate();
+            deltaSRayleighTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
-            _deltaSMieTableTextureUnit.activate();
+            deltaSMieTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-            _deltaJProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
-            _deltaJProgramObject->setUniform("deltaETexture", _deltaETableTextureUnit);
-            _deltaJProgramObject->setUniform("deltaSRTexture", _deltaSRayleighTableTextureUnit);
-            _deltaJProgramObject->setUniform("deltaSMTexture", _deltaSMieTableTextureUnit);
+            _deltaJProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
+            _deltaJProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
+            _deltaJProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
+            _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_deltaJProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_deltaJProgramObject, layer);
@@ -2048,13 +2068,12 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
 #endif
+            _deltaJProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing Delta J Table (Sup. Terms). OpenGL error: " << errString);
             }
-            //glBindTexture(GL_TEXTURE_2D, 0);
-            //glBindTexture(GL_TEXTURE_3D, 0);
-
+        
             // line 8 in algorithm 4.1
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
             checkFrameBufferState("_deltaETableTexture");
@@ -2064,15 +2083,15 @@ namespace openspace {
                 _irradianceSupTermsProgramObject->setUniform("first", 1.0f);
             else
                 _irradianceSupTermsProgramObject->setUniform("first", 0.0f);
-            _transmittanceTableTextureUnit.activate();
+            transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-            _deltaSRayleighTableTextureUnit.activate();
+            deltaSRayleighTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
-            _deltaSMieTableTextureUnit.activate();
+            deltaSMieTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-            _irradianceSupTermsProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
-            _irradianceSupTermsProgramObject->setUniform("deltaSRTexture", _deltaSRayleighTableTextureUnit);
-            _irradianceSupTermsProgramObject->setUniform("deltaSMTexture", _deltaSMieTableTextureUnit);
+            _irradianceSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
+            _irradianceSupTermsProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
+            _irradianceSupTermsProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);            
             renderQuadForCalc(vao, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
@@ -2081,13 +2100,12 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
 #endif
+            _irradianceSupTermsProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing Delta E Table (Sup. Terms). OpenGL error: " << errString);
             }
-            //glBindTexture(GL_TEXTURE_2D, 0);
-            //glBindTexture(GL_TEXTURE_3D, 0);
-
+            
             // line 9 in algorithm 4.1
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaSRayleighTableTexture, 0);
             checkFrameBufferState("_deltaSRayleighTableTexture");
@@ -2097,12 +2115,12 @@ namespace openspace {
                 _inScatteringSupTermsProgramObject->setUniform("first", 1.0f);
             else
                 _inScatteringSupTermsProgramObject->setUniform("first", 0.0f);
-            _transmittanceTableTextureUnit.activate();
+            transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-            _deltaJTableTextureUnit.activate();
+            deltaJTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
-            _inScatteringSupTermsProgramObject->setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
-            _inScatteringSupTermsProgramObject->setUniform("deltaJTexture", _deltaJTableTextureUnit);
+            _inScatteringSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
+            _inScatteringSupTermsProgramObject->setUniform("deltaJTexture", deltaJTableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_inScatteringSupTermsProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_inScatteringSupTermsProgramObject, layer);
@@ -2114,13 +2132,12 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
 #endif
+            _inScatteringSupTermsProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing Delta S Table (Sup. Terms). OpenGL error: " << errString);
             }
-            //glBindTexture(GL_TEXTURE_2D, 0);
-            //glBindTexture(GL_TEXTURE_3D, 0);
-
+            
             glEnable(GL_BLEND);
             glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
             glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
@@ -2131,9 +2148,9 @@ namespace openspace {
             glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
             _deltaEProgramObject->activate();
             _deltaEProgramObject->setUniform("line", 10);
-            _deltaETableTextureUnit.activate();
+            deltaETableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-            _deltaEProgramObject->setUniform("deltaETexture", _deltaETableTextureUnit);
+            _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);            
             renderQuadForCalc(vao, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
@@ -2142,20 +2159,20 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
 #endif
+            _deltaEProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing E Table (Sup. Terms). OpenGL error: " << errString);
             }
-            //glBindTexture(GL_TEXTURE_2D, 0);
-
+            
             // line 11 in algorithm 4.1
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _inScatteringTableTexture, 0);
             checkFrameBufferState("_inScatteringTableTexture");
             glViewport(0, 0, MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
             _deltaSSupTermsProgramObject->activate();
-            _deltaSRayleighTableTextureUnit.activate();
+            deltaSRayleighTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
-            _deltaSSupTermsProgramObject->setUniform("deltaSTexture", _deltaSRayleighTableTextureUnit);
+            _deltaSSupTermsProgramObject->setUniform("deltaSTexture", deltaSRayleighTableTextureUnit);
             loadAtmosphereDataIntoShaderProgram(_deltaSSupTermsProgramObject);            
             for (int layer = 0; layer < R_SAMPLES; ++layer) {
                 step3DTexture(_deltaSSupTermsProgramObject, layer, false);
@@ -2167,13 +2184,13 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
 #endif
+            _deltaSSupTermsProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing S Table (Sup. Terms). OpenGL error: " << errString);
             }
 
-            glDisable(GL_BLEND);
-            //glBindTexture(GL_TEXTURE_3D, 0);
+            glDisable(GL_BLEND);            
         }
 
     }
@@ -2223,12 +2240,13 @@ namespace openspace {
         GLint defaultFBO;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
+        GLint m_viewport[4];
+        glGetIntegerv(GL_VIEWPORT, m_viewport);
+
         // Creates the FBO for the calculations
         GLuint calcFBO;
         glGenFramebuffers(1, &calcFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
-        //glReadBuffer(GL_COLOR_ATTACHMENT0);
-        //glDrawBuffer(GL_COLOR_ATTACHMENT1);
         GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, drawBuffers);
 
@@ -2241,9 +2259,6 @@ namespace openspace {
         GLuint calcVAO;
         GLuint calcVBO;
         createRenderQuad(&calcVAO, &calcVBO, 1.0f);
-
-        GLint m_viewport[4];
-        glGetIntegerv(GL_VIEWPORT, m_viewport);
 
 
         /*if (_atmosphereCalculated) {
@@ -2339,7 +2354,6 @@ namespace openspace {
         /*GLint defaultFBO;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);    */
 
-        //_atmosphereTextureUnit.activate();
         ghoul::opengl::TextureUnit atmosphereTextureUnit;
         atmosphereTextureUnit.activate();
         glGenTextures(1, &_atmosphereTexture);
@@ -2495,7 +2509,7 @@ namespace openspace {
     }
 
     void RenderablePlanetAtmosphere::checkFrameBufferState(const std::string & codePosition) const {
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framework not built. " + codePosition);
             GLenum fbErr = glCheckFramebufferStatus(GL_FRAMEBUFFER);
             switch (fbErr) {

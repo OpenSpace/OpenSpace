@@ -152,20 +152,13 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _cleanTextureProgramObject;
-        ghoul::opengl::TextureUnit _dummyTextureUnit;
-        ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
-        ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
-        ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
-        ghoul::opengl::TextureUnit _deltaETableTextureUnit;
-        ghoul::opengl::TextureUnit _deltaSRayleighTableTextureUnit;
-        ghoul::opengl::TextureUnit _deltaSMieTableTextureUnit;
-        ghoul::opengl::TextureUnit _deltaJTableTextureUnit;
-        ghoul::opengl::TextureUnit _atmosphereTextureUnit;
+        
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
         std::unique_ptr<ghoul::opengl::Texture> _reflectanceTexture;
         std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
         std::unique_ptr<ghoul::opengl::Texture> _cloudsTexture;
+        
         GLuint _transmittanceTableTexture;
         GLuint _irradianceTableTexture;
         GLuint _inScatteringTableTexture;
