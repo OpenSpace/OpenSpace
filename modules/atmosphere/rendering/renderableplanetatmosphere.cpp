@@ -1906,10 +1906,23 @@ namespace openspace {
         ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
         ghoul::opengl::TextureUnit deltaJTableTextureUnit;
 
+        // Saving current OpenGL state
         bool blendEnabled = glIsEnabled(GL_BLEND);
+        GLint blendEquationRGB;
+        GLint blendEquationAlpha;
+        GLint blendDestAlpha;
+        GLint blendDestRGB;
+        GLint blendSrcAlpha;
+        GLint blendSrcRGB;
 
         if (blendEnabled)
             glDisable(GL_BLEND);
+        glGetIntegerv(GL_BLEND_EQUATION_RGB, &blendEquationRGB);
+        glGetIntegerv(GL_BLEND_EQUATION_ALPHA, &blendEquationAlpha);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDestAlpha);
+        glGetIntegerv(GL_BLEND_DST_RGB, &blendDestRGB);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrcAlpha);
+        glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcRGB);
 
         // ===========================================================
         // See Precomputed Atmosphere Scattering from Bruneton et al. paper, algorithm 4.1:
@@ -2198,8 +2211,12 @@ namespace openspace {
             glDisable(GL_BLEND);            
         }
 
+        // Restores OpenGL blending state
         if (blendEnabled)
             glEnable(GL_BLEND);
+        
+        glBlendEquationSeparate(blendEquationRGB, blendEquationAlpha);
+        glBlendFuncSeparate(blendSrcRGB, blendDestRGB, blendSrcAlpha, blendDestAlpha);
 
     }
 
