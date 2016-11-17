@@ -72,10 +72,10 @@ return {
                 Mie = {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
-                        Scattering = {4e-3, 4e-3, 4e-3},
-                        --Scattering = {2e-5, 2e-5, 2e-5},
+                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
                         -- Extinction coefficients are a fraction of the Scattering coefficients
-                        Extinction = {4e-3/0.9, 4e-3/0.9, 4e-3/0.9}
+                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
                         -- Height scale (atmosphere thickness for constant density) in Km
                     },
                     H_M = 1.2,

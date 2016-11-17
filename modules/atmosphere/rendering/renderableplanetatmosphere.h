@@ -125,7 +125,7 @@ namespace openspace {
         void resetAtmosphereTextures(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
         void createAtmosphereFBO();
         void createRenderQuad(GLuint * vao, GLuint * vbo, const GLfloat size);
-        void renderQuadForCalc(const GLuint vao, const GLsizei size);
+        void renderQuadForCalc(const GLuint vao, const GLsizei numberOfVertices);
         void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg,
             const int layer, const bool doCalc = true);
         void saveTextureToPPMFile(const GLenum color_buffer_attachment, const std::string & fileName,
