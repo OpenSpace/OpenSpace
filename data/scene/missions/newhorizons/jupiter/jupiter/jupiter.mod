@@ -115,24 +115,20 @@ return {
         },
     },    
     -- JupiterTrail module
-     {   
-         Name = "JupiterTrail",
-         Parent = "SolarSystemBarycenter",
-         Renderable = {
-             Type = "RenderableTrail",
-             Body = "JUPITER BARYCENTER",
-             Frame = "GALACTIC",
-             Observer = "SUN",
-             RGB = { 0.8, 0.7, 0.7 },
-             TropicalOrbitPeriod = 4330.595 ,
-             EarthOrbitRatio = 11.857,
-             DayLength = 9.9259,
-             Textures = {
-                 Type = "simple",
-                 Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                 -- need to add different texture
-             },  
-         },
-     }
+    {   
+        Name = "JupiterTrail",
+        Parent = "SolarSystemBarycenter",
+        Renderable = {
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "JUPITER BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 0.8, 0.7, 0.7 },
+            Period = 4330.595,
+            Resolution = 1000
+        }
+    }
     
 }

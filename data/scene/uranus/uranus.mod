@@ -51,19 +51,15 @@ return {
         Name = "UranusTrail",
         Parent = "UranusBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "URANUS BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.60,0.95,1.00 },
-            TropicalOrbitPeriod = 30588.740 ,
-            EarthOrbitRatio = 83.749,
-            DayLength = 17.24,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "URANUS BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = {0.60, 0.95, 1.00 },
+            Period = 30588.740,
+            Resolution = 1000
         },
     }
 }

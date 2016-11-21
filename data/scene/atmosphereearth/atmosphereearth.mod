@@ -107,15 +107,20 @@ return {
         Name = "EarthTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EARTH",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.5, 0.8, 1.0},
-            TropicalOrbitPeriod = 365.242,
-            EarthOrbitRatio = 1,
-            DayLength = 24
-        }
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN"
+            },
+            Color = { 0.5, 0.8, 1.0 },
+            -- StartTime = "2016 JUN 01 12:00:00.000",
+            -- EndTime = "2017 JAN 01 12:00:00.000",
+            -- SampleInterval = 3600
+            Period = 365.242,
+            Resolution = 1000
+        },
+        GuiName = "/Solar/EarthTrail"
     },
     {
         Name = "EarthMarker",

@@ -32,11 +32,12 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string KeyBody = "Body";
-    const std::string KeyObserver = "Observer";
-    const std::string KeyKernels = "Kernels";
+    const char* KeyBody = "Body";
+    const char* KeyObserver = "Observer";
+    const char* KeyFrame = "Frame";
+    const char* KeyKernels = "Kernels";
 
-    const std::string ReferenceFrame = "GALACTIC";
+    const char* DefaultReferenceFrame = "GALACTIC";
 }
 
 namespace openspace {
@@ -44,7 +45,7 @@ namespace openspace {
 Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
-    return {
+    return{
         "Spice Translation",
         "base_translation_spicetranslation",
         {
@@ -72,11 +73,18 @@ Documentation SpiceTranslation::Documentation() {
                 Optional::No
             },
             {
+                KeyFrame,
+                new StringAnnotationVerifier(
+                    "A valid SPICE NAIF name for a reference frame"
+                ),
+                "This is the SPICE NAIF name for the reference frame in which the "
+                "position should be retrieved. The default value is GALACTIC",
+                Optional::Yes
+            },
+            {
                 KeyKernels,
                 new OrVerifier(
-                    new TableVerifier({
-                        { "*", new StringVerifier }
-                    }),
+                    new StringListVerifier,
                     new StringVerifier
                 ),
                 "A single kernel or list of kernels that this SpiceTranslation depends "
@@ -92,6 +100,7 @@ Documentation SpiceTranslation::Documentation() {
 SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     : _target("target", "Target", "")
     , _origin("origin", "Origin", "")
+    , _frame("frame", "Reference Frame", DefaultReferenceFrame)
     , _kernelsLoadedSuccessfully(true)
 {
     documentation::testSpecificationAndThrow(
@@ -102,6 +111,10 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 
     _target = dictionary.value<std::string>(KeyBody);
     _origin = dictionary.value<std::string>(KeyObserver);
+
+    if (dictionary.hasKey(KeyFrame)) {
+        _frame = dictionary.value<std::string>(KeyFrame);
+    }
 
     auto loadKernel = [](const std::string& kernel) {
         if (!FileSys.fileExists(kernel)) {
@@ -142,7 +155,7 @@ glm::dvec3 SpiceTranslation::position() const {
 void SpiceTranslation::update(const UpdateData& data) {
     double lightTime = 0.0;
     _position = SpiceManager::ref().targetPosition(
-        _target, _origin, ReferenceFrame, {}, data.time, lightTime
+        _target, _origin, _frame, {}, data.time, lightTime
     ) * glm::pow(10.0, 3.0);
 }
 

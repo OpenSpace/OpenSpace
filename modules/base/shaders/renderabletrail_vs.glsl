@@ -22,21 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-uniform float forceFade;
-uniform vec3 color;
+#version __CONTEXT__
 
-in vec4 vs_positionScreenSpace;
-in float fade;
+// Fragile! Keep in sync with RenderableTrail::render
+#define VERTEX_SORTING_NEWESTFIRST 0
+#define VERTEX_SORTING_OLDESTFIRST 1
+#define VERTEX_SORTING_NOSORTING 2
 
-#include "PowerScaling/powerScaling_fs.hglsl"
-#include "fragment.glsl"
+layout(location = 0) in vec3 in_point_position;
 
-Fragment getFragment() {
-    vec4 c = vec4(color * fade * forceFade, 1.0);
-    Fragment frag;
-    frag.color = c;
-    frag.depth = vs_positionScreenSpace.w;
-    frag.blend = BLEND_MODE_ADDITIVE;
+out vec4 vs_positionScreenSpace;
+out float fade;
 
-    return frag;
+uniform dmat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
+uniform int idOffset;
+uniform int nVertices;
+uniform bool useLineFade;
+uniform float lineFade;
+uniform int vertexSortingMethod;
+uniform int pointSize;
+uniform int stride;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main() {
+    int modId = gl_VertexID;
+
+    if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
+        // Account for a potential rolling buffer
+        modId = gl_VertexID - idOffset;
+        if (modId < 0) {
+            modId += nVertices;
+        }
+
+        // Convert the index to a [0,1] ranger
+        float id = float(modId) / float(nVertices);
+
+        if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
+            id = 1.0 - id;
+        }
+
+        fade = clamp(id * lineFade, 0.0, 1.0); 
+    }
+    else {
+        fade = 1.0;
+    }
+
+    vs_positionScreenSpace = z_normalization(
+        projectionTransform * vec4(modelViewTransform * dvec4(in_point_position, 1))
+    );
+
+    gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? float(pointSize) : float(pointSize) / 2;
+    gl_Position = vs_positionScreenSpace;
 }

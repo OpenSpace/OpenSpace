@@ -30,16 +30,16 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderableconstellationbounds.h>
-#include <modules/base/rendering/renderablestars.h>
-#include <modules/base/rendering/renderabletrail.h>
-#include <modules/base/rendering/renderabletrailnew.h>
+#include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablepath.h>
+#include <modules/base/rendering/renderableplanet.h>
 #include <modules/base/rendering/renderablerings.h>
 #include <modules/base/rendering/renderablesphere.h>
 #include <modules/base/rendering/renderablesphericalgrid.h>
-#include <modules/base/rendering/renderableplanet.h>
+#include <modules/base/rendering/renderablestars.h>
+#include <modules/base/rendering/renderabletrailorbit.h>
+#include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/simplespheregeometry.h>
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/simplespheregeometry.h>
@@ -105,8 +105,8 @@ void BaseModule::internalInitialize() {
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
-    fRenderable->registerClass<RenderableTrail>("RenderableTrail");
-    fRenderable->registerClass<RenderableTrailNew>("RenderableTrailNew");
+    fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
+    fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
 
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
@@ -141,6 +141,8 @@ std::vector<Documentation> BaseModule::documentations() const {
         StaticTranslation::Documentation(),
         SpiceTranslation::Documentation(),
         RenderableRings::Documentation(),
+        RenderableTrailOrbit::Documentation(),
+        RenderableTrailTrajectory::Documentation(),
         modelgeometry::ModelGeometry::Documentation(),
         planetgeometry::PlanetGeometry::Documentation()
     };

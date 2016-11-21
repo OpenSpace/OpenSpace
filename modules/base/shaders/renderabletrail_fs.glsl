@@ -22,30 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform vec4 objectVelocity;
+in vec4 vs_positionScreenSpace;
+in float fade;
 
-uniform uint nVertices;
-uniform float lineFade;
+uniform vec3 color;
+uniform int renderPhase;
 
-layout(location = 0) in vec4 in_point_position;
+#include "fragment.glsl"
 
-out vec4 vs_positionScreenSpace;
-out float fade;
+Fragment getFragment() {
+    if (renderPhase == RenderPhasePoints) {
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        if (dot(circCoord, circCoord) > 1.0) {
+            discard;
+        }
+    }
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    Fragment frag;
+    frag.color = vec4(color * fade, fade);
+    frag.depth = vs_positionScreenSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
-void main() {
-    float id = float(gl_VertexID) / float(nVertices * lineFade);
-    fade = 1.0 - id;
-
-    // Convert from psc to regular homogenous coordinates
-    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
-    vec4 positionClipSpace = projectionTransform * modelViewTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    
-    gl_Position = vs_positionScreenSpace;
+    return frag;
 }

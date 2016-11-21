@@ -895,13 +895,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
 
+    _renderEngine->updateSceneGraph();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();
     _renderEngine->updateShaderPrograms();
     
     if (!_isMaster) {
-        _renderEngine->updateSceneGraph();
         _renderEngine->camera()->invalidateCache();
     }   
 
