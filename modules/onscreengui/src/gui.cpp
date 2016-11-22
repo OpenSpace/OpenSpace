@@ -441,27 +441,29 @@ void GUI::endFrame() {
         _program->rebuildFromFile();
     }
 
-    render();
-
-    if (_globalProperty.isEnabled()) {
-        _globalProperty.render();
-    }
-    if (_property.isEnabled()) {
-        _property.render();
-    }
-    if (_screenSpaceProperty.isEnabled()) {
-        _screenSpaceProperty.render();
-    }
-
     if (OsEng.renderEngine().doesPerformanceMeasurements()) {
         _performance.render();
     }
 
-    if (_help.isEnabled()) {
-        _help.render();
-    }
-    if (_iswa.isEnabled()) {
-        _iswa.render();
+    if (_isEnabled) {
+        render();
+
+        if (_globalProperty.isEnabled()) {
+            _globalProperty.render();
+        }
+        if (_property.isEnabled()) {
+            _property.render();
+        }
+        if (_screenSpaceProperty.isEnabled()) {
+            _screenSpaceProperty.render();
+        }
+
+        if (_help.isEnabled()) {
+            _help.render();
+        }
+        if (_iswa.isEnabled()) {
+            _iswa.render();
+        }
     }
 
     ImGui::Render();

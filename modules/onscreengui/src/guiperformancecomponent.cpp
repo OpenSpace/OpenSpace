@@ -56,7 +56,15 @@ namespace gui {
 
 GuiPerformanceComponent::GuiPerformanceComponent()
     : GuiComponent("PerformanceComponent")
-{}
+    , _sortingSelection("sortingSelection", "Sorting", -1, -1, 6)
+    , _sceneGraphIsEnabled("showSceneGraph", "Show Scene Graph Measurements", false)
+    , _functionsIsEnabled("showFunctions", "Show Function Measurements", false)
+{
+    addProperty(_sortingSelection);
+
+    addProperty(_sceneGraphIsEnabled);
+    addProperty(_functionsIsEnabled);
+}
 
 void GuiPerformanceComponent::render() {
     using ghoul::SharedMemory;
@@ -67,8 +75,12 @@ void GuiPerformanceComponent::render() {
     _isEnabled = v;
     PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
 
-    ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
-    ImGui::Checkbox("Functions", &_functionsIsEnabled);
+    v = _sceneGraphIsEnabled;
+    ImGui::Checkbox("SceneGraph", &v);
+    _sceneGraphIsEnabled = v;
+    v = _functionsIsEnabled;
+    ImGui::Checkbox("Functions", &v);
+    _functionsIsEnabled = v;
         
     ImGui::Spacing();
         
@@ -77,45 +89,49 @@ void GuiPerformanceComponent::render() {
     }
         
     if (_sceneGraphIsEnabled) {
-        ImGui::Begin("SceneGraph", &_sceneGraphIsEnabled);
+        bool v = _sceneGraphIsEnabled;
+        ImGui::Begin("SceneGraph", &v);
+        _sceneGraphIsEnabled = v;
         
         // The indices correspond to the index into the average array further below
         ImGui::Text("Sorting");
+        int sorting = _sortingSelection;
         ImGui::RadioButton(
             "No Sorting",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::NoSorting)
         );
         ImGui::RadioButton(
             "UpdateTranslation",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::UpdateTranslation)
         );
         ImGui::RadioButton(
             "UpdateRotation",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::UpdateRotation)
         );
         ImGui::RadioButton(
             "UpdateScaling",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::UpdateScaling)
         );
         ImGui::RadioButton(
             "UpdateRender",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::UpdateRender)
         );
         ImGui::RadioButton(
             "RenderTime",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::Render)
         );
         ImGui::RadioButton(
             "TotalTime",
-            &_sortingSelection,
+            &sorting,
             static_cast<int>(Sorting::Total)
         );
+        _sortingSelection = sorting;
 
         // Later, we will sort this indices list instead of the real values for
         // performance reasons
@@ -231,7 +247,7 @@ void GuiPerformanceComponent::render() {
             
         // If we don't want to sort, we will leave the indices list alone, thus
         // leaving them in the regular ordering
-        Sorting selection = Sorting(_sortingSelection);
+        Sorting selection = Sorting(sorting);
         if (selection != Sorting::NoSorting) {
             std::function<bool(size_t, size_t)> sortFunc;
 
@@ -383,7 +399,9 @@ void GuiPerformanceComponent::render() {
     }
         
     if (_functionsIsEnabled) {
-        ImGui::Begin("Functions", &_functionsIsEnabled);
+        bool v = _functionsIsEnabled;
+        ImGui::Begin("Functions", &v);
+        _functionsIsEnabled = v;
         using namespace performance;
             
         for (int i = 0; i < layout->nFunctionEntries; ++i) {
