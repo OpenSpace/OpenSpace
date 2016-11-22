@@ -25,6 +25,9 @@
 #ifndef __GUICOMPONENT_H__
 #define __GUICOMPONENT_H__
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
+
 namespace openspace {
 namespace gui {
 
@@ -33,8 +36,11 @@ class GUI;
 /**
  * The base class for a GUI component that can be rendered to the screen.
  */
-class GuiComponent {
+class GuiComponent : public properties::PropertyOwner {
 public:
+    /// Constructor that initializes this components member variables
+    GuiComponent(std::string name);
+
     /**
      * Returns if this component is enabled, that is, if it is currently active and
      * visible on the screen.
@@ -66,7 +72,7 @@ public:
 
 protected:
     /// <code>true</code> if this component is enabled and visible on the screen
-    bool _isEnabled = false;
+    properties::BoolProperty _isEnabled;
 };
 
 } // namespace gui

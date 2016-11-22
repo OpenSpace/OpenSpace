@@ -221,11 +221,20 @@ namespace openspace {
 namespace gui {
 
 GUI::GUI() 
-    : GuiComponent()
+    : GuiComponent("Main")
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
-{}
+{
+    addPropertySubOwner(_help);
+    addPropertySubOwner(_origin);
+    addPropertySubOwner(_performance);
+    addPropertySubOwner(_globalProperty);
+    addPropertySubOwner(_property);
+    addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_time);
+    addPropertySubOwner(_iswa);
+}
 
 GUI::~GUI() {
     ImGui::Shutdown();
@@ -565,31 +574,5 @@ void GUI::render() {
     ImGui::End();
 }
     
-scripting::LuaLibrary GUI::luaLibrary() {
-    return {
-        "gui",
-        {
-            {
-                "show",
-                &luascriptfunctions::gui::show,
-                "",
-                "Shows the console"
-            },
-            {
-                "hide",
-                &luascriptfunctions::gui::hide,
-                "",
-                "Hides the console"
-            },
-            {
-                "toggle",
-                &luascriptfunctions::gui::toggle,
-                "",
-                "Toggles the console"
-            }
-        }
-    };
-}
-
 } // namespace gui
 } // namespace openspace

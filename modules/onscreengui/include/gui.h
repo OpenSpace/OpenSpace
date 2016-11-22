@@ -61,8 +61,6 @@ public:
 
     void render();
 
-    static openspace::scripting::LuaLibrary luaLibrary();
-
 //protected:
     GuiHelpComponent _help;
     GuiOriginComponent _origin;

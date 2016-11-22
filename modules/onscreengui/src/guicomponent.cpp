@@ -27,6 +27,14 @@
 namespace openspace {
 namespace gui {
 
+GuiComponent::GuiComponent(std::string name)
+    : _isEnabled("enabled", "Is Enabled", false)
+{
+    setName(std::move(name));
+
+    addProperty(_isEnabled);
+}
+
 bool GuiComponent::isEnabled() const {
     return _isEnabled;
 }

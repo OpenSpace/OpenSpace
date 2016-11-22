@@ -32,6 +32,10 @@
 namespace openspace {
 namespace gui {
 
+GuiTimeComponent::GuiTimeComponent()
+    : GuiComponent("Time")
+{}
+
 void GuiTimeComponent::render() {
     float deltaTime = static_cast<float>(Time::ref().deltaTime());
     

@@ -54,12 +54,18 @@ namespace {
 namespace openspace {
 namespace gui {
 
+GuiPerformanceComponent::GuiPerformanceComponent()
+    : GuiComponent("PerformanceComponent")
+{}
+
 void GuiPerformanceComponent::render() {
     using ghoul::SharedMemory;
     using namespace performance;
 
-    ImGui::Begin("Performance", &_isEnabled);
-        PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
+    bool v = _isEnabled;
+    ImGui::Begin("Performance", &v);
+    _isEnabled = v;
+    PerformanceLayout* layout = OsEng.renderEngine().performanceManager()->performanceData();
 
     ImGui::Checkbox("SceneGraph", &_sceneGraphIsEnabled);
     ImGui::Checkbox("Functions", &_functionsIsEnabled);

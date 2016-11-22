@@ -32,6 +32,8 @@ namespace gui {
 
 class GuiOriginComponent : public GuiComponent {
 public:
+    GuiOriginComponent();
+
     void render() override;
 };
 

@@ -40,6 +40,8 @@ namespace gui {
 
 class GuiPerformanceComponent : public GuiComponent {
 public:
+    GuiPerformanceComponent();
+
     void render() override;
 
 protected:

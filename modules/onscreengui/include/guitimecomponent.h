@@ -32,6 +32,8 @@ namespace gui {
 
 class GuiTimeComponent : public GuiComponent {
 public:
+    GuiTimeComponent();
+
     void render() override;
 };
 
