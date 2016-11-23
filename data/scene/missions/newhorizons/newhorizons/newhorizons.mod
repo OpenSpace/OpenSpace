@@ -176,26 +176,21 @@ return {
         Name = "NewHorizonsTrailPluto",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "NEW HORIZONS",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            -- Optional rendering properties
-            LineColor = { 1.0, 0.8, 0.4 },
-            PointColor = { 1.0, 0.8, 0.4 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 1,
-            LineWidth = 2,
-            ShowTimeStamps = true,
-            RenderFullTrail = true,
-            -- Time interval
-            TimeRange = {
-                Start = "2015 JUL 07 12:00:00",
-                End = "2015 JUL 17 12:00:00"
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEW HORIZONS",
+                Observer = "PLUTO BARYCENTER"
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 3, 
+            Color = { 1.0, 0.8, 0.4 },
+            ShowFullTrail = true,
+            StartTime = "2015 JUL 07 12:00:00",
+            EndTime = "2015 JUL 17 12:00:00",
+            PointSize = 5,
+            SampleInterval = 3600,
+            TimeStampSubsampleFactor = 4,
+            EnableFade = false,
+            Rendering = "Lines+Points"
         },
     },
     --[[

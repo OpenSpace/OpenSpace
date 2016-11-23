@@ -57,7 +57,7 @@ return {
         "jupiter/jupiter",
         "saturn/saturn",
         "uranus",
-        "neptune",
+        -- "neptune",
         "stars",
         "milkyway",
         "missions/rosetta",

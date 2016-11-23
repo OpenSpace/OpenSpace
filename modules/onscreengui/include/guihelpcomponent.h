@@ -32,6 +32,8 @@ namespace gui {
 
 class GuiHelpComponent : public GuiComponent {
 public:
+    GuiHelpComponent();
+
     void render() override;
 };
 

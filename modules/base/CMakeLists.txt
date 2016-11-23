@@ -38,7 +38,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailnew.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
@@ -64,7 +65,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablestars.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailnew.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simplespheregeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
@@ -79,10 +81,6 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/constellationbounds_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ephemeris_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ephemeris_vs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrailnew_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrailnew_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/imageplane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
@@ -96,6 +94,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/plane_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pscstandard_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrail_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderabletrail_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/rings_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/sphere_fs.glsl

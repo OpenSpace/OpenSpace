@@ -40,14 +40,17 @@ namespace gui {
 
 class GuiPerformanceComponent : public GuiComponent {
 public:
+    GuiPerformanceComponent();
+
     void render() override;
 
 protected:
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
-    int _sortingSelection = -1;
-    
-    bool _sceneGraphIsEnabled = false;
-    bool _functionsIsEnabled = false;
+
+    properties::IntProperty _sortingSelection;
+
+    properties::BoolProperty _sceneGraphIsEnabled;
+    properties::BoolProperty _functionsIsEnabled;
 };
 
 } // namespace gui

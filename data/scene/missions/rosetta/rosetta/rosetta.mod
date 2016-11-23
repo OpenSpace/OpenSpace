@@ -365,52 +365,32 @@ return {
         Name = "RosettaCometTrail",
         Parent = "67PBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "ROSETTA",
-            Frame = "GALACTIC",
-            Observer = "CHURYUMOV-GERASIMENKO",
-            -- Optional rendering properties
-            LineColor = { 0.288, 0.375, 0.934 },
-            PointColor = { 0.9, 0.2, 0.9 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 0.5, -- [0,1]
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2014 AUG 01 12:00:00",
-                End = "2016 SEP 30 12:00:00"
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "ROSETTA",
+                Observer = "CHURYUMOV-GERASIMENKO",
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 3,
+            Color = { 0.288, 0.375, 0.934 },
+            StartTime = "2014 AUG 01 12:00:00",
+            EndTime = "2016 SEP 30 12:00:00",
+            SampleInterval = 3600,
         },
     },
     {
         Name = "PhilaeTrail",
         Parent = "67PBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "PHILAE",
-            Frame = "GALACTIC",
-            Observer = "CHURYUMOV-GERASIMENKO",
-            -- Optional rendering properties
-            LineColor = { 1.0, 1.0, 1.0 },
-            PointColor = { 0.9, 0.2, 0.9 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 0.5, -- [0,1]
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2014 NOV 12 08:35:00",
-                End = "2014 NOV 12 17:00:00"
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PHILAE",
+                Observer = "CHURYUMOV-GERASIMENKO",
             },
-            SampleDeltaTime = 2, -- Seconds between each point
-            SubSamples = 0,
+            Color = { 0.8, 0.5, 1.0 },
+            StartTime = "2014 NOV 12 08:35:00",
+            EndTime = "2014 NOV 12 17:00:00",
+            SampleInterval = 2,
         },
     },    
     {

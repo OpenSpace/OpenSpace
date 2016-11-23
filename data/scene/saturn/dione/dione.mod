@@ -33,14 +33,15 @@ return {
         Name = "DioneTrail",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "DIONE",
-            Frame = "GALACTIC",
-            Observer = "SATURN BARYCENTER",
-            RGB = { 0.5, 0.3, 0.3 },
-            TropicalOrbitPeriod = 60,
-            EarthOrbitRatio = 0.0075,
-            DayLength = 0.9424218
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "DIONE",
+                Observer = "SATURN BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period = 66 / 24,
+            Resolution = 1000
         }
     }
 }

@@ -31,8 +31,9 @@
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <QApplication>
 #include <QCheckBox>

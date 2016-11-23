@@ -33,8 +33,14 @@ namespace {
 namespace openspace {
 namespace gui {
 
+GuiHelpComponent::GuiHelpComponent()
+    : GuiComponent("Help")
+{}
+
 void GuiHelpComponent::render() {
-    ImGui::Begin("Help", &_isEnabled, size, 0.5f);
+    bool v = _isEnabled;
+    ImGui::Begin("Help", &v, size, 0.5f);
+    _isEnabled = v;
     ImGui::ShowUserGuide();
     ImGui::End();
 }

@@ -52,25 +52,20 @@ return {
             Texture = "textures/Nix-Text.png"
         },
     },
-    -- StyxTrail module
+    -- NixTrail module
     {   
         Name = "NixTrail",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "NIX",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            RGB = {0.00,0.62,1.00},
-            TropicalOrbitPeriod = 150 ,
-            EarthOrbitRatio = 0.12,
-            DayLength = 1,
-            DayLength = 16.11,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NIX",
+                Observer = "PLUTO BARYCENTER",
+            },
+            Color = {0.00, 0.62, 1.00},
+            Period = 24.85463,
+            Resolution = 1000
         },
     }
     

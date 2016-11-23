@@ -21,15 +21,59 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-uniform float exposure;
 
-vec4 HDR(vec4 color) {
-    color *= exposure;
-    
-    color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.r);
-    color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.g);
-    color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.b);
-    
-    return color;
+#version __CONTEXT__
+
+// Fragile! Keep in sync with RenderableTrail::render
+#define VERTEX_SORTING_NEWESTFIRST 0
+#define VERTEX_SORTING_OLDESTFIRST 1
+#define VERTEX_SORTING_NOSORTING 2
+
+layout(location = 0) in vec3 in_point_position;
+
+out vec4 vs_positionScreenSpace;
+out float fade;
+
+uniform dmat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
+uniform int idOffset;
+uniform int nVertices;
+uniform bool useLineFade;
+uniform float lineFade;
+uniform int vertexSortingMethod;
+uniform int pointSize;
+uniform int stride;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main() {
+    int modId = gl_VertexID;
+
+    if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
+        // Account for a potential rolling buffer
+        modId = gl_VertexID - idOffset;
+        if (modId < 0) {
+            modId += nVertices;
+        }
+
+        // Convert the index to a [0,1] ranger
+        float id = float(modId) / float(nVertices);
+
+        if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
+            id = 1.0 - id;
+        }
+
+        fade = clamp(id * lineFade, 0.0, 1.0); 
+    }
+    else {
+        fade = 1.0;
+    }
+
+    vs_positionScreenSpace = z_normalization(
+        projectionTransform * vec4(modelViewTransform * dvec4(in_point_position, 1))
+    );
+
+    gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? float(pointSize) : float(pointSize) / 2;
+    gl_Position = vs_positionScreenSpace;
 }

@@ -61,6 +61,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/font/font.h>
 #include <ghoul/glm.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -368,6 +369,7 @@ void RenderEngine::updateSceneGraph() {
         1,
         Time::ref().j2000Seconds(),
         Time::ref().deltaTime(),
+        Time::ref().paused(),
         Time::ref().timeJumped(),
         _performanceManager != nullptr
     });

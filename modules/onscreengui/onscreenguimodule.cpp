@@ -24,10 +24,16 @@
 
 #include <modules/onscreengui/onscreenguimodule.h>
 
+#include <modules/onscreengui/include/gui.h>
+
+#include <openspace/engine/openspaceengine.h>
+
 namespace openspace {
 
 OnScreenGUIModule::OnScreenGUIModule() 
     : OpenSpaceModule("OnScreenGUI")
-{}
+{
+    addPropertySubOwner(OsEng.gui());
+}
 
 } // namespace openspace

@@ -3,6 +3,14 @@ return {
     {
         Name = "MarsBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MARS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        }
     },
     -- Mars module
     {   
@@ -28,41 +36,27 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "MARS BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
                 DestinationFrame = "ECLIPJ2000",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
             },
         }
     },
     -- MarsTrail module
     {   
         Name = "MarsTrail",
-        Parent = "MarsBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "MARS BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 1, 0.8, 0.5 },
-            TropicalOrbitPeriod = 686.973,
-            EarthOrbitRatio = 1.881,
-            DayLength = 24.6597,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MARS BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 0.814, 0.305, 0.220 },
+            Period = 686.973,
+            Resolution = 1000
         }
     }
 }

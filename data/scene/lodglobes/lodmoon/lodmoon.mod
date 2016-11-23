@@ -61,14 +61,15 @@ return {
         Name = "MoonTrail",
         Parent = "EarthBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "MOON",
-            Frame = "GALACTIC",
-            Observer = "EARTH BARYCENTER",
-            RGB = { 0.5, 0.3, 0.3 },
-            TropicalOrbitPeriod =  60,
-            EarthOrbitRatio = 0.01,
-            DayLength = 1.0,
-        }
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MOON",
+                Observer = "EARTH BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period =  27,
+            Resolution = 1000
+        },
     }
 }

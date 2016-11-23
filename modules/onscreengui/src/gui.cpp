@@ -206,8 +206,12 @@ void addScreenSpaceRenderable(std::string texturePath) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
     }
+
+    texturePath = absPath(texturePath);
+    texturePath = FileSys.convertPathSeparator(texturePath, '/');
+
     std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '" + absPath(texturePath) + "' }";
+        "{Type = 'ScreenSpaceImage', TexturePath = '" + texturePath + "' }";
     std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
@@ -217,11 +221,20 @@ namespace openspace {
 namespace gui {
 
 GUI::GUI() 
-    : GuiComponent()
+    : GuiComponent("Main")
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
-{}
+{
+    addPropertySubOwner(_help);
+    addPropertySubOwner(_origin);
+    addPropertySubOwner(_performance);
+    addPropertySubOwner(_globalProperty);
+    addPropertySubOwner(_property);
+    addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_time);
+    addPropertySubOwner(_iswa);
+}
 
 GUI::~GUI() {
     ImGui::Shutdown();
@@ -324,8 +337,9 @@ void GUI::initializeGL() {
         "${MODULE_ONSCREENGUI}/shaders/gui_vs.glsl",
         "${MODULE_ONSCREENGUI}/shaders/gui_fs.glsl"
     );
-    if (!_program)
+    if (!_program) {
         return;
+    }
 
     unsigned char* pngData;
     glm::ivec2 textureSize;
@@ -406,8 +420,7 @@ void GUI::deinitializeGL() {
 }
 
 void GUI::startFrame(float deltaTime, const glm::vec2& windowSize,
-                     const glm::vec2& dpiScaling,
-                     const glm::vec2& mousePos,
+                     const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -428,20 +441,30 @@ void GUI::endFrame() {
         _program->rebuildFromFile();
     }
 
-    render();
-
-    if (_globalProperty.isEnabled())
-        _globalProperty.render();
-    if (_property.isEnabled())
-        _property.render();
-    if (_screenSpaceProperty.isEnabled())
-        _screenSpaceProperty.render();
-    if (_performance.isEnabled())
+    if (OsEng.renderEngine().doesPerformanceMeasurements()) {
         _performance.render();
-    if (_help.isEnabled())
-        _help.render();
-    if (_iswa.isEnabled())
-        _iswa.render();
+    }
+
+    if (_isEnabled) {
+        render();
+
+        if (_globalProperty.isEnabled()) {
+            _globalProperty.render();
+        }
+        if (_property.isEnabled()) {
+            _property.render();
+        }
+        if (_screenSpaceProperty.isEnabled()) {
+            _screenSpaceProperty.render();
+        }
+
+        if (_help.isEnabled()) {
+            _help.render();
+        }
+        if (_iswa.isEnabled()) {
+            _iswa.render();
+        }
+    }
 
     ImGui::Render();
 }
@@ -467,8 +490,9 @@ bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         int keyIndex = static_cast<int>(key);
-        if (keyIndex < 0)
+        if (keyIndex < 0) {
             LERROR("Pressed key of index '" << keyIndex << "' was negative");
+        }
         else {
             if (action == KeyAction::Press)
                 io.KeysDown[keyIndex] = true;
@@ -487,8 +511,9 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureKeyboard;
 
-    if (consumeEvent)
-        io.AddInputCharacter((unsigned short)character);
+    if (consumeEvent) {
+        io.AddInputCharacter(static_cast<unsigned short>(character));
+    }
 
     return consumeEvent;
 }
@@ -496,23 +521,41 @@ bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
 void GUI::render() {
     ImGui::Begin("OpenSpace GUI", nullptr);
 
-    ImGui::Checkbox("Scene Graph Properties", &_property._isEnabled);
-    ImGui::Checkbox("ScreenSpace Properties", &_screenSpaceProperty._isEnabled);
-    ImGui::Checkbox("Global Properties", &_globalProperty._isEnabled);
+    bool property = _property.isEnabled();
+    ImGui::Checkbox("Scene Graph Properties", &property);
+    _property.setEnabled(property);
+
+    bool screenSpaceProperty = _screenSpaceProperty.isEnabled();
+    ImGui::Checkbox("ScreenSpace Properties", &screenSpaceProperty);
+    _screenSpaceProperty.setEnabled(screenSpaceProperty);
+
+    bool globalProperty = _globalProperty.isEnabled();
+    ImGui::Checkbox("Global Properties", &globalProperty);
+    _globalProperty.setEnabled(globalProperty);
+
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    ImGui::Checkbox("iSWA", &_iswa._isEnabled);
+    bool iswa = _iswa.isEnabled();
+    ImGui::Checkbox("iSWA", &iswa);
+    _iswa.setEnabled(iswa);
 #endif
-    ImGui::Checkbox("Performance", &_performance._isEnabled);
+
     _origin.render();
     _time.render();
 
-    ImGui::Checkbox("Help", &_help._isEnabled);
+    bool help = _help.isEnabled();
+    ImGui::Checkbox("Help", &help);
+    _help.setEnabled(help);
 
     static const int addImageBufferSize = 256;
     static char addImageBuffer[addImageBufferSize];
-    ImGui::InputText("addImage", addImageBuffer, addImageBufferSize);
 
-    if (ImGui::SmallButton("Add Image")) {
+    bool addImage = ImGui::InputText(
+        "addImage",
+        addImageBuffer,
+        addImageBufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (addImage) {
         addScreenSpaceRenderable(std::string(addImageBuffer));
     }
 
@@ -533,31 +576,5 @@ void GUI::render() {
     ImGui::End();
 }
     
-scripting::LuaLibrary GUI::luaLibrary() {
-    return {
-        "gui",
-        {
-            {
-                "show",
-                &luascriptfunctions::gui::show,
-                "",
-                "Shows the console"
-            },
-            {
-                "hide",
-                &luascriptfunctions::gui::hide,
-                "",
-                "Hides the console"
-            },
-            {
-                "toggle",
-                &luascriptfunctions::gui::toggle,
-                "",
-                "Toggles the console"
-            }
-        }
-    };
-}
-
 } // namespace gui
 } // namespace openspace

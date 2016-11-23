@@ -22,36 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "atmosphere_common.glsl"
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
+
+#define Delta 0.25
+
+in vec4 vs_positionScreenSpace;
+in float fade;
+
+uniform vec3 color;
+uniform int renderPhase;
+
 #include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
-
-layout(location = 1) out vec4 renderTableColor;
-
-uniform sampler2D transmittanceTexture;
-
-void getRAndMu(out float r, out float mu) {
-    // See Bruneton and Colliene to understand the mapping.
-    mu = -0.2 + (gl_FragCoord.x - 0.5) / (float(OTHER_TEXTURES_W) - 1.0) * (1.0 + 0.2);
-    r  = Rg + (gl_FragCoord.y - 0.5) / (float(OTHER_TEXTURES_H) - 1.0) * (Rt - Rg);
-}
-
-vec3 transmittance(const float r, const float mu) {
-    float u_r  = sqrt((r - Rg) / (Rt - Rg));
-    // See Colliene to understand the different mapping.
-    float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
-    
-    return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
-}
 
 Fragment getFragment() {
-    float mu, r;
-    getRAndMu(r, mu);
-    renderTableColor = vec4(transmittance(r, mu) * max(mu, 0.0), 1.0);     
-    
     Fragment frag;
-    frag.color = vec4(1.0);
-    frag.depth = 1.0;
-    
+    frag.color = vec4(color * fade, fade);
+    frag.depth = vs_positionScreenSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
+
+    if (renderPhase == RenderPhasePoints) {
+        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+        // smoothstep to gradually decrease the alpha on the edges of the point
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
+
+
+
+        // if (dot(circCoord, circCoord) > 1.0) {
+
+        // }
+        // frag.color.a *= smoothstep();
+
+        // // Check for length > 1.0 without a square root
+        // frag.color.a *= smoothstep(dot(circCoord, circCoord), 1.0, 1.0 - 1.0 / pointSize);
+        // if (dot(circCoord, circCoord) > 1.0) {
+        //     discard;
+        // }
+    }
+
+
     return frag;
 }

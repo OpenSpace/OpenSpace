@@ -139,16 +139,17 @@ return {
     -- Trail module
     {   
         Name = "MarsTrail",
-        Parent = "Sun",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "MARS BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 1, 0.8, 0.5 },
-            TropicalOrbitPeriod = 686.973,
-            EarthOrbitRatio = 1.881,
-            DayLength = 24.6597,
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MARS BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 0.814, 0.305, 0.220 },
+            Period = 686.973,
+            Resolution = 1000
         }
     }
 }
