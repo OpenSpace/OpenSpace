@@ -74,14 +74,15 @@ return {
         Name = "MercuryTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "MERCURY",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.6, 0.5, 0.5 },
-            TropicalOrbitPeriod = 87.968 ,
-            EarthOrbitRatio = 0.241,
-            DayLength = 4222.6,
-        },
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MERCURY",
+                Observer = "SUN",
+            },
+            Color = {0.6, 0.5, 0.5 },
+            Period = 87.968,
+            Resolution = 100
+        }
     }
 }

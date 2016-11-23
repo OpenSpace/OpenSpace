@@ -150,6 +150,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop, properties
     using Func = std::function<void(properties::Property*, const std::string&)>;
     static std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
+        { "DoubleProperty", &renderDoubleProperty},
         { "IntProperty", &renderIntProperty },
         { "IVec2Property", &renderIVec2Property },
         { "IVec3Property", &renderIVec3Property },

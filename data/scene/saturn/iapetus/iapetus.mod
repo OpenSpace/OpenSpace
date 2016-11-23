@@ -33,14 +33,15 @@ return {
         Name = "IapetusTrail",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "IAPETUS",
-            Frame = "GALACTIC",
-            Observer = "SATURN BARYCENTER",
-            RGB = { 0.5, 0.3, 0.3 },
-            TropicalOrbitPeriod = 60,
-            EarthOrbitRatio = 0.1,
-            DayLength = 0.9424218
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "IAPETUS",
+                Observer = "SATURN BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period = 79,
+            Resolution = 1000
         }
     }
 }

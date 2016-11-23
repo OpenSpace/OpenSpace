@@ -76,20 +76,15 @@ return {
         Name = "GanymedeTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "GANYMEDE",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.7, 0.4, 0.2 },
-            TropicalOrbitPeriod =  80 ,
-            EarthOrbitRatio = 0.018,
-            DayLength = 9.9259,
-            LineFade = 2.0,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
-        },
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "GANYMEDE",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.4, 0.3, 0.3 },
+            Period =  172 / 24,
+            Resolution = 1000
+        }
     }
 }

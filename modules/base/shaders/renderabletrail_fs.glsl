@@ -22,30 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+// Fragile! Keep in sync with RenderableTrail::render::RenderPhase 
+#define RenderPhaseLines 0
+#define RenderPhasePoints 1
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform vec4 objectVelocity;
+#define Delta 0.25
 
-uniform uint nVertices;
-uniform float lineFade;
+in vec4 vs_positionScreenSpace;
+in float fade;
 
-layout(location = 0) in vec4 in_point_position;
+uniform vec3 color;
+uniform int renderPhase;
 
-out vec4 vs_positionScreenSpace;
-out float fade;
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+Fragment getFragment() {
+    Fragment frag;
+    frag.color = vec4(color * fade, fade);
+    frag.depth = vs_positionScreenSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
 
-void main() {
-    float id = float(gl_VertexID) / float(nVertices * lineFade);
-    fade = 1.0 - id;
+    if (renderPhase == RenderPhasePoints) {
+        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+        // smoothstep to gradually decrease the alpha on the edges of the point
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
 
-    // Convert from psc to regular homogenous coordinates
-    vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1);
-    vec4 positionClipSpace = projectionTransform * modelViewTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    
-    gl_Position = vs_positionScreenSpace;
+
+
+        // if (dot(circCoord, circCoord) > 1.0) {
+
+        // }
+        // frag.color.a *= smoothstep();
+
+        // // Check for length > 1.0 without a square root
+        // frag.color.a *= smoothstep(dot(circCoord, circCoord), 1.0, 1.0 - 1.0 / pointSize);
+        // if (dot(circCoord, circCoord) > 1.0) {
+        //     discard;
+        // }
+    }
+
+
+    return frag;
 }

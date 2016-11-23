@@ -81,7 +81,6 @@ Time Time::now() {
     return now;
 }
 
-
 bool Time::isInitialized() {
     return (_instance != nullptr);
 }

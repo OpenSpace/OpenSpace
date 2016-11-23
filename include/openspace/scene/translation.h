@@ -40,8 +40,11 @@ public:
 
     virtual ~Translation();
     virtual bool initialize();
+
     virtual glm::dvec3 position() const = 0;
     virtual void update(const UpdateData& data);
+
+    glm::dvec3 position(double time);
 
     static openspace::Documentation Documentation();
 };

@@ -85,4 +85,17 @@ bool Translation::initialize() {
     
 void Translation::update(const UpdateData& data) {}
 
+glm::dvec3 Translation::position(double time) {
+    update({
+        {},
+        time,
+        1.0,
+        false,
+        false
+    });
+
+    return position();
+}
+
+
 } // namespace openspace
