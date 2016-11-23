@@ -100,24 +100,16 @@ return {
         Name = "VestaTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "VESTA",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            
-            -- 3 Dummy values for compilation:
-            TropicalOrbitPeriod = 500.0,
-            EarthOrbitRatio = 0.2,
-            DayLength = 2,
-            -- End of Dummy values
-            
-            RGB = { 0.7, 0.8, 0.7 },
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare.png"
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "VESTA",
+                Observer = "SUN",
+            },
+            Color = { 0.7, 0.8, 0.7 },
             StartTime = "2007 JUL 20 12:00:00",
-            EndTime = "2018 JAN 22 12:00:00"
+            EndTime = "2018 JAN 22 12:00:00",
+            SampleInterval = 3600 * 24
         }
     }
 }

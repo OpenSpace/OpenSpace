@@ -14,7 +14,7 @@ helper.scheduledScript.reversible = {}
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
         "F1",
-        "openspace.gui.toggle()",
+        helper.property.invert('Global Properties.OnScreenGUI.Main.enabled'),
         "Toggles the visibility of the on-screen GUI."
     )
     openspace.bindKeyLocal(

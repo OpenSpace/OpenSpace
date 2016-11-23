@@ -95,11 +95,11 @@ public:
     void addOption(int value, std::string desc);
 
     /**
-    * Appends options with vectors of values and descriptions
-    * \param values A std::vector<int> of values for the options
-    * \param descs A std::vector<string> of descriptions for each value
+    * Adds multiple options to the OptionProperty. Each value in the vector consists of
+    * an integer value and a string description.
+    * \param options Pairs of <option, description> that are added to the OptionProperty
     */
-    void addOptions(std::vector<int> values, std::vector<std::string> descs);
+    void addOptions(std::vector<std::pair<int, std::string>> options);
 
     /**
      * Returns the list of available options.

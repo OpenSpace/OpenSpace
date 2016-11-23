@@ -38,6 +38,7 @@ void renderBoolProperty(properties::Property* prop, const std::string& ownerName
 void renderOptionProperty(properties::Property* prop, const std::string& ownerName);
 void renderSelectionProperty(properties::Property* prop, const std::string& ownerName);
 void renderStringProperty(properties::Property* prop, const std::string& ownerName);
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName);
 void renderIntProperty(properties::Property* prop, const std::string& ownerName);
 void renderIVec2Property(properties::Property* prop, const std::string& ownerName);
 void renderIVec3Property(properties::Property* prop, const std::string& ownerName);

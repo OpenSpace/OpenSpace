@@ -56,7 +56,6 @@ protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    std::string _name;
     SourceFunction _function;
 };
 

@@ -82,20 +82,15 @@ return {
         Name = "EuropaTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EUROPA",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.7, 0.4, 0.2 },
-            TropicalOrbitPeriod =  80 ,
-            EarthOrbitRatio = 0.009,
-            DayLength = 9.9259,
-            LineFade = 2.0,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
-        },
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EUROPA",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period =  85 / 24,
+            Resolution = 1000
+        }
     }
 }

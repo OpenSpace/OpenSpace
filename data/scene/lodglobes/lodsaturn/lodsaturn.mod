@@ -67,14 +67,15 @@ return {
         Name = "SaturnTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "SATURN BARYCENTER",
-            Frame = "GALACTIC",
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "SATURN BARYCENTER",
             Observer = "SUN",
-            RGB = {0.85,0.75,0.51 },
-            TropicalOrbitPeriod = 10746.94 ,
-            EarthOrbitRatio = 29.424,
-            DayLength = 10.656,
+            },
+            Color = {0.85,0.75,0.51 },
+            Period = 10746.94,
+            Resolution = 1000
         },
     }
 }

@@ -46,19 +46,15 @@ return {
         Name = "VenusTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "VENUS BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {1, 0.5, 0.2},
-            TropicalOrbitPeriod = 224.695 ,
-            EarthOrbitRatio = 0.615,
-            DayLength = 2802.0,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "VENUS BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 1.0, 0.5, 0.2 },
+            Period = 224.695,
+            Resolution = 1000
         },
     }
 }

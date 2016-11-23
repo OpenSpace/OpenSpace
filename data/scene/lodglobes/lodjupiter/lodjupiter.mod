@@ -59,14 +59,15 @@ return {
         Name = "JupiterTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "JUPITER BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.8, 0.7, 0.7 },
-            TropicalOrbitPeriod = 4330.595 ,
-            EarthOrbitRatio = 11.857,
-            DayLength = 9.9259,  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "JUPITER BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 0.8, 0.7, 0.7 },
+            Period = 4330.595,
+            Resolution = 1000
         }
-    },
+    }
 }

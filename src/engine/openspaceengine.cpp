@@ -173,7 +173,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
     SpiceManager::initialize();
     Time::initialize();
-    ghoul::systemcapabilities::SystemCapabilities::initialize();
     TransformationManager::initialize();
 }
 
@@ -385,10 +384,11 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_scriptEngine->deinitialize();
     delete _engine;
-    ghoul::systemcapabilities::SystemCapabilities::deinitialize();
     FactoryManager::deinitialize();
     Time::deinitialize();
     SpiceManager::deinitialize();
+
+    ghoul::fontrendering::FontRenderer::deinitialize();
 
     LogManager::deinitialize();
 
@@ -895,13 +895,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
 
+    _renderEngine->updateSceneGraph();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();
     _renderEngine->updateShaderPrograms();
     
     if (!_isMaster) {
-        _renderEngine->updateSceneGraph();
         _renderEngine->camera()->invalidateCache();
     }   
 
@@ -909,14 +909,14 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     //_interactionHandler->updateCamera();
     
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
+    if (_isMaster && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
         //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
         glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
         glm::ivec2 renderingSize = _windowWrapper->currentWindowResolution();
         uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
         
-        double dt = _windowWrapper->averageDeltaTime();
+        double dt = std::max(_windowWrapper->averageDeltaTime(), 0.0);
 
         _gui->startFrame(
             static_cast<float>(dt),
@@ -959,7 +959,7 @@ void OpenSpaceEngine::postDraw() {
         if (_console->isVisible())
             _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled() && _isMaster && _windowWrapper->isRegularRendering())
+        if (_isMaster && _windowWrapper->isRegularRendering())
             _gui->endFrame();
 #endif
     }
@@ -980,8 +980,9 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
         if (_gui->isEnabled()) {
             bool isConsumed = _gui->keyCallback(key, mod, action);
-            if (isConsumed)
+            if (isConsumed) {
                 return;
+            }
         }
 #endif
         if (key == _console->commandInputButton()) {

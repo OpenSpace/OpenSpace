@@ -39,7 +39,7 @@ namespace openspace {
 namespace gui {
 
 GuiPropertyComponent::GuiPropertyComponent(std::string name) 
-    : _name(std::move(name))
+    : GuiComponent(std::move(name))
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
@@ -47,9 +47,16 @@ void GuiPropertyComponent::setSource(SourceFunction function) {
 }
 
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
+    if (owner->propertiesRecursive().empty()) {
+        return;
+    }
+
     ImGui::PushID(owner->name().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
+        if (subOwner->propertiesRecursive().empty()) {
+            continue;
+        }
         if (subOwners.size() == 1) {
             renderPropertyOwner(subOwner);
         }
@@ -97,7 +104,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
 }
 
 void GuiPropertyComponent::render() {
-    ImGui::Begin(_name.c_str(), &_isEnabled, size, 0.5f);
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, size, 0.5f);
+    _isEnabled = v;
 
     ImGui::Spacing();
 
@@ -141,6 +150,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop, properties
     using Func = std::function<void(properties::Property*, const std::string&)>;
     static std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
+        { "DoubleProperty", &renderDoubleProperty},
         { "IntProperty", &renderIntProperty },
         { "IVec2Property", &renderIVec2Property },
         { "IVec3Property", &renderIVec3Property },

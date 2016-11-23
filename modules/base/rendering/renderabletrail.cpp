@@ -23,199 +23,351 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/renderabletrail.h>
-#include <openspace/util/time.h>
 
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/programobject.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/interaction/interactionhandler.h>
-
-#include <limits>
-#include <stdint.h>
-
-
-/* TODO for this class:
-*  In order to add geometry shader (for pretty-draw),
-*  need to pack each consecutive point pair into a vec2
-*  in order to draw quad between them. 
-*/
+#include <openspace/scene/translation.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableTrail";
-    //constants
-    const std::string keyName                    = "Name";
-        const std::string keyBody                = "Body";
-        const std::string keyObserver            = "Observer";
-        const std::string keyFrame               = "Frame";
-        const std::string keyPathModule          = "ModulePath";
-        const std::string keyColor               = "RGB";
-        const std::string keyTropicalOrbitPeriod = "TropicalOrbitPeriod";
-        const std::string keyEarthOrbitRatio     = "EarthOrbitRatio";
-        const std::string keyDayLength           = "DayLength";
-        const std::string keyStamps                 = "TimeStamps";
+    static const char* KeyTranslation = "Translation";
+    static const char* KeyColor = "Color";
+    static const char* KeyEnableFade = "EnableFade";
+    static const char* KeyFade = "Fade";
+    static const char* KeyLineWidth = "LineWidth";
+    static const char* KeyPointSize = "PointSize";
+    static const char* KeyRendering = "Rendering";
+
+    // The possible values for the _renderingModes property
+    enum RenderingMode {
+        RenderingModeLines = 0,
+        RenderingModePoints,
+        RenderingModeLinesPoints
+    };
+
+    // Fragile! Keep in sync with documentation
+    static const std::map<std::string, RenderingMode> RenderingModeConversion = {
+        { "Lines", RenderingModeLines },
+        { "Points", RenderingModePoints },
+        { "Lines+Points", RenderingModeLinesPoints },
+        { "Points+Lines", RenderingModeLinesPoints }
+    };
 }
 
 namespace openspace {
 
+Documentation RenderableTrail::Documentation() {
+using namespace documentation;
+    return {
+        "RenderableTrail",
+        "base_renderable_renderabletrail",
+        {
+            {
+                KeyTranslation,
+                new ReferencingVerifier("core_transform_translation"),
+                "This object is used to compute locations along the path. Any "
+                "Translation object can be used here.",
+                Optional::No
+            },
+            {
+                KeyColor,
+                new DoubleVector3Verifier,
+                "The main color the for lines and points on this trail. The value is "
+                "interpreted as an RGB value.",
+                Optional::No
+            },
+            {
+                KeyEnableFade,
+                new BoolVerifier,
+                "Toggles whether the trail should fade older points out. If this value "
+                "is 'true', the 'Fade' parameter determines the speed of fading. If this "
+                "value is 'false', the entire trail is rendered at full opacity and "
+                "color. The default value is 'true'.",
+                Optional::Yes
+            },
+            {
+                KeyFade,
+                new DoubleVerifier,
+                "The fading factor that is applied to the trail if the 'EnableFade' "
+                "value is 'true'. If it is 'false', this setting has no effect. The "
+                "higher the number, the less fading is applied. This value defaults to "
+                "1.0.",
+                Optional::Yes
+            },
+            {
+                KeyLineWidth,
+                new DoubleVerifier,
+                "This value specifies the line width of the trail if this rendering "
+                "method is selected. It defaults to 2.0.",
+                Optional::Yes
+            },
+            {
+                KeyPointSize,
+                new DoubleVerifier,
+                "This value specifies the base size of the points along the line if this "
+                "rendering method is selected. If a subsampling of the values is "
+                "performed, the subsampled values are half this size. The default value "
+                "is 1.0.",
+                Optional::Yes
+            },
+            {
+                KeyRendering,
+                new StringInListVerifier(
+                    // Taken from the RenderingModeConversion map above
+                    { "Lines", "Points", "Lines+Points", "Points + Lines" }
+                ),
+                "Determines how the trail should be rendered to the screen. If 'Lines' "
+                "is selected, only the line part is visible, if 'Points' is selected, "
+                "only the corresponding points (and subpoints) are shown. "
+                "Lines+Points' shows both parts. On default, only the lines are rendered",
+                Optional::Yes
+            }
+        },
+        Exhaustive::No
+    };
+}
+
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lineColor("lineColor", "Line Color")
-    , _lineFade("lineFade", "Line Fade", 0.75f, 0.f, 5.f)
+    , _lineColor("lineColor", "Color", glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _useLineFade("useLineFade", "Use Line Fade", true)
+    , _lineFade("lineFade", "Line Fade", 1.f, 0.f, 20.f)
     , _lineWidth("lineWidth", "Line Width", 2.f, 1.f, 20.f)
-    , _showTimestamps("timestamps", "Show Timestamps", false)
-    , _programObject(nullptr)
-    , _successfullDictionaryFetch(true)
-    , _vaoID(0)
-    , _vBufferID(0)
-    , _needsSweep(true)
-    , _oldTime(std::numeric_limits<double>::max())
-    , _tropic(0.f)
-    , _ratio(0.f)
-    , _day(0.f)
-    , _increment(0.f)
+    , _pointSize("pointSize", "Point Size", 1, 1, 64)
+    , _renderingModes(
+        "renderingMode",
+        "Rendering Mode",
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
-    _successfullDictionaryFetch &= dictionary.getValue(keyBody, _target);
-    _successfullDictionaryFetch &= dictionary.getValue(keyObserver, _observer);
-    _successfullDictionaryFetch &= dictionary.getValue(keyFrame, _frame);
-    _successfullDictionaryFetch &= dictionary.getValue(keyTropicalOrbitPeriod, _tropic);
-    _successfullDictionaryFetch &= dictionary.getValue(keyEarthOrbitRatio, _ratio);
-    _successfullDictionaryFetch &= dictionary.getValue(keyDayLength, _day);
-    // values in modfiles set from here
-    // http://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html
+    _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
+        dictionary.value<ghoul::Dictionary>(KeyTranslation)
+    ));
 
-    glm::vec3 color(0.f);
-    if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
-        dictionary.getValue(keyColor, color);
-    _lineColor = color;
-
-    bool timeStamps = false;
-    if (dictionary.hasKeyAndValue<bool>(keyStamps))
-        dictionary.getValue(keyStamps, timeStamps);
-    _showTimestamps = timeStamps;
-    addProperty(_showTimestamps);
-
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor = dictionary.value<glm::vec3>(KeyColor);
     addProperty(_lineColor);
 
+    if (dictionary.hasKeyAndValue<bool>(KeyEnableFade)) {
+        _useLineFade = dictionary.value<bool>(KeyEnableFade);
+    }
+    addProperty(_useLineFade);
+
+    if (dictionary.hasKeyAndValue<double>(KeyFade)) {
+        _lineFade = dictionary.value<double>(KeyFade);
+    }
     addProperty(_lineFade);
 
+    if (dictionary.hasKeyAndValue<double>(KeyLineWidth)) {
+        _lineWidth = dictionary.value<double>(KeyLineWidth);
+    }
     addProperty(_lineWidth);
-    _distanceFade = 1.0;
+
+    if (dictionary.hasKeyAndValue<double>(KeyPointSize)) {
+        _pointSize = dictionary.value<double>(KeyPointSize);
+    }
+    addProperty(_pointSize);
+
+    _renderingModes.addOptions({
+        { RenderingModeLines, "Lines" },
+        { RenderingModePoints, "Points" },
+        { RenderingModeLinesPoints, "Lines+Points" }
+    });
+
+    // This map is not accessed out of order as long as the Documentation is adapted
+    // whenever the map changes. The documentation will check for valid values
+    if (dictionary.hasKeyAndValue<std::string>(KeyRendering)) {
+        _renderingModes = RenderingModeConversion.at(
+            dictionary.value<std::string>(KeyRendering)
+        );
+    }
+    else {
+        _renderingModes = RenderingModeLines;
+    }
+    addProperty(_renderingModes);
 }
 
 bool RenderableTrail::initialize() {
-    if (!_successfullDictionaryFetch) {
-        LERROR("The following keys need to be set in the Dictionary. Cannot initialize!");
-        LERROR(keyBody << ": " << _target);
-        LERROR(keyObserver << ": " << _observer);
-        LERROR(keyFrame << ": " << _frame);
-        LERROR(keyTropicalOrbitPeriod << ": " << _tropic);
-        LERROR(keyEarthOrbitRatio << ": " << _ratio);
-        LERROR(keyDayLength << ": " << _day);
-        return false;
-    }
-
-    bool completeSuccess = true;
-
     RenderEngine& renderEngine = OsEng.renderEngine();
-    _programObject = renderEngine.buildRenderProgram("EphemerisProgram",
-        "${MODULE_BASE}/shaders/ephemeris_vs.glsl",
-        "${MODULE_BASE}/shaders/ephemeris_fs.glsl");
+    _programObject = renderEngine.buildRenderProgram(
+        "EphemerisProgram",
+        "${MODULE_BASE}/shaders/renderabletrail_vs.glsl",
+        "${MODULE_BASE}/shaders/renderabletrail_fs.glsl"
+    );
 
     setRenderBin(Renderable::RenderBin::Overlay);
 
-    if (!_programObject)
-        return false;
-
-    return completeSuccess;
+    return true;
 }
 
 bool RenderableTrail::deinitialize() {
-    glDeleteVertexArrays(1, &_vaoID);
-    glDeleteBuffers(1, &_vBufferID);
-
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_programObject) {
         renderEngine.removeRenderProgram(_programObject);
         _programObject = nullptr;
     }
-    
     return true;
 }
 
 bool RenderableTrail::isReady() const {
-    return (_programObject != nullptr) && _successfullDictionaryFetch;
+    return _programObject != nullptr;
 }
 
-void RenderableTrail::render(const RenderData& data) {
+void RenderableTrail::render(const RenderData & data) {
     _programObject->activate();
-    //psc currentPosition = data.position;
-    //psc campos = data.camera.position();
-    //glm::mat4 camrot = glm::mat4(data.camera.viewRotationMatrix());
 
-    //glm::mat4 transform = glm::mat4(1);
-
-    // setup the data to the shader
-    //_programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_programObject->setUniform("ModelTransform", transform);
-    //setPscUniforms(*_programObject.get(), data.camera, data.position);
-
-    // Calculate variables to be used as uniform variables in shader
-    glm::dvec3 bodyPosition = data.modelTransform.translation;
-
-    // Model transform and view transform needs to be in double precision
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), bodyPosition) * 
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-    _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
     _programObject->setUniform("color", _lineColor);
-    _programObject->setUniform("nVertices", static_cast<unsigned int>(_vertexArray.size()));
-    _programObject->setUniform("lineFade", _lineFade);
-    _programObject->setUniform("forceFade", _distanceFade);
+    _programObject->setUniform("useLineFade", _useLineFade);
+    if (_useLineFade) {
+        _programObject->setUniform("lineFade", _lineFade);
+    }
 
-    //const psc& position = data.camera.position();
-    //const psc& origin = openspace::OpenSpaceEngine::ref().interactionHandler()->focusNode()->worldPosition();
-    //const PowerScaledScalar& pssl = (position - origin).length();
-    //
-    //if (pssl[0] < 0.000001){
-    //    if (_distanceFade > 0.0f) _distanceFade -= 0.05f;
-    //    _programObject->setUniform("forceFade", _distanceFade);
-    //}
-    //else{
-    //    if (_distanceFade < 1.0f) _distanceFade += 0.05f;
-    //    _programObject->setUniform("forceFade", _distanceFade);
-    //}
+    static std::map<RenderInformation::VertexSorting, int> SortingMapping = {
+        // Fragile! Keep in sync with shader
+        { RenderInformation::VertexSorting::NewestFirst, 0 },
+        { RenderInformation::VertexSorting::OldestFirst, 1 },
+        { RenderInformation::VertexSorting::NoSorting, 2}
+    };
 
     bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
-
+        OsEng.renderEngine().rendererImplementation() ==
+        RenderEngine::RendererImplementation::Framebuffer;
+    
     if (usingFramebufferRenderer) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    glLineWidth(_lineWidth);
+    bool renderLines =
+        _renderingModes == RenderingModeLines |
+        _renderingModes == RenderingModeLinesPoints;
 
-    glBindVertexArray(_vaoID);
-    glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_vertexArray.size()));
-    glBindVertexArray(0);
+    bool renderPoints =
+        _renderingModes == RenderingModePoints |
+        _renderingModes == RenderingModeLinesPoints;
 
-    glLineWidth(1.f);
-
-    if (_showTimestamps){
-        glPointSize(5.f);
-        glBindVertexArray(_vaoID);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexArray.size()));
-        glBindVertexArray(0);
+    if (renderLines) {
+        glLineWidth(_lineWidth);
+    }
+    if (renderPoints) {
+        glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
+    auto render = [renderLines, renderPoints, p = _programObject.get(), &data,
+                   &modelTransform, pointSize = _pointSize.value()]
+                  (RenderInformation& info, int nVertices, int offset)
+    {
+        // We pass in the model view transformation matrix as double in order to maintain
+        // high precision for vertices; especially for the trails, a high vertex precision
+        // is necessary as they are usually far away from their reference
+        p->setUniform(
+            "modelViewTransform",
+            data.camera.combinedViewMatrix() * modelTransform * info._localTransform
+        );
+
+        // The vertex sorting method is used to tweak the fading along the trajectory
+        p->setUniform(
+            "vertexSortingMethod",
+            SortingMapping[info.sorting]
+        );
+
+        // This value is subtracted from the vertex id in the case of a potential ring
+        // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
+        // brightest
+        p->setUniform(
+            "idOffset",
+            offset
+        );
+
+        p->setUniform("nVertices", nVertices);
+
+        if (renderPoints) {
+            // The stride parameter determines the distance between larger points and
+            // smaller ones
+            p->setUniform("stride", info.stride);
+            p->setUniform("pointSize", pointSize);
+        }
+
+        // Fragile! Keep in sync with fragment shader
+        enum RenderPhase {
+            RenderPhaseLines = 0,
+            RenderPhasePoints
+        };
+
+        glBindVertexArray(info._vaoID);
+        if (renderLines) {
+            p->setUniform("renderPhase", RenderPhaseLines);
+            // Subclasses of this renderer might be using the index array or might now be
+            // so we check if there is data available and if there isn't, we use the
+            // glDrawArrays draw call; otherwise the glDrawElements
+            if (info._iBufferID == 0) {
+                glDrawArrays(
+                    GL_LINE_STRIP,
+                    info.first,
+                    info.count
+                );
+            }
+            else {
+                glDrawElements(
+                    GL_LINE_STRIP,
+                    info.count,
+                    GL_UNSIGNED_INT,
+                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+                );
+            }
+        }
+        if (renderPoints) {
+            // Subclasses of this renderer might be using the index array or might now be
+            // so we check if there is data available and if there isn't, we use the
+            // glDrawArrays draw call; otherwise the glDrawElements
+            p->setUniform("renderPhase", RenderPhasePoints);
+            if (info._iBufferID == 0) {
+                glDrawArrays(GL_POINTS, info.first, info.count);
+            }
+            else {
+                glDrawElements(
+                    GL_POINTS,
+                    info.count,
+                    GL_UNSIGNED_INT,
+                    reinterpret_cast<void*>(info.first * sizeof(unsigned int))
+                );
+            }
+        }
+    };
+
+    // The combined size of vertices; -1 because we duplicate the penultimate point
+    int totalNumber =
+        _primaryRenderInformation.count + _floatingRenderInformation.count - 1;
+
+    // The primary information might use an index buffer, so we might need to start at an
+    // offset
+    int primaryOffset =
+        _primaryRenderInformation._iBufferID == 0 ? 0 : _primaryRenderInformation.first;
+
+    // Render the primary batch of vertices
+    render(_primaryRenderInformation, totalNumber, primaryOffset);
+
+    // The secondary batch is optional,. so we need to check whether we have any data here
+    if (_floatingRenderInformation._vaoID == 0 || _floatingRenderInformation.count == 0) {
+        render(
+            _floatingRenderInformation,
+            totalNumber,
+            // -1 because we duplicate the penultimate point between the vertices
+            primaryOffset + _primaryRenderInformation.count - 1
+        );
+    }
+
+    if (renderPoints) {
+        glDisable(GL_PROGRAM_POINT_SIZE);
+    }
+     
+    glBindVertexArray(0);
 
     if (usingFramebufferRenderer) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -223,146 +375,6 @@ void RenderableTrail::render(const RenderData& data) {
     }
 
     _programObject->deactivate();
-}
-
-void RenderableTrail::update(const UpdateData& data) {
-    if (data.isTimeJump)
-        _needsSweep = true;
-
-    if (_needsSweep) {
-        fullYearSweep(data.time);
-        sendToGPU();
-        _needsSweep = false;
-        return;
-    }
-
-    double lightTime = 0.0;
-
-    bool intervalSet = hasTimeInterval();
-    double start = -DBL_MAX;
-    double end = DBL_MAX;
-    if (intervalSet) {
-        getInterval(start, end);
-    }
-
-    // Points in the vertex array should always have a fixed distance. For this reason we
-    // keep the first entry in the array floating and always pointing to the current date
-    // As soon as the time difference between the current time and the last time is bigger
-    // than the fixed distance, we need to create a new fixed point
-    double deltaTime = std::abs(data.time - _oldTime);
-    int nValues = static_cast<int>(floor(deltaTime / _increment));
-
-    glm::dvec3 p;
-    // Update the floating current time
-    if (start > data.time)
-        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, start, lightTime);
-    else if (end < data.time)
-        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, end, lightTime);
-    else
-        p = SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, data.time, lightTime);
-    
-    psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-    
-    pscPos[3] += 3; // KM to M
-    _vertexArray[0] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
-
-    if (nValues != 0) {
-        std::vector<TrailVBOLayout> tmp(nValues);
-        for (int i = nValues; i > 0; --i) {
-            double et = _oldTime + i * _increment;
-            if (start > et)
-                et = start;
-            else if (end < et)
-                et = end;
-            glm::dvec3 p =
-            SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, et, lightTime);
-            pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-            pscPos[3] += 3;
-            tmp[nValues - i] = { pscPos[0], pscPos[1], pscPos[2], pscPos[3] };
-        }
-
-        size_t size = _vertexArray.size();
-        _vertexArray.insert(_vertexArray.begin() + 1, tmp.begin(), tmp.end());
-        _vertexArray.resize(size);
-
-        _oldTime += nValues * _increment;
-    }
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() * sizeof(TrailVBOLayout), &_vertexArray[0]);
-}
-
-/* This algorithm estimates and precomputes the number of segments required for
-*  any planetary object in space, given a tropical orbit period and earth-to-planet 
-*  orbit ratio. In doing so, it finds the exact increment of time corresponding
-*  to a planetary year. 
-*  Therefore all planets need said constants, for other objects we need a different,
-*  and most likely heuristic measure to easily estimate a nodal time-increment.
-*  Trivial, yet - a TODO. 
-*/
-void RenderableTrail::fullYearSweep(double time) {
-    const int SecondsPerEarthYear = 31540000;
-
-    double lightTime = 0.0;
-    float planetYear = SecondsPerEarthYear * _ratio;
-    int segments = static_cast<int>(_tropic);
-
-    bool intervalSet = hasTimeInterval();
-    double start = -DBL_MAX;
-    double end = DBL_MAX;
-    if (intervalSet) {
-        intervalSet &= getInterval(start, end);
-    }
-
-    _increment = planetYear / _tropic;
-    
-    _oldTime = time;
-
-    _vertexArray.resize(segments+2);
-    glm::dvec3 p;
-    bool failed = false;
-    for (int i = 0; i < segments+2; i++) {
-        if (start > time && intervalSet) {
-            time = start;
-        }
-        else if (end < time && intervalSet) {
-            time = end;
-        }
-
-        if (!failed || intervalSet) {
-            try {
-                p =
-                    SpiceManager::ref().targetPosition(_target, _observer, _frame, {}, time, lightTime);
-            }
-            catch (const SpiceManager::SpiceException& e) {
-                // This fires for PLUTO BARYCENTER and SUN and uses the only value sometimes?
-                // ---abock
-                //LERROR(e.what());
-                failed = true;
-            }
-        }
-        
-        psc pscPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-        pscPos[3] += 3;
-
-        _vertexArray[i] = {pscPos[0], pscPos[1], pscPos[2], pscPos[3]};
-        time -= _increment;
-    }
-
-}
-
-void RenderableTrail::sendToGPU() {
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vertexArray.size() * sizeof(TrailVBOLayout), NULL, GL_STREAM_DRAW); // orphaning the buffer, sending NULL data.
-    glBufferSubData(GL_ARRAY_BUFFER, 0, _vertexArray.size() * sizeof(TrailVBOLayout), &_vertexArray[0]);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glBindVertexArray(0);
 }
 
 } // namespace openspace
