@@ -22,15 +22,10 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __LAYER_MANAGER_H__
-#define __LAYER_MANAGER_H__
+#ifndef __LAYERMANAGER_H__
+#define __LAYERMANAGER_H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/tileselector.h>
-
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/assert.h>
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
@@ -42,6 +37,8 @@
 
 namespace openspace {
 namespace globebrowsing {
+
+    class TileProvider;
 
     struct LayerRenderSettings : public properties::PropertyOwner{
         LayerRenderSettings();
@@ -62,7 +59,7 @@ namespace globebrowsing {
 
         ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 
-        bool enabled() const { return _enabled.value(); }
+        bool enabled() const { return _enabled.value(); }
         TileProvider* tileProvider() const { return _tileProvider.get(); }
         const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 
@@ -137,4 +134,4 @@ namespace globebrowsing {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __LAYER_MANAGER_H__
+#endif  // __LAYERMANAGER_H__

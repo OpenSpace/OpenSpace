@@ -30,7 +30,10 @@
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tileselector.h>
+
 
 #include <algorithm>
 

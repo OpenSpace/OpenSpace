@@ -24,7 +24,12 @@
 
 // globe browsing
 #include <modules/globebrowsing/globes/renderableglobe.h>
+
 #include <modules/globebrowsing/tile/tileselector.h>
+
+#include <modules/globebrowsing/globes/pointglobe.h>
+
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/layermanager.h>
 
 // open space includes
