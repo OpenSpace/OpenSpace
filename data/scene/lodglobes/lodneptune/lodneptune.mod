@@ -57,14 +57,15 @@ return {
         Name = "NeptuneTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "NEPTUNE BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.2, 0.5, 1.0 },
-            TropicalOrbitPeriod = 59799.9 ,
-            EarthOrbitRatio = 163.73,
-            DayLength = 16.11,
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEPTUNE BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = {0.2, 0.5, 1.0 },
+            Period  = 60200,
+            Resolution = 1000
         },
     }
 }

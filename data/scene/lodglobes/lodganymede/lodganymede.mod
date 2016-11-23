@@ -49,14 +49,15 @@ return {
         Name = "GanymedeTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "GANYMEDE",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.4, 0.3, 0.3 },
-            TropicalOrbitPeriod =  60 ,
-            EarthOrbitRatio = 0.019,
-            DayLength = 9.9259,
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "GANYMEDE",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.4, 0.3, 0.3 },
+            Period =  172 / 24,
+            Resolution = 1000
         }
-    },
+    }
 }
