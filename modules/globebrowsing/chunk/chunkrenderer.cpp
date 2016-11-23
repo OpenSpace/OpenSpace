@@ -47,11 +47,11 @@
 namespace {
     const std::string _loggerCat = "PatchRenderer";
 
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyShading = "PerformShading";
+    const char* keyFrame = "Frame";
+    const char* keyGeometry = "Geometry";
+    const char* keyShading = "PerformShading";
 
-    const std::string keyBody = "Body";
+    const char* keyBody = "Body";
 }
 
 namespace openspace {

@@ -35,66 +35,53 @@ namespace {
 }
 
 namespace openspace {
-    namespace modelgeometry {
+namespace modelgeometry {
 
-        MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
-            : ModelGeometry(dictionary)
-        {
-            loadObj(_file);
-        }
+MultiModelGeometry::MultiModelGeometry(const ghoul::Dictionary& dictionary)
+    : ModelGeometry(dictionary)
+{
+    loadObj(_file);
+}
 
-        bool MultiModelGeometry::initialize(Renderable* parent)
-        {
-            bool success = ModelGeometry::initialize(parent);
-            return success;
-        }
+bool MultiModelGeometry::initialize(Renderable* parent) {
+    bool success = ModelGeometry::initialize(parent);
+    return success;
+}
 
-        void MultiModelGeometry::deinitialize()
-        {
-            ModelGeometry::deinitialize();
-        }
+void MultiModelGeometry::deinitialize() {
+    ModelGeometry::deinitialize();
+}
 
-        bool MultiModelGeometry::loadModel(const std::string& filename) 
-        {
-            try {
-                ghoul::io::ModelReaderMultiFormat modelReader;
+bool MultiModelGeometry::loadModel(const std::string& filename)  {
+    ghoul::io::ModelReaderMultiFormat modelReader;
 
-                std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
-                std::vector<int> indices;
+    std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
+    std::vector<int> indices;
 
-                modelReader.loadModel(filename, vertices, indices);
+    modelReader.loadModel(filename, vertices, indices);
          
-                _vertices.reserve(vertices.size());
-                for (const auto & v : vertices)
-                {
-                    psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-                        v.location[0],
-                        v.location[1],
-                        v.location[2]
-                    );
+    _vertices.reserve(vertices.size());
+    for (const auto & v : vertices) {
+        psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+            v.location[0],
+            v.location[1],
+            v.location[2]
+        );
 
-                    Vertex vv;
-                    memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
-                    vv.location[3] = 1.0;
-                    //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
-                    memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
-                    memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
-                    _vertices.push_back(vv);
-                }
+        Vertex vv;
+        memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
+        vv.location[3] = 1.0;
+        //memcpy(vv.location, glm::value_ptr(p.vec4()), sizeof(GLfloat) * 4);
+        memcpy(vv.tex, v.tex, sizeof(GLfloat) * 2);
+        memcpy(vv.normal, v.normal, sizeof(GLfloat) * 3);
+        _vertices.push_back(vv);
+    }
 
-                _indices.resize(indices.size());                
-                std::copy(indices.begin(), indices.end(), _indices.begin());
-            }
-            catch (ghoul::io::ModelReaderBase::ModelReaderException & e)
-            {
-                // Log error reading geometry file.
-                LERROR(e.message);
-                return false;
-            }
+    _indices.resize(indices.size());                
+    std::copy(indices.begin(), indices.end(), _indices.begin());
 
-            return true;
-        }
+    return true;
+}
 
-
-    }  // namespace modelgeometry
+}  // namespace modelgeometry
 }  // namespace openspace

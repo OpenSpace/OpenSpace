@@ -44,8 +44,8 @@
 namespace {
 
 const std::string _loggerCat = "GUI";
-const std::string configurationFile = "imgui.ini";
-const std::string GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
+const char* configurationFile = "imgui.ini";
+const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;

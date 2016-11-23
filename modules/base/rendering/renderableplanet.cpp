@@ -48,17 +48,17 @@
 
 
 namespace {
-    const std::string _loggerCat = "RenderablePlanet";
+    static const std::string _loggerCat = "RenderablePlanet";
 
-    const std::string keyFrame                         = "Frame";
-    const std::string keyGeometry                      = "Geometry";
-    const std::string keyRadius                        = "Radius";
-    const std::string keyShading                       = "PerformShading";
-    const std::string keyShadowGroup                   = "Shadow_Group";
-    const std::string keyShadowSource                  = "Source";
-    const std::string keyShadowCaster                  = "Caster";
-    const std::string keyPlanetRadius                  = "PlanetRadius";
-    const std::string keyBody                          = "Body";
+    const char* keyFrame                         = "Frame";
+    const char* keyGeometry                      = "Geometry";
+    const char* keyRadius                        = "Radius";
+    const char* keyShading                       = "PerformShading";
+    const char* keyShadowGroup                   = "Shadow_Group";
+    const char* keyShadowSource                  = "Source";
+    const char* keyShadowCaster                  = "Caster";
+    const char* keyPlanetRadius                  = "PlanetRadius";
+    const char* keyBody                          = "Body";
 }
 
 namespace openspace {

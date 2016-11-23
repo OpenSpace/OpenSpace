@@ -22,7 +22,6 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
 #include <modules/globebrowsing/geometry/aabb.h>
 
 #include <string>

@@ -33,9 +33,9 @@ namespace {
     const std::string _loggerCat = "SpiceRotation";
     //const std::string keyGhosting = "EphmerisGhosting";
 
-    const std::string KeySourceFrame = "SourceFrame";
-    const std::string KeyDestinationFrame = "DestinationFrame";
-    const std::string KeyKernels = "Kernels";
+    const char* KeySourceFrame = "SourceFrame";
+    const char* KeyDestinationFrame = "DestinationFrame";
+    const char* KeyKernels = "Kernels";
 }
 
 namespace openspace {

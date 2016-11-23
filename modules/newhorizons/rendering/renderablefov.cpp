@@ -38,15 +38,15 @@
 namespace {
     const std::string _loggerCat              = "RenderableFov";
 
-    const std::string keyBody                 = "Body";
-    const std::string keyFrame                = "Frame";
-    const std::string keyPathModule           = "ModulePath";
-    const std::string keyColor                = "RGB";
-    const std::string keyInstrument           = "Instrument.Name";
-    const std::string keyInstrumentMethod     = "Instrument.Method";
-    const std::string keyInstrumentAberration = "Instrument.Aberration";
-    const std::string keyPotentialTargets     = "PotentialTargets";
-    const std::string keyFrameConversions     = "FrameConversions";
+    const char* keyBody                 = "Body";
+    const char* keyFrame                = "Frame";
+    const char* keyPathModule           = "ModulePath";
+    const char* keyColor                = "RGB";
+    const char* keyInstrument           = "Instrument.Name";
+    const char* keyInstrumentMethod     = "Instrument.Method";
+    const char* keyInstrumentAberration = "Instrument.Aberration";
+    const char* keyPotentialTargets     = "PotentialTargets";
+    const char* keyFrameConversions     = "FrameConversions";
 
     const int InterpolationSteps = 10;
     const int Stride = 8;

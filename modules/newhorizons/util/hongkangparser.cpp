@@ -42,7 +42,7 @@
 
 namespace {
     const std::string _loggerCat = "HongKangParser";
-    const std::string keyTranslation = "DataInputTranslation";
+    const char* keyTranslation = "DataInputTranslation";
 
     const std::string PlaybookIdentifierName = "HongKang";
 }

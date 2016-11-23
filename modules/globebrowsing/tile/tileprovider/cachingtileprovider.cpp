@@ -35,11 +35,11 @@
 namespace {
     const std::string _loggerCat = "CachingTileProvider";
 
-    const std::string KeyDoPreProcessing = "DoPreProcessing";
-    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
-    const std::string KeyFilePath = "FilePath";
-    const std::string KeyCacheSize = "CacheSize";
-    const std::string KeyFlushInterval = "FlushInterval";
+    const char* KeyDoPreProcessing = "DoPreProcessing";
+    const char* KeyMinimumPixelSize = "MinimumPixelSize";
+    const char* KeyFilePath = "FilePath";
+    const char* KeyCacheSize = "CacheSize";
+    const char* KeyFlushInterval = "FlushInterval";
 }
 
 namespace openspace {
@@ -54,7 +54,7 @@ namespace openspace {
         // 1. Get required Keys
         std::string filePath;
         if (!dictionary.getValue<std::string>(KeyFilePath, filePath)) {
-            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+            throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
         }
 
         // 2. Initialize default values for any optional Keys

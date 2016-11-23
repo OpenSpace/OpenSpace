@@ -28,8 +28,6 @@
 
 #include <ghoul/misc/assert.h>
 
-
-
 namespace {
     const std::string _loggerCat = "Geodetic2";
 }

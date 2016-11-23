@@ -39,27 +39,22 @@
 // ghoul includes
 #include <ghoul/misc/assert.h>
 
-
 namespace {
     const std::string _loggerCat = "RenderableGlobe";
 
     // Keys for the dictionary
-    const std::string keyFrame = "Frame";
-    const std::string keyRadii = "Radii";
-    const std::string keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
-    const std::string keyCameraMinHeight = "CameraMinHeight";
-    const std::string keySegmentsPerPatch = "SegmentsPerPatch";
-    const std::string keyTextureInitData = "TextureInitData";
-    const std::string keyTextures = "Textures";
-    const std::string keyColorTextures = "ColorTextures";
-    const std::string keyHeightMaps = "HeightMaps";
+    const char* keyFrame = "Frame";
+    const char* keyRadii = "Radii";
+    const char* keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
+    const char* keyCameraMinHeight = "CameraMinHeight";
+    const char* keySegmentsPerPatch = "SegmentsPerPatch";
+    const char* keyTextureInitData = "TextureInitData";
+    const char* keyTextures = "Textures";
+    const char* keyColorTextures = "ColorTextures";
+    const char* keyHeightMaps = "HeightMaps";
 }
 
-
-
 namespace openspace {
-
-
     RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         : _isEnabled(properties::BoolProperty("Enabled", "Enabled", true))
         , _toggleEnabledEveryFrame(properties::BoolProperty("Toggle enabled every frame", "Toggle enabled every frame", false))

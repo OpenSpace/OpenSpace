@@ -40,11 +40,11 @@
 namespace {
     const std::string _loggerCat = "RenderableConstellationBounds";
 
-    const std::string keyVertexFile = "File";
-    const std::string keyConstellationFile = "ConstellationFile";
-    const std::string keyReferenceFrame = "ReferenceFrame";
+    const char* keyVertexFile = "File";
+    const char* keyConstellationFile = "ConstellationFile";
+    const char* keyReferenceFrame = "ReferenceFrame";
 
-    const std::string defaultReferenceFrame = "J2000";
+    const char* defaultReferenceFrame = "J2000";
 
     float deg2rad(float deg) {
         return static_cast<float>((deg / 360.f) * 2.f * M_PI);

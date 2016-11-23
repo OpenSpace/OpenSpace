@@ -48,11 +48,11 @@
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
 
-    const std::string KeyDoPreProcessing = "DoPreProcessing";
-    const std::string KeyMinimumPixelSize = "MinimumPixelSize";
-    const std::string KeyFilePath = "FilePath";
-    const std::string KeyCacheSize = "CacheSize";
-    const std::string KeyFlushInterval = "FlushInterval";
+    const char* KeyDoPreProcessing = "DoPreProcessing";
+    const char* KeyMinimumPixelSize = "MinimumPixelSize";
+    const char* KeyFilePath = "FilePath";
+    const char* KeyCacheSize = "CacheSize";
+    const char* KeyFlushInterval = "FlushInterval";
 }
 
 
@@ -71,7 +71,7 @@ namespace openspace {
     {
 
         if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
-            throw std::runtime_error("Must define key '" + KeyFilePath + "'");
+            throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
         }
 
 

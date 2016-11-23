@@ -41,13 +41,13 @@
 
 namespace {
     const std::string _loggerCat = "RenderablePlaneProjection";
-    const std::string KeySpacecraft = "Spacecraft";
-    const std::string KeyInstrument = "Instrument";
-    const std::string KeyMoving = "Moving";
-    const std::string KeyTexture = "Texture";
-    const std::string KeyName = "Name";
-    const std::string KeyTarget = "DefaultTarget";
-    const std::string GalacticFrame = "GALACTIC";
+    const char* KeySpacecraft = "Spacecraft";
+    const char* KeyInstrument = "Instrument";
+    const char* KeyMoving = "Moving";
+    const char* KeyTexture = "Texture";
+    const char* KeyName = "Name";
+    const char* KeyTarget = "DefaultTarget";
+    const char* GalacticFrame = "GALACTIC";
     const double REALLY_FAR = 99999999999;
 }
 

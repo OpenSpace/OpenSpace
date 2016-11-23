@@ -42,13 +42,13 @@
 
 namespace { 
     const std::string _loggerCat     = "RenderableModel";
-    const std::string keyGeometry    = "Geometry";
-    const std::string keyBody        = "Body";
-    const std::string keyStart       = "StartTime";
-    const std::string keyEnd         = "EndTime";
-    const std::string keyFading      = "Shading.Fadeable";
+    const char* keyGeometry    = "Geometry";
+    const char* keyBody        = "Body";
+    const char* keyStart       = "StartTime";
+    const char* keyEnd         = "EndTime";
+    const char* keyFading      = "Shading.Fadeable";
     
-    const std::string keyModelTransform = "Rotation.ModelTransform";
+    const char* keyModelTransform = "Rotation.ModelTransform";
     //const std::string keyGhosting      = "Shading.Ghosting";
 
 }

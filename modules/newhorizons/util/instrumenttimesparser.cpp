@@ -39,11 +39,11 @@
 namespace {
     const std::string _loggerCat = "InstrumentTimesParser";
 
-    const std::string PlaybookIdentifierName = "InstrumentTimesParser";
-    const std::string KeyTargetBody = "Target.Body";
-    const std::string KeyInstruments = "Instruments";
-    const std::string KeyInstrument = "Instrument";
-    const std::string KeyInstrumentFiles = "Files";
+    const char* PlaybookIdentifierName = "InstrumentTimesParser";
+    const char* KeyTargetBody = "Target.Body";
+    const char* KeyInstruments = "Instruments";
+    const char* KeyInstrument = "Instrument";
+    const char* KeyInstrumentFiles = "Files";
 }
 
 namespace openspace {

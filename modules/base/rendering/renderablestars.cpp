@@ -41,11 +41,11 @@
 #include <stdint.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableStars";
+    static const std::string _loggerCat = "RenderableStars";
 
-    const std::string KeyFile = "File";
-    const std::string KeyTexture = "Texture";
-    const std::string KeyColorMap = "ColorMap";
+    const char* KeyFile = "File";
+    const char* KeyTexture = "Texture";
+    const char* KeyColorMap = "ColorMap";
 
     const int8_t CurrentCacheVersion = 1;
 

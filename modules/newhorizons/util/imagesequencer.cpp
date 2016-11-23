@@ -37,7 +37,7 @@
 #include <limits>
 
 namespace {
-const std::string _loggerCat = "ImageSequencer";
+    const std::string _loggerCat = "ImageSequencer";
 }
 
 namespace openspace {
