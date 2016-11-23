@@ -33,12 +33,15 @@ namespace properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(std::string identifier, std::string guiName);
-    NumericalProperty(std::string identifier, std::string guiName, T value);
+    NumericalProperty(std::string identifier, std::string guiName,
+        Visibility visibility = Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue);
+        Visibility visibility = Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue, T steppingValue);
+        T minimumValue, T maximumValue, Visibility visibility = Visibility::User);
+    NumericalProperty(std::string identifier, std::string guiName, T value,
+        T minimumValue, T maximumValue, T steppingValue,
+        Visibility visibility = Visibility::User);
 
     bool getLuaValue(lua_State* state) const override;
     bool setLuaValue(lua_State* state) override;

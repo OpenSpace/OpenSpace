@@ -63,6 +63,17 @@ class PropertyOwner;
 class Property {
 public:
     /**
+     * The visibility classes for Property%s. The classes are strictly ordered as
+     * All > Developer > User > None
+     */
+    enum class Visibility {
+        All = 3,  ///< Visible for all types, no matter what
+        Developer = 2, ///< Visible in Developer mode
+        User = 1, ///< Visible in User mode
+        None = 0 ///< Never visible
+    };
+
+    /**
      * The constructor for the property. The <code>identifier</code> needs to be unique
      * for each PropertyOwner. The <code>guiName</code> will be stored in the metaData
      * to be accessed by the GUI elements using the <code>guiName</code> key. The default
@@ -74,7 +85,8 @@ public:
      * \pre \p identifier must not be empty
      * \pre \p guiName must not be empty
      */
-    Property(std::string identifier, std::string guiName);
+    Property(std::string identifier, std::string guiName,
+        Visibility visibility = Visibility::All);
 
     /**
      * The destructor taking care of deallocating all unused memory. This method will not
@@ -255,20 +267,18 @@ public:
     std::string groupIdentifier() const;
 
     /**
-     * Determines a hint if this Property should be visible, or hidden. Each application
-     * accessing the properties is free to ignore this hint. It is stored in the metaData
-     * Dictionary with the key: <code>isVisible</code>. The default value is
-     * <code>true</code>.
-     * \param state <code>true</code> if the Property should be visible,
-     * <code>false</code> otherwise.
+     * Sets a hint about the visibility of the Property. Each application accessing the
+     * properties is free to ignore this hint. It is stored in the metaData Dictionary
+     * with the key: <code>Visibility</code>.
+     * \param visibility The new visibility of the Property
      */
-    void setVisible(bool state);
+    void setVisibility(Visibility visibility);
 
     /**
-     * Returns whether this Property is visible or not.
-     * \return Whether this Property is visible or hidden
+     * Returns this Property%'s visibility setting
+     * \return This Property%'s visibility setting
      */
-    bool isVisible() const;
+    Visibility visibility() const;
 
     /**
      * This method determines if this Property should be read-only in external

@@ -33,13 +33,15 @@ namespace properties {
     
 const std::string OptionProperty::OptionsKey = "Options";
 
-OptionProperty::OptionProperty(std::string identifier, std::string guiName)
-    : IntProperty(std::move(identifier), std::move(guiName))
+OptionProperty::OptionProperty(std::string identifier, std::string guiName,
+                               Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), visibility)
     , _displayType(DisplayType::Radio)
 {}
 
-OptionProperty::OptionProperty(std::string identifier, std::string guiName, DisplayType displayType) 
-    : IntProperty(std::move(identifier), std::move(guiName))
+OptionProperty::OptionProperty(std::string identifier, std::string guiName,
+                               DisplayType displayType, Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), visibility)
     , _displayType(displayType)
 {}
 

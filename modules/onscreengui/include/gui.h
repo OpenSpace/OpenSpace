@@ -33,6 +33,7 @@
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <modules/onscreengui/include/guiiswacomponent.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/properties/property.h>
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -70,6 +71,12 @@ public:
     GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
+
+private:
+    void renderAndUpdatePropertyVisibility();
+
+    properties::Property::Visibility _currentVisibility;
+
 };
 
 } // namespace gui

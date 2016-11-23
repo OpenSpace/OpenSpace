@@ -225,6 +225,7 @@ GUI::GUI()
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _currentVisibility(properties::Property::Visibility::All)
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_origin);
@@ -546,6 +547,8 @@ void GUI::render() {
     ImGui::Checkbox("Help", &help);
     _help.setEnabled(help);
 
+    renderAndUpdatePropertyVisibility();
+
     static const int addImageBufferSize = 256;
     static char addImageBuffer[addImageBufferSize];
 
@@ -576,5 +579,21 @@ void GUI::render() {
     ImGui::End();
 }
     
+void GUI::renderAndUpdatePropertyVisibility() {
+    // Fragile! Keep this in sync with properties::Property::Visibility
+    using V = properties::Property::Visibility;
+    int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
+
+    // Array is sorted by importance
+    std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
+    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+
+    _currentVisibility = static_cast<V>(t);
+    _globalProperty.setVisibility(_currentVisibility);
+    _property.setVisibility(_currentVisibility);
+    _screenSpaceProperty.setVisibility(_currentVisibility);
+}
+
+
 } // namespace gui
 } // namespace openspace

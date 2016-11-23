@@ -27,6 +27,8 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
+#include <openspace/properties/property.h>
+
 #include <functional>
 #include <string>
 #include <vector>
@@ -50,11 +52,15 @@ public:
     // component should render
     void setSource(SourceFunction func);
 
+    void setVisibility(properties::Property::Visibility visibility);
+
     void render();
 
 protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
+
+    properties::Property::Visibility _visibility;
 
     SourceFunction _function;
 };

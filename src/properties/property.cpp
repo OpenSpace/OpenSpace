@@ -35,7 +35,7 @@ namespace {
     const std::string _loggerCat = "Property";
     const std::string MetaDataKeyGuiName = "guiName";
     const std::string MetaDataKeyGroup = "Group";
-    const std::string MetaDataKeyVisible = "isVisible";
+    const std::string MetaDataKeyVisibility = "Visibility";
     const std::string MetaDataKeyReadOnly = "isReadOnly";
 
     const std::string _metaDataKeyViewPrefix = "view.";
@@ -51,14 +51,14 @@ const std::string Property::NameKey = "Name";
 const std::string Property::TypeKey = "Type";
 const std::string Property::MetaDataKey = "MetaData";
 
-Property::Property(std::string identifier, std::string guiName)
+Property::Property(std::string identifier, std::string guiName, Visibility visibility)
     : _owner(nullptr)
     , _identifier(std::move(identifier))
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
     ghoul_assert(!guiName.empty(), "guiName must not be empty");
 
-    setVisible(true);
+    setVisibility(visibility);
     _metaData.setValue(MetaDataKeyGuiName, std::move(guiName));
 }
 
@@ -131,14 +131,18 @@ std::string Property::groupIdentifier() const {
     return result;
 }
 
-void Property::setVisible(bool state) {
-    _metaData.setValue(MetaDataKeyVisible, state);
+void Property::setVisibility(Visibility visibility) {
+    _metaData.setValue(
+        MetaDataKeyVisibility,
+        static_cast<std::underlying_type_t<Visibility>>(visibility)
+    );
 }
 
-bool Property::isVisible() const {
-    bool visible = true;
-    _metaData.getValue(MetaDataKeyVisible, visible);
-    return visible;
+Property::Visibility Property::visibility() const {
+    return
+        static_cast<Visibility>(
+            _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility)
+        );
 }
 
 void Property::setReadOnly(bool state) {
@@ -185,15 +189,22 @@ std::string Property::generateBaseDescription() const {
 }
 
 std::string Property::generateMetaDataDescription() const {
-    bool isVisible, isReadOnly;
-    _metaData.getValue(MetaDataKeyVisible, isVisible);
-    _metaData.getValue(MetaDataKeyReadOnly, isReadOnly);
+    static const std::map<Visibility, std::string> VisibilityConverter = {
+        { Visibility::All, "All" },
+        { Visibility::Developer, "Developer" },
+        { Visibility::User, "User" },
+        { Visibility::None, "None" }
+    };
+    Visibility visibility = _metaData.value<Visibility>(MetaDataKeyVisibility);
+    bool isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
+
+    std::string vis = VisibilityConverter.at(visibility);
 
     return
         MetaDataKey + " = {" +
-            MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
-            MetaDataKeyVisible + " = " + (isVisible  ? "true" : "false") + "," +
-            MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
+        MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
+        MetaDataKeyVisibility + " = " + vis + "," +
+        MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";
 }
 
 std::string Property::generateAdditionalDescription() const {
