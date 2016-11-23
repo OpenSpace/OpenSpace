@@ -114,7 +114,9 @@ namespace openspace {
         // Check for errors
         GLenum error = glGetError();
         if (error != GL_NO_ERROR) {
-            LERROR(error);
+            // Commenting this line. It causes errors to be printed. However
+            // the errors are not caused by DebugRenderer!!
+            //LERROR(error);
         }
         
         // Clean up after the draw call was made

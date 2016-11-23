@@ -205,6 +205,7 @@ void RenderableStars::render(const RenderData& data) {
     _program->setUniform("alphaValue", _alphaValue);
     _program->setUniform("scaleFactor", _scaleFactor);
     _program->setUniform("minBillboardSize", _minBillboardSize);
+    _program->setUniform("screenSize", glm::vec2(OsEng.renderEngine().renderingResolution()));
     
     setPscUniforms(*_program.get(), data.camera, data.position);
     _program->setUniform("scaling", scaling);

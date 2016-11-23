@@ -26,20 +26,22 @@
 #define __SPICEROTATION_H__
 
 #include <openspace/scene/rotation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
     
 class SpiceRotation : public Rotation {
 public:
     SpiceRotation(const ghoul::Dictionary& dictionary);
-    virtual const glm::dmat3& matrix() const;
+    const glm::dmat3& matrix() const;
     void update(const UpdateData& data) override;
 
+    static openspace::Documentation Documentation();
+
 private:
-    std::string _sourceFrame;
-    std::string _destinationFrame;
-    glm::dmat3 _rotationMatrix;
-    bool _kernelsLoadedSuccessfully;
+    properties::StringProperty _sourceFrame;
+    properties::StringProperty _destinationFrame;
 };
     
 } // namespace openspace

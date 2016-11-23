@@ -124,7 +124,7 @@ public:
 
 private:
     GPUTexture gpuTexture;
-    GPUTileUvTransform gpuTileUvTransform;
+    GPUTileUvTransform gpuTileUvTransform;
 };
 
 /**
@@ -192,7 +192,7 @@ class Layer;
 /**
  * Manages a GPU representation of a <code>Layer</code>
  */
-class GPULayer {
+class GPULayer {
 public:
 
     /**
@@ -227,7 +227,7 @@ private:
  * Manages a GPU representation of a <code>Layer</code> representing
  * a height map.
  */
-class GPUHeightLayer : public GPULayer{
+class GPUHeightLayer : public GPULayer {
 public:
 
     /**

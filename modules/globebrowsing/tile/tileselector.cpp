@@ -119,7 +119,7 @@ namespace globebrowsing {
 
     std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
         std::vector<ChunkTile> tiles;
-        for (const auto& layer : layerGroup.activeLayers()){
+        for (const auto& layer : layerGroup.activeLayers()) {
             tiles.push_back(getHighestResolutionTile(layer->tileProvider(), tileIndex));
         }
 

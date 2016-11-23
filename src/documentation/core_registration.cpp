@@ -35,11 +35,11 @@
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/spicemanager.h>
@@ -54,7 +54,6 @@ namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ConfigurationManager::Documentation());
-    engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
@@ -63,6 +62,7 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
+    engine.addDocumentation(Translation::Documentation());
 }
 
 void registerCoreClasses(scripting::ScriptEngine& engine) {

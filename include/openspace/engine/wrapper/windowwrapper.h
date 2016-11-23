@@ -138,6 +138,13 @@ public:
      * \return The resolution of the currently active window in pixel coordinates
      */
     virtual glm::ivec2 currentDrawBufferResolution() const;
+    
+    /**
+     * Returns the DPI scaling factor for the current window. This is normally 1 on all
+     * regular monitors and 2 on Retina screens.
+     * \return The DPI scaling factor for the current window
+     */
+    virtual glm::vec2 dpiScaling() const;
 
     /**
      * Returns the number of anti-aliasing samples used in the current window.

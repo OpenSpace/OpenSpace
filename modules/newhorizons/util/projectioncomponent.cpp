@@ -29,12 +29,14 @@
 #include <modules/newhorizons/util/instrumenttimesparser.h>
 #include <modules/newhorizons/util/labelparser.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
@@ -44,17 +46,18 @@ namespace {
     const std::string keyInstrumentFovy = "Instrument.Fovy";
     const std::string keyInstrumentAspect = "Instrument.Aspect";
 
-    const std::string keyProjObserver = "Projection.Observer";
-    const std::string keyProjTarget = "Projection.Target";
-    const std::string keyProjAberration = "Projection.Aberration";
-
-    const std::string keySequenceDir = "Projection.Sequence";
-    const std::string keySequenceType = "Projection.SequenceType";
     const std::string keyTranslation = "DataInputTranslation";
 
-    const std::string keyNeedsTextureMapDilation = "Projection.TextureMap";
-    const std::string keyNeedsShadowing = "Projection.ShadowMap";
-    const std::string keyTextureMapAspectRatio = "Projection.AspectRatio";
+    const std::string keyProjObserver = "Observer";
+    const std::string keyProjTarget = "Target";
+    const std::string keyProjAberration = "Aberration";
+
+    const std::string keySequenceDir = "Sequence";
+    const std::string keySequenceType = "SequenceType";
+
+    const std::string keyNeedsTextureMapDilation = "TextureMap";
+    const std::string keyNeedsShadowing = "ShadowMap";
+    const std::string keyTextureMapAspectRatio = "AspectRatio";
 
     const std::string sequenceTypeImage = "image-sequence";
     const std::string sequenceTypePlaybook = "playbook";
@@ -71,6 +74,94 @@ namespace openspace {
 
 using ghoul::Dictionary;
 using glm::ivec2;
+
+Documentation ProjectionComponent::Documentation() {
+    using namespace documentation;
+    return {
+        "Projection Component",
+        "newhorizons_projectioncomponent",
+        {
+            {
+                keyInstrument,
+                new StringAnnotationVerifier("A SPICE name of an instrument"),
+                "The instrument that is used to perform the projections",
+                Optional::No
+            },
+            {
+                keyInstrumentFovy,
+                new DoubleVerifier,
+                "The field of view in degrees along the y axis",
+                Optional::No
+            },
+            {
+                keyInstrumentAspect,
+                new DoubleVerifier,
+                "The aspect ratio of the instrument in relation between x and y axis",
+                Optional::No
+            },
+            {
+                keyProjObserver,
+                new StringAnnotationVerifier("A SPICE name of the observing object"),
+                "The observer that is doing the projection. This has to be a valid SPICE "
+                "name or SPICE integer.",
+                Optional::No
+            },
+            {
+                keyProjTarget,
+                new StringAnnotationVerifier("A SPICE name of the observed object"),
+                "The observed object that is projected on. This has to be a valid SPICE "
+                "name or SPICE integer.",
+                Optional::No
+            },
+            {
+                keyProjAberration,
+                new StringInListVerifier({
+                    // from SpiceManager::AberrationCorrection::AberrationCorrection
+                    "NONE", "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S"
+                }),
+                "The aberration correction that is supposed to be used for the "
+                "projection. The values for the correction correspond to the SPICE "
+                "definition as described in "
+                "ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html",
+                Optional::No
+            },
+            {
+                keyPotentialTargets,
+                new StringListVerifier,
+                "The list of potential targets that are involved with the image "
+                "projection",
+                Optional::Yes
+            },
+            {
+                keyNeedsTextureMapDilation,
+                new BoolVerifier,
+                "Determines whether a dilation step of the texture map has to be "
+                "performed after each projection. This is necessary if the texture of "
+                "the projected object is a texture map where the borders are not "
+                "touching. The default value is 'false'.",
+                Optional::Yes
+            },
+            {
+                keyNeedsShadowing,
+                new BoolVerifier,
+                "Determines whether the object requires a self-shadowing algorithm. This "
+                "is necessary if the object is concave and might cast a shadow on itself "
+                "during presentation. The default value is 'false'.",
+                Optional::Yes
+            },
+            {
+                keyTextureMapAspectRatio,
+                new DoubleVerifier,
+                "Sets the desired aspect ratio of the projected texture. This might be "
+                "necessary as planets usually have 2x1 aspect ratios, whereas this does "
+                "not hold for non-planet objects (comets, asteroids, etc). The default "
+                "value is '1.0'.",
+                Optional::Yes
+            }
+
+        }
+    };
+}
 
 ProjectionComponent::ProjectionComponent()
     : properties::PropertyOwner()
@@ -96,7 +187,123 @@ ProjectionComponent::ProjectionComponent()
     _applyTextureSize.onChange([this]() { _textureSizeDirty = true; });
 }
 
-bool ProjectionComponent::initialize() {
+void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ProjectionComponent"
+    );
+    _instrumentID = dictionary.value<std::string>(keyInstrument);
+    _projectorID = dictionary.value<std::string>(keyProjObserver);
+    _projecteeID = dictionary.value<std::string>(keyProjTarget);
+    _fovy = dictionary.value<double>(keyInstrumentFovy);
+    _aspectRatio = dictionary.value<double>(keyInstrumentAspect);
+
+    _aberration = SpiceManager::AberrationCorrection(
+        dictionary.value<std::string>(keyProjAberration)
+    );
+
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
+        ghoul::Dictionary potentialTargets = dictionary.value<ghoul::Dictionary>(
+            keyPotentialTargets
+            );
+
+        _potentialTargets.reserve(potentialTargets.size());
+        for (int i = 1; i <= potentialTargets.size(); ++i) {
+            _potentialTargets.emplace_back(
+                potentialTargets.value<std::string>(std::to_string(i))
+            );
+        }
+    }
+
+    if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
+        _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
+    }
+
+    if (dictionary.hasKeyAndValue<bool>(keyNeedsShadowing)) {
+        _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
+    }
+
+    _projectionTextureAspectRatio = 1.f;
+    if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
+        _projectionTextureAspectRatio =
+            static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
+    }
+
+    std::string name;
+    dictionary.getValue(SceneGraphNode::KeyName, name);
+
+    std::vector<SequenceParser*> parsers;
+
+    std::string sequenceSource;
+    std::string sequenceType;
+    bool foundSequence = dictionary.getValue(keySequenceDir, sequenceSource);
+    if (foundSequence) {
+        sequenceSource = absPath(sequenceSource);
+
+        foundSequence = dictionary.getValue(keySequenceType, sequenceType);
+        //Important: client must define translation-list in mod file IFF playbook
+        if (dictionary.hasKey(keyTranslation)) {
+            ghoul::Dictionary translationDictionary;
+            //get translation dictionary
+            dictionary.getValue(keyTranslation, translationDictionary);
+
+            if (sequenceType == sequenceTypePlaybook) {
+                parsers.push_back(new HongKangParser(
+                    name,
+                    sequenceSource,
+                    _projectorID,
+                    translationDictionary,
+                    _potentialTargets));
+            }
+            else if (sequenceType == sequenceTypeImage) {
+                parsers.push_back(new LabelParser(
+                    name,
+                    sequenceSource,
+                    translationDictionary));
+            }
+            else if (sequenceType == sequenceTypeHybrid) {
+                //first read labels
+                parsers.push_back(new LabelParser(
+                    name,
+                    sequenceSource,
+                    translationDictionary));
+
+                std::string _eventFile;
+                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
+                if (foundEventFile) {
+                    //then read playbook
+                    _eventFile = absPath(_eventFile);
+                    parsers.push_back(new HongKangParser(
+                        name,
+                        _eventFile,
+                        _projectorID,
+                        translationDictionary,
+                        _potentialTargets));
+                }
+                else {
+                    LWARNING("No eventfile has been provided, please check modfiles");
+                }
+            }
+            else if (sequenceType == sequenceTypeInstrumentTimes) {
+                parsers.push_back(new InstrumentTimesParser(
+                    name,
+                    sequenceSource,
+                    translationDictionary));
+            }
+
+            for (SequenceParser* parser : parsers) {
+                openspace::ImageSequencer::ref().runSequenceParser(parser);
+                delete parser;
+            }
+        }
+        else {
+            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
+        }
+    }
+}
+
+bool ProjectionComponent::initializeGL() {
     int maxSize = OpenGLCap.max2DTextureSize();
     glm::ivec2 size;
 
@@ -191,131 +398,6 @@ bool ProjectionComponent::deinitialize() {
 
 bool ProjectionComponent::isReady() const {
     return (_projectionTexture != nullptr);
-}
-
-bool ProjectionComponent::initializeProjectionSettings(const Dictionary& dictionary) {
-    bool completeSuccess = true;
-    completeSuccess &= dictionary.getValue(keyInstrument, _instrumentID);
-    completeSuccess &= dictionary.getValue(keyProjObserver, _projectorID);
-    completeSuccess &= dictionary.getValue(keyProjTarget, _projecteeID);
-    completeSuccess &= dictionary.getValue(keyInstrumentFovy, _fovy);
-    completeSuccess &= dictionary.getValue(keyInstrumentAspect, _aspectRatio);
-
-    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
-
-    std::string a = "NONE";
-    bool s = dictionary.getValue(keyProjAberration, a);
-    _aberration = SpiceManager::AberrationCorrection(a);
-    completeSuccess &= s;
-    ghoul_assert(completeSuccess, "All neccessary attributes not found in modfile");
-
-
-    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(keyPotentialTargets)) {
-        ghoul::Dictionary potentialTargets = dictionary.value<ghoul::Dictionary>(
-            keyPotentialTargets
-        );
-
-        _potentialTargets.resize(potentialTargets.size());
-        for (int i = 0; i < potentialTargets.size(); ++i) {
-            std::string target;
-            potentialTargets.getValue(std::to_string(i + 1), target);
-            _potentialTargets[i] = target;
-        }
-    }
-
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsTextureMapDilation)) {
-        _dilation.isEnabled = dictionary.value<bool>(keyNeedsTextureMapDilation);
-    }
-    
-    if (dictionary.hasKeyAndValue<bool>(keyNeedsShadowing)) {
-        _shadowing.isEnabled = dictionary.value<bool>(keyNeedsShadowing);
-    }
-
-    _projectionTextureAspectRatio = 1.f;
-    if (dictionary.hasKeyAndValue<double>(keyTextureMapAspectRatio)) {
-        _projectionTextureAspectRatio = 
-            static_cast<float>(dictionary.value<double>(keyTextureMapAspectRatio));
-    }
-
-    return completeSuccess;
-}
-
-bool ProjectionComponent::initializeParser(const ghoul::Dictionary& dictionary) {
-    bool completeSuccess = true;
-
-    std::string name;
-    dictionary.getValue(SceneGraphNode::KeyName, name);
-
-    std::vector<SequenceParser*> parsers;
-
-    std::string sequenceSource;
-    std::string sequenceType;
-    bool foundSequence = dictionary.getValue(keySequenceDir, sequenceSource);
-    if (foundSequence) {
-        sequenceSource = absPath(sequenceSource);
-
-        foundSequence = dictionary.getValue(keySequenceType, sequenceType);
-        //Important: client must define translation-list in mod file IFF playbook
-        if (dictionary.hasKey(keyTranslation)) {
-            ghoul::Dictionary translationDictionary;
-            //get translation dictionary
-            dictionary.getValue(keyTranslation, translationDictionary);
-
-            if (sequenceType == sequenceTypePlaybook) {
-                parsers.push_back(new HongKangParser(
-                    name, 
-                    sequenceSource, 
-                    _projectorID, 
-                    translationDictionary, 
-                    _potentialTargets));
-            }
-            else if (sequenceType == sequenceTypeImage) {
-                parsers.push_back(new LabelParser(
-                    name, 
-                    sequenceSource, 
-                    translationDictionary));
-            }
-            else if (sequenceType == sequenceTypeHybrid) {
-                //first read labels
-                parsers.push_back(new LabelParser(
-                    name, 
-                    sequenceSource, 
-                    translationDictionary));
-
-                std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
-                if (foundEventFile) {
-                    //then read playbook
-                    _eventFile = absPath(_eventFile);
-                    parsers.push_back(new HongKangParser(
-                        name, 
-                        _eventFile, 
-                        _projectorID,
-                        translationDictionary, 
-                        _potentialTargets));
-                }
-                else {
-                    LWARNING("No eventfile has been provided, please check modfiles");
-                }
-            }
-            else if (sequenceType == sequenceTypeInstrumentTimes) {
-                parsers.push_back(new InstrumentTimesParser(
-                    name, 
-                    sequenceSource, 
-                    translationDictionary));
-            }
-
-            for(SequenceParser* parser : parsers){
-                openspace::ImageSequencer::ref().runSequenceParser(parser);
-                delete parser;
-            }
-        }
-        else {
-            LWARNING("No playbook translation provided, please make sure all spice calls match playbook!");
-        }
-    }
-
-    return completeSuccess;
 }
 
 void ProjectionComponent::imageProjectBegin() {

@@ -18,6 +18,10 @@ window.onload = function () {
     return identifier;
   });
 
+  factories.sort(function (a, b) {
+    return a.name < b.name ? -1 : (a.name > b.name ? 1 : 0);
+  });
+
   var data = {
     factories: factories,
     version: version

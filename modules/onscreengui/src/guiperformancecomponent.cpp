@@ -42,10 +42,12 @@ namespace {
 
     enum class Sorting {
         NoSorting = -1,
-        UpdateEphemeris = 0,
-        UpdateRender = 1,
-        Render = 2,
-        Total = 3
+        UpdateTranslation = 0,
+        UpdateRotation = 1,
+        UpdateScaling = 2,
+        UpdateRender = 3,
+        Render = 4,
+        Total = 5
     };
 }
 
@@ -80,9 +82,19 @@ void GuiPerformanceComponent::render() {
                 static_cast<int>(Sorting::NoSorting)
             );
             ImGui::RadioButton(
-                "UpdateEphemeris",
+                "UpdateTranslation",
                 &_sortingSelection,
-                static_cast<int>(Sorting::UpdateEphemeris)
+                static_cast<int>(Sorting::UpdateTranslation)
+            );
+            ImGui::RadioButton(
+                "UpdateRotation",
+                &_sortingSelection,
+                static_cast<int>(Sorting::UpdateRotation)
+            );
+            ImGui::RadioButton(
+                "UpdateScaling",
+                &_sortingSelection,
+                static_cast<int>(Sorting::UpdateScaling)
             );
             ImGui::RadioButton(
                 "UpdateRender",
@@ -106,15 +118,17 @@ void GuiPerformanceComponent::render() {
             std::iota(indices.begin(), indices.end(), 0);
 
             // Ordering:
-            // updateEphemeris
+            // updateTranslation
+            // updateRotation
+            // updateScaling
             // UpdateRender
             // RenderTime
-            std::vector<std::array<float, 3>> averages(
+            std::vector<std::array<float, 5>> averages(
                 layout->nScaleGraphEntries,
-                { 0.f, 0.f, 0.f }
+                { 0.f, 0.f, 0.f, 0.f, 0.f }
             );
             
-            std::vector<std::array<std::pair<float, float>, 3>> minMax(
+            std::vector<std::array<std::pair<float, float>, 5>> minMax(
                 layout->nScaleGraphEntries
             );
             
@@ -122,20 +136,26 @@ void GuiPerformanceComponent::render() {
                 const PerformanceLayout::SceneGraphPerformanceLayout& entry =
                     layout->sceneGraphEntries[i];
 
-                int nValues[3] = { 0, 0, 0 };
+                int nValues[5] = { 0, 0, 0, 0, 0 };
                 
                 // Compute the averages and count the number of values so we don't divide
                 // by 0 later
                 for (int j = 0; j < PerformanceLayout::NumberValues; ++j) {
-                    averages[i][0] += entry.updateEphemeris[j];
-                    if (entry.updateEphemeris[j] != 0.f)
+                    averages[i][0] += entry.updateTranslation[j];
+                    if (entry.updateTranslation[j] != 0.f)
                         ++(nValues[0]);
-                    averages[i][1] += entry.updateRenderable[j];
-                    if (entry.updateRenderable[j] != 0.f)
+                    averages[i][1] += entry.updateRotation[j];
+                    if (entry.updateRotation[j] != 0.f)
                         ++(nValues[1]);
-                    averages[i][2] += entry.renderTime[j];
-                    if (entry.renderTime[j] != 0.f)
+                    averages[i][2] += entry.updateScaling[j];
+                    if (entry.updateScaling[j] != 0.f)
                         ++(nValues[2]);
+                    averages[i][3] += entry.updateRenderable[j];
+                    if (entry.updateRenderable[j] != 0.f)
+                        ++(nValues[3]);
+                    averages[i][4] += entry.renderTime[j];
+                    if (entry.renderTime[j] != 0.f)
+                        ++(nValues[4]);
                 }
 
                 if (nValues[0] != 0)
@@ -144,23 +164,45 @@ void GuiPerformanceComponent::render() {
                     averages[i][1] /= static_cast<float>(nValues[1]);
                 if (nValues[2] != 0)
                     averages[i][2] /= static_cast<float>(nValues[2]);
-                
+                if (nValues[3] != 0)
+                    averages[i][3] /= static_cast<float>(nValues[3]);
+                if (nValues[4] != 0)
+                    averages[i][4] /= static_cast<float>(nValues[4]);
+
                 // Get the minimum/maximum values for each of the components so that we
                 // can scale the plot by these numbers
-                auto minmaxEphemeris = std::minmax_element(
-                    std::begin(entry.updateEphemeris),
-                    std::end(entry.updateEphemeris)
+                auto minmaxTranslation = std::minmax_element(
+                    std::begin(entry.updateTranslation),
+                    std::end(entry.updateTranslation)
                 );
                 minMax[i][0] = std::make_pair(
-                    *(minmaxEphemeris.first),
-                    *(minmaxEphemeris.second)
+                    *(minmaxTranslation.first),
+                    *(minmaxTranslation.second)
+                );
+
+                auto minmaxRotation = std::minmax_element(
+                    std::begin(entry.updateRotation),
+                    std::end(entry.updateRotation)
+                );
+                minMax[i][1] = std::make_pair(
+                    *(minmaxRotation.first),
+                    *(minmaxRotation.second)
+                );
+
+                auto minmaxScaling = std::minmax_element(
+                    std::begin(entry.updateScaling),
+                    std::end(entry.updateScaling)
+                );
+                minMax[i][2] = std::make_pair(
+                    *(minmaxScaling.first),
+                    *(minmaxScaling.second)
                 );
                 
                 auto minmaxUpdateRenderable = std::minmax_element(
                     std::begin(entry.updateRenderable),
                     std::end(entry.updateRenderable)
                 );
-                minMax[i][1] = std::make_pair(
+                minMax[i][3] = std::make_pair(
                     *(minmaxUpdateRenderable.first),
                     *(minmaxUpdateRenderable.second)
                 );
@@ -169,7 +211,7 @@ void GuiPerformanceComponent::render() {
                     std::begin(entry.renderTime),
                     std::end(entry.renderTime)
                 );
-                minMax[i][2] = std::make_pair(
+                minMax[i][4] = std::make_pair(
                     *(minmaxRendering.first),
                     *(minmaxRendering.second)
                 );
@@ -216,6 +258,16 @@ void GuiPerformanceComponent::render() {
                     sortFunc
                 );
             }
+            else {
+                // NoSorting -> So we sort by names instead
+                std::sort(
+                    indices.begin(),
+                    indices.end(),
+                    [layout](size_t a, size_t b) {
+                        return std::string(layout->sceneGraphEntries[a].name) < std::string(layout->sceneGraphEntries[b].name);
+                    }
+                );
+            }
 
             for (int i = 0; i < layout->nScaleGraphEntries; ++i) {
                 // We are using the indices list as an additional level of indirection
@@ -227,21 +279,57 @@ void GuiPerformanceComponent::render() {
 
                 if (ImGui::CollapsingHeader(entry.name)) {
 
-                    std::string updateEphemerisTime = std::to_string(
-                        entry.updateEphemeris[PerformanceLayout::NumberValues - 1]
+                    std::string updateTranslationTime = std::to_string(
+                        entry.updateTranslation[PerformanceLayout::NumberValues - 1]
                     ) + "us";
 
                     ImGui::PlotLines(
                         fmt::format(
-                            "UpdateEphemeris\nAverage: {}us",
+                            "UpdateTranslation\nAverage: {}us",
                             averages[indices[i]][0]
                         ).c_str(),
-                        &entry.updateEphemeris[0],
+                        &entry.updateTranslation[0],
                         PerformanceLayout::NumberValues,
                         0,
-                        updateEphemerisTime.c_str(),
+                        updateTranslationTime.c_str(),
                         minMax[indices[i]][0].first,
                         minMax[indices[i]][0].second,
+                        ImVec2(0, 40)
+                    );
+
+                    std::string updateRotationTime = std::to_string(
+                        entry.updateRotation[PerformanceLayout::NumberValues - 1]
+                    ) + "us";
+
+                    ImGui::PlotLines(
+                        fmt::format(
+                            "UpdateRotation\nAverage: {}us",
+                            averages[indices[i]][1]
+                        ).c_str(),
+                        &entry.updateRotation[0],
+                        PerformanceLayout::NumberValues,
+                        0,
+                        updateRotationTime.c_str(),
+                        minMax[indices[i]][1].first,
+                        minMax[indices[i]][1].second,
+                        ImVec2(0, 40)
+                    );
+
+                    std::string updateScalingTime = std::to_string(
+                        entry.updateScaling[PerformanceLayout::NumberValues - 1]
+                    ) + "us";
+
+                    ImGui::PlotLines(
+                        fmt::format(
+                            "UpdateScaling\nAverage: {}us",
+                            averages[indices[i]][2]
+                        ).c_str(),
+                        &entry.updateScaling[0],
+                        PerformanceLayout::NumberValues,
+                        0,
+                        updateScalingTime.c_str(),
+                        minMax[indices[i]][2].first,
+                        minMax[indices[i]][2].second,
                         ImVec2(0, 40)
                     );
 
@@ -252,14 +340,14 @@ void GuiPerformanceComponent::render() {
                     ImGui::PlotLines(
                         fmt::format(
                             "UpdateRender\nAverage: {}us",
-                            averages[indices[i]][1]
+                            averages[indices[i]][3]
                         ).c_str(),
                         &entry.updateRenderable[0],
                         PerformanceLayout::NumberValues,
                         0,
                         updateRenderableTime.c_str(),
-                        minMax[indices[i]][1].first,
-                        minMax[indices[i]][1].second,
+                        minMax[indices[i]][3].first,
+                        minMax[indices[i]][3].second,
                         ImVec2(0, 40)
                     );
 
@@ -270,14 +358,14 @@ void GuiPerformanceComponent::render() {
                     ImGui::PlotLines(
                         fmt::format(
                             "RenderTime\nAverage: {}us",
-                            averages[indices[i]][2]
+                            averages[indices[i]][4]
                         ).c_str(),
                         &entry.renderTime[0],
                         PerformanceLayout::NumberValues,
                         0,
                         renderTime.c_str(),
-                        minMax[indices[i]][2].first,
-                        minMax[indices[i]][2].second,
+                        minMax[indices[i]][4].first,
+                        minMax[indices[i]][4].second,
                         ImVec2(0, 40)
                     );
                 }

@@ -25,27 +25,31 @@
 #ifndef __ROTATION_H__
 #define __ROTATION_H__
 
-#include <ghoul/misc/dictionary.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 
-class Rotation {
+class Rotation : public properties::PropertyOwner {
 public:
     static Rotation* createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation();
     virtual bool initialize();
-    virtual const glm::dmat3& matrix() const = 0;
+    const glm::dmat3& matrix() const;
     virtual void update(const UpdateData& data);
 
     static openspace::Documentation Documentation();
 
 protected:
     Rotation();
+
+    glm::dmat3 _matrix;
 };
 
 }  // namespace openspace

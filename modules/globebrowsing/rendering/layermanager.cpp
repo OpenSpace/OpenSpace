@@ -26,6 +26,9 @@
 #include <openspace/properties/scalarproperty.h>
 
 #include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileselector.h>
+
 
 #include <ghoul/logging/logmanager.h>
 

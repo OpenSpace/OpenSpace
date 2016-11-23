@@ -10,7 +10,7 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime(openspace.time.currentWallTime())
-    dofile(openspace.absPath('${SCRIPTS}/bind_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
 end
 
@@ -21,7 +21,7 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enab`led", true)
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
@@ -35,17 +35,7 @@ function postInitialization()
     openspace.printInfo("Done setting default values")
 
     if openspace.modules.isLoaded("ISWA") then
-    
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
-
-        --openspace.iswa.addCygnet(7);
-
-        --openspace.iswa.addCygnet(-4,"Data","Gm");
-        --openspace.iswa.addCygnet(-5,"Data","Gm");
-        --openspace.iswa.addCygnet(-6,"Data","Gm");
-        --openspace.iswa.addCygnet(-7,"Data","Gm");
-        --openspace.iswa.addCygnet(-8,"Data","Gm");
-        --openspace.iswa.addCygnet(-9,"Data","Gm");
     end
 end
 
@@ -55,8 +45,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {526781518487.171326, 257168309890.072144, -1381125204152.817383},
-        Rotation = {-0.106166, 0.981574, -0.084545, 0.134513},
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",

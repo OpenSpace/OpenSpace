@@ -44,14 +44,7 @@
 #include <map>
 #include <condition_variable>
 
-#ifdef WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#include <windows.h>
-#include <ws2tcpip.h>
-#endif
+
 
 #if defined(WIN32) || defined(__MING32__) || defined(__MING64__)
 typedef size_t _SOCKET;
@@ -59,6 +52,8 @@ typedef size_t _SOCKET;
 typedef int _SOCKET;
 #include <netdb.h>
 #endif
+
+struct addrinfo;
 
 namespace openspace {
 

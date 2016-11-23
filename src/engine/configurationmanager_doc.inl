@@ -42,7 +42,8 @@ Documentation ConfigurationManager::Documentation() {
         {
             ConfigurationManager::KeyConfigScene,
             new StringAnnotationVerifier(
-                "A valid scene file as described in the Scene documentation"),
+                "A valid scene file as described in the Scene documentation"
+            ),
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
@@ -50,9 +51,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyPaths,
-            new TableVerifier({
-                { "*", new StringVerifier }
-            }),
+            new StringListVerifier,
             "A list of paths that are automatically registered with the file system. "
             "If a key X is used in the table, it is then useable by referencing ${X} "
             "in all other configuration files or scripts.",
@@ -60,9 +59,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyFonts,
-            new TableVerifier({
-                { "*", new StringVerifier, "Font paths loadable by FreeType" }
-            }),
+            new StringListVerifier("Font paths loadable by FreeType"),
             "A list of all fonts that will automatically be loaded on startup. Each "
             "key-value pair contained in the table will become the name and the file "
             "for a font.",
@@ -75,7 +72,7 @@ Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
-                        {"Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                        { "Debug", "Info", "Warning", "Error", "Fatal", "None" }
                     ),
                     "The severity of log messages that will be displayed. Only "
                     "messages of the selected level or higher will be displayed. All "
@@ -202,8 +199,8 @@ Documentation ConfigurationManager::Documentation() {
                     new StringInListVerifier(
                         // List taken from ScriptEngine::writeLog
                         { "text" }
-                    ),
-                    "The type of logfile that will be created."
+                        ),
+                        "The type of logfile that will be created."
                 },
                 {
                     ConfigurationManager::PartFile,
@@ -214,8 +211,8 @@ Documentation ConfigurationManager::Documentation() {
                 }
             }),
             "Contains a log of all Lua scripts that were executed in the last "
-            "session.",
-            Optional::Yes
+                            "session.",
+                            Optional::Yes
         },
         {
             ConfigurationManager::KeyKeyboardShortcuts,
@@ -296,6 +293,15 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyPerSceneCache,
+            new BoolVerifier,
+            "If this is set to 'true', the name of the scene will be appended to the "
+            "cache directory, thus not reusing the same directory. This is useful in "
+            "cases where the same instance of OpenSpace is run with multiple scenes, but "
+            "the caches should be retained. This value defaults to 'false'.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyOnScreenTextScaling,
             new StringInListVerifier({
                 // Values from RenderEngine:updateRenderer
@@ -303,17 +309,15 @@ Documentation ConfigurationManager::Documentation() {
             }),
             "The method for scaling the onscreen text in the window. As the resolution "
             "of the rendering can be different from the size of the window, the onscreen "
-            "text can either be scaled according to the window size (\"window\"), or the "
-            "rendering resolution (\"framebuffer\"). This value defaults to \"window\".",
+            "text can either be scaled according to the window size ('window'), or the "
+            "rendering resolution ('framebuffer'). This value defaults to 'window'.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyDownloadRequestURL,
             new OrVerifier(
                 new StringVerifier,
-                new TableVerifier({
-                    { "*", new StringVerifier }
-                })
+                new StringListVerifier
             ),
             "The URL from which files will be downloaded by the Launcher. This can "
             "either be a single URL or a list of possible URLs from which the "

@@ -107,7 +107,10 @@ bool IswaCygnet::initialize(){
     }else{
         _delete.onChange([this](){
             deinitialize();
-            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+            OsEng.scriptEngine().queueScript(
+                "openspace.removeSceneGraphNode('" + name() + "')",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         });
     }
     
@@ -260,7 +263,10 @@ void IswaCygnet::initializeGroup(){
 
     groupEvent->subscribe(name(), "clearGroup", [&](ghoul::Dictionary dict){
         LDEBUG(name() + " Event clearGroup");
-        OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + name() + "')");
+        OsEng.scriptEngine().queueScript(
+            "openspace.removeSceneGraphNode('" + name() + "')",
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     });
 }
 

@@ -34,6 +34,7 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/misc/boolean.h>
 
 #include <list>
 
@@ -70,8 +71,18 @@ public:
     void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
     void clearKeyframes();
 
-    void bindKeyLocal(Key key, KeyModifier modifier, std::string lua);
-    void bindKey(Key key, KeyModifier modifier, std::string lua);
+    void bindKeyLocal(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
+    void bindKey(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
     void lockControls();
     void unlockControls();
 
@@ -105,11 +116,19 @@ public:
     void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
+    using Synchronized = ghoul::Boolean;
+
+    struct KeyInformation {
+        std::string command;
+        Synchronized synchronization;
+        std::string documentation;
+    };
+
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 
     bool _cameraUpdatedFromScript = false;
 
-    std::multimap<KeyWithModifier, std::pair<std::string, bool>> _keyLua;
+    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
