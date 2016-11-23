@@ -32,6 +32,9 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/rendering/layermanager.h>
+
 
 #include <algorithm>
 
@@ -176,8 +179,7 @@ namespace globebrowsing {
         const Chunk& chunk,
         const RenderData& data) const {
         auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
-        auto heightLayers =
-            layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
+        auto heightLayers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
         int currLevel = chunk.tileIndex().level;
         
         for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
