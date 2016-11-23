@@ -45,7 +45,8 @@ namespace {
         RenderingModeLinesPoints
     };
 
-    static std::map<std::string, RenderingMode> RenderingModeConversion = {
+    // Fragile! Keep in sync with documentation
+    static const std::map<std::string, RenderingMode> RenderingModeConversion = {
         { "Lines", RenderingModeLines },
         { "Points", RenderingModePoints },
         { "Lines+Points", RenderingModeLinesPoints },
@@ -172,10 +173,12 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
+    // This map is not accessed out of order as long as the Documentation is adapted
+    // whenever the map changes. The documentation will check for valid values
     if (dictionary.hasKeyAndValue<std::string>(KeyRendering)) {
-        _renderingModes = RenderingModeConversion[
+        _renderingModes = RenderingModeConversion.at(
             dictionary.value<std::string>(KeyRendering)
-        ];
+        );
     }
     else {
         _renderingModes = RenderingModeLines;

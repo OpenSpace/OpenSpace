@@ -91,11 +91,10 @@ openspace::Documentation RenderableTrailTrajectory::Documentation() {
                 KeyTimeStampSubsample,
                 new IntVerifier,
                 "The factor that is used to create subsamples along the trajectory. This "
-                "value (together with 'TimeStampSubsampleFactor') determines how far "
-                "apart (in time) the samples are spaced along the trajectory. The time "
-                "interval between 'StartTime' and 'EndTime' is split into "
-                "'SampleInterval' * 'TimeStampSubsampleFactor' segments. The default "
-                "value for this is 1",
+                "value (together with 'SampleInterval') determines how far apart (in "
+                "time) the samples are spaced along the trajectory. The time interval "
+                "between 'StartTime' and 'EndTime' is split into 'SampleInterval' * "
+                "'TimeStampSubsampleFactor' segments. The default value for this is 1",
                 Optional::Yes
             },
             {

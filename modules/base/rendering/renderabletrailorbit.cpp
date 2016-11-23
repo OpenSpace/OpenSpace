@@ -30,7 +30,8 @@
 #include <numeric>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:
-// Structure of the array with a _resolution of 16:
+// Structure of the array with a _resolution of 16. FF denotes the floating position that
+// is updated every frame:
 //  ---------------------------------------------------------------------------------
 //  | FF |    |    |    |    |    |    |    |    |    |    |    |    |    |    |    |
 //  ---------------------------------------------------------------------------------
@@ -38,8 +39,8 @@
 //                    <------ newer in time                                    oldest
 //
 // In the begining the floating value starts at 0; this means that array element 0 is
-// updated and uploaded to the GPU at every frame. The F+1 element is the newest fixed 
-// location and F-1 element is the oldest fixed location (including wrapping around the
+// updated and uploaded to the GPU at every frame. The FF+1 element is the newest fixed 
+// location and FF-1 element is the oldest fixed location (including wrapping around the
 // array) with the times of _lastPointTime and _firstPointTime.
 //
 // If the time progresses forwards and abs(time - _lastPointTime) becomes big enough, the
@@ -58,13 +59,11 @@
 //
 // For the rendering, this is achieved by using an index buffer that is twice the size of
 // the vertex buffer containing identical two sequences indexing the vertex array.
-// In this example:
-// -----------------------------------------------------------------
-// |0|0|0|0|0|0|0|0|0|0|1|1|1|1|1|1|0|0|0|0|0|0|0|0|0|0|1|1|1|1|1|1|     << Values
-// |0|1|2|3|4|5|6|7|8|9|0|1|2|3|4|5|0|1|2|3|4|5|6|7|8|9|0|1|2|3|4|5| written top to bottom
-// -----------------------------------------------------------------
-//  0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 3      << Indices
-//  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1  written top to bottom
+// In an example of size 8:
+// ---------------------------------------------------------------------------------------
+// |0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15| 0| 1| 2| 3| 4| 5| 6| 7| 8| 9|10|11|12|13|14|15|
+// ---------------------------------------------------------------------------------------
+//  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
 //
 // The rendering step needs to know only the offset into the array (denoted by FF as the
 // floating position above) and use the index array from the position. Since the indices
@@ -86,7 +85,7 @@ namespace openspace {
 
 openspace::Documentation RenderableTrailOrbit::Documentation() {
     using namespace documentation;
-    openspace::Documentation doc {
+    openspace::Documentation doc{
         "RenderableTrailOrbit",
         "base_renderable_renderabletrailorbit",
         {
@@ -99,18 +98,19 @@ openspace::Documentation RenderableTrailOrbit::Documentation() {
             {
                 KeyPeriod,
                 new DoubleVerifier,
-                "The objects period in days, i.e. the length of its orbit around the "
-                "parent object. In the case of Earth, this would be a year"
-                "(=365.242 days). If this values is specified as multiples of the "
-                "period, it is possible to show the effects of precession.",
+                "The objects period, i.e. the length of its orbit around the parent "
+                "object given in (Earth) days. In the case of Earth, this would be a "
+                "sidereal year (=365.242 days). If this values is specified as multiples "
+                "of the period, it is possible to show the effects of precession.",
                 Optional::No
             },
             {
                 KeyResolution,
                 new IntVerifier,
                 "The number of samples along the orbit. This determines the resolution "
-                "of the trail. The higher, the smoother the trail, but also more memory "
-                "will be used",
+                "of the trail; the tradeoff being that a higher resolution is able to "
+                "resolve more detail, but will take more resources while rendering, too. "
+                "The higher, the smoother the trail, but also more memory will be used.",
                 Optional::No
             }
         }
@@ -179,6 +179,11 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 1. Update trails
     // 2. Update floating position
     // 3. Determine which parts of the array to upload and upload the data
+
+    // Early bailout when we don't move in time
+    if (data.timePaused || data.delta == 0.0) {
+        return;
+    }
 
 
     // 1

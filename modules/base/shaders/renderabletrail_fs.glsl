@@ -26,6 +26,8 @@
 #define RenderPhaseLines 0
 #define RenderPhasePoints 1
 
+#define Delta 0.25
+
 in vec4 vs_positionScreenSpace;
 in float fade;
 
@@ -35,17 +37,31 @@ uniform int renderPhase;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    if (renderPhase == RenderPhasePoints) {
-        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-        if (dot(circCoord, circCoord) > 1.0) {
-            discard;
-        }
-    }
-
     Fragment frag;
     frag.color = vec4(color * fade, fade);
     frag.depth = vs_positionScreenSpace.w;
     frag.blend = BLEND_MODE_ADDITIVE;
+
+    if (renderPhase == RenderPhasePoints) {
+        // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
+        // smoothstep to gradually decrease the alpha on the edges of the point
+        vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
+        frag.color.a *= 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
+
+
+
+        // if (dot(circCoord, circCoord) > 1.0) {
+
+        // }
+        // frag.color.a *= smoothstep();
+
+        // // Check for length > 1.0 without a square root
+        // frag.color.a *= smoothstep(dot(circCoord, circCoord), 1.0, 1.0 - 1.0 / pointSize);
+        // if (dot(circCoord, circCoord) > 1.0) {
+        //     discard;
+        // }
+    }
+
 
     return frag;
 }

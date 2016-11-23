@@ -369,6 +369,7 @@ void RenderEngine::updateSceneGraph() {
         1,
         Time::ref().j2000Seconds(),
         Time::ref().deltaTime(),
+        Time::ref().paused(),
         Time::ref().timeJumped(),
         _performanceManager != nullptr
     });
