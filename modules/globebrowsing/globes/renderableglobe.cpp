@@ -61,8 +61,7 @@ namespace globebrowsing {
         properties::BoolProperty("performShading", "perform shading", true),
         properties::BoolProperty("atmosphere", "atmosphere", false),
         properties::FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        properties::FloatProperty(
-            "cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
+        properties::FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
     })
     , _debugProperties({
         properties::BoolProperty("saveOrThrowCamera", "save or throw camera", false),
@@ -70,18 +69,15 @@ namespace globebrowsing {
         properties::BoolProperty("showChunkBounds", "show chunk bounds", false),
         properties::BoolProperty("showChunkAABB", "show chunk AABB", false),
     	properties::BoolProperty("showHeightResolution", "show height resolution", false),
-        properties::BoolProperty(
-            "showHeightIntensities", "show height intensities", false),
-        properties::BoolProperty(
-            "performFrustumCulling", "perform frustum culling", true),
-        properties::BoolProperty(
-            "performHorizonCulling", "perform horizon culling", true),
-        properties::BoolProperty(
-            "levelByProjectedAreaElseDistance", "level by projected area (else distance)",
-            false),
+        properties::BoolProperty("showHeightIntensities", "show height intensities", false),
+        properties::BoolProperty("performFrustumCulling", "perform frustum culling", true),
+        properties::BoolProperty("performHorizonCulling", "perform horizon culling", true),
+        properties::BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)",false),
         properties::BoolProperty("resetTileProviders", "reset tile providers", false),
-        properties::BoolProperty(
-            "toggleEnabledEveryFrame", "toggle enabled every frame", false)})
+        properties::BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
+        properties::BoolProperty("collectStats", "collect stats", false)
+        })
+
     {
         setName("RenderableGlobe");
         
@@ -142,6 +138,7 @@ namespace globebrowsing {
             _debugProperties.levelByProjectedAreaElseDistance);
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
         _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
+        _debugPropertyOwner.addProperty(_debugProperties.collectStats);
         
         addPropertySubOwner(_debugPropertyOwner);
         addPropertySubOwner(_layerManager.get());
@@ -164,6 +161,9 @@ namespace globebrowsing {
     }
 
     void RenderableGlobe::render(const RenderData& data) {
+        bool statsEnabled = _debugProperties.collectStats.value();
+        _chunkedLodGlobe->stats.setEnabled(statsEnabled);
+
         if (_debugProperties.toggleEnabledEveryFrame.value()) {
             _generalProperties.isEnabled.setValue(
                 !_generalProperties.isEnabled.value());

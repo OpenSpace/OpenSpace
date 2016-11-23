@@ -99,9 +99,6 @@ namespace globebrowsing {
         // In the future, this should be abstracted away and more easily queryable.
         // One must also handle how to sample pick one out of multiplte heightmaps
         auto layerManager = owner().chunkedLodGlobe()->layerManager();
-        
-        auto heightMapProviders =
-            layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
        
         // The raster of a height map is the first one. We assume that the height map is
         // a single raster image. If it is not we will just use the first raster

@@ -254,9 +254,9 @@ namespace globebrowsing {
     }
 
     void ChunkedLodGlobe::render(const RenderData& data) {
+        
         stats.startNewRecord();
         
-        int j2000s = Time::now().j2000Seconds();
         auto duration = std::chrono::system_clock::now().time_since_epoch();
         auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(
             duration).count();
@@ -271,13 +271,11 @@ namespace globebrowsing {
         dmat4 mvp = vp * _owner.modelTransform();
 
         // Render function
-        std::function<void(const ChunkNode&)> renderJob =
-            [this, &data, &mvp](const ChunkNode& chunkNode)
-        {
-            stats.i["chunks"]++;
+        auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
+            stats.i["chunks nodes"]++;
             const Chunk& chunk = chunkNode.getChunk();
             if (chunkNode.isLeaf()){
-                stats.i["chunks leafs"]++;
+                stats.i["leafs chunk nodes"]++;
                 if (chunk.isVisible()) {
                     stats.i["rendered chunks"]++;
                     double t0 = Time::now().j2000Seconds();
@@ -286,12 +284,16 @@ namespace globebrowsing {
                 }
             }
         };
-        
+
         _leftRoot->breadthFirst(renderJob);
         _rightRoot->breadthFirst(renderJob);
         
         //_leftRoot->reverseBreadthFirst(renderJob);
         //_rightRoot->reverseBreadthFirst(renderJob);
+
+        auto duration2 = std::chrono::system_clock::now().time_since_epoch();
+        auto millis2 = std::chrono::duration_cast<std::chrono::milliseconds>(duration2).count();
+        stats.i["chunk globe render time"] = millis2 - millis;
     }
 
     void ChunkedLodGlobe::debugRenderChunk(

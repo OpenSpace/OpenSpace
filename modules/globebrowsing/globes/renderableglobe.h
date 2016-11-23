@@ -74,6 +74,7 @@ public:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::BoolProperty resetTileProviders;
         properties::BoolProperty toggleEnabledEveryFrame;
+        properties::BoolProperty collectStats;
     };
     
     struct GeneralProperties {

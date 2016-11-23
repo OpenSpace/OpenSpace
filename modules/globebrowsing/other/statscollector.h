@@ -169,6 +169,10 @@ namespace globebrowsing {
             }
         }
 
+        void setEnabled(bool enabled){
+            _enabled = enabled;
+        }
+
         void disable() {
             _enabled = false;
         }
