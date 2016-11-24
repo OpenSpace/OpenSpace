@@ -34,14 +34,15 @@ template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
     NumericalProperty(std::string identifier, std::string guiName,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Property::Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Property::Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue, Visibility visibility = Visibility::User);
+        T minimumValue, T maximumValue,
+        Property::Visibility visibility = Property::Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
         T minimumValue, T maximumValue, T steppingValue,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Property::Visibility::User);
 
     bool getLuaValue(lua_State* state) const override;
     bool setLuaValue(lua_State* state) override;

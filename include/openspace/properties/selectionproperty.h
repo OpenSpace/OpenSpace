@@ -40,7 +40,7 @@ public:
     };
 
     SelectionProperty(std::string identifier, std::string guiName,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Property::Visibility::User);
     
     void addOption(Option option);
     void removeOptions();

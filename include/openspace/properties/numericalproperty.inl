@@ -234,7 +234,7 @@ const std::string NumericalProperty<T>::SteppingValueKey = "SteppingValue";
         
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName,
-                                        Visibility visibility)
+                                        Property::Visibility visibility)
     : NumericalProperty<T>(
         std::move(identifier), std::move(guiName),
         PropertyDelegate<NumericalProperty<T>>::template defaultValue<T>(),
@@ -248,7 +248,7 @@ NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiN
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier,
                                         std::string guiName, T value,
-                                        Visibility visibility)
+                                        Property::Visibility visibility)
     : NumericalProperty<T>(
         std::move(identifier), std::move(guiName), std::move(value),
         PropertyDelegate<NumericalProperty<T>>::template defaultMinimumValue<T>(),
@@ -261,7 +261,7 @@ NumericalProperty<T>::NumericalProperty(std::string identifier,
 template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier, std::string guiName,
                                         T value, T minimumValue, T maximumValue,
-                                        Visibility visibility)
+                                        Property::Visibility visibility)
     : NumericalProperty<T>(
         std::move(identifier) , std::move(guiName), std::move(value),
         std::move(minimumValue), std::move(maximumValue),
@@ -274,7 +274,7 @@ template <typename T>
 NumericalProperty<T>::NumericalProperty(std::string identifier,
                                         std::string guiName, T value,
                                         T minimumValue, T maximumValue, T steppingValue,
-                                        Visibility visibility)
+                                        Property::Visibility visibility)
     : TemplateProperty<T>(std::move(identifier), std::move(guiName), std::move(value),
                           visibility)
     , _minimumValue(std::move(minimumValue))

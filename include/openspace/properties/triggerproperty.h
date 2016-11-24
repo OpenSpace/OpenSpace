@@ -43,7 +43,7 @@ public:
      * \param guiName The human-readable name of this Property
      */
     TriggerProperty(std::string identifier, std::string guiName,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
      * Returns the class name <code>TriggerProperty</code>.

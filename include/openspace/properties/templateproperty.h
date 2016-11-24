@@ -64,7 +64,7 @@ public:
      * \param guiName The human-readable GUI name for this TemplateProperty
      */
     TemplateProperty(std::string identifier, std::string guiName,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Visibility::User);
 
     /**
      * The constructor initializing the TemplateProperty with the provided
@@ -72,7 +72,7 @@ public:
      * <code>value</code>.
      */
     TemplateProperty(std::string identifier, std::string guiName, T value,
-        Visibility visibility = Visibility::User);
+        Property::Visibility visibility = Visibility::User);
 
     /**
      * Returns the class name for this TemplateProperty. The default implementation makes
