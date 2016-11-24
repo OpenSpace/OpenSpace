@@ -62,12 +62,12 @@ return {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
-                    --[[
                     {
                         Name = "CTX Mosaic",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         Enabled = true,
                     },
+                    --[[
                     {
                         Name = "West Candor Chasma",
                         FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
@@ -112,7 +112,7 @@ return {
                         MinimumPixelSize = 64,
                         DoPreProcessing = true,
                     },
-                    
+--]]                    
                     {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
@@ -120,7 +120,7 @@ return {
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
-                    {
+--[[                    {
                         Name = "West Candor Chasma",
                         FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,

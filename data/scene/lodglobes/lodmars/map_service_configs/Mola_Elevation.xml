@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TiledWMS">
-    <ServerUrl>http://192.168.1.167/OnMars/wms.cgi?</ServerUrl>
+    <ServerUrl>http://wms.itn.liu.se/OnMars/wms.cgi?</ServerUrl>
     <TiledGroupName>Mola Elevation</TiledGroupName>
   </Service>
   <DataWindow>
