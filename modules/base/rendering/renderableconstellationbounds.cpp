@@ -37,6 +37,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
+
 namespace {
     const std::string _loggerCat = "RenderableConstellationBounds";
 
@@ -211,7 +214,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     float ra;
     float dec;
     std::string constellationName;
-    SpiceDouble rectangularValues[3];
+    double rectangularValues[3];
 
     // Overview of the reading algorithm:
     // We keep an active ConstellationBound (currentBound) and update it until we read

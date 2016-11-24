@@ -34,6 +34,9 @@
 #include <algorithm>
 #include <fmt/format.h>
 
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
+
 namespace {
     const std::string _loggerCat = "SpiceManager";
     
@@ -45,14 +48,16 @@ namespace {
     // This method checks if one of the previous SPICE methods has failed. If it has, an
     // exception with the SPICE error message is thrown
     void throwOnSpiceError(std::string errorMessage) {
-        SpiceBoolean failed = failed_c();
-        if (failed) {
-            char buffer[SpiceErrorBufferSize];
-            getmsg_c("LONG", SpiceErrorBufferSize, buffer);
-            reset_c();
-            throw openspace::SpiceManager::SpiceException(
-                errorMessage + ": " + buffer
-            );
+        if (openspace::SpiceManager::ref().exceptionHandling()) {
+            SpiceBoolean failed = failed_c();
+            if (failed) {
+                char buffer[SpiceErrorBufferSize];
+                getmsg_c("LONG", SpiceErrorBufferSize, buffer);
+                reset_c();
+                throw openspace::SpiceManager::SpiceException(
+                    errorMessage + ": " + buffer
+                );
+            }
         }
     }
     
@@ -85,9 +90,12 @@ namespace openspace {
     
 SpiceManager::SpiceException::SpiceException(const string& msg)
     : ghoul::RuntimeError(msg, "Spice")
-{}
-
-    
+{
+    ghoul_assert(
+        SpiceManager::ref().exceptionHandling() == SpiceManager::UseException::Yes,
+        "No exceptions should be thrown when UseException is No"
+    );
+}
     
 SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
     : type(t)
@@ -155,7 +163,9 @@ SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString( const strin
     return Mapping.at(type);
 }
 
-SpiceManager::SpiceManager() {
+SpiceManager::SpiceManager() 
+    : _useExceptions(UseException::No)
+{
     // Set the SPICE library to not exit the program if an error occurs
     erract_c("SET", 0, const_cast<char*>("REPORT"));
     // But we do not want SPICE to print the errors, we will fetch them ourselves
@@ -473,7 +483,7 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     
     bool targetHasCoverage = hasSpkCoverage(target, ephemerisTime);
     bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
-    if (!targetHasCoverage && !observerHasCoverage){
+    if (!targetHasCoverage && !observerHasCoverage && _useExceptions) {
         throw SpiceException(
             format("Neither target '{}' nor observer '{}' has SPK coverage at time {}",
                    target,
@@ -945,7 +955,7 @@ glm::dvec3 SpiceManager::getEstimatedPosition(const std::string& target,
         return glm::dvec3(0.0);
     }
     
-    if (_spkCoverageTimes.find(targetId) == _spkCoverageTimes.end()) {
+    if (_spkCoverageTimes.find(targetId) == _spkCoverageTimes.end() && _useExceptions) {
         // no coverage
         throw SpiceException(format("No position for '{}' at any time", target));
     }
@@ -1034,7 +1044,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     glm::dmat3 result;
     int idFrame = frameId(fromFrame);
     
-    if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end()) {
+    if (_ckCoverageTimes.find(idFrame) == _ckCoverageTimes.end() && _useExceptions) {
         // no coverage
         throw SpiceException(format(
             "No data available for the transform matrix from '{}' to '{}' at any time",
@@ -1105,6 +1115,14 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     }
     
     return result;
+}
+
+void SpiceManager::setExceptionHandling(UseException useException) {
+    _useExceptions = useException;
+}
+
+SpiceManager::UseException SpiceManager::exceptionHandling() const {
+    return _useExceptions;
 }
 
 scripting::LuaLibrary SpiceManager::luaLibrary() {
