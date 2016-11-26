@@ -116,17 +116,11 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
     
 void SpiceRotation::update(const UpdateData& data) {
-    try {
-        _matrix = SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            data.time
-        );
-    }
-    catch (const ghoul::RuntimeError&) {
-        // In case of missing coverage
-        _matrix = glm::dmat3(1);
-    }
+    _matrix = SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        data.time
+    );
 }
 
 } // namespace openspace

@@ -46,7 +46,16 @@ public:
 
     glm::dvec3 position(double time);
 
+    // Registers a callback that gets called when a significant change has been made that
+    // invalidates potentially stored points, for example in trails
+    void onParameterChange(std::function<void()> callback);
+
     static openspace::Documentation Documentation();
+
+protected:
+    void notifyObservers();
+
+    std::function<void()> _onParameterChangeCallback;
 };
 
 }  // namespace openspace
