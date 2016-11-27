@@ -28,7 +28,7 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/matrixproperty.h>
+#include <openspace/properties/matrix/dmat3property.h>
 
 namespace openspace {
     

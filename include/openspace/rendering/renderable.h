@@ -26,7 +26,8 @@
 #define __RENDERABLE_H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/updatestructures.h>
 

@@ -26,6 +26,7 @@
 #define __RENDERABLECONSTELLATIONBOUNDS_H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/selectionproperty.h>
 #include <ghoul/opengl/programobject.h>
@@ -53,7 +54,6 @@ namespace openspace {
 class RenderableConstellationBounds : public Renderable {
 public:
     RenderableConstellationBounds(const ghoul::Dictionary& dictionary);
-    ~RenderableConstellationBounds();
 
     bool initialize() override;
     bool deinitialize() override;

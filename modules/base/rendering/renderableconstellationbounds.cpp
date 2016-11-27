@@ -61,7 +61,7 @@ namespace {
 namespace openspace {
 
 RenderableConstellationBounds::RenderableConstellationBounds(
-            const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _vertexFilename("")
     , _constellationFilename("")
@@ -89,9 +89,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     _constellationSelection.onChange(
         std::bind(&RenderableConstellationBounds::selectionPropertyHasChanged, this)
     );
-}
-
-RenderableConstellationBounds::~RenderableConstellationBounds() {
 }
 
 bool RenderableConstellationBounds::initialize() {
