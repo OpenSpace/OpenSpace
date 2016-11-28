@@ -79,6 +79,12 @@ namespace globebrowsing {
         return *this;
     }
 
+
+    glm::vec2 TileIndex::positionRelativeParent() const{
+        // In OpenGL, positive y direction is up
+        return glm::vec2(isEastChild() ? 0.5 : 0, isNorthChild() ? 0.5 : 0);
+    }
+
     /**
     Gets the tile at a specified offset from this tile.
     Accepts delta indices ranging from [-2^level, Infinity[

@@ -80,14 +80,7 @@ namespace globebrowsing {
         uv.uvOffset *= 0.5;
         uv.uvScale *= 0.5;
 
-        if (tileIndex.isEastChild()) {
-            uv.uvOffset.x += 0.5;
-        }
-
-        // In OpenGL, positive y direction is up
-        if (tileIndex.isNorthChild()) {
-            uv.uvOffset.y += 0.5;
-        }
+        uv.uvOffset += tileIndex.positionRelativeParent();
 
         --tileIndex;
     }
