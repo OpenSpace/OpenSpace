@@ -131,7 +131,7 @@ openspace::Documentation RenderableTrailOrbit::Documentation() {
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resoluion", "Number of Samples along Orbit", 10000, 1, 1e6)
+    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1e6)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
 {
@@ -140,6 +140,10 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
         dictionary,
         "RenderableTrailOrbit"
     );
+
+    _translation->onParameterChange([this](){
+        _needsFullSweep = true;
+    });
 
     // Period is in days
     using namespace std::chrono;
@@ -179,12 +183,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 1. Update trails
     // 2. Update floating position
     // 3. Determine which parts of the array to upload and upload the data
-
-    // Early bailout when we don't move in time
-    if (data.timePaused || data.delta == 0.0) {
-        return;
-    }
-
 
     // 1
     // Update the trails; the report contains whether any of the other values has been
