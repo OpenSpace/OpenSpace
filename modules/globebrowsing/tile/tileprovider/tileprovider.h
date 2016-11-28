@@ -40,6 +40,9 @@
 
 namespace openspace {
 namespace globebrowsing {
+    
+    class ChunkTile;
+    class ChunkTilePile;
 
     using namespace ghoul::opengl;
     
@@ -95,6 +98,13 @@ namespace globebrowsing {
         * the method was invoked.
         */
         virtual Tile getTile(const TileIndex& tileIndex) = 0;
+
+
+        virtual ChunkTile getChunkTile(TileIndex tileIndex, int parents = 0);
+
+
+        virtual ChunkTilePile getChunkTilePile(TileIndex tileIndex, int pileSize);
+
 
         /**
         * TileProviders must be able to provide a defualt

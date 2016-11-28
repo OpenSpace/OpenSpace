@@ -200,7 +200,7 @@ namespace globebrowsing {
         for (const auto& layer : heightMapLayers) {
             TileProvider* tileProvider = layer->tileProvider();
             // Transform the uv coordinates to the current tile texture
-            ChunkTile chunkTile = TileSelector::getHighestResolutionTile(tileProvider, tileIndex);
+            ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
             const auto& tile = chunkTile.tile;
             const auto& uvTransform = chunkTile.uvTransform;
             const auto& depthTransform = tileProvider->depthTransform();

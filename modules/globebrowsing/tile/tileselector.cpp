@@ -42,65 +42,13 @@ namespace globebrowsing {
 
     const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
 
-    ChunkTilePile TileSelector::getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex, int pileSize){
-        ghoul_assert(pileSize >= 0, "pileSize must be positive");
-        ChunkTilePile chunkTilePile;
-        chunkTilePile.chunkTiles.resize(pileSize);
-        for (size_t i = 0; i < pileSize; ++i){
-            chunkTilePile.chunkTiles[i] = TileSelector::getHighestResolutionTile(tileProvider, tileIndex, i);
-            if (chunkTilePile.chunkTiles[i].tile.status == Tile::Status::Unavailable) {
-                if(i>0){
-                    chunkTilePile.chunkTiles[i].tile = chunkTilePile.chunkTiles[i-1].tile;
-                    chunkTilePile.chunkTiles[i].uvTransform.uvOffset = chunkTilePile.chunkTiles[i-1].uvTransform.uvOffset;
-                    chunkTilePile.chunkTiles[i].uvTransform.uvScale = chunkTilePile.chunkTiles[i-1].uvTransform.uvScale;
-                }
-                else{
-                    chunkTilePile.chunkTiles[i].tile = tileProvider->getDefaultTile();
-                    chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
-                    chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
-                }
-            }
-        }
-        return std::move(chunkTilePile);
-    }
-
-    ChunkTile TileSelector::getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents) {
-        TileUvTransform uvTransform;
-        uvTransform.uvOffset = glm::vec2(0, 0);
-        uvTransform.uvScale = glm::vec2(1, 1);
-
-        // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
-        for (int i = 0; i < parents && tileIndex.level > 1; i++) {
-            ascendToParent(tileIndex, uvTransform);
-        }
-
-        // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
-        //         the range of defined data.
-        int maximumLevel = tileProvider->maxLevel();
-        while(tileIndex.level > maximumLevel){
-            ascendToParent(tileIndex, uvTransform);
-        }
-        
-        // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
-        //         has a loaded tile ready to use. 
-        while (tileIndex.level > 1) {
-            Tile tile = tileProvider->getTile(tileIndex);
-            if (tile.status != Tile::Status::OK) {
-                ascendToParent(tileIndex, uvTransform);
-            }
-            else return { tile, uvTransform };
-        }
-        
-        return{ Tile::TileUnavailable, uvTransform };
-    }
-
     ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex) {
         ChunkTile mostHighResolution;
         mostHighResolution.tile = Tile::TileUnavailable;
         mostHighResolution.uvTransform.uvScale.x = 0;
 
         for (const auto& layer : layerGroup.activeLayers()) {
-            ChunkTile chunkTile = getHighestResolutionTile(layer->tileProvider(), tileIndex);
+            ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);
             bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
             bool tileHasMetaData = chunkTile.tile.metaData != nullptr;
             bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
@@ -120,7 +68,7 @@ namespace globebrowsing {
     std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
         std::vector<ChunkTile> tiles;
         for (const auto& layer : layerGroup.activeLayers()) {
-            tiles.push_back(getHighestResolutionTile(layer->tileProvider(), tileIndex));
+            tiles.push_back(layer->tileProvider()->getChunkTile(tileIndex));
         }
 
         std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);

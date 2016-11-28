@@ -27,6 +27,8 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <openspace/util/factorymanager.h>
+#include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/tileselector.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -59,6 +61,58 @@ TileProvider::TileProvider(const ghoul::Dictionary& dictionary) { };
 
 float TileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
+}
+
+ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents){
+    TileUvTransform uvTransform;
+    uvTransform.uvOffset = glm::vec2(0, 0);
+    uvTransform.uvScale = glm::vec2(1, 1);
+
+    // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
+    for (int i = 0; i < parents && tileIndex.level > 1; i++) {
+        TileSelector::ascendToParent(tileIndex, uvTransform);
+    }
+
+    // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
+    //         the range of defined data.
+    int maximumLevel = maxLevel();
+    while(tileIndex.level > maximumLevel){
+        TileSelector::ascendToParent(tileIndex, uvTransform);
+    }
+    
+    // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
+    //         has a loaded tile ready to use. 
+    while (tileIndex.level > 1) {
+        Tile tile = getTile(tileIndex);
+        if (tile.status != Tile::Status::OK) {
+            TileSelector::ascendToParent(tileIndex, uvTransform);
+        }
+        else return { tile, uvTransform };
+    }
+    
+    return{ Tile::TileUnavailable, uvTransform };
+}
+
+ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
+    ghoul_assert(pileSize >= 0, "pileSize must be positive");
+    ChunkTilePile chunkTilePile;
+    chunkTilePile.chunkTiles.resize(pileSize);
+    for (size_t i = 0; i < pileSize; ++i){
+        chunkTilePile.chunkTiles[i] = getChunkTile(tileIndex, i);
+        if (chunkTilePile.chunkTiles[i].tile.status == Tile::Status::Unavailable) {
+            if(i>0){
+                chunkTilePile.chunkTiles[i].tile = chunkTilePile.chunkTiles[i-1].tile;
+                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = chunkTilePile.chunkTiles[i-1].uvTransform.uvOffset;
+                chunkTilePile.chunkTiles[i].uvTransform.uvScale = chunkTilePile.chunkTiles[i-1].uvTransform.uvScale;
+            }
+            else{
+                chunkTilePile.chunkTiles[i].tile = getDefaultTile();
+                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
+                chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
+            }
+        }
+    }
+    return std::move(chunkTilePile);
 }
 
 } // namespace globebrowsing

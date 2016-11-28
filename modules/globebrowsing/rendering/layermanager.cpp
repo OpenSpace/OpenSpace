@@ -83,11 +83,8 @@ namespace globebrowsing {
 
     }
 
-    ChunkTilePile Layer::getChunkTilePile(
-        const TileIndex& tileIndex,
-        int pileSize) const {
-        return std::move(TileSelector::getHighestResolutionTilePile(
-            _tileProvider.get(), tileIndex, pileSize));
+    ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+        return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
