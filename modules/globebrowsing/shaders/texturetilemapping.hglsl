@@ -75,7 +75,7 @@
 float performLayerSettings(float currentValue, const LayerSettings settings) {
 	float newValue = currentValue;
 
-	newValue = sign(newValue) * pow(newValue, settings.gamma);
+	newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
 	newValue = newValue * settings.multiplier;
 	newValue = newValue * settings.opacity;
 
@@ -129,7 +129,7 @@ float calculateHeight(
 #if !HEIGHTMAP_BLENDING_ENABLED
 	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
-	
+
 	
 	#for i in 0..#{lastLayerIndexHeightLayers}
 	{
