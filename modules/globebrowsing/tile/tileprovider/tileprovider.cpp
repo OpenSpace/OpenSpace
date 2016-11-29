@@ -63,7 +63,7 @@ float TileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents){
+ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxParents){
     TileUvTransform uvTransform;
     uvTransform.uvOffset = glm::vec2(0, 0);
     uvTransform.uvScale = glm::vec2(1, 1);
@@ -72,12 +72,17 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents){
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
         TileSelector::ascendToParent(tileIndex, uvTransform);
     }
+    maxParents -= parents;
 
     // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside 
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while(tileIndex.level > maximumLevel){
         TileSelector::ascendToParent(tileIndex, uvTransform);
+        maxParents--;
+    }
+    if(maxParents < 0){
+        return{ Tile::TileUnavailable, uvTransform };
     }
     
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
@@ -85,6 +90,9 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents){
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
         if (tile.status != Tile::Status::OK) {
+            if(--maxParents < 0){
+                return{ Tile::TileUnavailable, uvTransform };
+            }
             TileSelector::ascendToParent(tileIndex, uvTransform);
         }
         else return { tile, uvTransform };

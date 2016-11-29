@@ -100,7 +100,7 @@ namespace globebrowsing {
         virtual Tile getTile(const TileIndex& tileIndex) = 0;
 
 
-        virtual ChunkTile getChunkTile(TileIndex tileIndex, int parents = 0);
+        virtual ChunkTile getChunkTile(TileIndex tileIndex, int parents = 0, int maxParents = 1337);
 
 
         virtual ChunkTilePile getChunkTilePile(TileIndex tileIndex, int pileSize);
