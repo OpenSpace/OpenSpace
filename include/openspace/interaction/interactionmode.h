@@ -31,6 +31,10 @@
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#endif
 
 #include <list>
 
@@ -258,7 +262,15 @@ public:
     virtual void setFocusNode(SceneGraphNode* focusNode);
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
-
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                   bool resetCameraDirection);
+    
+    void goToGeodetic3(Camera& camera,  globebrowsing::Geodetic3 geo3);
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+#endif
 private:
     //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED

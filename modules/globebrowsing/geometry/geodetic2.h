@@ -108,6 +108,7 @@ public:
     Scalar isNorthern() const;
 
     Geodetic2 getCorner(Quad q) const;
+    Geodetic2 getSize() const;
 
     Scalar minLat() const;
     Scalar maxLat() const;

@@ -203,6 +203,28 @@ void InteractionHandler::setInteractionMode(const std::string& interactionModeKe
             "' is not a valid interaction mode. Candidates are " << listInteractionModes);
     }
 }
+    
+void InteractionHandler::goToChunk(int x, int y, int level) {
+    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
+        std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
+    
+    if (gbim) {
+        gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
+    } else {
+        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+    }
+}
+
+void InteractionHandler::goToGeo(double latitude, double longitude) {
+    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
+    std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
+        
+    if (gbim) {
+        gbim->goToGeodetic2(*_camera, globebrowsing::Geodetic2(latitude, longitude) / 180 * M_PI, true);
+    } else {
+        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+    }
+}
 
 void InteractionHandler::lockControls() {
 
@@ -567,6 +589,18 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 &luascriptfunctions::resetCameraDirection,
                 "void",
                 "Reset the camera direction to point at the focus node"
+            },
+            {
+                "goToChunk",
+                &luascriptfunctions::goToChunk,
+                "void",
+                "Go to chunk with given index x, y, level"
+            },
+            {
+                "goToGeo",
+                &luascriptfunctions::goToGeo,
+                "void",
+                "Go to geographic coordinates latitude and longitude"
             },
         }
     };
