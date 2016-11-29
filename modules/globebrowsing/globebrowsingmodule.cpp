@@ -36,9 +36,10 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
+#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 
 
 namespace openspace {
@@ -66,7 +67,10 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<globebrowsing::TemporalTileProvider>("Temporal");
     fTileProvider->registerClass<globebrowsing::TileIndexTileProvider>("TileIndex");
     fTileProvider->registerClass<globebrowsing::SizeReferenceTileProvider>("SizeReference");
+
+    // Combining Tile Providers
     fTileProvider->registerClass<globebrowsing::TileProviderByLevel>("ByLevel");
+    fTileProvider->registerClass<globebrowsing::TileProviderByIndex>("ByIndex");
 }
 
 } // namespace openspace
