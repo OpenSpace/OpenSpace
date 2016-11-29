@@ -37,6 +37,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -119,6 +120,9 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
 
+    fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
+    fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
+    fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 
