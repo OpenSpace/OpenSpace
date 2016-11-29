@@ -31,6 +31,10 @@
 #include <vector>
 #include <stdint.h>
 
+namespace ghoul{
+    class Dictionary;
+}
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -59,6 +63,7 @@ struct TileIndex {
     TileIndex(int x, int y, int level) : x(x), y(y), level(level) { }
     TileIndex(const TileIndex& other) : x(other.x), y(other.y), level(other.level) { }
     TileIndex(const Geodetic2& point, int level);
+    TileIndex(const ghoul::Dictionary& dict);
 
 
     bool hasParent() const {
