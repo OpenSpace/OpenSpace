@@ -65,7 +65,10 @@ public:
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionMode(const std::string& interactionModeKey);
-
+    
+    void goToChunk(int x, int y, int level);
+    void goToGeo(double latitude, double longitude);
+    
     void resetKeyBindings();
 
     void addKeyframe(const datamessagestructures::CameraKeyframe &kf);

@@ -73,6 +73,7 @@ public:
         properties::BoolProperty resetTileProviders;
         properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
+        properties::BoolProperty onlyModelSpaceRendering;
     };
     
     struct GeneralProperties {

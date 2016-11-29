@@ -149,6 +149,11 @@ namespace globebrowsing {
         }
     }
 
+    Geodetic2 GeodeticPatch::getSize() const {
+        return _halfSize * 2;
+    }
+
+
     Scalar GeodeticPatch::minLat() const {
         return _center.lat - _halfSize.lat;
     }
