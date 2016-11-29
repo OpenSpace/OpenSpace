@@ -41,6 +41,19 @@ data/scene/jupiter/europa/textures
 data/scene/jupiter/ganymede/textures
 data/scene/jupiter/io/textures
 data/scene/jupiter/jupiter/textures
+data/scene/lodglobes/lodcallisto/textures
+data/scene/lodglobes/lodearth/textures
+data/scene/lodglobes/lodeuropa/textures
+data/scene/lodglobes/lodganymede/textures
+data/scene/lodglobes/lodio/textures
+data/scene/lodglobes/lodjupiter/textures
+data/scene/lodglobes/lodmars/textures
+data/scene/lodglobes/lodmercury/textures
+data/scene/lodglobes/lodmoon/textures
+data/scene/lodglobes/lodneptune/textures
+data/scene/lodglobes/lodsaturn/textures
+data/scene/lodglobes/loduranus/textures
+data/scene/lodglobes/lodvenus/textures
 data/scene/mars/textures
 data/scene/mercury/textures
 data/scene/milkyway/textures
@@ -103,5 +116,6 @@ data/spice/MAR063.BSP
 data/spice/NewHorizonsKernels
 data/spice/nh_kernels
 data/spice/OsirisRexKernels
+data/spice/plu055.bsp
 data/spice/Rosetta
 data/spice/sat375.bsp
