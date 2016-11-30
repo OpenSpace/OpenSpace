@@ -32,6 +32,7 @@
 #include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h> // abspath
 
 #include <openspace/util/time.h>
 
@@ -108,8 +109,17 @@ namespace globebrowsing {
             throw ghoul::RuntimeError("Invalid Time Format " + timeIdFormat + " in " + _datasetFile);
         }
 
+        std::string gdalDescription;
         CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "GDAL_WMS");
-        return CPLSerializeXMLTree(gdalNode);
+        if (gdalNode) {
+            gdalDescription = CPLSerializeXMLTree(gdalNode);
+        }
+        if (!gdalNode) {
+            CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "FilePath");
+            gdalDescription = std::string(gdalNode->psChild->pszValue);
+        }
+        
+        return gdalDescription;
     }
 
     std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::string& key, const std::string& defaultVal) {
@@ -155,7 +165,10 @@ namespace globebrowsing {
     }
 
     void TemporalTileProvider::update() {
-        _currentTileProvider = getTileProvider();
+        auto newCurrent = getTileProvider();
+        if (newCurrent) {
+            _currentTileProvider = newCurrent;
+        }
         _currentTileProvider->update();
     }
 
@@ -198,7 +211,8 @@ namespace globebrowsing {
     std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
         std::string gdalDatasetXml = getGdalDatasetXML(timekey);
         _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
-        return std::make_shared<CachingTileProvider>(_initDict);
+        auto tileProvider = std::make_shared<CachingTileProvider>(_initDict);
+        return tileProvider;
     }
     
     std::string TemporalTileProvider::getGdalDatasetXML(Time t) {
@@ -222,8 +236,14 @@ namespace globebrowsing {
         return t.ISO8601().substr(0, 10);
     }
 
-    std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
+    std::string YYYY_MM_DDThhColonmmColonssZ::stringify(const Time& t) const {
         return t.ISO8601().substr(0, 19) + "Z";
+    }
+    
+    std::string YYYY_MM_DDThh_mm_ssZ::stringify(const Time& t) const {
+        std::string timeString = t.ISO8601().substr(0, 19) + "Z";
+        replace( timeString.begin(), timeString.end(), ':', '_' );
+        return timeString;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +257,9 @@ namespace globebrowsing {
     void TimeIdProviderFactory::init() {
         _timeIdProviderMap.insert(
                                   std::pair<std::string, std::unique_ptr<TimeFormat> >( "YYYY-MM-DD", std::make_unique<YYYY_MM_DD>() ));
-      _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat> > ( "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() ));
+      _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat> > ( "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThhColonmmColonssZ>() ));
+        initialized = true;
+      _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat> > ( "YYYY-MM-DDThh_mm_ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() ));
         initialized = true;
     }
 
