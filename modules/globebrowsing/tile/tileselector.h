@@ -41,12 +41,7 @@ namespace globebrowsing {
 
     class TileSelector {
     public:
-        static ChunkTile getHighestResolutionTile(TileProvider* tileProvider, TileIndex tileIndex, int parents = 0);
-        static ChunkTile getHighestResolutionTile(
-            const LayerGroup& layerGroup,
-            TileIndex tileIndex
-        );
-        static ChunkTilePile getHighestResolutionTilePile(TileProvider* tileProvider, TileIndex tileIndex, int pileSize);
+        static ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex);
         static std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex);
 
         struct CompareResolution {
@@ -55,7 +50,6 @@ namespace globebrowsing {
 
         static const CompareResolution HIGHEST_RES;
 
-    private:
         static void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);
     };
 

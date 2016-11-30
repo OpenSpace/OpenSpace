@@ -57,8 +57,18 @@ return {
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+                        Name = "ESRI VIIRS Combo",
+                        Type = "ByLevel",
+                        LevelTileProviders = {
+                            {
+                                MaxLevel = 7, 
+                                TileProvider = { FilePath = "map_service_configs/GIBS/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
+                            },
+                            {
+                                MaxLevel = 22, 
+                                TileProvider = { FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms" },
+                            },
+                        },
                         Enabled = true,
                     },
                     {
@@ -72,14 +82,9 @@ return {
                         FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
                     },
                     {
-                        Name = "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-                        FilePath = "map_service_configs/GIBS/VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
-                        Enabled = true,
-                    },
-                    {
                         Type = "SingleImage",
                         Name = "Debug Tiles",
-                        FilePath = "textures/test_tile.png",
+                        FilePath = "../../debugglobe/textures/test_tile.png",
                     },
                 },
                 GrayScaleLayers = { },
@@ -112,11 +117,29 @@ return {
                         FilePath = "map_service_configs/GIBS/Reference_Labels.xml",
                     },
                     {
+                        Type = "TileIndex",
+                        Name = "Tile Indices",
+                    },
+                    {
                         Type = "SizeReference",
                         Name = "Size Reference",
                         Radii = earthEllipsoid,
                         BackgroundImagePath = "../../debugglobe/textures/arrows.png",
                     },
+                    --[[{
+                        Name = "Test",
+                        Type = "LevelSpecific",
+                        LevelTileProviders = {
+                            {
+                                MaxLevel = 5,
+                                TileProvider = { Type = "TileIndex" },
+                            },
+                            {
+                                MaxLevel = 7,
+                                TileProvider = { Type = "SingleImage", FilePath = "../../debugglobe/textures/test_tile.png",},
+                            },
+                        },
+                    },]]
                 },
                 HeightLayers = {
                     {

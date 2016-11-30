@@ -76,6 +76,14 @@ namespace globebrowsing {
     * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
     * Example: 2016-09-08T23:05:05Z
     */
+    struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
+        virtual std::string stringify(const Time& t) const;
+    };
+    
+    /**
+     * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
+     * Example: 2016-09-08T23:05:05Z
+     */
     struct YYYY_MM_DDThh_mm_ssZ : public TimeFormat {
         virtual std::string stringify(const Time& t) const;
     };

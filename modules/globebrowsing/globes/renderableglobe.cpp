@@ -80,7 +80,8 @@ namespace globebrowsing {
         properties::BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)",false),
         properties::BoolProperty("resetTileProviders", "reset tile providers", false),
         properties::BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
-        properties::BoolProperty("collectStats", "collect stats", false)
+        properties::BoolProperty("collectStats", "collect stats", false),
+        properties::BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
         })
 
     {
@@ -144,6 +145,7 @@ namespace globebrowsing {
         _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
         _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
         _debugPropertyOwner.addProperty(_debugProperties.collectStats);
+        _debugPropertyOwner.addProperty(_debugProperties.onlyModelSpaceRendering);
         
         addPropertySubOwner(_debugPropertyOwner);
         addPropertySubOwner(_layerManager.get());

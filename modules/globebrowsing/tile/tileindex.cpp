@@ -25,10 +25,16 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
+#include <ghoul/misc/dictionary.h>
+
 #include <sstream>
 
 namespace {
     const std::string _loggerCat = "TileIndex";
+
+    const std::string KeyLevel = "Level";
+    const std::string KeyX = "X";
+    const std::string KeyY = "Y";
 }
 
 namespace openspace {
@@ -48,6 +54,15 @@ namespace globebrowsing {
 
         x = floor(xIndexSpace);
         y = floor(yIndexSpace);
+    }
+
+    /** 
+    * Initializes a TileIndex from a Dictionary
+    */
+    TileIndex::TileIndex(const ghoul::Dictionary& dict){
+        level = static_cast<int>(dict.value<double>(KeyLevel));
+        x = static_cast<int>(dict.value<double>(KeyX));
+        y = static_cast<int>(dict.value<double>(KeyY));
     }
 
     TileIndex TileIndex::child(Quad q) const {
@@ -77,6 +92,12 @@ namespace globebrowsing {
         y <<= levels;
         level -= levels;
         return *this;
+    }
+
+
+    glm::vec2 TileIndex::positionRelativeParent() const{
+        // In OpenGL, positive y direction is up
+        return glm::vec2(isEastChild() ? 0.5 : 0, isNorthChild() ? 0.5 : 0);
     }
 
     /**

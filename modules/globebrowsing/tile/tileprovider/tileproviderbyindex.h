@@ -22,68 +22,54 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tileselector.h>
+#ifndef __TILE_PROVIDER_BY_INDEX__
+#define __TILE_PROVIDER_BY_INDEX__
+
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/asynctilereader.h>
+
+#include <gdal_priv.h>
+
+#include <openspace/engine/downloadmanager.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/filesystem/filesystem.h> // absPath
+#include <ghoul/opengl/texture.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/font/fontrenderer.h>
 
-#include <sstream>
-#include <algorithm>
-
-#include "gdal_priv.h"
-
-namespace {
-    const std::string _loggerCat = "TileSelector";
-}
+#include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
 
-    const TileSelector::CompareResolution TileSelector::HIGHEST_RES = TileSelector::CompareResolution();
+    using namespace ghoul::opengl;    
 
-    ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex) {
-        ChunkTile mostHighResolution;
-        mostHighResolution.tile = Tile::TileUnavailable;
-        mostHighResolution.uvTransform.uvScale.x = 0;
+    class TileProviderByIndex : public TileProvider {
+    public:
+        
+        TileProviderByIndex(const ghoul::Dictionary& dictionary);
+        TileProviderByIndex(const std::string& imagePath);
+        virtual ~TileProviderByIndex() { }
 
-        for (const auto& layer : layerGroup.activeLayers()) {
-            ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);
-            bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
-            bool tileHasMetaData = chunkTile.tile.metaData != nullptr;
-            bool tileIsHigherResolution = chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
-            if (tileIsOk && tileHasMetaData && tileIsHigherResolution) {
-                mostHighResolution = chunkTile;
-            }
-        }
+        virtual Tile getTile(const TileIndex& tileIndex);
+        virtual Tile getDefaultTile();
+        virtual Tile::Status getTileStatus(const TileIndex& index);
+        virtual TileDepthTransform depthTransform();
+        virtual void update();
+        virtual void reset();
+        virtual int maxLevel();
 
-        return mostHighResolution;
-    }
+    private:
+        
+        inline TileProvider* indexProvider(const TileIndex& tileIndex) const;
 
-    bool TileSelector::CompareResolution::operator()(const ChunkTile& a, const ChunkTile& b) {
-        // large uv scale means smaller resolution
-        return a.uvTransform.uvScale.x > b.uvTransform.uvScale.x;
-    }
-
-    std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
-        std::vector<ChunkTile> tiles;
-        for (const auto& layer : layerGroup.activeLayers()) {
-            tiles.push_back(layer->tileProvider()->getChunkTile(tileIndex));
-        }
-
-        std::sort(tiles.begin(), tiles.end(), TileSelector::HIGHEST_RES);
-
-        return tiles;
-    }
-
-    void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
-        uv.uvOffset *= 0.5;
-        uv.uvScale *= 0.5;
-
-        uv.uvOffset += tileIndex.positionRelativeParent();
-
-        --tileIndex;
-    }
+        std::unordered_map<TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
+        std::shared_ptr<TileProvider> _defaultTileProvider;
+    };
 
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif  // __TILE_PROVIDER_BY_INDEX__

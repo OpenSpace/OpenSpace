@@ -38,6 +38,7 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #endif
 
 
@@ -684,6 +685,93 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
     }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+void GlobeBrowsingInteractionMode::goToChunk(Camera& camera,
+    globebrowsing::TileIndex ti, glm::vec2 uv, bool resetCameraDirection) {
+    using namespace globebrowsing;
+    
+    // Camera position in model space
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+    
+    GeodeticPatch patch(ti);
+    Geodetic2 corner = patch.getCorner(SOUTH_WEST);
+    Geodetic2 positionOnPatch = patch.getSize();
+    positionOnPatch.lat *= uv.y;
+    positionOnPatch.lon *= uv.x;
+    Geodetic2 pointPosition = corner + positionOnPatch;
+    
+    glm::dvec3 positionOnEllipsoid =
+        _globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+    double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
+    
+    goToGeodetic3(camera, {pointPosition, altitude});
+    
+    if (resetCameraDirection) {
+        this->resetCameraDirection(camera, pointPosition);
+    }
+}
+
+void GlobeBrowsingInteractionMode::goToGeodetic2(Camera& camera,
+    globebrowsing::Geodetic2 geo2, bool resetCameraDirection) {
+    using namespace globebrowsing;
+    
+    // Camera position in model space
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+        
+    glm::dvec3 positionOnEllipsoid =
+    _globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+    double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
+        
+    goToGeodetic3(camera, {geo2, altitude});
+        
+    if (resetCameraDirection) {
+        this->resetCameraDirection(camera, geo2);
+    }
+}
+    
+void GlobeBrowsingInteractionMode::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3) {
+    glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianPosition(geo3);
+    glm::dmat4 modelTransform = _globe->modelTransform();
+    glm::dvec3 positionWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+    camera.setPositionVec3(positionWorldSpace);
+}
+    
+    void GlobeBrowsingInteractionMode::resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2) {
+        using namespace globebrowsing;
+        
+        // Camera is described in world space
+        glm::dmat4 modelTransform = _globe->modelTransform();
+        
+        // Lookup vector
+        glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo2);
+        glm::dvec3 slightlyNorth = _globe->ellipsoid().cartesianSurfacePosition(
+            Geodetic2(geo2.lat + 0.001, geo2.lon));
+        glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
+        glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
+        
+        // Lookat vector
+        glm::dvec3 lookAtWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+
+        // Eye position
+        glm::dvec3 eye = camera.positionVec3();
+        
+        // Matrix
+        glm::dmat4 lookAtMatrix = glm::lookAt(
+                        eye, lookAtWorldSpace, lookUpWorldSpace);
+        
+        // Set rotation
+        glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
+        camera.setRotation(rotation);
+    }
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 } // namespace interaction
 } // namespace openspace
