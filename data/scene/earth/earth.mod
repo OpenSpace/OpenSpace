@@ -12,8 +12,9 @@ return {
             }
         }
     },
+    {
     -- The default reference frame for Earth-orbiting satellites
-    Name = "EarthInertial",
+        Name = "EarthInertial",
         Parent = "EarthBarycenter",
         Transform = {
             Rotation = {

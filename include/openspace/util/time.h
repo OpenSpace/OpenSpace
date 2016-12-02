@@ -59,9 +59,19 @@ class SyncBuffer;
 
 class Time {
 public:
+    /**
+     * Converts the \p timeString representing a date to a double precision
+     * value representing the ephemeris time; that is the number of TDB
+     * seconds past the J2000 epoch.
+     * \param timeString A string representing the time to be converted
+     * \return The converted time; the number of TDB seconds past the J2000 epoch,
+     * representing the passed \p timeString
+     * \pre \p timeString must not be empty
+     */
+    static double convertTime(const std::string& time);
+    
     Time(double secondsJ2000 = -1);
     Time(const Time& other);
-
 
     /**
      * Initializes the Time singleton.
