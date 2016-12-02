@@ -22,42 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRANSLATION_H__
-#define __TRANSLATION_H__
+#ifndef __TLETRANSLATION_H__
+#define __TLETRANSLATION_H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/misc/dictionary.h>
+#include <modules/base/translation/keplertranslation.h>
 
 namespace openspace {
-
-class Translation : public properties::PropertyOwner {
+    
+/**
+ * A specialization of the KeplerTranslation that extracts the Keplerian elements from a
+ * two-line element as described by the US Space Command
+ * https://celestrak.com/columns/v04n03
+ * The ghoul::Dictionary passed to the constructor must contain the pointer to a file that
+ * will be read.
+ */
+class TLETranslation : public KeplerTranslation {
 public:
-    static Translation* createFromDictionary(const ghoul::Dictionary& dictionary);
-
-    virtual ~Translation();
-    virtual bool initialize();
-
-    virtual glm::dvec3 position() const = 0;
-    virtual void update(const UpdateData& data);
-
-    glm::dvec3 position(double time);
-
-    // Registers a callback that gets called when a significant change has been made that
-    // invalidates potentially stored points, for example in trails
-    void onParameterChange(std::function<void()> callback);
-
+    /**
+     * Constructor for the TLETranslation class. The \p dictionary must contain a key for
+     * the file that contains the TLE information. The ghoul::Dictionary will be tested
+     * against the openspace::Documentation returned by Documentation.
+     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     (*/
+    TLETranslation(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    
+    /**
+     * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
+     * that can be passed to the constructor.
+     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
+     * be passed to the constructor
+     */
     static openspace::Documentation Documentation();
 
-protected:
-    void notifyObservers();
-
-    std::function<void()> _onParameterChangeCallback;
+private:
+    /**
+     * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
+     * method with the correct values. If \p filename is a valid TLE file but contains
+     * disallowed values (see KeplerTranslation::setKeplerElements), a 
+     * KeplerTranslation::RangeError is thrown.
+     * \param filename The path to the file that contains the TLE file.
+     * \throw std::system_error if the TLE file is malformed (does not contain at least
+     * two lines that start with \c 1 and \c 2.
+     * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
+     * the valid range supported by Kepler::setKeplerElements
+     * \pre The \p filename must exist
+     */
+    void readTLEFile(const std::string& filename);
 };
+    
+} // namespace openspace
 
-}  // namespace openspace
-
-#endif // __TRANSLATION_H__
+#endif // __TLETRANSLATION_H__

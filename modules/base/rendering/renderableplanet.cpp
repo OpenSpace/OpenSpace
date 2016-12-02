@@ -349,7 +349,7 @@ void RenderablePlanet::render(const RenderData& data) {
     glm::dmat4 rot = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(1, 0, 0));
     glm::dmat4 roty = glm::rotate(glm::dmat4(1.0), M_PI_2, glm::dvec3(0, -1, 0));
     //glm::dmat4 rotProp = glm::rotate(glm::dmat4(1.0), glm::radians(static_cast<double>(_rotation)), glm::dvec3(0, 1, 0));
-    modelTransform = modelTransform * rot /** roty*/ /** rotProp*/;
+    modelTransform = modelTransform * rot * roty /** rotProp*/;
 
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 

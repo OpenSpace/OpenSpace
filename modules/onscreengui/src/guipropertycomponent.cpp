@@ -74,6 +74,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         return;
     }
 
+    int nThisProperty = nVisibleProperties(owner->properties(), _visibility);
     ImGui::PushID(owner->name().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
@@ -82,7 +83,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         if (count == 0) {
             continue;
         }
-        if (subOwners.size() == 1) {
+        if (subOwners.size() == 1 && (nThisProperty == 0)) {
             renderPropertyOwner(subOwner);
         }
         else {

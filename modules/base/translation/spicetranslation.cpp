@@ -144,8 +144,18 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
         }
     }
 
+    auto update = [this](){
+        notifyObservers();
+    };
+
+    _target.onChange(update);
     addProperty(_target);
+
+    _origin.onChange(update);
     addProperty(_origin);
+    
+    _frame.onChange(update);
+    addProperty(_frame);
 }
     
 glm::dvec3 SpiceTranslation::position() const {

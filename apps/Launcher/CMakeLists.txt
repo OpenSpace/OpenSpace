@@ -74,4 +74,4 @@ endif ()
 
 # Libtorrent
 include_external_library(${APPLICATION_NAME} libtorrent ${application_path}/ext/libtorrent)
-target_include_directories(${APPLICATION_NAME} PUBLIC SYSTEM ${application_path}/ext/libtorrent/include)
+target_include_directories(${APPLICATION_NAME} SYSTEM PUBLIC ${application_path}/ext/libtorrent/include)

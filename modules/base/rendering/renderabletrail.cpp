@@ -143,6 +143,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     ));
+    addPropertySubOwner(_translation.get());
 
     _lineColor = dictionary.value<glm::vec3>(KeyColor);
     addProperty(_lineColor);

@@ -48,8 +48,10 @@
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
+#include <modules/base/translation/keplertranslation.h>
 #include <modules/base/translation/statictranslation.h>
 #include <modules/base/translation/spicetranslation.h>
+#include <modules/base/translation/tletranslation.h>
 
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/rotation/spicerotation.h>
@@ -111,8 +113,10 @@ void BaseModule::internalInitialize() {
     auto fTranslation = FactoryManager::ref().factory<Translation>();
     ghoul_assert(fTranslation, "Ephemeris factory was not created");
 
+    fTranslation->registerClass<KeplerTranslation>("KeplerTranslation");
     fTranslation->registerClass<StaticTranslation>("StaticTranslation");
     fTranslation->registerClass<SpiceTranslation>("SpiceTranslation");
+    fTranslation->registerClass<TLETranslation>("TLETranslation");
 
     auto fRotation = FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");

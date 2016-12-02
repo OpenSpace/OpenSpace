@@ -140,6 +140,10 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
         "RenderableTrailTrajectory"
     );
 
+    _translation->onParameterChange([this]() {
+        _needsFullSweep = true;
+    });
+
     _startTime = dictionary.value<std::string>(KeyStartTime);
     _startTime.onChange([this] { _needsFullSweep = true; });
     addProperty(_startTime);
