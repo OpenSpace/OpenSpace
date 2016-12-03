@@ -73,7 +73,7 @@ namespace globebrowsing {
         properties::BoolProperty("showChunkEdges", "show chunk edges", false),
         properties::BoolProperty("showChunkBounds", "show chunk bounds", false),
         properties::BoolProperty("showChunkAABB", "show chunk AABB", false),
-    	properties::BoolProperty("showHeightResolution", "show height resolution", false),
+        properties::BoolProperty("showHeightResolution", "show height resolution", false),
         properties::BoolProperty("showHeightIntensities", "show height intensities", false),
         properties::BoolProperty("performFrustumCulling", "perform frustum culling", true),
         properties::BoolProperty("performHorizonCulling", "perform horizon culling", true),

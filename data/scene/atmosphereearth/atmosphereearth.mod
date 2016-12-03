@@ -20,7 +20,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",
-			Body = "EARTH",
+            Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
@@ -43,7 +43,7 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-				Night = "textures/earth_night.jpg",
+                Night = "textures/earth_night.jpg",
                 --Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",
@@ -133,7 +133,7 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

@@ -82,7 +82,7 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

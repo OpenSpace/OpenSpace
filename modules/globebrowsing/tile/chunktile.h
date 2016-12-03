@@ -42,7 +42,7 @@ namespace globebrowsing {
     };
 
     struct ChunkTilePile {
-    	std::vector<ChunkTile> chunkTiles;
+        std::vector<ChunkTile> chunkTiles;
     };
 
 } // namespace globebrowsing

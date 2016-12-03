@@ -31,23 +31,23 @@ in vec4 vs_positionClipSpace;
 
 Fragment getFragment() {
 
-	vec2 pointCoord = (gl_PointCoord.xy - vec2(0.5)) * 2;
-	pointCoord.y = -pointCoord.y; // y should point up in cam space
-	if(length(pointCoord) > 1) // Outside of circle radius?
-	  discard;
+    vec2 pointCoord = (gl_PointCoord.xy - vec2(0.5)) * 2;
+    pointCoord.y = -pointCoord.y; // y should point up in cam space
+    if(length(pointCoord) > 1) // Outside of circle radius?
+      discard;
 
-	// z_coord of sphere
-	float zCoord = sqrt(1 - pow(length(pointCoord),2));
+    // z_coord of sphere
+    float zCoord = sqrt(1 - pow(length(pointCoord),2));
 
-	// Light calculations
-	vec3 normal = normalize(vec3(pointCoord, zCoord));
-	float cosTerm = max(dot(directionToSunViewSpace, normal), 0);
+    // Light calculations
+    vec3 normal = normalize(vec3(pointCoord, zCoord));
+    float cosTerm = max(dot(directionToSunViewSpace, normal), 0);
 
-	vec3 color = vec3(1,1,1) * 0.7;
-	vec3 shadedColor = cosTerm * color;
+    vec3 color = vec3(1,1,1) * 0.7;
+    vec3 shadedColor = cosTerm * color;
 
     Fragment frag;
-	frag.color = vec4(shadedColor,1);
+    frag.color = vec4(shadedColor,1);
     frag.depth = vs_positionClipSpace.w;
     return frag;
 }

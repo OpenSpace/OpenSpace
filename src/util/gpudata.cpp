@@ -35,12 +35,12 @@
 #include <memory>
 
 namespace {
-	const std::string _loggerCat = "GPUData";
+    const std::string _loggerCat = "GPUData";
 }
 
 namespace openspace {
 
-	void UniformLocation::bind(ProgramObject* program, const std::string& name){
+    void UniformLocation::bind(ProgramObject* program, const std::string& name){
         _uniformLocation = program->uniformLocation(name);
         LDEBUG(name);
     }
