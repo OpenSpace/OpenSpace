@@ -30,14 +30,10 @@
 #include <fstream>
 #include <glm/glm.hpp>
 
-using namespace openspace;
-
 class AABBTest : public testing::Test {};
 
-
-
 TEST_F(AABBTest, Contains2) {
-
+    using namespace openspace::globebrowsing;
     AABB2 a1;
     AABB2 a2;
     /*
@@ -67,6 +63,7 @@ TEST_F(AABBTest, Contains2) {
 
 
 TEST_F(AABBTest, Intersects2) {
+    using namespace openspace::globebrowsing;
     AABB2 a1;
     AABB2 a2;
 
@@ -98,9 +95,8 @@ TEST_F(AABBTest, Intersects2) {
 
 }
 
-
-
 TEST_F(AABBTest, Contains3) {
+    using namespace openspace::globebrowsing;
     AABB3 a1;
     AABB3 a2;
 
@@ -122,6 +118,7 @@ TEST_F(AABBTest, Contains3) {
 
 
 TEST_F(AABBTest, Intersects3) {
+    using namespace openspace::globebrowsing;
     AABB3 a1;
     AABB3 a2;
 

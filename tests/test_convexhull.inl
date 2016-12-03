@@ -30,13 +30,10 @@
 #include <fstream>
 #include <glm/glm.hpp>
 
-using namespace openspace;
-
 class ConvexHull2Test : public testing::Test {};
 
-
-
 TEST_F(ConvexHull2Test, basic) {
+    using namespace openspace::globebrowsing;
     
     // points
     // 2     x
@@ -68,6 +65,7 @@ TEST_F(ConvexHull2Test, basic) {
 }
 
 TEST_F(ConvexHull2Test, intersection) {
+    using namespace openspace::globebrowsing;
     std::vector<Point2> points1 = {
         { -1.0, 0.0 },
         { 1.0, 0.0 },
@@ -97,6 +95,7 @@ TEST_F(ConvexHull2Test, intersection) {
 
 
 TEST_F(ConvexHull2Test, non_intersection) {
+    using namespace openspace::globebrowsing;
     std::vector<Point2> points1 = {
         { -2.0, 0.0 },
         { 2.0, 0.0 },

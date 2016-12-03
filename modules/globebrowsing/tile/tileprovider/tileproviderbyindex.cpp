@@ -81,7 +81,7 @@ namespace globebrowsing {
     }
 
     TileDepthTransform TileProviderByIndex::depthTransform() {
-        _defaultTileProvider->depthTransform();
+        return _defaultTileProvider->depthTransform();
     }
 
     void TileProviderByIndex::update() {

@@ -63,7 +63,7 @@ float TileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxParents){
+ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxParents) {
     TileUvTransform uvTransform;
     uvTransform.uvOffset = glm::vec2(0, 0);
     uvTransform.uvScale = glm::vec2(1, 1);

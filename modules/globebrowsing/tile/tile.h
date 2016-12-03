@@ -37,115 +37,115 @@ namespace openspace {
 namespace globebrowsing {
     
 
-    struct TileMetaData {
-        std::vector<float> maxValues;
-        std::vector<float> minValues;
-        std::vector<bool> hasMissingData;
+struct TileMetaData {
+    std::vector<float> maxValues;
+    std::vector<float> minValues;
+    std::vector<bool> hasMissingData;
 
-        void serialize(std::ostream& s);
-        static TileMetaData deserialize(std::istream& s);
-    };
+    void serialize(std::ostream& s);
+    static TileMetaData deserialize(std::istream& s);
+};
 
-    struct TextureFormat {
-        ghoul::opengl::Texture::Format ghoulFormat;
-        GLuint glFormat;
-    };
+struct TextureFormat {
+    ghoul::opengl::Texture::Format ghoulFormat;
+    GLuint glFormat;
+};
     
-    using namespace ghoul::opengl;
+using namespace ghoul::opengl;
     
-    struct RawTile {
-        RawTile();
+struct RawTile {
+    RawTile();
 
-        char* imageData;
-        glm::uvec3 dimensions;
-        std::shared_ptr<TileMetaData> tileMetaData;
-        TileIndex tileIndex;
-        CPLErr error;
-        size_t nBytesImageData;
+    char* imageData;
+    glm::uvec3 dimensions;
+    std::shared_ptr<TileMetaData> tileMetaData;
+    TileIndex tileIndex;
+    CPLErr error;
+    size_t nBytesImageData;
 
-        void serializeMetaData(std::ostream& s);
-        static RawTile deserializeMetaData(std::istream& s);
+    void serializeMetaData(std::ostream& s);
+    static RawTile deserializeMetaData(std::istream& s);
    
-        static RawTile createDefaultRes();
+    static RawTile createDefaultRes();
 
-    };
+};
 
 
 
-    struct TileUvTransform {
-        glm::vec2 uvOffset;
-        glm::vec2 uvScale;
-    };
+struct TileUvTransform {
+    glm::vec2 uvOffset;
+    glm::vec2 uvScale;
+};
 
+
+/**
+* Defines a status and may have a Texture and TileMetaData
+*/
+struct Tile {
+    std::shared_ptr<Texture> texture;
+    std::shared_ptr<TileMetaData> metaData;
 
     /**
-    * Defines a status and may have a Texture and TileMetaData
+    * Describe if this Tile is good for usage (OK) or otherwise
+    * the reason why it is not.
     */
-    struct Tile {
-        std::shared_ptr<Texture> texture;
-        std::shared_ptr<TileMetaData> metaData;
+    enum class Status { 
+        /** 
+        * E.g when texture data is not currently in memory. 
+        * texture and tileMetaData are both null
+        */
+        Unavailable, 
 
         /**
-        * Describe if this Tile is good for usage (OK) or otherwise
-        * the reason why it is not.
+        * Can be set by <code>TileProvider</code>s if the requested 
+        * <code>TileIndex</code> is undefined for that particular 
+        * provider. 
+        * texture and metaData are both null
         */
-        enum class Status { 
-            /** 
-            * E.g when texture data is not currently in memory. 
-            * texture and tileMetaData are both null
-            */
-            Unavailable, 
+        OutOfRange, 
 
-            /**
-            * Can be set by <code>TileProvider</code>s if the requested 
-            * <code>TileIndex</code> is undefined for that particular 
-            * provider. 
-            * texture and metaData are both null
-            */
-            OutOfRange, 
+        /**
+        * An IO Error happend
+        * texture and metaData are both null
+        */
+        IOError, 
 
-            /**
-            * An IO Error happend
-            * texture and metaData are both null
-            */
-            IOError, 
-
-            /**
-            * The Texture is uploaded to the GPU and good for usage.
-            * texture is defined. metaData may be defined.
-            */
-            OK 
-        } status;
+        /**
+        * The Texture is uploaded to the GPU and good for usage.
+        * texture is defined. metaData may be defined.
+        */
+        OK 
+    } status;
         
-        /**
-         * Instantiates a new tile with a single color. 
-         * 
-         * \param size The size of texture to be created
-         * \param color defined RGBA values in range 0-255.
-         *
-         * \returns a Tile with status OK and the a texture 
-         * with the requested size and color
-         */
-        static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
-
-        static glm::vec2 compensateSourceTextureSampling(
-                glm::vec2 startOffset,
-                glm::vec2 sizeDiff,
-                glm::uvec2 resolution,
-                glm::vec2 tileUV);
-
-        static glm::vec2 TileUvToTextureSamplePosition(
-            const TileUvTransform uvTransform,
-            glm::vec2 tileUV,
-            glm::uvec2 resolution);
-
-        /**
-        * A tile with status unavailable that any user can return to 
-        * indicate that a tile was unavailable.
+    /**
+        * Instantiates a new tile with a single color. 
+        * 
+        * \param size The size of texture to be created
+        * \param color defined RGBA values in range 0-255.
+        *
+        * \returns a Tile with status OK and the a texture 
+        * with the requested size and color
         */
-        static const Tile TileUnavailable;
+    static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
 
-    };
+    static glm::vec2 compensateSourceTextureSampling(
+            glm::vec2 startOffset,
+            glm::vec2 sizeDiff,
+            glm::uvec2 resolution,
+            glm::vec2 tileUV);
+
+    static glm::vec2 TileUvToTextureSamplePosition(
+        const TileUvTransform uvTransform,
+        glm::vec2 tileUV,
+        glm::uvec2 resolution);
+
+    /**
+    * A tile with status unavailable that any user can return to 
+    * indicate that a tile was unavailable.
+    */
+    static const Tile TileUnavailable;
+
+};
 
 } // namespace globebrowsing
 } // namespace openspace

@@ -31,7 +31,7 @@
 #include <vector>
 #include <stdint.h>
 
-namespace ghoul{
+namespace ghoul {
     class Dictionary;
 }
 

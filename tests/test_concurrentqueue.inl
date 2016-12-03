@@ -30,17 +30,11 @@
 #include <math.h>
 #include <glm/glm.hpp>
 
-
-
-
 class ConcurrentQueueTest : public testing::Test {};
 
-
-using namespace openspace;
-
-
-
 TEST_F(ConcurrentQueueTest, Basic) {
+    using namespace openspace::globebrowsing;
+
     ConcurrentQueue<int> q1;
     q1.push(4);
     int val = q1.pop();

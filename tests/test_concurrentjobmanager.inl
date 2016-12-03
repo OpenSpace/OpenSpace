@@ -31,22 +31,12 @@
 #include <math.h>
 #include <glm/glm.hpp>
 
-
-
-
 class ConcurrentJobManagerTest : public testing::Test {};
 
-
-using namespace openspace;
-using namespace std::chrono_literals;
-
-
-
-struct TestJob : public Job<int> {
+struct TestJob : public openspace::globebrowsing::Job<int> {
     TestJob(int jobExecutingTime)
-    : _jobExecutingTime(jobExecutingTime) {
-        
-    }
+        : _jobExecutingTime(jobExecutingTime)
+    {}
 
     virtual void execute() {
         std::cout << "Executing job ... " << std::endl;
@@ -68,6 +58,7 @@ private:
 
 
 TEST_F(ConcurrentJobManagerTest, Basic) {
+    using namespace openspace::globebrowsing;
     std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
     
     ConcurrentJobManager<int> jobManager(pool);
@@ -95,12 +86,6 @@ TEST_F(ConcurrentJobManagerTest, Basic) {
     EXPECT_EQ(product, 1337) << "Expecting product to be 1337";
 }
 
-
-
-
-
-
-
 struct VerboseProduct {
     VerboseProduct(int v)
     : val(v){
@@ -115,7 +100,7 @@ struct VerboseProduct {
 };
 
 
-struct VerboseJob : public Job<VerboseProduct>{
+struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
     VerboseJob(int jobExecutingTime)
         : _jobExecutingTime(jobExecutingTime) {
         std::cout << "VerboseTestJob constructor" << std::endl;
@@ -141,12 +126,9 @@ struct VerboseJob : public Job<VerboseProduct>{
 
 };
 
-
-
-
-
-
 TEST_F(ConcurrentJobManagerTest, JobCreation) {
+    using namespace openspace::globebrowsing;
+    
     std::shared_ptr<ThreadPool> pool = std::make_shared<ThreadPool>(1);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -170,8 +152,6 @@ TEST_F(ConcurrentJobManagerTest, JobCreation) {
         auto product = finishedJob->product();
     }
     
-
     int a;
-    
 }
 

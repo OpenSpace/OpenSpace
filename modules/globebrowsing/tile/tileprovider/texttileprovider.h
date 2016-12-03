@@ -25,6 +25,8 @@
 #ifndef __TEXT_TILE_PROVIDER_H__
 #define __TEXT_TILE_PROVIDER_H__
 
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+
 #include <memory>
 
 #include <ghoul/logging/logmanager.h>
@@ -37,109 +39,108 @@
 #include <ghoul/font/fontmanager.h>
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/other/lrucache.h>
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////
-//                                    TILE PROVIDER                                        //
+//                                    TILE PROVIDER                                     //
 //////////////////////////////////////////////////////////////////////////////////////////
 
 namespace openspace {
 namespace globebrowsing {
 
-    using namespace ghoul::fontrendering;
+using namespace ghoul::fontrendering;
 
-    /**
-     * Enables a simple way of providing tiles with any type of rendered text. 
-     * Internally it handles setting up a FBO for rendering the text, and defines a new 
-     * interface, consisting of only a single method for subclasses to implement: 
-     * renderText(const FontRenderer&, const TileIndex&) const;
-     */
-    class TextTileProvider : public TileProvider {
-    public:
-
-        /**
-        * Default constructor with default values for texture and font size
-        */
-        TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-        virtual ~TextTileProvider();
-
-        // The TileProvider interface below is implemented in this class
-        virtual Tile getTile(const TileIndex& tileIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const TileIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
-
-        /**
-        * Returns the tile which will be used to draw text onto. 
-        * Default implementation returns a tile with a plain transparent texture.
-        */
-        virtual Tile backgroundTile(const TileIndex& tileIndex) const;
-
-
-        /**
-        * Allow overriding of hash function. 
-        * Default is <code>TileIndex::hashKey()</code>
-        *
-        * \param tileIndex tileIndex to hash
-        * \returns hashkey used for in LRU cache for this tile
-        */
-        virtual TileHashKey toHash(const TileIndex& tileIndex) const;
-        
-        /**
-        * Uses the fontRenderer to render some text onto the tile texture provided in 
-        * backgroundTile(const TileIndex& tileIndex). 
-        * 
-        * \param fontRenderer used for rendering text onto texture
-        * \param tileIndex associated with the tile to be rendered onto
-        */
-        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const = 0;
-
-    protected:
-        std::shared_ptr<ghoul::fontrendering::Font> _font;
-        glm::uvec2 _textureSize;
-        size_t _fontSize;
-
-    private:
-        Tile createChunkIndexTile(const TileIndex& tileIndex);
-        std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-        TileCache _tileCache;
-        GLuint _fbo;
-    };
-
-    /**
-     * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
-     */
-    class TileIndexTileProvider : public TextTileProvider {
-    public:
-        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
-    };
-
-    /**
-    * Constructed with an ellipsoid and uses that to render the longitudal length of each
-    * of each tile.
+/**
+    * Enables a simple way of providing tiles with any type of rendered text. 
+    * Internally it handles setting up a FBO for rendering the text, and defines a new 
+    * interface, consisting of only a single method for subclasses to implement: 
+    * renderText(const FontRenderer&, const TileIndex&) const;
     */
-    class SizeReferenceTileProvider : public TextTileProvider {
-    public:
-        SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+class TextTileProvider : public TileProvider {
+public:
 
-        virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
-        virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+    /**
+    * Default constructor with default values for texture and font size
+    */
+    TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
+    virtual ~TextTileProvider();
 
-        virtual TileHashKey toHash(const TileIndex& tileIndex) const;
+    // The TileProvider interface below is implemented in this class
+    virtual Tile getTile(const TileIndex& tileIndex);
+    virtual Tile getDefaultTile();
+    virtual Tile::Status getTileStatus(const TileIndex& index);
+    virtual TileDepthTransform depthTransform();
+    virtual void update();
+    virtual void reset();
+    virtual int maxLevel();
 
-    private:
+    /**
+    * Returns the tile which will be used to draw text onto. 
+    * Default implementation returns a tile with a plain transparent texture.
+    */
+    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
 
-        int roundedLongitudalLength(const TileIndex& tileIndex) const;
 
-        Ellipsoid _ellipsoid;
-        Tile _backgroundTile;
-    };
+    /**
+    * Allow overriding of hash function. 
+    * Default is <code>TileIndex::hashKey()</code>
+    *
+    * \param tileIndex tileIndex to hash
+    * \returns hashkey used for in LRU cache for this tile
+    */
+    virtual TileHashKey toHash(const TileIndex& tileIndex) const;
+        
+    /**
+    * Uses the fontRenderer to render some text onto the tile texture provided in 
+    * backgroundTile(const TileIndex& tileIndex). 
+    * 
+    * \param fontRenderer used for rendering text onto texture
+    * \param tileIndex associated with the tile to be rendered onto
+    */
+    virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const = 0;
+
+protected:
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    glm::uvec2 _textureSize;
+    size_t _fontSize;
+
+private:
+    Tile createChunkIndexTile(const TileIndex& tileIndex);
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+
+    TileCache _tileCache;
+    GLuint _fbo;
+};
+
+/**
+    * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
+    */
+class TileIndexTileProvider : public TextTileProvider {
+public:
+    virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
+};
+
+/**
+* Constructed with an ellipsoid and uses that to render the longitudal length of each
+* of each tile.
+*/
+class SizeReferenceTileProvider : public TextTileProvider {
+public:
+    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+
+    virtual void renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const;
+    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+
+    virtual TileHashKey toHash(const TileIndex& tileIndex) const;
+
+private:
+
+    int roundedLongitudalLength(const TileIndex& tileIndex) const;
+
+    Ellipsoid _ellipsoid;
+    Tile _backgroundTile;
+};
 
 } // namespace globebrowsing
 } // namespace openspace
