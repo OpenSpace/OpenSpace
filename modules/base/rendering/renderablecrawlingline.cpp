@@ -33,11 +33,11 @@
 namespace {
     const std::string _loggerCat = "RenderableCrawlingLine";
 
-    const std::string KeySource = "Source";
-    const std::string KeyTarget = "Target";
-    const std::string KeyInstrument = "Instrument";
-    const std::string KeyReferenceFrame = "Frame";
-    const std::string keyColor = "RGB";
+    const char* KeySource = "Source";
+    const char* KeyTarget = "Target";
+    const char* KeyInstrument = "Instrument";
+    const char* KeyReferenceFrame = "Frame";
+    const char* keyColor = "RGB";
 
     static const int SourcePosition = 0;
     static const int TargetPosition = 1;

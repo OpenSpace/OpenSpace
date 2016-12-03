@@ -12,6 +12,18 @@ return {
             }
         }
     },
+    {
+    -- The default reference frame for Earth-orbiting satellites
+        Name = "EarthInertial",
+        Parent = "EarthBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "J2000",
+                DestinationFrame = "GALACTIC",
+            }
+        },
+    },
     -- Earth module
     {   
         Name = "Earth",

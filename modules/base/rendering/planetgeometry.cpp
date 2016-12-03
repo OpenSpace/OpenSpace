@@ -29,7 +29,7 @@
 
 namespace {
     const std::string _loggerCat = "PlanetGeometry";
-    const std::string KeyType = "Type";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {

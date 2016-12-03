@@ -35,13 +35,13 @@
 namespace {
     const std::string _loggerCat      = "RenderablePlane";
     
-    const std::string KeyType        = "TerminatorType";
-    const std::string KeyLightSource = "LightSource";
-    const std::string KeyObserver    = "Observer";
-    const std::string KeyBody        = "Body";
-    const std::string KeyBodyFrame   = "BodyFrame";
-    const std::string KeyMainFrame   = "MainFrame";
-    const std::string KeyAberration  = "Aberration"; 
+    const char* KeyType        = "TerminatorType";
+    const char* KeyLightSource = "LightSource";
+    const char* KeyObserver    = "Observer";
+    const char* KeyBody        = "Body";
+    const char* KeyBodyFrame   = "BodyFrame";
+    const char* KeyMainFrame   = "MainFrame";
+    const char* KeyAberration  = "Aberration";
 }
 
 namespace openspace {

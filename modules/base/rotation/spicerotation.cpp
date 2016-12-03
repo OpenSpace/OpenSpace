@@ -33,9 +33,9 @@ namespace {
     const std::string _loggerCat = "SpiceRotation";
     //const std::string keyGhosting = "EphmerisGhosting";
 
-    const std::string KeySourceFrame = "SourceFrame";
-    const std::string KeyDestinationFrame = "DestinationFrame";
-    const std::string KeyKernels = "Kernels";
+    const char* KeySourceFrame = "SourceFrame";
+    const char* KeyDestinationFrame = "DestinationFrame";
+    const char* KeyKernels = "Kernels";
 }
 
 namespace openspace {
@@ -116,17 +116,11 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 }
     
 void SpiceRotation::update(const UpdateData& data) {
-    try {
-        _matrix = SpiceManager::ref().positionTransformMatrix(
-            _sourceFrame,
-            _destinationFrame,
-            data.time
-        );
-    }
-    catch (const ghoul::RuntimeError&) {
-        // In case of missing coverage
-        _matrix = glm::dmat3(1);
-    }
+    _matrix = SpiceManager::ref().positionTransformMatrix(
+        _sourceFrame,
+        _destinationFrame,
+        data.time
+    );
 }
 
 } // namespace openspace

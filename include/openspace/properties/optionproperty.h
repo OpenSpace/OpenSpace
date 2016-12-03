@@ -25,7 +25,7 @@
 #ifndef __OPTIONPROPERTY_H__
 #define __OPTIONPROPERTY_H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <vector>
 
@@ -61,7 +61,8 @@ public:
      * \param identifier A unique identifier for this property
      * \param guiName The GUI name that should be used to represent this property
      */
-    OptionProperty(std::string identifier, std::string guiName);
+    OptionProperty(std::string identifier, std::string guiName, 
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
@@ -70,7 +71,8 @@ public:
     * \param guiName The GUI name that should be used to represent this property
     * \param displayType Optional DisplayType for GUI (default RADIO)
     */
-    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType);
+    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType,
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
      * Returns the name of the class for reflection purposes.

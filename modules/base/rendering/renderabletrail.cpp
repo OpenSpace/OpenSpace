@@ -30,13 +30,13 @@
 #include <openspace/scene/translation.h>
 
 namespace {
-    static const char* KeyTranslation = "Translation";
-    static const char* KeyColor = "Color";
-    static const char* KeyEnableFade = "EnableFade";
-    static const char* KeyFade = "Fade";
-    static const char* KeyLineWidth = "LineWidth";
-    static const char* KeyPointSize = "PointSize";
-    static const char* KeyRendering = "Rendering";
+    const char* KeyTranslation = "Translation";
+    const char* KeyColor = "Color";
+    const char* KeyEnableFade = "EnableFade";
+    const char* KeyFade = "Fade";
+    const char* KeyLineWidth = "LineWidth";
+    const char* KeyPointSize = "PointSize";
+    const char* KeyRendering = "Rendering";
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -143,6 +143,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     _translation = std::unique_ptr<Translation>(Translation::createFromDictionary(
         dictionary.value<ghoul::Dictionary>(KeyTranslation)
     ));
+    addPropertySubOwner(_translation.get());
 
     _lineColor = dictionary.value<glm::vec3>(KeyColor);
     addProperty(_lineColor);

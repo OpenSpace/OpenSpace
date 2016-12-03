@@ -25,15 +25,18 @@
 #ifndef __RENDERABLETOYVOLUME_H__
 #define __RENDERABLETOYVOLUME_H__
 
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
-#include <openspace/rendering/renderable.h>
-#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
-
 namespace openspace {
 
+class ToyVolumeRaycaster;
 struct RenderData;
     
 class RenderableToyVolume : public Renderable {

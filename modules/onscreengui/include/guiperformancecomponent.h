@@ -27,6 +27,9 @@
 
 #include <modules/onscreengui/include/guicomponent.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+
 #include <ghoul/misc/sharedmemory.h>
 
 #include <memory>

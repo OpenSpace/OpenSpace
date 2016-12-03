@@ -97,5 +97,14 @@ glm::dvec3 Translation::position(double time) {
     return position();
 }
 
+void Translation::notifyObservers() {
+    if (_onParameterChangeCallback) {
+        _onParameterChangeCallback();
+    }
+}
+
+void Translation::onParameterChange(std::function<void()> callback) {
+    _onParameterChangeCallback = std::move(callback);
+}
 
 } // namespace openspace

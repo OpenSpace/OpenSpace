@@ -28,7 +28,9 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/util/openspacemodule.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/scene/scene.h>
+
 
 #include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -41,10 +43,7 @@ namespace {
     const std::string _loggerCat = "SettingsEngine";
 }
 
-
 namespace openspace {
-
-
 
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
@@ -53,8 +52,19 @@ SettingsEngine::SettingsEngine()
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
     , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
+    , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
 {
     setName("Global Properties");
+
+    _spiceUseExceptions.onChange([this]{
+        if (_spiceUseExceptions) {
+            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);
+        }
+        else {
+            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
+        }
+    });
+    addProperty(_spiceUseExceptions);
 }
 
 void SettingsEngine::initialize() {

@@ -46,15 +46,14 @@
 namespace {
     const std::string _loggerCat = "RenderablePlanetProjection";
 
-    const std::string keyGeometry = "Geometry";
-    const std::string keyProjection = "Projection";
-    const std::string keyColorTexture = "Textures.Color";
-    const std::string keyHeightTexture = "Textures.Height";
+    const char* keyGeometry = "Geometry";
+    const char* keyProjection = "Projection";
+    const char* keyColorTexture = "Textures.Color";
+    const char* keyHeightTexture = "Textures.Height";
 
-
-    const std::string keyRadius = "Geometry.Radius";
-    const std::string keyShading = "PerformShading";
-    const std::string _mainFrame = "GALACTIC";
+    const char* keyRadius = "Geometry.Radius";
+    const char* keyShading = "PerformShading";
+    const char* _mainFrame = "GALACTIC";
 }
 
 namespace openspace {

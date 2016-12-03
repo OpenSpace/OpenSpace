@@ -34,8 +34,8 @@ namespace openspace {
 
 namespace constants {
 namespace simplespheregeometry {
-const std::string keyRadius = "Radius";
-const std::string keySegments = "Segments";
+    const char* keyRadius = "Radius";
+    const char* keySegments = "Segments";
 }  // namespace simplespheregeometry
 }
 

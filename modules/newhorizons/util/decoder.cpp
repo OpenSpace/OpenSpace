@@ -30,7 +30,7 @@
 #include <ghoul/misc/exception.h>
 
 namespace {
-const std::string _loggerCat = "Decoder";
+    const std::string _loggerCat = "Decoder";
 }
 
 namespace openspace {

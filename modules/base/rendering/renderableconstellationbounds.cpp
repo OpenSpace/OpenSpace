@@ -37,14 +37,17 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
+
 namespace {
     const std::string _loggerCat = "RenderableConstellationBounds";
 
-    const std::string keyVertexFile = "File";
-    const std::string keyConstellationFile = "ConstellationFile";
-    const std::string keyReferenceFrame = "ReferenceFrame";
+    const char* keyVertexFile = "File";
+    const char* keyConstellationFile = "ConstellationFile";
+    const char* keyReferenceFrame = "ReferenceFrame";
 
-    const std::string defaultReferenceFrame = "J2000";
+    const char* defaultReferenceFrame = "J2000";
 
     float deg2rad(float deg) {
         return static_cast<float>((deg / 360.f) * 2.f * M_PI);
@@ -58,7 +61,7 @@ namespace {
 namespace openspace {
 
 RenderableConstellationBounds::RenderableConstellationBounds(
-            const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _vertexFilename("")
     , _constellationFilename("")
@@ -86,9 +89,6 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     _constellationSelection.onChange(
         std::bind(&RenderableConstellationBounds::selectionPropertyHasChanged, this)
     );
-}
-
-RenderableConstellationBounds::~RenderableConstellationBounds() {
 }
 
 bool RenderableConstellationBounds::initialize() {
@@ -211,7 +211,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
     float ra;
     float dec;
     std::string constellationName;
-    SpiceDouble rectangularValues[3];
+    double rectangularValues[3];
 
     // Overview of the reading algorithm:
     // We keep an active ConstellationBound (currentBound) and update it until we read

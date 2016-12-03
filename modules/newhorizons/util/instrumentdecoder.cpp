@@ -29,9 +29,9 @@
 
 namespace {
     const std::string _loggerCat  = "InstrumentDecoder";
-    const std::string keyDetector = "DetectorType";
-    const std::string keySpice    = "Spice";
-    const std::string keyStopCommand = "StopCommand";
+    const char* keyDetector = "DetectorType";
+    const char* keySpice    = "Spice";
+    const char* keyStopCommand = "StopCommand";
 }
 
 namespace openspace {

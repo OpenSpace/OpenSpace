@@ -38,14 +38,14 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderablePlane";
+    static const std::string _loggerCat = "RenderablePlane";
 
-    const std::string keyFieldlines = "Fieldlines";
-    const std::string keyFilename = "File";
-    const std::string keyHints = "Hints";
-    const std::string keyShaders = "Shaders";
-    const std::string keyVertexShader = "VertexShader";
-    const std::string keyFragmentShader = "FragmentShader";
+    const char* keyFieldlines = "Fieldlines";
+    const char* keyFilename = "File";
+    const char* keyHints = "Hints";
+    const char* keyShaders = "Shaders";
+    const char* keyVertexShader = "VertexShader";
+    const char* keyFragmentShader = "FragmentShader";
 }
 
 namespace openspace {

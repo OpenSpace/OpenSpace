@@ -41,11 +41,11 @@
 #include <stdint.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableStars";
+    static const std::string _loggerCat = "RenderableStars";
 
-    const std::string KeyFile = "File";
-    const std::string KeyTexture = "Texture";
-    const std::string KeyColorMap = "ColorMap";
+    const char* KeyFile = "File";
+    const char* KeyTexture = "Texture";
+    const char* KeyColorMap = "ColorMap";
 
     const int8_t CurrentCacheVersion = 1;
 
@@ -130,7 +130,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _colorTexturePath("colorTexture", "ColorBV Texture")
     , _colorTexture(nullptr)
     , _colorTextureIsDirty(true)
-    , _colorOption("colorOption", "Color Option")
+    , _colorOption(
+        "colorOption",
+        "Color Option",
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _dataIsDirty(true)
     , _alphaValue("alphaValue", "Transparency", 1.f, 0.f, 1.f)
     , _scaleFactor("scaleFactor", "Scale Factor", 1.f, 0.f, 10.f)

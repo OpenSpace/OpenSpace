@@ -25,34 +25,18 @@
 #ifndef __SCRIPTSCHEDULER_H__
 #define __SCRIPTSCHEDULER_H__
 
-#include <ghoul/misc/dictionary.h>
-
+#include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
 #include <queue>
 #include <vector>
 
+namespace ghoul {
+class Dictionary;
+} // namespace ghoul
+
 namespace openspace {
-
 namespace scripting {
-
-
-
-struct ReversibleLuaScript {
-    std::string forwardScript;
-    std::string backwardScript;
-};
-
-struct ScheduledScript {
-    ScheduledScript() : time(-DBL_MAX) { }
-    ScheduledScript(const ghoul::Dictionary& dict);
-
-    double time;
-    ReversibleLuaScript script;
-
-    static bool CompareByTime(const ScheduledScript& s1, const ScheduledScript& s2);
-};
-
 
 /**
  * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple 
@@ -60,20 +44,24 @@ struct ScheduledScript {
  */
 class ScriptScheduler {
 public:
+    struct ScheduledScript {
+        ScheduledScript() = default;
+        ScheduledScript(const ghoul::Dictionary& dict);
+        
+        double time;
+        std::string forwardScript;
+        std::string backwardScript;
+    };
 
+    
     /**
-    * Load a schedule from a Lua-file
-    * \param filename Lua file to load
-    * \param L an optional lua_State defining variables that may be used
-    * in the Lua-file.
+    * Load a schedule from a ghoul::Dictionary \p dictionary and adds the
+     * ScheduledScript%s to the list of stored scripts.
+     * \param dictionary Dictionary to read
+     * \throw SpecificationError If the dictionary does not adhere to the Documentation as
+     * specified in the openspace::Documentation function
     */
-    void loadScripts(const std::string& filename, lua_State* L = nullptr);
-
-    /**
-    * Load a schedule from a <code>ghoul::Dictionary</code>
-    * \param dict Dictionary to read
-    */
-    void loadScripts(const ghoul::Dictionary& dict);
+    void loadScripts(const ghoul::Dictionary& dictionary);
 
 
     /**
@@ -96,7 +84,7 @@ public:
     *
     * \returns the ordered queue of scripts .
     */
-    std::queue<std::string> progressTo(double newTime);
+//    std::queue<std::string> progressTo(double newTime);
 
     /**
     * See <code>progressTo(double newTime)</code>.
@@ -104,10 +92,12 @@ public:
     * \param timeStr A string specifying the a new time stamp that the
     * scripts scheduler should progress to.
     */
-    std::queue<std::string> progressTo(const std::string& timeStr);
+//    std::queue<std::string> progressTo(const std::string& timeStr);
 
-
-
+    std::pair<
+        std::vector<std::string>::const_iterator, std::vector<std::string>::const_iterator
+    > progressTo(double newTime);
+    
     /**
     * Returns the the j2000 time value that the script scheduler is currently at 
     */
@@ -116,16 +106,19 @@ public:
     /**
     * \returns a vector of all scripts that has been loaded
     */
-    const std::vector<ScheduledScript>& allScripts() const;
+    std::vector<ScheduledScript> allScripts() const;
 
 
     static LuaLibrary luaLibrary();
+    
+    static openspace::Documentation Documentation();
 
 private:
-
-    std::vector<ScheduledScript> _scheduledScripts;
-
-    size_t _currentIndex = 0;
+    std::vector<double> _timings;
+    std::vector<std::string> _forwardScripts;
+    std::vector<std::string> _backwardScripts;
+    
+    int _currentIndex = 0;
     double _currentTime;
 
 };

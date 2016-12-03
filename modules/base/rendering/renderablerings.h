@@ -29,7 +29,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {

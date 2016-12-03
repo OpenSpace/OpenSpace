@@ -42,17 +42,16 @@
 namespace {
     const std::string _loggerCat = "RenderableTrail";
     //constants
-    const std::string keyName = "Name";
-    const std::string keyBody = "Body";
-    const std::string keyObserver = "Observer";
-    const std::string keyFrame = "Frame";
-    const std::string keyPathModule = "ModulePath";
-    const std::string keyColor = "RGB";
-    const std::string keyTimeSteps = "TimeSteps";
-    const std::string keyPointSteps = "PointSteps";
-    const std::string keyDrawLine = "DrawLine";
-    const std::string keRenderDistanceInterval = "RenderDistanceInterval";
-
+    const char* keyName = "Name";
+    const char* keyBody = "Body";
+    const char* keyObserver = "Observer";
+    const char* keyFrame = "Frame";
+    const char* keyPathModule = "ModulePath";
+    const char* keyColor = "RGB";
+    const char* keyTimeSteps = "TimeSteps";
+    const char* keyPointSteps = "PointSteps";
+    const char* keyDrawLine = "DrawLine";
+    const char* keRenderDistanceInterval = "RenderDistanceInterval";
 }
 
 namespace openspace {

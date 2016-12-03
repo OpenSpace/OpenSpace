@@ -24,6 +24,8 @@
 
 #include <openspace/properties/selectionproperty.h>
 
+#include <ghoul/lua/ghoul_lua.h>
+
 namespace {
     const std::string _loggerCat = "SelectionProperty";
 
@@ -35,8 +37,10 @@ namespace properties {
 
 const std::string SelectionProperty::OptionsKey = "Options";
 
-SelectionProperty::SelectionProperty(std::string identifier, std::string guiName)
-    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>())
+SelectionProperty::SelectionProperty(std::string identifier, std::string guiName,
+                                     Property::Visibility visibility)
+    : TemplateProperty(std::move(identifier), std::move(guiName), std::vector<int>(),
+                       visibility)
 {}
 
 void SelectionProperty::addOption(Option option) {

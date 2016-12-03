@@ -37,15 +37,15 @@
 
 namespace {
     const std::string _loggerCat = "RenderableModelProjection";
-    const std::string keySource = "Rotation.Source";
-    const std::string keyDestination = "Rotation.Destination";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyProjection = "Projection";
-    const std::string keyBoundingSphereRadius = "BoundingSphereRadius";
+    const char* keySource = "Rotation.Source";
+    const char* keyDestination = "Rotation.Destination";
+    const char* keyGeometry = "Geometry";
+    const char* keyProjection = "Projection";
+    const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const std::string keyTextureColor = "Textures.Color";
+    const char* keyTextureColor = "Textures.Color";
 
-    const std::string _destination = "GALACTIC";
+    const char* _destination = "GALACTIC";
 }
 
 namespace openspace {

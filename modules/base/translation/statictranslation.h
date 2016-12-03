@@ -28,7 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
     

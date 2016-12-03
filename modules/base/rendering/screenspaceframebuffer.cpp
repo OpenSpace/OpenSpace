@@ -33,10 +33,11 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 
 namespace openspace {
+
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
-    :ScreenSpaceRenderable(dictionary)
-    ,_size("size", "Size", glm::vec4(0), glm::vec4(0), glm::vec4(2000))
-    ,_framebuffer(nullptr)
+    : ScreenSpaceRenderable(dictionary)
+    , _size("size", "Size", glm::vec4(0), glm::vec4(0), glm::vec4(2000))
+    , _framebuffer(nullptr)
 {
     _id = id();
     setName("ScreenSpaceFramebuffer" + std::to_string(_id));

@@ -22,9 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/filesystem/filesystem.h>
-#include "gtest/gtest.h"
 #include <openspace/util/spicemanager.h>
+
+#include <ghoul/filesystem/filesystem.h>
+
+#include "SpiceUsr.h"
+#include "SpiceZpr.h"
 
 class SpiceManagerTest : public testing::Test {
 protected:

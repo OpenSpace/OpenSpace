@@ -28,7 +28,8 @@
 #include <modules/base/rendering/renderabletrail.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 

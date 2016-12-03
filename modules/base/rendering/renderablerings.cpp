@@ -36,9 +36,9 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string KeyTexture = "Texture";
-    const std::string KeySize = "Size";
-    const std::string KeyOffset = "Offset";
+    const char* KeyTexture = "Texture";
+    const char* KeySize = "Size";
+    const char* KeyOffset = "Offset";
 }
 
 namespace openspace {

@@ -25,7 +25,7 @@
 #ifndef __SELECTIONPROPERTY_H__
 #define __SELECTIONPROPERTY_H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/templateproperty.h>
 
 #include <vector>
 
@@ -39,7 +39,8 @@ public:
         std::string description;
     };
 
-    SelectionProperty(std::string identifier, std::string guiName);
+    SelectionProperty(std::string identifier, std::string guiName,
+        Property::Visibility visibility = Property::Visibility::User);
     
     void addOption(Option option);
     void removeOptions();

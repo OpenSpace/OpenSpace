@@ -29,7 +29,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 

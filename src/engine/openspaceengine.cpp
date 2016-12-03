@@ -867,11 +867,10 @@ void OpenSpaceEngine::preSynchronization() {
         _timeManager->preSynchronization(dt);
 
         auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
-        while(scheduledScripts.size()){
-            auto scheduledScript = scheduledScripts.front();
-            LINFO(scheduledScript);
-            _scriptEngine->queueScript(scheduledScript, ScriptEngine::RemoteScripting::Yes);
-            scheduledScripts.pop();
+        for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
+            _scriptEngine->queueScript(
+                *it, ScriptEngine::RemoteScripting::Yes
+            );
         }
 
         _interactionHandler->updateInputStates(dt);
