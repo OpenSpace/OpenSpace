@@ -28,6 +28,7 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/interactionmode.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
@@ -37,9 +38,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
+
 #include <glm/gtx/quaternion.hpp>
 
-//#include <modules/globebrowsing/globes/renderableglobe.h>
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#endif
 
 #include <ghoul/glm.h>
 
