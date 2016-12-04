@@ -48,7 +48,8 @@ class ChunkedLodGlobe : public Renderable {
 public:
     ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
         std::shared_ptr<LayerManager> layerManager);
-
+    ~ChunkedLodGlobe();
+    
     bool initialize() override;
     bool deinitialize() override;
     bool isReady() const override;

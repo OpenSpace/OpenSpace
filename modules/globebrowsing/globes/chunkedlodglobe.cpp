@@ -79,6 +79,10 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager);
 }
 
+// The destructor is defined here to make it feasiable to use a unique_ptr
+// with a forward declaration
+ChunkedLodGlobe::~ChunkedLodGlobe() {}
+    
 bool ChunkedLodGlobe::initialize() {
     return true;
 }

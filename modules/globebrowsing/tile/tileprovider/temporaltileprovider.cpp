@@ -267,14 +267,16 @@ std::unordered_map<std::string, std::unique_ptr<TimeFormat>>
     std::unordered_map<std::string, std::unique_ptr<TimeFormat>>();
 
 void TimeIdProviderFactory::init() {
-    _timeIdProviderMap.insert({ "YYYY-MM-DD" , std::make_unique<YYYY_MM_DD>() });
-    _timeIdProviderMap.insert(
+    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
+        { "YYYY-MM-DD" , std::make_unique<YYYY_MM_DD>() }
+    ));
+    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
         { "YYYY-MM-DDThh:mm:ssZ", std::make_unique<YYYY_MM_DDThhColonmmColonssZ>() }
-    );
+    ));
     initialized = true;
-    _timeIdProviderMap.insert(
+    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
         { "YYYY-MM-DDThh_mm_ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() }
-    );
+    ));
     initialized = true;
 }
 

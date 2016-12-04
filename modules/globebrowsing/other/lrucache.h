@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
 
+#include <list>
 #include <unordered_map>
 
 namespace openspace {
