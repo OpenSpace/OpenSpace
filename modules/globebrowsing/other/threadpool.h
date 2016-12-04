@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
 
+#include <condition_variable>
 #include <functional>
 #include <mutex>
 #include <queue>
